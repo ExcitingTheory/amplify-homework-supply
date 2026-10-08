@@ -284,10 +284,9 @@ export const Welcome: Story = {
                   <Typography variant="body2" sx={{ color: "text.secondary" }}>
                     Look at the <strong>Onboarding widget</strong> in the left
                     sidebar. Choose your authenticated role:{" "}
-                    <strong>Administrator</strong>, <strong>Instructor</strong>,
-                    or <strong>Learner</strong>.<strong> Translator</strong> is
-                    a Storybook-only persona used for localization previews, not
-                    a backend auth group.
+                    <strong>Instructor</strong> or <strong>Learner</strong>.
+                    <strong> Translator</strong> is a Storybook-only persona
+                    used for localization previews, not a backend auth group.
                   </Typography>
                 </Box>
               </Box>
@@ -363,7 +362,7 @@ export const Welcome: Story = {
                       )}
                       sx={{ color: "info.main", cursor: "pointer" }}
                     >
-                      📚 Creating Lessons
+                      ✏️ Lesson Editor
                     </Link>
                     ,{" "}
                     <Link

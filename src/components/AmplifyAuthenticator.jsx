@@ -19,10 +19,139 @@ import {
 } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
 import { useColorScheme } from "@mui/material/styles";
+import Box from "@mui/material/Box";
+import Button from "@mui/material/Button";
+import FormControl from "@mui/material/FormControl";
+import InputLabel from "@mui/material/InputLabel";
+import ListItemText from "@mui/material/ListItemText";
+import ListSubheader from "@mui/material/ListSubheader";
+import MenuItem from "@mui/material/MenuItem";
+import Select from "@mui/material/Select";
+import Stack from "@mui/material/Stack";
+import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Hub } from "aws-amplify/utils";
+import { signIn, signOut } from "aws-amplify/auth";
 import AuthContext from "@/context/authContext";
+
+const ROLE_LABELS = {
+  admin: "Admin",
+  instructor: "Instructor",
+  student: "Student",
+};
+
+// Dev-only one-click sign-in for seeded demo users; requires TEST_USER_PASSWORD_SEED
+// in .env.local and a seeded sandbox (see amplify/seed/seed.ts for the user list).
+function DevQuickLogin() {
+  const [users, setUsers] = React.useState([]);
+  const [selectedUsername, setSelectedUsername] = React.useState("");
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    fetch("/api/dev/quick-login")
+      .then((res) => res.json())
+      .then((body) => {
+        if (cancelled) return;
+        setUsers(body.users || []);
+        if (body.users?.length) setSelectedUsername(body.users[0].username);
+      })
+      .catch(() => {
+        if (!cancelled) setError("Quick login unavailable");
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const handleQuickLogin = async () => {
+    if (!selectedUsername) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(
+        `/api/dev/quick-login?username=${encodeURIComponent(selectedUsername)}`,
+      );
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error || "Quick login unavailable");
+      await signOut().catch(() => {});
+      await signIn({ username: body.username, password: body.password });
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Group users by role so the dropdown reads "Admin / Instructor / Student".
+  const usersByRole = users.reduce((acc, user) => {
+    (acc[user.role] ||= []).push(user);
+    return acc;
+  }, {});
+
+  if (!users.length) return null;
+
+  return (
+    <Box sx={{ maxWidth: 400, mx: "auto", mb: 2, textAlign: "center" }}>
+      <Typography
+        variant="caption"
+        color="text.secondary"
+        display="block"
+        mb={1}
+      >
+        Dev quick sign-in (seeded demo users)
+      </Typography>
+      <Stack direction="row" spacing={1} justifyContent="center">
+        <FormControl size="small" sx={{ minWidth: 220 }}>
+          <InputLabel id="dev-quick-login-label">Seeded user</InputLabel>
+          <Select
+            labelId="dev-quick-login-label"
+            label="Seeded user"
+            value={selectedUsername}
+            onChange={(e) => setSelectedUsername(e.target.value)}
+            renderValue={(value) =>
+              users.find((u) => u.username === value)?.displayName || value
+            }
+            MenuProps={{ PaperProps: { sx: { maxWidth: 360 } } }}
+          >
+            {Object.entries(usersByRole).map(([role, roleUsers]) => [
+              <ListSubheader key={`header-${role}`}>
+                {ROLE_LABELS[role] || role}
+              </ListSubheader>,
+              ...roleUsers.map((user) => (
+                <MenuItem
+                  key={user.username}
+                  value={user.username}
+                  sx={{ whiteSpace: "normal" }}
+                >
+                  <ListItemText
+                    primary={user.displayName}
+                    secondary={user.description}
+                  />
+                </MenuItem>
+              )),
+            ])}
+          </Select>
+        </FormControl>
+        <Button
+          size="small"
+          variant="outlined"
+          disabled={loading || !selectedUsername}
+          onClick={handleQuickLogin}
+        >
+          {loading ? "Signing in…" : "Sign in"}
+        </Button>
+      </Stack>
+      {error && (
+        <Typography variant="caption" color="error" display="block" mt={1}>
+          {error}
+        </Typography>
+      )}
+    </Box>
+  );
+}
 
 const amplifyAuthTheme = {
   name: "homework-supply-auth",
@@ -182,6 +311,7 @@ export default function MyAuth({ children }) {
 
   return (
     <AmplifyThemeProvider theme={amplifyAuthTheme} colorMode={colorMode}>
+      {isDevelopment && <DevQuickLogin />}
       <Authenticator
         variant="modal"
         formFields={formFields}

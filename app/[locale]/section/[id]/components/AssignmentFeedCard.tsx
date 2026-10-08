@@ -1,13 +1,6 @@
 "use client";
 import React from "react";
-import {
-  Box,
-  Button,
-  Card,
-  CardContent,
-  Chip,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Card, Chip, Typography } from "@mui/material";
 import EditNoteIcon from "@mui/icons-material/EditNote";
 import CardMediaThumbnail from "@/components/CardMediaThumbnail";
 import { SEMANTIC_THEME } from "@/themes/semanticTheme";
@@ -28,7 +21,7 @@ export interface AssignmentFeedCardProps {
   editUnitLabel?: string;
 }
 
-/** Image-left assignment feed card: date above title, a real CTA button, muted icon. */
+/** Flat, compact assignment row: small icon, one-line title/meta, single CTA — no imagery, shadow, or hover motion. */
 export function AssignmentFeedCard({
   unitName,
   description,
@@ -46,42 +39,67 @@ export function AssignmentFeedCard({
   return (
     <Card
       data-tour="assignment-card"
-      variant="assignment"
+      elevation={0}
       sx={{
         display: "flex",
         flexDirection: { xs: "column", sm: "row" },
-        margin: "1rem auto",
+        alignItems: { xs: "stretch", sm: "center" },
+        margin: "0.5rem auto",
         width: "100%",
         maxWidth: "80rem",
         overflow: "hidden",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: `${SEMANTIC_THEME.radius.card}px`,
       }}
     >
-      <CardMediaThumbnail s3Key={featuredImage} identityId={identityId} />
-      <Box sx={{ display: "flex", flexDirection: "column", flexGrow: 1 }}>
-        <CardContent sx={{ flex: "1 0 auto" }}>
-          <Typography
-            variant="caption"
-            color="text.secondary"
+      <CardMediaThumbnail
+        title={unitName}
+        size={48}
+        desktopWidth={96}
+        fillHeight
+      />
+      <Box
+        sx={{
+          flex: 1,
+          minWidth: 0,
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          alignItems: { xs: "stretch", sm: "center" },
+          gap: 1.5,
+          p: 1.5,
+        }}
+      >
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box
             sx={{
-              display: "block",
-              fontWeight: 700,
-              textTransform: "uppercase",
-              letterSpacing: "0.03em",
-              mb: 0.5,
+              display: "flex",
+              alignItems: "baseline",
+              gap: 1,
+              flexWrap: "wrap",
             }}
           >
-            {dueLabel}
-          </Typography>
-          <Typography component="div" variant="h5" sx={{ fontWeight: 600 }}>
-            {unitName}
-          </Typography>
-          <Typography
-            variant="subtitle1"
-            color="text.secondary"
-            component="div"
-          >
-            {description}
-          </Typography>
+            <Typography
+              component="div"
+              variant="subtitle1"
+              noWrap
+              sx={{ fontWeight: 600 }}
+            >
+              {unitName}
+            </Typography>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ flexShrink: 0, textTransform: "uppercase" }}
+            >
+              {dueLabel}
+            </Typography>
+          </Box>
+          {description && (
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {description}
+            </Typography>
+          )}
           {linkedChapter && (
             <Chip
               label={
@@ -90,42 +108,37 @@ export function AssignmentFeedCard({
                   : linkedChapter.title
               }
               size="small"
-              color="primary"
               variant="outlined"
               clickable
               onClick={(event) => onOpenChapter?.(event)}
-              sx={{ mt: 0.75, fontSize: "0.7rem", height: 22 }}
+              sx={{ mt: 0.5, fontSize: "0.7rem", height: 20 }}
             />
           )}
-        </CardContent>
+        </Box>
         <Box
           sx={{
             display: "flex",
             alignItems: "center",
-            justifyContent: "space-between",
-            px: 2,
-            pb: 1.5,
+            gap: 1,
+            flexWrap: "wrap",
+            flexShrink: 0,
           }}
         >
-          {editUnitUrl ? (
+          {editUnitUrl && (
             <Button
               variant="text"
+              size="small"
               color="inherit"
               href={editUnitUrl}
               disabled={disabled}
-              sx={{
-                textTransform: "none",
-                fontWeight: 600,
-                color: "text.secondary",
-              }}
+              sx={{ textTransform: "none", color: "text.secondary" }}
             >
               {editUnitLabel}
             </Button>
-          ) : (
-            <span />
           )}
           <Button
             variant="contained"
+            size="small"
             data-tour="view-workbook-button"
             href={workbookUrl}
             disabled={disabled}
@@ -133,8 +146,6 @@ export function AssignmentFeedCard({
             sx={{
               textTransform: "none",
               fontWeight: 600,
-              px: 3,
-              py: 1,
               borderRadius: `${SEMANTIC_THEME.radius.control}px`,
             }}
           >

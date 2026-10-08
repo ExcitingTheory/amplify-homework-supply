@@ -8,6 +8,10 @@ const LOCALE_COOKIE = "NEXT_LOCALE";
 
 const PUBLIC_ROUTES = ["/privacy", "/offline"];
 
+function isPublicRoute(pathname: string): boolean {
+  return PUBLIC_ROUTES.includes(pathname);
+}
+
 function isAuthenticated(request: NextRequest): boolean {
   const clientId = outputs.auth?.user_pool_client_id;
   if (!clientId) return false;

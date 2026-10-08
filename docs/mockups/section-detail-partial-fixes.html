@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>SectionDetailClient — Partial Fix Mockups</title>
+<style>
+  :root {
+    --primary: #1976d2;
+    --success: #2e7d32;
+    --warning: #ed6c02;
+    --error: #d32f2f;
+    --divider: rgba(0,0,0,0.12);
+    --paper: #ffffff;
+    --hover: rgba(0,0,0,0.04);
+    --text-secondary: rgba(0,0,0,0.6);
+    --gold: #FFD700;
+    --silver: #C0C0C0;
+    --bronze: #CD7F32;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+    background: #f4f6f8;
+    margin: 0;
+    padding: 40px 24px 80px;
+    color: rgba(0,0,0,0.87);
+  }
+  h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    max-width: 1100px;
+    margin: 0 auto 4px;
+  }
+  .intro {
+    max-width: 1100px;
+    margin: 0 auto 40px;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+  section.block {
+    max-width: 1100px;
+    margin: 0 auto 56px;
+  }
+  .block h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+  .block .desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    line-height: 1.5;
+  }
+  .compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 860px) {
+    .compare { grid-template-columns: 1fr; }
+  }
+  .panel {
+    background: var(--paper);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+  .panel .label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--divider);
+  }
+  .panel .label.before { color: var(--error); background: #fdecea; }
+  .panel .label.after { color: var(--success); background: #eaf6ec; }
+  .panel .content { padding: 16px; }
+
+  /* ---------- Generic table ---------- */
+  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--divider); }
+  th { font-weight: 700; color: var(--text-secondary); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  tr:last-child td { border-bottom: none; }
+
+  /* ---------- Section 1: Merged Gradebook + Completion cell ---------- */
+  .pct { font-weight: 700; }
+  .pct.good { color: var(--success); }
+  .pct.mid { color: var(--warning); }
+  .pct.low { color: var(--error); }
+
+  .completion-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    font-size: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
+  .completion-badge.done { background: var(--success); color: #fff; }
+  .completion-badge.progress { background: var(--warning); color: #fff; }
+  .completion-badge.not-started { background: rgba(0,0,0,0.15); color: rgba(0,0,0,0.5); }
+
+  .before-cell-stack { display: flex; flex-direction: column; gap: 2px; }
+  .before-pill {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    width: fit-content;
+  }
+  .before-pill.complete { background: #eaf6ec; color: var(--success); }
+  .before-pill.progress { background: #fff4e5; color: var(--warning); }
+  .before-pill.not-started { background: #f1f1f1; color: rgba(0,0,0,0.5); }
+
+  /* ---------- Section 2: Leaderboard ---------- */
+  .leaderboard-layout {
+    display: grid;
+    grid-template-columns: 1fr 280px;
+    gap: 20px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .leaderboard-layout { grid-template-columns: 1fr; }
+  }
+  .leaderboard-card {
+    background: var(--paper);
+    border: 1px solid var(--divider);
+    border-radius: 12px;
+    padding: 14px;
+  }
+  .leaderboard-card h3 {
+    font-size: 0.78rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-secondary);
+    margin: 0 0 12px;
+  }
+  .lb-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 4px;
+    border-radius: 8px;
+  }
+  .lb-row.current { background: #e8f0fe; }
+  .lb-rank {
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.72rem;
+    color: rgba(0,0,0,0.75);
+    flex-shrink: 0;
+  }
+  .lb-rank.plain { background: transparent; color: rgba(0,0,0,0.6); }
+  .lb-rank.gold { background: var(--gold); }
+  .lb-rank.silver { background: var(--silver); }
+  .lb-rank.bronze { background: var(--bronze); color: #fff; }
+  .lb-avatar {
+    width: 24px; height: 24px; border-radius: 50%;
+    background: linear-gradient(135deg,#90caf9,#42a5f5);
+    flex-shrink: 0;
+  }
+  .lb-name { flex: 1; font-size: 0.82rem; font-weight: 500; }
+  .lb-xp { font-size: 0.78rem; font-weight: 700; color: var(--primary); }
+  .lb-gap { text-align: center; font-size: 0.7rem; color: var(--text-secondary); padding: 2px 0; }
+
+  /* ---------- Section 3: gradebook spacing + muted icons ---------- */
+  .chapter-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px;
+    border-bottom: 1px solid var(--divider);
+    font-size: 0.82rem;
+  }
+  .chapter-row:last-child { border-bottom: none; }
+  .chapter-meta { color: var(--text-secondary); font-size: 0.72rem; }
+  .chevron { font-size: 1rem; }
+  .chevron.dark { color: rgba(0,0,0,0.87); }
+  .chevron.muted { color: var(--text-secondary); }
+  .tight { padding-right: 4px; }
+  .roomy { padding-right: 20px; }
+
+  .toolbar-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 12px;
+  }
+  .toolbar-row.wrapped { background: var(--hover); border-radius: 8px; }
+  .toolbar-row button {
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--divider);
+    background: #fff;
+    cursor: default;
+  }
+  .icon-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.78rem;
+  }
+  .icon-chip .ico { font-size: 0.95rem; }
+  .icon-chip.dark .ico { color: rgba(0,0,0,0.87); }
+  .icon-chip.muted .ico { color: var(--text-secondary); }
+
+  footer.note {
+    max-width: 1100px;
+    margin: 0 auto;
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+  }
+</style>
+</head>
+<body>
+
+<h1>SectionDetailClient — Outstanding Partial Fixes</h1>
+<p class="intro">
+  Static mockups for the four deliverables flagged <strong>PARTIAL</strong> in the plan-vs-implementation audit
+  (docs/Learning Platform Dashboard Redesign.md, Sections 6–8). Non-functional HTML/CSS only, for design review.
+</p>
+
+<!-- ============ 1. Merged Gradebook + Completion ============ -->
+<section class="block">
+  <h2>1. Merge Gradebook + Completion Overview into one grid cell</h2>
+  <p class="desc">Currently two separate tables share the same data (grade % and completion status) under one tab.
+     Proposed: a single cell shows the percentage with a small completion-status dot next to it.</p>
+  <div class="compare">
+    <div class="panel">
+      <div class="label before">Before — two tables</div>
+      <div class="content">
+        <table>
+          <thead><tr><th>Student</th><th>Greetings</th><th>Numbers</th></tr></thead>
+          <tbody>
+            <tr><td>Akira T.</td><td class="pct good">92%</td><td class="pct mid">74%</td></tr>
+            <tr><td>Maya R.</td><td class="pct low">58%</td><td class="pct good">88%</td></tr>
+          </tbody>
+        </table>
+        <div style="height:12px"></div>
+        <table>
+          <thead><tr><th>Student</th><th>Greetings</th><th>Numbers</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Akira T.</td>
+              <td class="before-cell-stack"><span class="before-pill complete">Complete</span></td>
+              <td class="before-cell-stack"><span class="before-pill progress">In Progress</span></td>
+            </tr>
+            <tr>
+              <td>Maya R.</td>
+              <td class="before-cell-stack"><span class="before-pill progress">In Progress</span></td>
+              <td class="before-cell-stack"><span class="before-pill complete">Complete</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="label after">After — one merged grid</div>
+      <div class="content">
+        <table>
+          <thead><tr><th>Student</th><th>Greetings</th><th>Numbers</th></tr></thead>
+          <tbody>
+            <tr>
+              <td>Akira T.</td>
+              <td><span class="pct good">92%</span><span class="completion-badge done" title="Complete">✓</span></td>
+              <td><span class="pct mid">74%</span><span class="completion-badge progress" title="In progress">●</span></td>
+            </tr>
+            <tr>
+              <td>Maya R.</td>
+              <td><span class="pct low">58%</span><span class="completion-badge progress" title="In progress">●</span></td>
+              <td><span class="pct good">88%</span><span class="completion-badge done" title="Complete">✓</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. Compact Leaderboard sidebar ============ -->
+<section class="block">
+  <h2>2. Leaderboard as a compact sidebar card</h2>
+  <p class="desc">Gold/silver/bronze rank badges already exist. Proposed: present the leaderboard as a narrow
+     sidebar card next to the main content instead of a full-width table.</p>
+  <div class="leaderboard-layout">
+    <div class="panel">
+      <div class="label before">Before — full-width table (current)</div>
+      <div class="content">
+        <table>
+          <thead><tr><th>#</th><th>Student</th><th>XP</th></tr></thead>
+          <tbody>
+            <tr><td><span class="lb-rank gold">1</span></td><td>Akira T.</td><td class="lb-xp">2,410</td></tr>
+            <tr><td><span class="lb-rank silver">2</span></td><td>Maya R.</td><td class="lb-xp">2,180</td></tr>
+            <tr><td><span class="lb-rank bronze">3</span></td><td>Jun K.</td><td class="lb-xp">1,975</td></tr>
+            <tr><td><span class="lb-rank plain">4</span></td><td>Sam P.</td><td class="lb-xp">1,840</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    <div class="leaderboard-card">
+      <div class="label after" style="margin:-14px -14px 12px;border-radius:12px 12px 0 0;">After — sidebar card</div>
+      <h3>Top Students</h3>
+      <div class="lb-row"><span class="lb-rank gold">1</span><span class="lb-avatar"></span><span class="lb-name">Akira T.</span><span class="lb-xp">2,410</span></div>
+      <div class="lb-row"><span class="lb-rank silver">2</span><span class="lb-avatar"></span><span class="lb-name">Maya R.</span><span class="lb-xp">2,180</span></div>
+      <div class="lb-row"><span class="lb-rank bronze">3</span><span class="lb-avatar"></span><span class="lb-name">Jun K.</span><span class="lb-xp">1,975</span></div>
+      <div class="lb-gap">⋯</div>
+      <div class="lb-row current"><span class="lb-rank plain">9</span><span class="lb-avatar"></span><span class="lb-name">You</span><span class="lb-xp">1,210</span></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 3. Gradebook spacing + muted icons ============ -->
+<section class="block">
+  <h2>3. Gradebook row spacing &amp; muted action icons</h2>
+  <p class="desc">Chapter-metric cells need breathing room before the chevron; assignment action icons
+     should be <code>text.secondary</code> instead of full-contrast black.</p>
+  <div class="compare">
+    <div class="panel">
+      <div class="label before">Before — cramped, dark icons</div>
+      <div class="content" style="padding:0;">
+        <div class="chapter-row">
+          <span>Ch. 3: Daily Activities Vocabulary</span>
+          <span class="chapter-meta tight">12/15 cards <span class="chevron dark">⌄</span></span>
+        </div>
+        <div class="chapter-row">
+          <span><span class="icon-chip dark"><span class="ico">📓</span> View Workbook</span></span>
+        </div>
+        <div class="toolbar-row">
+          <button>Unit ▾</button><button>Random Assign</button><button>Reset</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="label after">After — spaced, muted icons</div>
+      <div class="content" style="padding:0;">
+        <div class="chapter-row">
+          <span>Ch. 3: Daily Activities Vocabulary</span>
+          <span class="chapter-meta roomy">12/15 cards <span class="chevron muted">⌄</span></span>
+        </div>
+        <div class="chapter-row">
+          <span><span class="icon-chip muted"><span class="ico">📓</span> View Workbook</span></span>
+        </div>
+        <div class="toolbar-row wrapped">
+          <button>Unit ▾</button><button>Random Assign</button><button>Reset</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="note">
+  Note: item 4 from the audit (app-wide semantic radius token audit) has no distinct visual shape to mock —
+  it's a refactor of existing `borderRadius` values to `SEMANTIC_THEME.radius.*` tokens, not a new UI pattern.
+</footer>
+
+</body>
+</html>

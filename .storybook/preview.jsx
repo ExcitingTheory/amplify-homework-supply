@@ -93,10 +93,16 @@ import "./storybook.css";
 // Import the app's shared theme (with cssVariables + colorSchemes)
 import appTheme from "../src/theme";
 
-// Keep portal-based overlays inside the Storybook canvas
+// Keep portal-based overlays (notably the nav Drawer) inside the Storybook
+// canvas/viewport decorator instead of escaping to document.body.
 const theme = createTheme(appTheme, {
   components: {
     MuiModal: { defaultProps: { disablePortal: true } },
+    // Popover-based overlays (Menu, Select, etc.) opt back into portals: they
+    // render inline otherwise, which clips them inside ancestors that use
+    // `overflow: hidden` for layout (e.g. MainToolbar's AppBar Toolbar),
+    // cropping things like the profile menu into the toolbar strip.
+    MuiPopover: { defaultProps: { disablePortal: false } },
   },
 });
 

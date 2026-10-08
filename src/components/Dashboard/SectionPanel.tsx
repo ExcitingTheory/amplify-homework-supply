@@ -23,8 +23,11 @@ import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 import { openDiscussion } from "@/utils/chatDiscussBus";
 import { AssignmentCard, type AssignmentCardProps } from "./AssignmentCard";
-import { UpNextCard } from "./UpNextCard";
 import { GradeDonut } from "./GradeDonut";
+import {
+  NailedItWall,
+  type NailedItBlock,
+} from "@/components/Gamification/NailedItWall";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -71,6 +74,8 @@ export interface SectionPanelProps {
   >;
   /** XP-based nailed-it counts per unit */
   nailedItByUnit?: Record<string, number>;
+  /** This section's Nailed It moments (for the expandable wall) */
+  nailedItBlocks?: NailedItBlock[];
   /** Active campaign chapter title for this section */
   activeChapterTitle?: string | null;
   /** Content lock check */
@@ -101,6 +106,7 @@ export function SectionPanel({
   units,
   gradeMap,
   nailedItByUnit = {},
+  nailedItBlocks = [],
   activeChapterTitle,
   isLocked,
   getLockStatus,
@@ -115,10 +121,13 @@ export function SectionPanel({
   onRoomCreated,
 }: SectionPanelProps) {
   const [showCompleted, setShowCompleted] = React.useState(false);
+  const [showNailedIt, setShowNailedIt] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
   const reducedMotion = useReducedMotion();
   const upNextRef = React.useRef<HTMLDivElement>(null);
   const router = useRouter();
+  const [announcement, setAnnouncement] = React.useState("");
+  const priorCompletedIdsRef = React.useRef<Set<string> | null>(null);
 
   const handleAccordionChange = React.useCallback(
     (_: React.SyntheticEvent, expanded: boolean) => {
@@ -157,15 +166,32 @@ export function SectionPanel({
     (a) => a.dueDate && new Date(a.dueDate).getTime() < Date.now(),
   ).length;
 
-  // Up-next: first non-locked pending assignment
+  // Up-next: first non-locked pending assignment (used for prefetch + the
+  // completion announcement text, not for a dedicated hero card anymore).
   const upNext = pending.find((a) => !isLocked(a.unitID));
-  const remainingPending = pending.filter((a) => a.id !== upNext?.id);
   const nextDueAssignment = pending.find((assignment) => assignment.dueDate);
 
   // Prefetch the up-next workbook route so opening it feels instant
   React.useEffect(() => {
     if (upNext?.unitID) router.prefetch(`/workbook/${upNext.unitID}`);
   }, [upNext?.unitID, router]);
+
+  // Announce newly-completed assignments for screen reader users (Phase 5.3)
+  React.useEffect(() => {
+    const completedIds = new Set(completed.map((a) => a.id));
+    const prior = priorCompletedIdsRef.current;
+    if (prior && completedIds.size > prior.size) {
+      const nextStepText = upNext
+        ? ` Your next step is ${units[upNext.unitID]?.name || "your next assignment"}${
+            upNext.dueDate
+              ? `, due ${new Date(upNext.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
+              : ""
+          }.`
+        : " You're all caught up in this section.";
+      setAnnouncement(`Assignment completed.${nextStepText}`);
+    }
+    priorCompletedIdsRef.current = completedIds;
+  }, [completed, upNext, units]);
 
   // Stats
   const completionPct = assignments.length
@@ -265,6 +291,7 @@ export function SectionPanel({
               <Chip
                 label={`${pending.length} pending`}
                 size="small"
+                variant="status"
                 color="warning"
                 icon={<HourglassTopIcon />}
                 sx={{ fontWeight: 700 }}
@@ -274,6 +301,7 @@ export function SectionPanel({
               <Chip
                 label={`${completed.length} done`}
                 size="small"
+                variant="status"
                 color="success"
                 icon={<CheckCircleIcon />}
                 sx={{ fontWeight: 700 }}
@@ -283,16 +311,9 @@ export function SectionPanel({
               <Chip
                 label={`${overdueCount} overdue`}
                 size="small"
+                variant="status"
                 color="error"
                 icon={<WarningAmberIcon />}
-                sx={{ fontWeight: 700 }}
-              />
-            )}
-            {sectionLevel && (
-              <Chip
-                label={`Lv. ${sectionLevel.level}`}
-                size="small"
-                variant="outlined"
                 sx={{ fontWeight: 700 }}
               />
             )}
@@ -310,6 +331,21 @@ export function SectionPanel({
           )}
         </Stack>
       </AccordionSummary>
+
+      {/* Screen-reader announcement for assignment completion (Phase 5.3) */}
+      <Box
+        aria-live="assertive"
+        aria-atomic="true"
+        sx={{
+          position: "absolute",
+          width: 1,
+          height: 1,
+          overflow: "hidden",
+          clip: "rect(0 0 0 0)",
+        }}
+      >
+        {announcement}
+      </Box>
 
       <AccordionDetails
         id={`section-content-${section.id}`}
@@ -339,28 +375,18 @@ export function SectionPanel({
         {/* Campaign briefing (collapsed teaser, optional) */}
         {campaignBriefing}
 
-        {/* Up Next hero */}
-        {upNext && (
-          <Box ref={upNextRef} tabIndex={-1} sx={{ outline: "none" }}>
-            <UpNextCard
-              assignment={upNext}
-              unit={units[upNext.unitID]}
-              sectionName={section.name || "this section"}
-              chapterTitle={activeChapterTitle}
-              nailedItCount={nailedItByUnit[upNext.unitID] || 0}
-              accommodation={accommodation}
-              onOpenDrill={onOpenDrill}
-              onRequestGuidance={onRequestGuidance}
-            />
-          </Box>
-        )}
-
-        {/* Remaining pending */}
-        {remainingPending.length > 0 && (
-          <Stack spacing={1.5} sx={{ mb: 2 }}>
-            {remainingPending.map((assignment) => (
+        {/* Pending — plain list, no "Up Next" hero. The single most urgent
+            assignment across all sections is already featured in the
+            dashboard's Today card, so sections don't duplicate that hero. */}
+        <Stack spacing={1.5}>
+          {pending.map((assignment, index) => (
+            <Box
+              key={assignment.id}
+              ref={index === 0 ? upNextRef : undefined}
+              tabIndex={-1}
+              sx={{ outline: "none" }}
+            >
               <AssignmentCard
-                key={assignment.id}
                 assignment={assignment}
                 unit={units[assignment.unitID]}
                 locked={isLocked(assignment.unitID)}
@@ -370,11 +396,11 @@ export function SectionPanel({
                 onOpenDrill={onOpenDrill}
                 onRequestGuidance={onRequestGuidance}
               />
-            ))}
-          </Stack>
-        )}
+            </Box>
+          ))}
+        </Stack>
 
-        {/* Completed (collapsed by default) */}
+        {/* Completed — folded behind a toggle, greyscaled to read as done. */}
         {completed.length > 0 && (
           <Box sx={{ mt: 1 }}>
             <Button
@@ -422,6 +448,35 @@ export function SectionPanel({
             </Collapse>
           </Box>
         )}
+        {/* Nailed It wall — expandable, scoped to this section (Phase 1.3) */}
+        {nailedItBlocks.length > 0 && (
+          <Box sx={{ mt: 1 }}>
+            <Button
+              size="small"
+              onClick={() => setShowNailedIt((v) => !v)}
+              startIcon={<span aria-hidden>🎯</span>}
+              endIcon={
+                <ExpandMoreIcon
+                  sx={{
+                    transform: showNailedIt ? "rotate(180deg)" : "none",
+                    transition: reducedMotion ? "none" : "transform 0.2s",
+                  }}
+                />
+              }
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                mb: 1,
+                color: "text.secondary",
+              }}
+            >
+              Nailed It ({nailedItBlocks.length})
+            </Button>
+            <Collapse in={showNailedIt}>
+              <NailedItWall blocks={nailedItBlocks} />
+            </Collapse>
+          </Box>
+        )}
 
         {/* Section-aware empty state */}
         {pending.length === 0 && completed.length > 0 && (
@@ -430,7 +485,7 @@ export function SectionPanel({
           </Typography>
         )}
 
-        {/* Footer actions */}
+        {/* Footer actions — secondary outlined actions left, primary solid action right */}
         <Box
           sx={{
             mt: 2,
@@ -438,39 +493,42 @@ export function SectionPanel({
             borderTop: "1px solid",
             borderColor: "divider",
             display: "flex",
-            gap: 1,
+            justifyContent: "space-between",
             flexWrap: "wrap",
             alignItems: "center",
+            gap: 1,
           }}
         >
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            <Button
+              size="small"
+              variant="outlined"
+              startIcon={<ChatBubbleOutlineIcon />}
+              onClick={() =>
+                openDiscussion({
+                  sectionID: section.id,
+                  scope: "section",
+                  topicName: section.name || "Class discussion",
+                })
+              }
+            >
+              Discuss
+            </Button>
+            <SkillTreePopupButton
+              sectionId={section.id}
+              label={section.name}
+              size="small"
+            />
+          </Box>
           <Button
             component="a"
             href={`/section/${section.id}`}
             size="small"
-            variant="outlined"
+            variant="contained"
             endIcon={<ArrowForwardIcon />}
           >
             View Class
           </Button>
-          <Button
-            size="small"
-            variant="outlined"
-            startIcon={<ChatBubbleOutlineIcon />}
-            onClick={() =>
-              openDiscussion({
-                sectionID: section.id,
-                scope: "section",
-                topicName: section.name || "Class discussion",
-              })
-            }
-          >
-            Discuss
-          </Button>
-          <SkillTreePopupButton
-            sectionId={section.id}
-            label={section.name}
-            size="small"
-          />
         </Box>
       </AccordionDetails>
     </Accordion>

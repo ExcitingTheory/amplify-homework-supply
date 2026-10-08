@@ -2,44 +2,52 @@
 
 GitHub Copilot Agent Skills for the Homework Supply project.
 
-**📖 [Workflows & Skills Integration Guide](../WORKFLOWS_AND_SKILLS_GUIDE.md)** - Learn how skills work with workflow prompts
-
 ## Available Skills
 
-### [mock-data-validator](./mock-data-validator/)
-Validates Storybook mock data structures match component TypeScript prop types.
-
-**Use when**: Creating stories, updating component props, debugging rendering issues
-
-### [semantic-file-search](./semantic-file-search/)
-Natural language file discovery with relevance ranking and snippet extraction.
-
-**Use when**: Searching for components, patterns, or implementations without knowing exact paths
-
-### [storybook-audit](./storybook-audit/)
-Full Storybook health audit using `npm run storybook:run:with-logs`. Validates rendering, console errors, network failures, mock data schemas, and prop types.
-
-**Use when**: Testing Storybook, validating all stories, before releases, after upgrades
-
 ### [component-versioning](./component-versioning/)
-Automates creation of versioned component copies (Component → Component2) with updated imports, exports, and feature parity checklists.
+Create a versioned component copy with bounded evidence and focused validation.
 
-**Use when**: Creating v2 of existing components, refactoring major features, migrating to new patterns
+**Use when**: A rewrite, incompatible API change, or major migration — not for routine edits. Confirm the source component and target version first.
 
-### [feature-development-cycle](./feature-development-cycle/)
-The default background process for ALL development work. Automatically activates whenever planning, building, or implementing anything. Drives spec → testing plan → TODO → implementation → audit loops until verified complete.
+### [console-crawl-audit](./console-crawl-audit/)
+Scope-aware runtime crawl with targeted log inspection.
 
-**Use when**: Always. This is the background process for any planning, feature work, implementation, or code changes. No explicit invocation needed — if work is happening, this cycle is running.
+**Use when**: Verifying changed routes after a change (default scope). Crawl all roles/routes only for schema/context changes, a release check, or an explicit request.
 
-### [multi-model-ai-translation](./multi-model-ai-translation/)
-Translates content using multiple AI models in parallel (Claude, GPT-4o, Gemma) with consensus analysis, reverse translation verification, and cryptographic proof generation.
+### [docblock-backfill](./docblock-backfill/)
+Bounded docblock audit and backfill for explicitly requested files.
 
-**Use when**: Translating i18n files, validating translation quality, generating auditable translations
+**Use when**: A specific file or directory is explicitly named for docblock audit/backfill — defaults to dry-run first, not an open-ended sweep.
 
 ### [extract-code-documentation](./extract-code-documentation/)
-Extracts JSDoc/TSDoc docblocks from source code, maps components to descriptions, and enriches data with metadata from code annotations.
+Generate only requested translation metadata using existing scripts.
 
-**Use when**: Generating documentation, enriching translation metadata, auditing component documentation coverage
+**Use when**: One specific operation is needed — usage discovery, placeholder repair, or missing-metadata generation — scoped to requested namespaces.
+
+### [feature-development-cycle](./feature-development-cycle/)
+Proportionate feature workflow using focused evidence and validation.
+
+**Use when**: Multi-surface or multi-session work needs a concise plan (scope, acceptance criteria, risks, test strategy). Localized fixes use the normal edit-test loop instead.
+
+### [mock-data-validator](./mock-data-validator/)
+Validate a specified Storybook mock against its consuming component.
+
+**Use when**: A specific component or story target is given — checks its mocks and providers against the component's real props.
+
+### [multi-model-ai-translation](./multi-model-ai-translation/)
+Bounded multi-model translation with exception-only review.
+
+**Use when**: Translating i18n content. Defaults to `fake` mode; `provable` mode (real model calls) requires explicit user approval for provider cost.
+
+### [semantic-file-search](./semantic-file-search/)
+Focused code discovery using one query and limited evidence reads.
+
+**Use when**: Searching for components, patterns, or implementations without knowing exact paths — start with one natural-language query and a known scope if available.
+
+### [storybook-audit](./storybook-audit/)
+Focused Storybook audit that widens only from observed failures.
+
+**Use when**: Requested or changed stories need validation (default scope). Use the full suite only for a requested full audit, release check, or shared Storybook infrastructure change.
 
 ## Skill Structure
 
@@ -83,8 +91,6 @@ Skills are automatically loaded by GitHub Copilot when you work in this workspac
 | Create Component2 | `"Create ChatSidebar2 from ChatSidebar"` |
 | Check mock data types | `"Validate mock data for all stories"` |
 
-See [Workflows & Skills Integration Guide](../WORKFLOWS_AND_SKILLS_GUIDE.md) for detailed usage patterns.
-
 ### Requirements
 
 Enable skills in VS Code settings:
@@ -97,5 +103,3 @@ Enable skills in VS Code settings:
 ## Documentation
 
 - [Agent Skills Standard](https://agentskills.io)
-- [Agent Skills Architecture](../../docs/AGENT_SKILLS_ARCHITECTURE.md)
-- [Implementation Guide](../../docs/AGENT_SKILLS_IMPLEMENTATION.md)

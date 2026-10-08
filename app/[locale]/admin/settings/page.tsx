@@ -790,11 +790,9 @@ function GamificationAdmin() {
     <>
       <Box
         sx={{
-          marginTop: "1rem",
-          marginBottom: "3rem",
-          padding: "1rem",
           maxWidth: "80rem",
           margin: "1rem auto 3rem",
+          padding: "1rem",
         }}
       >
         <InstructorGamificationPanel

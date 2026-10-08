@@ -65,9 +65,9 @@ export function SectionHeader({
         borderBottom: "1px solid",
         borderColor: "divider",
         display: "flex",
-        alignItems: "flex-start",
-        gap: 2,
-        flexWrap: "wrap",
+        flexDirection: { xs: "column", sm: "row" },
+        alignItems: { xs: "stretch", sm: "flex-start" },
+        gap: { xs: 1.5, sm: 2 },
       }}
     >
       <Box sx={{ flex: 1, minWidth: 0 }}>

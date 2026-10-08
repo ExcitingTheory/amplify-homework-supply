@@ -1198,7 +1198,26 @@ const InsertNodeDropDown = ({
         &nbsp;
         <span className="text">{t("toolBarPlugin.insert")}</span>
       </Button>
-      <Menu open={open} onClose={handleClose} anchorEl={anchorEl}>
+      <Menu
+        open={open}
+        onClose={handleClose}
+        anchorEl={anchorEl}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        transformOrigin={{ vertical: "top", horizontal: "left" }}
+        slotProps={{
+          paper: {
+            // Cap height to the space below the toolbar itself (not just
+            // the viewport) so MUI never needs to slide the menu upward
+            // over the toolbar to make it fit — it scrolls instead. The
+            // small margin-top clears the toolbar row's own bottom padding
+            // below the button so the menu never dips into the toolbar.
+            sx: {
+              mt: "24px",
+              maxHeight: "calc(100vh - var(--app-bar-height, 11rem) - 32px)",
+            },
+          },
+        }}
+      >
         <MenuItem
           tabIndex={-1}
           onClick={() => {
@@ -2624,7 +2643,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
             <UnitTitleDescriptionEditor />
             <AppBar
               ref={secondAppBarRef}
-              position="static"
+              position="relative"
               color="default"
               data-tour="editor-toolbar"
               sx={{

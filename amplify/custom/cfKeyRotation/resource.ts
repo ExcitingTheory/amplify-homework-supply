@@ -146,6 +146,10 @@ export class CfKeyRotationConstruct extends Construct {
       logGroup: new logs.LogGroup(this, "HandlerLogGroup", {
         retention: logs.RetentionDays.ONE_WEEK,
       }),
+      environment: {
+        PUBLIC_KEY_PARAM: this.publicKeyParamName,
+        PRIVATE_KEY_PARAM: this.privateKeyParamName,
+      },
       bundling: {
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],

@@ -1,14 +1,24 @@
+"use client";
 /**
- * StreakIndicator — Shows a flame icon and current streak day count.
- * Displays nothing when streak is 0. Adds a glow effect at 7-day milestones.
+ * StreakIndicator — Shows the current streak day count as a heraldic flame
+ * medallion (shared Medallion finish, matching StreakShield/LevelBadge) with
+ * the day count as a small corner badge. Displays nothing when streak is 0.
+ * Adds a glow effect at 7-day milestones.
  *
  * @module StreakIndicator
  */
 
 import React from "react";
-import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Badge from "@mui/material/Badge";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
+import { useTheme } from "@mui/material/styles";
+import { Medallion } from "./Medallion";
+import {
+  getTinctures,
+  metalForTier,
+  readableInk,
+  medallionBadgeSx,
+} from "@/themes/heraldry";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export interface StreakIndicatorProps {
@@ -26,48 +36,63 @@ export function StreakIndicator({
   showEmpty = false,
 }: StreakIndicatorProps) {
   const reducedMotion = useReducedMotion();
+  const theme = useTheme();
 
   if (currentStreak <= 0 && !showEmpty) return null;
 
   const isMilestone = currentStreak >= 7;
   const isSmall = size === "small";
+  const px = isSmall ? 30 : 42;
+  const ariaLabel = `${currentStreak} day streak`;
+
+  const field = getTinctures(theme).gules;
+  const metal = metalForTier(currentStreak * 1000, theme);
+  const textColor = readableInk(field.main);
+
+  const charge = (
+    <WhatshotIcon
+      sx={{
+        fontSize: px * 0.5,
+        color: isMilestone ? "#ffe082" : "#fff3e0",
+        filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
+      }}
+    />
+  );
 
   return (
-    <Box
+    <Badge
       aria-live="polite"
       aria-atomic="true"
-      aria-label={`${currentStreak} day streak`}
+      aria-label={ariaLabel}
+      badgeContent={currentStreak}
+      showZero
+      overlap="circular"
+      anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
       sx={{
+        ...medallionBadgeSx(field.main, textColor),
         display: "inline-flex",
-        alignItems: "center",
-        gap: 0.5,
-        ...(isMilestone && {
-          filter: "drop-shadow(0 0 6px rgba(255,152,0,0.6))",
-          ...(!reducedMotion && {
-            animation: "pulse 2s ease-in-out infinite",
-            "@keyframes pulse": {
+        ...(isMilestone &&
+          !reducedMotion && {
+            animation: "streakPulse 2s ease-in-out infinite",
+            "@keyframes streakPulse": {
               "0%, 100%": {
-                filter: "drop-shadow(0 0 6px rgba(255,152,0,0.6))",
+                filter: "drop-shadow(0 0 4px rgba(255,109,0,0.5))",
               },
-              "50%": { filter: "drop-shadow(0 0 12px rgba(255,152,0,0.9))" },
+              "50%": { filter: "drop-shadow(0 0 10px rgba(255,109,0,0.85))" },
             },
           }),
-        }),
       }}
     >
-      <WhatshotIcon
-        sx={{
-          color: isMilestone ? "#ff6d00" : "#ff9800",
-          fontSize: isSmall ? "1rem" : "1.25rem",
-        }}
+      <Medallion
+        shape="disc"
+        size={px}
+        rimMetal={metal}
+        fieldColor={field.main}
+        charge={charge}
+        ariaLabel={ariaLabel}
+        reducedMotion={reducedMotion}
       />
-      <Typography
-        variant={isSmall ? "caption" : "body2"}
-        sx={{ fontWeight: 700, color: "text.primary" }}
-      >
-        {currentStreak}
-      </Typography>
-    </Box>
+    </Badge>
   );
 }
 

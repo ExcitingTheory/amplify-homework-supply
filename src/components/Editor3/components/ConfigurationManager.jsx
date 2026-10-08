@@ -125,9 +125,7 @@ export default function ConfigurationManager() {
 
   // UUID v4 pattern — used to distinguish stored File IDs from raw URLs
   const isFileId = (val) =>
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      val,
-    );
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
 
   const { unit, files } = React.useContext(UnitContext);
 
@@ -196,6 +194,13 @@ export default function ConfigurationManager() {
           });
 
           await uploadOperation.result;
+
+          // Fire-and-forget — generates the blurred teaser ContentLockCard uses
+          getAmplifyClient()
+            .mutations.generateBlurredPreview({ path: s3Path })
+            .catch((error) =>
+              console.error("[BlurredPreview] Generation failed:", error),
+            );
         }),
       );
 

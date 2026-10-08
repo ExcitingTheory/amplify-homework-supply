@@ -3191,8 +3191,8 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
       />
       {/* Metadata Editor */}
       <MetadataEditor file={selectedFile} />
-      {/* File Content */}
-      <Box sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+      {/* File Content — parent column owns scrolling, so this just lays out naturally */}
+      <Box sx={{ pb: 3 }}>
         <ExpandedFileContent
           file={selectedFile}
           parsedContent={parsedContent}
@@ -5180,7 +5180,12 @@ export default function FileManager2() {
                       flex: "0 0 65%",
                       display: "flex",
                       flexDirection: "column",
-                      overflow: "hidden",
+                      // Scroll the whole column — the header/metadata above
+                      // ExpandedFileContent can grow taller than the available
+                      // space, and a fixed "hidden" here clipped it with no way
+                      // to reach the rest by scrolling.
+                      overflowY: "auto",
+                      overflowX: "hidden",
                       bgcolor: "background.paper",
                       minWidth: 0,
                     }}

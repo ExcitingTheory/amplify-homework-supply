@@ -24,6 +24,9 @@ import {
   TableRow,
   useMediaQuery,
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
+import { readableInk } from "../themes/heraldry";
+import { getGrainySheenSx } from "../utils/grainySheen";
 import TrendingUpIcon from "@mui/icons-material/TrendingUp";
 import PeopleIcon from "@mui/icons-material/People";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
@@ -60,7 +63,7 @@ function isRecentlyActive(dateStr) {
 }
 
 // ── Section footer actions ────────────────────────────────────────────────
-/** Manage Section stays prominent; Peer Review lives behind an overflow menu. */
+/** Secondary actions (Skills, overflow menu) stay left; Manage Section is the sole primary action, right-aligned. */
 function SectionFooterActions({ section }) {
   const [anchorEl, setAnchorEl] = useState(null);
   return (
@@ -71,12 +74,45 @@ function SectionFooterActions({ section }) {
         borderTop: "1px solid",
         borderColor: "divider",
         display: "flex",
-        gap: 1,
+        justifyContent: "space-between",
         flexWrap: "wrap",
         alignItems: "center",
+        gap: 1,
         bgcolor: "action.hover",
       }}
     >
+      <Box
+        sx={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 1 }}
+      >
+        <SkillTreePopupButton
+          sectionId={section.id}
+          label={section.name}
+          size="small"
+          sx={{ color: "text.secondary", borderColor: "divider" }}
+        />
+        <Tooltip title="More actions">
+          <IconButton
+            size="small"
+            onClick={(event) => setAnchorEl(event.currentTarget)}
+          >
+            <MoreVertIcon />
+          </IconButton>
+        </Tooltip>
+        <Menu
+          anchorEl={anchorEl}
+          open={Boolean(anchorEl)}
+          onClose={() => setAnchorEl(null)}
+        >
+          <MenuItem
+            component="a"
+            href={`/section/${section.id}#peer-review`}
+            onClick={() => setAnchorEl(null)}
+          >
+            <RateReviewIcon fontSize="small" sx={{ mr: 1 }} />
+            Peer Review
+          </MenuItem>
+        </Menu>
+      </Box>
       <Button
         component="a"
         href={`/section/${section.id}`}
@@ -86,35 +122,6 @@ function SectionFooterActions({ section }) {
       >
         Manage Section
       </Button>
-      <SkillTreePopupButton
-        sectionId={section.id}
-        label={section.name}
-        size="small"
-        sx={{ color: "text.secondary", borderColor: "divider" }}
-      />
-      <Tooltip title="More actions">
-        <IconButton
-          size="small"
-          onClick={(event) => setAnchorEl(event.currentTarget)}
-          sx={{ ml: "auto" }}
-        >
-          <MoreVertIcon />
-        </IconButton>
-      </Tooltip>
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={() => setAnchorEl(null)}
-      >
-        <MenuItem
-          component="a"
-          href={`/section/${section.id}#peer-review`}
-          onClick={() => setAnchorEl(null)}
-        >
-          <RateReviewIcon fontSize="small" sx={{ mr: 1 }} />
-          Peer Review
-        </MenuItem>
-      </Menu>
     </Box>
   );
 }
@@ -122,6 +129,7 @@ function SectionFooterActions({ section }) {
 export default function InstructorDashboard({ sections = [] }) {
   const t = useTranslations("components");
   const client = getAmplifyClient();
+  const theme = useTheme();
 
   const [sectionStats, setSectionStats] = useState({});
   const [allGrades, setAllGrades] = useState([]);
@@ -553,6 +561,18 @@ export default function InstructorDashboard({ sections = [] }) {
   }
 
   const validSections = sections.filter((s) => s != null && s.id != null);
+  const heroStart = theme.palette.secondary.main;
+  const heroEnd = theme.palette.error.main;
+  const ink = readableInk(heroStart);
+  // "Pop" surface for the primary footer action — inverse of `ink` so it reads as a raised chip against the gradient either way.
+  const heroPopBg =
+    ink === "#f5f5f5" ? "rgba(255,255,255,0.95)" : "rgba(26,26,26,0.92)";
+  const heroPopText = ink === "#f5f5f5" ? "#1a1a1a" : "#f5f5f5";
+  const todayLabel = new Date().toLocaleDateString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+  });
 
   return (
     <Box sx={{ mb: 4, mx: "auto", width: "90vw", maxWidth: "80rem" }}>
@@ -561,34 +581,73 @@ export default function InstructorDashboard({ sections = [] }) {
         elevation={0}
         sx={{
           mb: 3,
-          borderRadius: DASHBOARD_TOKENS.radius.panel / 2,
+          // MUI's sx multiplies bare numeric borderRadius by theme.shape.borderRadius
+          // (4) — must be an explicit px string or 6 silently becomes 24.
+          borderRadius: `${DASHBOARD_TOKENS.radius.panel / 2}px`,
           overflow: "hidden",
           border: "1px solid",
           borderColor: "divider",
-          background: (theme) =>
-            theme.palette.mode === "dark"
-              ? "rgba(25,118,210,0.12)"
-              : "rgba(56,142,60,0.08)",
-          color: (theme) =>
-            theme.palette.mode === "dark" ? "#e3f2fd" : "#1b5e20",
+          ...getGrainySheenSx(heroStart, heroEnd),
+          color: ink,
           p: { xs: 2, sm: 3 },
         }}
       >
-        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-          <TrendingUpIcon />
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            Class health
-          </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "space-between",
+            flexWrap: "wrap",
+            gap: 2,
+            mb: 2.5,
+          }}
+        >
+          <Box sx={{ minWidth: 0 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: "inherit",
+                opacity: 0.75,
+                mb: 0.5,
+              }}
+            >
+              All sections · {todayLabel}
+            </Typography>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <TrendingUpIcon sx={{ color: "inherit" }} />
+              <Typography
+                variant="h5"
+                sx={{ fontWeight: 800, color: "inherit", lineHeight: 1.2 }}
+              >
+                Class health
+              </Typography>
+            </Box>
+            <Typography
+              variant="body2"
+              sx={{ color: "inherit", opacity: 0.85, mt: 0.5, maxWidth: 520 }}
+            >
+              {aggregateStats.totalStudents} student
+              {aggregateStats.totalStudents !== 1 ? "s" : ""} across{" "}
+              {validSections.length} section
+              {validSections.length !== 1 ? "s" : ""}, averaging{" "}
+              {aggregateStats.avgGrade}%.
+            </Typography>
+          </Box>
           <Chip
             label={`${validSections.length} section${validSections.length !== 1 ? "s" : ""}`}
             size="small"
             sx={{
-              bgcolor: (theme) =>
-                theme.palette.mode === "dark"
-                  ? "rgba(25,118,210,0.3)"
-                  : "rgba(56,142,60,0.2)",
+              bgcolor: alpha(ink, 0.18),
+              border: "1px solid",
+              borderColor: alpha(ink, 0.35),
               color: "inherit",
-              ml: "auto",
+              fontWeight: 700,
+              borderRadius: `${DASHBOARD_TOKENS.radius.chip}px`,
+              flexShrink: 0,
             }}
           />
         </Box>
@@ -599,7 +658,7 @@ export default function InstructorDashboard({ sections = [] }) {
               xs: "repeat(2, minmax(0, 1fr))",
               sm: "repeat(5, minmax(0, 1fr))",
             },
-            gap: { xs: 2, sm: 3 },
+            gap: { xs: 1.5, sm: 2 },
           }}
         >
           {[
@@ -631,7 +690,18 @@ export default function InstructorDashboard({ sections = [] }) {
           ].map(({ icon, label, value }) => (
             <Box
               key={label}
-              sx={{ display: "flex", flexDirection: "column", minWidth: 0 }}
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                minWidth: 0,
+                gap: 0.25,
+                px: 1.5,
+                py: 1,
+                borderRadius: `${DASHBOARD_TOKENS.radius.chip}px`,
+                bgcolor: alpha(ink, 0.14),
+                border: "1px solid",
+                borderColor: alpha(ink, 0.24),
+              }}
             >
               <Box
                 sx={{
@@ -659,25 +729,26 @@ export default function InstructorDashboard({ sections = [] }) {
           ))}
         </Box>
         <Stack
-          direction={{ xs: "column", sm: "row" }}
+          direction="row"
           spacing={1}
+          flexWrap="wrap"
+          useFlexGap
           sx={{ mt: 2 }}
         >
-          <Button
-            component="a"
-            href="/sections"
-            size="small"
-            variant="contained"
-            startIcon={<PeopleIcon />}
-          >
-            Manage sections
-          </Button>
           <Button
             component="a"
             href="/admin/moderation"
             size="small"
             variant="outlined"
             startIcon={<FlagIcon />}
+            sx={{
+              color: "inherit",
+              bgcolor: alpha(ink, 0.14),
+              borderColor: alpha(ink, 0.35),
+              whiteSpace: "nowrap",
+              borderRadius: `${DASHBOARD_TOKENS.radius.chip}px`,
+              "&:hover": { borderColor: ink, bgcolor: alpha(ink, 0.22) },
+            }}
           >
             Review flagged content
           </Button>
@@ -688,10 +759,36 @@ export default function InstructorDashboard({ sections = [] }) {
               size="small"
               variant="outlined"
               startIcon={<AssignmentTurnedInIcon />}
+              sx={{
+                color: "inherit",
+                bgcolor: alpha(ink, 0.14),
+                borderColor: alpha(ink, 0.35),
+                whiteSpace: "nowrap",
+                borderRadius: `${DASHBOARD_TOKENS.radius.chip}px`,
+                "&:hover": { borderColor: ink, bgcolor: alpha(ink, 0.22) },
+              }}
             >
               Open grade review
             </Button>
           )}
+          <Button
+            component="a"
+            href="/sections"
+            size="small"
+            variant="contained"
+            disableElevation
+            startIcon={<PeopleIcon />}
+            sx={{
+              bgcolor: heroPopBg,
+              color: heroPopText,
+              whiteSpace: "nowrap",
+              borderRadius: `${DASHBOARD_TOKENS.radius.chip}px`,
+              ml: { sm: "auto" },
+              "&:hover": { bgcolor: heroPopBg, opacity: 0.88 },
+            }}
+          >
+            Manage sections
+          </Button>
         </Stack>
       </Paper>
 
@@ -742,7 +839,7 @@ export default function InstructorDashboard({ sections = [] }) {
               key={s.id}
               variant="rounded"
               height={200}
-              sx={{ borderRadius: 3 }}
+              sx={{ borderRadius: `${DASHBOARD_TOKENS.radius.panel}px` }}
             />
           ))}
         </Stack>
@@ -1043,7 +1140,10 @@ export default function InstructorDashboard({ sections = [] }) {
                       <TableContainer
                         component={Paper}
                         variant="outlined"
-                        sx={{ borderRadius: 2, overflow: "hidden" }}
+                        sx={{
+                          borderRadius: `${DASHBOARD_TOKENS.radius.card}px`,
+                          overflow: "hidden",
+                        }}
                       >
                         <Table size="small" aria-label="recent activity table">
                           <TableHead sx={{ bgcolor: "action.hover" }}>

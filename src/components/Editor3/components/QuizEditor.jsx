@@ -541,8 +541,11 @@ const QuizEditor = ({ className, nodeKey, data }) => {
                     px: 1,
                     py: 0.5,
                   },
+                  // pl must clear the drag handle + disabled checkbox (same
+                  // positioning as SortableAnswers.jsx's rows — checkbox
+                  // right edge measures ~56px) with a visual gap.
                   "& input": {
-                    pl: { xs: 5, sm: 5.5 },
+                    pl: { xs: 8, sm: 8.5 },
                     pr: { xs: 5, sm: 5.5 },
                   },
                 }}

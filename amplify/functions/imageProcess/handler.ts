@@ -183,6 +183,21 @@ async function uploadToS3(
   );
 }
 
+/**
+ * Derive a blurred-preview sibling key for an arbitrary (possibly
+ * unprocessed) image path, e.g. "protected/{id}/featured-images/photo.png"
+ * -> "protected/{id}/featured-images/photo.preview-blurred.webp".
+ * Keep in sync with src/utils/getBlurredPreviewPath.js (client-side copy).
+ */
+function getBlurredPreviewPath(path: string): string {
+  const lastSlash = path.lastIndexOf("/");
+  const dir = path.slice(0, lastSlash + 1);
+  const filename = path.slice(lastSlash + 1);
+  const dotIndex = filename.lastIndexOf(".");
+  const base = dotIndex > 0 ? filename.slice(0, dotIndex) : filename;
+  return `${dir}${base}.preview-blurred.webp`;
+}
+
 // ---------------------------------------------------------------------------
 // Image processing
 // ---------------------------------------------------------------------------
@@ -311,6 +326,26 @@ async function processPdfThumbnail(
 // ---------------------------------------------------------------------------
 // Event handlers
 // ---------------------------------------------------------------------------
+
+/** GraphQL mutation: generateBlurredPreview(path) */
+async function handleGenerateBlurredPreview(args: any): Promise<string> {
+  const { path } = args;
+  if (!path) throw new Error("path is required");
+
+  const sourceBuffer = await downloadFromS3(path);
+  const processed = await sharp(sourceBuffer)
+    .resize(320, undefined, { fit: "inside", withoutEnlargement: true })
+    .blur(30)
+    .webp({ quality: 60, effort: 4 })
+    .toBuffer();
+
+  const outputKey = getBlurredPreviewPath(path);
+  await uploadToS3(outputKey, processed, "image/webp");
+
+  console.log(`[ImageProcess] Generated blurred preview: ${outputKey}`);
+
+  return outputKey;
+}
 
 /** GraphQL mutation: processFileImage(fileID) */
 async function handleProcessFileImage(args: any): Promise<string> {
@@ -499,6 +534,9 @@ export const handler: Handler = async (event, _context) => {
   const fieldName = event.fieldName || event.info?.fieldName;
   if (fieldName === "processFileImage") {
     return handleProcessFileImage(event.arguments);
+  }
+  if (fieldName === "generateBlurredPreview") {
+    return handleGenerateBlurredPreview(event.arguments);
   }
 
   console.warn("[ImageProcess] Unknown event type");

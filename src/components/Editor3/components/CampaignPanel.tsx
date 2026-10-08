@@ -1,20 +1,30 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
+import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Chip from "@mui/material/Chip";
 import CircularProgress from "@mui/material/CircularProgress";
 import Collapse from "@mui/material/Collapse";
+import Dialog from "@mui/material/Dialog";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
 import Divider from "@mui/material/Divider";
+import IconButton from "@mui/material/IconButton";
 import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import AddIcon from "@mui/icons-material/Add";
+import CloseIcon from "@mui/icons-material/Close";
 import EditIcon from "@mui/icons-material/Edit";
 import LinkOffIcon from "@mui/icons-material/LinkOff";
+import LockIcon from "@mui/icons-material/Lock";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import UnitContext from "../../../context/unitContext";
 import SectionContext from "../../../context/sectionContext";
 import { getAmplifyClient } from "../../../utils/amplifyClient";
+import { CampaignBriefing } from "../../Gamification/CampaignBriefing";
 import {
   GroupChallengeEditor,
   type GroupChallengeEditorData,
@@ -56,8 +66,17 @@ export default function CampaignPanel() {
   const [editingChapterId, setEditingChapterId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createSectionID, setCreateSectionID] = useState<string>("");
+  const [previewChapter, setPreviewChapter] = useState<ChapterReference | null>(
+    null,
+  );
+  const [requiredXPInput, setRequiredXPInput] = useState("");
+  const [savingLock, setSavingLock] = useState(false);
 
   const unitId = unit?.id;
+
+  useEffect(() => {
+    setRequiredXPInput(unit?.requiredXP ? String(unit.requiredXP) : "");
+  }, [unit?.requiredXP]);
 
   const fetchChapters = useCallback(async () => {
     if (!unitId) return;
@@ -182,6 +201,24 @@ export default function CampaignPanel() {
       ? Math.min(100, Math.round((ch.currentXP / ch.targetXP) * 100))
       : 0;
 
+  const handleSaveContentLock = async () => {
+    if (!unitId) return;
+    setSavingLock(true);
+    try {
+      const parsed =
+        requiredXPInput.trim() === "" ? null : Number(requiredXPInput);
+      await client.models.Unit.update({
+        id: unitId,
+        requiredXP: parsed,
+        _version: unit._version,
+      });
+    } catch (err) {
+      console.error("[CampaignPanel] Failed to update content lock:", err);
+    } finally {
+      setSavingLock(false);
+    }
+  };
+
   if (!unitId) {
     return (
       <Box sx={{ p: 2 }}>
@@ -205,6 +242,18 @@ export default function CampaignPanel() {
             Loading chapters…
           </Typography>
         </Box>
+      )}
+
+      {/* Warning when this unit has no campaign context (Phase 3.2) */}
+      {!loading && linkedChapters.length === 0 && (
+        <Alert
+          severity="warning"
+          icon={<WarningAmberIcon fontSize="small" />}
+          sx={{ mb: 2, fontSize: "0.8rem" }}
+        >
+          This unit isn&apos;t linked to any campaign chapters. Students
+          won&apos;t see narrative framing for this content.
+        </Alert>
       )}
 
       {/* Linked chapters list */}
@@ -297,6 +346,15 @@ export default function CampaignPanel() {
                   sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
                   {editingChapterId === ch.id ? "Close" : "Edit"}
+                </Button>
+                <Button
+                  size="small"
+                  variant="outlined"
+                  startIcon={<VisibilityIcon fontSize="small" />}
+                  onClick={() => setPreviewChapter(ch)}
+                  sx={{ fontSize: "0.7rem", py: 0.25 }}
+                >
+                  Preview
                 </Button>
                 <Button
                   size="small"
@@ -449,6 +507,82 @@ export default function CampaignPanel() {
           )}
         </Box>
       )}
+
+      {/* Content lock (Phase 4.2) */}
+      <Divider sx={{ my: 2 }} />
+      <Typography
+        variant="subtitle2"
+        fontWeight={600}
+        sx={{ mb: 1, display: "flex", alignItems: "center", gap: 0.5 }}
+      >
+        <LockIcon fontSize="small" /> Content Lock
+      </Typography>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+        <TextField
+          size="small"
+          type="number"
+          label="Required XP"
+          value={requiredXPInput}
+          onChange={(e) => setRequiredXPInput(e.target.value)}
+          onBlur={handleSaveContentLock}
+          sx={{ maxWidth: 160 }}
+        />
+        {savingLock && <CircularProgress size={16} />}
+      </Box>
+      {(unit?.requiredBadgeId || unit?.requiredModuleCompletion) && (
+        <Box sx={{ display: "flex", gap: 0.75, flexWrap: "wrap", mb: 1 }}>
+          {unit?.requiredBadgeId && (
+            <Chip
+              size="small"
+              label={`Badge: ${unit.requiredBadgeId}`}
+              variant="outlined"
+              sx={{ fontSize: "0.65rem" }}
+            />
+          )}
+          {unit?.requiredModuleCompletion && (
+            <Chip
+              size="small"
+              label={`${unit.requiredModuleCompletion}% module completion`}
+              variant="outlined"
+              sx={{ fontSize: "0.65rem" }}
+            />
+          )}
+        </Box>
+      )}
+      <Typography variant="caption" color="text.secondary">
+        Badge and module-completion locks are managed in the section&apos;s
+        Advanced gamification settings.
+      </Typography>
+
+      {/* Preview student narrative (Phase 3.2 / 4.2) */}
+      <Dialog
+        open={!!previewChapter}
+        onClose={() => setPreviewChapter(null)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+          }}
+        >
+          Student preview
+          <IconButton size="small" onClick={() => setPreviewChapter(null)}>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </DialogTitle>
+        <DialogContent>
+          {previewChapter && (
+            <CampaignBriefing
+              title={previewChapter.title}
+              setting={previewChapter.setting || undefined}
+              stakes={previewChapter.stakes || undefined}
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Box>
   );
 }

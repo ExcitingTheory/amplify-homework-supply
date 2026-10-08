@@ -251,3 +251,23 @@ export function emblemGlowFilter(
     `drop-shadow(0 0 3px ${metalLight})`
   );
 }
+
+/**
+ * Shared `MuiBadge-badge` sx for the small corner count/number badge used on
+ * app-bar-style Medallion emblems (streak, streak shield, level), so the three
+ * read as one consistent family instead of three separate badge treatments.
+ */
+export function medallionBadgeSx(bgColor: string, textColor: string) {
+  return {
+    "& .MuiBadge-badge": {
+      bgcolor: bgColor,
+      color: textColor,
+      fontWeight: 700,
+      fontSize: "0.5625rem",
+      minWidth: 15,
+      height: 15,
+      padding: 0,
+      border: (t: Theme) => `1px solid ${t.palette.background.paper}`,
+    },
+  };
+}

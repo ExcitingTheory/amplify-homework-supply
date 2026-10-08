@@ -97,8 +97,10 @@ test.describe.serial("Journey 5: Instructor — Create & Manage Sections", () =>
     const displayedCode = (await joinCode.textContent())!.trim();
     expect(displayedCode).toBe(sectionCode);
 
-    // Table must exist (roster/gradebook)
-    const table = page.locator("table").first();
+    // Roster is tab-gated — switch to it before querying the table
+    await page.getByRole("tab", { name: "Students" }).click();
+
+    const table = page.locator('[data-testid="roster-table"]').first();
     await expect(table).toBeVisible({ timeout: 15_000 });
 
     // Table must have header columns

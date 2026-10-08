@@ -439,6 +439,19 @@ export class AgentPermissions {
           }
         }
       }
+
+      // Patterns allowed only with explicit per-invocation confirmation
+      if (config.requiresConfirmation) {
+        for (const confirmCmd of config.requiresConfirmation) {
+          if (this.commandMatchesBlockedPattern(command, confirmCmd)) {
+            return {
+              allowed: true,
+              requiresConfirmation: true,
+              reason: `Destructive command requires explicit confirmation: ${confirmCmd}`,
+            };
+          }
+        }
+      }
     }
 
     return {

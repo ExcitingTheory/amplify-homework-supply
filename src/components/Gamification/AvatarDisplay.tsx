@@ -13,7 +13,6 @@ import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import Avatar from "@mui/material/Avatar";
 import { useTheme } from "@mui/material/styles";
-import WhatshotIcon from "@mui/icons-material/Whatshot";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
@@ -22,6 +21,7 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import SchoolIcon from "@mui/icons-material/School";
 import { DiceBearAvatar } from "./DiceBearAvatar";
 import { AvatarGlowRing, isGlowActive } from "./AvatarGlowRing";
+import { StreakIndicator } from "./StreakIndicator";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { sanitizeSvg } from "../../utils/sanitizeHtml";
 import { getLevelColors } from "./LevelBadge";
@@ -87,6 +87,10 @@ export interface AvatarDisplayProps {
   borderColorSecondary?: string;
   /** Optional glow ring config (overrides border effect when active) */
   glowRing?: GlowRingConfig | null;
+  /** When true, draws a themed (primary color) outline ring around the avatar face. */
+  outline?: boolean;
+  /** When true, overlays a subtle glossy highlight across the avatar face. */
+  sheen?: boolean;
   /** Avatar customization overrides */
   overrides?: AvatarOverrides;
   /** Optional click handler */
@@ -223,6 +227,8 @@ export function AvatarDisplay({
   borderColor,
   borderColorSecondary,
   glowRing,
+  outline = false,
+  sheen = false,
   overrides,
   onClick,
   label,
@@ -233,6 +239,7 @@ export function AvatarDisplay({
 }: AvatarDisplayProps) {
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
+  const ringColor = outline ? theme.palette.primary.main : undefined;
   const levelColors = React.useMemo(() => getLevelColors(theme), [theme]);
   const showGlow = glowRing && isGlowActive(glowRing);
   const effectGlow = reducedMotion
@@ -269,7 +276,8 @@ export function AvatarDisplay({
         minWidth: containerSize,
       }}
     >
-      {/* Streak indicator — 4 o'clock position */}
+      {/* Streak indicator — 4 o'clock position (shared Medallion, matching
+          the app-bar StreakIndicator so streak reads consistently everywhere) */}
       {streak > 0 && (
         <Box
           sx={{
@@ -277,26 +285,9 @@ export function AvatarDisplay({
             top: "60%",
             right: -20,
             zIndex: 3,
-            display: "flex",
-            alignItems: "center",
-            gap: "2px",
-            bgcolor: "background.paper",
-            borderRadius: "10px",
-            px: 0.5,
-            py: "1px",
-            boxShadow: 1,
-            fontSize: "0.7rem",
           }}
         >
-          <WhatshotIcon
-            sx={{
-              fontSize: "0.85rem",
-              color: streak >= 7 ? "#ff6d00" : "#ff9800",
-            }}
-          />
-          <Typography variant="caption" sx={{ fontWeight: 700, lineHeight: 1 }}>
-            {streak}
-          </Typography>
+          <StreakIndicator currentStreak={streak} size="small" />
         </Box>
       )}
 
@@ -387,6 +378,9 @@ export function AvatarDisplay({
           alignItems: "center",
           justifyContent: "center",
           ...(!activeGlow ? borderStyles : {}),
+          ...(ringColor && {
+            boxShadow: `0 0 0 2px ${theme.palette.background.paper}, 0 0 0 4px ${ringColor}`,
+          }),
         }}
       >
         {activeGlow ? (
@@ -410,6 +404,20 @@ export function AvatarDisplay({
             onClick={onClick}
             locked={locked}
             overrides={overrides}
+          />
+        )}
+        {sheen && (
+          <Box
+            aria-hidden
+            sx={{
+              position: "absolute",
+              inset: 0,
+              borderRadius: "50%",
+              pointerEvents: "none",
+              zIndex: 2,
+              background:
+                "radial-gradient(ellipse at 35% 22%, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.15) 40%, rgba(255,255,255,0) 70%)",
+            }}
           />
         )}
       </Box>

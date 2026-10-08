@@ -158,7 +158,7 @@ const LIST_XP_LOGS_FOR_SECTION = `query ListXPLogsBySectionID($sectionID: String
 
 const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: ID!) {
   listGradeBySectionID(sectionID: $sectionID) {
-    items { id owner sectionID complete accuracy _version _lastChangedAt _deleted }
+    items { id owner sectionID complete accuracy engagedTimeMs _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -231,7 +231,7 @@ const CREATE_STUDENT_PROFILE = `mutation CreateStudentProfile($input: CreateStud
 const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
   updateStudentProfile(input: $input) {
     id studentId totalXP level currentStreak longestStreak
-    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty cosmeticRewards activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed _version _lastChangedAt _deleted }
+    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty cosmeticRewards activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed reportCard { timeStats { min max avg count } lastUpdated } _version _lastChangedAt _deleted }
 }`;
 
 // StudentSkillProgress removed - skill progress now on StudentProfile.skillProgress
@@ -2018,6 +2018,30 @@ async function handleRebuildLeaderboard(
       (g: any) => g.owner === studentId && g.complete,
     ).length;
 
+    // Fastest-completion leaderboard stats — engagedTimeMs excludes idle time,
+    // so this works for any assignment, not just timed ones.
+    const engagedTimes = grades
+      .filter(
+        (g: any) =>
+          g.owner === studentId &&
+          g.complete &&
+          typeof g.engagedTimeMs === "number" &&
+          g.engagedTimeMs > 0,
+      )
+      .map((g: any) => g.engagedTimeMs as number);
+    const timeStats =
+      engagedTimes.length > 0
+        ? {
+            min: Math.min(...engagedTimes),
+            max: Math.max(...engagedTimes),
+            avg: Math.round(
+              engagedTimes.reduce((s: number, t: number) => s + t, 0) /
+                engagedTimes.length,
+            ),
+            count: engagedTimes.length,
+          }
+        : null;
+
     // Count nailed-it XP awards
     const nailedItCount = xpLogs.filter(
       (l: any) => l.reason === "NAILED_IT",
@@ -2041,6 +2065,12 @@ async function handleRebuildLeaderboard(
             completedAssignments,
             nailedItCount,
             lastUpdated: new Date().toISOString(),
+            ...(timeStats && {
+              reportCard: {
+                timeStats,
+                lastUpdated: new Date().toISOString(),
+              },
+            }),
             ...(avatarConfig?.avatarStyle && {
               avatarStyle: avatarConfig.avatarStyle,
             }),

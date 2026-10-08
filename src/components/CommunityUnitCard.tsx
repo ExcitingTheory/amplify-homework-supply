@@ -44,11 +44,11 @@ export default function CommunityUnitCard({
       elevation={2}
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
+        flexDirection: { xs: "column", sm: "row" },
         margin: "1rem auto",
         width: "90vw",
-        maxWidth: "80rem",
-        height: { xs: "auto", md: 180 },
+        maxWidth: "64rem",
+        height: { xs: "auto", sm: 180 },
         borderRadius: `${SEMANTIC_THEME.radius.card}px`,
         borderLeft: "4px solid",
         borderLeftColor: "info.main",
@@ -63,6 +63,9 @@ export default function CommunityUnitCard({
       <CardMediaThumbnail
         s3Key={unit.featuredImage}
         identityId={unit.identityId}
+        title={unit.name}
+        size={180}
+        wideOnLarge
       />
       <Box
         sx={{

@@ -769,13 +769,7 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
-      owner: a
-        .string()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
+      owner: a.string(),
       // Completion tracking
       percentComplete: a.float(),
       accuracy: a.float(),
@@ -801,14 +795,7 @@ const rawSchemaDefinition = {
       reviewedAt: a.datetime(),
       reviewedBy: a.string(),
       // Foreign keys
-      unitID: a
-        .id()
-        .required()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
+      unitID: a.id().required(),
       unit: a.belongsTo("Unit", ["unitID"]),
       sectionID: a.id(), // Section this grade is for (for section-based authorization)
       // Dynamic group authorization - single instructor group that can grade this submission
@@ -3539,6 +3526,17 @@ const rawSchemaDefinition = {
     .mutation()
     .arguments({
       fileID: a.id().required(),
+    })
+    .returns(a.string())
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(imageProcessHandler)),
+
+  // Generates a small blurred WebP preview next to a raw (unprocessed) image
+  // path — used by ContentLockCard to tease locked content.
+  generateBlurredPreview: a
+    .mutation()
+    .arguments({
+      path: a.string().required(),
     })
     .returns(a.string())
     .authorization((allow) => [allow.authenticated()])

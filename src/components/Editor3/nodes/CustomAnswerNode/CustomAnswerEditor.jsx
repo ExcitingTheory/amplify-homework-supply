@@ -64,7 +64,10 @@ import UnitContext from "../../../../context/unitContext";
 import { getAmplifyClient } from "../../../../utils/amplifyClient";
 import { $isCustomAnswerNode } from "../../plugins/CustomAnswerPlugin";
 
-import { AnswerConfigurationSelector } from "../../components/PromptMethodSelector";
+import {
+  AnswerConfigurationSelector,
+  isAnswerConfigValid,
+} from "../../components/PromptMethodSelector";
 import { fetchAuthSession } from "aws-amplify/auth";
 
 import getCachedUrl from "../../../../utils/getCachedUrl";
@@ -422,6 +425,24 @@ export default React.memo(function CustomAnswerEditor({
     [isSelected, nodeKey],
   );
 
+  const onEscape = React.useCallback(
+    (payload) => {
+      if (isSelected) {
+        const event = payload;
+        event.preventDefault();
+        // Keep the block open until at least one input and one output
+        // method are selected — otherwise the question isn't gradable.
+        if (!isAnswerConfigValid(allowedInput, promptMethod)) {
+          return true;
+        }
+        clearSelection();
+        return true;
+      }
+      return false;
+    },
+    [isSelected, clearSelection, allowedInput, promptMethod],
+  );
+
   const handleClose = () => {
     setDialogValue({
       prompt: "",
@@ -654,17 +675,25 @@ export default React.memo(function CustomAnswerEditor({
         COMMAND_PRIORITY_LOW,
       ),
       // editor.registerCommand(KEY_ENTER_COMMAND, onEnter, COMMAND_PRIORITY_LOW),
-      // editor.registerCommand(
-      //     KEY_ESCAPE_COMMAND,
-      //     onEscape,
-      //     COMMAND_PRIORITY_LOW,
-      // ),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        onEscape,
+        COMMAND_PRIORITY_LOW,
+      ),
     );
     return () => {
       isMounted = false;
       unregister();
     };
-  }, [clearSelection, editor, isSelected, nodeKey, onDelete, setSelected]);
+  }, [
+    clearSelection,
+    editor,
+    isSelected,
+    nodeKey,
+    onDelete,
+    onEscape,
+    setSelected,
+  ]);
 
   const _questionBank = Object.values(questionBank || []);
 

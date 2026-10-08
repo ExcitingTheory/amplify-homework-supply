@@ -92,10 +92,10 @@ import { FiImage } from "react-icons/fi";
 import FilesContext from "@/context/fileContext";
 import UnitContext from "@/context/unitContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
-import { CompletionGrid } from "@/components/Leaderboard/CompletionGrid";
 import { LeaderboardTable } from "@/components/Leaderboard/LeaderboardTable";
 import { SquadLeaderboard } from "@/components/Gamification/SquadLeaderboard";
 import { OpenCollaborationRooms } from "@/components/PeerReview/OpenCollaborationRooms";
+import { OpenPeerReviewButton } from "@/components/PeerReview/OpenPeerReviewButton";
 import {
   createPeerReviewRoom,
   randomAssignPeerReview,
@@ -105,11 +105,12 @@ import { useRouter, useParams } from "next/navigation";
 import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 import { useContentLock, useCampaign } from "@/context/gamificationContext";
-import { ContentLockCard } from "@/components/Gamification/ContentLockCard";
 import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
 import { GamificationQuickPanel } from "@/components/Section/GamificationQuickPanel";
 import { ChapterDetailPopover } from "@/components/Gamification/ChapterDetailPopover";
 import LockIcon from "@mui/icons-material/Lock";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
 import { AssignmentComposer } from "@/components/AssignmentComposer";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
@@ -125,6 +126,7 @@ import {
   getStudentAccommodation,
   hasAccommodation,
 } from "@/utils/accommodations";
+import { isPlaceholderDueDate } from "@/utils/dueDate";
 import { openDiscussion } from "@/utils/chatDiscussBus";
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
@@ -375,7 +377,6 @@ function SectionDetail({
     const headingToTab = {
       "nav-section-students": "students",
       "nav-section-gradebook": "gradebook",
-      "nav-section-completion": "gradebook",
       "nav-section-leaderboard": "leaderboard",
       "nav-section-assignments": "assignments",
     };
@@ -945,11 +946,15 @@ function SectionDetail({
 
   // Get MY grades (learner view only - shows their personal progress)
   // AND all grades (for gradebook + completion grid)
-  // Single unfiltered subscription — client-side filtering
+  // Scoped to this section — Grade.owner/unitID no longer carry a broad
+  // authenticated-read override, so an unfiltered query would only return
+  // grades this viewer is actually authorized to read (self/instructor/peer).
   useEffect(() => {
     if (!currentUser?.username) return;
 
-    const subscription = client.models.Grade.observeQuery().subscribe({
+    const subscription = client.models.Grade.observeQuery({
+      filter: { sectionID: { eq: id } },
+    }).subscribe({
       next: ({ items: allItems }) => {
         // Filter out null items
         const validGrades = allItems.filter((grade) => {
@@ -2588,6 +2593,7 @@ function SectionDetail({
           )}
 
           <Box
+            id="nav-section-gradebook"
             sx={{
               display: "flex",
               justifyContent: "space-between",
@@ -2597,14 +2603,6 @@ function SectionDetail({
             }}
           >
             <Box>
-              <Typography
-                id="nav-section-gradebook"
-                variant="h5"
-                component="div"
-                sx={{ lineHeight: 1.2 }}
-              >
-                {t("sectionDetail.gradebook")}
-              </Typography>
               {visibleAssignmentsCount < totalAssignments && isOwner && (
                 <Typography
                   variant="caption"
@@ -3115,7 +3113,10 @@ function SectionDetail({
                                         component="a"
                                         href={`/workbook/${assignment.unitID}`}
                                         onClick={(e) => e.stopPropagation()}
-                                        sx={{ p: 0.25 }}
+                                        sx={{
+                                          p: 0.25,
+                                          color: "text.secondary",
+                                        }}
                                       >
                                         <MenuBookIcon fontSize="small" />
                                       </IconButton>
@@ -3277,6 +3278,8 @@ function SectionDetail({
                               position: "sticky",
                               top: 0,
                               zIndex: 2,
+                              // Breathing room so the name/badges block isn't flush against the cell edge
+                              pr: 2,
                               backgroundColor: curveMethod
                                 ? "primary.50"
                                 : "background.paper",
@@ -3474,9 +3477,6 @@ function SectionDetail({
                             {formatLastFirst(student)}
                           </TableCell>
                           {visibleAssignments.map((assignment, colIndex) => {
-                            console.log("student.id", student.id);
-                            console.log("assignment.unitID", assignment.unitID);
-
                             // Future and draft assignments cannot have grades yet
                             const isDraft = assignment.status === "DRAFT";
                             const isFuture =
@@ -3485,10 +3485,6 @@ function SectionDetail({
                               new Date(assignment.dueDate) > clientNow;
                             const canHaveGrades = !isDraft && !isFuture;
 
-                            console.log(
-                              "gradeMap[student.id]?.[assignment.unitID]",
-                              gradeMap[student.id]?.[assignment.unitID],
-                            );
                             const rawHighest = canHaveGrades
                               ? gradeMap[student.id]?.[assignment.unitID]
                                   ?.highest?.accuracy
@@ -3515,24 +3511,6 @@ function SectionDetail({
                                   )
                                 : "-";
 
-                            // Debug logging for curve verification
-                            if (
-                              hasCurve &&
-                              rawHighest !== undefined &&
-                              rawHighest !== null
-                            ) {
-                              console.log(
-                                `[CURVE] Student: ${student.name}, Assignment: ${units[assignment.unitID]?.name}`,
-                              );
-                              console.log(
-                                `  Raw Highest: ${rawHighest}%, Curved: ${highest}%`,
-                              );
-                              console.log(
-                                `  Curve Data:`,
-                                curveData[assignment.unitID],
-                              );
-                            }
-
                             const colGrade =
                               highest !== "-" ? `${highest}%` : "—";
                             const gradeRecord =
@@ -3549,39 +3527,77 @@ function SectionDetail({
 
                             return (
                               <TableCell align="right" key={assignment.id}>
-                                <InlineGradeCell
-                                  computedGrade={colGrade}
-                                  rawHighest={rawHighest}
-                                  preCurveLabel={preCurveLabel}
-                                  curveApplied={Boolean(
-                                    curveSettings[assignment.unitID],
-                                  )}
-                                  overrideScore={override?.score}
-                                  sharedHistory={gradebookHistoryRef.current}
-                                  isOwner={isOwner}
-                                  row={studentKey}
-                                  col={colIndex}
-                                  onOverride={(score) =>
-                                    handleInlineOverride(
-                                      student.id,
-                                      assignment.unitID,
-                                      score,
-                                    )
-                                  }
-                                  onRemoveOverride={() =>
-                                    handleInlineRemoveOverride(
-                                      student.id,
-                                      assignment.unitID,
-                                    )
-                                  }
-                                  onGradeClick={() =>
-                                    handleGradeCellClick(
-                                      student,
-                                      assignment,
-                                      gradeRecord,
-                                    )
-                                  }
-                                />
+                                <Box
+                                  sx={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    justifyContent: "flex-end",
+                                    gap: 0.5,
+                                  }}
+                                >
+                                  <InlineGradeCell
+                                    computedGrade={colGrade}
+                                    rawHighest={rawHighest}
+                                    preCurveLabel={preCurveLabel}
+                                    curveApplied={Boolean(
+                                      curveSettings[assignment.unitID],
+                                    )}
+                                    overrideScore={override?.score}
+                                    sharedHistory={gradebookHistoryRef.current}
+                                    isOwner={isOwner}
+                                    row={studentKey}
+                                    col={colIndex}
+                                    onOverride={(score) =>
+                                      handleInlineOverride(
+                                        student.id,
+                                        assignment.unitID,
+                                        score,
+                                      )
+                                    }
+                                    onRemoveOverride={() =>
+                                      handleInlineRemoveOverride(
+                                        student.id,
+                                        assignment.unitID,
+                                      )
+                                    }
+                                    onGradeClick={() =>
+                                      handleGradeCellClick(
+                                        student,
+                                        assignment,
+                                        gradeRecord,
+                                      )
+                                    }
+                                  />
+                                  {/* Status trails the grade — it's a glanceable badge, not an action */}
+                                  {canHaveGrades &&
+                                    (() => {
+                                      const allGrade =
+                                        allGradeMap[student.id]?.[
+                                          assignment.unitID
+                                        ];
+                                      if (allGrade?.hasComplete) {
+                                        return (
+                                          <Tooltip title="Completed">
+                                            <CheckCircleIcon
+                                              fontSize="small"
+                                              color="success"
+                                            />
+                                          </Tooltip>
+                                        );
+                                      }
+                                      if (allGrade?.hasAny) {
+                                        return (
+                                          <Tooltip title="In progress">
+                                            <HourglassBottomIcon
+                                              fontSize="small"
+                                              color="warning"
+                                            />
+                                          </Tooltip>
+                                        );
+                                      }
+                                      return null;
+                                    })()}
+                                </Box>
                               </TableCell>
                             );
                           })}
@@ -3618,76 +3634,49 @@ function SectionDetail({
         </Box>
       )}
 
-      {/* Completion Grid — folded into the Gradebook/Assignments tab content
-          (same data scope as the grid above) instead of a separate module. */}
-      {activeTab === gradebookTabKey &&
-        sectionAssignments &&
-        Object.keys(sectionStudents).length > 0 && (
-          <Box
-            sx={{ width: "90%", maxWidth: "80rem", mx: "auto", mt: 2, mb: 3 }}
-          >
-            <Typography id="nav-section-completion" variant="h6" sx={{ mb: 1 }}>
-              {t("sectionDetail.completionGrid", "Completion Overview")}
-            </Typography>
-            <CompletionGrid
-              assignments={visibleAssignments.map((a) => ({
-                id: a.id || a.unitID,
-                title: units[a.unitID]?.name || a.unitID,
-              }))}
-              students={((isOwner || isTeacher) && !viewAsStudent
-                ? sortedStudents
-                : sortedStudents.filter(
-                    (student) => student.id === currentUser?.username,
-                  )
-              ).map((student) => ({
-                studentId: student.id,
-                studentName: formatLastFirst(student),
-                assignments: visibleAssignments.reduce((acc, assignment) => {
-                  const allGrade = allGradeMap[student.id]?.[assignment.unitID];
-                  if (allGrade?.hasComplete) {
-                    acc[assignment.id || assignment.unitID] = "completed";
-                  } else if (allGrade?.hasAny) {
-                    acc[assignment.id || assignment.unitID] = "in_progress";
-                  } else {
-                    acc[assignment.id || assignment.unitID] = "not_started";
-                  }
-                  return acc;
-                }, {}),
-              }))}
-              currentStudentId={currentUser?.username || ""}
-            />
-          </Box>
-        )}
-
-      {/* Leaderboard — XP-based ranking per section (shows when enabled) */}
+      {/* Leaderboard — XP-based ranking per section (shows when enabled).
+          Compact sidebar card; paired with Squads as the main column for instructors. */}
       {activeTab === "leaderboard" && leaderboardEnabledLocal && (
-        <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-          <Typography id="nav-section-leaderboard" variant="h6" sx={{ mb: 1 }}>
-            {t("sectionDetail.leaderboard", "Leaderboard")}
-          </Typography>
-          {leaderboardEntries.length > 0 ? (
-            <LeaderboardTable
-              entries={leaderboardEntries}
-              currentStudentId={currentUser?.username || ""}
-            />
-          ) : (
-            <Typography variant="body2" color="text.secondary">
-              {t(
-                "sectionDetail.noLeaderboardEntries",
-                "No leaderboard data yet. Students will appear here as they earn XP.",
-              )}
-            </Typography>
+        <Box
+          id="nav-section-leaderboard"
+          sx={{
+            display: "grid",
+            gridTemplateColumns: {
+              xs: "1fr",
+              md: isOwner && sectionSquads.length > 0 ? "1fr 320px" : "320px",
+            },
+            justifyContent: "flex-start",
+            gap: 3,
+            p: 2,
+            mx: "auto",
+            maxWidth: "80rem",
+            mt: 2,
+          }}
+        >
+          {isOwner && sectionSquads.length > 0 && (
+            <Box>
+              <Typography variant="h6" sx={{ mb: 1 }}>
+                {t("sectionDetail.squads", "Squads")}
+              </Typography>
+              <SquadLeaderboard squads={sectionSquads} />
+            </Box>
           )}
-        </Box>
-      )}
-
-      {/* Squads — show squads belonging to this section */}
-      {activeTab === "leaderboard" && isOwner && sectionSquads.length > 0 && (
-        <Box sx={{ p: 2, mx: "auto", maxWidth: "80rem", mt: 2 }}>
-          <Typography variant="h6" sx={{ mb: 1 }}>
-            {t("sectionDetail.squads", "Squads")}
-          </Typography>
-          <SquadLeaderboard squads={sectionSquads} />
+          <Box>
+            {leaderboardEntries.length > 0 ? (
+              <LeaderboardTable
+                entries={leaderboardEntries}
+                currentStudentId={currentUser?.username || ""}
+                variant="compact"
+              />
+            ) : (
+              <Typography variant="body2" color="text.secondary">
+                {t(
+                  "sectionDetail.noLeaderboardEntries",
+                  "No leaderboard data yet. Students will appear here as they earn XP.",
+                )}
+              </Typography>
+            )}
+          </Box>
         </Box>
       )}
 
@@ -3703,35 +3692,125 @@ function SectionDetail({
             borderRadius: `${SEMANTIC_THEME.radius.panel}px`,
           }}
         >
-          <OpenCollaborationRooms
-            rooms={openRooms}
-            grades={grades}
-            units={units}
-            sectionStudents={sectionStudents || {}}
-            sectionId={id}
-            isInstructor={isOwner}
-            onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
-            onAssignPeerReview={async (gradeId, ownerId, reviewerIds) => {
-              const result = await createPeerReviewRoom(
-                gradeId,
-                reviewerIds,
-                id,
-                ownerId,
-              );
-              if (!result.success)
-                throw new Error(result.error || "Failed to create room");
-            }}
-            onRandomAssign={async (unitId) => {
-              const result = await randomAssignPeerReview(id, unitId);
-              if (!result.success)
-                throw new Error(result.error || "Failed to random assign");
-            }}
-            onAwardTopReviewer={async (unitId) => {
-              const result = await awardTopReviewerXP(id, unitId);
-              if (!result.success)
-                throw new Error(result.error || "Failed to award XP");
-            }}
-          />
+          {isOwner ? (
+            <OpenCollaborationRooms
+              rooms={openRooms}
+              grades={grades}
+              units={units}
+              sectionStudents={sectionStudents || {}}
+              sectionId={id}
+              isInstructor
+              onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
+              onAssignPeerReview={async (gradeId, ownerId, reviewerIds) => {
+                const result = await createPeerReviewRoom(
+                  gradeId,
+                  reviewerIds,
+                  id,
+                  ownerId,
+                );
+                if (!result.success)
+                  throw new Error(result.error || "Failed to create room");
+              }}
+              onRandomAssign={async (unitId) => {
+                const result = await randomAssignPeerReview(id, unitId);
+                if (!result.success)
+                  throw new Error(result.error || "Failed to random assign");
+              }}
+              onAwardTopReviewer={async (unitId) => {
+                const result = await awardTopReviewerXP(id, unitId);
+                if (!result.success)
+                  throw new Error(result.error || "Failed to award XP");
+              }}
+            />
+          ) : (
+            <>
+              <OpenCollaborationRooms
+                rooms={openRooms.filter(
+                  (room) =>
+                    room.ownerId === currentUser?.username ||
+                    room.invitedUserIds?.includes(currentUser?.username),
+                )}
+                grades={grades}
+                units={units}
+                sectionStudents={sectionStudents || {}}
+                sectionId={id}
+                isInstructor={false}
+                onJoinRoom={(roomId) => router.push(`/review/${roomId}`)}
+                onAssignPeerReview={async () => {}}
+                onRandomAssign={async () => {}}
+                onAwardTopReviewer={async () => {}}
+              />
+              {(() => {
+                const sectionUnitIds = new Set(
+                  (sectionAssignments || []).map((a) => a.unitID),
+                );
+                const roomedGradeIds = new Set(
+                  openRooms.map((room) => room.gradeId),
+                );
+                const myReviewableGrades = grades.filter(
+                  (g) =>
+                    g.owner === currentUser?.username &&
+                    sectionUnitIds.has(g.unitID) &&
+                    !roomedGradeIds.has(g.id),
+                );
+                if (myReviewableGrades.length === 0) return null;
+                return (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                      {t(
+                        "sectionDetail.requestPeerReview",
+                        "Request peer review",
+                      )}
+                    </Typography>
+                    <Stack spacing={1}>
+                      {myReviewableGrades.map((grade) => (
+                        <Box
+                          key={grade.id}
+                          sx={{
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "space-between",
+                            gap: 1,
+                          }}
+                        >
+                          <Typography
+                            variant="body2"
+                            sx={{
+                              minWidth: 0,
+                              overflow: "hidden",
+                              textOverflow: "ellipsis",
+                              whiteSpace: "nowrap",
+                            }}
+                          >
+                            {units[grade.unitID]?.name || grade.unitID}
+                          </Typography>
+                          <OpenPeerReviewButton
+                            gradeId={grade.id}
+                            onCreateRoom={async (gradeId, invitedUserIds) => {
+                              const result = await createPeerReviewRoom(
+                                gradeId,
+                                invitedUserIds,
+                                id,
+                                currentUser.username,
+                              );
+                              if (!result.success || !result.roomId)
+                                throw new Error(
+                                  result.error || "Failed to create room",
+                                );
+                              return result.roomId;
+                            }}
+                            onRoomCreated={(roomId) =>
+                              router.push(`/review/${roomId}`)
+                            }
+                          />
+                        </Box>
+                      ))}
+                    </Stack>
+                  </Box>
+                );
+              })()}
+            </>
+          )}
         </Box>
       )}
 
@@ -3750,6 +3829,7 @@ function SectionDetail({
       )}
       {sectionAssignments && activeTab === "assignments" && (
         <Box
+          id="nav-section-assignments"
           data-tour="assignments-section"
           style={{
             padding: "1rem",
@@ -3758,15 +3838,6 @@ function SectionDetail({
             maxWidth: "80rem",
           }}
         >
-          <Typography
-            id="nav-section-assignments"
-            variant="h5"
-            component="div"
-            sx={{ flexGrow: 1, padding: "1rem", margin: "1rem auto" }}
-          >
-            {t("sectionDetail.assignments")}
-          </Typography>
-
           {[...sectionAssignments]
             .sort((a, b) => {
               // Chronological order; undated assignments sink to the bottom.
@@ -3780,9 +3851,10 @@ function SectionDetail({
             })
             .map(function (assignment) {
               const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-              const dueLabel = assignment.dueDate
-                ? `Due: ${new Date(assignment.dueDate).toLocaleString(undefined, { timeZone })}`
-                : t("sectionDetail.noDueDate", "No due date");
+              const dueLabel =
+                assignment.dueDate && !isPlaceholderDueDate(assignment.dueDate)
+                  ? `Due: ${new Date(assignment.dueDate).toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", timeZone })}`
+                  : t("sectionDetail.noDueDate", "No due date");
               const featuredImage = units[assignment.unitID]?.featuredImage;
               const identityId = units[assignment.unitID]?.identityId;
 

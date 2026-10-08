@@ -1864,35 +1864,48 @@ function DashboardHeroReal() {
   return (
     <DashboardHeroView
       greeting="Good afternoon, Sakura"
-      level={{ level: 3, label: "Adventurer", progress: 60 }}
-      avatar={<AvatarDisplay seed="hero-demo" size={72} streak={7} />}
-      nextStep={{
-        todayLabel: "Today",
-        unitName: "Greetings & Introductions",
-        sectionName: "Japanese 101",
-        dueText: "Due Sep 18",
-      }}
-      startButton={
-        <Button
-          variant="contained"
-          size="small"
-          sx={{ flexShrink: 0, alignSelf: { xs: "stretch", sm: "center" } }}
+      nextStepCard={
+        <Box
+          sx={{
+            p: 2,
+            border: "1px solid",
+            borderColor: "divider",
+            borderRadius: 2,
+            bgcolor: "background.paper",
+            display: "flex",
+            alignItems: "center",
+            gap: 1.5,
+            flexWrap: "wrap",
+          }}
         >
-          Start
-        </Button>
+          <Box sx={{ flex: 1, minWidth: 0 }}>
+            <Typography
+              variant="caption"
+              sx={{
+                fontWeight: 700,
+                textTransform: "uppercase",
+                color: "primary.main",
+              }}
+            >
+              Today
+            </Typography>
+            <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
+              Greetings &amp; Introductions
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              Japanese 101 · Due Sep 18
+            </Typography>
+          </Box>
+          <Button
+            variant="contained"
+            size="small"
+            sx={{ flexShrink: 0, alignSelf: { xs: "stretch", sm: "center" } }}
+          >
+            Start
+          </Button>
+        </Box>
       }
       caughtUpText="You are caught up on your assignments."
-      streak={{ currentStreak: 7, freezesRemaining: 3, freezesUsed: 1 }}
-      assignmentsCount={12}
-      badgesCount={SHOWCASE_BADGES.length}
-      totalXP={4250}
-      badgeShelf={<BadgeShelf earnedBadges={SHOWCASE_BADGES} earnedOnly />}
-      squad={{
-        id: "sq-1",
-        name: "Iron Dragons",
-        crestSvg: armorSampleCrestSvg,
-        totalXP: 18400,
-      }}
     />
   );
 }
@@ -4057,15 +4070,28 @@ export const GamificationComponents: Story = {
           </PatternCell>
 
           <PatternCell title="Level badge">
-            <LevelBadge
-              level={{
-                level: 3,
-                label: "Adventurer",
-                xpRequired: 400,
-                xpForNextLevel: 800,
-                progress: 55,
-              }}
-            />
+            <Stack direction="row" spacing={3} alignItems="center">
+              <LevelBadge
+                level={{
+                  level: 3,
+                  label: "Adventurer",
+                  xpRequired: 400,
+                  xpForNextLevel: 800,
+                  progress: 55,
+                }}
+              />
+              {/* App-bar variant — heraldic Medallion + corner badge, matching MainToolbar's live rendering. */}
+              <LevelBadge
+                level={{
+                  level: 3,
+                  label: "Adventurer",
+                  xpRequired: 400,
+                  xpForNextLevel: 800,
+                  progress: 55,
+                }}
+                size="small"
+              />
+            </Stack>
           </PatternCell>
 
           <PatternCell title="Animated XP counter">

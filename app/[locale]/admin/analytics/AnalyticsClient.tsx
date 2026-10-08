@@ -12,6 +12,21 @@ import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
+import PeopleIcon from "@mui/icons-material/People";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import DevicesIcon from "@mui/icons-material/Devices";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import TimerIcon from "@mui/icons-material/Timer";
+import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import PlayCircleOutlineIcon from "@mui/icons-material/PlayCircleOutline";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
+import GradeIcon from "@mui/icons-material/Grade";
+import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
+import DescriptionIcon from "@mui/icons-material/Description";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import RemoveIcon from "@mui/icons-material/Remove";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { TrendChart } from "./TrendChart";
@@ -72,6 +87,58 @@ function getDateRange(days: number): string[] {
   return dates;
 }
 
+interface TrendInfo {
+  direction: "up" | "down" | "flat";
+  changePct: number;
+}
+
+/** First-half vs second-half of the selected date range — a simple, dependency-free trend signal. */
+function computeTrend(
+  summaries: AnalyticsSummaryRecord[],
+  extract: (s: AnalyticsSummaryRecord) => number,
+): TrendInfo | undefined {
+  if (summaries.length < 4) return undefined;
+  const midpoint = Math.floor(summaries.length / 2);
+  const average = (records: AnalyticsSummaryRecord[]) =>
+    records.reduce((sum, s) => sum + extract(s), 0) / (records.length || 1);
+  const firstHalfAvg = average(summaries.slice(0, midpoint));
+  const secondHalfAvg = average(summaries.slice(midpoint));
+  if (firstHalfAvg === 0 && secondHalfAvg === 0) return undefined;
+  const changePct =
+    firstHalfAvg === 0
+      ? 100
+      : Math.round(((secondHalfAvg - firstHalfAvg) / firstHalfAvg) * 100);
+  // Treat small fluctuations (< 3%) as flat rather than noisy up/down churn.
+  const direction =
+    Math.abs(changePct) < 3 ? "flat" : changePct > 0 ? "up" : "down";
+  return { direction, changePct };
+}
+
+function TrendIndicator({ trend }: { trend: TrendInfo }) {
+  const Icon =
+    trend.direction === "up"
+      ? ArrowUpwardIcon
+      : trend.direction === "down"
+        ? ArrowDownwardIcon
+        : RemoveIcon;
+  const color =
+    trend.direction === "up"
+      ? "success.main"
+      : trend.direction === "down"
+        ? "error.main"
+        : "text.secondary";
+  return (
+    <Box
+      sx={{ display: "inline-flex", alignItems: "center", gap: 0.25, color }}
+    >
+      <Icon sx={{ fontSize: "0.9rem" }} />
+      <Typography variant="caption" sx={{ fontWeight: 700, color: "inherit" }}>
+        {Math.abs(trend.changePct)}%
+      </Typography>
+    </Box>
+  );
+}
+
 // ============================================================================
 // Stat Card Component
 // ============================================================================
@@ -81,11 +148,15 @@ function StatCard({
   value,
   subtitle,
   loading,
+  icon,
+  trend,
 }: {
   title: string;
   value: string | number;
   subtitle?: string;
   loading?: boolean;
+  icon?: React.ReactNode;
+  trend?: TrendInfo;
 }) {
   return (
     <Card
@@ -94,15 +165,30 @@ function StatCard({
       data-testid="analytics-stat-card"
     >
       <CardContent>
-        <Typography variant="caption" color="text.secondary" gutterBottom>
-          {title}
-        </Typography>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 1,
+          }}
+        >
+          <Typography variant="caption" color="text.secondary" gutterBottom>
+            {title}
+          </Typography>
+          {icon && (
+            <Box sx={{ color: "text.disabled", display: "flex" }}>{icon}</Box>
+          )}
+        </Box>
         {loading ? (
           <Skeleton variant="text" width="60%" height={40} />
         ) : (
-          <Typography variant="h4" component="div">
-            {value}
-          </Typography>
+          <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
+            <Typography variant="h4" component="div">
+              {value}
+            </Typography>
+            {trend && <TrendIndicator trend={trend} />}
+          </Box>
         )}
         {subtitle && (
           <Typography variant="body2" color="text.secondary">
@@ -260,6 +346,30 @@ function AnalyticsDashboard({
     };
   }, [summaries]);
 
+  // First-half vs second-half trend per stat card metric
+  const statTrends = React.useMemo(
+    () => ({
+      dau: computeTrend(summaries, (s) => s.dailyActiveUsers || 0),
+      pageViews: computeTrend(summaries, (s) => s.totalPageViews || 0),
+      sessions: computeTrend(summaries, (s) => s.totalSessions || 0),
+      avgSession: computeTrend(summaries, (s) => s.avgSessionDurationMs || 0),
+      engagedTime: computeTrend(summaries, (s) => s.totalEngagedTimeMs || 0),
+      avgEngaged: computeTrend(summaries, (s) => s.avgEngagedTimeMs || 0),
+      started: computeTrend(summaries, (s) => s.workbooksStarted || 0),
+      completed: computeTrend(summaries, (s) => s.workbooksCompleted || 0),
+      grades: computeTrend(summaries, (s) => s.gradesSubmitted || 0),
+      avgAccuracy: computeTrend(summaries, (s) => s.avgAccuracy || 0),
+      chatMessages: computeTrend(
+        summaries,
+        (s) =>
+          (s.studentChatMessagesSent || 0) +
+          (s.instructorChatMessagesSent || 0),
+      ),
+      documents: computeTrend(summaries, (s) => s.documentsAnalyzed || 0),
+    }),
+    [summaries],
+  );
+
   // Per-day trend series for the chart cards
   const trendSeries = React.useMemo(() => {
     const toPoints = (
@@ -411,6 +521,8 @@ function AnalyticsDashboard({
             title="Avg Daily Active Users"
             value={totals.dau}
             loading={loading}
+            icon={<PeopleIcon fontSize="small" />}
+            trend={statTrends.dau}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -418,6 +530,8 @@ function AnalyticsDashboard({
             title="Total Page Views"
             value={totals.pageViews.toLocaleString()}
             loading={loading}
+            icon={<VisibilityIcon fontSize="small" />}
+            trend={statTrends.pageViews}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -425,6 +539,8 @@ function AnalyticsDashboard({
             title="Total Sessions"
             value={totals.sessions.toLocaleString()}
             loading={loading}
+            icon={<DevicesIcon fontSize="small" />}
+            trend={statTrends.sessions}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -432,6 +548,8 @@ function AnalyticsDashboard({
             title="Avg Session Duration"
             value={formatDuration(totals.avgSession)}
             loading={loading}
+            icon={<AccessTimeIcon fontSize="small" />}
+            trend={statTrends.avgSession}
           />
         </Grid>
       </Grid>
@@ -446,6 +564,8 @@ function AnalyticsDashboard({
             title="Total Engaged Time"
             value={formatDuration(totals.engagedTime)}
             loading={loading}
+            icon={<TimerIcon fontSize="small" />}
+            trend={statTrends.engagedTime}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -453,6 +573,8 @@ function AnalyticsDashboard({
             title="Avg Engaged Time / Grade"
             value={formatDuration(totals.avgEngaged)}
             loading={loading}
+            icon={<HourglassBottomIcon fontSize="small" />}
+            trend={statTrends.avgEngaged}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -460,6 +582,8 @@ function AnalyticsDashboard({
             title="Workbooks Started"
             value={totals.started}
             loading={loading}
+            icon={<PlayCircleOutlineIcon fontSize="small" />}
+            trend={statTrends.started}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -472,6 +596,8 @@ function AnalyticsDashboard({
                 : undefined
             }
             loading={loading}
+            icon={<CheckCircleIcon fontSize="small" />}
+            trend={statTrends.completed}
           />
         </Grid>
       </Grid>
@@ -486,6 +612,8 @@ function AnalyticsDashboard({
             title="Grades Submitted"
             value={totals.grades}
             loading={loading}
+            icon={<AssignmentTurnedInIcon fontSize="small" />}
+            trend={statTrends.grades}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -493,6 +621,8 @@ function AnalyticsDashboard({
             title="Avg Accuracy"
             value={totals.avgAccuracy ? `${totals.avgAccuracy}%` : "—"}
             loading={loading}
+            icon={<GradeIcon fontSize="small" />}
+            trend={statTrends.avgAccuracy}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -500,6 +630,8 @@ function AnalyticsDashboard({
             title="Chat Messages"
             value={totals.chatMessages}
             loading={loading}
+            icon={<ChatBubbleOutlineIcon fontSize="small" />}
+            trend={statTrends.chatMessages}
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -507,6 +639,8 @@ function AnalyticsDashboard({
             title="Documents Analyzed"
             value={totals.documents}
             loading={loading}
+            icon={<DescriptionIcon fontSize="small" />}
+            trend={statTrends.documents}
           />
         </Grid>
       </Grid>

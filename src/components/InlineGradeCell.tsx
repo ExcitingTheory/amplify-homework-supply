@@ -571,6 +571,23 @@ export function InlineGradeCell({
       {/* View mode — grade display */}
       {!editing && (
         <>
+          {/* View work leads — it's the action instructors use most, so it
+              carries more visual weight than the (rarer) override affordance. */}
+          <Tooltip title="View student work" arrow>
+            <IconButton
+              size="small"
+              tabIndex={-1}
+              onClick={onGradeClick}
+              sx={{
+                p: 0.25,
+                opacity: 0.85,
+                "&:hover": { opacity: 1, color: "primary.main" },
+              }}
+            >
+              <VisibilityIcon sx={{ fontSize: 18 }} />
+            </IconButton>
+          </Tooltip>
+
           <Tooltip title="Click to override grade" arrow>
             <span
               onClick={startEditing}
@@ -580,8 +597,10 @@ export function InlineGradeCell({
                 color: hasOverride ? "#1976d2" : undefined,
                 fontWeight: showPreCurve ? 700 : hasOverride ? 600 : undefined,
                 whiteSpace: "nowrap",
-                borderBottom: "1px dashed",
-                borderBottomColor: hasOverride ? "#1976d2" : "#ccc",
+                borderBottom: hasOverride
+                  ? "1px dashed"
+                  : "1px dashed transparent",
+                borderBottomColor: hasOverride ? "#1976d2" : "transparent",
               }}
             >
               {displayValue}
@@ -615,21 +634,6 @@ export function InlineGradeCell({
               />
             </Tooltip>
           )}
-
-          <Tooltip title="View student work" arrow>
-            <IconButton
-              size="small"
-              tabIndex={-1}
-              onClick={onGradeClick}
-              sx={{
-                p: 0.25,
-                opacity: 0.6,
-                "&:hover": { opacity: 1, color: "primary.main" },
-              }}
-            >
-              <VisibilityIcon sx={{ fontSize: 14 }} />
-            </IconButton>
-          </Tooltip>
         </>
       )}
 

@@ -28,8 +28,12 @@ import { generateKeyPairSync } from "crypto";
 
 const ssm = new SSMClient({ region: process.env.AWS_REGION ?? "us-east-1" });
 
-const PUBLIC_KEY_PARAM = "/homework-supply/cloudfront/public-key";
-const PRIVATE_KEY_PARAM = "/homework-supply/cloudfront/private-key";
+// Falls back to the legacy shared path when not running under the CDK construct
+// (e.g. invoked directly in a test), which always sets these via Lambda env vars.
+const PUBLIC_KEY_PARAM =
+  process.env.PUBLIC_KEY_PARAM ?? "/homework-supply/cloudfront/public-key";
+const PRIVATE_KEY_PARAM =
+  process.env.PRIVATE_KEY_PARAM ?? "/homework-supply/cloudfront/private-key";
 
 async function parameterExists(name: string): Promise<boolean> {
   try {
@@ -124,7 +128,18 @@ export const handler = async (event: any): Promise<CrResponse> => {
           PublicKeyPem: publicKeyPem,
         });
       }
-      // No-op update — key pair is managed separately.
+      // The param path is derived from ResourceProperties (ssmPrefix), so an
+      // Update can legitimately point at a path that's never been written yet
+      // (e.g. the prefix changed). Self-heal instead of assuming Create already ran.
+      const exists = await parameterExists(PUBLIC_KEY_PARAM);
+      if (!exists) {
+        await writeKeyPair(false);
+        const publicKeyPem = await getPublicKeyPem();
+        return success(event, PUBLIC_KEY_PARAM, {
+          Action: "CreatedOnUpdate",
+          PublicKeyPem: publicKeyPem,
+        });
+      }
       const publicKeyPem = await getPublicKeyPem();
       return success(event, PUBLIC_KEY_PARAM, {
         Action: "NoOp",

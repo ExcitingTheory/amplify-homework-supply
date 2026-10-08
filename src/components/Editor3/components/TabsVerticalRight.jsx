@@ -290,7 +290,7 @@ export default function TabsVerticalRight({
               {t("tabsVerticalRight.gradesDesc")}
             </Typography>
           </Box>
-          <Box sx={{ px: 2 }}>
+          <Box sx={{ px: 2 }} data-tour="grades-list">
             {recentGrades.length === 0 ? (
               <Typography
                 variant="body2"
@@ -303,6 +303,7 @@ export default function TabsVerticalRight({
               recentGrades.map((g) => (
                 <Box
                   key={g.id}
+                  data-tour="grade-detail"
                   sx={{
                     display: "flex",
                     justifyContent: "space-between",

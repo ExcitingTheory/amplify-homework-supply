@@ -36,7 +36,14 @@ export function UpNextCard({
   onRequestGuidance,
 }: UpNextCardProps) {
   return (
-    <Box sx={{ position: "relative", mb: DASHBOARD_TOKENS.spacing.panelGap }}>
+    <Box
+      sx={{
+        position: "relative",
+        // MUI's sx multiplies bare numeric margin values by theme.spacing()
+        // (8) — must be an explicit px string or 24 silently becomes 192.
+        mb: `${DASHBOARD_TOKENS.spacing.panelGap}px`,
+      }}
+    >
       {/* Badge label — kept outside the Card so the card's overflow can stay
           hidden and clip nested elements to its rounded corners. */}
       <Box
@@ -61,7 +68,9 @@ export function UpNextCard({
         aria-label={`Your next step in ${sectionName}`}
         elevation={0}
         sx={{
-          borderRadius: DASHBOARD_TOKENS.radius.card,
+          // MUI's sx multiplies bare numeric borderRadius by theme.shape.borderRadius
+          // (4) \u2014 must be an explicit px string or 8 silently becomes 32.
+          borderRadius: `${DASHBOARD_TOKENS.radius.card}px`,
           border: "2px solid",
           borderColor: "primary.main",
           borderLeft: `4px solid`,

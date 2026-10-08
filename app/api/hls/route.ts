@@ -19,6 +19,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import { validateAuth } from "../_shared/auth";
 import { getServerClient } from "@/utils/amplifyServerClient";
+import outputs from "../../../amplify_outputs.json";
+
+// Stack-qualified per environment (see amplify/backend.ts); falls back to the
+// legacy shared path if the output isn't present for some reason.
+const CF_SSM_PREFIX: string =
+  (outputs as any).custom?.CLOUDFRONT?.ssmPrefix ??
+  "/homework-supply/cloudfront";
 
 // CloudFront signed URL TTL for segments: 6 hours (long enough for a full viewing session)
 const SEGMENT_TTL_MS = 6 * 60 * 60 * 1000;
@@ -43,13 +50,13 @@ async function loadCFCredentials(): Promise<{
   const [pkResult, kpResult] = await Promise.all([
     ssm.send(
       new GetParameterCommand({
-        Name: "/homework-supply/cloudfront/private-key",
+        Name: `${CF_SSM_PREFIX}/private-key`,
         WithDecryption: true,
       }),
     ),
     ssm.send(
       new GetParameterCommand({
-        Name: "/homework-supply/cloudfront/key-pair-id",
+        Name: `${CF_SSM_PREFIX}/key-pair-id`,
       }),
     ),
   ]);

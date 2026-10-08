@@ -69,6 +69,7 @@ import { $isAnswerNode } from "../plugins/AnswerPlugin";
 import {
   AnswerConfigurationSelector,
   MeaningAssociationPromptSelector,
+  isAnswerConfigValid,
 } from "./PromptMethodSelector";
 
 const filter = createFilterOptions();
@@ -230,13 +231,18 @@ const AnswerEditor = React.memo(function AnswerEditor({
       if (isSelected) {
         const event = payload;
         event.preventDefault();
+        // Keep the block open until at least one input and one output
+        // method are selected — otherwise the question isn't gradable.
+        if (!isAnswerConfigValid(allowedInput, promptMethod)) {
+          return true;
+        }
         // Clear selection when Escape is pressed
         clearSelection();
         return true;
       }
       return false;
     },
-    [isSelected, clearSelection],
+    [isSelected, clearSelection, allowedInput, promptMethod],
   );
 
   const handleClose = () => {

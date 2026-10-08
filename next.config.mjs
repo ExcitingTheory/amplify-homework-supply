@@ -152,6 +152,8 @@ const nextConfig = {
   // Optimize barrel imports to tree-shake unused exports from large packages
   experimental: {
     reactCompiler: true,
+    // Required for React's <ViewTransition> (used in app/[locale]/layout.tsx) to render
+    viewTransition: true,
     optimizePackageImports: [
       "@mui/material",
       "@mui/icons-material",

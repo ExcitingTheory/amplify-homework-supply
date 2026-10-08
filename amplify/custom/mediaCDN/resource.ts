@@ -32,7 +32,7 @@ import * as cloudfront from "aws-cdk-lib/aws-cloudfront";
 import * as origins from "aws-cdk-lib/aws-cloudfront-origins";
 import * as ssm from "aws-cdk-lib/aws-ssm";
 import * as s3 from "aws-cdk-lib/aws-s3";
-import { Duration } from "aws-cdk-lib";
+import { Duration, Names, Stack } from "aws-cdk-lib";
 
 export interface MediaCDNConstructProps {
   /** The Amplify storage S3 bucket */
@@ -43,6 +43,14 @@ export interface MediaCDNConstructProps {
    * references that fail on first deploy.
    */
   cfPublicKeyPem: string;
+
+  /**
+   * SSM path prefix for reading/writing CloudFront signing material.
+   * Must match the `ssmPrefix` passed to `CfKeyRotationConstruct`.
+   * Defaults to "/homework-supply/cloudfront" (shared, non-environment-scoped —
+   * only safe when a single environment is deployed per AWS account/region).
+   */
+  ssmPrefix?: string;
 }
 
 export class MediaCDNConstruct extends Construct {
@@ -54,10 +62,17 @@ export class MediaCDNConstruct extends Construct {
    */
   public readonly keyPairId: string;
 
+  /** The SSM parameter name the key pair ID was written to. */
+  public readonly keyPairIdParamName: string;
+
   constructor(scope: Construct, id: string, props: MediaCDNConstructProps) {
     super(scope, id);
 
-    const { bucket, cfPublicKeyPem } = props;
+    const {
+      bucket,
+      cfPublicKeyPem,
+      ssmPrefix = "/homework-supply/cloudfront",
+    } = props;
 
     // -------------------------------------------------------------------------
     // CloudFront key pair for signed URLs
@@ -76,8 +91,9 @@ export class MediaCDNConstruct extends Construct {
     this.keyPairId = cfPublicKey.publicKeyId;
 
     // Write key pair ID to SSM so Lambdas can read it at runtime
+    this.keyPairIdParamName = `${ssmPrefix}/key-pair-id`;
     new ssm.StringParameter(this, "CfKeyPairIdParam", {
-      parameterName: "/homework-supply/cloudfront/key-pair-id",
+      parameterName: this.keyPairIdParamName,
       stringValue: cfPublicKey.publicKeyId,
       description: "CloudFront key pair ID for signed URL generation",
     });
@@ -203,11 +219,16 @@ export class MediaCDNConstruct extends Construct {
     // -------------------------------------------------------------------------
     const cfnOac = new cloudfront.CfnOriginAccessControl(this, "OAC", {
       originAccessControlConfig: {
-        name: "homework-supply-media-oac",
+        // Account+region-unique: stack-qualified so sandbox and branch
+        // environments can coexist without colliding on a shared literal name.
+        name: Names.uniqueResourceName(this, {
+          maxLength: 64,
+          separator: "-",
+        }),
         originAccessControlOriginType: "s3",
         signingBehavior: "always",
         signingProtocol: "sigv4",
-        description: "OAC for Homework Supply media CDN",
+        description: `OAC for Homework Supply media CDN (${Stack.of(this).stackName})`,
       },
     });
 

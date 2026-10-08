@@ -27,6 +27,15 @@ const actionButtonSx = {
   },
 } as const;
 
+// Primary CTA: solid, right-aligned — secondary actions stay outlined on the left (card footer pattern).
+const primaryActionButtonSx = {
+  textTransform: "none",
+  fontWeight: 600,
+  px: 3,
+  py: 1,
+  borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+} as const;
+
 export interface UnitCardProps {
   unit: {
     id: string;
@@ -63,16 +72,18 @@ export function UnitCard({
       variant="assignment"
       sx={{
         display: "flex",
-        flexDirection: { xs: "column", md: "row" },
+        flexDirection: { xs: "column", sm: "row" },
         margin: "1rem auto",
         width: "90vw",
-        maxWidth: "80rem",
+        maxWidth: "64rem",
         overflow: "hidden",
       }}
     >
       <CardMediaThumbnail
         s3Key={unit?.featuredImage}
         identityId={unit?.identityId}
+        title={unit?.name}
+        wideOnLarge
       />
       <Box
         sx={{
@@ -108,40 +119,44 @@ export function UnitCard({
           sx={{
             display: "flex",
             alignItems: "center",
+            justifyContent: "space-between",
             pl: 2,
+            pr: 2,
             pb: 1.5,
             flexWrap: "wrap",
             gap: 1,
           }}
         >
+          <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
+            {showPractice && (
+              <Button
+                variant="outlined"
+                disabled={disabled}
+                onClick={onPractice}
+                startIcon={<FitnessCenterIcon />}
+                sx={actionButtonSx}
+              >
+                {labels.practice}
+              </Button>
+            )}
+            <Button
+              variant="outlined"
+              href={`/unit/${unit.id}`}
+              disabled={disabled}
+              startIcon={<IconEdit />}
+              sx={actionButtonSx}
+            >
+              {labels.editUnit}
+            </Button>
+          </Box>
           <Button
-            variant="outlined"
+            variant="contained"
             href={`/workbook/${unit.id}`}
             disabled={disabled}
             startIcon={<EditNoteIcon />}
-            sx={actionButtonSx}
+            sx={primaryActionButtonSx}
           >
             {labels.viewWorkbook}
-          </Button>
-          {showPractice && (
-            <Button
-              variant="outlined"
-              disabled={disabled}
-              onClick={onPractice}
-              startIcon={<FitnessCenterIcon />}
-              sx={actionButtonSx}
-            >
-              {labels.practice}
-            </Button>
-          )}
-          <Button
-            variant="outlined"
-            href={`/unit/${unit.id}`}
-            disabled={disabled}
-            startIcon={<IconEdit />}
-            sx={actionButtonSx}
-          >
-            {labels.editUnit}
           </Button>
         </Box>
       </Box>

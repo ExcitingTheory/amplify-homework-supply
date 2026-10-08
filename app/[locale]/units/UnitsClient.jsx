@@ -682,6 +682,7 @@ function Units({ initialUnits = [] }) {
                       id={`unit-${unit.id}`}
                       title={unit.name || t("units.untitledUnit")}
                       isLocked={unitLocked}
+                      thumbnailPath={unit.featuredImage || unit.thumbnail}
                       requiredXP={lockStatus?.requiredXP}
                       currentXP={totalXP}
                       requiredCompletion={lockStatus?.requiredCompletion}

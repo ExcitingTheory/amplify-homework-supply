@@ -9,15 +9,16 @@ import {
   Tooltip,
   Typography,
 } from "@mui/material";
+import { alpha, useTheme } from "@mui/material/styles";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RateReviewIcon from "@mui/icons-material/RateReview";
 import LockIcon from "@mui/icons-material/Lock";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { getAssignmentWindowState } from "@/utils/assignmentTiming";
 import { getEffectiveDueDate } from "@/utils/accommodations";
+import { isPlaceholderDueDate } from "@/utils/dueDate";
 import { DASHBOARD_TOKENS } from "./constants";
 
 export function gradeColor(pct = 0) {
@@ -39,6 +40,15 @@ export function gradeLabel(pct = 0, t?: (key: string) => string) {
   if (pct >= 80) return t("good");
   if (pct >= 60) return t("fair");
   return t("needsWork");
+}
+
+// Lightweight time estimate derived from unit difficulty metadata — no
+// dedicated schema field exists yet, so this is a heuristic, not exact.
+function estimateMinutesLabel(difficulty?: string): string | null {
+  if (difficulty === "easy") return "~10 min";
+  if (difficulty === "medium") return "~20 min";
+  if (difficulty === "hard") return "~30 min";
+  return null;
 }
 
 function getDueStatus(dueDate?: string, t?: (key: string) => string) {
@@ -91,6 +101,10 @@ export interface AssignmentCardData {
   isUpNext?: boolean;
   /** Nailed-it count for this unit */
   nailedItCount?: number;
+  /** Small caption shown above the due-status line (e.g. "Today") — omit for normal list cards. */
+  eyebrowLabel?: string;
+  /** Use an opaque, high-contrast card surface instead of the low-opacity state tint — for cards placed on top of a colorful gradient background. */
+  onGradient?: boolean;
   /** This learner's accommodation for the section (extra due-date days / time multiplier) */
   accommodation?: {
     dueDateExtensionDays?: number;
@@ -136,6 +150,8 @@ export function AssignmentCardView({
   lockStatus,
   isUpNext = false,
   nailedItCount = 0,
+  eyebrowLabel,
+  onGradient = false,
   accommodation,
   onOpenDrill,
   onRequestGuidance,
@@ -166,9 +182,13 @@ export function AssignmentCardView({
 
   const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
   // Apply this learner's due-date extension (accommodation) to the base dates.
-  const effectiveDueDate =
+  const rawEffectiveDueDate =
     getEffectiveDueDate(assignment.dueDate, accommodation) ||
     assignment.dueDate;
+  // Unrealistically far-future dates are draft/undated placeholders, not real deadlines.
+  const effectiveDueDate = isPlaceholderDueDate(rawEffectiveDueDate)
+    ? undefined
+    : rawEffectiveDueDate;
   const effectiveAvailableUntil =
     getEffectiveDueDate(
       assignment.availableUntil || assignment.dueDate,
@@ -180,7 +200,14 @@ export function AssignmentCardView({
     !!accommodation?.dueDateExtensionDays &&
     Number(accommodation.dueDateExtensionDays) > 0;
   const localTime = effectiveDueDate
-    ? new Date(effectiveDueDate).toLocaleString(undefined, { timeZone })
+    ? new Date(effectiveDueDate).toLocaleString(undefined, {
+        month: "short",
+        day: "numeric",
+        year: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+        timeZone,
+      })
     : null;
   const windowState = getAssignmentWindowState({
     availableFrom: assignment.availableFrom || assignment.unlockDate,
@@ -196,47 +223,34 @@ export function AssignmentCardView({
     ? getDueStatus(effectiveDueDate, (key) => t(key))
     : null;
 
-  // Overdue is surfaced as a pill floating on top of the card (like "Up Next"),
-  // not as an inline chip in the header row. Suppressed when the card is itself
-  // the Up Next hero (that card owns the top-of-card badge slot).
-  const showOverdueBadge =
-    !!isOverdue && !isUpNext && !locked && !windowState.isLocked;
+  // Overdue is surfaced inline in the metadata caption below the title —
+  // no floating badge, to keep the card flat and low-noise.
+  const showsOverdueIndicator = !!isOverdue || dueStatus?.color === "error";
 
-  // "Late" and the overdue indicator (floating badge or inline chip) both mean
-  // "this is overdue" — show only one, not both, on the same card.
-  const showsOverdueIndicator =
-    showOverdueBadge || dueStatus?.color === "error";
-
-  const borderLeftColor = isCompleted
-    ? `${gradeColor(pct)}.main`
+  const theme = useTheme();
+  // Muted, flat state tint (like a Recording Studio track) instead of a
+  // vivid color-coded border — same state logic, much lower visual noise.
+  const stateColor = isCompleted
+    ? theme.palette[gradeColor(pct)].main
     : locked || windowState.isLocked
-      ? "grey.400"
+      ? theme.palette.grey[500]
       : isOverdue || windowState.isLate
-        ? "error.main"
+        ? theme.palette.error.main
         : isUpNext
-          ? "primary.main"
-          : "warning.main";
+          ? theme.palette.primary.main
+          : theme.palette.warning.main;
+  // On the gradient hero, use a frosted translucent white panel with a white
+  // outline instead of the state color — keeps the card legible no matter
+  // which part of the animated gradient sits behind it, and reserves color
+  // for the spinning ring around the start button.
+  const cardBg = onGradient ? alpha("#fff", 0.16) : alpha(stateColor, 0.06);
+  const cardBorder = onGradient ? alpha("#fff", 0.55) : alpha(stateColor, 0.3);
+  const gradientTextSx = onGradient
+    ? { color: "common.white", borderColor: alpha("#fff", 0.6), bgcolor: "transparent", "& .MuiChip-icon": { color: "common.white" } }
+    : {};
 
   return (
     <Box sx={{ position: "relative" }}>
-      {showOverdueBadge && (
-        <Box
-          sx={{
-            position: "absolute",
-            top: -10,
-            left: 16,
-            zIndex: 2,
-          }}
-        >
-          <Chip
-            icon={<WarningAmberIcon />}
-            label={localTime ? `Overdue · ${localTime}` : t("overdue")}
-            color="error"
-            size="small"
-            sx={{ fontWeight: 700, fontSize: "0.75rem" }}
-          />
-        </Box>
-      )}
       <Card
         component="article"
         aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct, (key) => t(key))}` : ""}`}
@@ -245,49 +259,160 @@ export function AssignmentCardView({
         }
         elevation={0}
         sx={{
-          // When nested inside UpNextCard, suppress the outer border and elevation
-          // (UpNextCard's own Card provides the highlighted outline treatment).
-          border: isUpNext ? "none" : "1px outset",
-          borderColor: isUpNext ? undefined : "divider",
-          ...(isUpNext ? {} : { borderLeft: "4px solid", borderLeftColor }),
-          borderRadius: isUpNext ? 0 : DASHBOARD_TOKENS.radius.card,
+          // Flat, muted "track" chrome — a tinted fill + thin matching border
+          // instead of a vivid color-coded border and white background. On a
+          // gradient background, use a thicker opaque outline instead so the
+          // card reads clearly against the colorful surface behind it.
+          border: isUpNext ? "none" : onGradient ? "2px solid" : "1px solid",
+          borderColor: isUpNext ? undefined : cardBorder,
+          bgcolor: isUpNext ? "action.selected" : cardBg,
+          // MUI's sx multiplies bare numeric borderRadius by theme.shape.borderRadius
+          // (4) \u2014 must be an explicit px string or 8 silently becomes 32.
+          borderRadius: isUpNext ? 0 : `${DASHBOARD_TOKENS.radius.card}px`,
           display: "flex",
           flexDirection: { xs: "column", sm: "row" },
           // Always clip to the card's own radius so nested elements (thumbnail,
           // chips) never show square corners poking out under the rounded curve.
           overflow: "hidden",
-          minHeight: { xs: 0, sm: 160 },
+          minHeight: { xs: 0, sm: 96 },
           opacity: locked ? 0.7 : 1,
-          transition: justCompleted ? "none" : "box-shadow 0.2s",
-          "&:hover": { boxShadow: locked ? 0 : 4 },
-          ...(isUpNext && {
-            boxShadow: 0,
-            bgcolor: "action.selected",
-          }),
-          ...(justCompleted && {
-            animation: "cardComplete 0.6s ease-out",
-            "@keyframes cardComplete": {
-              "0%": { boxShadow: "0 0 0 0 rgba(76,175,80,0.5)" },
-              "50%": { boxShadow: "0 0 0 8px rgba(76,175,80,0.15)" },
-              "100%": { boxShadow: "0 0 0 0 rgba(76,175,80,0)" },
-            },
-          }),
         }}
       >
         {thumbnail}
-        <Box sx={{ flex: 1, p: 2 }}>
+        <Box sx={{ flex: 1, p: 3 }}>
+          {eyebrowLabel && (
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: "0.08em",
+                color: onGradient ? "common.white" : "primary.main",
+                mb: 0.5,
+              }}
+            >
+              {eyebrowLabel}
+            </Typography>
+          )}
+          {/* Metadata line — kept on its own row, above and separate from the
+              title, instead of competing with it for the same line. */}
+          {!isCompleted &&
+            !(locked || windowState.isLocked) &&
+            dueStatus && (
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  fontWeight: 600,
+                  mb: 0.5,
+                  color: onGradient
+                    ? alpha("#fff", 0.85)
+                    : dueStatus.color === "default"
+                      ? "text.secondary"
+                      : `${dueStatus.color}.main`,
+                }}
+              >
+                {localTime
+                  ? `${dueStatus.label}: ${localTime}`
+                  : dueStatus.label}
+              </Typography>
+            )}
+
+          <Typography
+            variant="h6"
+            component="h3"
+            sx={{
+              fontWeight: 700,
+              mb: 0.5,
+              color: onGradient ? "common.white" : undefined,
+            }}
+          >
+            {unit?.name || ""}
+          </Typography>
+
+          {/* Primary status chip — always visible, collapsed or not: the
+              one signal that matters most at a glance (grade or lock state). */}
+          {(isCompleted || locked || windowState.isLocked) && (
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+              {isCompleted && (
+                <Chip
+                  label={`${pct}% · ${gradeLabel(pct, (key) => t(key))}`}
+                  size="small"
+                  variant={onGradient ? "outlined" : "status"}
+                  color={onGradient ? undefined : gradeColor(pct)}
+                  icon={<CheckCircleIcon />}
+                  sx={{
+                    fontWeight: 700,
+                    ...gradientTextSx,
+                    // Satisfying check pop when the card transitions to completed
+                    ...(justCompleted && {
+                      animation: "chipPop 0.6s ease-out",
+                      "@keyframes chipPop": {
+                        "0%": { transform: "scale(0.8)", opacity: 0 },
+                        "60%": { transform: "scale(1.12)" },
+                        "100%": { transform: "scale(1)", opacity: 1 },
+                      },
+                      "& .MuiChip-icon": {
+                        animation: "checkPop 0.6s ease-out",
+                      },
+                      "@keyframes checkPop": {
+                        "0%": { transform: "scale(0) rotate(-90deg)" },
+                        "70%": { transform: "scale(1.3) rotate(0deg)" },
+                        "100%": { transform: "scale(1) rotate(0deg)" },
+                      },
+                    }),
+                  }}
+                />
+              )}
+              {(locked || windowState.isLocked) && (
+                <Chip
+                  label={
+                    windowState.opensAt
+                      ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                      : lockStatus?.unlockDate
+                        ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
+                        : "Locked"
+                  }
+                  size="small"
+                  color="default"
+                  variant="outlined"
+                  icon={<LockIcon />}
+                  sx={{ fontSize: "0.7rem", ...gradientTextSx }}
+                />
+              )}
+            </Box>
+          )}
+
+          {/* Description — always visible, not tucked behind the collapse. */}
+          {unit?.description && (
+            <Typography
+              variant="body2"
+              color={onGradient ? undefined : "text.secondary"}
+              sx={{
+                lineHeight: 1.5,
+                mb: 1,
+                overflow: "hidden",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                color: onGradient ? alpha("#fff", 0.85) : undefined,
+              }}
+            >
+              {unit.description}
+            </Typography>
+          )}
+
+          {/* Secondary chips — lower-priority context. */}
           <Box
             sx={{
               display: "flex",
-              alignItems: "flex-start",
+              alignItems: "center",
               gap: 1,
-              mb: 0.5,
+              mb: 1,
               flexWrap: "wrap",
             }}
           >
-            <Typography variant="subtitle1" sx={{ fontWeight: 700, flex: 1 }}>
-              {unit?.name || ""}
-            </Typography>
             {unit?.difficulty && (
               <Tooltip title={`Difficulty: ${unit.difficulty}`}>
                 <Box
@@ -307,10 +432,17 @@ export function AssignmentCardView({
                         width: 7,
                         height: 7,
                         borderRadius: "50%",
-                        bgcolor:
-                          dot <=
-                          ({ easy: 1, medium: 2, hard: 3 }[unit.difficulty!] ??
-                            0)
+                        bgcolor: onGradient
+                          ? dot <=
+                            ({ easy: 1, medium: 2, hard: 3 }[
+                              unit.difficulty!
+                            ] ?? 0)
+                            ? "common.white"
+                            : alpha("#fff", 0.3)
+                          : dot <=
+                              ({ easy: 1, medium: 2, hard: 3 }[
+                                unit.difficulty!
+                              ] ?? 0)
                             ? unit.difficulty === "easy"
                               ? "success.main"
                               : unit.difficulty === "medium"
@@ -323,70 +455,37 @@ export function AssignmentCardView({
                 </Box>
               </Tooltip>
             )}
-            <Box sx={{ display: { xs: "none", sm: "block" } }}>
-              {prefetchBadge}
-            </Box>
-            {isCompleted && (
+            {!isCompleted && estimateMinutesLabel(unit?.difficulty) && (
               <Chip
-                label={`${pct}% · ${gradeLabel(pct, (key) => t(key))}`}
+                label={estimateMinutesLabel(unit?.difficulty)}
                 size="small"
-                variant="status"
-                color={gradeColor(pct)}
-                icon={<CheckCircleIcon />}
+                variant="outlined"
                 sx={{
-                  fontWeight: 700,
-                  // Satisfying check pop when the card transitions to completed
-                  ...(justCompleted && {
-                    animation: "chipPop 0.6s ease-out",
-                    "@keyframes chipPop": {
-                      "0%": { transform: "scale(0.8)", opacity: 0 },
-                      "60%": { transform: "scale(1.12)" },
-                      "100%": { transform: "scale(1)", opacity: 1 },
-                    },
-                    "& .MuiChip-icon": {
-                      animation: "checkPop 0.6s ease-out",
-                    },
-                    "@keyframes checkPop": {
-                      "0%": { transform: "scale(0) rotate(-90deg)" },
-                      "70%": { transform: "scale(1.3) rotate(0deg)" },
-                      "100%": { transform: "scale(1) rotate(0deg)" },
-                    },
-                  }),
+                  fontSize: "0.7rem",
+                  color: onGradient ? "common.white" : "text.secondary",
+                  ...(onGradient && { borderColor: alpha("#fff", 0.6) }),
                 }}
               />
             )}
+            <Box sx={{ display: { xs: "none", sm: "block" } }}>
+              {prefetchBadge}
+            </Box>
             {isCompleted && nailedItCount > 0 && (
               <Chip
                 label={`🎯 ${nailedItCount}`}
                 size="small"
-                color="success"
+                color={onGradient ? undefined : "success"}
                 variant="outlined"
-                sx={{ fontWeight: 700, fontSize: "0.7rem" }}
-              />
-            )}
-            {(locked || windowState.isLocked) && (
-              <Chip
-                label={
-                  windowState.opensAt
-                    ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
-                    : lockStatus?.unlockDate
-                      ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
-                      : "Locked"
-                }
-                size="small"
-                color="default"
-                variant="outlined"
-                icon={<LockIcon />}
-                sx={{ fontSize: "0.7rem" }}
+                sx={{ fontWeight: 700, fontSize: "0.7rem", ...gradientTextSx }}
               />
             )}
             {windowState.isLate && !isCompleted && !showsOverdueIndicator && (
               <Chip
                 label="Late"
                 size="small"
-                color="warning"
-                variant="filled"
-                sx={{ fontSize: "0.7rem" }}
+                color={onGradient ? undefined : "warning"}
+                variant={onGradient ? "outlined" : "filled"}
+                sx={{ fontSize: "0.7rem", ...gradientTextSx }}
               />
             )}
             {assignment.lateStatus === "DROPPED" && (
@@ -395,25 +494,9 @@ export function AssignmentCardView({
                 size="small"
                 color="default"
                 variant="outlined"
-                sx={{ fontSize: "0.7rem" }}
+                sx={{ fontSize: "0.7rem", ...gradientTextSx }}
               />
             )}
-            {!isCompleted &&
-              !(locked || windowState.isLocked) &&
-              dueStatus &&
-              !showOverdueBadge && (
-                <Chip
-                  label={
-                    localTime
-                      ? `${dueStatus.label} · ${localTime}`
-                      : dueStatus.label
-                  }
-                  size="small"
-                  color={dueStatus.color}
-                  variant="outlined"
-                  sx={{ fontSize: "0.7rem" }}
-                />
-              )}
             {!isCompleted && hasDueExtension && (
               <Tooltip
                 title={accommodation?.note || "Extended due date accommodation"}
@@ -421,28 +504,11 @@ export function AssignmentCardView({
                 <Chip
                   label="Extended"
                   size="small"
-                  color="info"
+                  color={onGradient ? undefined : "info"}
                   variant="outlined"
-                  sx={{ fontSize: "0.7rem" }}
+                  sx={{ fontSize: "0.7rem", ...gradientTextSx }}
                 />
               </Tooltip>
-            )}
-          </Box>
-          <Box sx={{ height: "2.625rem", mb: 1.5, overflow: "hidden" }}>
-            {unit?.description && (
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                sx={{
-                  lineHeight: 1.5,
-                  overflow: "hidden",
-                  display: "-webkit-box",
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                {unit.description}
-              </Typography>
             )}
           </Box>
 
@@ -450,8 +516,13 @@ export function AssignmentCardView({
           {locked || windowState.isLocked ? (
             <Typography
               variant="body2"
-              color="text.secondary"
-              sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
+              color={onGradient ? undefined : "text.secondary"}
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                gap: 0.5,
+                color: onGradient ? alpha("#fff", 0.85) : undefined,
+              }}
             >
               <LockIcon fontSize="small" />
               {windowState.opensAt
@@ -475,9 +546,10 @@ export function AssignmentCardView({
                 sx={{ alignItems: "center" }}
               >
                 <Button
-                  variant="outlined"
+                  variant="text"
                   size="small"
                   startIcon={<AutoFixHighIcon />}
+                  sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
                   onClick={() =>
                     onOpenDrill(assignment.unitID, unit?.name || "")
                   }
@@ -485,9 +557,10 @@ export function AssignmentCardView({
                   {t("practice")}
                 </Button>
                 <Button
-                  variant="outlined"
+                  variant="text"
                   size="small"
                   startIcon={<ChatBubbleOutlineIcon />}
+                  sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
                   onClick={() => onDiscuss?.()}
                 >
                   {t("discuss")}
@@ -509,9 +582,10 @@ export function AssignmentCardView({
                 <Tooltip title={t("requestGuidanceTooltip")}>
                   <span>
                     <Button
-                      variant="outlined"
+                      variant="text"
                       size="small"
                       color="secondary"
+                      sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
                       startIcon={<SupportAgentIcon />}
                       onClick={() =>
                         onRequestGuidance(

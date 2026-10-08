@@ -474,11 +474,18 @@ export const semanticComponentOverrides: Components<Theme> = {
     },
   },
   MuiAccordion: {
+    defaultProps: {
+      // Flat/flush is the app's one true accordion look — no per-instance
+      // elevation or gutters props needed (see SectionPanel/ParentSectionCard).
+      disableGutters: true,
+      elevation: 0,
+    },
     styleOverrides: {
       root: ({ theme }) => ({
         // Theme-level override wins over the component's own first/last-of-type
         // radius rules, so instances don't need an inline !important.
         borderRadius: SEMANTIC_THEME.radius.panel,
+        overflow: "hidden",
         "&:before": { display: "none" },
         // Stacked accordions sit flush (no gap) — only the group's outer
         // corners are rounded; subtle zebra striping tells rows apart instead.

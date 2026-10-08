@@ -1,13 +1,9 @@
-
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages, setRequestLocale } from 'next-intl/server';
-import { notFound } from 'next/navigation';
-import { Suspense } from 'react';
-import { ViewTransition } from 'react';
-import { headers } from 'next/headers';
-import { routing } from '../../src/i18n/routing';
-import { onError, getMessageFallback } from '../../src/i18n/errorHandling';
-import Providers from '../providers';
+import { getMessages, setRequestLocale } from "next-intl/server";
+import { notFound } from "next/navigation";
+import { headers } from "next/headers";
+import { routing } from "../../src/i18n/routing";
+import Providers from "../providers";
+import IntlProviderClient from "./IntlProviderClient";
 
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
@@ -26,21 +22,12 @@ async function LocaleContent({
 }) {
   const messages = await getMessages();
   const headerStore = await headers();
-  const nonce = headerStore.get('x-nonce') || undefined;
+  const nonce = headerStore.get("x-nonce") || undefined;
 
   return (
-    <NextIntlClientProvider
-      locale={locale}
-      messages={messages}
-      onError={onError}
-      getMessageFallback={getMessageFallback}
-    >
-      <Providers nonce={nonce}>
-        <Suspense>
-          <ViewTransition>{children}</ViewTransition>
-        </Suspense>
-      </Providers>
-    </NextIntlClientProvider>
+    <IntlProviderClient locale={locale} messages={messages}>
+      <Providers nonce={nonce}>{children}</Providers>
+    </IntlProviderClient>
   );
 }
 
@@ -59,9 +46,8 @@ export default async function LocaleLayout({
 
   setRequestLocale(locale);
 
-  return (
-    <Suspense fallback={null}>
-      <LocaleContent locale={locale}>{children}</LocaleContent>
-    </Suspense>
-  );
+  // No outer Suspense here: PPR isn't enabled in next.config.mjs, so this
+  // boundary added no streaming benefit and instead raced with dev-mode HMR,
+  // intermittently rendering IntlProviderClient/Providers as undefined.
+  return <LocaleContent locale={locale}>{children}</LocaleContent>;
 }

@@ -208,9 +208,10 @@ export function LiveLeaderboard({
         />
       )}
 
-      {mode === "fastest" && entries.length > 0 && (
-        <FastestCompletionsTable
-          entries={entries
+      {mode === "fastest" &&
+        entries.length > 0 &&
+        (() => {
+          const fastestEntries = entries
             .filter(
               (e) =>
                 e.reportCard?.timeStats && e.reportCard.timeStats.count > 0,
@@ -227,10 +228,27 @@ export function LiveLeaderboard({
               avatarOverrides: e.avatarOverrides,
               avatarSeed: e.avatarSeed,
               avatarLoaded: e.avatarLoaded,
-            }))}
-          currentStudentId={currentUserId}
-        />
-      )}
+            }));
+
+          if (fastestEntries.length === 0) {
+            return (
+              <EmptyState
+                icon={<TimerIcon fontSize="inherit" />}
+                title={t("leaderboard.fastestEmpty", {
+                  defaultValue:
+                    "No completion times yet. Finish an assignment to appear here.",
+                })}
+              />
+            );
+          }
+
+          return (
+            <FastestCompletionsTable
+              entries={fastestEntries}
+              currentStudentId={currentUserId}
+            />
+          );
+        })()}
 
       {mode === "squads" && (
         <SquadLeaderboard squads={squadsWithMembers} mySquadId={mySquad?.id} />

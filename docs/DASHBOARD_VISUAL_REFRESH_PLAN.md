@@ -35,11 +35,12 @@ Replace the current heavy gradient-card feel with a calmer dashboard system:
 - Meaningful status colors only for completion, warning, overdue, and moderation states
 - Consistent radii, spacing, card padding, and elevation
 - Typography and spacing used for hierarchy instead of strong decorative gradients
+- The button should have a clear primary action style, with secondary actions visually subdued, primary actions are the most visually prominent and on the right side of the action row.
 
 Suggested role accents:
 
 - Student: focused blue or teal for learning momentum
-- Instructor: green or slate for class health and operations
+- Instructor: slate for class health and operations
 - Warning/error colors reserved for actual intervention states
 
 ## Student Dashboard Improvements
@@ -52,12 +53,12 @@ Change the hero into a compact "Today" panel with:
 
 - Greeting and learner identity
 - Current level/progress in a restrained secondary position
-- One dominant next assignment callout
+- One dominant next assignment callout, needs to use the next assignment card component
 - Due date urgency and section name
 - One primary action: start or continue
 - Optional secondary action: practice focus areas
 
-Move secondary gamification details, such as badge shelf and squad banner, below the main next-action area.
+Move secondary gamification details, such as badge shelf and squad banner, below the main next-action area. Or remove entirely because they are already in the menu bar.
 
 ### 2. Strengthen the Global Next Step
 
@@ -74,7 +75,10 @@ Recommended changes:
 
 ### 3. Polish Assignment Cards
 
-`AssignmentCard.tsx` is functional but visually dense. The title row can accumulate difficulty dots, prefetch badge, grade chip, nailed-it chip, lock chip, and due chip.
+`AssignmentCard.tsx` is functional but visually dense. The title row can accumulate difficulty dots, prefetch badge, grade chip, nailed-it chip, lock chip, and due chip. There is no need to have another level chip in the title row. 
+Also it is too curved and doesn't align with the more restrained visual language of the rest of the dashboard, nor does it work well within the accordion-style section panels. Consider reducing the border radius and simplifying the visual hierarchy to match the overall dashboard aesthetic.
+
+The up next card is redundant with the global next-step banner and should be visually de-emphasized or removed to reduce cognitive load.```
 
 Recommended card structure:
 
@@ -97,7 +101,7 @@ Each section summary should show:
 - Completed count
 - Completion percentage
 - Current or next due assignment
-- Optional campaign chapter teaser
+- Campaign chapter teaser
 
 Inside the expanded panel:
 

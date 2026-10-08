@@ -1,6 +1,8 @@
 "use client";
 
 import * as React from "react";
+// Next's vendored experimental React build only exports this as `unstable_ViewTransition`.
+import { Suspense, unstable_ViewTransition as ViewTransition } from "react";
 import ThemeRegistry from "./ThemeRegistry";
 
 import "../src/components/Editor3/theme.css";
@@ -180,7 +182,10 @@ export default function Providers({
                     <SearchProvider>
                       <TourProvider>
                         <AuthenticatedShell hideChatButton={hideChatButton}>
-                          {children}
+                          {/* ViewTransition must render inside a Client Component - react-server condition doesn't export it */}
+                          <Suspense>
+                            <ViewTransition>{children}</ViewTransition>
+                          </Suspense>
                         </AuthenticatedShell>
                       </TourProvider>
                     </SearchProvider>

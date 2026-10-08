@@ -1,3 +1,6 @@
+import { cookies } from "next/headers";
+import { fetchAuthSession } from "aws-amplify/auth/server";
+import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { Box, Card, Typography } from "@mui/material";
 import { getTranslations } from "next-intl/server";
@@ -195,7 +198,20 @@ export default async function ProfilePage({ params }: Props) {
     nailedItBlocks,
   } = await getCachedProfileData(routeUsername);
 
-  const isOwnProfile = false;
+  // Compare the authenticated session's sub to the route param — the /profile
+  // redirect sends users to /profile/{sub}, so this matches for own-profile
+  // visits regardless of whether routeUsername is a sub or a friendly slug.
+  let isOwnProfile = false;
+  try {
+    const session = await runWithAmplifyServerContext({
+      nextServerContext: { cookies },
+      operation: (contextSpec) => fetchAuthSession(contextSpec),
+    });
+    const sub = session?.tokens?.idToken?.payload?.sub;
+    isOwnProfile = Boolean(sub && sub === routeUsername);
+  } catch {
+    // Unauthenticated or session fetch failed — treat as viewing another profile.
+  }
 
   // Parse custom palette if it's a JSON string
   const parsedCustomPalette = customThemePalette

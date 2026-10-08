@@ -87,10 +87,12 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
     await doneBtn.click();
 
     // Wait for auto-save
-    await page.waitForResponse(
-      (resp) => resp.url().includes("graphql") && resp.status() === 200,
-      { timeout: 15_000 },
-    ).catch(() => {});
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 15_000 },
+      )
+      .catch(() => {});
     await ctx.close();
   });
 
@@ -212,10 +214,12 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
     }
 
     // Wait for grade to be recorded
-    await page.waitForResponse(
-      (resp) => resp.url().includes("graphql") && resp.status() === 200,
-      { timeout: 10_000 },
-    ).catch(() => {});
+    await page
+      .waitForResponse(
+        (resp) => resp.url().includes("graphql") && resp.status() === 200,
+        { timeout: 10_000 },
+      )
+      .catch(() => {});
   });
 
   // ─── INSTRUCTOR: Verify grades appear ────────────────────────────────
@@ -233,8 +237,10 @@ test.describe.serial("Journey 4: Instructor — Grade Student Work", () => {
       timeout: 15_000,
     });
 
-    // Gradebook table must exist with data rows
-    const table = page.locator("table").first();
+    // Gradebook is tab-gated — switch to it before querying the table
+    await page.getByRole("tab", { name: "Gradebook" }).click();
+
+    const table = page.locator('[data-testid="gradebook-table"]').first();
     await expect(table).toBeVisible({ timeout: 15_000 });
 
     const dataRows = table.locator("tbody tr");

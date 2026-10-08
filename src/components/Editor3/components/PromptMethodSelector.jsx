@@ -1,11 +1,13 @@
 import * as React from "react";
 import {
+  Box,
   ButtonGroup,
   Divider,
   Menu,
   MenuItem,
   ListItemIcon,
   ListItemText,
+  Typography,
 } from "@mui/material";
 import Button from "@mui/material/Button";
 import { Check } from "@mui/icons-material";
@@ -63,6 +65,11 @@ const configureSectionSx = {
 
 const configureSectionTitleProps = { fontWeight: 700 };
 const configureSectionDescriptionProps = { fontSize: "0.75rem" };
+
+/** An answer-type block needs at least one Output (prompt) method and one Input (response) method before it's gradable. */
+export function isAnswerConfigValid(allowedInput = [], promptMethod = []) {
+  return allowedInput.length > 0 && promptMethod.length > 0;
+}
 
 export const MeaningAssociationModeSelector = React.memo(
   ({
@@ -237,6 +244,7 @@ export const AnswerConfigurationSelector = React.memo(
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
     const inputValue = allowedInput[0] || "text";
+    const isValid = isAnswerConfigValid(allowedInput, promptMethod);
 
     const togglePromptMethod = (value) => {
       const nextMethods = promptMethod.includes(value)
@@ -246,9 +254,9 @@ export const AnswerConfigurationSelector = React.memo(
     };
 
     return (
-      <>
+      <Box sx={{ display: "inline-flex", flexDirection: "column", gap: 0.25 }}>
         <Button
-          color="primary"
+          color={isValid ? "primary" : "error"}
           variant="contained"
           size="small"
           startIcon={<ViewModuleIcon />}
@@ -256,9 +264,19 @@ export const AnswerConfigurationSelector = React.memo(
           onClick={(event) => setAnchorEl(event.currentTarget)}
           aria-haspopup="true"
           aria-expanded={open ? "true" : undefined}
+          sx={selectorButtonSx}
         >
           Configure
         </Button>
+        {!isValid && (
+          <Typography
+            variant="caption"
+            color="error.main"
+            sx={{ fontSize: "0.7rem", lineHeight: 1.2 }}
+          >
+            Select at least one input and output method
+          </Typography>
+        )}
         <Menu
           anchorEl={anchorEl}
           open={open}
@@ -362,7 +380,7 @@ export const AnswerConfigurationSelector = React.memo(
             );
           })}
         </Menu>
-      </>
+      </Box>
     );
   },
 );

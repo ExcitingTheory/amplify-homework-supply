@@ -32,6 +32,11 @@ let cachedUserPoolId: string | null = null;
 let cfPrivateKey: string | null = null;
 let cfKeyPairId: string | null = null;
 
+// Falls back to the legacy shared path only if backend.ts hasn't set the env var
+// (e.g. local unit tests invoking the handler directly).
+const CF_SSM_PREFIX =
+  process.env.CF_SSM_PREFIX ?? "/homework-supply/cloudfront";
+
 /**
  * Generate a CloudFront canned-policy signed URL using Node.js built-in crypto.
  * Avoids any external signing library dependency.
@@ -125,13 +130,13 @@ async function handleGetUnitsCdnCookie(): Promise<{
     const [keyResult, idResult] = await Promise.all([
       ssm.send(
         new GetParameterCommand({
-          Name: "/homework-supply/cloudfront/private-key",
+          Name: `${CF_SSM_PREFIX}/private-key`,
           WithDecryption: true,
         }),
       ),
       ssm.send(
         new GetParameterCommand({
-          Name: "/homework-supply/cloudfront/key-pair-id",
+          Name: `${CF_SSM_PREFIX}/key-pair-id`,
           WithDecryption: false,
         }),
       ),
@@ -1355,13 +1360,13 @@ async function handleGetStudentSubmissionUrl(
     const [pkResult, kpIdResult] = await Promise.all([
       ssmClient.send(
         new GetParameterCommand({
-          Name: "/homework-supply/cloudfront/private-key",
+          Name: `${CF_SSM_PREFIX}/private-key`,
           WithDecryption: true,
         }),
       ),
       ssmClient.send(
         new GetParameterCommand({
-          Name: "/homework-supply/cloudfront/key-pair-id",
+          Name: `${CF_SSM_PREFIX}/key-pair-id`,
         }),
       ),
     ]);

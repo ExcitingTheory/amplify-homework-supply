@@ -54,9 +54,20 @@ function AppShellDecorator({ children }) {
   );
   return (
     <AppShellContext.Provider value={contextValue}>
+      {/* `fixed` (not `sticky`) matches real AppShell's AppBar — it must be
+          removed from document flow, since Editor3 sizes its own content as
+          `calc(100vh - appBarHeight)` assuming the toolbar occupies no flow
+          space. `sticky` would double-count the toolbar's height and force
+          an extra scrollbar on the outer .storybook-wrapper. */}
       <div
         ref={toolbarPortalRef}
-        style={{ position: "sticky", top: 0, zIndex: 1100 }}
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1100,
+        }}
       />
       {children}
     </AppShellContext.Provider>

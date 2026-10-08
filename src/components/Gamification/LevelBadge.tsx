@@ -10,6 +10,7 @@ import Box from "@mui/material/Box";
 import Tooltip from "@mui/material/Tooltip";
 import LinearProgress from "@mui/material/LinearProgress";
 import Chip from "@mui/material/Chip";
+import Badge from "@mui/material/Badge";
 import { useTheme, type Theme } from "@mui/material/styles";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import TravelExploreIcon from "@mui/icons-material/TravelExplore";
@@ -19,7 +20,12 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import SchoolIcon from "@mui/icons-material/School";
 import type { LevelInfo } from "../../utils/xpCalculation";
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
-import { readableInk } from "../../themes/heraldry";
+import {
+  readableInk,
+  metalForTier,
+  medallionBadgeSx,
+} from "../../themes/heraldry";
+import { Medallion } from "./Medallion";
 
 export interface LevelBadgeProps {
   /** Level information from XP context. */
@@ -74,30 +80,30 @@ export function LevelBadge({
       ? `Lvl. ${level.level} · ${level.label} — ${level.progress}% to Lvl. ${level.level + 1}`
       : `Lvl. ${level.level} · ${level.label}`;
 
-  // App-bar variant: a tight icon + number pill (no "Lvl." text, no progress).
+  // App-bar variant: a heraldic medallion (shared finish and 30px height with
+  // StreakIndicator/StreakShield) with the level number as a small corner badge.
   if (isSmall) {
+    const metal = metalForTier(level.level * 3000, theme);
     return (
       <Tooltip title={tooltipText} arrow>
-        <Box
+        <Badge
           aria-label={tooltipText}
-          sx={{
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 0.25,
-            height: 20,
-            px: 0.625,
-            borderRadius: "10px",
-            bgcolor: color,
-            color: textColor,
-            fontWeight: 700,
-            fontSize: "0.6875rem",
-            lineHeight: 1,
-            "& svg": { fontSize: 13 },
-          }}
+          badgeContent={level.level}
+          overlap="circular"
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          sx={medallionBadgeSx(color, textColor)}
         >
-          {icon}
-          {level.level}
-        </Box>
+          <Medallion
+            shape="hex"
+            size={30}
+            rimMetal={metal}
+            fieldColor={color}
+            charge={React.cloneElement(icon, {
+              sx: { fontSize: 16, color: textColor },
+            })}
+            ariaLabel={tooltipText}
+          />
+        </Badge>
       </Tooltip>
     );
   }

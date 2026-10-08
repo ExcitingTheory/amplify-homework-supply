@@ -567,7 +567,24 @@ const mediaConvert = new MediaConvertConstruct(dataStack, "MediaConvert", {
 // ==========================================================================
 // CfKeyRotation — generates RSA key pair and writes to SSM before CloudFront
 // ==========================================================================
-const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation");
+
+// Stack-qualified so sandbox and branch deployments never collide on the same
+// SSM parameter names. `dataStack` is a NestedStack, whose `stackName` is an
+// unresolved deploy-time token (CloudFormation assigns nested stack physical
+// names at deploy time) — walk up to the root (non-nested) stack instead,
+// whose name is a literal string known at synth time.
+function getRootStackName(stack: cdk.Stack): string {
+  let current: cdk.Stack = stack;
+  while (cdk.NestedStack.isNestedStack(current) && current.nestedStackParent) {
+    current = current.nestedStackParent;
+  }
+  return current.stackName;
+}
+const cfSsmPrefix = `/homework-supply/${getRootStackName(dataStack)}/cloudfront`;
+
+const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation", {
+  ssmPrefix: cfSsmPrefix,
+});
 
 // ==========================================================================
 // MediaCDN — CloudFront distribution in front of S3 with OAC
@@ -576,6 +593,7 @@ const cfKeyRotation = new CfKeyRotationConstruct(dataStack, "CfKeyRotation");
 const mediaCDN = new MediaCDNConstruct(dataStack, "MediaCDN", {
   bucket: backend.storage.resources.bucket,
   cfPublicKeyPem: cfKeyRotation.publicKeyPem,
+  ssmPrefix: cfSsmPrefix,
 });
 
 // Ensure key pair is written to SSM before the distribution is created/updated
@@ -604,6 +622,9 @@ backend.addOutput({
     CLOUDFRONT: {
       domain: mediaCDN.distribution.distributionDomainName,
       distributionId: mediaCDN.distribution.distributionId,
+      // Lets server-side Next.js routes (not CDK-managed Lambdas) resolve the
+      // same stack-qualified SSM path this environment's signing keys live under.
+      ssmPrefix: cfSsmPrefix,
     },
   },
 });
@@ -625,6 +646,7 @@ backend.sectionHandler.addEnvironment(
   "CDN_DOMAIN",
   mediaCDN.distribution.distributionDomainName,
 );
+backend.sectionHandler.addEnvironment("CF_SSM_PREFIX", cfSsmPrefix);
 
 // Grant sectionHandler SSM read so it can fetch the CF private key and key pair ID at runtime
 const sectionHandlerSSMPolicy = new Policy(
@@ -635,7 +657,7 @@ const sectionHandlerSSMPolicy = new Policy(
       new PolicyStatement({
         actions: ["ssm:GetParameter", "ssm:GetParameters"],
         resources: [
-          `arn:aws:ssm:${dataStack.region}:${dataStack.account}:parameter/homework-supply/cloudfront/*`,
+          `arn:aws:ssm:${dataStack.region}:${dataStack.account}:parameter${cfSsmPrefix}/*`,
         ],
       }),
     ],

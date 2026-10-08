@@ -16,7 +16,7 @@ import { useTranslations } from "next-intl";
 // import AppBar from '@mui/material/AppBar';
 // import Box from '@mui/material/Box';
 import Toolbar from "@mui/material/Toolbar";
-// import Typography from '@mui/material/Typography';
+import Typography from "@mui/material/Typography";
 // import Button from '@mui/material/Button';
 import IconButton from "@mui/material/IconButton";
 import ProfileIcon from "@mui/icons-material/AccountCircle";
@@ -89,6 +89,12 @@ import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import GlobalSearchBar from "./GlobalSearchBar";
+
+// Uncategorized (total-count) notification badges read as black so they stay
+// visually distinct from the red category badges used on nav items.
+const blackNotificationBadgeSx = {
+  "& .MuiBadge-badge": { bgcolor: "common.black", color: "common.white" },
+};
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -296,6 +302,8 @@ export function UserMenu({ onJoinSection }) {
             style={avatarStyle}
             overrides={avatarOverrides}
             glowRing={glowRing}
+            outline
+            sheen
             guildCrestSvg={mySquad?.crestSvg ?? null}
             guildName={mySquad?.name}
             guildId={mySquad?.id}
@@ -342,7 +350,7 @@ export function UserMenu({ onJoinSection }) {
               handleClose();
             }}
           >
-            <NotificationBadge>
+            <NotificationBadge sx={blackNotificationBadgeSx}>
               <NotificationsIcon />
             </NotificationBadge>
             &nbsp;{tCommon("navigation.notifications", "Notifications")}
@@ -379,7 +387,19 @@ export default function MainToolbar({ children }) {
   const tEditorAuth = useTranslations("editor.authoring");
   const { level, sectionLevel } = useXP();
   const { streak } = useProgress();
-  const { session: authSession } = React.useContext(AuthContext);
+  const { mySquad } = useSquad();
+  const { session: authSession, user } = React.useContext(AuthContext);
+  const {
+    style: avatarStyle,
+    overrides: avatarOverrides,
+    isLoaded: isAvatarLoaded,
+    glowRing,
+  } = useAvatarConfig();
+  const avatarSeed = user?.attributes?.sub || "";
+  const displayName =
+    user?.attributes?.name ||
+    user?.attributes?.email?.split("@")[0] ||
+    tCommon("navigation.profile");
   const isInstructorOrAdmin = React.useMemo(() => {
     const groups = authSession?.groups || [];
     return groups.some((g) =>
@@ -593,10 +613,6 @@ export default function MainToolbar({ children }) {
       {
         id: "nav-section-gradebook",
         label: tComponents("sectionDetail.gradebook"),
-      },
-      {
-        id: "nav-section-completion",
-        label: tComponents("sectionDetail.completionGrid"),
       },
       {
         id: "nav-section-leaderboard",
@@ -1089,7 +1105,7 @@ export default function MainToolbar({ children }) {
         <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
           <ListItemButton component="a" href="/profile/notifications">
             <ListItemIcon sx={{ color: "text.primary" }}>
-              <NotificationBadge>
+              <NotificationBadge sx={blackNotificationBadgeSx}>
                 <NotificationsIcon />
               </NotificationBadge>
             </ListItemIcon>
@@ -1139,6 +1155,93 @@ export default function MainToolbar({ children }) {
           </ListItemButton>
         </ListItem>
       </List>
+
+      {/* Mobile-only gamification + profile snapshot — streak, shield, level,
+          and notifications are hidden from the toolbar below the md
+          breakpoint, so surface them here instead of losing them entirely. */}
+      <Box
+        sx={{
+          display: { xs: "flex", md: "none" },
+          flexDirection: "column",
+          alignItems: "center",
+          gap: 1,
+          mt: 2,
+          px: 2,
+          py: 1.5,
+          borderTop: "1px solid",
+          borderColor: "divider",
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <Box
+          component="a"
+          href="/profile"
+          onClick={() => setDrawerOpen(false)}
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            gap: 1,
+            width: "100%",
+            minWidth: 0,
+            textDecoration: "none",
+            color: "inherit",
+          }}
+        >
+          {avatarSeed && isAvatarLoaded ? (
+            <AvatarDisplay
+              seed={avatarSeed}
+              size={32}
+              style={avatarStyle}
+              overrides={avatarOverrides}
+              glowRing={glowRing}
+              outline
+              sheen
+              guildCrestSvg={mySquad?.crestSvg ?? null}
+              guildName={mySquad?.name}
+              guildId={mySquad?.id}
+            />
+          ) : (
+            <ProfileIcon />
+          )}
+          <Typography variant="body2" fontWeight={600} noWrap>
+            {displayName}
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 1.5,
+          }}
+        >
+          <StreakIndicator
+            currentStreak={streak?.currentStreak || 0}
+            size="small"
+            showEmpty={!isInstructorOrAdmin}
+          />
+          <StreakShield
+            freezesRemaining={streak?.freezesRemaining || 0}
+            freezesUsed={streak?.freezesUsed || 0}
+            size="small"
+            showEmpty={!isInstructorOrAdmin}
+          />
+          <LevelBadge
+            level={currentSearchParams.get("sectionId") ? sectionLevel : level}
+            size="small"
+          />
+          <IconButton
+            color="inherit"
+            aria-label="Notifications"
+            size="small"
+            onClick={() => router.push("/profile/notifications")}
+          >
+            <NotificationBadge sx={blackNotificationBadgeSx}>
+              <NotificationsIcon />
+            </NotificationBadge>
+          </IconButton>
+        </Box>
+      </Box>
     </>
   );
 
@@ -1283,6 +1386,18 @@ export default function MainToolbar({ children }) {
           maxWidth: "100%",
           overflow: "hidden",
           boxSizing: "border-box",
+          // Storybook forces MuiModal disablePortal (.storybook/preview.jsx),
+          // so the nav drawer below renders inline as this Toolbar's sibling
+          // instead of escaping to document.body. A transparent Toolbar here
+          // would only keep its own text/icons above the drawer while
+          // showing the drawer through its background, so repaint the
+          // AppBar's own glass background here too. No-op in production,
+          // where the drawer portals to body and compares against the
+          // AppBar instead.
+          position: "relative",
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          backgroundColor: "custom.glassNavbar",
+          backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
         }}
       >
         <IconButton
@@ -1330,7 +1445,7 @@ export default function MainToolbar({ children }) {
           onClick={() => router.push("/profile/notifications")}
           sx={{ display: { xs: "none", md: "inline-flex" } }}
         >
-          <NotificationBadge>
+          <NotificationBadge sx={blackNotificationBadgeSx}>
             <NotificationsIcon />
           </NotificationBadge>
         </IconButton>
@@ -1373,7 +1488,8 @@ export default function MainToolbar({ children }) {
                   backgroundColor: "custom.glassNavbar",
                   borderRight: "1px solid",
                   borderColor: "divider",
-                  zIndex: (theme) => theme.zIndex.modal + 1,
+                  // Below the AppBar, and below theme.zIndex.modal so real dialogs win.
+                  zIndex: (theme) => theme.zIndex.drawer,
                   transition: (theme) =>
                     theme.transitions.create("width", {
                       easing: theme.transitions.easing.sharp,
@@ -1397,6 +1513,7 @@ export default function MainToolbar({ children }) {
               <Box
                 role="separator"
                 aria-orientation="vertical"
+                tabIndex={0}
                 aria-label={
                   appShell.hidden
                     ? "Show navigation"
@@ -1427,14 +1544,16 @@ export default function MainToolbar({ children }) {
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  zIndex: (theme) => theme.zIndex.modal + 2,
+                  // Above the drawer itself, still below the AppBar and theme.zIndex.modal.
+                  zIndex: (theme) => theme.zIndex.drawer + 1,
                   transition: (theme) =>
                     theme.transitions.create("left", {
                       easing: theme.transitions.easing.sharp,
                       duration: theme.transitions.duration.enteringScreen,
                     }),
-                  "&:hover .nav-drag-grip": {
+                  "&:hover .nav-drag-grip, &:focus-visible .nav-drag-grip": {
                     opacity: 1,
+                    width: 6,
                     backgroundColor: "primary.main",
                   },
                 }}
@@ -1449,8 +1568,12 @@ export default function MainToolbar({ children }) {
                       theme.palette.mode === "dark"
                         ? SEMANTIC_THEME.surface.darkDragHandle
                         : SEMANTIC_THEME.surface.lightDragHandle,
-                    opacity: 1,
-                    transition: "opacity 0.2s ease, background-color 0.2s ease",
+                    // Subtle at rest so it hides into the layout; pops out
+                    // wider and fully opaque once the pointer is near enough
+                    // to grab it (hover covers the full 24px hit zone).
+                    opacity: 0.35,
+                    transition:
+                      "opacity 0.2s ease, background-color 0.2s ease, width 0.2s ease",
                   }}
                 />
               </Box>,
@@ -1466,7 +1589,8 @@ export default function MainToolbar({ children }) {
               onClose={toggleDrawer(anchor, false)}
               onOpen={toggleDrawer(anchor, true)}
               sx={{
-                zIndex: (theme) => theme.zIndex.modal + 7,
+                // Below the AppBar, and below theme.zIndex.modal so real dialogs win.
+                zIndex: (theme) => theme.zIndex.drawer,
               }}
               ModalProps={{
                 keepMounted: true,

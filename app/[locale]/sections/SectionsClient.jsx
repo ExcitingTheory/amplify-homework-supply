@@ -501,18 +501,20 @@ function Sections({ user }) {
                   variant="assignment"
                   sx={{
                     display: "flex",
-                    flexDirection: { xs: "column", md: "row" },
+                    flexDirection: { xs: "column", sm: "row" },
                     margin: "1rem auto",
                     width:
                       isDesktop && drawerOpen
                         ? `calc(90vw - ${drawerWidth}px)`
                         : "90vw",
-                    maxWidth: "80rem",
+                    maxWidth: "64rem",
                   }}
                 >
                   <CardMediaThumbnail
                     s3Key={section?.featuredImage}
                     identityId={section?.identityId}
+                    title={section?.name}
+                    wideOnLarge
                   />
                   <Box
                     sx={{

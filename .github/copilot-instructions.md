@@ -353,7 +353,7 @@ await client.graphql({
 
 ## Preferred MCP Usage
 
-Use MCP servers intentionally based on task type. See [.github/prompts/mcp-tool-routing.prompt.md](.github/prompts/mcp-tool-routing.prompt.md) for a full routing checklist.
+Use MCP servers intentionally based on task type. See [.github/prompts/mcp-tool-routing-v2.prompt.md](.github/prompts/mcp-tool-routing-v2.prompt.md) for a full routing checklist.
 
 - **GitHub operations**: Prefer `io.github.github/github-mcp-server` for issues, PRs, reviews, labels, branch/commit metadata, and repository information.
 - **Browser/UI verification**: Prefer `microsoft/playwright-mcp` for end-to-end interaction checks and reproducible UI validation.

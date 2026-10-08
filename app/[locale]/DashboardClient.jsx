@@ -15,7 +15,6 @@ import {
   LinearProgress,
   Paper,
   Tooltip,
-  Avatar,
   Divider,
   IconButton,
   Alert,
@@ -36,28 +35,24 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { FilesProvider } from "@/context/fileContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
-import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { NailedItWall } from "@/components/Gamification/NailedItWall";
 import { StreakIndicator } from "@/components/Gamification/StreakIndicator";
 import { StreakShield } from "@/components/Gamification/StreakShield";
 import { ProgressRings } from "@/components/Gamification/ProgressRings";
 import { CampaignBriefing } from "@/components/Gamification/CampaignBriefing";
 import { BossBattleCard } from "@/components/Gamification/BossBattleCard";
+import { EmptyState } from "@/components/EmptyState";
 import { CampaignTimeline } from "@/components/Gamification/CampaignTimeline";
 
 import { LevelBadge } from "@/components/Gamification/LevelBadge";
 import { ArmoriaShield } from "@/components/Gamification/ArmoriaShield";
-import { AvatarDisplay } from "@/components/Gamification/AvatarDisplay";
 
 import {
   useXP,
   useProgress,
   useCampaign,
-  useBadges,
-  useSquad,
   useContentLock,
 } from "@/context/gamificationContext";
-import { useAvatarConfig } from "@/hooks/useAvatarConfig";
 import { useStudentMemory } from "@/hooks/useStudentMemory";
 import { parseMemoryMarkdown } from "@/utils/memoryParser";
 import {
@@ -66,11 +61,10 @@ import {
 } from "@/utils/accommodations";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { useRouter } from "next/navigation";
-import { PrefetchButton } from "@/components/PrefetchButton";
 
 import { createPeerReviewRoom } from "../actions/peerReview";
 import AuthContext from "@/context/authContext";
-import { SectionPanel } from "@/components/Dashboard";
+import { AssignmentCard, SectionPanel } from "@/components/Dashboard";
 import { DashboardHeroView } from "@/components/Dashboard/DashboardHeroView";
 import InstructorDashboard from "@/components/InstructorDashboard";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
@@ -141,34 +135,17 @@ function Index({
   const sectionCountRef = useRef(0);
 
   // ── gamification ──────────────────────────────────────────────────────────
-  const { totalXP, level, sectionLevel, xpLogs } = useXP();
+  const { sectionLevel, xpLogs } = useXP();
   const { modules: progressModules, streak } = useProgress();
   const { campaign, activeChallenges, completedChallenges } = useCampaign();
-  const { badges: earnedBadges } = useBadges();
-  const { mySquad, myMembership } = useSquad();
   const { isLocked, getLockStatus } = useContentLock();
 
-  // ── avatar ────────────────────────────────────────────────────────────────
-  const {
-    style: avatarStyle,
-    overrides: avatarOverrides,
-    seed: configSeed,
-    isLoaded,
-    glowRing,
-  } = useAvatarConfig();
   const userId =
     authSession?.idToken?.payload?.sub ||
     authSession?.username ||
     authSession?.userId ||
     user?.attributes?.sub ||
     getUserId(user);
-  const avatarSeed =
-    authSession?.idToken?.payload?.sub ||
-    authSession?.username ||
-    user?.attributes?.sub ||
-    user?.userId ||
-    user?.username ||
-    "";
 
   // ── AI memory ─────────────────────────────────────────────────────────────
   const rawMemory = useStudentMemory(userId);
@@ -214,7 +191,11 @@ function Index({
   useEffect(() => {
     if (!userId) return;
     const client = getAmplifyClient();
-    const subscription = client.models.Grade.observeQuery().subscribe({
+    // Scoped to this viewer — Grade.owner no longer carries a broad
+    // authenticated-read override, so this only returns grades the viewer owns.
+    const subscription = client.models.Grade.observeQuery({
+      filter: { owner: { eq: userId } },
+    }).subscribe({
       next: ({ items }) => {
         items = items.filter((item) => item != null && item.id != null);
         if (items.length === gradeCountRef.current && gradeCountRef.current > 0)
@@ -393,7 +374,20 @@ function Index({
         "Excellent understanding demonstrated in a completed task.",
       homeworkTitle: "Learner Workbook",
       createdAt: log.createdAt || new Date().toISOString(),
+      unitID: log.unitID,
+      sectionID: log.sectionID,
     }));
+  }, [xpLogs]);
+
+  // Per-unit Nailed It counts (not capped at 12, so section badge chips stay accurate)
+  const nailedItByUnit = React.useMemo(() => {
+    const map = {};
+    (xpLogs || [])
+      .filter((log) => log && log.reason === "NAILED_IT" && log.unitID)
+      .forEach((log) => {
+        map[log.unitID] = (map[log.unitID] || 0) + 1;
+      });
+    return map;
   }, [xpLogs]);
 
   // ── helpers ───────────────────────────────────────────────────────────────
@@ -412,6 +406,22 @@ function Index({
     if (!result?.success)
       throw new Error(result?.error || "Failed to create room");
     return result.roomId;
+  };
+
+  const handleRequestGuidance = async (referenceId, sectionID) => {
+    try {
+      const result = await createPeerReviewRoom(
+        referenceId,
+        [],
+        sectionID,
+        userId,
+      );
+      if (result?.success && result.roomId) {
+        router.push(`/review/${result.roomId}`);
+      }
+    } catch (e) {
+      console.error("[Index] guidance room error:", e);
+    }
   };
 
   const hasNoSections = sections.length === 0 && mySections.length === 0;
@@ -497,95 +507,43 @@ function Index({
         >
           Skip to your next assignment
         </Box>
-        {/* ── HERO CARD ────────────────────────────────────────────────── */}
-        <DashboardHeroView
-          greeting={t(greetingKey, {
-            name: user?.attributes?.name || user?.username || "Learner",
-          })}
-          level={level}
-          avatar={
-            avatarSeed && isLoaded ? (
-              <AvatarDisplay
-                seed={avatarSeed}
-                size={72}
-                style={avatarStyle}
-                overrides={avatarOverrides}
-                glowRing={glowRing}
-                guildCrestSvg={mySquad?.crestSvg ?? null}
-                guildName={mySquad?.name}
-                guildId={mySquad?.id}
-              />
-            ) : (
-              <Avatar
-                sx={{
-                  width: 72,
-                  height: 72,
-                  bgcolor: "rgba(255,255,255,0.2)",
-                  fontSize: 32,
-                }}
-              >
-                {(user?.username || "?")[0]?.toUpperCase()}
-              </Avatar>
-            )
-          }
-          nextStep={
-            urgentNextAssignment
-              ? {
-                  todayLabel: "Today",
-                  unitName:
-                    units[urgentNextAssignment.unitID]?.name ||
-                    "Next assignment",
-                  sectionName:
-                    sections.find(
-                      (s) => s.id === urgentNextAssignment.sectionID,
-                    )?.name || "Your next lesson",
-                  dueText: urgentNextAssignment.dueDate
-                    ? `Due ${new Date(getEffectiveDueDate(urgentNextAssignment.dueDate, accommodationBySectionId[urgentNextAssignment.sectionID]) || urgentNextAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-                    : undefined,
-                }
-              : null
-          }
-          startButton={
-            urgentNextAssignment ? (
-              <PrefetchButton
-                variant="contained"
-                size="small"
-                href={`/workbook/${urgentNextAssignment.unitID}`}
-                sx={{
-                  flexShrink: 0,
-                  alignSelf: { xs: "stretch", sm: "center" },
-                }}
-              >
-                Start
-              </PrefetchButton>
-            ) : null
-          }
-          caughtUpText="You are caught up on your assignments."
-          streak={streak}
-          showStreakEmpty={!isInstructorOrAdmin}
-          assignmentsCount={
-            completedAssignmentsList.length + pendingAssignments.length
-          }
-          badgesCount={earnedBadges?.length || 0}
-          totalXP={totalXP}
-          badgeShelf={
-            earnedBadges?.length > 0 ? (
-              <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
-            ) : null
-          }
-          squad={
-            mySquad
-              ? {
-                  id: mySquad.id,
-                  name: mySquad.name,
-                  crestSvg: mySquad.crestSvg,
-                  totalXP: mySquad.totalXP,
-                }
-              : null
-          }
-        />
-
-        {/* ── INSTRUCTOR DASHBOARD ─────────────────────────────────── */}
+        {/* ── HERO CARD (learners only — instructors get their own "Class health" hero below) ── */}
+        {!isInstructorOrAdmin && (
+          <DashboardHeroView
+            greeting={
+              t(greetingKey, {
+                name: user?.attributes?.name || user?.username || "Learner",
+              }) +
+              (streak?.currentStreak > 0
+                ? ` You're on a ${streak.currentStreak}-day streak! 🔥`
+                : "")
+            }
+            nextStepCard={
+              urgentNextAssignment ? (
+                <AssignmentCard
+                  assignment={urgentNextAssignment}
+                  unit={units[urgentNextAssignment.unitID]}
+                  locked={false}
+                  lockStatus={getLockStatus(urgentNextAssignment.unitID)}
+                  nailedItCount={
+                    nailedItByUnit[urgentNextAssignment.unitID] || 0
+                  }
+                  accommodation={
+                    accommodationBySectionId[urgentNextAssignment.sectionID]
+                  }
+                  eyebrowLabel="Today"
+                  onGradient
+                  hideThumbnail
+                  onOpenDrill={openDrill}
+                  onRequestGuidance={handleRequestGuidance}
+                  onCreateReviewRoom={handleCreateReviewRoom}
+                  onRoomCreated={(roomId) => router.push(`/review/${roomId}`)}
+                />
+              ) : null
+            }
+            caughtUpText="You are caught up on your assignments."
+          />
+        )}
         {isInstructorOrAdmin && mySections.length > 0 && (
           <InstructorDashboard sections={mySections} />
         )}
@@ -757,6 +715,10 @@ function Index({
                         assignments={sectionAssignments}
                         units={units}
                         gradeMap={myGradeMap}
+                        nailedItByUnit={nailedItByUnit}
+                        nailedItBlocks={xpNailedItBlocks.filter(
+                          (b) => b.sectionID === section.id,
+                        )}
                         activeChapterTitle={sectionChapter?.title || null}
                         isLocked={isLocked}
                         getLockStatus={getLockStatus}
@@ -786,21 +748,7 @@ function Index({
                           ) : null
                         }
                         onOpenDrill={openDrill}
-                        onRequestGuidance={async (referenceId, sectionID) => {
-                          try {
-                            const result = await createPeerReviewRoom(
-                              referenceId,
-                              [],
-                              sectionID,
-                              userId,
-                            );
-                            if (result?.success && result.roomId) {
-                              router.push(`/review/${result.roomId}`);
-                            }
-                          } catch (e) {
-                            console.error("[Index] guidance room error:", e);
-                          }
-                        }}
+                        onRequestGuidance={handleRequestGuidance}
                         onCreateReviewRoom={handleCreateReviewRoom}
                         onRoomCreated={(roomId) =>
                           router.push(`/review/${roomId}`)
@@ -980,6 +928,17 @@ function Index({
                       />
                     </Box>
                   ))}
+                </Box>
+              )}
+
+              {campaign && activeChallenges?.length === 0 && (
+                <Box sx={{ mb: 3 }}>
+                  <EmptyState
+                    icon={<EmojiEventsIcon fontSize="inherit" />}
+                    title="No active boss battles"
+                    description="Check back when your instructor launches the next encounter."
+                    dense
+                  />
                 </Box>
               )}
 

@@ -151,10 +151,16 @@ function Answer({
               "& .MuiOutlinedInput-root": {
                 borderRadius: `${SEMANTIC_THEME.radius.control}px`,
                 bgcolor: "background.paper",
-                "& input": {
-                  pl: { xs: 6, sm: 6.5 },
-                  pr: { xs: 8, sm: 8.5 },
-                },
+              },
+              // Target the actual MUI input class, not a bare `input` tag
+              // selector — the latter loses the cascade to MUI's own
+              // OutlinedInput styles and the text renders under the checkbox.
+              // pl must clear the drag handle + checkbox (checkbox right edge
+              // measures ~56px) with a visual gap, not just their nominal
+              // left offsets.
+              "& .MuiOutlinedInput-input": {
+                pl: { xs: 8, sm: 8.5 },
+                pr: { xs: 8, sm: 8.5 },
               },
             }}
           />

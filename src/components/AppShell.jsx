@@ -167,13 +167,29 @@ export default function AppShell({ children, toolbarChildren }) {
         sx={{
           backgroundColor: "custom.glassNavbar",
           backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
-          zIndex: (theme) => theme.zIndex.modal + 6,
+          // Above the nav drawer/menu, but below theme.zIndex.modal so real dialogs win.
+          zIndex: (theme) => theme.zIndex.drawer + 2,
           isolation: "isolate",
         }}
       >
         <MainToolbar>{toolbarChildren}</MainToolbar>
         {toolbarContent}
-        <div ref={toolbarPortalRef} />
+        <Box
+          ref={toolbarPortalRef}
+          sx={{
+            // Storybook forces MuiModal disablePortal (.storybook/preview.jsx), so
+            // the nav drawer renders inline as this box's sibling instead of
+            // escaping to document.body. A transparent box here would only
+            // keep its own text/icons above the drawer while showing the
+            // drawer through its background, so repaint the AppBar's own
+            // glass background here too. No-op in production, where the
+            // drawer portals to body and compares against the AppBar instead.
+            position: "relative",
+            zIndex: (theme) => theme.zIndex.drawer + 1,
+            backgroundColor: "custom.glassNavbar",
+            backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
+          }}
+        />
       </AppBar>
 
       <Box

@@ -346,7 +346,7 @@ export function InstructorGamificationPanel({
   }, [customBadges]);
 
   return (
-    <Box sx={{ maxWidth: 800 }}>
+    <Box sx={{ maxWidth: 800, margin: "0 auto" }}>
       <Typography variant="h5" fontWeight={700} gutterBottom>
         Gamification Admin
       </Typography>
@@ -950,7 +950,7 @@ export function InstructorGamificationPanel({
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <ReportProblemIcon sx={{ mr: 1, color: "error.main" }} />
           <Typography component="div" fontWeight={600}>
-            Anti-Badges
+            Anti-Badges ({getAllAntiBadgeTypes().length} badges)
             {antiBadgesEnabled === false && (
               <Chip
                 label="Disabled"
@@ -960,13 +960,6 @@ export function InstructorGamificationPanel({
                 sx={{ ml: 1, height: 18, fontSize: "0.6rem" }}
               />
             )}
-            <Chip
-              label={`${getAllAntiBadgeTypes().length} badges`}
-              size="small"
-              color="error"
-              variant="outlined"
-              sx={{ ml: 1, height: 20, fontSize: "0.65rem" }}
-            />
           </Typography>
         </AccordionSummary>
         <AccordionDetails>

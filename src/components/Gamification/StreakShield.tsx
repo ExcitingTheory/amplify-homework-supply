@@ -1,18 +1,27 @@
 "use client";
 /**
  * StreakShield — Shows remaining streak freezes as a heraldic shield medallion
- * (shared Medallion finish). Clicking reveals a tooltip explaining the mechanic.
+ * (shared Medallion finish, matching StreakIndicator/LevelBadge) with the
+ * remaining count as a small corner badge. Clicking reveals a tooltip
+ * explaining the mechanic.
  *
  * @module StreakShield
  */
 
 import React from "react";
 import Box from "@mui/material/Box";
-import Typography from "@mui/material/Typography";
+import Badge from "@mui/material/Badge";
 import Tooltip from "@mui/material/Tooltip";
+import AcUnitIcon from "@mui/icons-material/AcUnit";
 import { useTheme } from "@mui/material/styles";
 import { Medallion } from "./Medallion";
-import { getTinctures, getMetals, metalForTier } from "@/themes/heraldry";
+import {
+  getTinctures,
+  getMetals,
+  metalForTier,
+  readableInk,
+  medallionBadgeSx,
+} from "@/themes/heraldry";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export interface StreakShieldProps {
@@ -46,20 +55,17 @@ export function StreakShield({
   const metal = active
     ? metalForTier(freezesRemaining * 2500, theme)
     : getMetals(theme).bronze;
+  const textColor = readableInk(field.main);
+  const ariaLabel = `${freezesRemaining} streak shields remaining`;
 
   const charge = (
-    <Typography
-      component="span"
+    <AcUnitIcon
       sx={{
-        fontWeight: 800,
-        fontSize: px * 0.42,
-        lineHeight: 1,
+        fontSize: px * 0.5,
         color: active ? "#f5f5f5" : "rgba(245,245,245,0.6)",
-        textShadow: "0 1px 1px rgba(0,0,0,0.45)",
+        filter: "drop-shadow(0 1px 1px rgba(0,0,0,0.45))",
       }}
-    >
-      {freezesRemaining}
-    </Typography>
+    />
   );
 
   return (
@@ -67,18 +73,25 @@ export function StreakShield({
       title={`Streak Shields protect your streak if you miss a day. You have ${freezesRemaining} remaining. Earn 1 shield every 7-day streak.`}
       arrow
     >
-      <Box
-        sx={{ display: "inline-flex", alignItems: "center", cursor: "help" }}
-      >
-        <Medallion
-          shape="shield"
-          size={px}
-          rimMetal={metal}
-          fieldColor={field.main}
-          charge={charge}
-          ariaLabel={`${freezesRemaining} streak shields remaining`}
-          reducedMotion={reducedMotion}
-        />
+      <Box sx={{ display: "inline-flex", cursor: "help" }}>
+        <Badge
+          aria-label={ariaLabel}
+          badgeContent={freezesRemaining}
+          showZero
+          overlap="circular"
+          anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+          sx={medallionBadgeSx(field.main, textColor)}
+        >
+          <Medallion
+            shape="shield"
+            size={px}
+            rimMetal={metal}
+            fieldColor={field.main}
+            charge={charge}
+            ariaLabel={ariaLabel}
+            reducedMotion={reducedMotion}
+          />
+        </Badge>
       </Box>
     </Tooltip>
   );

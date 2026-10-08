@@ -21,6 +21,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import { SEMANTIC_THEME } from "../../themes/semanticTheme";
 
 // ============================================================================
 // Types
@@ -193,7 +194,10 @@ export function BossBattleProgress({
             variant="determinate"
             value={progress}
             color={isComplete ? "success" : isExpired ? "error" : "primary"}
-            sx={{ height: 8, borderRadius: 1 }}
+            sx={{
+              height: 8,
+              borderRadius: `${SEMANTIC_THEME.radius.progress}px`,
+            }}
           />
         </Box>
 

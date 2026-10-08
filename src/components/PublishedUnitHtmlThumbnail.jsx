@@ -16,8 +16,12 @@ export default function PublishedUnitHtmlThumbnail({
   thumbnailS3Key,
   fallbackS3Key,
   fallbackIdentityId,
+  title,
   emptyLabel = "Preview unavailable",
-  size,
+  size = 160,
+  desktopWidth,
+  aspectRatio,
+  fillHeight,
 }) {
   const s3Key = thumbnailS3Key || fallbackS3Key;
 
@@ -25,8 +29,12 @@ export default function PublishedUnitHtmlThumbnail({
     <CardMediaThumbnail
       s3Key={s3Key}
       identityId={fallbackIdentityId}
+      title={title}
       emptyLabel={emptyLabel}
       size={size}
+      desktopWidth={desktopWidth}
+      aspectRatio={aspectRatio}
+      fillHeight={fillHeight}
     />
   );
 }

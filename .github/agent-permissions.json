@@ -72,13 +72,8 @@
       "delete": {
         "allowed": true,
         "requiresConfirmation": true,
-        "allowedPaths": [
-          "proxy.ts",
-          "**/*.test.{ts,tsx,js,jsx}",
-          "**/*.md",
-          ".translation-cache/**"
-        ],
-        "description": "Block deletes by default, allow only test files and docs with confirmation"
+        "allowedPaths": ["**/*"],
+        "description": "Allow deleting any file, gated on explicit user confirmation of the specific target each time"
       },
 
       "rename": {
@@ -125,7 +120,7 @@
             "rebase",
             "commit",
             "add",
-            "rm",
+            "git rm",
             "checkout",
             "merge"
           ],
@@ -203,20 +198,17 @@
         "testing": {
           "commands": ["npx cypress run", "npx cypress open"],
           "description": "Allow running Cypress E2E tests"
+        },
+
+        "fileDeletion": {
+          "commands": [],
+          "requiresConfirmation": ["rm", "rmdir"],
+          "description": "Allow deleting files/directories only when the user has explicitly confirmed that specific target for this invocation — never run silently or on unconfirmed paths"
         }
       },
 
       "blocked": {
-        "dangerous": [
-          "rm",
-          "rmdir",
-          "del",
-          "sudo",
-          "chmod",
-          "chown",
-          "kill",
-          "pkill"
-        ],
+        "dangerous": ["del", "sudo", "chmod", "chown", "kill", "pkill"],
         "network": ["curl", "wget", "ssh", "scp", "rsync"],
         "packageManagers": [
           "npm uninstall",

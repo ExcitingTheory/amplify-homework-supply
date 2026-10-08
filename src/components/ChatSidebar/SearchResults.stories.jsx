@@ -363,7 +363,11 @@ export const AssignmentsOnly = {
   },
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    await canvas.findByText(/Introduction to Particles/i);
+    // The assignment's name and unitName are both "Introduction to Particles",
+    // so it legitimately renders twice (title + "Unit: ..." line) — use
+    // findAllByText rather than the singular findByText.
+    const matches = await canvas.findAllByText(/Introduction to Particles/i);
+    expect(matches.length).toBeGreaterThan(0);
   },
 };
 

@@ -13,6 +13,7 @@ import {
   Typography,
 } from "@mui/material";
 import { AvatarDisplay } from "../Gamification/AvatarDisplay";
+import { DASHBOARD_TOKENS } from "./constants";
 
 const MEDALS = ["🥇", "🥈", "🥉"];
 
@@ -47,7 +48,10 @@ export function CompactStudentTable({
     <TableContainer
       component={Paper}
       variant="outlined"
-      sx={{ borderRadius: 2, overflow: "hidden" }}
+      sx={{
+        borderRadius: `${DASHBOARD_TOKENS.radius.card}px`,
+        overflow: "hidden",
+      }}
     >
       <Table size="small" aria-label="student performance matrix table">
         <TableHead sx={{ bgcolor: "action.hover" }}>
