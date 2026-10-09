@@ -1906,6 +1906,14 @@ function DashboardHeroReal() {
         </Box>
       }
       caughtUpText="You are caught up on your assignments."
+      badgesCount={SHOWCASE_BADGES.length}
+      badgeShelf={<BadgeShelf earnedBadges={SHOWCASE_BADGES} earnedOnly />}
+      squad={{
+        id: "sq-1",
+        name: "Iron Dragons",
+        crestSvg: armorSampleCrestSvg,
+        totalXP: 18400,
+      }}
     />
   );
 }

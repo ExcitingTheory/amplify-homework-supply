@@ -151,7 +151,7 @@
     "windsurf": true,
     "cursor-global": true,
     "cursor-workspace": true
-  },
+},
   "chat.mcp.assisted.nuget.enabled": true,
   "github.copilot.chat.githubMcpServer.enabled": true,
   "github.copilot.chat.githubMcpServer.readonly": false

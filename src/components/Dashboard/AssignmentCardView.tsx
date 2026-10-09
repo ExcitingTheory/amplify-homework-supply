@@ -19,6 +19,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import { getAssignmentWindowState } from "@/utils/assignmentTiming";
 import { getEffectiveDueDate } from "@/utils/accommodations";
 import { isPlaceholderDueDate } from "@/utils/dueDate";
+import { ExerciseProgressMeters } from "@/components/Editor3/components/ExerciseProgressMeters";
 import { DASHBOARD_TOKENS } from "./constants";
 
 export function gradeColor(pct = 0) {
@@ -91,7 +92,12 @@ export interface AssignmentCardData {
     difficulty?: string;
   } | null;
   /** Grade info for completed assignments */
-  latestGrade?: { id: string; accuracy?: number; sectionID?: string } | null;
+  latestGrade?: {
+    id: string;
+    accuracy?: number;
+    percentComplete?: number;
+    sectionID?: string;
+  } | null;
   locked?: boolean;
   lockStatus?: {
     unlockDate?: string;
@@ -167,6 +173,7 @@ export function AssignmentCardView({
 }: AssignmentCardViewProps) {
   const isCompleted = !!latestGrade;
   const pct = latestGrade ? Math.round(latestGrade.accuracy || 0) : 0;
+  const progressPct = latestGrade?.percentComplete ?? 100;
 
   // Track previous completed state to fire flash animation on completion
   const prevCompleted = React.useRef(isCompleted);
@@ -246,7 +253,12 @@ export function AssignmentCardView({
   const cardBg = onGradient ? alpha("#fff", 0.16) : alpha(stateColor, 0.06);
   const cardBorder = onGradient ? alpha("#fff", 0.55) : alpha(stateColor, 0.3);
   const gradientTextSx = onGradient
-    ? { color: "common.white", borderColor: alpha("#fff", 0.6), bgcolor: "transparent", "& .MuiChip-icon": { color: "common.white" } }
+    ? {
+        color: "common.white",
+        borderColor: alpha("#fff", 0.6),
+        bgcolor: "transparent",
+        "& .MuiChip-icon": { color: "common.white" },
+      }
     : {};
 
   return (
@@ -297,27 +309,23 @@ export function AssignmentCardView({
           )}
           {/* Metadata line — kept on its own row, above and separate from the
               title, instead of competing with it for the same line. */}
-          {!isCompleted &&
-            !(locked || windowState.isLocked) &&
-            dueStatus && (
-              <Typography
-                variant="caption"
-                sx={{
-                  display: "block",
-                  fontWeight: 600,
-                  mb: 0.5,
-                  color: onGradient
-                    ? alpha("#fff", 0.85)
-                    : dueStatus.color === "default"
-                      ? "text.secondary"
-                      : `${dueStatus.color}.main`,
-                }}
-              >
-                {localTime
-                  ? `${dueStatus.label}: ${localTime}`
-                  : dueStatus.label}
-              </Typography>
-            )}
+          {!isCompleted && !(locked || windowState.isLocked) && dueStatus && (
+            <Typography
+              variant="caption"
+              sx={{
+                display: "block",
+                fontWeight: 600,
+                mb: 0.5,
+                color: onGradient
+                  ? alpha("#fff", 0.85)
+                  : dueStatus.color === "default"
+                    ? "text.secondary"
+                    : `${dueStatus.color}.main`,
+              }}
+            >
+              {localTime ? `${dueStatus.label}: ${localTime}` : dueStatus.label}
+            </Typography>
+          )}
 
           <Typography
             variant="h6"
@@ -382,6 +390,17 @@ export function AssignmentCardView({
                 />
               )}
             </Box>
+          )}
+
+          {/* Progress/accuracy meters — same two-bar pattern used inside the
+              answer exercises, attached here so the card shows how the
+              attempt went, not just the final grade chip. */}
+          {isCompleted && (
+            <ExerciseProgressMeters
+              percentComplete={progressPct}
+              accuracy={pct}
+              hasAttempts
+            />
           )}
 
           {/* Description — always visible, not tucked behind the collapse. */}
@@ -549,7 +568,9 @@ export function AssignmentCardView({
                   variant="text"
                   size="small"
                   startIcon={<AutoFixHighIcon />}
-                  sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
+                  sx={{
+                    color: onGradient ? alpha("#fff", 0.85) : "text.secondary",
+                  }}
                   onClick={() =>
                     onOpenDrill(assignment.unitID, unit?.name || "")
                   }
@@ -560,7 +581,9 @@ export function AssignmentCardView({
                   variant="text"
                   size="small"
                   startIcon={<ChatBubbleOutlineIcon />}
-                  sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
+                  sx={{
+                    color: onGradient ? alpha("#fff", 0.85) : "text.secondary",
+                  }}
                   onClick={() => onDiscuss?.()}
                 >
                   {t("discuss")}
@@ -585,7 +608,11 @@ export function AssignmentCardView({
                       variant="text"
                       size="small"
                       color="secondary"
-                      sx={{ color: onGradient ? alpha("#fff", 0.85) : "text.secondary" }}
+                      sx={{
+                        color: onGradient
+                          ? alpha("#fff", 0.85)
+                          : "text.secondary",
+                      }}
                       startIcon={<SupportAgentIcon />}
                       onClick={() =>
                         onRequestGuidance(

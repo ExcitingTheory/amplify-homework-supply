@@ -70,7 +70,12 @@ export interface SectionPanelProps {
   >;
   gradeMap: Record<
     string,
-    { id: string; accuracy?: number; sectionID?: string }[]
+    {
+      id: string;
+      accuracy?: number;
+      percentComplete?: number;
+      sectionID?: string;
+    }[]
   >;
   /** XP-based nailed-it counts per unit */
   nailedItByUnit?: Record<string, number>;

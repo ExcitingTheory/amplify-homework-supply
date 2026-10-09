@@ -35,6 +35,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 import { FilesProvider } from "@/context/fileContext";
 import { useChatPageContext } from "@/hooks/useChatPageContext";
+import { BadgeShelf } from "@/components/Gamification/BadgeShelf";
 import { NailedItWall } from "@/components/Gamification/NailedItWall";
 import { StreakIndicator } from "@/components/Gamification/StreakIndicator";
 import { StreakShield } from "@/components/Gamification/StreakShield";
@@ -51,6 +52,8 @@ import {
   useXP,
   useProgress,
   useCampaign,
+  useBadges,
+  useSquad,
   useContentLock,
 } from "@/context/gamificationContext";
 import { useStudentMemory } from "@/hooks/useStudentMemory";
@@ -138,6 +141,8 @@ function Index({
   const { sectionLevel, xpLogs } = useXP();
   const { modules: progressModules, streak } = useProgress();
   const { campaign, activeChallenges, completedChallenges } = useCampaign();
+  const { badges: earnedBadges } = useBadges();
+  const { mySquad } = useSquad();
   const { isLocked, getLockStatus } = useContentLock();
 
   const userId =
@@ -542,6 +547,22 @@ function Index({
               ) : null
             }
             caughtUpText="You are caught up on your assignments."
+            badgesCount={earnedBadges?.length || 0}
+            badgeShelf={
+              earnedBadges?.length > 0 ? (
+                <BadgeShelf earnedBadges={earnedBadges} earnedOnly />
+              ) : null
+            }
+            squad={
+              mySquad
+                ? {
+                    id: mySquad.id,
+                    name: mySquad.name,
+                    crestSvg: mySquad.crestSvg,
+                    totalXP: mySquad.totalXP,
+                  }
+                : null
+            }
           />
         )}
         {isInstructorOrAdmin && mySections.length > 0 && (
