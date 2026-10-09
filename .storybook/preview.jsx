@@ -92,6 +92,10 @@ import "./storybook.css";
 
 // Import the app's shared theme (with cssVariables + colorSchemes)
 import appTheme from "../src/theme";
+import {
+  getThemeOptions,
+  sharedComponentOverrides,
+} from "../src/themes/editorThemes";
 
 // Keep portal-based overlays (notably the nav Drawer) inside the Storybook
 // canvas/viewport decorator instead of escaping to document.body.
@@ -140,6 +144,23 @@ import { setNavigationState } from "@storybook-mocks/next-navigation";
 // Import translation mode addon
 import { withTranslationMode } from "./addons/translation-mode";
 import { globalTypes as translationGlobalTypes } from "./addons/translation-mode/globalTypes";
+
+// Builds a full theme for one of the app's real cosmetic theme palettes
+// (src/themes/editorThemes.ts) — "default" matches the module-level `theme`
+// above; other ids swap in that palette while keeping the same component
+// overrides and portal-containment behavior.
+function buildStorybookTheme(themeId) {
+  if (!themeId || themeId === "default") return theme;
+  const base = createTheme({
+    ...getThemeOptions(themeId),
+    components: sharedComponentOverrides,
+  });
+  return createTheme(base, {
+    components: {
+      MuiModal: { defaultProps: { disablePortal: true } },
+    },
+  });
+}
 
 // Import custom docs page template
 import DocsPageWithPanel from "./components/DocsPageWithPanel";
@@ -579,6 +600,23 @@ const preview = {
           { value: "light", title: "Light", icon: "sun" },
           { value: "dark", title: "Dark", icon: "moon" },
           { value: "system", title: "System", icon: "settings" },
+        ],
+        dynamicTitle: true,
+      },
+    },
+    cosmeticTheme: {
+      description: "Cosmetic theme palette",
+      defaultValue: "default",
+      toolbar: {
+        title: "Theme",
+        icon: "paintbrush",
+        items: [
+          { value: "default", title: "Default" },
+          { value: "midnight", title: "Midnight" },
+          { value: "forest", title: "Forest" },
+          { value: "sunset", title: "Sunset" },
+          { value: "aurora", title: "Aurora" },
+          { value: "highContrast", title: "High Contrast" },
         ],
         dynamicTitle: true,
       },
@@ -1082,9 +1120,14 @@ const preview = {
         error: mockAuth.error,
       };
 
-      // Get color scheme from Storybook globals
+      // Get color scheme + cosmetic theme from Storybook globals
       const [globals] = useGlobals();
       const colorScheme = globals?.colorScheme || "light";
+      const cosmeticTheme = globals?.cosmeticTheme || "default";
+      const resolvedTheme = React.useMemo(
+        () => buildStorybookTheme(cosmeticTheme),
+        [cosmeticTheme],
+      );
 
       // Resolve 'system' to actual OS preference — computed synchronously to avoid flash
       const resolvedFromPref = React.useMemo(() => {
@@ -1128,7 +1171,7 @@ const preview = {
               cross-tab mode sync — every open Storybook tab shares the same
               origin, so without this, tabs on different colorScheme globals
               fight over the shared 'mui-mode' key and flicker forever. */}
-          <ThemeProvider theme={theme} storageManager={null}>
+          <ThemeProvider theme={resolvedTheme} storageManager={null}>
             <ColorSchemeSynchronizer scheme={schemeToApply} />
             <CssBaseline />
             <div
