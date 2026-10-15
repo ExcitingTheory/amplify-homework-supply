@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "意味の関連付け"
   },
+  "customAIEditor": {
+    "title": "AI採点演習",
+    "description": "学習者が質問に回答し、AIが独自の採点基準に基づいて回答を評価するAI採点演習を作成します。"
+  },
   "customAnswerEditor": {
     "add": "追加します",
     "addWordLabel": "演習に単語を追加します",

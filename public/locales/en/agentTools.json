@@ -42,5 +42,22 @@
     "instructorOnly": "This tool is only available to instructors.",
     "noSection": "No section specified.",
     "error": "Failed to load student list."
+  },
+  "atRiskStudents": {
+    "instructorOnly": "This tool is only available to instructors.",
+    "noSection": "No section specified and no current section context.",
+    "error": "Failed to load at-risk students."
+  },
+  "updateAssignmentDueDate": {
+    "instructorOnly": "This tool is only available to instructors.",
+    "invalidDate": "The provided due date could not be parsed.",
+    "notFound": "No assignment found with that ID.",
+    "error": "Failed to update the assignment due date."
+  },
+  "exportSectionGrades": {
+    "instructorOnly": "This tool is only available to instructors.",
+    "noSection": "No section specified and no current section context.",
+    "noGrades": "No grades recorded yet for this section.",
+    "error": "Failed to export section grades."
   }
 }

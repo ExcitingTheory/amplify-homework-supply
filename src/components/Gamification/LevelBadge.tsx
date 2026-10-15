@@ -20,11 +20,7 @@ import EmojiObjectsIcon from "@mui/icons-material/EmojiObjects";
 import SchoolIcon from "@mui/icons-material/School";
 import type { LevelInfo } from "../../utils/xpCalculation";
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
-import {
-  readableInk,
-  metalForTier,
-  medallionBadgeSx,
-} from "../../themes/heraldry";
+import { metalForTier, medallionBadgeSx } from "../../themes/heraldry";
 import { Medallion } from "./Medallion";
 
 export interface LevelBadgeProps {
@@ -45,7 +41,12 @@ export interface LevelBadgeProps {
 export function getLevelColors(theme: Theme): Record<number, string> {
   const p = theme.palette;
   return {
-    1: p.grey[theme.palette.mode === "dark" ? 600 : 500],
+    // Level 1's grey is intentionally mode-independent here — theme.palette.mode
+    // is static under this app's CSS-variables theming, so picking a shade by
+    // mode here would never update at runtime. Consumers that render this in
+    // an sx callback override it for dark mode via theme.applyStyles instead
+    // (see the Chip sx below, and AvatarDisplay's level-ring sx).
+    1: p.grey[500],
     2: p.success.main,
     3: p.info.main,
     4: p.secondary.main,
@@ -71,7 +72,7 @@ export function LevelBadge({
   const theme = useTheme();
   const LEVEL_COLORS = React.useMemo(() => getLevelColors(theme), [theme]);
   const color = LEVEL_COLORS[level.level] || LEVEL_COLORS[1];
-  const textColor = readableInk(color);
+  const textColor = theme.palette.getContrastText(color);
   const icon = LEVEL_ICONS[level.level] || LEVEL_ICONS[1];
   const isSmall = size === "small";
 
@@ -125,7 +126,7 @@ export function LevelBadge({
           icon={icon}
           label={`Lvl. ${level.level}`}
           size={isSmall ? "small" : "medium"}
-          sx={{
+          sx={(theme) => ({
             bgcolor: color,
             color: textColor,
             fontWeight: 700,
@@ -143,7 +144,17 @@ export function LevelBadge({
                   },
                 }
               : {}),
-          }}
+            // Level 1's neutral grey comes from a fixed light-mode shade (see
+            // getLevelColors) that doesn't track runtime dark/light toggling
+            // under MUI's CSS-variables theming — override it via the
+            // CSS-selector-based applyStyles instead of theme.palette.mode.
+            ...(level.level === 1 &&
+              theme.applyStyles("dark", {
+                bgcolor: theme.palette.grey[700],
+                color: "#f5f5f5",
+                "& .MuiChip-icon": { color: "#f5f5f5" },
+              })),
+          })}
         />
         {showProgress && level.xpForNextLevel !== null && (
           <Box sx={{ width: "100%", minWidth: isSmall ? 60 : 100 }}>

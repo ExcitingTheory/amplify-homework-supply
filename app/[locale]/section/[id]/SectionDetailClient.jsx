@@ -8,6 +8,13 @@ import { uploadData } from "aws-amplify/storage";
 import { listSectionStudents } from "../../../actions/section";
 import { formatLastFirst, getInitials } from "@/utils/formatUserName";
 import { trackGradeSubmitted, trackGuildViewed } from "@/utils/analytics";
+import {
+  GRADE_AGGREGATION_METHODS,
+  GRADE_AGGREGATION_LABELS,
+  DEFAULT_GRADE_AGGREGATION_METHOD,
+  computeAggregatedGrade,
+  pickRepresentativeGrade,
+} from "@/utils/gradeAggregation";
 import { useAppShell } from "@/components/AppShellContext";
 import { useScrolledAppBar } from "@/hooks/useScrolledAppBar";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -121,6 +128,7 @@ import { RosterEnrollDialog } from "@/components/Section/RosterEnrollDialog";
 import { AccommodationsDialog } from "@/components/Section/AccommodationsDialog";
 import { BulkDueDateDialog } from "@/components/Section/BulkDueDateDialog";
 import { removeStudentFromSection } from "../../../actions/section";
+import { recomputeGradeAggregation } from "../../../actions/section";
 import {
   parseAccommodations,
   getStudentAccommodation,
@@ -316,6 +324,18 @@ function SectionDetail({
     React.useState("scale-to-top");
   const [curveTargetDraft, setCurveTargetDraft] = React.useState([]);
   const [curveMenuAnchorEl, setCurveMenuAnchorEl] = React.useState(null);
+  // Grade-aggregation settings — section-wide default + per-assignment overrides
+  // (mirrors the curveSettings state shape/save pattern above).
+  const [gradeAggDefault, setGradeAggDefault] = React.useState(
+    DEFAULT_GRADE_AGGREGATION_METHOD,
+  );
+  const [gradeAggOverrides, setGradeAggOverrides] = React.useState({}); // { [unitID]: { method } }
+  const gradeAggLoadedRef = React.useRef(false); // true after first server load
+  // Draft state for the unified "Apply grade method" control (method + target columns)
+  const [gradeAggMethodDraft, setGradeAggMethodDraft] =
+    React.useState("use-default");
+  const [gradeAggTargetDraft, setGradeAggTargetDraft] = React.useState([]);
+  const [gradeAggMenuAnchorEl, setGradeAggMenuAnchorEl] = React.useState(null);
   const [showFutureAssignments, setShowFutureAssignments] =
     React.useState(false);
   const [showDraftAssignments, setShowDraftAssignments] = React.useState(false);
@@ -906,6 +926,25 @@ function SectionDetail({
           // Mark curve settings as server-loaded (skip first auto-save)
           if (!curveSettingsLoadedRef.current)
             curveSettingsLoadedRef.current = true;
+          // Load grade-aggregation settings from section — section-wide default
+          // plus per-assignment overrides (schema stores overrides as array [{unitID, method}])
+          setGradeAggDefault(
+            sectionData.gradeAggregationMethod ||
+              DEFAULT_GRADE_AGGREGATION_METHOD,
+          );
+          if (Array.isArray(sectionData.gradeAggregationOverrides)) {
+            const map = {};
+            sectionData.gradeAggregationOverrides.forEach((item) => {
+              if (item?.unitID && item?.method)
+                map[item.unitID] = { method: item.method };
+            });
+            setGradeAggOverrides((prev) => {
+              if (JSON.stringify(prev) === JSON.stringify(map)) return prev;
+              return map;
+            });
+          }
+          // Mark grade-aggregation settings as server-loaded (skip first auto-save)
+          if (!gradeAggLoadedRef.current) gradeAggLoadedRef.current = true;
           // Load grade overrides from section
           if (sectionData.gradeOverrides) {
             const parsed =
@@ -979,9 +1018,11 @@ function SectionDetail({
             gradesByUnit[grade.unitID] = {
               last: grade,
               highest: grade,
+              lowest: grade,
               average: 0,
               sum: 0,
               count: 0,
+              attempts: [],
             };
           }
           if (grade.updatedAt > gradesByUnit[grade.unitID].last.updatedAt) {
@@ -990,6 +1031,10 @@ function SectionDetail({
           if (grade.accuracy > gradesByUnit[grade.unitID].highest.accuracy) {
             gradesByUnit[grade.unitID].highest = grade;
           }
+          if (grade.accuracy < gradesByUnit[grade.unitID].lowest.accuracy) {
+            gradesByUnit[grade.unitID].lowest = grade;
+          }
+          gradesByUnit[grade.unitID].attempts.push(grade);
           gradesByUnit[grade.unitID].sum += grade.accuracy;
           gradesByUnit[grade.unitID].count += 1;
           if (gradesByUnit[grade.unitID].count > 0) {
@@ -1013,9 +1058,11 @@ function SectionDetail({
           if (!gradesByUserUnit[grade.owner][grade.unitID]) {
             gradesByUserUnit[grade.owner][grade.unitID] = {
               highest: grade,
+              lowest: grade,
               average: 0,
               sum: 0,
               count: 0,
+              attempts: [],
             };
           }
           if (grade.updatedAt > units[grade.unitID]?.dueDate) {
@@ -1027,6 +1074,13 @@ function SectionDetail({
           ) {
             gradesByUserUnit[grade.owner][grade.unitID].highest = grade;
           }
+          if (
+            grade.accuracy <
+            gradesByUserUnit[grade.owner][grade.unitID].lowest.accuracy
+          ) {
+            gradesByUserUnit[grade.owner][grade.unitID].lowest = grade;
+          }
+          gradesByUserUnit[grade.owner][grade.unitID].attempts.push(grade);
           gradesByUserUnit[grade.owner][grade.unitID].sum += grade.accuracy;
           gradesByUserUnit[grade.owner][grade.unitID].count += 1;
           if (gradesByUserUnit[grade.owner][grade.unitID].count > 0) {
@@ -1325,6 +1379,28 @@ function SectionDetail({
   const totalAssignments = sectionAssignments.length;
   const visibleAssignmentsCount = visibleAssignments.length;
 
+  // Resolves which stat counts as "the" grade for a unit: per-assignment
+  // override wins, else the section-wide default, else MAX (legacy "highest").
+  const resolveGradeAggMethod = (unitID) =>
+    gradeAggOverrides[unitID]?.method ||
+    gradeAggDefault ||
+    DEFAULT_GRADE_AGGREGATION_METHOD;
+
+  // Resolves a gradeMap/myGradeMap entry ({ highest, lowest, attempts, ... })
+  // into { accuracy, grade } under the resolved method — `grade` is the actual
+  // attempt closest to that value, for click-to-review navigation.
+  const getEffectiveGrade = (entry, unitID) => {
+    if (!entry) return { accuracy: undefined, grade: undefined };
+    const method = resolveGradeAggMethod(unitID);
+    const values = (entry.attempts || []).map((g) => g.accuracy);
+    const accuracy = computeAggregatedGrade(method, values);
+    const grade =
+      accuracy == null
+        ? undefined
+        : pickRepresentativeGrade(entry.attempts, accuracy);
+    return { accuracy, grade };
+  };
+
   // Calculate curve data for each assignment (using per-assignment method from curveSettings)
   const calculateCurveData = () => {
     const curveData = {};
@@ -1335,8 +1411,10 @@ function SectionDetail({
 
       const grades = [];
       Object.values(sectionStudents).forEach((student) => {
-        const grade =
-          gradeMap[student.id]?.[assignment.unitID]?.highest?.accuracy;
+        const { accuracy: grade } = getEffectiveGrade(
+          gradeMap[student.id]?.[assignment.unitID],
+          assignment.unitID,
+        );
         if (grade !== undefined && grade !== null && !isNaN(grade)) {
           grades.push(grade);
         }
@@ -1428,6 +1506,28 @@ function SectionDetail({
         ? getCurveMethodLabel(appliedCurveMethods[0])
         : t("sectionDetail.mixedCurves", "Mixed curves");
 
+  // Apply the drafted grade-aggregation method to every selected target
+  // column — "use-default" clears the per-assignment override instead of
+  // setting a method, falling back to the section-wide default.
+  const handleApplyGradeAgg = () => {
+    setGradeAggOverrides((prev) => {
+      const next = { ...prev };
+      gradeAggTargetDraft.forEach((unitId) => {
+        if (gradeAggMethodDraft === "use-default") {
+          delete next[unitId];
+        } else {
+          next[unitId] = { method: gradeAggMethodDraft };
+        }
+      });
+      return next;
+    });
+    setGradeAggMenuAnchorEl(null);
+  };
+
+  const hasGradeAggOverrides = Object.keys(gradeAggOverrides).length > 0;
+  const gradeAggButtonLabel =
+    GRADE_AGGREGATION_LABELS[gradeAggDefault] || gradeAggDefault;
+
   // Save curve settings to section when they change
   useEffect(() => {
     if (!section?.id || !isOwner) return;
@@ -1461,6 +1561,52 @@ function SectionDetail({
     const timeoutId = setTimeout(saveCurveSettings, 500);
     return () => clearTimeout(timeoutId);
   }, [curveSettings, section?.id, isOwner]);
+
+  // Save grade-aggregation settings to section when they change (mirrors the
+  // curveSettings save effect above).
+  useEffect(() => {
+    if (!section?.id || !isOwner) return;
+    // Skip saving until server data has been loaded at least once
+    if (!gradeAggLoadedRef.current) return;
+
+    const saveGradeAggSettings = async () => {
+      try {
+        const overridesArray = Object.entries(gradeAggOverrides).map(
+          ([unitID, setting]) => ({
+            unitID,
+            method: setting.method || DEFAULT_GRADE_AGGREGATION_METHOD,
+          }),
+        );
+        const { errors } = await client.models.Section.update({
+          id: section.id,
+          gradeAggregationMethod: gradeAggDefault,
+          gradeAggregationOverrides: overridesArray,
+          _version: section._version,
+        });
+
+        if (errors?.length) {
+          console.error("Error saving grade-aggregation settings:", errors);
+          return;
+        }
+
+        // Self-heal the Lambda-maintained rollups the InstructorDashboard
+        // overview reads — otherwise `effective` grades stay stale until a
+        // student submits a new attempt for each assignment/unit.
+        const result = await recomputeGradeAggregation(section.id);
+        if (!result.success) {
+          console.error(
+            "Error recomputing grade-aggregation rollups:",
+            result.error,
+          );
+        }
+      } catch (error) {
+        console.error("Error saving grade-aggregation settings:", error);
+      }
+    };
+
+    const timeoutId = setTimeout(saveGradeAggSettings, 500);
+    return () => clearTimeout(timeoutId);
+  }, [gradeAggDefault, gradeAggOverrides, section?.id, isOwner]);
 
   // Save gradeOverrides to section (debounced)
   useEffect(() => {
@@ -1522,7 +1668,13 @@ function SectionDetail({
     if (currentGrade?.id && currentGrade?.complete) {
       // Build ordered grade IDs for same assignment across all sorted students
       const gradeIds = sortedStudents
-        .map((s) => gradeMap[s.id]?.[assignment.unitID]?.highest)
+        .map(
+          (s) =>
+            getEffectiveGrade(
+              gradeMap[s.id]?.[assignment.unitID],
+              assignment.unitID,
+            ).grade,
+        )
         .filter((g) => g?.id && g?.complete)
         .map((g) => g.id);
       const currentIndex = gradeIds.indexOf(currentGrade.id);
@@ -2883,6 +3035,184 @@ function SectionDetail({
             </Box>
           )}
 
+          {/* Grade-aggregation controls — section-wide default select + per-assignment override dropdown, mirrors the curve controls above */}
+          {isOwner && !viewAsStudent && (
+            <Box
+              sx={{
+                padding: "0 1rem 0.5rem 1rem",
+                display: "flex",
+                alignItems: "center",
+                gap: 2,
+                flexWrap: "wrap",
+              }}
+            >
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel id="grade-agg-default-label">
+                  {t("sectionDetail.gradeAggDefault", "Default grade")}
+                </InputLabel>
+                <Select
+                  labelId="grade-agg-default-label"
+                  label={t("sectionDetail.gradeAggDefault", "Default grade")}
+                  value={gradeAggDefault}
+                  onChange={(e) => setGradeAggDefault(e.target.value)}
+                >
+                  {GRADE_AGGREGATION_METHODS.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {GRADE_AGGREGATION_LABELS[method]}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <Button
+                variant={hasGradeAggOverrides ? "contained" : "outlined"}
+                size="small"
+                endIcon={<ArrowDropDownIcon />}
+                aria-haspopup="dialog"
+                aria-expanded={Boolean(gradeAggMenuAnchorEl)}
+                onClick={(event) =>
+                  setGradeAggMenuAnchorEl(event.currentTarget)
+                }
+                sx={{ whiteSpace: "nowrap" }}
+              >
+                {t("sectionDetail.gradeAggOverrides", "Overrides")}
+                {hasGradeAggOverrides &&
+                  ` (${Object.keys(gradeAggOverrides).length}/${visibleAssignments.length})`}
+              </Button>
+              <Popover
+                open={Boolean(gradeAggMenuAnchorEl)}
+                anchorEl={gradeAggMenuAnchorEl}
+                onClose={() => setGradeAggMenuAnchorEl(null)}
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                disablePortal={false}
+                slotProps={{
+                  paper: { sx: { p: 2, width: 320, maxWidth: "90vw" } },
+                }}
+              >
+                <FormLabel
+                  id="grade-agg-method-label"
+                  sx={{ typography: "subtitle2" }}
+                >
+                  {t("sectionDetail.gradeAggType", "Grade method")}
+                </FormLabel>
+                <RadioGroup
+                  aria-labelledby="grade-agg-method-label"
+                  value={gradeAggMethodDraft}
+                  onChange={(e) => setGradeAggMethodDraft(e.target.value)}
+                  sx={{ mb: 1 }}
+                >
+                  <FormControlLabel
+                    value="use-default"
+                    control={<Radio size="small" />}
+                    label={t(
+                      "sectionDetail.useSectionDefault",
+                      "Use section default",
+                    )}
+                  />
+                  {GRADE_AGGREGATION_METHODS.map((method) => (
+                    <FormControlLabel
+                      key={method}
+                      value={method}
+                      control={<Radio size="small" />}
+                      label={GRADE_AGGREGATION_LABELS[method]}
+                    />
+                  ))}
+                </RadioGroup>
+                <Divider sx={{ mb: 1 }} />
+                <FormLabel component="div" sx={{ typography: "subtitle2" }}>
+                  {t("sectionDetail.applyTo", "Apply to")}
+                </FormLabel>
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      size="small"
+                      checked={
+                        visibleAssignments.length > 0 &&
+                        gradeAggTargetDraft.length === visibleAssignments.length
+                      }
+                      indeterminate={
+                        gradeAggTargetDraft.length > 0 &&
+                        gradeAggTargetDraft.length < visibleAssignments.length
+                      }
+                      onChange={(e) =>
+                        setGradeAggTargetDraft(
+                          e.target.checked
+                            ? visibleAssignments.map((a) => a.unitID)
+                            : [],
+                        )
+                      }
+                    />
+                  }
+                  label={t("sectionDetail.allAssignments", "All Assignments")}
+                />
+                <Box sx={{ pl: 2, maxHeight: 220, overflowY: "auto" }}>
+                  {visibleAssignments.map((a) => {
+                    const appliedMethod = gradeAggOverrides[a.unitID]?.method;
+                    return (
+                      <FormControlLabel
+                        key={a.unitID}
+                        sx={{ display: "flex", mr: 0 }}
+                        control={
+                          <Checkbox
+                            size="small"
+                            checked={gradeAggTargetDraft.includes(a.unitID)}
+                            onChange={(e) =>
+                              setGradeAggTargetDraft((prev) =>
+                                e.target.checked
+                                  ? [...prev, a.unitID]
+                                  : prev.filter((id) => id !== a.unitID),
+                              )
+                            }
+                          />
+                        }
+                        label={
+                          <Box
+                            component="span"
+                            sx={{ display: "flex", gap: 1 }}
+                          >
+                            <span>{units[a.unitID]?.name || a.unitID}</span>
+                            {appliedMethod && (
+                              <Typography
+                                component="span"
+                                variant="caption"
+                                color="primary"
+                              >
+                                {GRADE_AGGREGATION_LABELS[appliedMethod] ||
+                                  appliedMethod}
+                              </Typography>
+                            )}
+                          </Box>
+                        }
+                      />
+                    );
+                  })}
+                </Box>
+                <Box
+                  sx={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: 1,
+                    mt: 1,
+                  }}
+                >
+                  <Button
+                    size="small"
+                    onClick={() => setGradeAggMenuAnchorEl(null)}
+                  >
+                    {tCommon("actions.cancel", "Cancel")}
+                  </Button>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    disabled={gradeAggTargetDraft.length === 0}
+                    onClick={handleApplyGradeAgg}
+                  >
+                    {t("sectionDetail.applyGradeAgg", "Apply")}
+                  </Button>
+                </Box>
+              </Popover>
+            </Box>
+          )}
+
           {/* Curve Debug Information - only show for selected assignments */}
           {isOwner && !viewAsStudent && hasCurve && (
             <Box sx={{ padding: "0 1rem 1rem 1rem" }}>
@@ -2947,7 +3277,10 @@ function SectionDetail({
 
                       const studentId = currentUser?.username;
                       const rawHighest = canHaveGrades
-                        ? myGradeMap[assignment.unitID]?.highest?.accuracy
+                        ? getEffectiveGrade(
+                            myGradeMap[assignment.unitID],
+                            assignment.unitID,
+                          ).accuracy
                         : undefined;
                       const grade =
                         rawHighest !== undefined &&
@@ -3156,9 +3489,10 @@ function SectionDetail({
                             const canHaveGrades = !isDraft && !isFuture;
 
                             if (canHaveGrades) {
-                              const grade =
-                                myGradeMap[assignment.unitID]?.highest
-                                  ?.accuracy;
+                              const grade = getEffectiveGrade(
+                                myGradeMap[assignment.unitID],
+                                assignment.unitID,
+                              ).accuracy;
                               if (
                                 grade !== undefined &&
                                 grade !== null &&
@@ -3385,9 +3719,10 @@ function SectionDetail({
                         const canHaveGrades = !isDraft && !isFuture;
 
                         if (canHaveGrades) {
-                          const highest =
-                            gradeMap[student.id]?.[assignment.unitID]?.highest
-                              ?.accuracy;
+                          const highest = getEffectiveGrade(
+                            gradeMap[student.id]?.[assignment.unitID],
+                            assignment.unitID,
+                          ).accuracy;
                           if (
                             highest !== undefined &&
                             highest !== null &&
@@ -3485,9 +3820,12 @@ function SectionDetail({
                               new Date(assignment.dueDate) > clientNow;
                             const canHaveGrades = !isDraft && !isFuture;
 
+                            const effectiveEntry = getEffectiveGrade(
+                              gradeMap[student.id]?.[assignment.unitID],
+                              assignment.unitID,
+                            );
                             const rawHighest = canHaveGrades
-                              ? gradeMap[student.id]?.[assignment.unitID]
-                                  ?.highest?.accuracy
+                              ? effectiveEntry.accuracy
                               : undefined;
                             const rawAverage = canHaveGrades
                               ? gradeMap[student.id]?.[assignment.unitID]
@@ -3513,9 +3851,7 @@ function SectionDetail({
 
                             const colGrade =
                               highest !== "-" ? `${highest}%` : "—";
-                            const gradeRecord =
-                              gradeMap[student.id]?.[assignment.unitID]
-                                ?.highest;
+                            const gradeRecord = effectiveEntry.grade;
                             const override =
                               gradeOverrides[student.id]?.[assignment.unitID];
                             const preCurveLabel =
@@ -3968,8 +4304,10 @@ function SectionDetail({
           // Find the student name for the navigated grade
           const studentForGrade = sortedStudents.find(
             (s) =>
-              gradeMap[s.id]?.[gradeDrawerData.unitId]?.highest?.id ===
-              nextGradeId,
+              getEffectiveGrade(
+                gradeMap[s.id]?.[gradeDrawerData.unitId],
+                gradeDrawerData.unitId,
+              ).grade?.id === nextGradeId,
           );
           setGradeDrawerData((prev) => ({
             ...prev,

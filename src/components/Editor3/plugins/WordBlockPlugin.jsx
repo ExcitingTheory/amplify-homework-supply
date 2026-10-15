@@ -508,7 +508,7 @@ export class WordBlockNode extends DecoratorBlockNode {
   }
 
   constructor(id, format, key) {
-    super(key);
+    super(format, key);
     this.__id = id;
   }
 

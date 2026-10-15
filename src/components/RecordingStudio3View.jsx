@@ -558,6 +558,9 @@ export default function RecordingStudio3View({
         onPlay={() => setPlaying(true)}
         onStop={() => setPlaying(false)}
         onRecordingComplete={handleAudioWaveformRecordingComplete}
+        onUpdateTiming={(dialogueId, start, end) =>
+          handleUpdateDialogueLine(dialogueId, { timing: { start, end } })
+        }
         readOnly={readOnly}
       />
 

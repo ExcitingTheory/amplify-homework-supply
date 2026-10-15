@@ -231,16 +231,10 @@ export const STORY_CATEGORIES: Record<string, string> = {
   "📚-creating-lessons-editor--editor-with-content": "instructor-content",
   "📁-managing-content-vocabulary-review--default": "instructor-content",
 
-  // Alternative Index stories
-  "📄-pages-index--student-dashboard": "learner-dashboard",
-  "📄-pages-index--instructor-dashboard": "instructor-dashboard",
-  "📄-pages-index--empty-state": "general",
-
   // Learner workflows
   "📄-pages-application-pages--workbook": "learner-coursework",
   "📄-pages-application-pages--workbook-timed-exercise": "learner-coursework",
   "📄-pages-application-pages--index": "learner-dashboard",
-  "📄-pages-application-pages--index-assignments": "learner-coursework",
   "📄-pages-application-pages--section-detail-student": "learner-coursework",
 
   // User management

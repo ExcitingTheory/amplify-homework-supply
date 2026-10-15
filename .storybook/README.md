@@ -95,7 +95,7 @@ Mock implementations are in `.storybook/__mocks__/` directory.
 | File | Stories | groups override |
 |---|---|---|
 | `.storybook/docs/QuickTour-Student.stories.tsx` | `Step1_Dashboard`, `Step2_JoinSection`, `Step3_Workbook` | `['Learners', 'section-jpn-101-learners', 'section-jpn-102-learners']` |
-| `src/stories/pages-index.stories.tsx` | `Index`, `IndexAssignments` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
+| `src/stories/pages-index.stories.tsx` | `Index` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
 | | `IndexNoSections` | `[]` |
 | `src/stories/pages-sections.stories.tsx` | `Sections` | `['section-jpn-101-learners', 'section-jpn-102-learners']` |
 | | `SectionsEmptyState` | `[]` |

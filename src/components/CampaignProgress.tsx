@@ -7,55 +7,55 @@
  * @module CampaignProgress
  */
 
-import React, { useState, useEffect } from 'react'
-import Box from '@mui/material/Box'
-import Typography from '@mui/material/Typography'
-import Stack from '@mui/material/Stack'
-import Card from '@mui/material/Card'
-import CardContent from '@mui/material/CardContent'
-import LinearProgress from '@mui/material/LinearProgress'
-import Chip from '@mui/material/Chip'
-import Stepper from '@mui/material/Stepper'
-import Step from '@mui/material/Step'
-import StepLabel from '@mui/material/StepLabel'
-import StepContent from '@mui/material/StepContent'
-import Paper from '@mui/material/Paper'
-import TimerIcon from '@mui/icons-material/Timer'
-import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
-import WarningIcon from '@mui/icons-material/Warning'
-import CheckCircleIcon from '@mui/icons-material/CheckCircle'
+import React, { useState, useEffect } from "react";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Stack from "@mui/material/Stack";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import LinearProgress from "@mui/material/LinearProgress";
+import Chip from "@mui/material/Chip";
+import Stepper from "@mui/material/Stepper";
+import Step from "@mui/material/Step";
+import StepLabel from "@mui/material/StepLabel";
+import StepContent from "@mui/material/StepContent";
+import Paper from "@mui/material/Paper";
+import TimerIcon from "@mui/icons-material/Timer";
+import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
+import WarningIcon from "@mui/icons-material/Warning";
+import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 
 // ============================================================================
 // Types
 // ============================================================================
 
 export interface CampaignChapter {
-  id: string
-  title: string
-  order: number
-  completed: boolean
-  xpRequired?: number
+  id: string;
+  title: string;
+  order: number;
+  completed: boolean;
+  xpRequired?: number;
 }
 
 export interface CampaignProgressProps {
   /** Campaign title */
-  title: string
+  title: string;
   /** Campaign narrative setting */
-  setting?: string
+  setting?: string;
   /** What's at stake */
-  stakes?: string
+  stakes?: string;
   /** Current accumulated XP */
-  currentXP: number
+  currentXP: number;
   /** Target XP to complete the campaign */
-  targetXP: number
+  targetXP: number;
   /** ISO datetime deadline string */
-  deadline?: string
+  deadline?: string;
   /** Bonus multiplier for contributions */
-  bonusMultiplier?: number
+  bonusMultiplier?: number;
   /** Chapters / checkpoints in order */
-  chapters?: CampaignChapter[]
+  chapters?: CampaignChapter[];
   /** Whether the campaign is still active */
-  active?: boolean
+  active?: boolean;
 }
 
 // ============================================================================
@@ -63,15 +63,15 @@ export interface CampaignProgressProps {
 // ============================================================================
 
 function formatCountdown(deadline: string): { text: string; urgent: boolean } {
-  const diff = new Date(deadline).getTime() - Date.now()
-  if (diff <= 0) return { text: 'Campaign ended', urgent: true }
-  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
-  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60))
-  const urgent = days === 0 && hours < 12
-  if (days > 0) return { text: `${days}d ${hours}h remaining`, urgent: false }
-  if (hours > 0) return { text: `${hours}h ${minutes}m remaining`, urgent }
-  return { text: `${minutes}m remaining`, urgent: true }
+  const diff = new Date(deadline).getTime() - Date.now();
+  if (diff <= 0) return { text: "Campaign ended", urgent: true };
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+  const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+  const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+  const urgent = days === 0 && hours < 12;
+  if (days > 0) return { text: `${days}d ${hours}h remaining`, urgent: false };
+  if (hours > 0) return { text: `${hours}h ${minutes}m remaining`, urgent };
+  return { text: `${minutes}m remaining`, urgent: true };
 }
 
 // ============================================================================
@@ -89,53 +89,69 @@ export function CampaignProgress({
   chapters = [],
   active = true,
 }: CampaignProgressProps) {
-  const [countdown, setCountdown] = useState<{ text: string; urgent: boolean }>({
-    text: '',
-    urgent: false,
-  })
+  const [countdown, setCountdown] = useState<{ text: string; urgent: boolean }>(
+    {
+      text: "",
+      urgent: false,
+    },
+  );
 
-  const progress = targetXP > 0 ? Math.min(100, (currentXP / targetXP) * 100) : 0
-  const isComplete = currentXP >= targetXP
-  const sortedChapters = [...chapters].sort((a, b) => a.order - b.order)
-  const activeChapterIndex = sortedChapters.findIndex((ch) => !ch.completed)
+  const progress =
+    targetXP > 0 ? Math.min(100, (currentXP / targetXP) * 100) : 0;
+  const isComplete = currentXP >= targetXP;
+  const sortedChapters = [...chapters].sort((a, b) => a.order - b.order);
+  const activeChapterIndex = sortedChapters.findIndex((ch) => !ch.completed);
 
   // Live countdown
   useEffect(() => {
-    if (!deadline) return
-    setCountdown(formatCountdown(deadline))
+    if (!deadline) return;
+    setCountdown(formatCountdown(deadline));
     const interval = setInterval(() => {
-      setCountdown(formatCountdown(deadline))
-    }, 60_000)
-    return () => clearInterval(interval)
-  }, [deadline])
+      setCountdown(formatCountdown(deadline));
+    }, 60_000);
+    return () => clearInterval(interval);
+  }, [deadline]);
 
   return (
     <Card
       variant="outlined"
       sx={{
-        borderColor: isComplete ? 'success.main' : active ? 'primary.main' : 'grey.400',
+        borderColor: isComplete
+          ? "success.main"
+          : active
+            ? "primary.main"
+            : "grey.400",
         borderWidth: 2,
       }}
     >
       <CardContent>
         <Stack spacing={3}>
           {/* Header */}
-          <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack
+            direction="row"
+            justifyContent="space-between"
+            alignItems="center"
+          >
             <Stack direction="row" spacing={1} alignItems="center">
-              <EmojiEventsIcon color={isComplete ? 'success' : 'primary'} />
+              <EmojiEventsIcon color={isComplete ? "success" : "primary"} />
               <Typography variant="h6">{title}</Typography>
             </Stack>
-            {!active && (
-              <Chip label="Ended" color="default" size="small" />
-            )}
+            {!active && <Chip label="Ended" color="default" size="small" />}
             {bonusMultiplier && bonusMultiplier > 1 && active && (
-              <Chip label={`×${bonusMultiplier} XP Bonus`} color="secondary" size="small" />
+              <Chip
+                label={`×${bonusMultiplier} XP Bonus`}
+                color="secondary"
+                size="small"
+              />
             )}
           </Stack>
 
           {/* Narrative setting */}
           {setting && (
-            <Paper variant="outlined" sx={{ p: 2, bgcolor: 'grey.50' }}>
+            <Paper
+              variant="outlined"
+              sx={{ p: 2, bgcolor: "background.default" }}
+            >
               <Typography variant="body2" fontStyle="italic">
                 {setting}
               </Typography>
@@ -155,7 +171,7 @@ export function CampaignProgress({
             <LinearProgress
               variant="determinate"
               value={progress}
-              color={isComplete ? 'success' : 'primary'}
+              color={isComplete ? "success" : "primary"}
               sx={{ height: 12, borderRadius: 6 }}
             />
           </Box>
@@ -165,12 +181,12 @@ export function CampaignProgress({
             <Stack direction="row" spacing={1} alignItems="center">
               <TimerIcon
                 fontSize="small"
-                color={countdown.urgent ? 'error' : 'action'}
+                color={countdown.urgent ? "error" : "action"}
               />
               <Typography
                 variant="body2"
-                color={countdown.urgent ? 'error.main' : 'text.secondary'}
-                fontWeight={countdown.urgent ? 'bold' : 'normal'}
+                color={countdown.urgent ? "error.main" : "text.secondary"}
+                fontWeight={countdown.urgent ? "bold" : "normal"}
               >
                 {countdown.text}
               </Typography>
@@ -194,7 +210,11 @@ export function CampaignProgress({
                 Chapter Progression
               </Typography>
               <Stepper
-                activeStep={activeChapterIndex === -1 ? sortedChapters.length : activeChapterIndex}
+                activeStep={
+                  activeChapterIndex === -1
+                    ? sortedChapters.length
+                    : activeChapterIndex
+                }
                 orientation="vertical"
               >
                 {sortedChapters.map((chapter) => (
@@ -228,7 +248,7 @@ export function CampaignProgress({
 
           {/* Completion message */}
           {isComplete && (
-            <Paper sx={{ p: 2, bgcolor: 'success.light', textAlign: 'center' }}>
+            <Paper sx={{ p: 2, bgcolor: "success.light", textAlign: "center" }}>
               <Typography variant="h6" color="success.dark">
                 🎉 Campaign Complete!
               </Typography>
@@ -237,5 +257,5 @@ export function CampaignProgress({
         </Stack>
       </CardContent>
     </Card>
-  )
+  );
 }

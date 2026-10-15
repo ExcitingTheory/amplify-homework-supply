@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslations } from "next-intl";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import FormControl from "@mui/material/FormControl";
 import TextField from "@mui/material/TextField";
@@ -25,6 +26,10 @@ export interface PasswordChangeViewProps {
   onNewPasswordChange: (value: string) => void;
   onConfirmNewPasswordChange: (value: string) => void;
   onSubmit: (event: React.FormEvent) => void;
+  /** "card" (default) renders a standalone bordered Card with its own heading.
+   * "bare" drops the Card chrome and heading for embedding inside an
+   * AccordionDetails, where the summary already shows the title. */
+  variant?: "card" | "bare";
 }
 
 /**
@@ -41,11 +46,14 @@ export function PasswordChangeView({
   onNewPasswordChange,
   onConfirmNewPasswordChange,
   onSubmit,
+  variant = "card",
 }: PasswordChangeViewProps) {
   const t = useTranslations("pages");
+  const isBare = variant === "bare";
+  const Wrapper: React.ElementType = isBare ? Box : Card;
   return (
-    <Card sx={CARD_SX}>
-      <h1>{t("profile.changePassword.heading")}</h1>
+    <Wrapper sx={isBare ? undefined : CARD_SX}>
+      {!isBare && <h1>{t("profile.changePassword.heading")}</h1>}
       <p>{t("profile.changePassword.description")}</p>
       <form onSubmit={onSubmit}>
         <FormControl fullWidth>
@@ -102,7 +110,7 @@ export function PasswordChangeView({
           </Button>
         </FormControl>
       </form>
-    </Card>
+    </Wrapper>
   );
 }
 

@@ -93,16 +93,18 @@ async function getCachedProfileData(routeUsername: string) {
       return showBadgesOnProfile;
     });
 
-    // Resolve unit names for progress modules
+    // Resolve section names for progress modules — moduleId is the Section
+    // this student is enrolled in (handleRecomputeProgress's real semantics:
+    // "assignments done / assignments in that section"), not a Unit.
     if (progressModules.length > 0) {
-      const unitIds = progressModules.map((m: any) => m.moduleId);
-      const unitResults = await Promise.all(
-        unitIds.map((id: string) =>
-          client.models.Unit.get({ id }).catch(() => ({ data: null })),
+      const sectionIds = progressModules.map((m: any) => m.moduleId);
+      const sectionResults = await Promise.all(
+        sectionIds.map((id: string) =>
+          client.models.Section.get({ id }).catch(() => ({ data: null })),
         ),
       );
       const nameMap: Record<string, string> = {};
-      unitResults.forEach((res: any) => {
+      sectionResults.forEach((res: any) => {
         if (res?.data?.id && res.data.name) {
           nameMap[res.data.id] = res.data.name;
         }

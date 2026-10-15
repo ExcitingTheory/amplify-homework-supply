@@ -34,7 +34,6 @@ const DataGrid = lazy(() =>
 );
 import Button from "@mui/material/Button";
 import DeleteIcon from "@mui/icons-material/Delete";
-import SmartToyIcon from "@mui/icons-material/SmartToy";
 import SecurityIcon from "@mui/icons-material/Security";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
@@ -246,12 +245,15 @@ export default React.memo(function CustomAIEditor({
   }, [editor, onDelete]);
 
   return (
-    <ExerciseBlockCard blockType="custom-ai" selected={isSelected}>
+    <ExerciseBlockCard
+      blockType="custom-ai"
+      selected={isSelected}
+      sx={{ maxWidth: "72rem" }}
+    >
       {/* Header */}
-      <Box sx={{ display: "flex", alignItems: "center", mb: 2, gap: 1 }}>
-        <SmartToyIcon color="primary" />
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          AI-Graded Exercise
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+        <Typography variant="h5" sx={{ flexGrow: 1 }}>
+          {t("customAIEditor.title")}
         </Typography>
         <Chip
           icon={<SecurityIcon />}
@@ -262,8 +264,10 @@ export default React.memo(function CustomAIEditor({
         />
       </Box>
 
+      <Typography variant="p">{t("customAIEditor.description")}</Typography>
+
       {/* Allowed Input Modes */}
-      <Box sx={{ mb: 2 }}>
+      <Box sx={{ mt: 1.5, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
           Student Input Modes
         </Typography>

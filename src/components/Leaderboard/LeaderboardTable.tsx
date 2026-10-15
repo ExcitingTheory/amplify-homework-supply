@@ -21,7 +21,7 @@ import Box from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
 import { AvatarDisplay } from "../Gamification/AvatarDisplay";
 import { Medallion } from "../Gamification/Medallion";
-import { getMetals, readableInk, type MetalKey } from "@/themes/heraldry";
+import { getMetals, type MetalKey } from "@/themes/heraldry";
 import type {
   AvatarStyleTier,
   AvatarOverrides,
@@ -79,7 +79,7 @@ function RankBadge({ rank }: { rank: number }) {
           sx={{
             fontWeight: 800,
             fontSize: "0.7rem",
-            color: readableInk(metal.mid),
+            color: theme.palette.getContrastText(metal.mid),
           }}
         >
           {rank}

@@ -11,14 +11,19 @@
 import React, { useId, useMemo } from "react";
 import Box, { type BoxProps } from "@mui/material/Box";
 import { useTheme } from "@mui/material/styles";
-import { motion, type Variants, type HTMLMotionProps } from "framer-motion";
+import {
+  m,
+  LazyMotion,
+  domAnimation,
+  type Variants,
+  type HTMLMotionProps,
+} from "framer-motion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { getMetals, type MetalKey } from "@/themes/heraldry";
 
 // Typed wrapper to avoid MUI Box + motion.div type conflicts
-const MotionBox = motion.create(Box) as React.FC<
-  BoxProps & HTMLMotionProps<"div">
->;
+// Uses `m` (not `motion`) so LazyMotion can code-split the animation engine
+const MotionBox = m.create(Box) as React.FC<BoxProps & HTMLMotionProps<"div">>;
 import {
   getBadgeConfig,
   getRarityEffects,
@@ -185,36 +190,38 @@ function DrawableIcon({
   }
 
   return (
-    <MotionBox
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        transform: `translate(${tx}px, ${ty}px)`,
-        color,
-        // SVG path draw animation via CSS
-        "& svg": {
-          overflow: "visible",
-        },
-        "& svg path, & svg circle, & svg rect, & svg line, & svg polyline, & svg polygon, & svg ellipse":
-          {
-            strokeDasharray: 1000,
-            strokeDashoffset: 1000,
-            animation: `badgeIconDraw 1.2s ease-out ${animationDelay}s forwards, badgeIconFill 0.4s ease-in ${animationDelay + 1.0}s forwards`,
-            stroke: color,
-            strokeWidth: 0.5,
-            fill: "transparent",
+    <LazyMotion features={domAnimation}>
+      <MotionBox
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          transform: `translate(${tx}px, ${ty}px)`,
+          color,
+          // SVG path draw animation via CSS
+          "& svg": {
+            overflow: "visible",
           },
-        "@keyframes badgeIconDraw": {
-          to: { strokeDashoffset: 0 },
-        },
-        "@keyframes badgeIconFill": {
-          to: { fill: color, strokeWidth: 0 },
-        },
-      }}
-    >
-      <Icon size={iconSize} />
-    </MotionBox>
+          "& svg path, & svg circle, & svg rect, & svg line, & svg polyline, & svg polygon, & svg ellipse":
+            {
+              strokeDasharray: 1000,
+              strokeDashoffset: 1000,
+              animation: `badgeIconDraw 1.2s ease-out ${animationDelay}s forwards, badgeIconFill 0.4s ease-in ${animationDelay + 1.0}s forwards`,
+              stroke: color,
+              strokeWidth: 0.5,
+              fill: "transparent",
+            },
+          "@keyframes badgeIconDraw": {
+            to: { strokeDashoffset: 0 },
+          },
+          "@keyframes badgeIconFill": {
+            to: { fill: color, strokeWidth: 0 },
+          },
+        }}
+      >
+        <Icon size={iconSize} />
+      </MotionBox>
+    </LazyMotion>
   );
 }
 
@@ -319,145 +326,149 @@ export function BadgeIcon({
   }, [earned, rarityEffect]);
 
   return (
-    <MotionBox
-      variants={
-        effectiveAnimate && earned
-          ? containerVariants[mountAnim]
-          : containerVariants.none
-      }
-      initial={effectiveAnimate && earned ? "hidden" : "visible"}
-      animate="visible"
-      whileHover={
-        earned && !reducedMotion ? (hoverVariants[hoverAnim] as any) : undefined
-      }
-      transition={{ delay: animationDelay }}
-      onClick={onClick}
-      sx={{
-        width: size,
-        height: size,
-        position: "relative",
-        cursor: onClick ? "pointer" : "default",
-        filter: filterStyle,
-        ...sxProp,
-      }}
-    >
-      {/* SVG shape background */}
-      <svg
-        viewBox="-4 -4 108 108"
-        width={size}
-        height={size}
-        style={{
-          position: "absolute",
-          top: 0,
-          left: 0,
-          filter: `drop-shadow(${glowShadow})`,
+    <LazyMotion features={domAnimation}>
+      <MotionBox
+        variants={
+          effectiveAnimate && earned
+            ? containerVariants[mountAnim]
+            : containerVariants.none
+        }
+        initial={effectiveAnimate && earned ? "hidden" : "visible"}
+        animate="visible"
+        whileHover={
+          earned && !reducedMotion
+            ? (hoverVariants[hoverAnim] as any)
+            : undefined
+        }
+        transition={{ delay: animationDelay }}
+        onClick={onClick}
+        sx={{
+          width: size,
+          height: size,
+          position: "relative",
+          cursor: onClick ? "pointer" : "default",
+          filter: filterStyle,
+          ...sxProp,
         }}
       >
-        <GradientDefs
-          id={cleanGradientId}
-          gradient={config.gradient}
-          bgColor={config.bgColor}
-        />
-        <defs>
-          {/* specular gloss — enamel highlight */}
-          <radialGradient id={glossId} cx="50%" cy="30%" r="55%">
-            <stop offset="0%" stopColor="rgba(255,255,255,0.55)" />
-            <stop offset="55%" stopColor="rgba(255,255,255,0.12)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </radialGradient>
-          {/* beveled metal ring keyed to rarity */}
-          <linearGradient id={rimMetalId} x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor={rimMetal.light} />
-            <stop offset="50%" stopColor={rimMetal.mid} />
-            <stop offset="100%" stopColor={rimMetal.dark} />
-          </linearGradient>
-          {/* sheen sweep gradient */}
-          <linearGradient id={sheenId} x1="0" y1="0" x2="1" y2="0">
-            <stop offset="0%" stopColor="rgba(255,255,255,0)" />
-            <stop offset="50%" stopColor="rgba(255,255,255,0.65)" />
-            <stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </linearGradient>
-          <clipPath id={clipId}>
-            <path d={shapePath} />
-          </clipPath>
-        </defs>
-        <path
-          d={shapePath}
-          fill={`url(#${cleanGradientId})`}
-          stroke={earned ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.1)"}
-          strokeWidth={rarityEffect.borderWidth}
-        />
-        {/* enamel gloss + earn sheen — earned only, clipped to the shape */}
-        {earned && (
-          <g clipPath={`url(#${clipId})`}>
-            <ellipse
-              cx="50"
-              cy="28"
-              rx="38"
-              ry="24"
-              fill={`url(#${glossId})`}
-            />
-            {effectiveAnimate && (
-              <rect
-                y="0"
-                width="26"
-                height="100"
-                fill={`url(#${sheenId})`}
-                transform="skewX(-16)"
-              >
-                <animateTransform
-                  attributeName="transform"
-                  type="translate"
-                  additive="sum"
-                  from="-50 0"
-                  to="150 0"
-                  begin={`${animationDelay + 0.5}s`}
-                  dur="1.1s"
-                  repeatCount="1"
-                  fill="freeze"
-                />
-              </rect>
-            )}
-          </g>
-        )}
-        {/* beveled metallic rim — material tier framing */}
-        {earned && (
-          <path
-            d={shapePath}
-            fill="none"
-            stroke={`url(#${rimMetalId})`}
-            strokeWidth={rarityEffect.borderWidth + 1}
-            strokeLinejoin="round"
-          />
-        )}
-      </svg>
-
-      {/* Icon overlay — hidden when unearned */}
-      {earned && (
-        <Box
-          sx={{
+        {/* SVG shape background */}
+        <svg
+          viewBox="-4 -4 108 108"
+          width={size}
+          height={size}
+          style={{
             position: "absolute",
             top: 0,
             left: 0,
-            width: "100%",
-            height: "100%",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            filter: `drop-shadow(${glowShadow})`,
           }}
         >
-          <DrawableIcon
-            Icon={config.icon}
-            color={config.iconColor}
-            size={size}
-            draw={effectiveAnimate && effectiveDrawIcon}
-            scale={config.iconScale ?? 1}
-            translate={config.iconTranslate ?? [0, 0]}
-            animationDelay={animationDelay + 0.3}
+          <GradientDefs
+            id={cleanGradientId}
+            gradient={config.gradient}
+            bgColor={config.bgColor}
           />
-        </Box>
-      )}
-    </MotionBox>
+          <defs>
+            {/* specular gloss — enamel highlight */}
+            <radialGradient id={glossId} cx="50%" cy="30%" r="55%">
+              <stop offset="0%" stopColor="rgba(255,255,255,0.55)" />
+              <stop offset="55%" stopColor="rgba(255,255,255,0.12)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </radialGradient>
+            {/* beveled metal ring keyed to rarity */}
+            <linearGradient id={rimMetalId} x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stopColor={rimMetal.light} />
+              <stop offset="50%" stopColor={rimMetal.mid} />
+              <stop offset="100%" stopColor={rimMetal.dark} />
+            </linearGradient>
+            {/* sheen sweep gradient */}
+            <linearGradient id={sheenId} x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stopColor="rgba(255,255,255,0)" />
+              <stop offset="50%" stopColor="rgba(255,255,255,0.65)" />
+              <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+            </linearGradient>
+            <clipPath id={clipId}>
+              <path d={shapePath} />
+            </clipPath>
+          </defs>
+          <path
+            d={shapePath}
+            fill={`url(#${cleanGradientId})`}
+            stroke={earned ? "rgba(255,255,255,0.3)" : "rgba(0,0,0,0.1)"}
+            strokeWidth={rarityEffect.borderWidth}
+          />
+          {/* enamel gloss + earn sheen — earned only, clipped to the shape */}
+          {earned && (
+            <g clipPath={`url(#${clipId})`}>
+              <ellipse
+                cx="50"
+                cy="28"
+                rx="38"
+                ry="24"
+                fill={`url(#${glossId})`}
+              />
+              {effectiveAnimate && (
+                <rect
+                  y="0"
+                  width="26"
+                  height="100"
+                  fill={`url(#${sheenId})`}
+                  transform="skewX(-16)"
+                >
+                  <animateTransform
+                    attributeName="transform"
+                    type="translate"
+                    additive="sum"
+                    from="-50 0"
+                    to="150 0"
+                    begin={`${animationDelay + 0.5}s`}
+                    dur="1.1s"
+                    repeatCount="1"
+                    fill="freeze"
+                  />
+                </rect>
+              )}
+            </g>
+          )}
+          {/* beveled metallic rim — material tier framing */}
+          {earned && (
+            <path
+              d={shapePath}
+              fill="none"
+              stroke={`url(#${rimMetalId})`}
+              strokeWidth={rarityEffect.borderWidth + 1}
+              strokeLinejoin="round"
+            />
+          )}
+        </svg>
+
+        {/* Icon overlay — hidden when unearned */}
+        {earned && (
+          <Box
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <DrawableIcon
+              Icon={config.icon}
+              color={config.iconColor}
+              size={size}
+              draw={effectiveAnimate && effectiveDrawIcon}
+              scale={config.iconScale ?? 1}
+              translate={config.iconTranslate ?? [0, 0]}
+              animationDelay={animationDelay + 0.3}
+            />
+          </Box>
+        )}
+      </MotionBox>
+    </LazyMotion>
   );
 }
 

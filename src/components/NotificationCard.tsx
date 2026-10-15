@@ -8,15 +8,20 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
 import IconButton from "@mui/material/IconButton";
+import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import CloseIcon from "@mui/icons-material/Close";
+import RestoreIcon from "@mui/icons-material/RestoreFromTrash";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import AssignmentIcon from "@mui/icons-material/Assignment";
 import GroupsIcon from "@mui/icons-material/Groups";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import CampaignIcon from "@mui/icons-material/Campaign";
 import ChatIcon from "@mui/icons-material/Chat";
 import InfoIcon from "@mui/icons-material/Info";
+import GavelIcon from "@mui/icons-material/Gavel";
+import ShieldIcon from "@mui/icons-material/Shield";
 import { useTranslations } from "next-intl";
 
 type NotificationCategoryKey = keyof typeof CATEGORY_ICONS;
@@ -31,21 +36,33 @@ interface NotificationCardItem {
   seen?: boolean;
   interacted?: boolean;
   createdAt?: string;
+  hiddenAt?: string | null;
 }
 
 interface NotificationCardProps {
   notification: NotificationCardItem;
   onMarkSeen?: (notificationId: string) => void;
   onMarkInteracted?: (notificationId: string) => void;
+  /** Soft-delete (move to recycle bin). Ignored when onRestore/onDeleteForever are provided. */
   onDelete?: (notificationId: string) => void;
   onNavigate?: (path: string) => void;
+  /** Recycle-bin variant: restore this notification back to the inbox. */
+  onRestore?: (notificationId: string) => void;
+  /** Recycle-bin variant: permanently delete this notification (irreversible). */
+  onDeleteForever?: (notificationId: string) => void;
+  /** Multi-select mode: shows a checkbox and routes clicks to selection instead of navigation. */
+  selectable?: boolean;
+  selected?: boolean;
+  onToggleSelect?: (notificationId: string) => void;
 }
 
 const CATEGORY_ICONS = {
   ASSIGNMENT: AssignmentIcon,
   COLLABORATION: GroupsIcon,
   GAMIFICATION: EmojiEventsIcon,
+  MODERATION: GavelIcon,
   SQUAD: CampaignIcon,
+  GUILD: ShieldIcon,
   CHAT: ChatIcon,
   SYSTEM: InfoIcon,
 };
@@ -54,7 +71,9 @@ const CATEGORY_COLORS = {
   ASSIGNMENT: "primary",
   COLLABORATION: "secondary",
   GAMIFICATION: "warning",
+  MODERATION: "error",
   SQUAD: "info",
+  GUILD: "secondary",
   CHAT: "default",
   SYSTEM: "error",
 } as const;
@@ -81,16 +100,27 @@ export default function NotificationCard({
   onMarkInteracted,
   onDelete,
   onNavigate,
+  onRestore,
+  onDeleteForever,
+  selectable = false,
+  selected = false,
+  onToggleSelect,
 }: NotificationCardProps) {
   const t = useTranslations("components");
   const categoryKey = (notification.category || "SYSTEM") as NotificationCategoryKey;
   const Icon = CATEGORY_ICONS[categoryKey] || InfoIcon;
   const chipColor = CATEGORY_COLORS[categoryKey] || "default";
+  const isRecycleBinVariant = Boolean(onRestore || onDeleteForever);
 
   const isUnseen = !notification.seen;
   const isInteracted = notification.interacted;
 
   const handleClick = () => {
+    if (selectable) {
+      onToggleSelect?.(notification.id);
+      return;
+    }
+    if (isRecycleBinVariant) return;
     if (!notification.seen && onMarkSeen) {
       onMarkSeen(notification.id);
     }
@@ -115,8 +145,8 @@ export default function NotificationCard({
         backgroundColor: isUnseen
           ? "action.hover"
           : "transparent",
-        opacity: isInteracted ? 0.7 : 1,
-        cursor: notification.linkPath ? "pointer" : "default",
+        opacity: isInteracted && !isRecycleBinVariant ? 0.7 : 1,
+        cursor: selectable || (notification.linkPath && !isRecycleBinVariant) ? "pointer" : "default",
         transition: "all 0.2s ease",
         "&:hover": {
           backgroundColor: "action.hover",
@@ -125,6 +155,15 @@ export default function NotificationCard({
         borderBottomColor: "divider",
       }}
     >
+      {selectable && (
+        <Checkbox
+          size="small"
+          checked={selected}
+          onClick={(e) => e.stopPropagation()}
+          onChange={() => onToggleSelect?.(notification.id)}
+          sx={{ mt: -0.25, p: 0.25 }}
+        />
+      )}
       <Icon
         sx={{
           color: isUnseen ? `${chipColor}.main` : "text.secondary",
@@ -210,19 +249,53 @@ export default function NotificationCard({
         </Box>
       </Box>
 
-      {onDelete && (
-        <Tooltip title={t("notification.delete")}>
-          <IconButton
-            size="small"
-            onClick={(e) => {
-              e.stopPropagation();
-              onDelete(notification.id);
-            }}
-            sx={{ mt: 0.25 }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+      {isRecycleBinVariant ? (
+        <Box sx={{ display: "flex", gap: 0.5 }}>
+          {onRestore && (
+            <Tooltip title={t("notification.restore")}>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onRestore(notification.id);
+                }}
+                sx={{ mt: 0.25 }}
+              >
+                <RestoreIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+          {onDeleteForever && (
+            <Tooltip title={t("notification.deletePermanently")}>
+              <IconButton
+                size="small"
+                color="error"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDeleteForever(notification.id);
+                }}
+                sx={{ mt: 0.25 }}
+              >
+                <DeleteForeverIcon fontSize="small" />
+              </IconButton>
+            </Tooltip>
+          )}
+        </Box>
+      ) : (
+        onDelete && (
+          <Tooltip title={t("notification.delete")}>
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete(notification.id);
+              }}
+              sx={{ mt: 0.25 }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )
       )}
     </Box>
   );

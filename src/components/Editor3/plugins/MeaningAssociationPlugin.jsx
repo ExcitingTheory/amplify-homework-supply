@@ -15,8 +15,12 @@ import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from "lexical";
 import * as React from "react";
 import { useEffect } from "react";
 
-import MeaningAssociationEditor from "../components/MeaningAssociationEditor";
 import MeaningAssociationExercise from "../../MeaningAssociationExercise";
+
+// Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
+const MeaningAssociationEditor = React.lazy(() =>
+  import("../components/MeaningAssociationEditor"),
+);
 
 /**
  * Converts a DOM element into a MeaningAssociationNode.
@@ -233,16 +237,18 @@ export class MeaningAssociationNode extends DecoratorNode {
     return (
       <>
         {isEditable && (
-          <MeaningAssociationEditor
-            className={className}
-            format={this.__format}
-            nodeKey={this.getKey()}
-            wordIDs={this.__ids}
-            enabledModes={this.__enabledModes || ["learn", "easy", "hard"]}
-            promptFor={this.__promptFor || "definition"}
-            showAudio={this.__showAudio !== false}
-            showPronunciation={this.__showPronunciation !== false}
-          />
+          <React.Suspense fallback={null}>
+            <MeaningAssociationEditor
+              className={className}
+              format={this.__format}
+              nodeKey={this.getKey()}
+              wordIDs={this.__ids}
+              enabledModes={this.__enabledModes || ["learn", "easy", "hard"]}
+              promptFor={this.__promptFor || "definition"}
+              showAudio={this.__showAudio !== false}
+              showPronunciation={this.__showPronunciation !== false}
+            />
+          </React.Suspense>
         )}
 
         {!isEditable && (

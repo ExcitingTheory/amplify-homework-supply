@@ -217,6 +217,7 @@ export async function awardXP(
   sectionID?: string,
   unitID?: string,
   accuracy?: number,
+  overrideAmount?: number,
 ): Promise<AwardXPResult | null> {
   if (!(await assertCallerIsStudentOrPrivileged(studentId))) return null;
 
@@ -231,6 +232,7 @@ export async function awardXP(
       sectionID: sectionID ?? undefined,
       unitID: unitID ?? undefined,
       accuracy: accuracy ?? undefined,
+      overrideAmount: overrideAmount ?? undefined,
     });
   } catch (err) {
     console.error("[gamification action] awardXP error:", err);
@@ -263,6 +265,7 @@ export async function recordGradeCompletion(
   referenceId: string,
   submissionText?: string,
   sectionID?: string,
+  xpOverrideAmount?: number,
 ): Promise<GradeCompletionResult> {
   if (!(await assertCallerIsStudentOrPrivileged(studentId))) {
     return { xp: null, personalBest: null, easterEggs: null };
@@ -280,6 +283,7 @@ export async function recordGradeCompletion(
       sectionID: sectionID ?? undefined,
       unitID,
       accuracy,
+      overrideAmount: xpOverrideAmount ?? undefined,
     });
   } catch (err) {
     console.error("[gamification action] awardXP error:", err);

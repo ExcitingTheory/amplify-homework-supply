@@ -400,3 +400,58 @@ export async function removeStudentFromSection(
     };
   }
 }
+
+export interface RecomputeGradeAggregationResult {
+  success: boolean;
+  assignmentsUpdated?: number;
+  studentsUpdated?: number;
+  error?: string;
+}
+
+/**
+ * Instructor-initiated — recomputes Assignment.gradeSummary/Section.studentProgress
+ * `effective` grades from already-stored recentValues under the section's CURRENT
+ * gradeAggregationMethod/Overrides, so changing the method mid-term doesn't require
+ * a new Grade submission for the instructor dashboard to reflect it.
+ * Wraps the `recomputeGradeAggregation` Lambda mutation server-side.
+ */
+export async function recomputeGradeAggregation(
+  sectionId: string,
+): Promise<RecomputeGradeAggregationResult> {
+  if (!sectionId || sectionId.trim().length === 0) {
+    return { success: false, error: "Section is required" };
+  }
+
+  const client = getServerClient();
+
+  try {
+    const { data, errors } = await (
+      client as any
+    ).mutations.recomputeGradeAggregation({
+      sectionId: sectionId.trim(),
+    });
+
+    if (errors?.length) {
+      const errorMsg =
+        errors[0]?.message || "Failed to recompute grade aggregation";
+      console.error(
+        "[section action] recomputeGradeAggregation errors:",
+        errors,
+      );
+      return { success: false, error: errorMsg };
+    }
+
+    const result = typeof data === "string" ? JSON.parse(data) : data;
+    return {
+      success: true,
+      assignmentsUpdated: result?.assignmentsUpdated ?? 0,
+      studentsUpdated: result?.studentsUpdated ?? 0,
+    };
+  } catch (err: any) {
+    console.error("[section action] recomputeGradeAggregation error:", err);
+    return {
+      success: false,
+      error: err?.message || "Failed to recompute grade aggregation",
+    };
+  }
+}

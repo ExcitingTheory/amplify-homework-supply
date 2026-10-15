@@ -1,6 +1,8 @@
 "use client";
 import React from "react";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
+import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
@@ -18,6 +20,10 @@ export interface AccountPreferencesViewProps {
   onToggle: (key: keyof AccountPreferences, value: boolean) => void;
   /** next-intl translator scoped to "pages"; falls back to English when omitted. */
   t?: (key: string) => string;
+  /** "card" (default) renders each group as its own bordered Card. "bare"
+   * renders all groups in a single container separated by dividers, for
+   * embedding inside an AccordionDetails. */
+  variant?: "card" | "bare";
 }
 
 const CARD_SX = {
@@ -37,13 +43,18 @@ export function AccountPreferencesView({
   preferences,
   onToggle,
   t,
+  variant = "card",
 }: AccountPreferencesViewProps) {
   const s = preferences ?? {};
   const tr = (key: string, fallback: string) => (t ? t(key) : fallback);
-  return (
+  const isBare = variant === "bare";
+  const Group: React.ElementType = isBare ? Box : Card;
+  const groupSx = isBare ? undefined : CARD_SX;
+
+  const content = (
     <>
       {/* Privacy */}
-      <Card sx={CARD_SX}>
+      <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
           {tr("settings.privacy.heading", "Privacy")}
         </Typography>
@@ -55,7 +66,10 @@ export function AccountPreferencesView({
               onChange={(e) => onToggle("leaderboardOptIn", e.target.checked)}
             />
           }
-          label={tr("settings.privacy.leaderboardOptIn", "Show me on leaderboards")}
+          label={tr(
+            "settings.privacy.leaderboardOptIn",
+            "Show me on leaderboards",
+          )}
         />
         <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
           {tr(
@@ -63,10 +77,12 @@ export function AccountPreferencesView({
             "When off, you won't appear on any public leaderboards.",
           )}
         </Typography>
-      </Card>
+      </Group>
+
+      {isBare && <Divider sx={{ my: 2 }} />}
 
       {/* Accessibility */}
-      <Card sx={CARD_SX}>
+      <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
           Accessibility
         </Typography>
@@ -107,10 +123,12 @@ export function AccountPreferencesView({
         <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
           Increase contrast for text and UI elements to improve readability.
         </Typography>
-      </Card>
+      </Group>
+
+      {isBare && <Divider sx={{ my: 2 }} />}
 
       {/* Profile Visibility */}
-      <Card sx={CARD_SX}>
+      <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
           Profile Visibility
         </Typography>
@@ -122,7 +140,9 @@ export function AccountPreferencesView({
           control={
             <Switch
               checked={s.showBadgesOnProfile !== false}
-              onChange={(e) => onToggle("showBadgesOnProfile", e.target.checked)}
+              onChange={(e) =>
+                onToggle("showBadgesOnProfile", e.target.checked)
+              }
             />
           }
           label="Show badges on profile"
@@ -150,9 +170,11 @@ export function AccountPreferencesView({
           Display anti-badges on your profile. These are humorous, not punitive
           — show them off if you want!
         </Typography>
-      </Card>
+      </Group>
     </>
   );
+
+  return isBare ? <Box>{content}</Box> : content;
 }
 
 export default AccountPreferencesView;

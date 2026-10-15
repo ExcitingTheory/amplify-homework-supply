@@ -103,18 +103,6 @@ const deduplicateUrls = (urls) => {
   return Array.from(set);
 };
 
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
-
 // Convert blob to base64 for serialization
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -1655,7 +1643,6 @@ export function DictionaryEditor2() {
     severity: "warning",
   });
   const sharedHistoryState = React.useRef(createEmptyHistoryState());
-  const [search, setSearch] = React.useState("");
   const [newPhrase, setNewPhrase] = React.useState("");
   const [newPronunciation, setNewPronunciation] = React.useState("");
   const [newDefinition, setNewDefinition] = React.useState("");
@@ -1680,30 +1667,10 @@ export function DictionaryEditor2() {
 
   const parentRef = React.useRef(null);
 
-  // Filter words based on search
+  // Local filtering moved to the global search bar; mirror the dictionary straight through.
   React.useEffect(() => {
-    if (!search || !dictionary) {
-      setFilteredDictionary(dictionary);
-      return;
-    }
-
-    const filtered = {};
-    Object.entries(dictionary).forEach(([key, word]) => {
-      const matchesSearch =
-        (word.phrase &&
-          word.phrase.toLowerCase().includes(search.toLowerCase())) ||
-        (word.pronunciation &&
-          word.pronunciation.toLowerCase().includes(search.toLowerCase())) ||
-        (word.definition &&
-          word.definition.toLowerCase().includes(search.toLowerCase()));
-
-      if (matchesSearch) {
-        filtered[key] = word;
-      }
-    });
-
-    setFilteredDictionary(filtered);
-  }, [search, dictionary]);
+    setFilteredDictionary(dictionary);
+  }, [dictionary]);
 
   const handleToggleExpand = (id) => {
     setExpandedItems((prev) => {
@@ -1833,17 +1800,6 @@ export function DictionaryEditor2() {
     }
   };
 
-  const debouncedSearch = React.useCallback(
-    debounce((search) => {
-      setSearch(search);
-    }, 500),
-    [],
-  );
-
-  const handleSearch = (e) => {
-    debouncedSearch(e.target.value.trim());
-  };
-
   const initialConfig = React.useMemo(
     () => ({
       namespace: "DictionaryEditor2",
@@ -1960,16 +1916,6 @@ export function DictionaryEditor2() {
           </Tooltip>
         </Box>
 
-        <TextField
-          defaultValue={search}
-          onInput={handleSearch}
-          type="text"
-          size="small"
-          fullWidth
-          placeholder="Search words..."
-          label="Search"
-        />
-
         <Tooltip title="New Word">
           <IconButton
             onClick={toggleNewWordFormOpen}
@@ -2029,7 +1975,6 @@ export function DictionaryEditor2() {
           <HistoryPlugin />
           <WordsPlugin
             dictionary={filteredDictionary}
-            searchTerm={search}
             expandedItems={expandedItems}
             selectedItems={selectedItems}
             onToggleExpand={handleToggleExpand}

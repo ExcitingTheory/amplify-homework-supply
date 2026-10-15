@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslations } from "next-intl";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
@@ -24,6 +25,10 @@ export interface LanguagePreferenceViewProps {
   selectedLocale: string;
   availableLocales: LocaleOption[];
   onChange: (event: SelectChangeEvent) => void;
+  /** "card" (default) renders a standalone bordered Card with its own heading.
+   * "bare" drops the Card chrome and heading for embedding inside an
+   * AccordionDetails, where the summary already shows the title. */
+  variant?: "card" | "bare";
 }
 
 /**
@@ -34,11 +39,14 @@ export function LanguagePreferenceView({
   selectedLocale,
   availableLocales,
   onChange,
+  variant = "card",
 }: LanguagePreferenceViewProps) {
   const t = useTranslations("pages");
+  const isBare = variant === "bare";
+  const Wrapper: React.ElementType = isBare ? Box : Card;
   return (
-    <Card sx={CARD_SX}>
-      <h1>{t("profile.languagePreference.heading")}</h1>
+    <Wrapper sx={isBare ? undefined : CARD_SX}>
+      {!isBare && <h1>{t("profile.languagePreference.heading")}</h1>}
       <p>{t("profile.languagePreference.description")}</p>
 
       <FormControl fullWidth sx={{ mt: 2 }}>
@@ -59,7 +67,7 @@ export function LanguagePreferenceView({
           ))}
         </Select>
       </FormControl>
-    </Card>
+    </Wrapper>
   );
 }
 

@@ -21,6 +21,8 @@ export interface SearchResult {
   page?: number;
   highlightTerm?: string;
   role?: "user" | "assistant" | "unknown";
+  /** Owning unit id, when applicable (word/question/file results) — lets consumers detect "already on this unit's page". */
+  unitId?: string;
 }
 
 type SearchType = "unit" | "file" | "word" | "question" | "section" | "chat";
@@ -515,6 +517,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
                     score: r.score,
                     page: r.item.meta.page,
                     highlightTerm: cleanQuery,
+                    unitId: r.item.meta.unitId,
                   }) as SearchResult,
               )
               .filter((r) => (parsed.type ? r.type === parsed.type : true));
@@ -604,6 +607,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
                     description: f.description || f.mimeType || undefined,
                     score,
                     highlightTerm: cleanQuery,
+                    unitId: f.unitID || undefined,
                   });
                 }
               });
@@ -629,6 +633,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
                     description: w.definition || undefined,
                     score,
                     highlightTerm: cleanQuery,
+                    unitId: w.unitID || undefined,
                   });
                 }
               });
@@ -654,6 +659,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
                     description: q.explanation || undefined,
                     score,
                     highlightTerm: cleanQuery,
+                    unitId: q.unitID || undefined,
                   });
                 }
               });

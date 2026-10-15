@@ -225,13 +225,9 @@ function relativeLuminance(color: string): number {
   return 0.2126 * toLinear(r) + 0.7152 * toLinear(g) + 0.0722 * toLinear(b);
 }
 
-/**
- * Return a legible ink color (near-black or near-white) for text/charges laid
- * over the given background hex, using WCAG relative luminance.
- */
-export function readableInk(hexColor: string): string {
-  return relativeLuminance(hexColor) > 0.45 ? "#1a1a1a" : "#f5f5f5";
-}
+// readableInk was removed — callers use theme.palette.getContrastText(color)
+// instead, MUI's own WCAG-based contrast-text picker (relativeLuminance above
+// is still used by emblemGlowFilter below).
 
 /**
  * Metallic outer-glow filter for charge lettering/devices that may end up dark-on-dark

@@ -80,11 +80,19 @@ import { StreakShield } from "./Gamification/StreakShield";
 import { useAvatarConfig } from "../hooks/useAvatarConfig";
 import SyncStatusIndicator from "./SyncStatusIndicator";
 import { useXP, useProgress, useSquad } from "../context/gamificationContext";
+import { useNotifications } from "../context/notificationContext";
 import AuthContext from "../context/authContext";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TuneIcon from "@mui/icons-material/Tune";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import DashboardIcon from "@mui/icons-material/Dashboard";
+import FlagIcon from "@mui/icons-material/Flag";
+import InsightsIcon from "@mui/icons-material/Insights";
+import Inventory2Icon from "@mui/icons-material/Inventory2";
+import SpellcheckIcon from "@mui/icons-material/Spellcheck";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
+import QuizIcon from "@mui/icons-material/Quiz";
 import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -258,6 +266,7 @@ export function UserMenu({ onJoinSection }) {
   const { level } = useXP();
   const { streak } = useProgress();
   const { mySquad } = useSquad();
+  const { openPanel } = useNotifications();
   const { user } = React.useContext(AuthContext);
   const {
     style: avatarStyle,
@@ -346,7 +355,7 @@ export function UserMenu({ onJoinSection }) {
           <MenuItem
             key="notifications"
             onClick={() => {
-              router.push("/profile/notifications");
+              openPanel();
               handleClose();
             }}
           >
@@ -388,6 +397,7 @@ export default function MainToolbar({ children }) {
   const { level, sectionLevel } = useXP();
   const { streak } = useProgress();
   const { mySquad } = useSquad();
+  const { openPanel } = useNotifications();
   const { session: authSession, user } = React.useContext(AuthContext);
   const {
     style: avatarStyle,
@@ -1073,6 +1083,76 @@ export default function MainToolbar({ children }) {
         </ListItem>
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <DashboardIcon />
+              </ListItemIcon>
+              <ListItemText primary="Admin Dashboard" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/moderation">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <FlagIcon />
+              </ListItemIcon>
+              <ListItemText primary="Moderation" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/analytics">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <InsightsIcon />
+              </ListItemIcon>
+              <ListItemText primary="Analytics" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/words">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <SpellcheckIcon />
+              </ListItemIcon>
+              <ListItemText primary="Words" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/files">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <InsertDriveFileIcon />
+              </ListItemIcon>
+              <ListItemText primary="Files" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/questions">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <QuizIcon />
+              </ListItemIcon>
+              <ListItemText primary="Questions" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/admin/archives">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <Inventory2Icon />
+              </ListItemIcon>
+              <ListItemText primary="Archives" />
+            </ListItemButton>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/settings">
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <TuneIcon />
@@ -1103,7 +1183,12 @@ export default function MainToolbar({ children }) {
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
-          <ListItemButton component="a" href="/profile/notifications">
+          <ListItemButton
+            onClick={() => {
+              openPanel();
+              setDrawerOpen(false);
+            }}
+          >
             <ListItemIcon sx={{ color: "text.primary" }}>
               <NotificationBadge sx={blackNotificationBadgeSx}>
                 <NotificationsIcon />
@@ -1155,94 +1240,97 @@ export default function MainToolbar({ children }) {
           </ListItemButton>
         </ListItem>
       </List>
+    </>
+  );
 
-      {/* Mobile-only gamification + profile snapshot — streak, shield, level,
-          and notifications are hidden from the toolbar below the md
-          breakpoint, so surface them here instead of losing them entirely. */}
+  // Avatar + gamification pills, pinned to the bottom of the drawer/slideout
+  // — shown whenever the topbar's own pill row is hidden (below the md
+  // breakpoint), so they aren't lost, just relocated.
+  const mobileGamificationFooter = (
+    <Box
+      sx={{
+        display: { xs: "flex", md: "none" },
+        flexDirection: "column",
+        alignItems: "center",
+        gap: 1,
+        px: 2,
+        py: 1.5,
+        flexShrink: 0,
+        borderTop: "1px solid",
+        borderColor: "divider",
+      }}
+      onClick={(e) => e.stopPropagation()}
+    >
       <Box
+        component="a"
+        href="/profile"
+        onClick={() => setDrawerOpen(false)}
         sx={{
-          display: { xs: "flex", md: "none" },
-          flexDirection: "column",
+          display: "flex",
           alignItems: "center",
           gap: 1,
-          mt: 2,
-          px: 2,
-          py: 1.5,
-          borderTop: "1px solid",
-          borderColor: "divider",
+          width: "100%",
+          minWidth: 0,
+          textDecoration: "none",
+          color: "inherit",
         }}
-        onClick={(e) => e.stopPropagation()}
       >
-        <Box
-          component="a"
-          href="/profile"
-          onClick={() => setDrawerOpen(false)}
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            width: "100%",
-            minWidth: 0,
-            textDecoration: "none",
-            color: "inherit",
-          }}
-        >
-          {avatarSeed && isAvatarLoaded ? (
-            <AvatarDisplay
-              seed={avatarSeed}
-              size={32}
-              style={avatarStyle}
-              overrides={avatarOverrides}
-              glowRing={glowRing}
-              outline
-              sheen
-              guildCrestSvg={mySquad?.crestSvg ?? null}
-              guildName={mySquad?.name}
-              guildId={mySquad?.id}
-            />
-          ) : (
-            <ProfileIcon />
-          )}
-          <Typography variant="body2" fontWeight={600} noWrap>
-            {displayName}
-          </Typography>
-        </Box>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 1.5,
-          }}
-        >
-          <StreakIndicator
-            currentStreak={streak?.currentStreak || 0}
-            size="small"
-            showEmpty={!isInstructorOrAdmin}
+        {avatarSeed && isAvatarLoaded ? (
+          <AvatarDisplay
+            seed={avatarSeed}
+            size={32}
+            style={avatarStyle}
+            overrides={avatarOverrides}
+            glowRing={glowRing}
+            outline
+            sheen
+            guildCrestSvg={mySquad?.crestSvg ?? null}
+            guildName={mySquad?.name}
+            guildId={mySquad?.id}
           />
-          <StreakShield
-            freezesRemaining={streak?.freezesRemaining || 0}
-            freezesUsed={streak?.freezesUsed || 0}
-            size="small"
-            showEmpty={!isInstructorOrAdmin}
-          />
-          <LevelBadge
-            level={currentSearchParams.get("sectionId") ? sectionLevel : level}
-            size="small"
-          />
-          <IconButton
-            color="inherit"
-            aria-label="Notifications"
-            size="small"
-            onClick={() => router.push("/profile/notifications")}
-          >
-            <NotificationBadge sx={blackNotificationBadgeSx}>
-              <NotificationsIcon />
-            </NotificationBadge>
-          </IconButton>
-        </Box>
+        ) : (
+          <ProfileIcon />
+        )}
+        <Typography variant="body2" fontWeight={600} noWrap>
+          {displayName}
+        </Typography>
       </Box>
-    </>
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexWrap: "wrap",
+          gap: 1,
+        }}
+      >
+        <StreakIndicator
+          currentStreak={streak?.currentStreak || 0}
+          pill
+          showEmpty={!isInstructorOrAdmin}
+        />
+        <StreakShield
+          freezesRemaining={streak?.freezesRemaining || 0}
+          freezesUsed={streak?.freezesUsed || 0}
+          pill
+          showEmpty={!isInstructorOrAdmin}
+        />
+        <LevelBadge
+          level={currentSearchParams.get("sectionId") ? sectionLevel : level}
+          showProgress={false}
+        />
+        <IconButton
+          color="inherit"
+          aria-label="Notifications"
+          size="small"
+          onClick={() => openPanel()}
+        >
+          <NotificationBadge sx={blackNotificationBadgeSx}>
+            <NotificationsIcon />
+          </NotificationBadge>
+        </IconButton>
+      </Box>
+    </Box>
   );
 
   // Collapsed icon-only rail — shows tooltips ("popup names") on hover.
@@ -1320,6 +1408,99 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </Tooltip>
         </ListItem>
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Admin Dashboard" placement="right" arrow>
+              <ListItemButton component="a" href="/admin" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <DashboardIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Moderation" placement="right" arrow>
+              <ListItemButton
+                component="a"
+                href="/admin/moderation"
+                sx={railItemSx}
+              >
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <FlagIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Analytics" placement="right" arrow>
+              <ListItemButton
+                component="a"
+                href="/admin/analytics"
+                sx={railItemSx}
+              >
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <InsightsIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Words" placement="right" arrow>
+              <ListItemButton component="a" href="/admin/words" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <SpellcheckIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Files" placement="right" arrow>
+              <ListItemButton component="a" href="/admin/files" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <InsertDriveFileIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Questions" placement="right" arrow>
+              <ListItemButton
+                component="a"
+                href="/admin/questions"
+                sx={railItemSx}
+              >
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <QuizIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip title="Archives" placement="right" arrow>
+              <ListItemButton
+                component="a"
+                href="/admin/archives"
+                sx={railItemSx}
+              >
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <Inventory2Icon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
             <Tooltip
@@ -1420,29 +1601,34 @@ export default function MainToolbar({ children }) {
         {!usesContextualToolbarSearch && <GlobalSearchBar />}
         {/* </Typography> */}
         <Box sx={{ flexGrow: 1 }} />
-        <Box sx={{ display: { xs: "none", md: "contents" } }}>
+        <Box
+          sx={{
+            display: { xs: "none", md: "contents" },
+            "& > .MuiChip-root": { mx: 0.5 },
+          }}
+        >
           <SyncStatusIndicator />
           <StreakIndicator
             currentStreak={streak?.currentStreak || 0}
-            size="small"
+            pill
             showEmpty={!isInstructorOrAdmin}
           />
           <StreakShield
             freezesRemaining={streak?.freezesRemaining || 0}
             freezesUsed={streak?.freezesUsed || 0}
-            size="small"
+            pill
             showEmpty={!isInstructorOrAdmin}
           />
           <LevelBadge
             level={currentSearchParams.get("sectionId") ? sectionLevel : level}
-            size="small"
+            showProgress={false}
           />
         </Box>
         <IconButton
           color="inherit"
           aria-label="Notifications"
           data-tour="notification-bell"
-          onClick={() => router.push("/profile/notifications")}
+          onClick={() => openPanel()}
           sx={{ display: { xs: "none", md: "inline-flex" } }}
         >
           <NotificationBadge sx={blackNotificationBadgeSx}>
@@ -1481,8 +1667,9 @@ export default function MainToolbar({ children }) {
                   left: 0,
                   width: appShell.drawerWidth,
                   height: `calc(100% - ${appShell.appBarHeight || 48}px)`,
-                  overflowY: "auto",
-                  overflowX: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
                   backdropFilter: SEMANTIC_THEME.surface.appBarBlur,
                   WebkitBackdropFilter: SEMANTIC_THEME.surface.appBarBlur,
                   backgroundColor: "custom.glassNavbar",
@@ -1498,7 +1685,10 @@ export default function MainToolbar({ children }) {
                 }}
                 role="presentation"
               >
-                {appShell.collapsed ? railNavContent : drawerNavContent}
+                <Box sx={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+                  {appShell.collapsed ? railNavContent : drawerNavContent}
+                </Box>
+                {!appShell.collapsed && mobileGamificationFooter}
               </Box>,
               document.body,
             )}
@@ -1560,21 +1750,21 @@ export default function MainToolbar({ children }) {
               >
                 <Box
                   className="nav-drag-grip"
-                  sx={{
+                  sx={(theme) => ({
                     width: 3,
                     height: "100%",
                     borderRadius: 0,
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? SEMANTIC_THEME.surface.darkDragHandle
-                        : SEMANTIC_THEME.surface.lightDragHandle,
+                    backgroundColor: SEMANTIC_THEME.surface.lightDragHandle,
+                    ...theme.applyStyles("dark", {
+                      backgroundColor: SEMANTIC_THEME.surface.darkDragHandle,
+                    }),
                     // Subtle at rest so it hides into the layout; pops out
                     // wider and fully opaque once the pointer is near enough
                     // to grab it (hover covers the full 24px hit zone).
                     opacity: 0.35,
                     transition:
                       "opacity 0.2s ease, background-color 0.2s ease, width 0.2s ease",
-                  }}
+                  })}
                 />
               </Box>,
               document.body,
@@ -1597,35 +1787,36 @@ export default function MainToolbar({ children }) {
               }}
               slotProps={{
                 backdrop: {
-                  sx: {
+                  sx: (theme) => ({
                     top: 0,
                     bottom: 0,
                     height: "100dvh",
-                    backgroundColor: (theme) =>
-                      theme.palette.mode === "dark"
-                        ? SEMANTIC_THEME.surface.darkDrawerBackdrop
-                        : SEMANTIC_THEME.surface.lightDrawerBackdrop,
+                    backgroundColor: SEMANTIC_THEME.surface.lightDrawerBackdrop,
+                    ...theme.applyStyles("dark", {
+                      backgroundColor:
+                        SEMANTIC_THEME.surface.darkDrawerBackdrop,
+                    }),
                     backdropFilter: `${SEMANTIC_THEME.surface.overlayBlur} saturate(1.15)`,
                     WebkitBackdropFilter: `${SEMANTIC_THEME.surface.overlayBlur} saturate(1.15)`,
-                  },
+                  }),
                 },
               }}
               PaperProps={{
-                sx: {
+                sx: (theme) => ({
                   top: 0,
                   height: "100dvh",
                   maxHeight: "100dvh",
                   overflow: "hidden",
                   backdropFilter: SEMANTIC_THEME.surface.overlayBlur,
                   WebkitBackdropFilter: SEMANTIC_THEME.surface.overlayBlur,
-                  backgroundColor: (theme) =>
-                    theme.palette.mode === "dark"
-                      ? SEMANTIC_THEME.surface.darkDrawer
-                      : SEMANTIC_THEME.surface.lightDrawer,
+                  backgroundColor: SEMANTIC_THEME.surface.lightDrawer,
+                  ...theme.applyStyles("dark", {
+                    backgroundColor: SEMANTIC_THEME.surface.darkDrawer,
+                  }),
                   backgroundImage: "none",
                   borderRight: "1px solid",
                   borderColor: "divider",
-                },
+                }),
               }}
             >
               <Box
@@ -1633,8 +1824,9 @@ export default function MainToolbar({ children }) {
                   width: 250,
                   height: "100%",
                   boxSizing: "border-box",
-                  overflowY: "auto",
-                  overflowX: "hidden",
+                  display: "flex",
+                  flexDirection: "column",
+                  overflow: "hidden",
                 }}
                 role="presentation"
                 onClick={toggleDrawer(anchor, false)}
@@ -1660,7 +1852,10 @@ export default function MainToolbar({ children }) {
                     <MenuIcon />
                   </IconButton>
                 </Box>
-                {drawerNavContent}
+                <Box sx={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+                  {drawerNavContent}
+                </Box>
+                {mobileGamificationFooter}
               </Box>
             </SwipeableDrawer>
           )}

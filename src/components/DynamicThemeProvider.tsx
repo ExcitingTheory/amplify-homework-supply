@@ -27,7 +27,10 @@ export default function DynamicThemeProvider({
   children: React.ReactNode;
 }) {
   const { settings } = useContext(SettingsContext);
-  const profileThemeId = settings?.profileThemeId || "default";
+  // Accessibility override — high contrast takes priority over any cosmetic theme choice.
+  const profileThemeId = settings?.highContrastMode
+    ? "highContrast"
+    : settings?.profileThemeId || "default";
 
   const theme = React.useMemo(() => {
     let options;

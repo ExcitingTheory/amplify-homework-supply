@@ -15,6 +15,7 @@ import { generatePracticeDrillHandler } from "../functions/generatePracticeDrill
 import { publishUnitHandler } from "../functions/publishUnit/resource";
 import { rebuildNgramIndexHandler } from "../functions/rebuildNgramIndex/resource";
 import { recycleBinHandler } from "../functions/recycleBin/resource";
+import { gradeRollupStreamHandler } from "../functions/gradeRollupStream/resource";
 
 /**
  * Amplify Gen 2 Data Schema
@@ -422,6 +423,31 @@ const CurveSettings = a.customType({
   method: a.string().required(), // scale-to-top | linear-adjustment
 });
 
+// Late-submission policy — presence of a percent field implies that penalty is
+// active (no separate enabled flags). acceptLateWork: false auto-resolves the
+// submission to lateStatus DROPPED instead of the legacy manual PENDING review.
+const LatePolicy = a.customType({
+  acceptLateWork: a.boolean(), // false = auto-DROPPED; true/unset = auto-KEPT
+  scorePenaltyPercent: a.float(), // 0-100 — unset means no score penalty
+  xpPenaltyPercent: a.float(), // 0-100 — unset means no XP penalty; 100 = no XP
+});
+
+const LatePolicyOverride = a.customType({
+  unitID: a.string().required(),
+  acceptLateWork: a.boolean(),
+  scorePenaltyPercent: a.float(),
+  xpPenaltyPercent: a.float(),
+});
+
+// Grade-aggregation method — which stat across a student's attempts counts as
+// "the" grade for an assignment: MIN | MAX | AVG | MEDIAN. Per-assignment
+// override by unitID; unset falls back to Section.gradeAggregationMethod,
+// which itself falls back to MAX (legacy "highest attempt" behavior).
+const GradeAggregationOverride = a.customType({
+  unitID: a.string().required(),
+  method: a.string().required(), // MIN | MAX | AVG | MEDIAN
+});
+
 // --- Workbook comments ---
 const CommentReply = a.customType({
   authorId: a.string().required(),
@@ -614,6 +640,9 @@ const rawSchemaDefinition = {
   BlockBreakdown,
   ResumeState,
   CurveSettings,
+  LatePolicy,
+  LatePolicyOverride,
+  GradeAggregationOverride,
   CommentReply,
   JobError,
   ConceptStrength,
@@ -751,6 +780,31 @@ const rawSchemaDefinition = {
           allow.group("Admins").to(["create", "read", "delete"]),
           allow.authenticated().to(["read"]),
         ]),
+      // Lambda-maintained rollup of this assignment's grades, keyed by studentId —
+      // { perStudentBest: { [studentId]: { best, worst, sum, effective, attempts,
+      //   firstCompletedAt } }, submittedCount, totalStudents, lastComputedAt }.
+      // `effective` is "the" grade under the section's configured
+      // gradeAggregationMethod (MIN | MAX | AVG | MEDIAN; default MAX).
+      // Instructor/Admin read-only — no owner()/Learners()/authenticated() so the
+      // assigned student can never see classmates' scores through this field.
+      // Written only by the rollup Lambda via the schema-level allow.resource() grant.
+      gradeSummary: a
+        .json()
+        .authorization((allow) => [
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+        ]),
+      // Anonymous class-wide aggregate derived from the same gradeSummary.perStudentBest
+      // .effective values — { avg, min, max, count }, no studentId keys. The one rollup
+      // slice safe for the assigned student to read directly ("you're at 85%, class avg
+      // is 78%") without exposing any classmate's individual score.
+      classStats: a
+        .json()
+        .authorization((allow) => [
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+          allow.group("Learners").to(["read"]),
+        ]),
     })
     .authorization((allow) => [
       // Student owns their assignment
@@ -809,6 +863,10 @@ const rawSchemaDefinition = {
     .secondaryIndexes((index) => [
       index("practiceSessionID").name("byPracticeSession"),
       index("sectionID").name("bySectionID"),
+      // Lets a per-student query (e.g. module progress recompute) read only that
+      // student's own rows for a section, instead of scanning every student's
+      // attempts via bySectionID.
+      index("owner").sortKeys(["sectionID"]).name("byOwnerAndSection"),
     ])
     .authorization((allow) => [
       // Student owns their grade
@@ -865,11 +923,67 @@ const rawSchemaDefinition = {
       identityId: a.string(),
       // Gradebook curve settings — per-assignment
       curveSettings: a.ref("CurveSettings").array(),
-      // Instructor grade overrides — per-student per-unit
-      gradeOverrides: a.json(), // { [studentId]: { [unitID]: { score: number, updatedAt: string } } }
+      // Late-submission policy — section-wide default; a matching entry in
+      // latePolicyOverrides (by unitID) wins when present. Neither set means
+      // the legacy behavior: late submissions are flagged lateStatus PENDING
+      // for manual instructor review (see Assignment.lateStatus).
+      lateWorkPolicy: a.ref("LatePolicy"),
+      latePolicyOverrides: a.ref("LatePolicyOverride").array(),
+      // Grade-aggregation method — section-wide default (MIN | MAX | AVG |
+      // MEDIAN); a matching entry in gradeAggregationOverrides (by unitID)
+      // wins when present. Unset means the legacy behavior: MAX (highest
+      // attempt). Consumed by the gradebook (client) and the Lambda-maintained
+      // Assignment.gradeSummary/Section.studentProgress rollups.
+      gradeAggregationMethod: a.string(),
+      gradeAggregationOverrides: a.ref("GradeAggregationOverride").array(),
+      // Instructor grade overrides — per-student per-unit. Field-level override so
+      // Learners/authenticated (granted read at the model level below, for section-code
+      // lookup) can never read another student's — or their own — override here.
+      gradeOverrides: a
+        .json() // { [studentId]: { [unitID]: { score: number, updatedAt: string } } }
+        .authorization((allow) => [
+          allow.owner(),
+          allow.group("Admins"),
+          allow.group("Instructors"),
+        ]),
       // Per-student accommodations — extra time / due-date extensions applied across this section's assignments
       // { [studentId]: { dueDateExtensionDays?: number, timeMultiplier?: number, note?: string, updatedAt: string } }
-      accommodations: a.json(),
+      // Same field-level restriction as gradeOverrides above.
+      accommodations: a
+        .json()
+        .authorization((allow) => [
+          allow.owner(),
+          allow.group("Admins"),
+          allow.group("Instructors"),
+        ]),
+      // Lambda-maintained per-student rollup across every unit in this section —
+      // { [studentId]: { perUnitStats: { [unitID]: { best, worst, sum, attempts,
+      //   recentValues } }, perUnitEffective: { [unitID]: number }, averageGrade,
+      //   unitsCompleted, lastActive } }.
+      // perUnitEffective is "the" per-unit grade under the section's configured
+      // gradeAggregationMethod (MIN | MAX | AVG | MEDIAN; default MAX) — averageGrade
+      // is derived from perUnitEffective, not a hardcoded best-attempt.
+      // Instructor/Admin read-only — no owner()/Learners()/authenticated() so a student
+      // can never see their own or classmates' rollup through this field.
+      // Written only by the rollup Lambda via the schema-level allow.resource() grant.
+      studentProgress: a
+        .json()
+        .authorization((allow) => [
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+        ]),
+      // Lambda-maintained section-wide activity rollup — { activityByDay: { [date]:
+      // count }, recentActivity: [{ owner, unitID, accuracy, timestamp }], recentGradeIds,
+      // lastComputedAt }. Bounded to a trailing window (days and entry count), not every
+      // Grade attempt. Instructor/Admin read-only, same reasoning as studentProgress above —
+      // recentActivity carries other students' identities/scores.
+      // Written only by the rollup Lambda via the schema-level allow.resource() grant.
+      activityFeed: a
+        .json()
+        .authorization((allow) => [
+          allow.group("Admins").to(["read"]),
+          allow.group("Instructors").to(["read"]),
+        ]),
       // Leaderboard
       leaderboardEnabled: a.boolean(), // Instructor toggle — show leaderboard for this section
       leaderboardRebuiltAt: a.datetime(), // Timestamp of last successful leaderboard rebuild (debounce)
@@ -1871,6 +1985,9 @@ const rawSchemaDefinition = {
       showAntiBadgesOnProfile: a.boolean(), // Show anti-badges on profile (default: false)
       profileThemeId: a.string(), // Cosmetic theme applied to profile page (from CosmeticSelector)
       customThemePalette: a.json(), // User-mixed custom theme colors (when profileThemeId is 'custom')
+      // Accessibility
+      reducedMotion: a.boolean(), // Suppress animations/transitions app-wide (default: false)
+      highContrastMode: a.boolean(), // Increase text/UI contrast app-wide (default: false)
       // Leaderboard & gamification
       leaderboardOptIn: a.boolean(), // Student opt-in for overall leaderboard
       // Recording settings
@@ -1913,6 +2030,8 @@ const rawSchemaDefinition = {
       seen: a.boolean().default(false),
       interacted: a.boolean().default(false),
       expiresAt: a.datetime(),
+      // Soft-delete marker for the recycle bin; null/unset = active (shown in inbox + search).
+      hiddenAt: a.datetime(),
       metadata: a.json(),
     })
     .secondaryIndexes((index) => [
@@ -2209,6 +2328,9 @@ const rawSchemaDefinition = {
       maxFailedAttemptsOnSingleRef: a.integer().default(0),
       recentSubmissionTimestamps: a.json(), // last 5 HOMEWORK_SUBMITTED timestamps
       activeDaysCount: a.integer().default(0),
+      // Bounded window of StudentXPLog ids already folded into totalXP/reasonCounts/etc —
+      // makes the stream handler's cumulative sum safe against DynamoDB Streams redelivery.
+      recentXpLogIds: a.string().array(),
       // Cosmetic penalty (boss battle consequence)
       cosmeticPenalty: a.json(),
       // Earned cosmetic rewards (rings, titles, borders, styles, themes)
@@ -2371,6 +2493,8 @@ const rawSchemaDefinition = {
       maxFailedAttemptsOnSingleRef: a.integer().default(0),
       recentSubmissionTimestamps: a.json(),
       activeDaysCount: a.integer().default(0),
+      // Same redelivery-safety field as StudentProfile.recentXpLogIds.
+      recentXpLogIds: a.string().array(),
       // Module progress within this section
       moduleProgress: a.ref("ModuleProgressEntry").array(),
       owner: a
@@ -2637,6 +2761,9 @@ const rawSchemaDefinition = {
       linkedUnitIds: a.string().array(),
       // Embedded contributions (absorbed from GroupChallengeContribution)
       contributions: a.ref("ChallengeContribution").array(),
+      // Bounded window of StudentXPLog ids already credited to currentXP/contributions —
+      // same redelivery-safety pattern as StudentProfile.recentXpLogIds.
+      creditedXpLogIds: a.string().array(),
     })
     .secondaryIndexes((index) => [index("sectionID").name("bySection")])
     .authorization((allow) => [
@@ -3217,6 +3344,23 @@ const rawSchemaDefinition = {
     ])
     .handler(a.handler.function(sectionHandler)),
 
+  // Instructor-initiated — recomputes Assignment.gradeSummary.perStudentBest[*].effective
+  // and Section.studentProgress.perUnitEffective/averageGrade from already-stored
+  // recentValues under the section's CURRENT gradeAggregationMethod/Overrides, so
+  // changing the method mid-term doesn't require a new Grade submission to "self-heal"
+  // the rollups the instructor overview dashboard reads.
+  recomputeGradeAggregation: a
+    .mutation()
+    .arguments({
+      sectionId: a.id().required(),
+    })
+    .returns(a.json())
+    .authorization((allow) => [
+      allow.group("Instructors"),
+      allow.group("Admins"),
+    ])
+    .handler(a.handler.function(sectionHandler)),
+
   // Peer Review Mutations
   createPeerReviewRoom: a
     .mutation()
@@ -3628,6 +3772,7 @@ const schema = a
     allow.resource(gamificationHandler),
     allow.resource(moderationHandler),
     allow.resource(recycleBinHandler),
+    allow.resource(gradeRollupStreamHandler),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;

@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "Bedeutungszuordnung"
   },
+  "customAIEditor": {
+    "title": "KI-bewertete Übung",
+    "description": "Erstellen Sie eine KI-bewertete Übung, bei der Lernende auf Fragen antworten und die KI die Antworten anhand Ihrer eigenen Bewertungskriterien auswertet."
+  },
   "customAnswerEditor": {
     "add": "Hinzufügen",
     "addWordLabel": "Wort zur Übung hinzufügen",

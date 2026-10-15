@@ -93,6 +93,7 @@ import {
   $insertGeneratedNodes,
 } from "@lexical/clipboard";
 import { BotAvatar } from "./BotAvatar";
+import { useBotAvatarConfig } from "../hooks/useBotAvatarConfig";
 import {
   trackChatMessageSent,
   trackChatFileUploaded,
@@ -338,6 +339,13 @@ const ChatSidebarContent = ({ onClose }) => {
 
   // Get auth state
   const { user, isLoading: authLoading } = React.useContext(AuthContext);
+
+  // Saved AI assistant avatar customization
+  const botAvatarConfig = useBotAvatarConfig();
+  const botAvatarOverrides = React.useMemo(
+    () => ({ backgroundColor: [botAvatarConfig.backgroundColor] }),
+    [botAvatarConfig.backgroundColor],
+  );
 
   // Fetch student memory for AI context
   const [studentMemory, setStudentMemory] = React.useState(null);
@@ -1753,7 +1761,11 @@ const ChatSidebarContent = ({ onClose }) => {
                 p: 1.5,
               }}
             >
-              <BotAvatar size={40} />
+              <BotAvatar
+                size={40}
+                style={botAvatarConfig.style}
+                overrides={botAvatarOverrides}
+              />
               <Box
                 sx={{
                   flex: 1,
@@ -2238,7 +2250,11 @@ const ChatSidebarContent = ({ onClose }) => {
                         }}
                       >
                         {message.role === "assistant" && (
-                          <BotAvatar size={48} />
+                          <BotAvatar
+                            size={48}
+                            style={botAvatarConfig.style}
+                            overrides={botAvatarOverrides}
+                          />
                         )}
                         <Box
                           className={

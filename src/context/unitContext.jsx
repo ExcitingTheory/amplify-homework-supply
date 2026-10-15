@@ -15,7 +15,11 @@ import { summarizeFeedback as summarizeFeedbackAction } from "../../app/actions/
 import AuthContext from "../context/authContext";
 import { useWorkbookCollaboration } from "../yjs/workbookHooks";
 import { trackWorkbookStarted, trackGradeSubmitted } from "../utils/analytics";
-import { getAssignmentWindowState } from "../utils/assignmentTiming";
+import {
+  getAssignmentWindowState,
+  resolveLatePolicy,
+} from "../utils/assignmentTiming";
+import { getXPForAction } from "../utils/xpCalculation";
 import {
   unitReducer,
   initialState as unitInitialState,
@@ -43,6 +47,7 @@ const UnitProvider = ({ children, id }) => {
   const [state, dispatch] = useReducer(unitReducer, unitInitialState);
   const [sectionId, setSectionId] = React.useState(undefined);
   const [assignmentRecord, setAssignmentRecord] = React.useState(undefined);
+  const [sectionRecord, setSectionRecord] = React.useState(undefined);
   const [assignmentWindowReady, setAssignmentWindowReady] =
     React.useState(false);
   const savingCountRef = useRef(0);
@@ -248,6 +253,38 @@ const UnitProvider = ({ children, id }) => {
     };
   }, [id, user, authLoading]);
 
+  // Fetch the Section's late-work policy (section-wide default + per-unit
+  // overrides) once sectionId is known — needed to resolve late-submission
+  // handling in saveGrade without a per-save network round-trip.
+  React.useEffect(() => {
+    if (!sectionId) {
+      setSectionRecord(undefined);
+      return;
+    }
+    let cancelled = false;
+    const client = getAmplifyClient();
+
+    async function lookupSection() {
+      try {
+        const { data } = await client.models.Section.get({ id: sectionId });
+        if (!cancelled) setSectionRecord(data || null);
+      } catch (err) {
+        if (!cancelled) {
+          setSectionRecord(null);
+          console.warn(
+            "[UnitContext] Failed to look up Section for late policy:",
+            err,
+          );
+        }
+      }
+    }
+
+    lookupSection();
+    return () => {
+      cancelled = true;
+    };
+  }, [sectionId]);
+
   const verifyAccuracy = React.useCallback((data) => {
     let total = 0;
     let accuracy = 0;
@@ -280,7 +317,7 @@ const UnitProvider = ({ children, id }) => {
   }, []);
 
   const createGrade = React.useCallback(
-    async (unitAccuracy, unitIsComplete) => {
+    async (unitAccuracy, unitIsComplete, xpOverrideAmount) => {
       // Ensure we have authentication before creating grade
       // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
       const currentUsername = usernameRef.current || user?.attributes?.sub;
@@ -319,6 +356,8 @@ const UnitProvider = ({ children, id }) => {
         _grade.id,
         sectionId || undefined,
         id,
+        undefined,
+        xpOverrideAmount,
       );
 
       return _grade;
@@ -428,6 +467,40 @@ const UnitProvider = ({ children, id }) => {
         unitAccuracy = verifyAccuracy(data);
       }
 
+      // Resolve the section's late-work policy (section default, per-unit
+      // override wins) — only acted on for a newly-detected late submission;
+      // shouldRequestLateReview already excludes assignments already resolved
+      // KEPT/DROPPED. No policy configured preserves the legacy manual
+      // lateStatus PENDING instructor-review flow further below.
+      const latePolicy = shouldRequestLateReview
+        ? resolveLatePolicy(sectionRecord, id)
+        : null;
+      let resolvedLateStatus = null;
+      let xpOverrideAmount;
+      if (unitIsComplete && latePolicy) {
+        resolvedLateStatus = latePolicy.acceptLateWork ? "KEPT" : "DROPPED";
+        if (!latePolicy.acceptLateWork) {
+          // Dropped work never earns XP, regardless of any configured xpPenaltyPercent.
+          xpOverrideAmount = 0;
+        } else {
+          if (latePolicy.scorePenaltyPercent != null) {
+            unitAccuracy = Math.max(
+              0,
+              Math.round(
+                unitAccuracy * (1 - latePolicy.scorePenaltyPercent / 100),
+              ),
+            );
+          }
+          if (latePolicy.xpPenaltyPercent != null) {
+            const baseXp = getXPForAction("HOMEWORK_SUBMITTED");
+            xpOverrideAmount = Math.max(
+              0,
+              Math.round(baseXp * (1 - latePolicy.xpPenaltyPercent / 100)),
+            );
+          }
+        }
+      }
+
       // Keep the current record usable before the Grade subscription echoes the write.
       if (currentGrade?.id) {
         const optimisticGrade = {
@@ -479,7 +552,11 @@ const UnitProvider = ({ children, id }) => {
         };
 
         if (!currentGrade?.id) {
-          const newGrade = await createGrade(unitAccuracy, unitIsComplete);
+          const newGrade = await createGrade(
+            unitAccuracy,
+            unitIsComplete,
+            xpOverrideAmount,
+          );
           if (newGrade && newGrade.id) {
             gradeId = newGrade.id;
             gradeStateRef.current = {
@@ -503,7 +580,9 @@ const UnitProvider = ({ children, id }) => {
             const client = getAmplifyClient();
             await client.models.Assignment.update({
               id: assignment.id,
-              lateStatus: "PENDING",
+              // A configured late policy resolves this automatically (KEPT/DROPPED);
+              // otherwise fall back to the legacy manual-review PENDING flag.
+              lateStatus: resolvedLateStatus || "PENDING",
               _version: assignment._version,
             });
           } catch (error) {
@@ -555,6 +634,7 @@ const UnitProvider = ({ children, id }) => {
                   gradeStateRef.current.id,
                   undefined,
                   sectionId || undefined,
+                  xpOverrideAmount,
                 );
                 // Show personal best banner if applicable
                 if (result?.personalBest?.isNewBest) {
@@ -650,6 +730,7 @@ const UnitProvider = ({ children, id }) => {
       createGrade,
       timeLimitSeconds,
       assignmentRecord,
+      sectionRecord,
     ],
   );
 

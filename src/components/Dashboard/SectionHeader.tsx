@@ -7,7 +7,56 @@ import FlagIcon from "@mui/icons-material/Flag";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { GradeDonut } from "./GradeDonut";
+
+export interface ClassScheduleEntry {
+  dayOfWeek: number;
+  startTime: string;
+  endTime?: string | null;
+}
+
+const DAY_ABBR = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+function formatTime(time: string): string {
+  const [hours, minutes] = time.split(":").map(Number);
+  if (Number.isNaN(hours)) return time;
+  const period = hours >= 12 ? "PM" : "AM";
+  const hour12 = hours % 12 === 0 ? 12 : hours % 12;
+  return minutes
+    ? `${hour12}:${String(minutes).padStart(2, "0")}${period}`
+    : `${hour12}${period}`;
+}
+
+/** Groups meeting days that share the same time (e.g. Mon/Wed/Fri 9-9:50am) into one readable line per distinct time slot. */
+export function formatClassSchedule(
+  classSchedule?: ClassScheduleEntry[] | null,
+): string | null {
+  if (!classSchedule || classSchedule.length === 0) return null;
+
+  const groups = new Map<string, number[]>();
+  for (const entry of classSchedule) {
+    if (!Number.isInteger(entry?.dayOfWeek) || !entry?.startTime) continue;
+    const key = `${entry.startTime}|${entry.endTime || ""}`;
+    const days = groups.get(key) || [];
+    days.push(entry.dayOfWeek);
+    groups.set(key, days);
+  }
+  if (groups.size === 0) return null;
+
+  const parts: string[] = [];
+  for (const [key, days] of groups) {
+    const [startTime, endTime] = key.split("|");
+    const dayLabels = [...new Set(days)]
+      .sort((a, b) => a - b)
+      .map((d) => DAY_ABBR[d]);
+    const timeLabel = endTime
+      ? `${formatTime(startTime)}\u2013${formatTime(endTime)}`
+      : formatTime(startTime);
+    parts.push(`${dayLabels.join(", ")} ${timeLabel}`);
+  }
+  return parts.join(" \u00b7 ");
+}
 
 export function CopyableCode({ code }: { code: string }) {
   const [copied, setCopied] = React.useState(false);
@@ -35,6 +84,8 @@ export interface SectionHeaderProps {
   name: string;
   code?: string;
   description?: string;
+  /** Recurring weekly class meeting times — rendered as a schedule line under the description. */
+  classSchedule?: ClassScheduleEntry[] | null;
   /** 0-100 average grade, rendered as a donut ring next to the title */
   averageGrade?: number;
   studentCount: number;
@@ -49,6 +100,7 @@ export function SectionHeader({
   name,
   code,
   description,
+  classSchedule,
   averageGrade,
   studentCount,
   activeCount,
@@ -56,6 +108,7 @@ export function SectionHeader({
   atRiskCount = 0,
   excellingCount = 0,
 }: SectionHeaderProps) {
+  const scheduleText = formatClassSchedule(classSchedule);
   return (
     <Box
       sx={{
@@ -70,32 +123,52 @@ export function SectionHeader({
         gap: { xs: 1.5, sm: 2 },
       }}
     >
-      <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Box
-          sx={{
-            display: "flex",
-            alignItems: "center",
-            gap: 1,
-            flexWrap: "wrap",
-          }}
-        >
-          {averageGrade != null && (
-            <GradeDonut value={averageGrade} size={36} />
-          )}
-          <Typography variant="h6" sx={{ fontWeight: 700 }}>
-            {name}
-          </Typography>
-          {code && <CopyableCode code={code} />}
-        </Box>
-        {description && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{ mt: 0.25, lineHeight: 1.4 }}
+      <Box
+        sx={{
+          display: "flex",
+          alignItems: "flex-start",
+          gap: 1.5,
+          flex: 1,
+          minWidth: 0,
+        }}
+      >
+        {averageGrade != null && <GradeDonut value={averageGrade} size={36} />}
+        <Box sx={{ flex: 1, minWidth: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+            }}
           >
-            {description}
-          </Typography>
-        )}
+            <Typography variant="h6" sx={{ fontWeight: 700 }}>
+              {name}
+            </Typography>
+            {code && <CopyableCode code={code} />}
+          </Box>
+          {description && (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{ mt: 0.25, lineHeight: 1.4 }}
+            >
+              {description}
+            </Typography>
+          )}
+          {scheduleText && (
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.5, mt: 0.5 }}
+            >
+              <AccessTimeIcon
+                sx={{ fontSize: "0.9rem", color: "text.disabled" }}
+              />
+              <Typography variant="body2" color="text.secondary">
+                {scheduleText}
+              </Typography>
+            </Box>
+          )}
+        </Box>
       </Box>
       <Stack
         direction="row"

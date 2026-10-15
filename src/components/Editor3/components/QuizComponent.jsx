@@ -194,23 +194,36 @@ export function QuizView({
         : checked
           ? "primary.main"
           : "divider";
-    const rowBgColor = (theme) =>
-      showCorrectFeedback
-        ? alpha(
-            theme.palette.success.main,
-            theme.palette.mode === "dark" ? 0.32 : 0.24,
-          )
-        : showWrongFeedback
-          ? alpha(
-              theme.palette.error.main,
-              theme.palette.mode === "dark" ? 0.32 : 0.24,
-            )
-          : checked && !isLocked
-            ? alpha(
-                theme.palette.primary.main,
-                theme.palette.mode === "dark" ? 0.22 : 0.12,
-              )
-            : "transparent";
+    // theme.palette.mode is static under this app's CSS-variables theming, so
+    // the dark/light split must come from theme.applyStyles (CSS selector),
+    // not a JS ternary, to actually react to runtime scheme toggling.
+    const rowBgSx = (theme) => {
+      if (showCorrectFeedback) {
+        return {
+          bgcolor: alpha(theme.palette.success.main, 0.24),
+          ...theme.applyStyles("dark", {
+            bgcolor: alpha(theme.palette.success.main, 0.32),
+          }),
+        };
+      }
+      if (showWrongFeedback) {
+        return {
+          bgcolor: alpha(theme.palette.error.main, 0.24),
+          ...theme.applyStyles("dark", {
+            bgcolor: alpha(theme.palette.error.main, 0.32),
+          }),
+        };
+      }
+      if (checked && !isLocked) {
+        return {
+          bgcolor: alpha(theme.palette.primary.main, 0.12),
+          ...theme.applyStyles("dark", {
+            bgcolor: alpha(theme.palette.primary.main, 0.22),
+          }),
+        };
+      }
+      return { bgcolor: "transparent" };
+    };
 
     return (
       <FormControlLabel
@@ -247,7 +260,7 @@ export function QuizView({
             )}
           </Box>
         }
-        sx={{
+        sx={(theme) => ({
           m: 0,
           width: "100%",
           px: 1,
@@ -255,13 +268,13 @@ export function QuizView({
           borderRadius: `${SEMANTIC_THEME.radius.control}px`,
           border: "1px solid",
           borderColor: rowBorderColor,
-          bgcolor: rowBgColor,
+          ...rowBgSx(theme),
           transition: "border-color 0.15s, background-color 0.15s",
           color: "text.primary",
           "& .MuiFormControlLabel-label.Mui-disabled": {
             color: wasAttempted ? "text.primary" : "text.disabled",
           },
-        }}
+        })}
       />
     );
   });

@@ -4,11 +4,16 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import { alpha, darken, lighten, useTheme } from "@mui/material/styles";
+import {
+  alpha,
+  darken,
+  lighten,
+  useTheme,
+  useColorScheme,
+} from "@mui/material/styles";
 import { getGrainySheenSx } from "@/utils/grainySheen";
 import {
   getTinctures,
-  readableInk,
   TINCTURE_KEYS,
   type Tincture,
   type TinctureKey,
@@ -115,6 +120,22 @@ function usePresets(): GradientPreset[] {
       shine: 0,
       animate: false,
     },
+    {
+      id: "recommended-textured",
+      label: "Recommended + subtle texture",
+      description:
+        "Primary-tinted start fading to near-black (never white), heavy grain, animated sheen pass — white vs. dark nested card",
+      // Previous version used alpha(primary, 0.18) → grey[200], which is a
+      // semi-transparent near-white paint over the page background blending
+      // into another near-white stop — the whole card read as plain white,
+      // not "subtle texture". Use an opaque primary stop (no alpha, so it
+      // doesn't blend with whatever's behind it) fading to near-black.
+      colorA: theme.palette.primary.main,
+      colorB: theme.palette.grey[900],
+      grain: 0.3,
+      shine: 0.14,
+      animate: true,
+    },
   ];
 }
 
@@ -183,62 +204,117 @@ function MockNextStepCard({
       <Typography variant="body2" sx={{ color: secondaryTextColor, mb: 2 }}>
         Due soon · Section 2B
       </Typography>
-      <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+      <Stack
+        direction="row"
+        spacing={1}
+        flexWrap="wrap"
+        useFlexGap
+        justifyContent="space-between"
+        alignItems="center"
+      >
+        <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
+          {/* Dismiss is the lowest-emphasis action — a real text/link button, not a faint outline impersonating one. */}
+          <Button
+            variant="text"
+            size="small"
+            sx={{
+              color: textColor,
+              fontWeight: 600,
+              "&:hover": {
+                bgcolor: isWhite ? alpha("#fff", 0.08) : alpha("#000", 0.08),
+              },
+            }}
+          >
+            Dismiss
+          </Button>
+          <Button
+            variant="outlined"
+            size="small"
+            sx={{
+              color: textColor,
+              borderWidth: "1.5px",
+              borderColor: isWhite ? alpha("#fff", 0.8) : alpha("#000", 0.8),
+              bgcolor: "transparent",
+              fontWeight: 700,
+              "&:hover": {
+                borderColor: isWhite ? "common.white" : "common.black",
+                bgcolor: isWhite ? alpha("#fff", 0.08) : alpha("#000", 0.08),
+              },
+            }}
+          >
+            Practice focus areas
+          </Button>
+        </Stack>
+        {/* Primary CTA uses real theme semantics (color="primary") instead of swapping raw white/black fills. */}
         <Button
           variant="contained"
+          color="primary"
           size="small"
-          sx={{
-            bgcolor: isWhite ? "common.white" : "common.black",
-            color: isWhite ? "primary.main" : "common.white",
-            fontWeight: 700,
-            "&:hover": {
-              bgcolor: isWhite ? alpha("#fff", 0.85) : alpha("#000", 0.75),
-            },
-          }}
+          sx={{ fontWeight: 700 }}
         >
           Start
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{
-            color: textColor,
-            borderWidth: "1.5px",
-            borderColor: isWhite ? alpha("#fff", 0.8) : alpha("#000", 0.8),
-            bgcolor: "transparent",
-            fontWeight: 700,
-            "&:hover": {
-              borderColor: isWhite ? "common.white" : "common.black",
-              bgcolor: isWhite ? alpha("#fff", 0.08) : alpha("#000", 0.08),
-            },
-          }}
-        >
-          Practice focus areas
-        </Button>
-        <Button
-          variant="outlined"
-          size="small"
-          sx={{
-            color: textColor,
-            borderWidth: "1px",
-            borderColor: isWhite ? alpha("#fff", 0.35) : alpha("#000", 0.35),
-            bgcolor: "transparent",
-            fontWeight: 600,
-            "&:hover": {
-              borderColor: isWhite ? alpha("#fff", 0.6) : alpha("#000", 0.6),
-              bgcolor: isWhite ? alpha("#fff", 0.05) : alpha("#000", 0.05),
-            },
-          }}
-        >
-          Dismiss
         </Button>
       </Stack>
     </Box>
   );
 }
 
+/**
+ * Plan recommendation: no gradient at all. Flat `background.paper` panel,
+ * restrained `divider` border, ordinary text colors — the "calmer panel
+ * styling" called for in the Dashboard Visual Refresh Plan, as opposed to
+ * the toned-down-but-still-gradient presets below.
+ */
+function FlatPanelBlock() {
+  const theme = useTheme();
+  return (
+    <Box sx={{ mb: 5 }}>
+      <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.25 }}>
+        No gradient (calm panel) — plan recommendation
+      </Typography>
+      <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
+        Flat background.paper, 1px divider border, no wash/grain/sheen.
+      </Typography>
+      <Box
+        sx={{
+          borderRadius: `${DASHBOARD_TOKENS.radius.card}px`,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          p: { xs: 2.5, sm: 3 },
+          maxWidth: 560,
+        }}
+      >
+        <Typography
+          variant="caption"
+          color="text.secondary"
+          sx={{
+            display: "block",
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: "0.08em",
+            mb: 0.5,
+          }}
+        >
+          Today
+        </Typography>
+        <Typography variant="h4" sx={{ fontWeight: 800, mb: 2 }}>
+          Good afternoon, Sakura
+        </Typography>
+        <MockNextStepCard
+          overlay="white"
+          onGradient={false}
+          accentColor={theme.palette.primary.main}
+        />
+      </Box>
+    </Box>
+  );
+}
+
 function PresetBlock({ preset }: { preset: GradientPreset }) {
-  const ink = readableInk(preset.colorA);
+  const theme = useTheme();
+  // General contrast pick, not a heraldry tincture — use MUI's own API, not readableInk.
+  const ink = theme.palette.getContrastText(preset.colorA);
   return (
     <Box sx={{ mb: 5 }}>
       <Typography variant="subtitle1" sx={{ fontWeight: 700, mb: 0.25 }}>
@@ -320,6 +396,7 @@ export const GradientPresetGallery: Story = {
         <Typography variant="h5" sx={{ fontWeight: 800, mb: 3 }}>
           Hero gradient presets
         </Typography>
+        <FlatPanelBlock />
         {presets.map((preset) => (
           <PresetBlock key={preset.id} preset={preset} />
         ))}
@@ -330,21 +407,22 @@ export const GradientPresetGallery: Story = {
 
 /**
  * Single-tincture conic-gradient ring wrapped around arbitrary children (a card
- * body or a button). Uses the tincture's own opaque shade/light stops (not an
- * alpha-blended wash) so the ring stays visible against both light and dark
- * `background.paper` — alpha(hue, 0.15) reads as near-invisible on a white
- * card, which was the cause of the "colors are too subtle in light mode" bug.
- * The gradient lives on an oversized `::before` pseudo-element centered on the
- * wrapper via `top/left: 50% + translate(-50%, -50%)`, then spun with a
- * `transform: rotate()` keyframe — animating the `background` declaration
- * itself (e.g. a `from <angle>` custom property) does not repaint conic-gradient
- * stops in any browser, which is why an earlier version never visibly rotated.
+ * body or a button). Uses the tincture's own opaque shade/light/main stops
+ * (not an alpha-blended wash) so the ring stays visible against both light
+ * and dark `background.paper` — alpha(hue, 0.15) reads as near-invisible on a
+ * white card, which was the cause of the "colors are too subtle in light
+ * mode" bug. The gradient lives on an oversized `::before` pseudo-element
+ * centered on the wrapper via `top/left: 50% + translate(-50%, -50%)`, then
+ * spun with a `transform: rotate()` keyframe — animating the `background`
+ * declaration itself via a custom-property angle doesn't repaint reliably
+ * (tried it: the angle never visibly interpolated, only `opacity` did,
+ * which just looks like fading rather than rotating).
  */
 function ConicGradientRing({
   tincture,
   rotate,
   radius,
-  thickness = 3,
+  thickness = 2,
   children,
 }: {
   tincture: Tincture;
@@ -353,9 +431,7 @@ function ConicGradientRing({
   thickness?: number;
   children: React.ReactNode;
 }) {
-  // Exactly 3 stops (shade → light → shade) — one bright cone per revolution.
-  // 5 stops (dim/hue/dim/hue/dim) would produce two cones instead of one.
-  const ring = `conic-gradient(from 0deg, ${tincture.shade} 0%, ${tincture.light} 50%, ${tincture.shade} 100%)`;
+  const ring = `conic-gradient(from 0deg, ${buildConicStops([tincture])})`;
   return (
     <Box
       sx={{
@@ -375,13 +451,11 @@ function ConicGradientRing({
           position: "absolute",
           top: "50%",
           left: "50%",
-          // `width: %, height: %` resolves against the wrapper's own box, so on
-          // a non-square wrapper (e.g. a wide, short button) it stretches into
-          // a rectangle instead of a circle — the conic-gradient cone warps as
-          // it turns instead of sweeping smoothly. Fixing the aspect ratio to
-          // 1 keeps it a true circle (and therefore a steady rotation) no
-          // matter the wrapper's shape; sizing off `width` alone is safe here
-          // since every wrapper (card or button) is wider than it is tall.
+          // Oversized + aspect-ratio 1 keeps it a true circle regardless of
+          // the wrapper's own shape, so every point on the visible rounded-
+          // rect border still sweeps through the full 360° of color as it
+          // spins — sizing off `width` alone is safe since every wrapper
+          // here (card or button) is wider than it is tall.
           width: "300%",
           aspectRatio: "1",
           background: ring,
@@ -471,6 +545,9 @@ function ConicBorderButton({
         size="small"
         sx={{
           borderRadius: `${DASHBOARD_TOKENS.radius.button}px`,
+          // The animated ring IS the outline — the button's own static MUI
+          // border would otherwise sit a few px inside it, duplicating it.
+          ...(variant === "outlined" && { border: "none" }),
           ...(variant === "outlined" &&
             !neutralSx && { bgcolor: "transparent" }),
           ...(neutralSx ? neutralSx[variant] : {}),
@@ -510,23 +587,27 @@ function DepressingSquare() {
  * Tertiary's ring doesn't spin continuously like Primary/Secondary — it
  * cycles through 4 phases on one 8s timeline: invisible → the cone rotates in
  * → crossfades into a fully solid ring → fades back to invisible (pause)
- * before repeating. Two pseudo-elements carry it: `::before` is the existing
- * oversized rotating cone with its opacity cycled on top of its spin;
- * `::after` is a plain solid-color ring (no gradient, so it never needs to
- * rotate) that only becomes visible during the "solid" phase.
+ * before repeating. `::before` carries the cone: rotation and opacity are
+ * baked into ONE keyframe animation (not two separately-timed ones) so the
+ * cone always reaches the same rotation at the same opacity every single
+ * cycle — two independent animations (e.g. a 6s linear spin + an 8s opacity
+ * cycle) drift out of phase with each other (they only realign every 24s),
+ * so the cone would appear at a different, seemingly random angle each time
+ * it faded in. `::after` is a plain (non-rotating) gradient fill that only
+ * becomes visible during the "solid" phase.
  */
 function TertiaryConicRing({
-  tincture,
+  tinctures,
   radius,
   thickness = 2,
   children,
 }: {
-  tincture: Tincture;
+  tinctures: Tincture[];
   radius: number;
   thickness?: number;
   children: React.ReactNode;
 }) {
-  const ring = `conic-gradient(from 0deg, ${tincture.shade} 0%, ${tincture.light} 50%, ${tincture.shade} 100%)`;
+  const ring = `conic-gradient(from 0deg, ${buildConicStops(tinctures)})`;
   return (
     <Box
       sx={{
@@ -537,14 +618,22 @@ function TertiaryConicRing({
         p: `${thickness}px`,
         overflow: "hidden",
         isolation: "isolate",
-        "@keyframes conicGradientSpin": {
-          from: { transform: "translate(-50%, -50%) rotate(0deg)" },
-          to: { transform: "translate(-50%, -50%) rotate(360deg)" },
-        },
-        // Cone visible only while it "rotates in" (20%–55%); invisible the rest.
-        "@keyframes tertiaryConeOpacity": {
-          "0%, 20%, 55%, 100%": { opacity: 0 },
-          "40%": { opacity: 1 },
+        // Cone rotates in (0\u2192160deg) while fading in, keeps turning while
+        // it fades back out (\u2192360deg, visually == 0deg so the loop is
+        // seamless), then holds still \u2014 invisible \u2014 through the pause.
+        "@keyframes tertiaryConeSpin": {
+          "0%, 20%": {
+            transform: "translate(-50%, -50%) rotate(0deg)",
+            opacity: 0,
+          },
+          "40%": {
+            transform: "translate(-50%, -50%) rotate(160deg)",
+            opacity: 1,
+          },
+          "55%, 100%": {
+            transform: "translate(-50%, -50%) rotate(360deg)",
+            opacity: 0,
+          },
         },
         // Solid ring fades in right as the cone fades out, holds, then fades
         // out into the pause — never visible at the same time as the cone.
@@ -560,9 +649,7 @@ function TertiaryConicRing({
           width: "300%",
           aspectRatio: "1",
           background: ring,
-          transform: "translate(-50%, -50%)",
-          animation:
-            "conicGradientSpin 6s linear infinite, tertiaryConeOpacity 8s ease-in-out infinite",
+          animation: "tertiaryConeSpin 8s ease-in-out infinite",
           "@media (prefers-reduced-motion: reduce)": {
             animation: "none",
             opacity: 0,
@@ -572,7 +659,7 @@ function TertiaryConicRing({
           content: '""',
           position: "absolute",
           inset: 0,
-          background: tincture.light,
+          background: ring,
           opacity: 0,
           animation: "tertiarySolidOpacity 8s ease-in-out infinite",
           "@media (prefers-reduced-motion: reduce)": {
@@ -598,12 +685,12 @@ function TertiaryConicRing({
 }
 
 function TertiaryLinkButton({
-  tincture,
+  tinctures,
   label,
   color,
   textColorOverride,
 }: {
-  tincture: Tincture;
+  tinctures: Tincture[];
   label: string;
   /** MUI semantic color — omit to keep the default primary text color. */
   color?: "primary" | "secondary" | "success" | "info" | "warning" | "error";
@@ -612,7 +699,7 @@ function TertiaryLinkButton({
 }) {
   return (
     <TertiaryConicRing
-      tincture={tincture}
+      tinctures={tinctures}
       radius={DASHBOARD_TOKENS.radius.button + 2}
     >
       <Button
@@ -642,7 +729,13 @@ function TertiaryLinkButton({
 export const ConicMonochromeBorders: Story = {
   render: function Render() {
     const theme = useTheme();
-    const isDarkMode = theme.palette.mode === "dark";
+    // theme.palette.mode is static under this app's CSS-variables theming —
+    // it never updates after theme creation. useColorScheme() is the actual
+    // reactive signal for the live scheme.
+    const { mode: schemeMode, systemMode } = useColorScheme();
+    const isDarkMode =
+      schemeMode === "dark" ||
+      (schemeMode === "system" && systemMode === "dark");
     const hues: Array<{ id: string; label: string; tincture: Tincture }> = [
       {
         id: "primary",
@@ -675,7 +768,8 @@ export const ConicMonochromeBorders: Story = {
         color: text,
         "&:hover": { bgcolor: bg, opacity: 0.88 },
       },
-      outlined: { color: text, borderColor: text, bgcolor: "transparent" },
+      // The animated ring IS the outline — no separate static border here.
+      outlined: { color: text, border: "none", bgcolor: "transparent" },
       text: { color: text },
     });
 
@@ -814,7 +908,7 @@ export const ConicMonochromeBorders: Story = {
                 rotate
                 variant="outlined"
               />
-              <TertiaryLinkButton tincture={hue.tincture} label="Link" />
+              <TertiaryLinkButton tinctures={[hue.tincture]} label="Link" />
             </Stack>
           ))}
         </Box>
@@ -857,7 +951,7 @@ export const ConicMonochromeBorders: Story = {
                 neutralSx={hue.neutralSx}
               />
               <TertiaryLinkButton
-                tincture={hue.tincture}
+                tinctures={[hue.tincture]}
                 label="Link"
                 color={hue.color}
                 textColorOverride={hue.textColorOverride}
@@ -892,7 +986,7 @@ function themeButtonColorAt(index: number): ThemeButtonColor {
   return THEME_BUTTON_COLORS[index % THEME_BUTTON_COLORS.length];
 }
 
-/** MUI `color` prop + sx override for a theme button color (white/black need explicit, variant-specific sx since MUI has no color enum for them). */
+/** MUI `color` prop + sx override for a theme button color + variant (white/black need explicit sx per variant, MUI has no color enum for them). */
 function themeButtonProps(
   colorName: ThemeButtonColor,
   variant: "contained" | "outlined" | "text" = "contained",
@@ -901,34 +995,27 @@ function themeButtonProps(
   sx: object;
 } {
   if (colorName === "white" || colorName === "black") {
-    const hex = colorName === "white" ? "#ffffff" : "#000000";
-    const ink = colorName === "white" ? "#000000" : "#ffffff";
+    const bg = colorName === "white" ? "#ffffff" : "#000000";
+    const text = colorName === "white" ? "#000000" : "#ffffff";
     if (variant === "contained") {
       return {
         sx: {
-          bgcolor: hex,
-          color: ink,
-          "&:hover": { bgcolor: alpha(hex, 0.85) },
+          bgcolor: bg,
+          color: text,
+          "&:hover": { bgcolor: bg, opacity: 0.88 },
         },
       };
     }
     if (variant === "outlined") {
-      return {
-        sx: {
-          color: hex,
-          borderColor: hex,
-          "&:hover": { borderColor: hex, bgcolor: alpha(hex, 0.08) },
-        },
-      };
+      // The animated ring IS the outline — no separate static border here.
+      return { sx: { color: text, border: "none", bgcolor: "transparent" } };
     }
-    return {
-      sx: {
-        color: hex,
-        "&:hover": { bgcolor: alpha(hex, 0.08) },
-      },
-    };
+    return { sx: { color: text } };
   }
-  return { color: colorName, sx: {} };
+  return {
+    color: colorName,
+    sx: variant === "outlined" ? { border: "none" } : {},
+  };
 }
 
 /** One labeled gradient bar built from a tincture's own shade → main → light ramp. */
@@ -939,7 +1026,8 @@ function TinctureRampSwatch({
   tinctureKey: TinctureKey;
   tincture: Tincture;
 }) {
-  const ink = readableInk(tincture.main);
+  const theme = useTheme();
+  const ink = theme.palette.getContrastText(tincture.main);
   return (
     <Box
       sx={{
@@ -992,7 +1080,8 @@ function TincturePairRow({
   a: Tincture;
   b: Tincture;
 }) {
-  const ink = readableInk(a.main);
+  const theme = useTheme();
+  const ink = theme.palette.getContrastText(a.main);
   return (
     <Box sx={{ mb: 1.5 }}>
       <Typography
@@ -1050,43 +1139,89 @@ function TincturePairRow({
 }
 
 /**
- * Builds a conic-gradient background cycling through each tincture's own
- * shade→light→shade ramp, evenly split around the circle — one bright cone
- * per tincture per revolution. For 2+ tinctures, each segment's boundary
- * stops are pulled inward by `softnessPct` so adjacent hues blend smoothly
- * over a wide arc instead of meeting at a hard, same-angle color cut (two
- * stops at the exact same position is an instant edge, not a transition, in
- * a conic-gradient).
+ * Deterministic per-tincture arc-size weight (in [0.7, 1.3]) derived from the
+ * tincture's own name, so multi-tincture rings don't always split into
+ * perfectly even halves/thirds — real heraldic quartering reads as more
+ * organic when the proportions vary a bit per pairing instead of every card
+ * in the grid showing the exact same symmetric 50/50 (or 33/33/33) split.
  */
-function buildConicFill(tinctures: Tincture[], softnessPct = 20): string {
+function tinctureWeight(name: string): number {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = (hash * 31 + name.charCodeAt(i)) >>> 0;
+  }
+  return 0.7 + ((hash % 1000) / 1000) * 0.6;
+}
+
+/**
+ * Builds the comma-separated conic-gradient color-stop list cycling through
+ * each tincture's own shade→main→light→main→shade ramp around the circle —
+ * a bright specular "glint" sweeps through the middle of each tincture's arc
+ * per revolution, instead of a flat two-tone fade (which reads as a dull,
+ * nearly-static band at small ring thicknesses). The peak stop is only a
+ * partial blend toward `light` (not the full value) — a thin ring that
+ * swings all the way from dark `shade` to fully-bright `light` creates a
+ * brightness-driven optical illusion (irradiation: bright segments of an
+ * equal-width ring visually read as *thicker* than dark segments against a
+ * dark background), which is what reads as "the outline is a different
+ * thickness in different places" even though the ring's physical CSS width
+ * never changes. Damping the peak keeps the thickness perceptually uniform
+ * while still giving a visible highlight as it sweeps around. Arc widths
+ * are weighted per `tinctureWeight` rather than split evenly (see above).
+ * For 2+ tinctures, each *internal* segment boundary blends `main`→`main`
+ * (not `shade`→`shade`) across a `softnessPct`-wide gap, so adjacent hues
+ * actually cross-fade into each other instead of both dipping to a dark
+ * seam between two solid, disconnected-looking halves — `shade` is reserved
+ * for the two outer ends of the whole sweep only. Returns stops only (no
+ * `conic-gradient(...)` wrapper) so callers plug it into their own
+ * `conic-gradient(from 0deg, ...)`.
+ */
+function buildConicStops(tinctures: Tincture[], softnessPct = 10): string {
   const n = tinctures.length;
   const soften = n > 1 ? softnessPct : 0;
+  const weights = tinctures.map((t) => tinctureWeight(t.name));
+  const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+  const boundaries = [0];
+  let cumulative = 0;
+  weights.forEach((w) => {
+    cumulative += w;
+    boundaries.push((cumulative / totalWeight) * 100);
+  });
   const stops: string[] = [];
   tinctures.forEach((t, i) => {
-    const start = (i / n) * 100;
-    const mid = ((i + 0.5) / n) * 100;
-    const end = ((i + 1) / n) * 100;
-    const startPos = i === 0 ? start : start + soften;
-    const endPos = i === n - 1 ? end : end - soften;
+    const isFirst = i === 0;
+    const isLast = i === n - 1;
+    const start = boundaries[i];
+    const end = boundaries[i + 1];
+    const mid = (start + end) / 2;
+    const startColor = isFirst ? t.shade : t.main;
+    const endColor = isLast ? t.shade : t.main;
+    const startPos = isFirst ? start : start + soften;
+    const endPos = isLast ? end : end - soften;
+    const quarter = (startPos + mid) / 2;
+    const threeQuarter = (mid + endPos) / 2;
+    const peak = `color-mix(in srgb, ${t.main} 45%, ${t.light} 55%)`;
     stops.push(
-      `${t.shade} ${startPos}%`,
-      `${t.light} ${mid}%`,
-      `${t.shade} ${endPos}%`,
+      `${startColor} ${startPos}%`,
+      `${t.main} ${quarter}%`,
+      `${peak} ${mid}%`,
+      `${t.main} ${threeQuarter}%`,
+      `${endColor} ${endPos}%`,
     );
   });
-  return `conic-gradient(from 0deg, ${stops.join(", ")})`;
+  return stops.join(", ");
 }
 
 /**
  * Rotating conic-gradient RING (like `ConicGradientRing`, but generalized to
- * N tinctures via `buildConicFill` instead of a single hardcoded 3-stop cone)
- * — a thin accent border around a neutral `background.paper` card interior,
- * rather than a full-bleed gradient fill.
+ * N tinctures via `buildConicStops`) — a thin accent border around a neutral
+ * `background.paper` card interior, rather than a full-bleed gradient fill.
+ * Same oversized-circle + `transform: rotate()` technique as `ConicGradientRing`.
  */
 function ConicBorderSurface({
   tinctures,
   radius,
-  thickness = 3,
+  thickness = 2,
   children,
 }: {
   tinctures: Tincture[];
@@ -1094,7 +1229,7 @@ function ConicBorderSurface({
   thickness?: number;
   children: React.ReactNode;
 }) {
-  const gradient = buildConicFill(tinctures);
+  const gradient = `conic-gradient(from 0deg, ${buildConicStops(tinctures)})`;
   return (
     <Box
       sx={{
@@ -1151,6 +1286,7 @@ function TinctureConicCard({
     <ConicBorderSurface
       tinctures={tinctures}
       radius={DASHBOARD_TOKENS.radius.card + 2}
+      thickness={2}
     >
       <Box sx={{ p: 2.5 }}>
         <Typography
@@ -1179,42 +1315,61 @@ function TinctureConicCard({
   );
 }
 
-const BUTTON_VARIANTS = [
+const TINCTURE_BUTTON_VARIANTS: Array<{
+  variant: "contained" | "outlined";
+  label: string;
+}> = [
   { variant: "contained", label: "Solid" },
   { variant: "outlined", label: "Outline" },
-  { variant: "text", label: "Link" },
-] as const;
+];
 
-/** Same gradient ring, one per button variant, so every kind of button is visible under each gradient. */
-function TinctureConicButton({
-  tinctures,
-  themeColor,
-}: {
-  tinctures: Tincture[];
-  themeColor: ThemeButtonColor;
-}) {
+/** Every theme color, each in Solid/Outline/Link — Solid/Outline each get their own rotating ring (so the animated border actually hugs that button), Link gets its own tertiary cycling-ring animation instead (see `TertiaryLinkButton`). */
+function TinctureConicButton({ tinctures }: { tinctures: Tincture[] }) {
   return (
-    <Stack spacing={1}>
-      {BUTTON_VARIANTS.map(({ variant, label }) => (
-        <ConicBorderSurface
-          key={variant}
-          tinctures={tinctures}
-          radius={DASHBOARD_TOKENS.radius.button + 2}
-        >
-          <Button
-            fullWidth
-            variant={variant}
-            size="small"
-            color={themeButtonProps(themeColor, variant).color}
-            sx={{
-              borderRadius: `${DASHBOARD_TOKENS.radius.button}px`,
-              ...themeButtonProps(themeColor, variant).sx,
-            }}
-          >
-            {label}
-          </Button>
-        </ConicBorderSurface>
-      ))}
+    <Stack spacing={2}>
+      {THEME_BUTTON_COLORS.map((colorName) => {
+        const linkProps = themeButtonProps(colorName, "text");
+        const textColorOverride = (linkProps.sx as { color?: string }).color;
+        return (
+          <Stack key={colorName} spacing={0.75}>
+            <Typography
+              variant="caption"
+              color="text.secondary"
+              sx={{ fontWeight: 700, textTransform: "capitalize" }}
+            >
+              {colorName}
+            </Typography>
+            <Stack spacing={1}>
+              {TINCTURE_BUTTON_VARIANTS.map(({ variant, label }) => (
+                <ConicBorderSurface
+                  key={variant}
+                  tinctures={tinctures}
+                  radius={DASHBOARD_TOKENS.radius.button + 2}
+                >
+                  <Button
+                    fullWidth
+                    variant={variant}
+                    size="small"
+                    color={themeButtonProps(colorName, variant).color}
+                    sx={{
+                      borderRadius: `${DASHBOARD_TOKENS.radius.button}px`,
+                      ...themeButtonProps(colorName, variant).sx,
+                    }}
+                  >
+                    {label}
+                  </Button>
+                </ConicBorderSurface>
+              ))}
+            </Stack>
+            <TertiaryLinkButton
+              tinctures={tinctures}
+              label="Link"
+              color={linkProps.color}
+              textColorOverride={textColorOverride}
+            />
+          </Stack>
+        );
+      })}
     </Stack>
   );
 }
@@ -1335,10 +1490,7 @@ export const TinctureGradients: Story = {
                 tinctures={[tinctures[key]]}
                 themeColor={themeButtonColorAt(i)}
               />
-              <TinctureConicButton
-                tinctures={[tinctures[key]]}
-                themeColor={themeButtonColorAt(i)}
-              />
+              <TinctureConicButton tinctures={[tinctures[key]]} />
             </Stack>
           ))}
         </Box>
@@ -1369,7 +1521,6 @@ export const TinctureGradients: Story = {
               />
               <TinctureConicButton
                 tinctures={[tinctures[keyA], tinctures[keyB]]}
-                themeColor={themeButtonColorAt(i)}
               />
             </Stack>
           ))}

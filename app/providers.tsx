@@ -23,6 +23,7 @@ import { SearchProvider } from "../src/context/searchContext";
 import { EasterEggLayer } from "../src/components/Gamification/EasterEggLayer";
 import GlobalChatButton from "../src/components/GlobalChatButton";
 import GlobalChatDrawer from "../src/components/GlobalChatDrawer";
+import NotificationPanel from "../src/components/NotificationPanel";
 import OfflineBanner from "../src/components/OfflineBanner";
 import FirstRunChecklist from "../src/components/FirstRunChecklist";
 import { useGlobalChatShortcut } from "../src/hooks/useGlobalChatShortcut";
@@ -229,6 +230,7 @@ function AuthenticatedShell({
       <FirstRunChecklist role={role} />
       {!hideChatButton && <GlobalChatButton />}
       {!hideChatButton && <GlobalChatDrawer />}
+      <NotificationPanel />
       <OfflineBanner />
       <EasterEggLayer />
     </>

@@ -53,10 +53,18 @@ function TestConsumer() {
       <span data-testid="count">{ctx.unseenCount}</span>
       <span data-testid="loading">{String(ctx.loading)}</span>
       <span data-testid="total">{ctx.notifications.length}</span>
+      <span data-testid="hiddenAt-n1">
+        {String(ctx.notifications.find((n) => n.id === "n1")?.hiddenAt ?? "")}
+      </span>
       <button data-testid="markSeen" onClick={() => ctx.markSeen("n1")} />
       <button data-testid="markInteracted" onClick={() => ctx.markInteracted("n1")} />
       <button data-testid="markAllSeen" onClick={() => ctx.markAllSeen()} />
       <button data-testid="deleteN" onClick={() => ctx.deleteNotification("n1")} />
+      <button data-testid="restoreN" onClick={() => ctx.restoreNotification?.("n1")} />
+      <button
+        data-testid="deleteForeverN"
+        onClick={() => ctx.deleteNotificationForever?.("n1")}
+      />
     </div>
   );
 }
@@ -235,7 +243,7 @@ describe("NotificationContext", () => {
     expect(mockUpdate).toHaveBeenCalledTimes(2);
   });
 
-  it("deleteNotification calls delete on the client", async () => {
+  it("deleteNotification soft-deletes (moves to recycle bin) with _version", async () => {
     render(
       <NotificationProvider>
         <TestConsumer />
@@ -250,7 +258,56 @@ describe("NotificationContext", () => {
       screen.getByTestId("deleteN").click();
     });
 
-    expect(mockDelete).toHaveBeenCalledWith({ id: "n1" });
+    expect(mockDelete).not.toHaveBeenCalled();
+    expect(mockUpdate).toHaveBeenCalledWith(
+      expect.objectContaining({ id: "n1", hiddenAt: expect.any(String), _version: 1 }),
+    );
+    expect(screen.getByTestId("hiddenAt-n1").textContent).not.toBe("");
+    // Hidden notifications no longer count toward unseen.
+    expect(screen.getByTestId("count").textContent).toBe("1");
+  });
+
+  it("restoreNotification clears hiddenAt", async () => {
+    render(
+      <NotificationProvider>
+        <TestConsumer />
+      </NotificationProvider>,
+    );
+
+    await act(async () => {
+      subscribeCallback?.({ items: sampleNotifications });
+    });
+    await act(async () => {
+      screen.getByTestId("deleteN").click();
+    });
+    expect(screen.getByTestId("hiddenAt-n1").textContent).not.toBe("");
+
+    await act(async () => {
+      screen.getByTestId("restoreN").click();
+    });
+
+    expect(screen.getByTestId("hiddenAt-n1").textContent).toBe("");
+    expect(mockUpdate).toHaveBeenLastCalledWith(
+      expect.objectContaining({ id: "n1", hiddenAt: null }),
+    );
+  });
+
+  it("deleteNotificationForever permanently deletes with _version", async () => {
+    render(
+      <NotificationProvider>
+        <TestConsumer />
+      </NotificationProvider>,
+    );
+
+    await act(async () => {
+      subscribeCallback?.({ items: sampleNotifications });
+    });
+
+    await act(async () => {
+      screen.getByTestId("deleteForeverN").click();
+    });
+
+    expect(mockDelete).toHaveBeenCalledWith({ id: "n1", _version: 1 });
   });
 
   describe("useUnseenCount", () => {

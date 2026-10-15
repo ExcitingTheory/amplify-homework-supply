@@ -95,18 +95,6 @@ const deduplicateUrls = (urls) => {
   return Array.from(set);
 };
 
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
-
 // Convert blob to base64 for serialization
 const blobToBase64 = (blob) => {
   return new Promise((resolve, reject) => {
@@ -960,7 +948,6 @@ export function QuestionEditor2() {
     severity: "warning",
   });
   const sharedHistoryState = React.useRef(createEmptyHistoryState());
-  const [search, setSearch] = React.useState("");
   const [newPrompt, setNewPrompt] = React.useState("");
   const [newAnswer, setNewAnswer] = React.useState("");
   const [newHint, setNewHint] = React.useState("");
@@ -976,31 +963,10 @@ export function QuestionEditor2() {
 
   const parentRef = React.useRef(null);
 
-  // Filter questions based on search
+  // Local filtering moved to the global search bar; mirror the question bank straight through.
   React.useEffect(() => {
-    if (!questionBank) {
-      setFilteredQuestionBank(null);
-      return;
-    }
-
-    if (!search) {
-      setFilteredQuestionBank(questionBank);
-      return;
-    }
-
-    const filtered = Object.fromEntries(
-      Object.entries(questionBank).filter(([id, q]) => {
-        const searchLower = search.toLowerCase();
-        return (
-          (q.prompt && q.prompt.toLowerCase().includes(searchLower)) ||
-          (q.hint && q.hint.toLowerCase().includes(searchLower)) ||
-          (q.answer && q.answer.toLowerCase().includes(searchLower))
-        );
-      }),
-    );
-
-    setFilteredQuestionBank(filtered);
-  }, [search, questionBank]);
+    setFilteredQuestionBank(questionBank);
+  }, [questionBank]);
 
   const handleToggleExpand = (id) => {
     setExpandedItems((prev) => {
@@ -1113,17 +1079,6 @@ export function QuestionEditor2() {
     }
   };
 
-  const debouncedSearch = React.useCallback(
-    debounce((search) => {
-      setSearch(search);
-    }, 500),
-    [],
-  );
-
-  const handleSearch = (e) => {
-    debouncedSearch(e.target.value);
-  };
-
   const initialConfig = {
     namespace: "QuestionEditor2",
     theme: {},
@@ -1228,16 +1183,6 @@ export function QuestionEditor2() {
           </Tooltip>
         </Box>
 
-        <TextField
-          defaultValue={search}
-          onInput={handleSearch}
-          type="text"
-          size="small"
-          fullWidth
-          placeholder="Search questions..."
-          label="Search"
-        />
-
         <Tooltip title="New Question">
           <IconButton
             onClick={toggleNewQuestionFormOpen}
@@ -1294,7 +1239,6 @@ export function QuestionEditor2() {
           <HistoryPlugin />
           <QuestionsPlugin
             questionBank={filteredQuestionBank}
-            searchTerm={search}
             expandedItems={expandedItems}
             selectedItems={selectedItems}
             onToggleExpand={handleToggleExpand}

@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "Meaning Association"
   },
+  "customAIEditor": {
+    "title": "AI-Graded Exercise",
+    "description": "Create an AI-graded exercise where students respond to questions and the AI evaluates answers against your custom grading criteria."
+  },
   "customAnswerEditor": {
     "add": "Add",
     "addWordLabel": "Add word to exercise",

@@ -9,7 +9,6 @@
 
 import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
-
 import DashboardClient from "../../app/[locale]/DashboardClient";
 
 import {
@@ -147,61 +146,5 @@ export const IndexNoSections: Story = {
   },
 };
 
-/**
- * Home page showing both pending and completed assignments with grade statistics.
- */
-export const IndexAssignments: Story = {
-  decorators: [
-    (Story: React.FC) => {
-      setMockUser({
-        username: "student-alice-sub",
-        userId: "student-alice-sub",
-        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
-        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
-      });
-      seedIndexPageData("student");
-      return (
-        <FilesProvider>
-          <Story />
-        </FilesProvider>
-      );
-    },
-  ],
-  render: () => (
-    <DashboardClient
-      signOut={undefined}
-      user={{
-        username: "student-alice-sub",
-        userId: "student-alice-sub",
-        attributes: {
-          sub: "student-alice-sub",
-          email: "alice@example.com",
-          name: "Alice Smith",
-        },
-        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
-      }}
-      initialSections={[
-        mockSections["section-jpn-101"],
-        mockSections["section-jpn-102"],
-      ]}
-      initialAssignments={studentAssignments}
-      initialGrades={studentGrades}
-    />
-  ),
-  parameters: {
-    mockAuth: {
-      user: {
-        attributes: { sub: "student-alice-sub", email: "alice@example.com" },
-      },
-      session: {
-        username: "student-alice-sub",
-        identityId: "identity-alice",
-        groups: ["section-jpn-101-learners", "section-jpn-102-learners"],
-      },
-    },
-    nextjs: { navigation: { pathname: "/" } },
-  },
-  play: async ({ canvasElement }) => {
-    expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
-  },
-};
+// Note: a former `IndexAssignments` story here was an exact duplicate of `Index`
+// (identical render/props/mock data, differing only in docstring) — removed.

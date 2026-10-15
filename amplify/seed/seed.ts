@@ -997,6 +997,9 @@ const sectionsResponse = await Promise.all([
     description: "Beginner Japanese for 9th grade",
     status: "PUBLISHED",
     code: "JPN101-P1",
+    // Demonstrates the grade-aggregation feature — student2's 3 attempts on
+    // unit 0 (50/78/95) resolve to the MEDIAN (78), not the highest (95).
+    gradeAggregationMethod: "MEDIAN",
     featuredImage: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
     thumbnail: `protected/${instructor1IdentityId}/files/pattern-texture.png`,
     learner: "section-jpn101-learners",
@@ -1226,6 +1229,7 @@ const student1Grades = await Promise.all([
     percentComplete: 100,
     accuracy: 100,
     complete: true,
+    engagedTimeMs: 240_000, // 4 min
     data: JSON.stringify(sampleGradeData),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
@@ -1237,6 +1241,7 @@ const student1Grades = await Promise.all([
     percentComplete: 100,
     accuracy: 75,
     complete: true,
+    engagedTimeMs: 360_000, // 6 min
     data: JSON.stringify({
       "answer-1": {
         complete: true,
@@ -1261,19 +1266,62 @@ await signInUser({
 });
 
 const student2Grades = await Promise.all([
-  // Student 2 - Japanese unit 0 (completed, 78%)
+  // Student 2 - Japanese unit 0 — THREE attempts (demonstrates the
+  // gradeAggregationMethod feature: MIN=50, MAX=95, AVG≈74, MEDIAN=78 all differ).
+  // Japanese 101 is configured with gradeAggregationMethod: "MEDIAN" below, so
+  // the gradebook/dashboard show 78 for this student+unit, not the highest (95).
+  client.models.Grade.create({
+    unitID: units[0].id,
+    sectionID: sections[0].id,
+    percentComplete: 100,
+    accuracy: 50,
+    complete: true,
+    attempt: 1,
+    engagedTimeMs: 280_000, // ~4.7 min
+    data: JSON.stringify({
+      "quiz-1": {
+        complete: true,
+        accuracy: 50,
+        userAnswer: "Hi",
+        feedback: "First attempt — review basic greetings.",
+      },
+    }),
+    instructorGroup: "section-jpn101-instructors",
+    instructor: "instructor1@example.com",
+  }),
   client.models.Grade.create({
     unitID: units[0].id,
     sectionID: sections[0].id,
     percentComplete: 100,
     accuracy: 78,
     complete: true,
+    attempt: 2,
+    engagedTimeMs: 300_000, // 5 min
     data: JSON.stringify({
       "quiz-1": {
         complete: true,
         accuracy: 78,
         userAnswer: "Hello",
         feedback: "Good, but work on pronunciation.",
+      },
+    }),
+    instructorGroup: "section-jpn101-instructors",
+    instructor: "instructor1@example.com",
+  }),
+  client.models.Grade.create({
+    unitID: units[0].id,
+    sectionID: sections[0].id,
+    percentComplete: 100,
+    accuracy: 95,
+    complete: true,
+    attempt: 3,
+    engagedTimeMs: 210_000, // 3.5 min
+    data: JSON.stringify({
+      "quiz-1": {
+        complete: true,
+        accuracy: 95,
+        userAnswer: "おはようございます (Good morning)",
+        feedback: "Third attempt — excellent improvement!",
       },
     }),
     instructorGroup: "section-jpn101-instructors",
@@ -1299,6 +1347,7 @@ const student3Grades = await Promise.all([
     percentComplete: 100,
     accuracy: 92,
     complete: true,
+    engagedTimeMs: 180_000, // 3 min
     data: JSON.stringify({
       "quiz-1": {
         complete: true,
@@ -1317,6 +1366,7 @@ const student3Grades = await Promise.all([
     percentComplete: 100,
     accuracy: 88,
     complete: true,
+    engagedTimeMs: 420_000, // 7 min
     data: JSON.stringify({
       "answer-1": {
         complete: true,
@@ -1348,6 +1398,7 @@ const student4Grades = await Promise.all([
     percentComplete: 100,
     accuracy: 52,
     complete: true,
+    engagedTimeMs: 600_000, // 10 min — struggled longer for a lower score
     data: JSON.stringify({
       "quiz-1": {
         complete: true,
@@ -2202,20 +2253,22 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       sourceId: "chapter-1-bug-wars",
     },
   ] as any,
-  // Module progress (was StudentProgress)
+  // Module progress (was StudentProgress) — moduleId is the Section this
+  // student is enrolled in; completion is "assignments done / assignments in
+  // that section", matching handleRecomputeProgress's real semantics.
   moduleProgress: [
     {
-      moduleId: units[0].id,
-      completionPercent: 100,
-      totalWorkbooks: 1,
+      moduleId: sections[0].id, // Japanese 101 — 1 of 2 assignments done
+      completionPercent: 50,
+      totalWorkbooks: 2,
       completedWorkbooks: 1,
       lastUpdatedAt: daysAgo(1),
     },
     {
-      moduleId: units[1].id,
+      moduleId: sections[1].id, // Biology 101 — 1 of 2 assignments done
       completionPercent: 50,
-      totalWorkbooks: 1,
-      completedWorkbooks: 0,
+      totalWorkbooks: 2,
+      completedWorkbooks: 1,
       lastUpdatedAt: daysAgo(0),
     },
   ] as any,
@@ -3545,11 +3598,13 @@ await Promise.all([
     badges: [
       { badgeType: "FIRST_SUBMISSION", awardedAt: daysAgo(8), sectionID },
     ] as any,
+    // moduleId is the Section this student is enrolled in (jpn101) — 0 of 2
+    // assignments done, matching the sparse/empty-state intent of this record.
     moduleProgress: [
       {
-        moduleId: units[0].id,
+        moduleId: sections[0].id,
         completionPercent: 0,
-        totalWorkbooks: 1,
+        totalWorkbooks: 2,
         completedWorkbooks: 0,
         lastUpdatedAt: daysAgo(8),
       },

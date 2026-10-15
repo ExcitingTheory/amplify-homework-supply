@@ -262,9 +262,33 @@ export default function GlobalSearchBar() {
     }
   };
 
+  const currentUnitId = React.useMemo(() => {
+    const match = pathname?.match(/\/unit\/([^/]+)/);
+    return match ? match[1] : null;
+  }, [pathname]);
+
+  // Tab names match LEFT_TAB_NAMES in src/utils/tabStateUtils.js
+  const SIDEBAR_TAB_BY_TYPE: Record<string, string> = {
+    word: "dictionary",
+    question: "questions",
+    file: "files",
+  };
+
   const navigateToResult = (result: SearchResult) => {
     setOpen(false);
     const q = encodeURIComponent(query);
+
+    // Already viewing the unit this word/question/file belongs to: stay on the
+    // page, open the right side panel, and let it scroll to/highlight the item
+    // instead of navigating away to the standalone dictionary/files page.
+    const sidebarTab = SIDEBAR_TAB_BY_TYPE[result.type];
+    if (sidebarTab && result.unitId && result.unitId === currentUnitId) {
+      router.push(
+        `${pathname}?sidebars=${sidebarTab}&focusType=${result.type}&focusId=${result.id}`,
+      );
+      return;
+    }
+
     switch (result.type) {
       case "unit":
         router.push(`/units?q=${q}&id=${result.id}`);
@@ -282,6 +306,7 @@ export default function GlobalSearchBar() {
         router.push(`/?q=${q}`);
     }
   };
+
 
   return (
     <Box

@@ -196,11 +196,10 @@ function Index({
   useEffect(() => {
     if (!userId) return;
     const client = getAmplifyClient();
-    // Scoped to this viewer — Grade.owner no longer carries a broad
-    // authenticated-read override, so this only returns grades the viewer owns.
-    const subscription = client.models.Grade.observeQuery({
-      filter: { owner: { eq: userId } },
-    }).subscribe({
+    // No manual owner filter — Grade uses allow.owner(), which already scopes
+    // observeQuery to the viewer's own records. Adding `owner: { eq: userId }`
+    // here conflicts with that implicit auth filter and breaks the subscription.
+    const subscription = client.models.Grade.observeQuery().subscribe({
       next: ({ items }) => {
         items = items.filter((item) => item != null && item.id != null);
         if (items.length === gradeCountRef.current && gradeCountRef.current > 0)
@@ -565,9 +564,7 @@ function Index({
             }
           />
         )}
-        {isInstructorOrAdmin && mySections.length > 0 && (
-          <InstructorDashboard sections={mySections} />
-        )}
+        {isInstructorOrAdmin && <InstructorDashboard sections={mySections} />}
 
         {/* ── LEARNER CONTENT (hidden for instructors) ────────────── */}
         {!isInstructorOrAdmin && (

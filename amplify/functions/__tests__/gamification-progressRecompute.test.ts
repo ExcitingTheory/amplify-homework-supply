@@ -1,8 +1,13 @@
 /**
  * Unit tests for the gamification handler — progress recompute
  *
- * The handler now stores module progress in StudentProfile.moduleProgress JSON
- * field via getOrCreateStudentProfile(), not a separate StudentProgress model.
+ * The handler stores module progress in StudentProfile.moduleProgress JSON
+ * field via getOrCreateStudentProfile(). `moduleId` is the Section this
+ * student is enrolled in (not a Unit) — totalWorkbooks/completedWorkbooks are
+ * the distinct units assigned in that section vs. distinct units this student
+ * has completed, bounded by this student's own grades (listGradeByOwnerAndSection)
+ * and the section's own assignment list (listAssignments), never a scan of
+ * every student's attempts in the section.
  */
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
@@ -51,43 +56,27 @@ describe("gamification handler — recomputeProgress", () => {
 
   it("should create progress record when none exists", async () => {
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGradeBySectionID")) {
+      if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
           data: {
-            listGradeBySectionID: {
+            listGradeByOwnerAndSection: {
               items: [
-                {
-                  id: "g1",
-                  owner: "student-1",
-                  sectionID: "sec1",
-                  complete: true,
-                  accuracy: 90,
-                  _version: 1,
-                },
-                {
-                  id: "g2",
-                  owner: "student-1",
-                  sectionID: "sec1",
-                  complete: true,
-                  accuracy: 85,
-                  _version: 1,
-                },
-                {
-                  id: "g3",
-                  owner: "student-1",
-                  sectionID: "sec1",
-                  complete: false,
-                  accuracy: 0,
-                  _version: 1,
-                },
-                {
-                  id: "g4",
-                  owner: "student-2",
-                  sectionID: "sec1",
-                  complete: true,
-                  accuracy: 88,
-                  _version: 1,
-                },
+                { id: "g1", unitID: "unit-a", complete: true },
+                { id: "g2", unitID: "unit-b", complete: true },
+                { id: "g3", unitID: "unit-c", complete: false },
+              ],
+            },
+          },
+        });
+      }
+      if (query?.includes("listAssignments")) {
+        return Promise.resolve({
+          data: {
+            listAssignments: {
+              items: [
+                { id: "a1", unitID: "unit-a" },
+                { id: "a2", unitID: "unit-b" },
+                { id: "a3", unitID: "unit-c" },
               ],
             },
           },
@@ -117,6 +106,7 @@ describe("gamification handler — recomputeProgress", () => {
     );
 
     expect(result.created).toBe(true);
+    expect(result.totalWorkbooks).toBe(3);
     expect(result.completedWorkbooks).toBe(2);
     expect(result.completionPercent).toBe(67);
   });
@@ -132,27 +122,25 @@ describe("gamification handler — recomputeProgress", () => {
     ]);
 
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGradeBySectionID")) {
+      if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
           data: {
-            listGradeBySectionID: {
+            listGradeByOwnerAndSection: {
               items: [
-                {
-                  id: "g1",
-                  owner: "student-1",
-                  sectionID: "sec1",
-                  complete: true,
-                  accuracy: 90,
-                  _version: 1,
-                },
-                {
-                  id: "g2",
-                  owner: "student-1",
-                  sectionID: "sec1",
-                  complete: true,
-                  accuracy: 85,
-                  _version: 1,
-                },
+                { id: "g1", unitID: "unit-a", complete: true },
+                { id: "g2", unitID: "unit-b", complete: true },
+              ],
+            },
+          },
+        });
+      }
+      if (query?.includes("listAssignments")) {
+        return Promise.resolve({
+          data: {
+            listAssignments: {
+              items: [
+                { id: "a1", unitID: "unit-a" },
+                { id: "a2", unitID: "unit-b" },
               ],
             },
           },
@@ -192,9 +180,21 @@ describe("gamification handler — recomputeProgress", () => {
 
   it("should handle zero grades gracefully", async () => {
     mockGraphql.mockImplementation(({ query }: any) => {
-      if (query?.includes("listGradeBySectionID")) {
+      if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
-          data: { listGradeBySectionID: { items: [] } },
+          data: { listGradeByOwnerAndSection: { items: [] } },
+        });
+      }
+      if (query?.includes("listAssignments")) {
+        return Promise.resolve({
+          data: {
+            listAssignments: {
+              items: [
+                { id: "a1", unitID: "unit-a" },
+                { id: "a2", unitID: "unit-b" },
+              ],
+            },
+          },
         });
       }
       if (query?.includes("listStudentProfileByStudentId")) {
@@ -221,6 +221,7 @@ describe("gamification handler — recomputeProgress", () => {
     );
 
     expect(result.created).toBe(true);
+    expect(result.completedWorkbooks).toBe(0);
     expect(result.completionPercent).toBe(0);
   });
 });

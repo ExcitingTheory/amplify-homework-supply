@@ -53,6 +53,8 @@ interface HorizontalTimelineProps {
   onPlay: () => void;
   onStop: () => void;
   onRecordingComplete: (audioBlob: Blob, waveformData?: number[]) => void;
+  /** Called when a dialogue card is dragged to a new position (seconds). */
+  onUpdateTiming?: (dialogueId: string, start: number, end: number) => void;
   readOnly?: boolean;
 }
 
@@ -79,6 +81,7 @@ export default function HorizontalTimeline({
   onPlay,
   onStop,
   onRecordingComplete,
+  onUpdateTiming = () => {},
   readOnly = false,
 }: HorizontalTimelineProps) {
   const t = useTranslations("components");
@@ -124,13 +127,17 @@ export default function HorizontalTimeline({
     return order;
   }, [scriptData.dialogue, scriptData.speakers]);
 
-  // Group dialogue lines by speaker
+  // Group dialogue lines by speaker, sorted by start time so neighbors can
+  // bound each other's drag range (prevents overlapping cards on one track).
   const linesBySpeaker = useMemo(() => {
     const map: Record<string, DialogueLine[]> = {};
     for (const key of speakerOrder) map[key] = [];
     for (const line of scriptData.dialogue) {
       if (!map[line.speaker]) map[line.speaker] = [];
       map[line.speaker].push(line);
+    }
+    for (const key of Object.keys(map)) {
+      map[key].sort((a, b) => a.timing.start - b.timing.start);
     }
     return map;
   }, [scriptData.dialogue, speakerOrder]);
@@ -301,17 +308,31 @@ export default function HorizontalTimeline({
                 borderColor: "divider",
               }}
             >
-              {(linesBySpeaker[key] || []).map((line) => (
-                <TimelineCard
-                  key={line.id}
-                  line={line}
-                  speaker={scriptData.speakers[line.speaker]}
-                  isSelected={selectedDialogueId === line.id}
-                  left={line.timing.start * pxPerSec}
-                  width={(line.timing.end - line.timing.start) * pxPerSec}
-                  onClick={onSelectDialogue}
-                />
-              ))}
+              {(linesBySpeaker[key] || []).map((line, idx, arr) => {
+                const prevLine = arr[idx - 1];
+                const nextLine = arr[idx + 1];
+                const duration = line.timing.end - line.timing.start;
+                const minStart = prevLine ? prevLine.timing.end : 0;
+                const maxStart = nextLine
+                  ? nextLine.timing.start - duration
+                  : Infinity;
+                return (
+                  <TimelineCard
+                    key={line.id}
+                    line={line}
+                    speaker={scriptData.speakers[line.speaker]}
+                    isSelected={selectedDialogueId === line.id}
+                    left={line.timing.start * pxPerSec}
+                    width={duration * pxPerSec}
+                    pxPerSec={pxPerSec}
+                    minStart={minStart}
+                    maxStart={maxStart}
+                    readOnly={readOnly}
+                    onClick={onSelectDialogue}
+                    onDragEnd={onUpdateTiming}
+                  />
+                );
+              })}
             </Box>
           ))}
         </Box>

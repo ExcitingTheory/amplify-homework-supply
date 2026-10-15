@@ -12,7 +12,7 @@ Improve the student and instructor dashboards so they are easier to scan, more u
 - Student dashboard route: `app/[locale]/DashboardClient.jsx`
 - Student dashboard components: `src/components/Dashboard/SectionPanel.tsx`, `src/components/Dashboard/AssignmentCard.tsx`, `src/components/Dashboard/UpNextCard.tsx`
 - Instructor dashboard: `src/components/InstructorDashboard.jsx`
-- Dashboard stories: `src/stories/index.stories.jsx`, `src/components/InstructorDashboard.stories.jsx`, `src/components/Dashboard/*.stories.tsx`
+- Dashboard stories: `src/stories/pages-index.stories.tsx`, `src/components/InstructorDashboard.stories.jsx`, `src/components/Dashboard/*.stories.tsx`
 - Related learner UX plan: `docs/LEARNER_DASHBOARD_UX_PLAN.md`
 
 ## Design Direction

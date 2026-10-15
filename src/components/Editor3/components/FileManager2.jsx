@@ -30,7 +30,6 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Badge,
-  InputAdornment,
   Snackbar,
   Alert,
   Chip,
@@ -45,7 +44,6 @@ import { isMimeType } from "@lexical/utils";
 import VectorStoreContext from "../../../context/vectorStoreContext";
 
 import Skeleton from "@mui/material/Skeleton";
-import SearchIcon from "@mui/icons-material/Search";
 import UploadFile from "@mui/icons-material/UploadFile";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
@@ -101,7 +99,6 @@ import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "../plugins/ConversationPla
 import { INSERT_IMAGE_COMMAND } from "../plugins/ImagesPlugin";
 import { INSERT_PDF_COMMAND } from "../plugins/PdfViewerPlugin";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
-import { useSearchParams } from "next/navigation";
 import ShowDeletedToggle from "../../ShowDeletedToggle";
 import { useRecycleBin } from "../../../hooks/useRecycleBin";
 import { PLAYLIST_FILE_DRAG_TYPE } from "./PlaylistFilePickerDialog";
@@ -146,6 +143,8 @@ import ExpandLess from "@mui/icons-material/ExpandLess";
 import ExpandMore from "@mui/icons-material/ExpandMore";
 import ImageIcon from "@mui/icons-material/Image";
 import AudioFileIcon from "@mui/icons-material/AudioFile";
+import VideoFileIcon from "@mui/icons-material/VideoFile";
+import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import FolderIcon from "@mui/icons-material/Folder";
 import DescriptionIcon from "@mui/icons-material/Description";
 import ArticleIcon from "@mui/icons-material/Article";
@@ -165,19 +164,6 @@ import { SuggestedVocabulary, SuggestedQuestions } from "./SuggestedContent";
 import RecordingStudio3Modal from "../../RecordingStudio3Modal";
 import RecordingStudioEnhancedModal from "../../RecordingStudioEnhancedModal";
 import { createConversationPreset } from "../../../utils/recordingStudioPresets";
-
-// Utility functions for hybrid search
-const debounce = (func, wait) => {
-  let timeout;
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout);
-      func(...args);
-    };
-    clearTimeout(timeout);
-    timeout = setTimeout(later, wait);
-  };
-};
 
 // Highlight text matches
 const highlightMatches = (text, searchTerm) => {
@@ -204,12 +190,6 @@ const highlightMatches = (text, searchTerm) => {
         )
       : part,
   );
-};
-
-// Check if text contains search term (case-insensitive)
-const containsSearchTerm = (text, searchTerm) => {
-  if (!text || !searchTerm) return false;
-  return text.toLowerCase().includes(searchTerm.toLowerCase());
 };
 
 // IndexedDB-backed vector store for persistent semantic search
@@ -2150,17 +2130,17 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({
   const getIconForType = (type) => {
     switch (type) {
       case "images":
-        return "🖼️";
+        return <ImageIcon sx={{ fontSize: "1.1rem" }} />;
       case "audio":
-        return "🎵";
+        return <AudioFileIcon sx={{ fontSize: "1.1rem" }} />;
       case "documents":
-        return "📄";
+        return <PictureAsPdfIcon sx={{ fontSize: "1.1rem" }} />;
       case "video":
-        return "🎬";
+        return <VideoFileIcon sx={{ fontSize: "1.1rem" }} />;
       case "other":
-        return "📎";
+        return <InsertDriveFileIcon sx={{ fontSize: "1.1rem" }} />;
       default:
-        return "📁";
+        return <FolderIcon sx={{ fontSize: "1.1rem" }} />;
     }
   };
 
@@ -2194,7 +2174,14 @@ const FileTypeSubheader = React.memo(function FileTypeSubheader({
           transition: "transform 0.2s ease",
         }}
       />
-      <Box component="span" sx={{ fontSize: "1rem", lineHeight: 1 }}>
+      <Box
+        component="span"
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          color: "text.secondary",
+        }}
+      >
         {getIconForType(fileType)}
       </Box>
       <Typography
@@ -2649,6 +2636,34 @@ const FileRowComponent = React.memo(
     const { bumpFileVersion } = React.useContext(FilesContext);
     const isEvenRow = index % 2 === 0;
 
+    // Scroll-to/highlight support for the global search bar
+    const rowRef = React.useRef(null);
+    const tabContext = useTabContext();
+    const [isFocusHighlighted, setIsFocusHighlighted] = React.useState(false);
+
+    React.useEffect(() => {
+      if (tabContext?.registerItemRef && file.id) {
+        tabContext.registerItemRef("file", file.id, rowRef);
+      }
+      return () => {
+        if (tabContext?.unregisterItemRef && file.id) {
+          tabContext.unregisterItemRef("file", file.id);
+        }
+      };
+    }, [file.id, tabContext]);
+
+    React.useEffect(() => {
+      if (
+        tabContext?.focusItem?.type === "file" &&
+        tabContext.focusItem.id === file.id
+      ) {
+        setIsFocusHighlighted(true);
+        setSelectedItems(new Set([file.id]));
+        const timer = setTimeout(() => setIsFocusHighlighted(false), 3000);
+        return () => clearTimeout(timer);
+      }
+    }, [tabContext?.focusItem, file.id, setSelectedItems]);
+
     // Lazy Yjs: Only connect when editing
     const { metadata, updateMetadata, forceSave, isSynced } = useYjsFile({
       fileId: isEditing ? file.id : null,
@@ -2837,15 +2852,18 @@ const FileRowComponent = React.memo(
 
     return (
       <Box
+        ref={rowRef}
         draggable={isPlaylistMedia && !isEditing}
         onDragStart={handleDragStart}
         onClick={handleRowClick}
         sx={{
-          backgroundColor: isSelected
-            ? "action.selected"
-            : isEvenRow
-              ? "action.hover"
-              : "background.paper",
+          backgroundColor: isFocusHighlighted
+            ? "warning.light"
+            : isSelected
+              ? "action.selected"
+              : isEvenRow
+                ? "action.hover"
+                : "background.paper",
           borderBottom: "1px solid",
           borderColor: "divider",
           borderLeft: "3px solid",
@@ -3322,15 +3340,9 @@ function SelectedFileDetailsPanel({
 export default function FileManager2() {
   const t = useTranslations("editor.files");
   const [editor] = useLexicalComposerContext();
-  const searchParams = useSearchParams();
-  const [search, setSearch] = React.useState(() => {
-    if (typeof window !== "undefined") {
-      return searchParams?.get("q") || "";
-    }
-    return "";
-  });
-  const [searchMode, setSearchMode] = React.useState("hybrid"); // 'keyword', 'semantic', 'hybrid'
-  const [searching, setSearching] = React.useState(false);
+  // Local search UI moved to the global search bar; `search` stays an inert
+  // constant since it's still threaded through to row/detail highlighting.
+  const search = "";
   const [selectedItems, setSelectedItems] = React.useState(new Set());
 
   // Load expanded items from localStorage
@@ -3435,35 +3447,12 @@ export default function FileManager2() {
     severity: "warning",
   });
   const [editingFileId, setEditingFileId] = React.useState(null);
-  const [semanticResults, setSemanticResults] = React.useState(null); // {fileId: {maxScore, pages: [{page, score}]}}
   const [fileEmbeddings, setFileEmbeddings] = React.useState({}); // Cache embeddings
 
   // Use vector store from FilesContext (shared across entire app, initialized early)
   const { vectorStore, vectorStoreReady } = React.useContext(FilesContext);
   const { unit } = React.useContext(UnitContext);
   const loadedVersions = React.useRef(new Map()); // Track loaded document versions
-
-  const debouncedSearch = React.useRef(
-    debounce((value) => {
-      setSearch(value);
-    }, 300),
-  ).current;
-
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    setSearch(value);
-    debouncedSearch(value);
-
-    // Trigger semantic search for semantic/hybrid modes
-    if (
-      (searchMode === "semantic" || searchMode === "hybrid") &&
-      value.trim()
-    ) {
-      performSemanticSearch(value);
-    } else {
-      setSemanticResults(null);
-    }
-  };
 
   // Select/Deselect handlers
   const handleSelectAll = () => {
@@ -3826,149 +3815,6 @@ export default function FileManager2() {
   const documentStatuses = documents || {};
   const { identityId } = session || {};
 
-  // Enhanced text search function
-  const performSimpleTextSearch = React.useCallback(
-    (query) => {
-      if (!query.trim()) {
-        setSemanticResults(null);
-        return;
-      }
-
-      const searchTerms = query
-        .toLowerCase()
-        .split(/\s+/)
-        .filter((term) => term.length > 0);
-      const results = {};
-
-      // Search through file names and any extracted content
-      files.forEach((file) => {
-        const fileName = file.name.toLowerCase();
-        const filePath = file.path?.toLowerCase() || "";
-        const matches = [];
-
-        // Check file name matches
-        searchTerms.forEach((term) => {
-          if (fileName.includes(term)) {
-            matches.push({
-              type: "filename",
-              score: 0.9,
-              text: file.name,
-              term,
-            });
-          }
-          if (filePath.includes(term)) {
-            matches.push({ type: "path", score: 0.7, text: file.path, term });
-          }
-        });
-
-        // Check parsed content if available (parsedContent is a hasMany array, take first item)
-        const parsedContent =
-          file.parsedContent?.[0] || file.document?.parsedContent?.[0];
-        console.log(
-          "[SimpleTextSearch] Parsed content for file",
-          file.id,
-          parsedContent,
-        );
-        if (parsedContent) {
-          // Search vocabulary
-          (parsedContent.vocabulary || []).forEach((v) => {
-            const vocabText = `${v.term} ${v.definition}`.toLowerCase();
-            searchTerms.forEach((term) => {
-              if (vocabText.includes(term)) {
-                matches.push({
-                  type: "vocabulary",
-                  score: 0.8,
-                  text: `${v.term}: ${v.definition}`,
-                  term,
-                });
-              }
-            });
-          });
-
-          // Search summaries
-          (parsedContent.summaries || []).forEach((s) => {
-            const summaryText = s.content.toLowerCase();
-            searchTerms.forEach((term) => {
-              if (summaryText.includes(term)) {
-                matches.push({
-                  type: "summary",
-                  score: 0.6,
-                  text: s.content,
-                  term,
-                });
-              }
-            });
-          });
-
-          // Search objectives
-          (parsedContent.objectives || []).forEach((o) => {
-            const objText = o.description.toLowerCase();
-            searchTerms.forEach((term) => {
-              if (objText.includes(term)) {
-                matches.push({
-                  type: "objective",
-                  score: 0.6,
-                  text: o.description,
-                  term,
-                });
-              }
-            });
-          });
-
-          // Search concepts
-          (parsedContent.concepts || []).forEach((c) => {
-            const conceptText = `${c.name} ${c.description}`.toLowerCase();
-            searchTerms.forEach((term) => {
-              if (conceptText.includes(term)) {
-                matches.push({
-                  type: "concept",
-                  score: 0.6,
-                  text: `${c.name}: ${c.description}`,
-                  term,
-                });
-              }
-            });
-          });
-
-          // Search questions
-          (parsedContent.questions || []).forEach((q) => {
-            const questionText =
-              `${q.question} ${q.answer || ""}`.toLowerCase();
-            searchTerms.forEach((term) => {
-              if (questionText.includes(term)) {
-                matches.push({
-                  type: "question",
-                  score: 0.7,
-                  text: `Q: ${q.question}${q.answer ? ` A: ${q.answer}` : ""}`,
-                  term,
-                });
-              }
-            });
-          });
-        }
-
-        if (matches.length > 0) {
-          // Sort matches by score and create pages
-          matches.sort((a, b) => b.score - a.score);
-          const maxScore = Math.max(...matches.map((m) => m.score));
-
-          results[file.id] = {
-            maxScore,
-            pages: matches.slice(0, 10).map((match, index) => ({
-              page: index + 1,
-              score: match.score,
-              text: match.text,
-              type: match.type,
-            })),
-          };
-        }
-      });
-
-      setSemanticResults(Object.keys(results).length > 0 ? results : null);
-    },
-    [files],
-  );
-
   // Vector store search function exposed to other components
   const performVectorSearch = React.useCallback(
     async (query, options = {}) => {
@@ -4030,111 +3876,8 @@ export default function FileManager2() {
     [vectorStore],
   );
 
-  // Enhanced text search function — uses vector store when available
-  const performSemanticSearch = React.useCallback(
-    async (query) => {
-      if (!query.trim()) {
-        setSemanticResults(null);
-        return;
-      }
-
-      setSearching(true);
-      try {
-        if (vectorStoreReady) {
-          // Use actual vector search when embeddings are loaded
-          const { results } = await performVectorSearch(query);
-          if (results && results.length > 0) {
-            setSemanticResults(results);
-            return;
-          }
-        }
-        // Fallback to text search
-        performSimpleTextSearch(query);
-      } finally {
-        setSearching(false);
-      }
-    },
-    [vectorStoreReady, performVectorSearch, performSimpleTextSearch],
-  );
-
-  // Filter files based on search term and mode
-  const filteredFiles = React.useMemo(() => {
-    if (!search.trim()) return files;
-
-    const searchLower = search.toLowerCase();
-
-    // Helper: Check if file matches keyword search
-    const matchesKeyword = (file) => {
-      // Search in filename
-      if (containsSearchTerm(file.name, search)) return true;
-
-      // Search in file description/summary
-      if (file.description && containsSearchTerm(file.description, search))
-        return true;
-
-      // Search in metadata if available
-      if (file.metadata) {
-        const metadataStr = JSON.stringify(file.metadata);
-        if (containsSearchTerm(metadataStr, search)) return true;
-      }
-
-      return false;
-    };
-
-    // Mode-specific filtering
-    if (searchMode === "keyword") {
-      // Pure keyword search with highlighting
-      return files.filter(matchesKeyword);
-    }
-
-    if (searchMode === "semantic") {
-      // Pure semantic search (requires embeddings)
-      if (!semanticResults) return files.filter(matchesKeyword); // Fallback to keyword
-
-      // Sort by semantic similarity score (using max page score)
-      return files
-        .map((file) => ({
-          file,
-          score: semanticResults[file.id]?.maxScore || 0,
-          pages: semanticResults[file.id]?.pages || [],
-        }))
-        .filter((item) => item.score > 0.5) // Threshold for relevance
-        .sort((a, b) => b.score - a.score)
-        .map((item) => item.file);
-    }
-
-    // Hybrid: Combine keyword and semantic
-    if (searchMode === "hybrid") {
-      // Filter out null items before processing
-      const validFiles = files.filter((f) => f != null && f.id != null);
-      const keywordMatches = new Set(
-        validFiles.filter(matchesKeyword).map((f) => f.id),
-      );
-
-      if (!semanticResults) {
-        // No semantic results yet, use keyword only
-        return files.filter((f) => keywordMatches.has(f.id));
-      }
-
-      // Combine: Include keyword matches + high-scoring semantic matches (best page)
-      return files
-        .map((file) => {
-          const keywordMatch = keywordMatches.has(file.id);
-          const semanticScore = semanticResults[file.id]?.maxScore || 0;
-          const pages = semanticResults[file.id]?.pages || [];
-
-          // Boost score if keyword match
-          const finalScore = keywordMatch ? semanticScore + 0.5 : semanticScore;
-
-          return { file, score: finalScore, keywordMatch, pages };
-        })
-        .filter((item) => item.keywordMatch || item.score > 0.4)
-        .sort((a, b) => b.score - a.score)
-        .map((item) => item.file);
-    }
-
-    return files;
-  }, [files, search, searchMode, semanticResults, documentStatuses]);
+  // Files are no longer locally filtered — the global search bar handles search/discovery.
+  const filteredFiles = files;
 
   // Helper function to organize files by protection level
   const organizeFilesByProtectionLevel = (files) => {
@@ -4762,22 +4505,6 @@ export default function FileManager2() {
                   </span>
                 </Tooltip>
               </Box>
-
-              {/* Search Bar */}
-              <TextField
-                value={search}
-                onInput={handleSearch}
-                size="small"
-                placeholder={t("fileManager2.toolbar.searchPlaceholder")}
-                sx={{ flex: 1, minWidth: "100px", mx: 1 }}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <SearchIcon fontSize="small" />
-                    </InputAdornment>
-                  ),
-                }}
-              />
 
               <Tooltip title={t("fileManager2.toolbar.uploadTooltip")}>
                 <IconButton

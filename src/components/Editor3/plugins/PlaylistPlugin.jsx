@@ -25,7 +25,8 @@ import { getAmplifyClient } from '../../../utils/amplifyClient';
 // Type import removed - not needed in runtime JS
 import UnitContext from '../../../context/unitContext';
 
-import PlaylistEditor from '../components/PlaylistEditor';
+// Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
+const PlaylistEditor = lazy(() => import('../components/PlaylistEditor'));
 const MediaPlayerComponent = lazy(() => import('../components/MediaPlayerComponent'));
 
 /**
@@ -184,12 +185,14 @@ export class PlaylistNode extends DecoratorNode {
                 // alignable={false}
                 // alignableContents={false}
             >
+            <Suspense fallback={<Skeleton variant="rectangular" width="100%" height={60} sx={{ borderRadius: 1 }} />}>
             <PlaylistEditor
                 className={className}
                 format={this.__format}
                 nodeKey={this.getKey()}
                 fileIDs={this.__ids}
             />
+            </Suspense>
             </BlockWithAlignableContents>
 
         )}

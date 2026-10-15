@@ -57,6 +57,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TimerIcon from "@mui/icons-material/Timer";
 import WifiTetheringIcon from "@mui/icons-material/WifiTethering";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { SEMANTIC_THEME } from "@/themes/semanticTheme";
 
 const vDivider = <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />;
 
@@ -151,7 +152,7 @@ export function DefaultAppBar() {
           px: 1.25,
           py: 0.5,
           mr: 1,
-          borderRadius: 999,
+          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
           bgcolor: "action.hover",
         }}
       >
@@ -159,6 +160,7 @@ export function DefaultAppBar() {
         <Typography variant="body2" color="text.secondary">
           Search…
         </Typography>
+        <Chip size="small" label="⌘K" variant="outlined" />
       </Box>
       <Chip size="small" icon={<EmojiEventsIcon />} label="1,240 XP" />
       <Chip
@@ -416,7 +418,7 @@ export function ContextualAppBar() {
             gap: 0.5,
             px: 1.25,
             py: 0.5,
-            borderRadius: 999,
+            borderRadius: `${SEMANTIC_THEME.radius.control}px`,
             bgcolor: "background.paper",
           }}
         >

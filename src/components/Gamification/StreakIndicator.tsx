@@ -10,13 +10,13 @@
 
 import React from "react";
 import Badge from "@mui/material/Badge";
+import Chip from "@mui/material/Chip";
 import WhatshotIcon from "@mui/icons-material/Whatshot";
 import { useTheme } from "@mui/material/styles";
 import { Medallion } from "./Medallion";
 import {
   getTinctures,
   metalForTier,
-  readableInk,
   medallionBadgeSx,
 } from "@/themes/heraldry";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -28,12 +28,15 @@ export interface StreakIndicatorProps {
   size?: "small" | "medium";
   /** When true, renders a zero-state indicator instead of returning null when streak is 0. */
   showEmpty?: boolean;
+  /** Renders a flat outlined Chip pill instead of the heraldic Medallion — for compact app-bar rows. */
+  pill?: boolean;
 }
 
 export function StreakIndicator({
   currentStreak,
   size = "medium",
   showEmpty = false,
+  pill = false,
 }: StreakIndicatorProps) {
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
@@ -45,9 +48,22 @@ export function StreakIndicator({
   const px = isSmall ? 30 : 42;
   const ariaLabel = `${currentStreak} day streak`;
 
+  if (pill) {
+    return (
+      <Chip
+        size={isSmall ? "small" : "medium"}
+        variant="outlined"
+        color={isMilestone ? "warning" : "default"}
+        icon={<WhatshotIcon fontSize="small" />}
+        label={currentStreak}
+        aria-label={ariaLabel}
+      />
+    );
+  }
+
   const field = getTinctures(theme).gules;
   const metal = metalForTier(currentStreak * 1000, theme);
-  const textColor = readableInk(field.main);
+  const textColor = theme.palette.getContrastText(field.main);
 
   const charge = (
     <WhatshotIcon

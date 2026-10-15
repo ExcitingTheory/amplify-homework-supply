@@ -475,16 +475,14 @@ export function AssignmentCardView({
               </Tooltip>
             )}
             {!isCompleted && estimateMinutesLabel(unit?.difficulty) && (
-              <Chip
-                label={estimateMinutesLabel(unit?.difficulty)}
-                size="small"
-                variant="outlined"
+              <Typography
+                variant="caption"
                 sx={{
-                  fontSize: "0.7rem",
-                  color: onGradient ? "common.white" : "text.secondary",
-                  ...(onGradient && { borderColor: alpha("#fff", 0.6) }),
+                  color: onGradient ? alpha("#fff", 0.75) : "text.secondary",
                 }}
-              />
+              >
+                {estimateMinutesLabel(unit?.difficulty)}
+              </Typography>
             )}
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
               {prefetchBadge}
@@ -498,38 +496,52 @@ export function AssignmentCardView({
                 sx={{ fontWeight: 700, fontSize: "0.7rem", ...gradientTextSx }}
               />
             )}
-            {windowState.isLate && !isCompleted && !showsOverdueIndicator && (
-              <Chip
-                label="Late"
-                size="small"
-                color={onGradient ? undefined : "warning"}
-                variant={onGradient ? "outlined" : "filled"}
-                sx={{ fontSize: "0.7rem", ...gradientTextSx }}
-              />
-            )}
-            {assignment.lateStatus === "DROPPED" && (
-              <Chip
-                label="Dropped by instructor"
-                size="small"
-                color="default"
-                variant="outlined"
-                sx={{ fontSize: "0.7rem", ...gradientTextSx }}
-              />
-            )}
-            {!isCompleted && hasDueExtension && (
+          </Box>
+
+          {/* Low-noise secondary status text — late/dropped/extended are
+              informational, not alert-worthy, so they read as text rather
+              than competing chips (plan: keep chips for overdue/locked/
+              completed/nailed-it only). */}
+          {(() => {
+            const isLate =
+              windowState.isLate && !isCompleted && !showsOverdueIndicator;
+            const isDropped = assignment.lateStatus === "DROPPED";
+            const isExtended = !isCompleted && hasDueExtension;
+            if (!isLate && !isDropped && !isExtended) return null;
+            const text = isDropped
+              ? "Dropped by instructor"
+              : isExtended
+                ? "Extended due date"
+                : "Late";
+            const content = (
+              <Typography
+                variant="caption"
+                sx={{
+                  display: "block",
+                  mb: 1,
+                  fontWeight: 600,
+                  color: onGradient
+                    ? alpha("#fff", 0.85)
+                    : isDropped
+                      ? "text.secondary"
+                      : isExtended
+                        ? "info.main"
+                        : "warning.main",
+                }}
+              >
+                {text}
+              </Typography>
+            );
+            return isExtended ? (
               <Tooltip
                 title={accommodation?.note || "Extended due date accommodation"}
               >
-                <Chip
-                  label="Extended"
-                  size="small"
-                  color={onGradient ? undefined : "info"}
-                  variant="outlined"
-                  sx={{ fontSize: "0.7rem", ...gradientTextSx }}
-                />
+                {content}
               </Tooltip>
-            )}
-          </Box>
+            ) : (
+              content
+            );
+          })()}
 
           {/* Actions */}
           {locked || windowState.isLocked ? (

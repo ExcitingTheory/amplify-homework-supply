@@ -25,7 +25,9 @@ type NotificationCategory =
   | "ASSIGNMENT"
   | "COLLABORATION"
   | "GAMIFICATION"
+  | "MODERATION"
   | "SQUAD"
+  | "GUILD"
   | "CHAT"
   | "SYSTEM";
 
@@ -43,6 +45,8 @@ interface NotificationItem {
   seen?: boolean;
   interacted?: boolean;
   createdAt?: string;
+  /** Soft-delete marker — set when moved to the recycle bin, cleared on restore. */
+  hiddenAt?: string | null;
   _version?: number | null;
   [key: string]: unknown;
 }
@@ -57,7 +61,9 @@ type NotificationAction =
   | { type: "SET_LOADING"; payload: boolean }
   | { type: "MARK_SEEN"; payload: string }
   | { type: "MARK_INTERACTED"; payload: string }
-  | { type: "MARK_ALL_SEEN" };
+  | { type: "MARK_ALL_SEEN" }
+  | { type: "HIDE_MANY"; payload: string[] }
+  | { type: "RESTORE_MANY"; payload: string[] };
 
 interface NotificationContextValue {
   notifications: NotificationItem[];
@@ -67,7 +73,21 @@ interface NotificationContextValue {
   markSeen: (notificationId: string) => Promise<void>;
   markInteracted: (notificationId: string) => Promise<void>;
   markAllSeen: () => Promise<void>;
+  /** Soft-delete (move to recycle bin) a single notification. */
   deleteNotification: (notificationId: string) => Promise<void>;
+  /** Soft-delete (move to recycle bin) multiple notifications at once. */
+  hideNotifications?: (notificationIds: string[]) => Promise<void>;
+  /** Restore a single notification out of the recycle bin. */
+  restoreNotification?: (notificationId: string) => Promise<void>;
+  /** Restore multiple notifications out of the recycle bin. */
+  restoreNotifications?: (notificationIds: string[]) => Promise<void>;
+  /** Permanently delete a single notification (irreversible). */
+  deleteNotificationForever?: (notificationId: string) => Promise<void>;
+  /** Permanently delete multiple notifications at once (irreversible). */
+  deleteNotificationsForever?: (notificationIds: string[]) => Promise<void>;
+  panelOpen?: boolean;
+  openPanel?: () => void;
+  closePanel?: () => void;
 }
 
 // ============================================================================
@@ -108,6 +128,8 @@ const actionTypes = {
   MARK_SEEN: "MARK_SEEN",
   MARK_INTERACTED: "MARK_INTERACTED",
   MARK_ALL_SEEN: "MARK_ALL_SEEN",
+  HIDE_MANY: "HIDE_MANY",
+  RESTORE_MANY: "RESTORE_MANY",
 } as const;
 
 const initialState: NotificationState = {
@@ -147,6 +169,25 @@ function notificationReducer(
           n.seen ? n : { ...n, seen: true },
         ),
       };
+    case actionTypes.HIDE_MANY: {
+      const ids = new Set(action.payload);
+      const now = new Date().toISOString();
+      return {
+        ...state,
+        notifications: state.notifications.map((n) =>
+          ids.has(n.id) ? { ...n, hiddenAt: now } : n,
+        ),
+      };
+    }
+    case actionTypes.RESTORE_MANY: {
+      const ids = new Set(action.payload);
+      return {
+        ...state,
+        notifications: state.notifications.map((n) =>
+          ids.has(n.id) ? { ...n, hiddenAt: null } : n,
+        ),
+      };
+    }
     default:
       return state;
   }
@@ -164,6 +205,14 @@ const NotificationContext = createContext<NotificationContextValue>({
   markInteracted: async () => {},
   markAllSeen: async () => {},
   deleteNotification: async () => {},
+  hideNotifications: async () => {},
+  restoreNotification: async () => {},
+  restoreNotifications: async () => {},
+  deleteNotificationForever: async () => {},
+  deleteNotificationsForever: async () => {},
+  panelOpen: false,
+  openPanel: () => {},
+  closePanel: () => {},
 });
 
 // ============================================================================
@@ -173,6 +222,9 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
   const { user, isLoading: authLoading } = useContext(AuthContext) as any;
   const [state, dispatch] = useReducer(notificationReducer, initialState);
   const versionMapRef = useRef<Record<string, number>>({});
+  const [panelOpen, setPanelOpen] = React.useState(false);
+  const openPanel = useCallback(() => setPanelOpen(true), []);
+  const closePanel = useCallback(() => setPanelOpen(false), []);
 
   // Subscribe to notifications for the current user
   useEffect(() => {
@@ -254,16 +306,18 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
     return () => subscription.unsubscribe();
   }, [authLoading, user]);
 
-  // Compute unseen counts
+  // Compute unseen counts — hidden (recycle-binned) notifications never count,
+  // since they're excluded from the inbox/search view.
   const unseenCount = useMemo(
-    () => state.notifications.filter((n) => !n.seen).length,
+    () =>
+      state.notifications.filter((n) => !n.seen && !n.hiddenAt).length,
     [state.notifications],
   );
 
   const unseenByCategory = useMemo(() => {
     const counts: Record<string, number> = {};
     state.notifications.forEach((n: NotificationItem) => {
-      if (!n.seen && n.category) {
+      if (!n.seen && !n.hiddenAt && n.category) {
         counts[n.category] = (counts[n.category] || 0) + 1;
       }
     });
@@ -337,14 +391,148 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
 
   const deleteNotification = useCallback(
     async (notificationId: string) => {
+      // "Delete" from the inbox is a soft-delete: move to the recycle bin
+      // rather than destroying the record, so it can be restored later.
+      dispatch({ type: actionTypes.HIDE_MANY, payload: [notificationId] });
       try {
         const client = getAmplifyClient();
-        await client.models.Notification.delete({ id: notificationId });
+        const item = state.notifications.find((n) => n.id === notificationId);
+        await client.models.Notification.update({
+          id: notificationId,
+          hiddenAt: new Date().toISOString(),
+          _version: item?._version ?? 0,
+        });
       } catch (err) {
-        console.error("[NotificationContext] Error deleting notification:", err);
+        console.error("[NotificationContext] Error hiding notification:", err);
       }
     },
-    [],
+    [state.notifications],
+  );
+
+  const hideNotifications = useCallback(
+    async (notificationIds: string[]) => {
+      if (notificationIds.length === 0) return;
+      dispatch({ type: actionTypes.HIDE_MANY, payload: notificationIds });
+      try {
+        const client = getAmplifyClient();
+        const now = new Date().toISOString();
+        const results = await Promise.allSettled(
+          notificationIds.map((id) => {
+            const item = state.notifications.find((n) => n.id === id);
+            return client.models.Notification.update({
+              id,
+              hiddenAt: now,
+              _version: item?._version ?? 0,
+            });
+          }),
+        );
+        const failures = results.filter((r) => r.status === "rejected");
+        if (failures.length > 0) {
+          console.warn(
+            `[NotificationContext] ${failures.length} notification(s) failed to hide`,
+          );
+        }
+      } catch (err) {
+        console.error("[NotificationContext] Error hiding notifications:", err);
+      }
+    },
+    [state.notifications],
+  );
+
+  const restoreNotification = useCallback(
+    async (notificationId: string) => {
+      dispatch({ type: actionTypes.RESTORE_MANY, payload: [notificationId] });
+      try {
+        const client = getAmplifyClient();
+        const item = state.notifications.find((n) => n.id === notificationId);
+        await client.models.Notification.update({
+          id: notificationId,
+          hiddenAt: null,
+          _version: item?._version ?? 0,
+        });
+      } catch (err) {
+        console.error("[NotificationContext] Error restoring notification:", err);
+      }
+    },
+    [state.notifications],
+  );
+
+  const restoreNotifications = useCallback(
+    async (notificationIds: string[]) => {
+      if (notificationIds.length === 0) return;
+      dispatch({ type: actionTypes.RESTORE_MANY, payload: notificationIds });
+      try {
+        const client = getAmplifyClient();
+        const results = await Promise.allSettled(
+          notificationIds.map((id) => {
+            const item = state.notifications.find((n) => n.id === id);
+            return client.models.Notification.update({
+              id,
+              hiddenAt: null,
+              _version: item?._version ?? 0,
+            });
+          }),
+        );
+        const failures = results.filter((r) => r.status === "rejected");
+        if (failures.length > 0) {
+          console.warn(
+            `[NotificationContext] ${failures.length} notification(s) failed to restore`,
+          );
+        }
+      } catch (err) {
+        console.error("[NotificationContext] Error restoring notifications:", err);
+      }
+    },
+    [state.notifications],
+  );
+
+  const deleteNotificationForever = useCallback(
+    async (notificationId: string) => {
+      try {
+        const client = getAmplifyClient();
+        const item = state.notifications.find((n) => n.id === notificationId);
+        await client.models.Notification.delete({
+          id: notificationId,
+          _version: item?._version ?? 0,
+        });
+      } catch (err) {
+        console.error(
+          "[NotificationContext] Error permanently deleting notification:",
+          err,
+        );
+      }
+    },
+    [state.notifications],
+  );
+
+  const deleteNotificationsForever = useCallback(
+    async (notificationIds: string[]) => {
+      if (notificationIds.length === 0) return;
+      try {
+        const client = getAmplifyClient();
+        const results = await Promise.allSettled(
+          notificationIds.map((id) => {
+            const item = state.notifications.find((n) => n.id === id);
+            return client.models.Notification.delete({
+              id,
+              _version: item?._version ?? 0,
+            });
+          }),
+        );
+        const failures = results.filter((r) => r.status === "rejected");
+        if (failures.length > 0) {
+          console.warn(
+            `[NotificationContext] ${failures.length} notification(s) failed to permanently delete`,
+          );
+        }
+      } catch (err) {
+        console.error(
+          "[NotificationContext] Error permanently deleting notifications:",
+          err,
+        );
+      }
+    },
+    [state.notifications],
   );
 
   const contextValue = useMemo(
@@ -357,6 +545,14 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
       markInteracted,
       markAllSeen,
       deleteNotification,
+      hideNotifications,
+      restoreNotification,
+      restoreNotifications,
+      deleteNotificationForever,
+      deleteNotificationsForever,
+      panelOpen,
+      openPanel,
+      closePanel,
     }),
     [
       state.notifications,
@@ -367,6 +563,14 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
       markInteracted,
       markAllSeen,
       deleteNotification,
+      hideNotifications,
+      restoreNotification,
+      restoreNotifications,
+      deleteNotificationForever,
+      deleteNotificationsForever,
+      panelOpen,
+      openPanel,
+      closePanel,
     ],
   );
 

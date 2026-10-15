@@ -12,8 +12,10 @@ import { $insertNodeToNearestRoot } from '@lexical/utils';
 import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode, $getSelection } from 'lexical';
 import * as React from 'react';
 import { useEffect } from 'react';
-import CustomAnswerEditor from '../nodes/CustomAnswerNode/CustomAnswerEditor';
 import CustomAnswerComponent from '../nodes/CustomAnswerNode/CustomAnswerComponent';
+
+// Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
+const CustomAnswerEditor = React.lazy(() => import('../nodes/CustomAnswerNode/CustomAnswerEditor'));
 
 /**
  * Converts a DOM element into a CustomAnswerNode.
@@ -212,14 +214,16 @@ export class CustomAnswerNode extends DecoratorNode {
     return (
       <>
         {isEditable && (
-          <CustomAnswerEditor
-            className={className}
-            format={this.__format}
-            nodeKey={this.getKey()}
-            ids={this.__ids}
-            allowedInput={this.__allowedInput}
-            promptMethod={this.__promptMethod}
-          />
+          <React.Suspense fallback={null}>
+            <CustomAnswerEditor
+              className={className}
+              format={this.__format}
+              nodeKey={this.getKey()}
+              ids={this.__ids}
+              allowedInput={this.__allowedInput}
+              promptMethod={this.__promptMethod}
+            />
+          </React.Suspense>
         )}
 
         {!isEditable && (

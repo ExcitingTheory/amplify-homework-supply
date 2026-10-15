@@ -247,3 +247,29 @@ export function getAssignmentWindowState(assignment = {}) {
     closesAt: availableUntil,
   };
 }
+
+/**
+ * Resolves the effective late-work policy for a unit: a Section.latePolicyOverrides
+ * entry (matched by unitID) wins over Section.lateWorkPolicy (the section-wide
+ * default). Returns null when neither is configured — callers should fall back
+ * to the legacy manual lateStatus PENDING review flow in that case, not assume
+ * accept-as-is.
+ */
+export function resolveLatePolicy(section, unitID) {
+  if (!section) return null;
+  const overrides = section.latePolicyOverrides || [];
+  const override = overrides.find((o) => o != null && o.unitID === unitID);
+  const source = override || section.lateWorkPolicy;
+  if (!source) return null;
+  return {
+    acceptLateWork: source.acceptLateWork !== false,
+    scorePenaltyPercent:
+      typeof source.scorePenaltyPercent === "number"
+        ? source.scorePenaltyPercent
+        : null,
+    xpPenaltyPercent:
+      typeof source.xpPenaltyPercent === "number"
+        ? source.xpPenaltyPercent
+        : null,
+  };
+}

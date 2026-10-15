@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "意义关联"
   },
+  "customAIEditor": {
+    "title": "AI 评分练习",
+    "description": "创建一个由 AI 评分的练习，学习者回答问题后，AI 会根据您自定义的评分标准对答案进行评估。"
+  },
   "customAnswerEditor": {
     "add": "添加",
     "addWordLabel": "将单词添加到练习",

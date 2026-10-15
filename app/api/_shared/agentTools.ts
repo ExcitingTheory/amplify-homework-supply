@@ -625,6 +625,9 @@ export function buildAgentTools(
   if (isInstructor) {
     tools.get_section_analytics = createGetSectionAnalyticsTool(ctx);
     tools.get_student_list = createGetStudentListTool(ctx);
+    tools.get_at_risk_students = createGetAtRiskStudentsTool(ctx);
+    tools.update_assignment_due_date = createUpdateAssignmentDueDateTool(ctx);
+    tools.export_section_grades = createExportSectionGradesTool(ctx);
   }
 
   // Wrap each tool's execute with an OTel span for Phoenix trace visibility
@@ -649,6 +652,9 @@ export const AGENT_TOOL_NAMES = [
   "update_memory",
   "get_section_analytics",
   "get_student_list",
+  "get_at_risk_students",
+  "update_assignment_due_date",
+  "export_section_grades",
 ];
 
 // ─── Memory Tools ─────────────────────────────────────────────────────────────
@@ -1340,6 +1346,326 @@ export function createGetStudentListTool(ctx: AgentContext) {
         console.error("[get_student_list] Error:", error);
         const t = await getAgentTranslations(ctx.locale);
         return { error: t("studentList.error") };
+      }
+    },
+  });
+}
+
+export function createGetAtRiskStudentsTool(ctx: AgentContext) {
+  return tool({
+    description:
+      "Get students in a section whose average accuracy is below a threshold — use this to identify who needs support. Instructor-only.",
+    inputSchema: z.object({
+      sectionId: z
+        .string()
+        .optional()
+        .describe("Section ID. Defaults to current section."),
+      threshold: z
+        .number()
+        .optional()
+        .describe(
+          "Accuracy percentage below which a student is flagged at-risk. Defaults to 60.",
+        ),
+    }),
+    execute: async ({
+      sectionId,
+      threshold,
+    }: {
+      sectionId?: string;
+      threshold?: number;
+    }) => {
+      try {
+        const t = await getAgentTranslations(ctx.locale);
+        const isInstructor = ctx.groups.some(
+          (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
+        );
+        if (!isInstructor) {
+          return { error: t("atRiskStudents.instructorOnly") };
+        }
+
+        const targetSectionId = sectionId || ctx.sectionId;
+        if (!targetSectionId) {
+          return { error: t("atRiskStudents.noSection") };
+        }
+        const riskThreshold = threshold ?? 60;
+
+        const { getServerClient } = await import("@/utils/amplifyServerClient");
+        const client = getServerClient();
+
+        const { data: assignments } = await (
+          client as any
+        ).models.Assignment.list({
+          filter: { sectionID: { eq: targetSectionId } },
+          limit: 50,
+        });
+
+        const validAssignments = (assignments || []).filter(
+          (a: any) => a != null && a.unitID,
+        );
+        const unitIds = [
+          ...new Set(validAssignments.map((a: any) => a.unitID)),
+        ];
+
+        const studentMap: Record<
+          string,
+          { totalAccuracy: number; accuracyCount: number; lastActivity: string }
+        > = {};
+
+        for (const uid of unitIds.slice(0, 10)) {
+          const { data: grades } = await (client as any).models.Grade.list({
+            filter: { unitID: { eq: uid }, complete: { eq: true } },
+            limit: 200,
+          });
+          for (const g of (grades || []).filter((g: any) => g != null)) {
+            if (g.accuracy == null) continue;
+            const student = g.owner || "unknown";
+            const s = studentMap[student] || {
+              totalAccuracy: 0,
+              accuracyCount: 0,
+              lastActivity: "",
+            };
+            s.totalAccuracy += g.accuracy;
+            s.accuracyCount += 1;
+            if (g.createdAt && g.createdAt > s.lastActivity) {
+              s.lastActivity = g.createdAt;
+            }
+            studentMap[student] = s;
+          }
+        }
+
+        const atRisk = Object.entries(studentMap)
+          .map(([studentId, data]) => ({
+            studentId,
+            avgAccuracy: Math.round(data.totalAccuracy / data.accuracyCount),
+            lastActivity: data.lastActivity || null,
+          }))
+          .filter((s) => s.avgAccuracy < riskThreshold)
+          .sort((a, b) => a.avgAccuracy - b.avgAccuracy);
+
+        return {
+          sectionId: targetSectionId,
+          threshold: riskThreshold,
+          totalAtRisk: atRisk.length,
+          students: atRisk.slice(0, 50),
+        };
+      } catch (error: any) {
+        console.error("[get_at_risk_students] Error:", error);
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("atRiskStudents.error") };
+      }
+    },
+  });
+}
+
+export function createUpdateAssignmentDueDateTool(ctx: AgentContext) {
+  return tool({
+    description: "Reschedule an assignment's due date. Instructor-only.",
+    inputSchema: z.object({
+      assignmentId: z
+        .string()
+        .describe("The Assignment record ID to reschedule."),
+      newDueDate: z
+        .string()
+        .describe("New due date as an ISO 8601 datetime string."),
+    }),
+    execute: async ({
+      assignmentId,
+      newDueDate,
+    }: {
+      assignmentId: string;
+      newDueDate: string;
+    }) => {
+      try {
+        const t = await getAgentTranslations(ctx.locale);
+        const isInstructor = ctx.groups.some(
+          (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
+        );
+        if (!isInstructor) {
+          return { error: t("updateAssignmentDueDate.instructorOnly") };
+        }
+
+        const parsed = new Date(newDueDate);
+        if (Number.isNaN(parsed.getTime())) {
+          return { error: t("updateAssignmentDueDate.invalidDate") };
+        }
+
+        const { getServerClient } = await import("@/utils/amplifyServerClient");
+        const client = getServerClient();
+
+        const { data: assignment } = await (
+          client as any
+        ).models.Assignment.get({ id: assignmentId });
+        if (!assignment) {
+          return { error: t("updateAssignmentDueDate.notFound") };
+        }
+
+        // Written with the calling instructor's own session — AppSync authorization
+        // enforces who may update this Assignment, same as every other write path.
+        const { data: updated, errors } = await (
+          client as any
+        ).models.Assignment.update({
+          id: assignmentId,
+          dueDate: parsed.toISOString(),
+          _version: assignment._version,
+        });
+        if (errors?.length) {
+          console.error("[update_assignment_due_date] Update errors:", errors);
+          return { error: t("updateAssignmentDueDate.error") };
+        }
+
+        return {
+          assignmentId,
+          previousDueDate: assignment.dueDate || null,
+          newDueDate: updated?.dueDate || parsed.toISOString(),
+        };
+      } catch (error: any) {
+        console.error("[update_assignment_due_date] Error:", error);
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("updateAssignmentDueDate.error") };
+      }
+    },
+  });
+}
+
+export function createExportSectionGradesTool(ctx: AgentContext) {
+  return tool({
+    description:
+      "Export a section's grades for offline review, as CSV text or structured JSON rows. Instructor-only.",
+    inputSchema: z.object({
+      sectionId: z
+        .string()
+        .optional()
+        .describe("Section ID. Defaults to current section."),
+      format: z
+        .enum(["csv", "json"])
+        .optional()
+        .describe("Output format. Defaults to csv."),
+      includeDetails: z
+        .boolean()
+        .optional()
+        .describe(
+          "Include every attempt instead of collapsing to each student's best grade per unit.",
+        ),
+    }),
+    execute: async ({
+      sectionId,
+      format,
+      includeDetails,
+    }: {
+      sectionId?: string;
+      format?: "csv" | "json";
+      includeDetails?: boolean;
+    }) => {
+      try {
+        const t = await getAgentTranslations(ctx.locale);
+        const isInstructor = ctx.groups.some(
+          (g) => g === "Instructors" || g === "Admins" || g === "Moderators",
+        );
+        if (!isInstructor) {
+          return { error: t("exportSectionGrades.instructorOnly") };
+        }
+
+        const targetSectionId = sectionId || ctx.sectionId;
+        if (!targetSectionId) {
+          return { error: t("exportSectionGrades.noSection") };
+        }
+        const outputFormat = format || "csv";
+
+        const { getServerClient } = await import("@/utils/amplifyServerClient");
+        const client = getServerClient();
+
+        const { data: assignments } = await (
+          client as any
+        ).models.Assignment.list({
+          filter: { sectionID: { eq: targetSectionId } },
+          limit: 50,
+        });
+        const validAssignments = (assignments || []).filter(
+          (a: any) => a != null && a.unitID,
+        );
+        const unitIds = [
+          ...new Set(validAssignments.map((a: any) => a.unitID)),
+        ];
+
+        type Row = {
+          studentId: string;
+          unitId: string;
+          accuracy: number | null;
+          complete: boolean;
+          completedAt: string | null;
+        };
+        const rows: Row[] = [];
+
+        for (const uid of unitIds.slice(0, 10)) {
+          const { data: grades } = await (client as any).models.Grade.list({
+            filter: { unitID: { eq: uid } },
+            limit: 200,
+          });
+          for (const g of (grades || []).filter((g: any) => g != null)) {
+            rows.push({
+              studentId: g.owner || "unknown",
+              unitId: uid,
+              accuracy: g.accuracy ?? null,
+              complete: !!g.complete,
+              completedAt: g.complete ? g.createdAt || null : null,
+            });
+          }
+        }
+
+        if (!rows.length) {
+          return {
+            sectionId: targetSectionId,
+            message: t("exportSectionGrades.noGrades"),
+            totalRows: 0,
+          };
+        }
+
+        // Collapse to each student's best attempt per unit unless full detail was requested.
+        const finalRows = includeDetails
+          ? rows
+          : Object.values(
+              rows.reduce(
+                (acc, r) => {
+                  const key = `${r.studentId}|${r.unitId}`;
+                  const existing = acc[key];
+                  if (
+                    !existing ||
+                    (r.accuracy ?? -1) > (existing.accuracy ?? -1)
+                  ) {
+                    acc[key] = r;
+                  }
+                  return acc;
+                },
+                {} as Record<string, Row>,
+              ),
+            );
+
+        if (outputFormat === "json") {
+          return {
+            sectionId: targetSectionId,
+            format: "json",
+            totalRows: finalRows.length,
+            rows: finalRows.slice(0, 500),
+          };
+        }
+
+        const header = "studentId,unitId,accuracy,complete,completedAt";
+        const csvLines = finalRows
+          .slice(0, 500)
+          .map(
+            (r) =>
+              `${r.studentId},${r.unitId},${r.accuracy ?? ""},${r.complete},${r.completedAt ?? ""}`,
+          );
+        return {
+          sectionId: targetSectionId,
+          format: "csv",
+          totalRows: finalRows.length,
+          csv: [header, ...csvLines].join("\n"),
+        };
+      } catch (error: any) {
+        console.error("[export_section_grades] Error:", error);
+        const t = await getAgentTranslations(ctx.locale);
+        return { error: t("exportSectionGrades.error") };
       }
     },
   });

@@ -5,6 +5,7 @@
 import * as React from "react";
 import { useContext, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { useSearchParams, usePathname, useRouter } from "next/navigation";
 import { Box } from "@mui/material";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
@@ -153,6 +154,9 @@ function EditorRefPlugin(): null {
  */
 function EditorContent(): React.ReactElement {
   const t = useTranslations("common");
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const router = useRouter();
   const { unit, session, editorRef, files, dictionary, questionBank } =
     useContext(UnitContext);
   const { sections } = useContext(SectionContext);
@@ -470,6 +474,52 @@ function EditorContent(): React.ReactElement {
     },
     [debouncedSave, editorStateRef],
   );
+
+  // Consume ?focusType=&focusId= from the global search bar: open the matching
+  // side panel and scroll to/highlight the item, then strip the params so
+  // remounts or back-navigation don't re-trigger it.
+  const consumedFocusParamsRef = useRef<string | null>(null);
+  useEffect(() => {
+    const focusType = searchParams.get("focusType");
+    const focusId = searchParams.get("focusId");
+    if (!focusType || !focusId) return;
+
+    const paramsKey = `${focusType}:${focusId}`;
+    if (consumedFocusParamsRef.current === paramsKey) return;
+    consumedFocusParamsRef.current = paramsKey;
+
+    const LEFT_TAB_BY_FOCUS_TYPE: Record<string, number> = {
+      word: 2,
+      question: 3,
+      file: 4,
+    };
+    const tabIndex = LEFT_TAB_BY_FOCUS_TYPE[focusType];
+    if (tabIndex != null) {
+      setTabValueLeft(tabIndex);
+      setOpenTabVerticalLeft(true);
+    }
+    setFocusItem({ type: focusType, id: focusId });
+
+    const timer = setTimeout(() => {
+      scrollToItem(focusType, focusId);
+    }, 300);
+
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("focusType");
+    params.delete("focusId");
+    const newQuery = params.toString();
+    router.replace(newQuery ? `${pathname}?${newQuery}` : pathname);
+
+    return () => clearTimeout(timer);
+  }, [
+    searchParams,
+    pathname,
+    router,
+    setTabValueLeft,
+    setOpenTabVerticalLeft,
+    setFocusItem,
+    scrollToItem,
+  ]);
 
   // Memoize the tab provider value to prevent unnecessary re-renders
   const tabProviderValue: any = React.useMemo(

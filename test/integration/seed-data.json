@@ -1,15 +1,15 @@
 {
-  "generatedAt": "2026-10-07T04:32:16.810Z",
+  "generatedAt": "2026-10-15T02:46:51.085Z",
   "users": {
     "admin": {
       "username": "admin@example.com",
-      "sub": "845804e8-40f1-700b-ed4d-d66c2407e4be",
+      "sub": "c4f804e8-3011-7012-b358-df50abfe19b7",
       "group": "Admins"
     },
     "instructor1": {
       "username": "instructor1@example.com",
-      "sub": "04483428-90c1-704d-ad14-c592c0e9cb13",
-      "identityId": "us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5",
+      "sub": "44381428-c071-70c5-747b-aa65234e0f68",
+      "identityId": "us-east-1:b0eadde9-f057-c359-361f-13559337cb1f",
       "group": "Instructors"
     },
     "instructor2": {
@@ -18,8 +18,8 @@
     },
     "student1": {
       "username": "student1@example.com",
-      "sub": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
-      "identityId": "us-east-1:b0eadde9-f0f6-c8e5-e445-e2b7f3d72a7f",
+      "sub": "7408e468-3071-70f1-df88-ac8bf65f37ee",
+      "identityId": "us-east-1:b0eadde9-f05c-cfd4-f20d-3f4c9924a9c4",
       "group": "Learners"
     },
     "student2": {
@@ -29,31 +29,31 @@
   },
   "words": [
     {
-      "id": "8da921ff-e47a-4b2b-8319-3e8febfec42f",
+      "id": "83ea53e3-91e4-44f7-9e86-7b84c5579584",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "509c263f-bcf1-4635-bc73-bd20ab9da337",
+      "id": "0f9a0051-23f3-4f51-8cad-dcef3f4710e6",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "c62ce728-4711-420f-b1b2-3074a8bbce7a",
+      "id": "bdf851a4-c356-4b82-b91c-ba4120e7c2db",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "b5cc73ee-8cfd-40af-bfb5-662eee01079d",
+      "id": "42f6bc52-1973-490a-b33b-e6d1d3a42f01",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "817f5fed-4d54-40f5-8111-893f27ca4c05",
+      "id": "7539c518-8510-4ff5-bb7f-07049c911dad",
       "phrase": null,
       "pronunciation": null,
       "definition": null
@@ -61,429 +61,447 @@
   ],
   "questions": [
     {
-      "id": "cd44d1ff-0bd7-4af2-a7f2-4dc922675170",
+      "id": "65e04f70-ae34-4091-8817-06aa7cae6f18",
       "prompt": null,
       "answer": null
     },
     {
-      "id": "1cc7b464-e064-4abe-99c9-57f6fae0f459",
+      "id": "ffe31f8d-4a8b-496a-b3e0-99c5581f9332",
       "prompt": null,
       "answer": null
     },
     {
-      "id": "f9289217-6c72-4208-99fd-b81881e180fb",
+      "id": "0224913d-845d-4076-a91b-4b2ea7f09fca",
       "prompt": null,
       "answer": null
     }
   ],
   "units": [
     {
-      "id": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
+      "id": "784fe6fa-563b-4726-a3df-3775019548ad",
       "name": null,
       "status": null
     },
     {
-      "id": "e977c9e7-4fb6-4ac1-a886-29f01f64e56b",
+      "id": "e04bb71b-87ea-43c2-b0e3-51566c6b988e",
       "name": null,
       "status": null
     },
     {
-      "id": "57423611-f1fa-4cb2-bb1d-5322352d1da2",
+      "id": "895648bc-ba8e-4d8b-b060-2daa95311e4f",
       "name": null,
       "status": null
     },
     {
-      "id": "da93d8dd-d364-40e2-8dc3-6eac74a509a9",
+      "id": "3ebaafa9-2ad3-453f-bbd3-e4fa8c676b88",
       "name": null,
       "status": null
     }
   ],
   "sections": [
     {
-      "id": "c432f160-573e-413a-94e8-9c2077afaa05",
+      "id": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "name": "Japanese 101 - Period 1",
       "code": "JPN101-P1"
     },
     {
-      "id": "a26e02cb-22b2-40b7-a839-691b81d01510",
+      "id": "db3fe044-c1f2-40a9-9781-d6b18f31ba45",
       "name": "Biology 101 - Period 3",
       "code": "BIO101-P3"
     }
   ],
   "assignments": [
     {
-      "id": "1e01999e-b0c6-488e-8fc7-ff37dd818580",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336"
+      "id": "782bb6a1-fbc3-4aad-8f80-c81c350cc8dd",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad"
     },
     {
-      "id": "ac361ae3-0c75-4123-b8a7-1a2847a0559b",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
-      "unitID": "57423611-f1fa-4cb2-bb1d-5322352d1da2"
+      "id": "224e4aeb-d21e-44f7-96c2-5cd95789afab",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
+      "unitID": "895648bc-ba8e-4d8b-b060-2daa95311e4f"
     },
     {
-      "id": "05293c64-ced8-4da5-a4df-8eb57b50c9e4",
-      "sectionID": "a26e02cb-22b2-40b7-a839-691b81d01510",
-      "unitID": "e977c9e7-4fb6-4ac1-a886-29f01f64e56b"
+      "id": "2b8b4a2c-ee68-4a07-b4b9-eb4635d56a86",
+      "sectionID": "db3fe044-c1f2-40a9-9781-d6b18f31ba45",
+      "unitID": "e04bb71b-87ea-43c2-b0e3-51566c6b988e"
     },
     {
-      "id": "e61614db-1826-4d23-9d85-0faccd18a0dc",
-      "sectionID": "a26e02cb-22b2-40b7-a839-691b81d01510",
-      "unitID": "da93d8dd-d364-40e2-8dc3-6eac74a509a9"
+      "id": "68685081-7a90-4cbf-93cd-ff6ad29af388",
+      "sectionID": "db3fe044-c1f2-40a9-9781-d6b18f31ba45",
+      "unitID": "3ebaafa9-2ad3-453f-bbd3-e4fa8c676b88"
     }
   ],
   "grades": [
     {
-      "id": "b7957598-1cf3-4cb7-a244-4de47eeea14a",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
+      "id": "eb91ebce-de97-4808-ae99-4ae74f9d95d6",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "complete": true
     },
     {
-      "id": "b412e2f7-5153-4627-9b19-0d2ddff8e425",
-      "unitID": "e977c9e7-4fb6-4ac1-a886-29f01f64e56b",
-      "sectionID": "a26e02cb-22b2-40b7-a839-691b81d01510",
+      "id": "6fe5aa27-2025-49e2-bdac-6c2e88a67fb7",
+      "unitID": "e04bb71b-87ea-43c2-b0e3-51566c6b988e",
+      "sectionID": "db3fe044-c1f2-40a9-9781-d6b18f31ba45",
       "complete": true
     },
     {
-      "id": "8e4949b2-93e1-461d-9a39-074de9617493",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
+      "id": "7347f194-0c84-4ea0-94f2-b24897f2cbf1",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "complete": true
     },
     {
-      "id": "48c356ec-93e6-409e-ac35-5466bca374ee",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
+      "id": "24e481e0-aa92-4a98-af64-7ed62b0f50ae",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "complete": true
     },
     {
-      "id": "d8e6ab28-5e5e-47a7-9880-5b33a741cc74",
-      "unitID": "e977c9e7-4fb6-4ac1-a886-29f01f64e56b",
-      "sectionID": "a26e02cb-22b2-40b7-a839-691b81d01510",
+      "id": "f0cd2e34-1b6f-4fd1-975b-c3bd03e7dc5d",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "complete": true
     },
     {
-      "id": "342cb4ff-7ac6-4e85-9e2f-11587486714a",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
-      "sectionID": "c432f160-573e-413a-94e8-9c2077afaa05",
+      "id": "b1de700d-9a80-4ee8-bd90-8d83e94fb4d2",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
+      "complete": true
+    },
+    {
+      "id": "ae09126a-5dbc-4b5c-b994-14a6acd7b78b",
+      "unitID": "e04bb71b-87ea-43c2-b0e3-51566c6b988e",
+      "sectionID": "db3fe044-c1f2-40a9-9781-d6b18f31ba45",
+      "complete": true
+    },
+    {
+      "id": "8c812be0-d772-46cb-b7ce-bf2ec9e2ee46",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
+      "sectionID": "452577ea-4655-44f6-8bc5-d0c46bdd91d2",
       "complete": true
     }
   ],
   "files": [
     {
-      "id": "5c6e0be3-8f78-44e9-a03d-0447df93f93f",
+      "id": "5cf7cbde-430d-4afa-a684-bdfb2a3cd108",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/chloroplast-diagram.jpg",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/chloroplast-diagram.jpg",
       "mimeType": null
     },
     {
-      "id": "638b8afd-3e67-414b-b186-93f4717fcdbc",
+      "id": "94232200-42df-476a-9e84-1e13d243c113",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/animals-photo.jpg",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/animals-photo.jpg",
       "mimeType": null
     },
     {
-      "id": "9a5cf722-0fbf-435a-84a8-ec47c9714ca7",
+      "id": "77a145f6-05aa-4187-9884-0c9146e928a5",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/pattern-texture.png",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/pattern-texture.png",
       "mimeType": null
     },
     {
-      "id": "aa3cb9e6-ffad-4304-beb7-d06991bfb537",
+      "id": "0038b723-4feb-4792-9d51-623f7eb438f3",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/japanese-grammar-guide.pdf",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-guide.pdf",
       "mimeType": null
     },
     {
-      "id": "6a54aa4a-9cb1-48de-aa4c-8b9d32b65693",
+      "id": "fc48567e-0f0d-488f-b858-8b3f764262b2",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/science-lesson-water-cycle.pdf",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/science-lesson-water-cycle.pdf",
       "mimeType": null
     },
     {
-      "id": "ac54ca2f-20e0-47e5-9ca1-1d4a8946d66c",
+      "id": "5712c7b6-4f55-4be7-b3bb-695656324410",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/biology-cell-structure.docx",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-structure.docx",
       "mimeType": null
     },
     {
-      "id": "d87659a5-205c-4616-8ce8-38b0608e93ec",
+      "id": "a4c3ee21-a765-4c3b-b809-d7f7d2359e45",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/science-lesson-water-cycle.docx",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/science-lesson-water-cycle.docx",
       "mimeType": null
     },
     {
-      "id": "f5db7fe1-de41-46b1-9cc6-580925740434",
+      "id": "7bc43c3e-6f6f-4122-93d4-6b6563bd9443",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/french-seasons-vocabulary.txt",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/french-seasons-vocabulary.txt",
       "mimeType": null
     },
     {
-      "id": "8e59d309-3dfd-4e52-8df8-d43cb219b873",
+      "id": "a3d8a324-24c2-4cfa-8466-67ef1e78107a",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/spanish-ar-verbs.txt",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-ar-verbs.txt",
       "mimeType": null
     },
     {
-      "id": "5914a2ed-c988-41ae-b61f-4ab76db1e97a",
+      "id": "e6fba0a2-cd66-404d-8873-f897379bf744",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/philosophy-presocratics.txt",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/philosophy-presocratics.txt",
       "mimeType": null
     },
     {
-      "id": "10940e8d-8cf5-4028-bc6a-af049888bde8",
+      "id": "a5fb0880-d97b-4877-833b-56ba3438ca5f",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/japanese-grammar-guide.md",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-guide.md",
       "mimeType": null
     },
     {
-      "id": "44be3094-edc3-4359-b647-1c0983694e12",
+      "id": "2c7a01eb-3895-4498-aee0-a471264988cc",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/biology-vocabulary-list.csv",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-structure.md",
       "mimeType": null
     },
     {
-      "id": "7e02fcc3-f87c-45b0-8dbb-fefde5dc8cc2",
+      "id": "d28ff1e5-75a5-4c3b-b09e-f88a82246707",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/spanish-verbs-vocabulary.csv",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-vocabulary-list.csv",
       "mimeType": null
     },
     {
-      "id": "62de9e7b-e40a-4673-96f0-d729d21ddf09",
+      "id": "85b8ca58-1840-498b-b37e-12dec8512993",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/philosophy-presocratics.rtf",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-verbs-vocabulary.csv",
       "mimeType": null
     },
     {
-      "id": "425001a8-efd9-4bc2-95c9-f245adb5d579",
+      "id": "72f233b3-6ffc-4b18-b273-86b8d76bcff7",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/water-cycle-guide.epub",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/philosophy-presocratics.rtf",
       "mimeType": null
     },
     {
-      "id": "557d89f3-0fff-4aa8-a79e-667efbeb8481",
+      "id": "6962641e-c577-41ac-8093-76ca4e000ad1",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/spanish-quiz.gift",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/water-cycle-guide.epub",
       "mimeType": null
     },
     {
-      "id": "23fc57b0-ddc4-4657-9feb-830a8f4c3b5c",
+      "id": "754fae63-fff1-4530-8ea1-02af8d747e92",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/biology-cell-quiz.qti",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-quiz.gift",
       "mimeType": null
     },
     {
-      "id": "63492721-6fbd-4fc0-a59f-04cffe0daeda",
+      "id": "98e94f2c-f1e1-463c-838b-24db420fea47",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/japanese-grammar-course.imscc",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-quiz.qti",
       "mimeType": null
     },
     {
-      "id": "015795a6-67e2-48a4-bf41-e12811c6df36",
+      "id": "7480631a-af15-4d25-a4d3-414ee4f0ac67",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/biology-photosynthesis-scorm.zip",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-course.imscc",
       "mimeType": null
     },
     {
-      "id": "6506cc77-5a26-40a7-85c3-f4e018b3fda4",
+      "id": "418fb216-51d9-4e7c-9d8d-5be85387555d",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-photosynthesis-scorm.zip",
       "mimeType": null
     },
     {
-      "id": "e03dce34-e6cc-4c79-ae5f-4cfee3a766f8",
+      "id": "879450f8-f490-45f5-9bdb-101e7d7f8aaf",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
       "mimeType": null
     },
     {
-      "id": "98e264a7-a679-4171-9dd1-f9cc552a0f47",
+      "id": "554d0bc7-f855-4067-8a8a-dff260e6b1f9",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/sound-design-elements-sfx-ps-022-302865.mp3",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
       "mimeType": null
     },
     {
-      "id": "de5a4ccf-d8fa-4221-9412-2722fa9ec8d6",
+      "id": "11081d0c-6276-46c6-8bd4-4083b3926750",
       "name": null,
-      "path": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/files/sample-tone.wav",
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/sound-design-elements-sfx-ps-022-302865.mp3",
+      "mimeType": null
+    },
+    {
+      "id": "acc70f8b-da04-46c1-ae6f-280320a84654",
+      "name": null,
+      "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/sample-tone.wav",
       "mimeType": null
     }
   ],
   "documents": [
     {
-      "id": "c0d85c39-5e60-4ee3-b3e2-f9922bd0d4a5",
+      "id": "1122b046-36d9-49e8-af3a-06d153736e70",
       "filename": "photosynthesis-notes.pdf",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/photosynthesis-notes.pdf",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/photosynthesis-notes.pdf",
       "status": "completed"
     },
     {
-      "id": "77da0b93-8f25-462e-a2d8-9927bd9af4fc",
+      "id": "454ed264-e66a-47de-9b8f-f72eb1628ac6",
       "filename": "japanese-grammar-guide.pdf",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/japanese-grammar-guide.pdf",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/japanese-grammar-guide.pdf",
       "status": "uploaded"
     },
     {
-      "id": "5184481a-4b9a-4834-8cfd-70a7478dda8f",
+      "id": "7146c83f-a6d9-46d6-8ff0-7072554fa054",
       "filename": "biology-cell-structure.docx",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/biology-cell-structure.docx",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-cell-structure.docx",
       "status": "uploaded"
     },
     {
-      "id": "10c73b08-9537-4731-b5e0-649c4f042bad",
+      "id": "93649cde-c78a-4db4-a8c3-23400938fc5c",
       "filename": "french-seasons-vocabulary.txt",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/french-seasons-vocabulary.txt",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/french-seasons-vocabulary.txt",
       "status": "uploaded"
     },
     {
-      "id": "9471430f-7a6f-4002-9b32-a534036fbfd8",
+      "id": "effc7c44-39e7-449e-aa42-5f3743aa00fb",
       "filename": "spanish-quiz.gift",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/spanish-quiz.gift",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/spanish-quiz.gift",
       "status": "uploaded"
     },
     {
-      "id": "2b2b9a74-85ee-4572-84fc-5e1577ac7715",
+      "id": "9b75a965-ba89-49d9-8ba6-ea5b8865eaef",
       "filename": "biology-cell-quiz.qti",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/biology-cell-quiz.qti",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-cell-quiz.qti",
       "status": "uploaded"
     },
     {
-      "id": "8f3b2122-0c7b-4ff7-ac16-1d4c131d13fb",
+      "id": "29488d2b-9d2e-475f-b22e-116f8dca22fc",
       "filename": "japanese-grammar-course.imscc",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/japanese-grammar-course.imscc",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/japanese-grammar-course.imscc",
       "status": "uploaded"
     },
     {
-      "id": "cc5fd223-45f9-4466-abbd-aac176a4fbe0",
+      "id": "69545806-de70-473a-921b-b296a408019d",
       "filename": "biology-photosynthesis-scorm.zip",
-      "s3Key": "protected/us-east-1:b0eadde9-f072-cbf1-f704-0eca9b9d8dc5/documents/biology-photosynthesis-scorm.zip",
+      "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-photosynthesis-scorm.zip",
       "status": "uploaded"
     }
   ],
   "analyticsSummaries": [],
   "squads": [
     {
-      "id": "59e5529d-9f66-451a-ab1d-eb431b5b45c3",
+      "id": "70d17d0b-e856-4ea7-897b-de7b7d73df14",
       "name": "Dragon Scholars"
     },
     {
-      "id": "f505b290-99e1-4c37-8447-43dc4637f9fd",
+      "id": "3a9cd524-7c86-4882-8e08-110562d12484",
       "name": "Phoenix Writers"
     }
   ],
   "skills": [
     {
-      "id": "1025a762-4b86-4756-bb4d-2785d364298b",
+      "id": "6235512d-f853-4b57-ab9e-44f7e0fcc05c",
       "title": "Basic Vocabulary"
     },
     {
-      "id": "60ca75f5-1cd5-4b74-84b0-5d8764e8ee7e",
+      "id": "67c00c48-85a6-48a8-877b-7643726c117b",
       "title": "Reading Comprehension"
     },
     {
-      "id": "a4cd9d9d-e338-4f23-aa78-514e15a30392",
+      "id": "ebb2861c-697f-44ba-ba9d-1568a66ef41d",
       "title": "Grammar Patterns"
     },
     {
-      "id": "285c979e-fc45-406d-9181-904a6ea275c9",
+      "id": "623a097c-6d3a-4e97-bb70-f0b691d6ac7f",
       "title": "Listening & Speaking"
     },
     {
-      "id": "334768a2-03c3-4abf-8419-e1cceb73b886",
+      "id": "a80ac771-d6ef-4c92-9757-e348cada4460",
       "title": "Advanced Composition"
     },
     {
-      "id": "c37e5d91-2dda-48f2-9ffb-b2f9e3d9a640",
+      "id": "49aa8135-85fb-49d4-b587-18e1cdca1db0",
       "title": "Oral Presentation"
     },
     {
-      "id": "43ae8949-ee7f-4433-9f22-e5d89b6eb37a",
+      "id": "18d8427e-dbf6-469c-aed9-0e352c927d2b",
       "title": "Critical Analysis"
     },
     {
-      "id": "fb8bc562-ddbc-4a59-ab43-f2b698b88839",
+      "id": "a6818737-2f0f-4b3b-829d-7cff6250004d",
       "title": "Language Mastery"
     }
   ],
   "badges": [
     {
-      "id": "a5ed5e6c-4b5d-4e32-ab5d-f746d545f820",
+      "id": "993ef0b7-98b2-488a-a8b3-12f444848c7c",
       "title": "First Submission",
       "category": "Achievement"
     },
     {
-      "id": "770d7501-95c9-479f-8565-65ed93e7dfe6",
+      "id": "7a5adef7-b8f4-4a16-8ed3-f1ceb5e9cd09",
       "title": "Perfect Score",
       "category": "Excellence"
     },
     {
-      "id": "a7a523bf-6b97-48c4-9743-beb0d62dcb2c",
+      "id": "8efc772a-950d-4fa8-b241-a2610a06bbf0",
       "title": "Week Warrior",
       "category": "Consistency"
     },
     {
-      "id": "963172ac-1c12-495e-ad53-0bd25eb96542",
+      "id": "2c0e6d2b-3513-432b-90fc-88d12b9f78df",
       "title": "Speed Demon",
       "category": "Speed"
     },
     {
-      "id": "14a5a908-88aa-40f2-ab51-75cde244342b",
+      "id": "53b6364f-b127-47ef-9a74-438f4b1c038d",
       "title": "Bug Squasher Initiate",
       "category": "Campaign"
     },
     {
-      "id": "7d31191b-bcf3-4622-8978-d642add71376",
+      "id": "7e3ebdf8-0ccc-415b-bbfd-0281bf67afb2",
       "title": "Completionist",
       "category": "Achievement"
     }
   ],
   "xpLogs": [
     {
-      "id": "4fc06cd1-2a1b-4fd6-aaa3-2c6ac30a2a17",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "d506d96b-0695-4e31-9e5b-0d804de3f9f7",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 50,
       "reason": "HOMEWORK_SUBMITTED"
     },
     {
-      "id": "bd77849c-f730-4559-9353-19e2900b5b92",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "1e3280a8-ca42-4796-b3a2-ce7fe463cfbd",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 100,
       "reason": "ALL_BLOCKS_COMPLETED"
     },
     {
-      "id": "c280c27b-8296-4866-9646-116e443aedbe",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "4664972a-b943-4b2d-beb9-d6f591056524",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 25,
       "reason": "ON_TIME_SUBMISSION"
     },
     {
-      "id": "fae4c774-1d3f-48e6-841f-8c9b7090100f",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "ced96fe8-7311-45f2-8984-5feb9a5d5bdf",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 75,
       "reason": "STREAK_3DAY"
     },
     {
-      "id": "83112174-0b65-4a6f-93fe-3b66824e7ed7",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "75052b89-2758-4765-a51e-01438dc393e5",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 150,
       "reason": "PERFECT_SCORE"
     },
     {
-      "id": "bab4ad56-6b90-4165-9553-57faa8b16383",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "f53ade8a-3964-4b1e-b9b2-f6142e6a947c",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 30,
       "reason": "NAILED_IT"
     },
     {
-      "id": "5ce1a015-b02b-4431-9cc2-70793413b7ea",
-      "studentId": "7418e4c8-6011-70cf-d28b-4750a3d203b1",
+      "id": "d7194db4-015f-4a81-a1ef-790681dca421",
+      "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 40,
       "reason": "PEER_REVIEW_GIVEN"
     }
   ],
   "challenges": [
     {
-      "id": "e906ab32-efa8-425e-96c4-9b021198e27c",
+      "id": "534c952d-59e5-4966-b945-830bb854b144",
       "title": "Chapter 3: The Merge Conflict Colosseum",
       "chapterOrder": 3,
       "active": false
@@ -491,25 +509,25 @@
   ],
   "notifications": [
     {
-      "id": "7744435a-9b92-4e4a-aa81-f452a9236755",
+      "id": "4e8302c1-e8e6-4271-8366-a9402789b918",
       "type": null,
       "category": null,
       "title": "Assignment Due Tomorrow"
     },
     {
-      "id": "a674f067-4f04-46bb-9d7d-6c44b3c6cc5d",
+      "id": "53ab96a2-aa9c-4c67-aca3-55bb08f57486",
       "type": null,
       "category": null,
       "title": "New Badge Earned! 🏅"
     },
     {
-      "id": "6e57a2d8-5db9-4f42-b180-4e23c45b576f",
+      "id": "f87c2d44-be83-4e7a-8f9d-0550ef2c8b81",
       "type": null,
       "category": null,
       "title": "New Comment on Your Work"
     },
     {
-      "id": "5aad9f4f-b9be-4d5d-8a27-9fea03f03e75",
+      "id": "d91ca45e-a694-4c81-9e66-a6a370ce83d4",
       "type": null,
       "category": null,
       "title": "Bug Wars Chapter 2 — 42% Complete!"
@@ -517,30 +535,30 @@
   ],
   "easterEggs": [
     {
-      "id": "b98fef2f-85cf-4ca8-8f7f-51ffaffff3da",
+      "id": "edb72b32-1117-42d6-b9dd-3a812f556850",
       "trigger": "KEYWORD",
       "triggerValue": "konnichiwa"
     }
   ],
   "practiceSessions": [
     {
-      "id": "8c02495d-ab9c-4437-b9b7-e61133844faa",
-      "unitID": "6850f8f2-4ebc-4345-9c2b-534a69af2336",
+      "id": "1c222214-b3eb-40d5-8c97-a67168851a39",
+      "unitID": "784fe6fa-563b-4726-a3df-3775019548ad",
       "drillType": "VOCABULARY",
       "complete": true
     },
     {
-      "id": "9369ae4e-746c-45f2-b100-fb306d45bed4",
-      "unitID": "e977c9e7-4fb6-4ac1-a886-29f01f64e56b",
+      "id": "78f43a4e-d367-472f-a02c-6584ed73e535",
+      "unitID": "e04bb71b-87ea-43c2-b0e3-51566c6b988e",
       "drillType": "MIXED",
       "complete": false
     }
   ],
   "homeworkRoom": {
-    "id": "94298a87-6177-442c-83ed-0f56dc42b82f",
+    "id": "4036397c-b8f0-4266-b780-2c0d8efc5dbc",
     "code": null
   },
   "platformSettings": {
-    "id": "dea70420-973d-401f-875b-033bedacc602"
+    "id": "1807e959-315a-4965-b9dc-d8cbeaf3a5cf"
   }
 }

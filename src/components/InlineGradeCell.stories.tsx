@@ -21,9 +21,6 @@ import {
   Box,
 } from "@mui/material";
 
-// Shared history state across all cells in the story
-const sharedHistory = createEmptyHistoryState();
-
 const meta: Meta<typeof InlineGradeCell> = {
   title: "📊 Instructor Tools/Inline Grade Cell",
   component: InlineGradeCell,
@@ -31,6 +28,14 @@ const meta: Meta<typeof InlineGradeCell> = {
     // Pure presentational component — skip the app context/subscription stack.
     minimalProviders: true,
     layout: "padded",
+    // `sharedHistory` holds a live, mutable Lexical HistoryState (real EditorState
+    // objects get pushed into its undo/redo stacks once play() types into the editor).
+    // Storybook's "auto" docs Source block reconstructs JSX from args and crashes with
+    // "Maximum call stack size exceeded" trying to stringify that object graph. This
+    // prop is never meant to be serialized, so force the static (code-extracted) source.
+    docs: {
+      source: { type: "code" },
+    },
   },
   decorators: [
     (Story) => (
@@ -49,7 +54,8 @@ export const Default: Story = {
     computedGrade: "85% (78%)",
     rawHighest: 85,
     overrideScore: undefined,
-    sharedHistory,
+    // Isolated per story — not shared/spread — so one story's edits don't mutate another's args.
+    sharedHistory: createEmptyHistoryState(),
     isOwner: true,
     onOverride: fn(),
     onRemoveOverride: fn(),
@@ -82,6 +88,7 @@ export const Default: Story = {
 export const WithOverride: Story = {
   args: {
     ...Default.args,
+    sharedHistory: createEmptyHistoryState(),
     overrideScore: 92,
     onOverride: fn(),
     onRemoveOverride: fn(),
@@ -116,6 +123,7 @@ export const WithOverride: Story = {
 export const NoGrade: Story = {
   args: {
     ...Default.args,
+    sharedHistory: createEmptyHistoryState(),
     computedGrade: "— (—)",
     rawHighest: undefined,
     overrideScore: undefined,
@@ -136,6 +144,7 @@ export const NoGrade: Story = {
 export const StudentView: Story = {
   args: {
     ...Default.args,
+    sharedHistory: createEmptyHistoryState(),
     isOwner: false,
     onOverride: fn(),
     onRemoveOverride: fn(),

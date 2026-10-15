@@ -3,7 +3,18 @@ import * as React from "react";
 import { useTranslations } from "next-intl";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-import Card from "@mui/material/Card";
+import Accordion from "@mui/material/Accordion";
+import AccordionSummary from "@mui/material/AccordionSummary";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import Stack from "@mui/material/Stack";
+import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import PersonIcon from "@mui/icons-material/Person";
+import LockIcon from "@mui/icons-material/Lock";
+import TranslateIcon from "@mui/icons-material/Translate";
+import ShieldIcon from "@mui/icons-material/Shield";
+import TuneIcon from "@mui/icons-material/Tune";
+import PaletteIcon from "@mui/icons-material/Palette";
+import FaceIcon from "@mui/icons-material/Face";
 
 import {
   fetchUserAttributes,
@@ -21,6 +32,8 @@ import { LanguagePreferenceView } from "@/components/Settings/LanguagePreference
 import { AdvancedSettingsView } from "@/components/Settings/AdvancedSettingsView";
 import { CosmeticSelector } from "@/components/Gamification/CosmeticSelector";
 import { BotCustomizer } from "@/components/BotCustomizer";
+import { useAvatarConfig } from "@/hooks/useAvatarConfig";
+import { useBotAvatarConfig } from "@/hooks/useBotAvatarConfig";
 import { useXP, useBadges } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { getAmplifyClient } from "@/utils/amplifyClient";
@@ -61,8 +74,59 @@ function Settings() {
     React.useState(false);
   const { settings, updateSettings } = React.useContext(SettingsContext) || {};
 
+  // Parse settings.metadata once per render; used to merge avatar/bot updates
+  // without clobbering unrelated metadata keys (e.g. glowRing).
+  const metadataRef = React.useRef({});
+  metadataRef.current = React.useMemo(() => {
+    const raw = settings?.metadata;
+    if (typeof raw === "string") {
+      try {
+        return JSON.parse(raw);
+      } catch {
+        return {};
+      }
+    }
+    return raw || {};
+  }, [settings?.metadata]);
+
   useChatPageContext({});
-  const { level } = useXP();
+  const { level, avatarUnlockConfig } = useXP();
+
+  const {
+    style: selectedAvatarTier,
+    overrides: avatarOverrides,
+    seed: avatarSeed,
+  } = useAvatarConfig();
+  const botAvatarConfig = useBotAvatarConfig();
+
+  const handleAvatarTierSelect = (tier) => {
+    if (!updateSettings) return;
+    updateSettings({
+      metadata: { ...metadataRef.current, avatarStyle: tier },
+    });
+  };
+
+  const handleAvatarOverridesSave = (overrides, style) => {
+    if (!updateSettings) return;
+    updateSettings({
+      metadata: {
+        ...metadataRef.current,
+        avatarStyle: style,
+        avatarOverrides: overrides,
+      },
+    });
+  };
+
+  const handleBotAvatarChange = (config) => {
+    if (!updateSettings) return;
+    updateSettings({
+      metadata: {
+        ...metadataRef.current,
+        botAvatarStyle: config.style,
+        botAvatarBackgroundColor: config.backgroundColor,
+      },
+    });
+  };
 
   // Compute Bot Whisperer tier from earned badges
   const { badges: earnedBadges } = useBadges();
@@ -332,131 +396,207 @@ function Settings() {
             {errorMessage}
           </Alert>
         </Snackbar>
-        <ProfileInfoView
-          email={email}
-          name={name}
-          username={username}
-          userSub={user?.sub}
-          identityId={identityId}
-          isWorking={isWorking}
-          errorMessage={errorMessage}
-          onEmailChange={setEmail}
-          onNameChange={setName}
-          onSubmit={updateUser}
-          onCancel={() => {
-            setName(user?.name || "");
-            setEmail(user?.email || "");
-          }}
-          needsConfirmation={needsConfirmation}
-          confirmationCode={confirmationCode}
-          onConfirmationCodeChange={setConfirmationCode}
-          onConfirmationSubmit={updateEmailConfirmation}
-          onConfirmationClose={() => setNeedsConfirmation(false)}
-        />
+        <Box sx={{ mb: 2 }}>
+          <Accordion defaultExpanded>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <PersonIcon color="primary" />
+                <Typography variant="h6">
+                  {t("settings.profileInfo.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <ProfileInfoView
+                variant="bare"
+                email={email}
+                name={name}
+                username={username}
+                userSub={user?.sub}
+                identityId={identityId}
+                isWorking={isWorking}
+                errorMessage={errorMessage}
+                onEmailChange={setEmail}
+                onNameChange={setName}
+                onSubmit={updateUser}
+                onCancel={() => {
+                  setName(user?.name || "");
+                  setEmail(user?.email || "");
+                }}
+                needsConfirmation={needsConfirmation}
+                confirmationCode={confirmationCode}
+                onConfirmationCodeChange={setConfirmationCode}
+                onConfirmationSubmit={updateEmailConfirmation}
+                onConfirmationClose={() => setNeedsConfirmation(false)}
+              />
+            </AccordionDetails>
+          </Accordion>
 
-        <PasswordChangeView
-          username={username}
-          oldPassword={oldPassword}
-          newPassword={newPassword}
-          confirmNewPassword={confirmNewPassword}
-          isWorking={isWorking}
-          onOldPasswordChange={setOldPassword}
-          onNewPasswordChange={setNewPassword}
-          onConfirmNewPasswordChange={setConfirmNewPassword}
-          onSubmit={changePassword}
-        />
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <LockIcon color="primary" />
+                <Typography variant="h6">
+                  {t("profile.changePassword.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <PasswordChangeView
+                variant="bare"
+                username={username}
+                oldPassword={oldPassword}
+                newPassword={newPassword}
+                confirmNewPassword={confirmNewPassword}
+                isWorking={isWorking}
+                onOldPasswordChange={setOldPassword}
+                onNewPasswordChange={setNewPassword}
+                onConfirmNewPasswordChange={setConfirmNewPassword}
+                onSubmit={changePassword}
+              />
+            </AccordionDetails>
+          </Accordion>
 
-        <LanguagePreferenceView
-          selectedLocale={selectedLocale}
-          availableLocales={availableLocales}
-          onChange={handleLocaleChange}
-        />
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <TranslateIcon color="primary" />
+                <Typography variant="h6">
+                  {t("profile.languagePreference.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <LanguagePreferenceView
+                variant="bare"
+                selectedLocale={selectedLocale}
+                availableLocales={availableLocales}
+                onChange={handleLocaleChange}
+              />
+            </AccordionDetails>
+          </Accordion>
 
-        <AdvancedSettingsView
-          isWorking={isWorking}
-          dialogOpen={clearDataStoreDialogOpen}
-          onClearCacheClick={() => setClearDataStoreDialogOpen(true)}
-          onDialogClose={() => setClearDataStoreDialogOpen(false)}
-          onConfirmClear={handleClearDataStore}
-        />
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <ShieldIcon color="primary" />
+                <Typography variant="h6">
+                  Privacy, Accessibility &amp; Visibility
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <AccountPreferencesView
+                variant="bare"
+                preferences={settings}
+                onToggle={(key, value) =>
+                  updateSettings && updateSettings({ [key]: value })
+                }
+                t={t}
+              />
+            </AccordionDetails>
+          </Accordion>
 
-        {/* Offline Storage Management */}
-        <StorageManagement />
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <TuneIcon color="primary" />
+                <Typography variant="h6">
+                  {t("profile.advanced.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <AdvancedSettingsView
+                variant="bare"
+                isWorking={isWorking}
+                dialogOpen={clearDataStoreDialogOpen}
+                onClearCacheClick={() => setClearDataStoreDialogOpen(true)}
+                onDialogClose={() => setClearDataStoreDialogOpen(false)}
+                onConfirmClear={handleClearDataStore}
+              />
+            </AccordionDetails>
+          </Accordion>
 
-        {/* Privacy, Accessibility & Profile Visibility preferences */}
-        <AccountPreferencesView
-          preferences={settings}
-          onToggle={(key, value) =>
-            updateSettings && updateSettings({ [key]: value })
-          }
-          t={t}
-        />
+          {/* Offline Storage Management */}
+          <StorageManagement />
 
-        {/* Cosmetic Customization */}
-        <Card
-          sx={{
-            padding: "2rem 1rem",
-            margin: "1rem auto",
-            height: "fit-content",
-            maxWidth: "60rem",
-          }}
-        >
-          <Typography variant="h5" gutterBottom>
-            {t("settings.customization.heading")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t("settings.customization.description")}
-          </Typography>
-          <CosmeticSelector
-            level={level?.level || 1}
-            selectedThemeId={
-              settings?.profileThemeId || settings?.editorTheme || "default"
-            }
-            onThemeSelect={(themeId) => {
-              if (updateSettings) {
-                updateSettings({ profileThemeId: themeId });
-              }
-            }}
-            customThemePalette={
-              settings?.customThemePalette
-                ? typeof settings.customThemePalette === "string"
-                  ? JSON.parse(settings.customThemePalette)
-                  : settings.customThemePalette
-                : null
-            }
-            onCustomPaletteSave={(palette) => {
-              if (updateSettings) {
-                updateSettings({
-                  profileThemeId: "custom",
-                  customThemePalette: JSON.stringify(palette),
-                });
-              }
-            }}
-            robotStylesUnlocked={robotStylesUnlocked}
-          />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            Your selected theme will also be applied to your public profile
-            page.
-          </Typography>
-        </Card>
+          {/* Cosmetic Customization */}
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <PaletteIcon color="primary" />
+                <Typography variant="h6">
+                  {t("settings.customization.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("settings.customization.description")}
+              </Typography>
+              <CosmeticSelector
+                level={level?.level || 1}
+                selectedThemeId={
+                  settings?.profileThemeId || settings?.editorTheme || "default"
+                }
+                onThemeSelect={(themeId) => {
+                  if (updateSettings) {
+                    updateSettings({ profileThemeId: themeId });
+                  }
+                }}
+                customThemePalette={
+                  settings?.customThemePalette
+                    ? typeof settings.customThemePalette === "string"
+                      ? JSON.parse(settings.customThemePalette)
+                      : settings.customThemePalette
+                    : null
+                }
+                onCustomPaletteSave={(palette) => {
+                  if (updateSettings) {
+                    updateSettings({
+                      profileThemeId: "custom",
+                      customThemePalette: JSON.stringify(palette),
+                    });
+                  }
+                }}
+                robotStylesUnlocked={robotStylesUnlocked}
+                avatarSeed={avatarSeed || username}
+                selectedAvatarTier={selectedAvatarTier}
+                onAvatarTierSelect={handleAvatarTierSelect}
+                avatarOverrides={avatarOverrides}
+                onAvatarOverridesSave={handleAvatarOverridesSave}
+                avatarUnlockConfig={avatarUnlockConfig}
+              />
+              <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+                Your selected theme will also be applied to your public profile
+                page.
+              </Typography>
+            </AccordionDetails>
+          </Accordion>
 
-        {/* Bot Avatar Customization */}
-        <Card
-          sx={{
-            padding: "2rem 1rem",
-            margin: "1rem auto",
-            height: "fit-content",
-            maxWidth: "60rem",
-          }}
-        >
-          <Typography variant="h5" gutterBottom>
-            {t("settings.botCustomizer.heading")}
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            {t("settings.botCustomizer.description")}
-          </Typography>
-          <BotCustomizer botWhispererTier={botWhispererTier} />
-        </Card>
+          {/* Bot Avatar Customization */}
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <FaceIcon color="primary" />
+                <Typography variant="h6">
+                  {t("settings.botCustomizer.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                {t("settings.botCustomizer.description")}
+              </Typography>
+              <BotCustomizer
+                botWhispererTier={botWhispererTier}
+                initialConfig={botAvatarConfig}
+                onChange={handleBotAvatarChange}
+              />
+            </AccordionDetails>
+          </Accordion>
+        </Box>
 
         <Snackbar
           open={successMessage !== ""}

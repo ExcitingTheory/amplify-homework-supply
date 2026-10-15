@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useTranslations } from "next-intl";
+import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
@@ -22,6 +23,10 @@ export interface AdvancedSettingsViewProps {
   onClearCacheClick: () => void;
   onDialogClose: () => void;
   onConfirmClear: () => void;
+  /** "card" (default) renders a standalone bordered Card with its own heading.
+   * "bare" drops the Card chrome and heading for embedding inside an
+   * AccordionDetails, where the summary already shows the title. */
+  variant?: "card" | "bare";
 }
 
 /**
@@ -34,12 +39,15 @@ export function AdvancedSettingsView({
   onClearCacheClick,
   onDialogClose,
   onConfirmClear,
+  variant = "card",
 }: AdvancedSettingsViewProps) {
   const t = useTranslations("pages");
+  const isBare = variant === "bare";
+  const Wrapper: React.ElementType = isBare ? Box : Card;
   return (
     <>
-      <Card sx={CARD_SX}>
-        <h1>{t("profile.advanced.heading")}</h1>
+      <Wrapper sx={isBare ? undefined : CARD_SX}>
+        {!isBare && <h1>{t("profile.advanced.heading")}</h1>}
         <p>{t("profile.advanced.description")}</p>
 
         <Button
@@ -51,7 +59,7 @@ export function AdvancedSettingsView({
         >
           {t("profile.advanced.clearCache")}
         </Button>
-      </Card>
+      </Wrapper>
 
       <Dialog
         open={dialogOpen}

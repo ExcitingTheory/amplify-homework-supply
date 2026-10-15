@@ -24,6 +24,16 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { SSMClient, GetParameterCommand } from "@aws-sdk/client-ssm";
 import * as crypto from "crypto";
+import {
+  MAX_RETRY_ATTEMPTS,
+  sleep,
+  backoffMs,
+  isConditionalCheckFailure,
+} from "../shared/concurrency";
+import {
+  resolveGradeAggregationMethod,
+  computeAggregatedGrade,
+} from "../shared/gradeAggregation";
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
@@ -320,6 +330,69 @@ const CREATE_ASSIGNMENT = /* GraphQL */ `
   }
 `;
 
+// recomputeGradeAggregation GraphQL operations
+const GET_SECTION_FOR_GRADE_RECOMPUTE = /* GraphQL */ `
+  query GetSectionForGradeRecompute($id: ID!) {
+    getSection(id: $id) {
+      id
+      _version
+      gradeAggregationMethod
+      gradeAggregationOverrides {
+        unitID
+        method
+      }
+      studentProgress
+    }
+  }
+`;
+
+const UPDATE_SECTION_STUDENT_PROGRESS = /* GraphQL */ `
+  mutation UpdateSectionStudentProgress(
+    $input: UpdateSectionInput!
+    $condition: ModelSectionConditionInput
+  ) {
+    updateSection(input: $input, condition: $condition) {
+      id
+      _version
+    }
+  }
+`;
+
+const LIST_ASSIGNMENTS_FOR_GRADE_RECOMPUTE = /* GraphQL */ `
+  query ListAssignmentsForGradeRecompute($filter: ModelAssignmentFilterInput) {
+    listAssignments(filter: $filter) {
+      items {
+        id
+        unitID
+        gradeSummary
+        _version
+      }
+    }
+  }
+`;
+
+const GET_ASSIGNMENT_FOR_GRADE_RECOMPUTE = /* GraphQL */ `
+  query GetAssignmentForGradeRecompute($id: ID!) {
+    getAssignment(id: $id) {
+      id
+      gradeSummary
+      _version
+    }
+  }
+`;
+
+const UPDATE_ASSIGNMENT_GRADE_SUMMARY = /* GraphQL */ `
+  mutation UpdateAssignmentGradeSummary(
+    $input: UpdateAssignmentInput!
+    $condition: ModelAssignmentConditionInput
+  ) {
+    updateAssignment(input: $input, condition: $condition) {
+      id
+      _version
+    }
+  }
+`;
+
 // Peer Review GraphQL operations
 const GET_GRADE = /* GraphQL */ `
   query GetGrade($id: ID!) {
@@ -516,6 +589,8 @@ export const handler: Handler = async (event: any, context: any) => {
           claims,
           groupManager,
         );
+      case "recomputeGradeAggregation":
+        return await handleRecomputeGradeAggregation(args, userId, claims);
       case "listSectionStudents":
         return await handleListSectionStudents(args, userId, groupManager);
       case "createPeerReviewRoom":
@@ -904,6 +979,178 @@ async function handleRemoveStudentFromSection(
     sectionId,
     username,
     message: `Removed ${username} from section`,
+  });
+}
+
+function parseJsonField(value: unknown): any {
+  if (value == null) return null;
+  try {
+    return typeof value === "string" ? JSON.parse(value) : value;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Instructor-initiated — recomputes rollup `effective` grades from already-stored
+ * recentValues under the section's CURRENT gradeAggregationMethod/Overrides.
+ * Mirrors gradeRollupStream/handler.ts's merge logic but reads the already-persisted
+ * rollup state instead of replaying the Grade table, so a mid-term method change
+ * doesn't require every student to resubmit before the instructor dashboard reflects it.
+ */
+async function handleRecomputeGradeAggregation(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<string> {
+  const { sectionId } = args;
+  const client = getClient();
+
+  await authorizeSectionInstructor(sectionId, userId, claims);
+
+  let sectionConfig: any;
+  let studentsUpdated = 0;
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const { data } = await client.graphql({
+      query: GET_SECTION_FOR_GRADE_RECOMPUTE,
+      variables: { id: sectionId },
+    });
+    sectionConfig = data?.getSection;
+    if (!sectionConfig) throw new Error(`Section not found: ${sectionId}`);
+
+    const studentProgress = parseJsonField(sectionConfig.studentProgress) || {};
+    for (const student of Object.values(studentProgress) as any[]) {
+      if (!student?.perUnitStats) continue;
+      student.perUnitEffective = student.perUnitEffective || {};
+      for (const [unitID, stats] of Object.entries(student.perUnitStats) as [
+        string,
+        any,
+      ][]) {
+        const method = resolveGradeAggregationMethod(sectionConfig, unitID);
+        student.perUnitEffective[unitID] =
+          computeAggregatedGrade(method, stats?.recentValues || []) ??
+          stats?.best ??
+          0;
+      }
+      const effectives = Object.values(student.perUnitEffective) as number[];
+      student.averageGrade =
+        effectives.length > 0
+          ? effectives.reduce((sum, v) => sum + v, 0) / effectives.length
+          : 0;
+      student.unitsCompleted = effectives.length;
+    }
+    studentsUpdated = Object.keys(studentProgress).length;
+
+    const expectedVersion = sectionConfig._version ?? 1;
+    try {
+      await client.graphql({
+        query: UPDATE_SECTION_STUDENT_PROGRESS,
+        variables: {
+          input: {
+            id: sectionId,
+            studentProgress: JSON.stringify(studentProgress),
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
+
+  const { data: assignmentsData } = await client.graphql({
+    query: LIST_ASSIGNMENTS_FOR_GRADE_RECOMPUTE,
+    variables: { filter: { sectionID: { eq: sectionId } } },
+  });
+  const assignments = (assignmentsData?.listAssignments?.items || []).filter(
+    (a: any) => a != null && a.id != null,
+  );
+
+  let assignmentsUpdated = 0;
+  for (const assignment of assignments) {
+    const method = resolveGradeAggregationMethod(
+      sectionConfig,
+      assignment.unitID,
+    );
+
+    let current = assignment;
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      if (attempt > 0) {
+        const { data } = await client.graphql({
+          query: GET_ASSIGNMENT_FOR_GRADE_RECOMPUTE,
+          variables: { id: assignment.id },
+        });
+        current = data?.getAssignment;
+        if (!current) break; // Assignment deleted concurrently — nothing left to update.
+      }
+
+      const summary = parseJsonField(current.gradeSummary) || {};
+      const perStudentBest = summary.perStudentBest || {};
+      for (const student of Object.values(perStudentBest) as any[]) {
+        student.effective =
+          computeAggregatedGrade(method, student?.recentValues || []) ??
+          student?.best ??
+          0;
+      }
+      const effectives = Object.values(perStudentBest).map(
+        (s: any) => s.effective,
+      );
+      const classStats =
+        effectives.length > 0
+          ? {
+              avg:
+                effectives.reduce((sum: number, v: number) => sum + v, 0) /
+                effectives.length,
+              min: Math.min(...effectives),
+              max: Math.max(...effectives),
+              count: effectives.length,
+            }
+          : null;
+
+      const expectedVersion = current._version ?? 1;
+      try {
+        await client.graphql({
+          query: UPDATE_ASSIGNMENT_GRADE_SUMMARY,
+          variables: {
+            input: {
+              id: assignment.id,
+              gradeSummary: JSON.stringify({
+                ...summary,
+                perStudentBest,
+                lastComputedAt: new Date().toISOString(),
+              }),
+              classStats: JSON.stringify(classStats),
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        assignmentsUpdated += 1;
+        break; // Success.
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue; // Re-read and retry with fresh data.
+        }
+        throw err;
+      }
+    }
+  }
+
+  return JSON.stringify({
+    success: true,
+    sectionId,
+    assignmentsUpdated,
+    studentsUpdated,
   });
 }
 

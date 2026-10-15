@@ -9,10 +9,10 @@
  *   src/components/Editor3/plugins/WordBlockPlugin.jsx
  */
 
-import { DecoratorBlockNode } from '@lexical/react/LexicalDecoratorBlockNode';
+import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 
 function convertWordBlockElement(domNode) {
-  const wordID = domNode.getAttribute('data-lexical-word-block');
+  const wordID = domNode.getAttribute("data-lexical-word-block");
   if (wordID) {
     const node = $createWordBlockNode(wordID);
     return { node };
@@ -24,7 +24,7 @@ export class WordBlockNode extends DecoratorBlockNode {
   __id;
 
   static getType() {
-    return 'word-block';
+    return "word-block";
   }
 
   static clone(node) {
@@ -40,27 +40,27 @@ export class WordBlockNode extends DecoratorBlockNode {
   exportJSON() {
     return {
       ...super.exportJSON(),
-      type: 'word-block',
+      type: "word-block",
       version: 1,
       wordID: this.__id,
     };
   }
 
   constructor(id, format, key) {
-    super(key);
+    super(format, key);
     this.__id = id;
   }
 
   exportDOM() {
-    const element = document.createElement('div');
-    element.setAttribute('data-lexical-word-block', this.__id);
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-word-block", this.__id);
     return { element };
   }
 
   static importDOM() {
     return {
       div: (domNode) => {
-        if (!domNode.hasAttribute('data-lexical-word-block')) {
+        if (!domNode.hasAttribute("data-lexical-word-block")) {
           return null;
         }
         return {

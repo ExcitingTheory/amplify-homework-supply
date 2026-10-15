@@ -14,12 +14,7 @@ import { useTheme } from "@mui/material/styles";
 import type { IconType } from "react-icons";
 import { Medallion } from "./Medallion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
-import {
-  pickTinctures,
-  pickDivision,
-  metalForTier,
-  readableInk,
-} from "@/themes/heraldry";
+import { pickTinctures, pickDivision, metalForTier } from "@/themes/heraldry";
 
 export interface SquadCrestProps {
   squadId: string;
@@ -66,7 +61,10 @@ export function SquadCrest({
     () => metalForTier(totalXP ?? 0, theme),
     [totalXP, theme],
   );
-  const ink = useMemo(() => readableInk(field.main), [field]);
+  const ink = useMemo(
+    () => theme.palette.getContrastText(field.main),
+    [field, theme],
+  );
 
   const chargeNode = ChargeIcon ? (
     <ChargeIcon

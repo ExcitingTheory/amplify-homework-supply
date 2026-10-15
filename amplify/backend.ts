@@ -51,12 +51,17 @@ import { generatePracticeDrillHandler } from "./functions/generatePracticeDrill/
 import { streakResetCronHandler } from "./functions/streakResetCron/resource";
 import { notificationCronHandler } from "./functions/notificationCron/resource";
 import { leaderboardStreamHandler } from "./functions/leaderboardStream/resource";
+import { gradeRollupStreamHandler } from "./functions/gradeRollupStream/resource";
 import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/resource";
 import { publishUnitHandler } from "./functions/publishUnit/resource";
 import { rebuildNgramIndexHandler } from "./functions/rebuildNgramIndex/resource";
 import { collaboratorHandler } from "./functions/collaborator/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
-import { DynamoEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
+import {
+  DynamoEventSource,
+  SqsDlq,
+} from "aws-cdk-lib/aws-lambda-event-sources";
+import { Queue } from "aws-cdk-lib/aws-sqs";
 
 /**
  * @see https://docs.amplify.aws/gen2/build-a-backend/ to learn how to build backends with Amplify.
@@ -87,6 +92,7 @@ export const backend = defineBackend({
   streakResetCronHandler,
   notificationCronHandler,
   leaderboardStreamHandler,
+  gradeRollupStreamHandler,
   analyticsAggregatorHandler,
   publishUnitHandler,
   rebuildNgramIndexHandler,
@@ -1329,6 +1335,14 @@ if (studentXPLogTable) {
   const leaderboardStreamLambda =
     backend.leaderboardStreamHandler.resources.lambda;
 
+  // Batches that exhaust retryAttempts land here instead of silently vanishing —
+  // the handler now rethrows every non-permanent failure (was previously swallowed).
+  const leaderboardStreamDlq = new Queue(
+    leaderboardStreamLambda.stack,
+    "LeaderboardStreamDlq",
+    { retentionPeriod: cdk.Duration.days(14) },
+  );
+
   leaderboardStreamLambda.addEventSource(
     new DynamoEventSource(studentXPLogTable, {
       startingPosition: lambda.StartingPosition.TRIM_HORIZON,
@@ -1336,6 +1350,7 @@ if (studentXPLogTable) {
       maxBatchingWindow: cdk.Duration.seconds(10), // Wait up to 10s to batch records
       retryAttempts: 3,
       bisectBatchOnError: true,
+      onFailure: new SqsDlq(leaderboardStreamDlq),
       filters: [
         lambda.FilterCriteria.filter({
           eventName: lambda.FilterRule.isEqual("INSERT"),
@@ -1346,6 +1361,68 @@ if (studentXPLogTable) {
 
   // Grant the stream handler read access to the StudentXPLog table stream
   studentXPLogTable.grantStreamRead(leaderboardStreamLambda);
+}
+
+// ==========================================================================
+// Grade Rollup Stream Handler — DynamoDB Stream on Grade
+// ==========================================================================
+
+backend.gradeRollupStreamHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+
+const gradeRollupStreamAppSyncPolicy = new Policy(
+  backend.gradeRollupStreamHandler.resources.lambda.stack,
+  "GradeRollupStreamAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.gradeRollupStreamHandler.resources.lambda.role?.attachInlinePolicy(
+  gradeRollupStreamAppSyncPolicy,
+);
+
+// Connect DynamoDB Stream from Grade to the rollup stream handler (Grade is a
+// foundational model present in every bootstrap phase, so no existence guard needed).
+const gradeTable = backend.data.resources.tables["Grade"];
+if (gradeTable) {
+  const gradeRollupStreamLambda =
+    backend.gradeRollupStreamHandler.resources.lambda;
+
+  // Batches that exhaust retryAttempts land here instead of silently vanishing —
+  // the handler rethrows every non-permanent failure, so this is where to look
+  // when a student's grade stopped showing up in the rollup.
+  const gradeRollupDlq = new Queue(
+    gradeRollupStreamLambda.stack,
+    "GradeRollupStreamDlq",
+    { retentionPeriod: cdk.Duration.days(14) },
+  );
+
+  gradeRollupStreamLambda.addEventSource(
+    new DynamoEventSource(gradeTable, {
+      startingPosition: lambda.StartingPosition.TRIM_HORIZON,
+      batchSize: 25,
+      maxBatchingWindow: cdk.Duration.seconds(10),
+      retryAttempts: 3,
+      bisectBatchOnError: true,
+      onFailure: new SqsDlq(gradeRollupDlq),
+      filters: [
+        lambda.FilterCriteria.filter({
+          eventName: lambda.FilterRule.isEqual("INSERT"),
+        }),
+      ],
+    }),
+  );
+
+  gradeTable.grantStreamRead(gradeRollupStreamLambda);
 }
 
 // ==========================================================================

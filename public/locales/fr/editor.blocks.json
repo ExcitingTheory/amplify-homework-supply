@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "Association de sens"
   },
+  "customAIEditor": {
+    "title": "Exercice noté par l'IA",
+    "description": "Créez un exercice noté par l'IA où les apprenants répondent à des questions et l'IA évalue les réponses selon vos critères de notation personnalisés."
+  },
   "customAnswerEditor": {
     "add": "Ajouter",
     "addWordLabel": "Ajouter le mot à l'exercice",

@@ -19,7 +19,6 @@ import React, {
 import { useTranslations } from "next-intl";
 import {
   Box,
-  LinearProgress,
   Typography,
   ToggleButton,
   ToggleButtonGroup,
@@ -33,6 +32,8 @@ import AudioWaveformPlayer from "../../components/AudioWaveformPlayer";
 import UnitContext from "../../../../context/unitContext";
 import DictionaryContext from "../../../../context/dictionaryContext";
 import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhancements";
+import { ExerciseBlockCard } from "../../components/ExerciseBlockCard";
+import { ExerciseProgressMeters } from "../../components/ExerciseProgressMeters";
 import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../../utils/waveformDefaults";
 
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
@@ -53,21 +54,6 @@ interface CustomAIComponentProps {
   inputMode: CustomAIInputMode;
   criteria: string;
   allowedInput: CustomAIInputMode[];
-}
-
-function LinearProgressWithLabel({ value }: { value: number }) {
-  return (
-    <Box display="flex" alignItems="center" margin={1}>
-      <Box width="95%">
-        <LinearProgress variant="determinate" value={value} />
-      </Box>
-      <Box width="fit-content" marginLeft={1}>
-        <Typography variant="body2" color="textSecondary">
-          {`${Math.round(value)}%`}
-        </Typography>
-      </Box>
-    </Box>
-  );
 }
 
 /**
@@ -269,305 +255,345 @@ export default function CustomAIComponent({
     }
   };
 
-  const progress = React.useMemo(() => {
-    if (!questionIDs || questionIDs.length === 0) return 0;
-    const answered = questionIDs.filter((qid) => feedback[qid]).length;
-    return (answered / questionIDs.length) * 100;
-  }, [questionIDs, feedback]);
+  const totalQuestions = questionIDs?.length || 0;
+  const answeredCount = Object.keys(feedback).length;
+  const correctCount = Object.values(feedback).filter(
+    (result) => result?.correct === true,
+  ).length;
+  const percentComplete =
+    totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const accuracy = answeredCount > 0 ? (correctCount / answeredCount) * 100 : 0;
+  const graded = totalQuestions > 0 && answeredCount >= totalQuestions;
 
   const blockGradeData = grade?.data?.[nodeKey];
   const nailedIt = blockGradeData?.nailedIt === true;
 
+  const MODE_LABELS: Record<CustomAIInputMode, string> = {
+    text: "Type answer",
+    audio: "Speak answer",
+    drawing: "Draw answer",
+    image: "Upload image",
+  };
+
   return (
     <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <div
-        className={className?.base}
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          marginBottom: "6rem",
-        }}
-      >
-        <Box sx={{ flexGrow: 1 }}>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {t("customAnswerComponent.answerQuestions")}
-          </Typography>
-        </Box>
+      <div className={className?.base}>
+        <ExerciseBlockCard
+          blockType="custom-ai"
+          accuracy={accuracy}
+          graded={graded}
+          sx={{ my: 2 }}
+        >
+          <ExerciseProgressMeters
+            percentComplete={percentComplete}
+            accuracy={accuracy}
+            hasAttempts={answeredCount > 0}
+            progressDescription="Percentage of AI-graded questions answered."
+            accuracyDescription="Percentage of submitted answers marked correct by the AI."
+          />
 
-        {/* Input mode toggle */}
-        {allowedInput?.length > 1 && (
-          <ToggleButtonGroup
-            exclusive
-            value={currentInputMethod}
-            onChange={handleInputChange}
-            aria-label="Input method"
-            sx={{ mb: 1 }}
-          >
-            {allowedInput.map((mode) => (
-              <ToggleButton key={mode} value={mode} aria-label={mode}>
-                {mode.charAt(0).toUpperCase() + mode.slice(1)}
-              </ToggleButton>
-            ))}
-          </ToggleButtonGroup>
-        )}
+          <ol style={{ margin: 0, paddingLeft: "1.25rem" }}>
+            {questionIDs?.map((questionID) => {
+              const question = questionBankMap[questionID] || {};
+              const isCompleted = feedback[questionID] !== undefined;
+              const isGrading = grading[questionID] === true;
+              const displayPrompt =
+                question.prompt ||
+                question.question ||
+                `Question ${questionID}`;
 
-        <Box>
-          <LinearProgressWithLabel value={progress} />
-        </Box>
+              let borderStyle = "1px solid #ccc";
+              if (feedback[questionID]?.correct === true) {
+                borderStyle = "1px solid green";
+              } else if (feedback[questionID]?.correct === false) {
+                borderStyle = "1px solid red";
+              }
 
-        <ol>
-          {questionIDs?.map((questionID) => {
-            const question = questionBankMap[questionID] || {};
-            const isCompleted = feedback[questionID] !== undefined;
-            const isGrading = grading[questionID] === true;
-            const displayPrompt =
-              question.prompt || question.question || `Question ${questionID}`;
-
-            let borderStyle = "1px solid #ccc";
-            if (feedback[questionID]?.correct === true) {
-              borderStyle = "1px solid green";
-            } else if (feedback[questionID]?.correct === false) {
-              borderStyle = "1px solid red";
-            }
-
-            return (
-              <li key={questionID} style={{ marginBottom: "1.5rem" }}>
-                {/* Question prompt */}
-                <Typography
-                  variant="body1"
-                  sx={{ mb: 1, wordBreak: "normal", textWrap: "wrap" }}
-                >
-                  <strong>{t("customAnswerComponent.question")}</strong>
-                  &nbsp;{displayPrompt}
-                </Typography>
-
-                {/* Feedback area */}
-                {feedback[questionID] && (
-                  <Box
-                    sx={{
-                      mb: 1.5,
-                      p: 1.5,
-                      border: 1,
-                      borderColor: feedback[questionID].correct
-                        ? "success.main"
-                        : "error.main",
-                      borderRadius: 1,
-                      bgcolor: "action.hover",
-                    }}
+              return (
+                <li key={questionID} style={{ marginBottom: "1.5rem" }}>
+                  {/* Question prompt */}
+                  <Typography
+                    variant="body1"
+                    sx={{ mb: 1, wordBreak: "normal", textWrap: "wrap" }}
                   >
+                    <strong>{t("customAnswerComponent.question")}</strong>
+                    &nbsp;{displayPrompt}
+                  </Typography>
+
+                  {/* Feedback area */}
+                  {feedback[questionID] && (
+                    <Box
+                      sx={{
+                        mb: 1.5,
+                        p: 1.5,
+                        border: 1,
+                        borderColor: feedback[questionID].correct
+                          ? "success.main"
+                          : "error.main",
+                        borderRadius: 1,
+                        bgcolor: "action.hover",
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          mb: 0.5,
+                        }}
+                      >
+                        <Typography variant="body2" color="text.secondary">
+                          Score: {feedback[questionID].score}/100
+                        </Typography>
+                        <Typography
+                          variant="body2"
+                          color={
+                            feedback[questionID].correct
+                              ? "success.main"
+                              : "error.main"
+                          }
+                        >
+                          {feedback[questionID].correct
+                            ? "Correct"
+                            : "Needs Improvement"}
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2" color="text.primary">
+                        {feedback[questionID].feedback}
+                      </Typography>
+                    </Box>
+                  )}
+
+                  {/* Grading spinner */}
+                  {isGrading && (
                     <Box
                       sx={{
                         display: "flex",
-                        justifyContent: "space-between",
-                        mb: 0.5,
+                        alignItems: "center",
+                        mb: 1,
+                        gap: 1,
                       }}
                     >
+                      <CircularProgress size={20} />
                       <Typography variant="body2" color="text.secondary">
-                        Score: {feedback[questionID].score}/100
-                      </Typography>
-                      <Typography
-                        variant="body2"
-                        color={
-                          feedback[questionID].correct
-                            ? "success.main"
-                            : "error.main"
-                        }
-                      >
-                        {feedback[questionID].correct
-                          ? "Correct"
-                          : "Needs Improvement"}
+                        AI is grading your response...
                       </Typography>
                     </Box>
-                    <Typography variant="body2" color="text.primary">
-                      {feedback[questionID].feedback}
-                    </Typography>
-                  </Box>
-                )}
+                  )}
 
-                {/* Grading spinner */}
-                {isGrading && (
-                  <Box
-                    sx={{
-                      display: "flex",
-                      alignItems: "center",
-                      mb: 1,
-                      gap: 1,
-                    }}
-                  >
-                    <CircularProgress size={20} />
-                    <Typography variant="body2" color="text.secondary">
-                      AI is grading your response...
-                    </Typography>
-                  </Box>
-                )}
-
-                {/* Text input */}
-                {currentInputMethod === "text" && (
-                  <Box sx={{ mb: 1 }}>
-                    <PlainTextAnswerInput
-                      value={answers[questionID] || ""}
-                      onChange={(text: string) => {
-                        setAnswers((prev) => ({ ...prev, [questionID]: text }));
-                      }}
-                      onAutoSubmit={(text: string) =>
-                        handleTextSubmit(questionID, text)
-                      }
-                      historyState={sharedHistoryState.current}
-                      placeholder={t("customAnswerComponent.answerPlaceholder")}
-                      ariaLabel="Your answer"
-                      borderStyle={borderStyle}
-                      textColor={
-                        feedback[questionID]?.correct === true
-                          ? "green"
-                          : feedback[questionID]?.correct === false
-                            ? "red"
-                            : "inherit"
-                      }
-                      testId="custom-ai-input"
-                      wordId={questionID}
-                      questionId={questionID}
-                      disabled={isCompleted}
-                    />
-                  </Box>
-                )}
-
-                {/* Audio input */}
-                {currentInputMethod === "audio" && (
-                  <Box sx={{ mb: 1 }}>
-                    <AudioAutoSubmitWrapper>
-                      {({
-                        wrapOnRecordingComplete,
-                      }: {
-                        wrapOnRecordingComplete: Function;
-                      }) => (
-                        <AudioWaveformPlayer
-                          audioUrl=""
-                          file={{}}
-                          width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
-                          height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
-                          showDuration={true}
-                          enableRecording={true}
-                          gradeId={grade?.id || ""}
-                          nodeKey={`custom-ai-${questionID}`}
-                          metadata={{}}
-                          title={displayPrompt}
-                          onRecordingComplete={wrapOnRecordingComplete(
-                            async (audioFile: any) => {
-                              // For audio, we'd transcribe then grade
-                              // For now, save the audio reference
-                              const currentGradeData = grade?.data || {};
-                              const audioNodeKey = `custom-ai-${questionID}`;
-                              const updatedGradeData = {
-                                ...currentGradeData,
-                                [audioNodeKey]: {
-                                  ...currentGradeData[audioNodeKey],
-                                  audioFilePath: audioFile?.path || null,
-                                  audioFileId: audioFile?.id || null,
-                                  inputMethod: "audio",
-                                },
-                              };
-                              saveGrade(updatedGradeData);
-
-                              try {
-                                if (audioFile?.path) {
-                                  const result = await gradeWithAI({
-                                    questionId: questionID,
-                                    question: displayPrompt,
-                                    answer: `[Audio submission: ${audioFile.path}]`,
-                                    inputMode: "audio",
-                                    criteria,
-                                  });
-                                  setFeedback((prev) => ({
-                                    ...prev,
-                                    [questionID]: result,
-                                  }));
-                                  workbookApi?.setFeedback?.(nodeKey, {
-                                    text: result.feedback,
-                                    timestamp: Date.now(),
-                                  });
-                                }
-                              } catch (err) {
-                                console.error(
-                                  "[CustomAIComponent] Audio grading error:",
-                                  err,
-                                );
-                              }
-                            },
-                          )}
-                        />
-                      )}
-                    </AudioAutoSubmitWrapper>
-                  </Box>
-                )}
-
-                {/* Drawing input */}
-                {currentInputMethod === "drawing" && (
-                  <Box sx={{ mb: 1 }}>
-                    <Suspense fallback={<div>Loading...</div>}>
-                      <SketchPad
-                        excalidrawData={inProgress?.excalidrawData ?? {}}
-                        expect={question.answer || ""}
-                        questionID={questionID}
-                        setFeedback={(data: any) => {
-                          if (data?.imageBase64) {
-                            handleDrawingSubmit(questionID, data.imageBase64);
-                          } else {
-                            setFeedback((prev) => ({
-                              ...prev,
-                              [questionID]: {
-                                correct: data?.answer ?? false,
-                                score: data?.accuracy ?? 0,
-                                feedback: data?.reason || "",
-                              },
-                            }));
-                          }
-                          workbookApi?.setFeedback?.(nodeKey, {
-                            text: data?.reason || "",
-                            timestamp: Date.now(),
-                          });
+                  {/* Text input */}
+                  {currentInputMethod === "text" && (
+                    <Box sx={{ mb: 1 }}>
+                      <PlainTextAnswerInput
+                        value={answers[questionID] || ""}
+                        onChange={(text: string) => {
+                          setAnswers((prev) => ({
+                            ...prev,
+                            [questionID]: text,
+                          }));
                         }}
-                        feedback={feedback}
+                        onAutoSubmit={(text: string) =>
+                          handleTextSubmit(questionID, text)
+                        }
+                        historyState={sharedHistoryState.current}
+                        placeholder={t(
+                          "customAnswerComponent.answerPlaceholder",
+                        )}
+                        ariaLabel="Your answer"
+                        borderStyle={borderStyle}
+                        textColor={
+                          feedback[questionID]?.correct === true
+                            ? "green"
+                            : feedback[questionID]?.correct === false
+                              ? "red"
+                              : "inherit"
+                        }
+                        testId="custom-ai-input"
+                        wordId={questionID}
+                        questionId={questionID}
+                        disabled={isCompleted}
                       />
-                    </Suspense>
-                  </Box>
-                )}
+                    </Box>
+                  )}
 
-                {/* Image input */}
-                {currentInputMethod === "image" && (
-                  <Box sx={{ mb: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
-                      Image upload input - submit an image for AI evaluation
-                    </Typography>
-                    <input
-                      type="file"
-                      accept="image/*"
-                      disabled={isCompleted}
-                      onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
+                  {/* Audio input */}
+                  {currentInputMethod === "audio" && (
+                    <Box sx={{ mb: 1 }}>
+                      <AudioAutoSubmitWrapper>
+                        {({
+                          wrapOnRecordingComplete,
+                        }: {
+                          wrapOnRecordingComplete: Function;
+                        }) => (
+                          <AudioWaveformPlayer
+                            audioUrl=""
+                            file={{}}
+                            width={AUDIO_WAVEFORM_PLAYER_DEFAULTS.width}
+                            height={AUDIO_WAVEFORM_PLAYER_DEFAULTS.height}
+                            showDuration={true}
+                            enableRecording={true}
+                            gradeId={grade?.id || ""}
+                            nodeKey={`custom-ai-${questionID}`}
+                            metadata={{}}
+                            title={displayPrompt}
+                            onRecordingComplete={wrapOnRecordingComplete(
+                              async (audioFile: any) => {
+                                // For audio, we'd transcribe then grade
+                                // For now, save the audio reference
+                                const currentGradeData = grade?.data || {};
+                                const audioNodeKey = `custom-ai-${questionID}`;
+                                const updatedGradeData = {
+                                  ...currentGradeData,
+                                  [audioNodeKey]: {
+                                    ...currentGradeData[audioNodeKey],
+                                    audioFilePath: audioFile?.path || null,
+                                    audioFileId: audioFile?.id || null,
+                                    inputMethod: "audio",
+                                  },
+                                };
+                                saveGrade(updatedGradeData);
 
-                        const reader = new FileReader();
-                        reader.onload = async () => {
-                          const base64 = (reader.result as string).split(
-                            ",",
-                          )[1];
-                          if (base64) {
-                            setAnswers((prev) => ({
-                              ...prev,
-                              [questionID]: `[Image: ${file.name}]`,
-                            }));
-                            await handleDrawingSubmit(questionID, base64);
-                          }
-                        };
-                        reader.readAsDataURL(file);
-                      }}
-                    />
-                  </Box>
-                )}
-              </li>
-            );
-          })}
-        </ol>
+                                try {
+                                  if (audioFile?.path) {
+                                    const result = await gradeWithAI({
+                                      questionId: questionID,
+                                      question: displayPrompt,
+                                      answer: `[Audio submission: ${audioFile.path}]`,
+                                      inputMode: "audio",
+                                      criteria,
+                                    });
+                                    setFeedback((prev) => ({
+                                      ...prev,
+                                      [questionID]: result,
+                                    }));
+                                    workbookApi?.setFeedback?.(nodeKey, {
+                                      text: result.feedback,
+                                      timestamp: Date.now(),
+                                    });
+                                  }
+                                } catch (err) {
+                                  console.error(
+                                    "[CustomAIComponent] Audio grading error:",
+                                    err,
+                                  );
+                                }
+                              },
+                            )}
+                          />
+                        )}
+                      </AudioAutoSubmitWrapper>
+                    </Box>
+                  )}
+
+                  {/* Drawing input */}
+                  {currentInputMethod === "drawing" && (
+                    <Box sx={{ mb: 1 }}>
+                      <Suspense fallback={<div>Loading...</div>}>
+                        <SketchPad
+                          excalidrawData={inProgress?.excalidrawData ?? {}}
+                          expect={question.answer || ""}
+                          questionID={questionID}
+                          setFeedback={(data: any) => {
+                            if (data?.imageBase64) {
+                              handleDrawingSubmit(questionID, data.imageBase64);
+                            } else {
+                              setFeedback((prev) => ({
+                                ...prev,
+                                [questionID]: {
+                                  correct: data?.answer ?? false,
+                                  score: data?.accuracy ?? 0,
+                                  feedback: data?.reason || "",
+                                },
+                              }));
+                            }
+                            workbookApi?.setFeedback?.(nodeKey, {
+                              text: data?.reason || "",
+                              timestamp: Date.now(),
+                            });
+                          }}
+                          feedback={feedback}
+                        />
+                      </Suspense>
+                    </Box>
+                  )}
+
+                  {/* Image input */}
+                  {currentInputMethod === "image" && (
+                    <Box sx={{ mb: 1 }}>
+                      <Typography variant="body2" color="text.secondary">
+                        Image upload input - submit an image for AI evaluation
+                      </Typography>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        disabled={isCompleted}
+                        onChange={async (e) => {
+                          const file = e.target.files?.[0];
+                          if (!file) return;
+
+                          const reader = new FileReader();
+                          reader.onload = async () => {
+                            const base64 = (reader.result as string).split(
+                              ",",
+                            )[1];
+                            if (base64) {
+                              setAnswers((prev) => ({
+                                ...prev,
+                                [questionID]: `[Image: ${file.name}]`,
+                              }));
+                              await handleDrawingSubmit(questionID, base64);
+                            }
+                          };
+                          reader.readAsDataURL(file);
+                        }}
+                      />
+                    </Box>
+                  )}
+                </li>
+              );
+            })}
+          </ol>
+
+          {allowedInput?.length > 1 && (
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: "flex-end",
+                mt: 1.5,
+                pt: 1.5,
+                borderTop: "1px solid",
+                borderColor: "divider",
+              }}
+            >
+              <ToggleButtonGroup
+                exclusive
+                value={currentInputMethod}
+                onChange={handleInputChange}
+                aria-label="Input method"
+                size="small"
+                sx={{
+                  maxWidth: 360,
+                  "& .MuiToggleButton-root": {
+                    minHeight: 36,
+                    px: 1.5,
+                    textTransform: "none",
+                    borderColor: "divider",
+                    "&.Mui-selected": {
+                      fontWeight: 700,
+                      color: "secondary.main",
+                      bgcolor: "action.selected",
+                    },
+                  },
+                }}
+              >
+                {allowedInput.map((mode) => (
+                  <ToggleButton key={mode} value={mode} aria-label={mode}>
+                    {MODE_LABELS[mode] || mode}
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Box>
+          )}
+        </ExerciseBlockCard>
       </div>
     </WorkbookBlockEnhancements>
   );

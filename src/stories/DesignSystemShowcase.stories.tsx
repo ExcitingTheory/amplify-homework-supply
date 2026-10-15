@@ -2498,7 +2498,7 @@ function LiveEditorBlocks() {
   );
   // Kitchen-sink fixture plus an AI answer (custom-ai) block so both editors
   // render every graded block type, including AI answer.
-  const editorContent = React.useMemo(() => {
+  const initialEditorContent = React.useMemo(() => {
     const base = JSON.parse(JSON.stringify(kitchenSinkEditorState));
     base.root.children.push(heading("AI answer (custom-ai)"), {
       type: "custom-ai",
@@ -2510,6 +2510,12 @@ function LiveEditorBlocks() {
       format: "",
     });
     return JSON.stringify(base);
+  }, []);
+  // Shared state: edits in the editable pane flow into the read-only render.
+  const [sharedEditorContent, setSharedEditorContent] =
+    React.useState(initialEditorContent);
+  const handleSharedEditorChange = React.useCallback((json: unknown) => {
+    setSharedEditorContent(JSON.stringify(json));
   }, []);
   return (
     <DictionaryContext.Provider value={blockMockDictionaryContext as any}>
@@ -2531,7 +2537,8 @@ function LiveEditorBlocks() {
                 mode="editable"
                 showBlockInserter
                 placeholder="Type here, or hover the left gutter and click + to insert a block…"
-                content={editorContent}
+                content={initialEditorContent}
+                onChange={handleSharedEditorChange}
               />
             </Box>
           </Box>
@@ -2543,7 +2550,7 @@ function LiveEditorBlocks() {
               variant="outlined"
               sx={{ p: 2, borderRadius: `${SEMANTIC_THEME.radius.card}px` }}
             >
-              <MiniEditor mode="readonly" content={editorContent} />
+              <MiniEditor mode="readonly" content={sharedEditorContent} />
             </Paper>
           </Box>
         </Box>

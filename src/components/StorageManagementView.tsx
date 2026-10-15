@@ -1,8 +1,9 @@
 import React from "react";
 import {
   Box,
-  Card,
-  CardContent,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Typography,
   LinearProgress,
   List,
@@ -20,6 +21,8 @@ import {
   Storage,
   SmartToy,
   CheckCircle,
+  ExpandMore,
+  Assignment,
 } from "@mui/icons-material";
 import { useTranslations } from "next-intl";
 import type {
@@ -63,16 +66,18 @@ export function StorageManagementView({
 }: StorageManagementViewProps) {
   const t = useTranslations("components");
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", gap: 3 }}>
+    <>
       {/* Storage overview */}
-      <Card>
-        <CardContent>
-          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Stack direction="row" alignItems="center" spacing={1}>
             <Storage color="primary" />
             <Typography variant="h6">
               {t("storageManagement.offlineStorage")}
             </Typography>
           </Stack>
+        </AccordionSummary>
+        <AccordionDetails>
           <LinearProgress
             variant="determinate"
             value={storageBudget.percentUsed}
@@ -90,18 +95,20 @@ export function StorageManagementView({
               {t("storageManagement.storageFullWarning")}
             </Alert>
           )}
-        </CardContent>
-      </Card>
+        </AccordionDetails>
+      </Accordion>
 
       {/* AI Model management */}
-      <Card>
-        <CardContent>
-          <Stack direction="row" alignItems="center" spacing={1} mb={2}>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Stack direction="row" alignItems="center" spacing={1}>
             <SmartToy color="primary" />
             <Typography variant="h6">
               {t("storageManagement.aiModelForOffline")}
             </Typography>
           </Stack>
+        </AccordionSummary>
+        <AccordionDetails>
           <List dense>
             {models.map((model) => (
               <ListItem key={model.id} sx={{ gap: 1 }}>
@@ -161,15 +168,20 @@ export function StorageManagementView({
               </Typography>
             </Box>
           )}
-        </CardContent>
-      </Card>
+        </AccordionDetails>
+      </Accordion>
 
       {/* Cached assignments */}
-      <Card>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            {t("storageManagement.cachedAssignments")}
-          </Typography>
+      <Accordion>
+        <AccordionSummary expandIcon={<ExpandMore />}>
+          <Stack direction="row" alignItems="center" spacing={1}>
+            <Assignment color="primary" />
+            <Typography variant="h6">
+              {t("storageManagement.cachedAssignments")}
+            </Typography>
+          </Stack>
+        </AccordionSummary>
+        <AccordionDetails>
           {prefetchStatuses.length === 0 ? (
             <Typography variant="body2" color="text.secondary">
               {t("storageManagement.noCachedAssignments")}
@@ -200,9 +212,9 @@ export function StorageManagementView({
               ))}
             </List>
           )}
-        </CardContent>
-      </Card>
-    </Box>
+        </AccordionDetails>
+      </Accordion>
+    </>
   );
 }
 

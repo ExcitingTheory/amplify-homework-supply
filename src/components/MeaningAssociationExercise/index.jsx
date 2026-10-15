@@ -40,10 +40,15 @@ import { ExerciseProgressMeters } from "../Editor3/components/ExerciseProgressMe
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
 
 function dropTargetSx(theme, { isActive, canDrop, isMatched = false }) {
-  const primaryTint = alpha(
-    theme.palette.primary.main,
-    theme.palette.mode === "dark" ? 0.18 : 0.08,
-  );
+  // theme.palette.mode is static under this app's CSS-variables theming, so
+  // the dark/light split must come from theme.applyStyles (CSS selector),
+  // not a JS ternary, to actually react to runtime scheme toggling.
+  const primaryTintSx = {
+    bgcolor: alpha(theme.palette.primary.main, 0.08),
+    ...theme.applyStyles("dark", {
+      bgcolor: alpha(theme.palette.primary.main, 0.18),
+    }),
+  };
 
   return {
     boxSizing: "border-box",
@@ -56,13 +61,13 @@ function dropTargetSx(theme, { isActive, canDrop, isMatched = false }) {
         : canDrop
           ? alpha(theme.palette.primary.main, 0.65)
           : alpha(theme.palette.text.primary, 0.28),
-    bgcolor: isMatched
-      ? alpha(theme.palette.success.main, 0.12)
+    ...(isMatched
+      ? { bgcolor: alpha(theme.palette.success.main, 0.12) }
       : isActive
-        ? primaryTint
+        ? primaryTintSx
         : canDrop
-          ? alpha(theme.palette.primary.main, 0.04)
-          : "action.hover",
+          ? { bgcolor: alpha(theme.palette.primary.main, 0.04) }
+          : { bgcolor: "action.hover" }),
     borderRadius: `${SEMANTIC_THEME.radius.card}px`,
     boxShadow: isActive
       ? `inset 0 0 0 2px ${alpha(theme.palette.primary.main, 0.22)}`

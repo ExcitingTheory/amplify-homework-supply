@@ -24,6 +24,12 @@ import type { DynamoDBStreamHandler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import {
+  MAX_RETRY_ATTEMPTS,
+  sleep,
+  backoffMs,
+  isConditionalCheckFailure,
+} from "../shared/concurrency";
 
 // ============================================================================
 // GraphQL Operations
@@ -45,8 +51,8 @@ const CREATE_SECTION_PROGRESS = `mutation CreateSectionProgress($input: CreateSe
   createSectionProgress(input: $input) { id _version }
 }`;
 
-const UPDATE_SECTION_PROGRESS = `mutation UpdateSectionProgress($input: UpdateSectionProgressInput!) {
-  updateSectionProgress(input: $input) { id totalXP level _version }
+const UPDATE_SECTION_PROGRESS = `mutation UpdateSectionProgress($input: UpdateSectionProgressInput!, $condition: ModelSectionProgressConditionInput) {
+  updateSectionProgress(input: $input, condition: $condition) { id totalXP level _version }
 }`;
 
 const GET_PLATFORM_SETTINGS = `query GetPlatformSettings {
@@ -55,8 +61,8 @@ const GET_PLATFORM_SETTINGS = `query GetPlatformSettings {
   }
 }`;
 
-const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
-  updateStudentProfile(input: $input) { id totalXP level _version }
+const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!, $condition: ModelStudentProfileConditionInput) {
+  updateStudentProfile(input: $input, condition: $condition) { id totalXP level _version }
 }`;
 
 const CHECK_BADGES_BATCH = `mutation CheckBadgesBatch($entries: AWSJSON!) {
@@ -67,14 +73,29 @@ const CREATE_NOTIFICATION = `mutation CreateNotification($input: CreateNotificat
   createNotification(input: $input) { id }
 }`;
 
-const LIST_ACTIVE_CHALLENGES_BY_SECTION = `query ListActiveChallenges($sectionID: String!) {
-  listGroupChallenges(filter: { sectionID: { eq: $sectionID }, active: { eq: true } }) {
-    items { id sectionID title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } _version }
+// Dedup check before creating level-up/milestone notifications — scoped to the
+// recipient's own notifications via the existing byRecipient index, filtered by
+// referenceId (bounded by one student's notification count, not a table scan).
+const LIST_NOTIFICATIONS_BY_RECIPIENT_AND_REF = `query ListNotificationsByRecipientAndRef($recipientId: String!, $referenceId: String!) {
+  listNotificationByRecipientId(recipientId: $recipientId, filter: { referenceId: { eq: $referenceId } }, limit: 1) {
+    items { id }
   }
 }`;
 
-const UPDATE_GROUP_CHALLENGE = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!) {
-  updateGroupChallenge(input: $input) { id currentXP active _version }
+const LIST_ACTIVE_CHALLENGES_BY_SECTION = `query ListActiveChallenges($sectionID: String!) {
+  listGroupChallenges(filter: { sectionID: { eq: $sectionID }, active: { eq: true } }) {
+    items { id sectionID title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } creditedXpLogIds _version }
+  }
+}`;
+
+const UPDATE_GROUP_CHALLENGE = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!, $condition: ModelGroupChallengeConditionInput) {
+  updateGroupChallenge(input: $input, condition: $condition) { id currentXP active _version }
+}`;
+
+const GET_GROUP_CHALLENGE = `query GetGroupChallenge($id: ID!) {
+  getGroupChallenge(id: $id) {
+    id sectionID title targetXP currentXP active deadline rewardXP bonusMultiplier rewardBadge linkedUnitIds contributions { studentId xpContributed contributedAt } creditedXpLogIds _version
+  }
 }`;
 
 const CREATE_STUDENT_XP_LOG = `mutation CreateStudentXPLog($input: CreateStudentXPLogInput!) {
@@ -272,6 +293,7 @@ function getClient(): any {
 // ============================================================================
 
 interface XPRecord {
+  id: string;
   studentId: string;
   xpAmount: number;
   reason: string;
@@ -279,6 +301,57 @@ interface XPRecord {
   sectionID?: string;
   unitID?: string;
   referenceId?: string;
+}
+
+// ============================================================================
+// Hardening helpers — redelivery idempotency (retry/backoff come from shared/concurrency)
+// ============================================================================
+
+const RECENT_XP_LOG_IDS_CAP = 100;
+
+/**
+ * Splits a batch's records into "already applied" (its id is in the target
+ * row's recentXpLogIds) vs genuinely new, so a DynamoDB Streams redelivery of
+ * the same batch doesn't double-apply the cumulative XP/counter sums.
+ */
+function dedupeNewRecords(
+  allRecords: XPRecord[],
+  recentIds: string[] | string | null | undefined,
+): { newRecords: XPRecord[]; nextRecentIds: string[] } {
+  const existing = Array.isArray(recentIds) ? recentIds : [];
+  const seen = new Set(existing);
+  const newRecords = allRecords.filter((r) => !seen.has(r.id));
+  const nextRecentIds = [...existing, ...newRecords.map((r) => r.id)].slice(
+    -RECENT_XP_LOG_IDS_CAP,
+  );
+  return { newRecords, nextRecentIds };
+}
+
+/** Creates a notification only if one with the same recipient+referenceId doesn't already exist — guards against duplicate level-up/milestone notifications on stream redelivery. */
+async function createNotificationIfNew(
+  gqlClient: any,
+  input: {
+    recipientId: string;
+    type: string;
+    title: string;
+    body: string;
+    referenceId: string;
+    referenceType: string;
+    senderName: string;
+  },
+): Promise<void> {
+  const { data } = await gqlClient.graphql({
+    query: LIST_NOTIFICATIONS_BY_RECIPIENT_AND_REF,
+    variables: {
+      recipientId: input.recipientId,
+      referenceId: input.referenceId,
+    },
+  });
+  if ((data?.listNotificationByRecipientId?.items?.length || 0) > 0) return;
+  await gqlClient.graphql({
+    query: CREATE_NOTIFICATION,
+    variables: { input },
+  });
 }
 
 export const handler: DynamoDBStreamHandler = async (event) => {
@@ -292,6 +365,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
     if (!img) continue;
 
     xpRecords.push({
+      id: img.id?.S || "",
       studentId: img.studentId?.S || "",
       xpAmount: parseInt(img.xpAmount?.N || "0", 10),
       reason: img.reason?.S || "",
@@ -325,14 +399,6 @@ export const handler: DynamoDBStreamHandler = async (event) => {
     const { studentId, sectionID, unitID } = records[0];
 
     try {
-      // 1. Rollup: increment totalXP on StudentProfile
-      const { data: profileData } = await (gqlClient as any).graphql({
-        query: GET_STUDENT_PROFILE,
-        variables: { studentId, sectionID: sectionID || null },
-      });
-      const profiles = profileData?.listStudentProfiles?.items || [];
-      const profile = profiles[0];
-
       // Fetch global PlatformSettings
       let sectionSettings: any = null;
       try {
@@ -360,14 +426,68 @@ export const handler: DynamoDBStreamHandler = async (event) => {
           }
         })();
 
-      if (profile) {
+      // 1. Rollup: increment totalXP on StudentProfile — retried with a fresh
+      // re-read on optimistic-concurrency conflict; `newRecords` is this
+      // attempt's not-yet-applied subset (dedup makes stream redelivery a no-op).
+      let profileOutcome: {
+        skipped: boolean;
+        profile: any;
+        oldXP: number;
+        oldLevel: number;
+        newXP: number;
+        newLevel: number;
+        newNailedItCount: number;
+        reasonCounts: Record<string, number>;
+        newTotalSubmissions: number;
+        maxFailed: number;
+        recentTimestamps: string[];
+        newActiveDaysCount: number;
+        today: string;
+      } | null = null;
+
+      for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+        const { data: profileData } = await (gqlClient as any).graphql({
+          query: GET_STUDENT_PROFILE,
+          variables: { studentId, sectionID: sectionID || null },
+        });
+        const profile = profileData?.listStudentProfiles?.items?.[0];
+        if (!profile) break; // No profile yet — permanent for this event, not retryable.
+
+        const { newRecords, nextRecentIds } = dedupeNewRecords(
+          records,
+          profile.recentXpLogIds,
+        );
+        if (newRecords.length === 0) {
+          // Entire batch already applied — redelivery, not a new event.
+          profileOutcome = {
+            skipped: true,
+            profile,
+            oldXP: profile.totalXP || 0,
+            oldLevel: profile.level || 1,
+            newXP: profile.totalXP || 0,
+            newLevel: profile.level || 1,
+            newNailedItCount: profile.nailedItCount || 0,
+            reasonCounts: {},
+            newTotalSubmissions: profile.totalSubmissions || 0,
+            maxFailed: profile.maxFailedAttemptsOnSingleRef || 0,
+            recentTimestamps: [],
+            newActiveDaysCount: profile.activeDaysCount || 0,
+            today: new Date().toISOString().split("T")[0],
+          };
+          break;
+        }
+
+        const newBatchDelta = newRecords.reduce(
+          (sum, r) => sum + r.xpAmount,
+          0,
+        );
         const oldXP = profile.totalXP || 0;
         const oldLevel = profile.level || 1;
-        const newXP = oldXP + totalDelta;
+        const newXP = oldXP + newBatchDelta;
         const newLevel = calculateLevel(newXP);
 
         // Count nailed-it in this batch
-        const nailedItDelta = records.filter(
+        const nailedItDelta = newRecords.filter(
           (r) => r.reason === "NAILED_IT",
         ).length;
         const newNailedItCount = (profile.nailedItCount || 0) + nailedItDelta;
@@ -386,21 +506,21 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             return {};
           }
         })();
-        for (const rec of records) {
+        for (const rec of newRecords) {
           if (rec.reason) {
             reasonCounts[rec.reason] = (reasonCounts[rec.reason] || 0) + 1;
           }
         }
 
         // totalSubmissions: count HOMEWORK_SUBMITTED in this batch
-        const submissionDelta = records.filter(
+        const submissionDelta = newRecords.filter(
           (r) => r.reason === "HOMEWORK_SUBMITTED",
         ).length;
         const newTotalSubmissions =
           (profile.totalSubmissions || 0) + submissionDelta;
 
         // onTimeSubmissions: count ON_TIME_SUBMISSION in this batch
-        const onTimeDelta = records.filter(
+        const onTimeDelta = newRecords.filter(
           (r) => r.reason === "ON_TIME_SUBMISSION",
         ).length;
         const newOnTimeSubmissions =
@@ -408,7 +528,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
 
         // maxFailedAttemptsOnSingleRef: track max 0-XP logs per referenceId
         let maxFailed = profile.maxFailedAttemptsOnSingleRef || 0;
-        const failedInBatch = records.filter(
+        const failedInBatch = newRecords.filter(
           (r) => r.xpAmount === 0 && r.referenceId,
         );
         if (failedInBatch.length > 0) {
@@ -455,167 +575,141 @@ export const handler: DynamoDBStreamHandler = async (event) => {
           newActiveDaysCount += 1;
         }
 
-        await (gqlClient as any).graphql({
-          query: UPDATE_STUDENT_PROFILE,
-          variables: {
-            input: {
-              id: profile.id,
-              totalXP: newXP,
-              level: newLevel,
-              nailedItCount: newNailedItCount,
-              lastUpdated: new Date().toISOString(),
-              lastActivityDate: today,
-              reasonCounts: JSON.stringify(reasonCounts),
-              totalSubmissions: newTotalSubmissions,
-              onTimeSubmissions: newOnTimeSubmissions,
-              maxFailedAttemptsOnSingleRef: maxFailed,
-              recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
-              activeDaysCount: newActiveDaysCount,
-              _version: profile._version ?? 1,
-            },
-          },
-        });
-
-        // 2. Level-up notification
-        if (newLevel > oldLevel) {
+        const expectedVersion = profile._version ?? 1;
+        try {
           await (gqlClient as any).graphql({
-            query: CREATE_NOTIFICATION,
+            query: UPDATE_STUDENT_PROFILE,
             variables: {
               input: {
-                recipientId: studentId,
-                type: "LEVEL_UP",
-                title: `Level Up! You reached level ${newLevel}`,
-                body: `Congratulations! You've advanced from level ${oldLevel} to level ${newLevel}.`,
-                referenceId: `level-${newLevel}`,
-                referenceType: "StudentProfile",
-                senderName: "System",
+                id: profile.id,
+                totalXP: newXP,
+                level: newLevel,
+                nailedItCount: newNailedItCount,
+                lastUpdated: new Date().toISOString(),
+                lastActivityDate: today,
+                reasonCounts: JSON.stringify(reasonCounts),
+                totalSubmissions: newTotalSubmissions,
+                onTimeSubmissions: newOnTimeSubmissions,
+                maxFailedAttemptsOnSingleRef: maxFailed,
+                recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
+                activeDaysCount: newActiveDaysCount,
+                recentXpLogIds: nextRecentIds,
+                _version: expectedVersion + 1,
               },
+              condition: { _version: { eq: expectedVersion } },
             },
           });
-        }
-
-        // 3. XP milestone notification
-        for (const milestone of XP_MILESTONES) {
-          if (newXP >= milestone && oldXP < milestone) {
-            await (gqlClient as any).graphql({
-              query: CREATE_NOTIFICATION,
-              variables: {
-                input: {
-                  recipientId: studentId,
-                  type: "XP_MILESTONE",
-                  title: `XP Milestone: ${milestone} XP reached!`,
-                  body: `You've earned a total of ${milestone} XP. Keep up the great work!`,
-                  referenceId: `xp-milestone-${milestone}`,
-                  referenceType: "StudentProfile",
-                  senderName: "System",
-                },
-              },
-            });
-            break; // Only one milestone per batch
+          profileOutcome = {
+            skipped: false,
+            profile: {
+              ...profile,
+              id: profile.id,
+              _version: expectedVersion + 1,
+            },
+            oldXP,
+            oldLevel,
+            newXP,
+            newLevel,
+            newNailedItCount,
+            reasonCounts,
+            newTotalSubmissions,
+            maxFailed,
+            recentTimestamps,
+            newActiveDaysCount,
+            today,
+          };
+          break; // Success.
+        } catch (err) {
+          if (
+            isConditionalCheckFailure(err) &&
+            attempt < MAX_RETRY_ATTEMPTS - 1
+          ) {
+            await sleep(backoffMs(attempt));
+            continue; // Re-read and retry with fresh data.
           }
+          throw err; // Exhausted retries or a non-conflict error — surface it.
         }
+      }
 
-        // 4. Update SectionProgress (per-student, per-section tracking)
-        let sectionLevel = newLevel;
-        if (sectionID) {
-          try {
+      if (!profileOutcome || profileOutcome.skipped) {
+        // No profile yet, or the whole batch was already applied (redelivery) — nothing left to do.
+        continue;
+      }
+
+      const {
+        profile,
+        oldXP,
+        oldLevel,
+        newXP,
+        newLevel,
+        newNailedItCount,
+        reasonCounts,
+        newTotalSubmissions,
+        maxFailed,
+        recentTimestamps,
+        newActiveDaysCount,
+        today,
+      } = profileOutcome;
+
+      // 2. Level-up notification (deduped by referenceId — safe against redelivery)
+      if (newLevel > oldLevel) {
+        await createNotificationIfNew(gqlClient, {
+          recipientId: studentId,
+          type: "LEVEL_UP",
+          title: `Level Up! You reached level ${newLevel}`,
+          body: `Congratulations! You've advanced from level ${oldLevel} to level ${newLevel}.`,
+          referenceId: `level-${newLevel}`,
+          referenceType: "StudentProfile",
+          senderName: "System",
+        });
+      }
+
+      // 3. XP milestone notification (deduped by referenceId)
+      for (const milestone of XP_MILESTONES) {
+        if (newXP >= milestone && oldXP < milestone) {
+          await createNotificationIfNew(gqlClient, {
+            recipientId: studentId,
+            type: "XP_MILESTONE",
+            title: `XP Milestone: ${milestone} XP reached!`,
+            body: `You've earned a total of ${milestone} XP. Keep up the great work!`,
+            referenceId: `xp-milestone-${milestone}`,
+            referenceType: "StudentProfile",
+            senderName: "System",
+          });
+          break; // Only one milestone per batch
+        }
+      }
+
+      // 4. Update SectionProgress (per-student, per-section tracking) —
+      // same retry-with-condition + redelivery-dedup pattern as StudentProfile,
+      // using its own recentXpLogIds since it's a separate row that can fall
+      // behind the profile independently.
+      let sectionLevel = newLevel;
+      if (sectionID) {
+        try {
+          for (let spAttempt = 0; spAttempt < MAX_RETRY_ATTEMPTS; spAttempt++) {
             const { data: spData } = await (gqlClient as any).graphql({
               query: GET_SECTION_PROGRESS,
               variables: { studentId, sectionId: sectionID },
             });
-            const spItems = spData?.listSectionProgresses?.items || [];
-            const sectionProgress = spItems[0];
+            const sectionProgress = spData?.listSectionProgresses?.items?.[0];
 
-            if (sectionProgress) {
-              // Update existing SectionProgress
-              const spOldXP = sectionProgress.totalXP || 0;
-              const spNewXP = spOldXP + totalDelta;
-              sectionLevel = calculateLevelWithThresholds(
-                spNewXP,
-                levelThresholds,
+            if (!sectionProgress) {
+              // Create new SectionProgress for this student+section. A true
+              // insert-insert race between two concurrent invocations is a
+              // known, separate gap (would need a composite unique key).
+              const spNailedItDelta = records.filter(
+                (r) => r.reason === "NAILED_IT",
+              ).length;
+              const spSubmissionDelta = records.filter(
+                (r) => r.reason === "HOMEWORK_SUBMITTED",
+              ).length;
+              const spOnTimeDelta = records.filter(
+                (r) => r.reason === "ON_TIME_SUBMISSION",
+              ).length;
+              const spFailedInBatch = records.filter(
+                (r) => r.xpAmount === 0 && r.referenceId,
               );
-
-              // Same rollup fields scoped to this section
-              const spReasonCounts: Record<string, number> = (() => {
-                try {
-                  const p =
-                    typeof sectionProgress.reasonCounts === "string"
-                      ? JSON.parse(sectionProgress.reasonCounts)
-                      : sectionProgress.reasonCounts;
-                  return p || {};
-                } catch {
-                  return {};
-                }
-              })();
-              for (const rec of records) {
-                if (rec.reason) {
-                  spReasonCounts[rec.reason] =
-                    (spReasonCounts[rec.reason] || 0) + 1;
-                }
-              }
-              // Track per-ref failures in section
-              let spMaxFailed =
-                sectionProgress.maxFailedAttemptsOnSingleRef || 0;
-              for (const rec of failedInBatch) {
-                const fKey = `__fail_${rec.referenceId}`;
-                spReasonCounts[fKey] = (spReasonCounts[fKey] || 0) + 1;
-                if (spReasonCounts[fKey] > spMaxFailed) {
-                  spMaxFailed = spReasonCounts[fKey];
-                }
-              }
-
-              const spRecentTimestamps: string[] = (() => {
-                try {
-                  const p =
-                    typeof sectionProgress.recentSubmissionTimestamps ===
-                    "string"
-                      ? JSON.parse(sectionProgress.recentSubmissionTimestamps)
-                      : sectionProgress.recentSubmissionTimestamps;
-                  return Array.isArray(p) ? p : [];
-                } catch {
-                  return [];
-                }
-              })();
-              if (submissionDelta > 0) {
-                const now = new Date().toISOString();
-                for (let i = 0; i < submissionDelta; i++) {
-                  spRecentTimestamps.push(now);
-                }
-                while (spRecentTimestamps.length > 5) {
-                  spRecentTimestamps.shift();
-                }
-              }
-
-              const spLastActivity = sectionProgress.lastActivityDate || "";
-              let spActiveDaysCount = sectionProgress.activeDaysCount || 0;
-              if (spLastActivity !== today) spActiveDaysCount += 1;
-
-              await (gqlClient as any).graphql({
-                query: UPDATE_SECTION_PROGRESS,
-                variables: {
-                  input: {
-                    id: sectionProgress.id,
-                    totalXP: spNewXP,
-                    level: sectionLevel,
-                    nailedItCount:
-                      (sectionProgress.nailedItCount || 0) + nailedItDelta,
-                    lastUpdated: new Date().toISOString(),
-                    lastActivityDate: today,
-                    reasonCounts: JSON.stringify(spReasonCounts),
-                    totalSubmissions:
-                      (sectionProgress.totalSubmissions || 0) + submissionDelta,
-                    onTimeSubmissions:
-                      (sectionProgress.onTimeSubmissions || 0) + onTimeDelta,
-                    maxFailedAttemptsOnSingleRef: spMaxFailed,
-                    recentSubmissionTimestamps:
-                      JSON.stringify(spRecentTimestamps),
-                    activeDaysCount: spActiveDaysCount,
-                    _version: sectionProgress._version ?? 1,
-                  },
-                },
-              });
-            } else {
-              // Create new SectionProgress for this student+section
               sectionLevel = calculateLevelWithThresholds(
                 totalDelta,
                 levelThresholds,
@@ -629,7 +723,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 }
               }
               let initMaxFailed = 0;
-              for (const rec of failedInBatch) {
+              for (const rec of spFailedInBatch) {
                 const fKey = `__fail_${rec.referenceId}`;
                 initReasonCounts[fKey] = (initReasonCounts[fKey] || 0) + 1;
                 if (initReasonCounts[fKey] > initMaxFailed) {
@@ -638,84 +732,254 @@ export const handler: DynamoDBStreamHandler = async (event) => {
               }
 
               const initTimestamps: string[] = [];
-              if (submissionDelta > 0) {
+              if (spSubmissionDelta > 0) {
                 const now = new Date().toISOString();
-                for (let i = 0; i < submissionDelta; i++) {
+                for (let i = 0; i < spSubmissionDelta; i++) {
                   initTimestamps.push(now);
                 }
               }
 
+              try {
+                await (gqlClient as any).graphql({
+                  query: CREATE_SECTION_PROGRESS,
+                  variables: {
+                    input: {
+                      studentId,
+                      sectionId: sectionID,
+                      totalXP: totalDelta,
+                      level: sectionLevel,
+                      nailedItCount: spNailedItDelta,
+                      completedAssignments: 0,
+                      onTimeSubmissions: spOnTimeDelta,
+                      currentStreak: 0,
+                      longestStreak: 0,
+                      lastActivityDate: today,
+                      lastUpdated: new Date().toISOString(),
+                      reasonCounts: JSON.stringify(initReasonCounts),
+                      totalSubmissions: spSubmissionDelta,
+                      maxFailedAttemptsOnSingleRef: initMaxFailed,
+                      recentSubmissionTimestamps:
+                        JSON.stringify(initTimestamps),
+                      activeDaysCount: 1,
+                      recentXpLogIds: records
+                        .map((r) => r.id)
+                        .slice(-RECENT_XP_LOG_IDS_CAP),
+                    },
+                  },
+                });
+                break; // Success.
+              } catch (createErr) {
+                // Another concurrent invocation likely created it first — retry as an update.
+                if (spAttempt < MAX_RETRY_ATTEMPTS - 1) {
+                  await sleep(backoffMs(spAttempt));
+                  continue;
+                }
+                throw createErr;
+              }
+            }
+
+            const { newRecords: spNewRecords, nextRecentIds: spNextRecentIds } =
+              dedupeNewRecords(records, sectionProgress.recentXpLogIds);
+            if (spNewRecords.length === 0) {
+              // Already applied — redelivery.
+              sectionLevel = sectionProgress.level || 1;
+              break;
+            }
+
+            const spNailedItDelta = spNewRecords.filter(
+              (r) => r.reason === "NAILED_IT",
+            ).length;
+            const spSubmissionDelta = spNewRecords.filter(
+              (r) => r.reason === "HOMEWORK_SUBMITTED",
+            ).length;
+            const spOnTimeDelta = spNewRecords.filter(
+              (r) => r.reason === "ON_TIME_SUBMISSION",
+            ).length;
+            const spFailedInBatch = spNewRecords.filter(
+              (r) => r.xpAmount === 0 && r.referenceId,
+            );
+            const spBatchDelta = spNewRecords.reduce(
+              (sum, r) => sum + r.xpAmount,
+              0,
+            );
+
+            // Update existing SectionProgress
+            const spOldXP = sectionProgress.totalXP || 0;
+            const spNewXP = spOldXP + spBatchDelta;
+            sectionLevel = calculateLevelWithThresholds(
+              spNewXP,
+              levelThresholds,
+            );
+
+            // Same rollup fields scoped to this section
+            const spReasonCounts: Record<string, number> = (() => {
+              try {
+                const p =
+                  typeof sectionProgress.reasonCounts === "string"
+                    ? JSON.parse(sectionProgress.reasonCounts)
+                    : sectionProgress.reasonCounts;
+                return p || {};
+              } catch {
+                return {};
+              }
+            })();
+            for (const rec of spNewRecords) {
+              if (rec.reason) {
+                spReasonCounts[rec.reason] =
+                  (spReasonCounts[rec.reason] || 0) + 1;
+              }
+            }
+            // Track per-ref failures in section
+            let spMaxFailed = sectionProgress.maxFailedAttemptsOnSingleRef || 0;
+            for (const rec of spFailedInBatch) {
+              const fKey = `__fail_${rec.referenceId}`;
+              spReasonCounts[fKey] = (spReasonCounts[fKey] || 0) + 1;
+              if (spReasonCounts[fKey] > spMaxFailed) {
+                spMaxFailed = spReasonCounts[fKey];
+              }
+            }
+
+            const spRecentTimestamps: string[] = (() => {
+              try {
+                const p =
+                  typeof sectionProgress.recentSubmissionTimestamps === "string"
+                    ? JSON.parse(sectionProgress.recentSubmissionTimestamps)
+                    : sectionProgress.recentSubmissionTimestamps;
+                return Array.isArray(p) ? p : [];
+              } catch {
+                return [];
+              }
+            })();
+            if (spSubmissionDelta > 0) {
+              const now = new Date().toISOString();
+              for (let i = 0; i < spSubmissionDelta; i++) {
+                spRecentTimestamps.push(now);
+              }
+              while (spRecentTimestamps.length > 5) {
+                spRecentTimestamps.shift();
+              }
+            }
+
+            const spLastActivity = sectionProgress.lastActivityDate || "";
+            let spActiveDaysCount = sectionProgress.activeDaysCount || 0;
+            if (spLastActivity !== today) spActiveDaysCount += 1;
+
+            const spExpectedVersion = sectionProgress._version ?? 1;
+            try {
               await (gqlClient as any).graphql({
-                query: CREATE_SECTION_PROGRESS,
+                query: UPDATE_SECTION_PROGRESS,
                 variables: {
                   input: {
-                    studentId,
-                    sectionId: sectionID,
-                    totalXP: totalDelta,
+                    id: sectionProgress.id,
+                    totalXP: spNewXP,
                     level: sectionLevel,
-                    nailedItCount: nailedItDelta,
-                    completedAssignments: 0,
-                    onTimeSubmissions: onTimeDelta,
-                    currentStreak: 0,
-                    longestStreak: 0,
-                    lastActivityDate: today,
+                    nailedItCount:
+                      (sectionProgress.nailedItCount || 0) + spNailedItDelta,
                     lastUpdated: new Date().toISOString(),
-                    reasonCounts: JSON.stringify(initReasonCounts),
-                    totalSubmissions: submissionDelta,
-                    maxFailedAttemptsOnSingleRef: initMaxFailed,
-                    recentSubmissionTimestamps: JSON.stringify(initTimestamps),
-                    activeDaysCount: 1,
+                    lastActivityDate: today,
+                    reasonCounts: JSON.stringify(spReasonCounts),
+                    totalSubmissions:
+                      (sectionProgress.totalSubmissions || 0) +
+                      spSubmissionDelta,
+                    onTimeSubmissions:
+                      (sectionProgress.onTimeSubmissions || 0) + spOnTimeDelta,
+                    maxFailedAttemptsOnSingleRef: spMaxFailed,
+                    recentSubmissionTimestamps:
+                      JSON.stringify(spRecentTimestamps),
+                    activeDaysCount: spActiveDaysCount,
+                    recentXpLogIds: spNextRecentIds,
+                    _version: spExpectedVersion + 1,
                   },
+                  condition: { _version: { eq: spExpectedVersion } },
                 },
               });
-            }
-          } catch (spErr) {
-            console.warn(
-              `[xpStream] SectionProgress update failed for ${studentId}:`,
-              spErr,
-            );
-          }
-
-          // 4b. GroupChallenge rollup — increment currentXP on active challenges.
-          // Students have read-only access to GroupChallenge; only this Lambda
-          // (IAM credentials) can update challenge records.
-          try {
-            const { data: challengeData } = await (gqlClient as any).graphql({
-              query: LIST_ACTIVE_CHALLENGES_BY_SECTION,
-              variables: { sectionID },
-            });
-            const activeChallenges = (
-              challengeData?.listGroupChallenges?.items || []
-            ).filter((c: any) => c != null && c.active);
-
-            for (const challenge of activeChallenges) {
-              // Skip if past deadline
+              break; // Success.
+            } catch (err) {
               if (
-                challenge.deadline &&
-                new Date(challenge.deadline) < new Date()
+                isConditionalCheckFailure(err) &&
+                spAttempt < MAX_RETRY_ATTEMPTS - 1
               ) {
-                continue;
+                await sleep(backoffMs(spAttempt));
+                continue; // Re-read and retry with fresh data.
               }
+              throw err;
+            }
+          }
+        } catch (spErr) {
+          console.warn(
+            `[xpStream] SectionProgress update failed for ${studentId}:`,
+            spErr,
+          );
+        }
+
+        // 4b. GroupChallenge rollup — increment currentXP on active challenges.
+        // Students have read-only access to GroupChallenge; only this Lambda
+        // (IAM credentials) can update challenge records.
+        try {
+          const { data: challengeData } = await (gqlClient as any).graphql({
+            query: LIST_ACTIVE_CHALLENGES_BY_SECTION,
+            variables: { sectionID },
+          });
+          const activeChallenges = (
+            challengeData?.listGroupChallenges?.items || []
+          ).filter((c: any) => c != null && c.active);
+
+          for (const challenge of activeChallenges) {
+            // Skip if past deadline
+            if (
+              challenge.deadline &&
+              new Date(challenge.deadline) < new Date()
+            ) {
+              continue;
+            }
+
+            // Retried with a fresh re-read on optimistic-concurrency conflict;
+            // dedupe is per-challenge (its own creditedXpLogIds), independent
+            // of the StudentProfile/SectionProgress dedup above — this is a
+            // separate row that can fall behind independently.
+            let updateSucceeded = false;
+            let goalReached = false;
+            let contributorIds: Set<string> = new Set();
+            let finalRewardXP = 0;
+
+            for (let cAttempt = 0; cAttempt < MAX_RETRY_ATTEMPTS; cAttempt++) {
+              let currentChallenge = challenge;
+              if (cAttempt > 0) {
+                const { data } = await (gqlClient as any).graphql({
+                  query: GET_GROUP_CHALLENGE,
+                  variables: { id: challenge.id },
+                });
+                currentChallenge = data?.getGroupChallenge;
+                if (!currentChallenge) break; // Deleted concurrently.
+              }
+
+              const {
+                newRecords: challengeNewRecords,
+                nextRecentIds: nextCreditedIds,
+              } = dedupeNewRecords(records, currentChallenge.creditedXpLogIds);
+              if (challengeNewRecords.length === 0) break; // Already credited — redelivery.
 
               // Scoped XP: if linkedUnitIds is populated, only credit XP from matching units
-              let creditableDelta = totalDelta;
-              if (
-                challenge.linkedUnitIds &&
-                challenge.linkedUnitIds.length > 0
-              ) {
-                creditableDelta = records
-                  .filter(
-                    (r: XPRecord) =>
-                      r.unitID && challenge.linkedUnitIds.includes(r.unitID),
-                  )
-                  .reduce((sum: number, r: XPRecord) => sum + r.xpAmount, 0);
-                if (creditableDelta <= 0) continue; // No XP from linked units — skip
-              }
+              const creditableRecords =
+                currentChallenge.linkedUnitIds &&
+                currentChallenge.linkedUnitIds.length > 0
+                  ? challengeNewRecords.filter(
+                      (r: XPRecord) =>
+                        r.unitID &&
+                        currentChallenge.linkedUnitIds.includes(r.unitID),
+                    )
+                  : challengeNewRecords;
+              const creditableDelta = creditableRecords.reduce(
+                (sum: number, r: XPRecord) => sum + r.xpAmount,
+                0,
+              );
+              if (creditableDelta <= 0) break; // No XP from linked units — skip.
 
-              const oldChallengeXP = challenge.currentXP || 0;
+              const oldChallengeXP = currentChallenge.currentXP || 0;
               const newChallengeXP = oldChallengeXP + creditableDelta;
-              const goalReached = newChallengeXP >= challenge.targetXP;
-              const existingContributions = challenge.contributions || [];
+              goalReached = newChallengeXP >= currentChallenge.targetXP;
+              const existingContributions =
+                currentChallenge.contributions || [];
               const updatedContributions = [
                 ...existingContributions,
                 {
@@ -725,181 +989,175 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 },
               ];
 
-              let updateSucceeded = false;
+              const expectedVersion = currentChallenge._version ?? 1;
               try {
                 await (gqlClient as any).graphql({
                   query: UPDATE_GROUP_CHALLENGE,
                   variables: {
                     input: {
-                      id: challenge.id,
+                      id: currentChallenge.id,
                       currentXP: newChallengeXP,
                       active: !goalReached,
                       contributions: updatedContributions,
-                      _version: challenge._version ?? 1,
+                      creditedXpLogIds: nextCreditedIds,
+                      _version: expectedVersion + 1,
                     },
+                    condition: { _version: { eq: expectedVersion } },
                   },
                 });
                 updateSucceeded = true;
-              } catch (updateErr: any) {
-                // Version conflict from concurrent stream events — expected, skip
-                const msg =
-                  updateErr?.message || updateErr?.errors?.[0]?.message || "";
-                if (
-                  msg.includes("ConditionalCheckFailedException") ||
-                  msg.includes("version")
-                ) {
-                  console.warn(
-                    `[xpStream] challenge ${challenge.id} version conflict — skipping`,
-                  );
-                } else {
-                  console.error(
-                    `[xpStream] challenge update error for ${challenge.id}:`,
-                    updateErr,
-                  );
-                }
-              }
-
-              // Award completion bonus XP to all contributors only if WE
-              // successfully set active: false (prevents double-awarding on retries)
-              if (goalReached && updateSucceeded) {
-                const baseRewardXP = challenge.rewardXP || 500;
-                const multiplier = challenge.bonusMultiplier || 1.5;
-                const finalRewardXP = Math.round(baseRewardXP * multiplier);
-
-                const contributorIds = new Set<string>(
+                contributorIds = new Set<string>(
                   updatedContributions
                     .map((c: any) => c.studentId)
                     .filter((id: string) => !!id),
                 );
+                finalRewardXP = Math.round(
+                  (currentChallenge.rewardXP || 500) *
+                    (currentChallenge.bonusMultiplier || 1.5),
+                );
+                break; // Success.
+              } catch (updateErr: any) {
+                if (
+                  isConditionalCheckFailure(updateErr) &&
+                  cAttempt < MAX_RETRY_ATTEMPTS - 1
+                ) {
+                  await sleep(backoffMs(cAttempt));
+                  continue; // Re-read and retry with fresh data.
+                }
+                console.error(
+                  `[xpStream] challenge update error for ${challenge.id}:`,
+                  updateErr,
+                );
+                break;
+              }
+            }
 
-                for (const contributorId of contributorIds) {
-                  try {
-                    // Create XP log directly (Lambda has IAM access)
-                    // The resulting stream event will do the profile rollup
-                    await (gqlClient as any).graphql({
-                      query: CREATE_STUDENT_XP_LOG,
-                      variables: {
-                        input: {
-                          studentId: contributorId,
-                          xpAmount: finalRewardXP,
-                          reason: "SQUAD_CHALLENGE_BONUS",
-                          referenceId: `challenge-${challenge.id}`,
-                          sectionID,
-                        },
-                      },
-                    });
-                  } catch (bonusErr) {
-                    console.error(
-                      `[xpStream] challenge bonus XP error for ${contributorId}:`,
-                      bonusErr,
-                    );
-                  }
-
-                  // Grant cosmetic reward if configured
-                  if (challenge.rewardCosmetic) {
-                    try {
-                      await grantCosmeticRewardToProfile(
-                        gqlClient,
-                        contributorId,
-                        challenge.rewardCosmetic,
-                        challenge.id,
-                      );
-                    } catch (cosErr) {
-                      console.warn(
-                        `[xpStream] cosmetic reward error for ${contributorId}:`,
-                        cosErr,
-                      );
-                    }
-                  }
-
-                  // Grant badge reward if configured
-                  if (challenge.rewardBadge) {
-                    try {
-                      await grantChallengeBadgeToProfile(
-                        gqlClient,
-                        contributorId,
-                        challenge.rewardBadge,
-                        challenge.id,
+            // Award completion bonus XP to all contributors only if WE
+            // successfully set active: false (prevents double-awarding on retries)
+            if (goalReached && updateSucceeded) {
+              for (const contributorId of contributorIds) {
+                try {
+                  // Create XP log directly (Lambda has IAM access)
+                  // The resulting stream event will do the profile rollup
+                  await (gqlClient as any).graphql({
+                    query: CREATE_STUDENT_XP_LOG,
+                    variables: {
+                      input: {
+                        studentId: contributorId,
+                        xpAmount: finalRewardXP,
+                        reason: "SQUAD_CHALLENGE_BONUS",
+                        referenceId: `challenge-${challenge.id}`,
                         sectionID,
-                      );
-                    } catch (badgeErr) {
-                      console.warn(
-                        `[xpStream] badge reward error for ${contributorId}:`,
-                        badgeErr,
-                      );
-                    }
+                      },
+                    },
+                  });
+                } catch (bonusErr) {
+                  console.error(
+                    `[xpStream] challenge bonus XP error for ${contributorId}:`,
+                    bonusErr,
+                  );
+                }
+
+                // Grant cosmetic reward if configured
+                if (challenge.rewardCosmetic) {
+                  try {
+                    await grantCosmeticRewardToProfile(
+                      gqlClient,
+                      contributorId,
+                      challenge.rewardCosmetic,
+                      challenge.id,
+                    );
+                  } catch (cosErr) {
+                    console.warn(
+                      `[xpStream] cosmetic reward error for ${contributorId}:`,
+                      cosErr,
+                    );
                   }
                 }
 
-                // Notify all contributors of the victory
-                for (const contributorId of contributorIds) {
+                // Grant badge reward if configured
+                if (challenge.rewardBadge) {
                   try {
-                    await (gqlClient as any).graphql({
-                      query: CREATE_NOTIFICATION,
-                      variables: {
-                        input: {
-                          recipientId: contributorId,
-                          type: "CHALLENGE_COMPLETE",
-                          title: `Challenge Complete: ${challenge.title}`,
-                          body: `Your cohort completed the challenge! You earned ${finalRewardXP} bonus XP.`,
-                          referenceId: `challenge-${challenge.id}`,
-                          referenceType: "GroupChallenge",
-                          senderName: "System",
-                        },
-                      },
-                    });
-                  } catch (notifErr) {
+                    await grantChallengeBadgeToProfile(
+                      gqlClient,
+                      contributorId,
+                      challenge.rewardBadge,
+                      challenge.id,
+                      sectionID,
+                    );
+                  } catch (badgeErr) {
                     console.warn(
-                      "[xpStream] challenge completion notification error:",
-                      notifErr,
+                      `[xpStream] badge reward error for ${contributorId}:`,
+                      badgeErr,
                     );
                   }
                 }
               }
-            }
-          } catch (challengeErr) {
-            console.warn(
-              `[xpStream] challenge rollup failed for cohort ${sectionID}:`,
-              challengeErr,
-            );
-          }
-        }
 
-        // 5. Collect badge check entry with pre-fetched data
-        // Uses section-level for badge criteria when section settings exist
-        // The batch mutation receives this so it can skip re-reading the profile
-        // AND skip scanning XP logs — all criteria data is in rollup fields
-        badgeEntries.push({
-          studentId,
-          sectionID: sectionID || null,
-          unitID: unitID || null,
-          // Pre-fetched profile data
-          profileId: profile.id,
-          profileVersion: profile._version + 1, // version incremented by the update above
-          totalXP: newXP,
-          level: sectionLevel,
-          currentStreak: profile.currentStreak || 0,
-          longestStreak: profile.longestStreak || 0,
-          lastActivityDate: today,
-          nailedItCount: newNailedItCount,
-          completedAssignments: profile.completedAssignments || 0,
-          badges: profile.badges || "[]",
-          // Rollup fields — eliminates all XP log scans in badge evaluation
-          reasonCounts: JSON.stringify(reasonCounts),
-          totalSubmissions: newTotalSubmissions,
-          maxFailedAttemptsOnSingleRef: maxFailed,
-          recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
-          activeDaysCount: newActiveDaysCount,
-          // Section settings for badge evaluation
-          sectionBadgesEnabled: sectionSettings?.badgesEnabled ?? true,
-          sectionAntiBadgesEnabled: sectionSettings?.antiBadgesEnabled ?? true,
-        });
+              // Notify all contributors of the victory (deduped by referenceId)
+              for (const contributorId of contributorIds) {
+                try {
+                  await createNotificationIfNew(gqlClient, {
+                    recipientId: contributorId,
+                    type: "CHALLENGE_COMPLETE",
+                    title: `Challenge Complete: ${challenge.title}`,
+                    body: `Your cohort completed the challenge! You earned ${finalRewardXP} bonus XP.`,
+                    referenceId: `challenge-${challenge.id}`,
+                    referenceType: "GroupChallenge",
+                    senderName: "System",
+                  });
+                } catch (notifErr) {
+                  console.warn(
+                    "[xpStream] challenge completion notification error:",
+                    notifErr,
+                  );
+                }
+              }
+            }
+          }
+        } catch (challengeErr) {
+          console.warn(
+            `[xpStream] challenge rollup failed for cohort ${sectionID}:`,
+            challengeErr,
+          );
+        }
       }
+
+      // 5. Collect badge check entry with pre-fetched data
+      // Uses section-level for badge criteria when section settings exist
+      // The batch mutation receives this so it can skip re-reading the profile
+      // AND skip scanning XP logs — all criteria data is in rollup fields
+      badgeEntries.push({
+        studentId,
+        sectionID: sectionID || null,
+        unitID: unitID || null,
+        // Pre-fetched profile data
+        profileId: profile.id,
+        profileVersion: profile._version, // already the post-update version — see profileOutcome above
+        totalXP: newXP,
+        level: sectionLevel,
+        currentStreak: profile.currentStreak || 0,
+        longestStreak: profile.longestStreak || 0,
+        lastActivityDate: today,
+        nailedItCount: newNailedItCount,
+        completedAssignments: profile.completedAssignments || 0,
+        badges: profile.badges || "[]",
+        // Rollup fields — eliminates all XP log scans in badge evaluation
+        reasonCounts: JSON.stringify(reasonCounts),
+        totalSubmissions: newTotalSubmissions,
+        maxFailedAttemptsOnSingleRef: maxFailed,
+        recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
+        activeDaysCount: newActiveDaysCount,
+        // Section settings for badge evaluation
+        sectionBadgesEnabled: sectionSettings?.badgesEnabled ?? true,
+        sectionAntiBadgesEnabled: sectionSettings?.antiBadgesEnabled ?? true,
+      });
     } catch (err) {
       console.error(
         `[xpStream] profile rollup failed for ${records[0]?.studentId}:`,
         err,
       );
+      throw err; // Surface genuine failures instead of swallowing — let Lambda retry / route to the DLQ.
     }
   }
 

@@ -14,7 +14,9 @@ const config: StorybookConfig = {
     // Documentation pages (intro, quick tour, concepts)
     "./docs/**/*.stories.@(js|jsx|mjs|ts|tsx)",
     // "../src/**/*.mdx", // Temporarily disabled - vitest plugin excludes ../**/*.mdx causing no tests to run
-    "../src/**/*.stories.@(js|jsx|mjs|ts|tsx)",
+    // !(index) excludes src/stories/index.stories.jsx — retired (no default export; content moved to
+    // pages-index.stories.tsx and InstructorDashboard.stories.jsx) but its own stale export was breaking the index.
+    "../src/**/!(index).stories.@(js|jsx|mjs|ts|tsx)",
     "./TranslationMode.stories.tsx",
     "./components/**/*.stories.@(js|jsx|mjs|ts|tsx)",
   ],

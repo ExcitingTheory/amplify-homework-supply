@@ -14,6 +14,12 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import { createNotification } from "../shared/notificationUtils";
 import {
+  MAX_RETRY_ATTEMPTS,
+  sleep,
+  backoffMs,
+  isConditionalCheckFailure,
+} from "../shared/concurrency";
+import {
   getEffectiveConfig,
   isBadgeEnabled,
   getBadgeThresholdOverride,
@@ -82,8 +88,8 @@ const GET_SQUAD = `query GetSquad($id: ID!) {
   getSquad(id: $id) { id name sectionID totalXP members _version _lastChangedAt _deleted }
 }`;
 
-const UPDATE_SQUAD = `mutation UpdateSquad($input: UpdateSquadInput!) {
-  updateSquad(input: $input) { id name totalXP members _version _lastChangedAt _deleted }
+const UPDATE_SQUAD = `mutation UpdateSquad($input: UpdateSquadInput!, $condition: ModelSquadConditionInput) {
+  updateSquad(input: $input, condition: $condition) { id name totalXP members _version _lastChangedAt _deleted }
 }`;
 
 const LIST_SQUADS_BY_SECTION = `query ListSquadsBySection($sectionID: String!) {
@@ -162,6 +168,20 @@ const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: ID!) {
   }
 }`;
 
+// Bounded to one student's own rows for a section (byOwnerAndSection index) —
+// used by recomputeProgress instead of scanning every student's attempts.
+const LIST_GRADES_BY_OWNER_AND_SECTION = `query ListGradesByOwnerAndSection($owner: String!, $sectionID: String!) {
+  listGradeByOwnerAndSection(owner: $owner, sectionID: { eq: $sectionID }) {
+    items { id unitID complete }
+  }
+}`;
+
+const LIST_ASSIGNMENTS_BY_SECTION = `query ListAssignmentsBySection($sectionID: ID!) {
+  listAssignments(filter: { sectionID: { eq: $sectionID } }) {
+    items { id unitID }
+  }
+}`;
+
 const GET_SECTION = `query GetSection($id: ID!) {
   getSection(id: $id) { id leaderboardEnabled leaderboardRebuiltAt leaderboardUpdateInProgressAt xpConfig badgesEnabled antiBadgesEnabled _version _lastChangedAt _deleted }
 }`;
@@ -228,8 +248,8 @@ const CREATE_STUDENT_PROFILE = `mutation CreateStudentProfile($input: CreateStud
   createStudentProfile(input: $input) { id studentId _version _lastChangedAt _deleted }
 }`;
 
-const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!) {
-  updateStudentProfile(input: $input) {
+const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!, $condition: ModelStudentProfileConditionInput) {
+  updateStudentProfile(input: $input, condition: $condition) {
     id studentId totalXP level currentStreak longestStreak
     badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty cosmeticRewards activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed reportCard { timeStats { min max avg count } lastUpdated } _version _lastChangedAt _deleted }
 }`;
@@ -275,8 +295,14 @@ const LIST_ALL_BADGES = `query ListAllBadges {
 }`;
 
 // GroupChallenge update (for embedded contributions)
-const UPDATE_CHALLENGE_WITH_CONTRIBUTIONS = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!) {
-  updateGroupChallenge(input: $input) { id currentXP contributions _version _lastChangedAt _deleted }
+const UPDATE_CHALLENGE_WITH_CONTRIBUTIONS = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!, $condition: ModelGroupChallengeConditionInput) {
+  updateGroupChallenge(input: $input, condition: $condition) { id currentXP contributions _version _lastChangedAt _deleted }
+}`;
+
+const GET_GROUP_CHALLENGE = `query GetGroupChallenge($id: ID!) {
+  getGroupChallenge(id: $id) {
+    id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId linkedUnitIds contributions _version _lastChangedAt _deleted
+  }
 }`;
 
 // ============================================================================
@@ -1475,60 +1501,11 @@ async function handleCheckBadges(
     profile = fetchedProfile;
   }
 
-  const existingBadges: any[] = (() => {
-    try {
-      return JSON.parse(profile.badges || "[]");
-    } catch {
-      return [];
-    }
-  })();
-  const existingByType = new Map<string, any>(
-    existingBadges.map((b: any) => [b.badgeType, b]),
-  );
-  const totalXP =
-    preFetched?.totalXP ??
-    xpLogs.reduce((s: number, l: any) => s + l.xpAmount, 0);
-
-  const newBadges: string[] = [];
-  const updatedBadges: string[] = [];
-
-  for (const criteria of BADGE_CRITERIA) {
-    // Skip badges disabled via merged config (global + section)
-    if (!isBadgeEnabled(effectiveConfig, criteria.badgeType)) continue;
-
-    if (
-      !criteria.check({ xpLogs, badges: existingBadges, totalXP, reasonCounts })
-    )
-      continue;
-
-    const existing = existingByType.get(criteria.badgeType);
-    if (existing) {
-      // Badge already earned — increment count
-      existing.count = (existing.count || 1) + 1;
-      existing.awardedAt = new Date().toISOString();
-      if (sectionID) existing.sectionID = sectionID;
-      if (unitID) existing.unitID = unitID;
-      updatedBadges.push(criteria.badgeType);
-    } else {
-      // First time earning this badge
-      const newBadge = {
-        badgeType: criteria.badgeType,
-        awardedAt: new Date().toISOString(),
-        sectionID: sectionID || null,
-        unitID: unitID || null,
-        count: 1,
-      };
-      existingBadges.push(newBadge);
-      existingByType.set(criteria.badgeType, newBadge);
-      newBadges.push(criteria.badgeType);
-    }
-  }
-
-  // ---- Check DB-based Badge model criteria (custom instructor badges) ----
-  // Also evaluate custom badges from effective config (global + section merged)
+  // Pre-fetch DB-based custom badges once — doesn't depend on current badges state,
+  // so it's safe outside the re-read retry loop below.
+  let dbBadges: any[] = [];
   try {
-    const dbBadges = await fetchAutoEvaluateBadges(gqlClient, sectionID);
-    // Add any custom badges from effective config that aren't already in DB
+    dbBadges = await fetchAutoEvaluateBadges(gqlClient, sectionID);
     const dbBadgeIds = new Set(dbBadges.map((b: any) => b.id));
     for (const configBadge of effectiveConfig.customBadges) {
       if (configBadge.autoEvaluate && !dbBadgeIds.has(configBadge.id)) {
@@ -1541,6 +1518,84 @@ async function handleCheckBadges(
         });
       }
     }
+  } catch (err) {
+    console.warn("[gamification] DB badge evaluation error:", err);
+  }
+
+  const totalXP =
+    preFetched?.totalXP ??
+    xpLogs.reduce((s: number, l: any) => s + l.xpAmount, 0);
+
+  // `badges`/`activeDebuffs`/`freezesRemaining` are shared with grantChallengeBadge
+  // and handleClaimStorybookBadges — re-read fresh and recompute every attempt so a
+  // concurrent writer's changes aren't silently clobbered by a stale merge.
+  let newBadges: string[] = [];
+  let updatedBadges: string[] = [];
+  let newAntiBadges: string[] = [];
+  let redeemedBadges: string[] = [];
+  let existingBadges: any[] = [];
+
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      profile = await getOrCreateStudentProfile(
+        gqlClient,
+        studentId,
+        sectionID,
+      );
+    }
+
+    existingBadges = (() => {
+      try {
+        return JSON.parse(profile.badges || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    const existingByType = new Map<string, any>(
+      existingBadges.map((b: any) => [b.badgeType, b]),
+    );
+
+    newBadges = [];
+    updatedBadges = [];
+
+    for (const criteria of BADGE_CRITERIA) {
+      // Skip badges disabled via merged config (global + section)
+      if (!isBadgeEnabled(effectiveConfig, criteria.badgeType)) continue;
+
+      if (
+        !criteria.check({
+          xpLogs,
+          badges: existingBadges,
+          totalXP,
+          reasonCounts,
+        })
+      )
+        continue;
+
+      const existing = existingByType.get(criteria.badgeType);
+      if (existing) {
+        // Badge already earned — increment count
+        existing.count = (existing.count || 1) + 1;
+        existing.awardedAt = new Date().toISOString();
+        if (sectionID) existing.sectionID = sectionID;
+        if (unitID) existing.unitID = unitID;
+        updatedBadges.push(criteria.badgeType);
+      } else {
+        // First time earning this badge
+        const newBadge = {
+          badgeType: criteria.badgeType,
+          awardedAt: new Date().toISOString(),
+          sectionID: sectionID || null,
+          unitID: unitID || null,
+          count: 1,
+        };
+        existingBadges.push(newBadge);
+        existingByType.set(criteria.badgeType, newBadge);
+        newBadges.push(criteria.badgeType);
+      }
+    }
+
+    // ---- Check DB-based Badge model criteria (custom instructor badges) ----
     for (const badge of dbBadges) {
       if (existingByType.has(badge.id)) continue; // Already earned (by badge model ID)
       const criteriaJson =
@@ -1590,128 +1645,139 @@ async function handleCheckBadges(
         newBadges.push(badge.title || badge.id);
       }
     }
-  } catch (err) {
-    console.warn("[gamification] DB badge evaluation error:", err);
-  }
 
-  // ---- Check anti-badge criteria ----
-  const newAntiBadges: string[] = [];
-  const activeDebuffs: any[] = getActiveDebuffs(profile);
+    // ---- Check anti-badge criteria ----
+    newAntiBadges = [];
+    const activeDebuffs: any[] = getActiveDebuffs(profile);
 
-  // Skip anti-badge loop entirely if disabled for this section
-  if (effectiveConfig.antiBadgesEnabled) {
-    for (const criteria of ANTI_BADGE_CRITERIA) {
-      if (
-        !criteria.check({
-          xpLogs,
-          badges: existingBadges,
-          totalXP,
-          profile,
-          reasonCounts,
-        })
-      )
-        continue;
+    // Skip anti-badge loop entirely if disabled for this section
+    if (effectiveConfig.antiBadgesEnabled) {
+      for (const criteria of ANTI_BADGE_CRITERIA) {
+        if (
+          !criteria.check({
+            xpLogs,
+            badges: existingBadges,
+            totalXP,
+            profile,
+            reasonCounts,
+          })
+        )
+          continue;
 
-      const existing = existingByType.get(criteria.badgeType);
-      if (existing) {
-        // Anti-badge already earned — increment count, refresh debuff
-        existing.count = (existing.count || 1) + 1;
-        existing.awardedAt = new Date().toISOString();
-        if (sectionID) existing.sectionID = sectionID;
-        // Refresh debuff duration
-        refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
-      } else {
-        // First time earning this anti-badge
-        const antiBadge = {
-          badgeType: criteria.badgeType,
-          awardedAt: new Date().toISOString(),
-          sectionID: sectionID || null,
-          unitID: unitID || null,
-          count: 1,
-          isAnti: true,
-        };
-        existingBadges.push(antiBadge);
-        existingByType.set(criteria.badgeType, antiBadge);
-        newAntiBadges.push(criteria.badgeType);
-        // Apply debuff
-        applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+        const existing = existingByType.get(criteria.badgeType);
+        if (existing) {
+          // Anti-badge already earned — increment count, refresh debuff
+          existing.count = (existing.count || 1) + 1;
+          existing.awardedAt = new Date().toISOString();
+          if (sectionID) existing.sectionID = sectionID;
+          // Refresh debuff duration
+          refreshDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+        } else {
+          // First time earning this anti-badge
+          const antiBadge = {
+            badgeType: criteria.badgeType,
+            awardedAt: new Date().toISOString(),
+            sectionID: sectionID || null,
+            unitID: unitID || null,
+            count: 1,
+            isAnti: true,
+          };
+          existingBadges.push(antiBadge);
+          existingByType.set(criteria.badgeType, antiBadge);
+          newAntiBadges.push(criteria.badgeType);
+          // Apply debuff
+          applyDebuff(activeDebuffs, criteria.badgeType, criteria.debuff);
+        }
+      }
+    } // end if (sectionAntiBadgesEnabled)
+
+    // ---- Auto-redeem anti-badges whose conditions are now met ----
+    redeemedBadges = [];
+    const badgesToRemove: Set<string> = new Set();
+
+    for (const badge of existingBadges) {
+      if (!badge.isAnti) continue;
+      if (!REDEMPTION_CONDITIONS[badge.badgeType]) continue;
+
+      const isRedeemed = evaluateRedemption(badge.badgeType, {
+        xpLogs,
+        profile,
+        badge,
+      });
+
+      if (isRedeemed) {
+        badgesToRemove.add(badge.badgeType);
+        redeemedBadges.push(badge.badgeType);
+        // Also remove the associated debuff
+        const debuffIdx = activeDebuffs.findIndex(
+          (d) => d.badgeType === badge.badgeType,
+        );
+        if (debuffIdx >= 0) activeDebuffs.splice(debuffIdx, 1);
       }
     }
-  } // end if (sectionAntiBadgesEnabled)
 
-  // ---- Auto-redeem anti-badges whose conditions are now met ----
-  const redeemedBadges: string[] = [];
-  const badgesToRemove: Set<string> = new Set();
-
-  for (const badge of existingBadges) {
-    if (!badge.isAnti) continue;
-    if (!REDEMPTION_CONDITIONS[badge.badgeType]) continue;
-
-    const isRedeemed = evaluateRedemption(badge.badgeType, {
-      xpLogs,
-      profile,
-      badge,
-    });
-
-    if (isRedeemed) {
-      badgesToRemove.add(badge.badgeType);
-      redeemedBadges.push(badge.badgeType);
-      // Also remove the associated debuff
-      const debuffIdx = activeDebuffs.findIndex(
-        (d) => d.badgeType === badge.badgeType,
+    // Remove redeemed anti-badges from the badges array
+    if (badgesToRemove.size > 0) {
+      for (let i = existingBadges.length - 1; i >= 0; i--) {
+        if (badgesToRemove.has(existingBadges[i].badgeType)) {
+          existingBadges.splice(i, 1);
+        }
+      }
+      // Also remove from the map
+      for (const bt of badgesToRemove) {
+        existingByType.delete(bt);
+      }
+      console.log(
+        `[gamification] Auto-redeemed ${redeemedBadges.length} anti-badges:`,
+        redeemedBadges,
       );
-      if (debuffIdx >= 0) activeDebuffs.splice(debuffIdx, 1);
     }
-  }
 
-  // Remove redeemed anti-badges from the badges array
-  if (badgesToRemove.size > 0) {
-    for (let i = existingBadges.length - 1; i >= 0; i--) {
-      if (badgesToRemove.has(existingBadges[i].badgeType)) {
-        existingBadges.splice(i, 1);
+    // Apply streak freeze removal from new anti-badge debuffs
+    let freezesPenalty = 0;
+    for (const ab of newAntiBadges) {
+      const criteria = ANTI_BADGE_CRITERIA.find((c) => c.badgeType === ab);
+      if (criteria?.debuff.streakFreezesRemoved) {
+        freezesPenalty += criteria.debuff.streakFreezesRemoved;
       }
     }
-    // Also remove from the map
-    for (const bt of badgesToRemove) {
-      existingByType.delete(bt);
+
+    // Write updated badges + debuffs to StudentProfile
+    const expectedVersion = profile._version ?? 1;
+    const updateInput: any = {
+      id: profile.id,
+      badges: JSON.stringify(existingBadges),
+      activeDebuffs: JSON.stringify(activeDebuffs),
+      _version: expectedVersion + 1,
+    };
+    if (freezesPenalty > 0) {
+      const currentFreezes = profile.freezesRemaining || 0;
+      updateInput.freezesRemaining = Math.max(
+        0,
+        currentFreezes - freezesPenalty,
+      );
     }
-    console.log(
-      `[gamification] Auto-redeemed ${redeemedBadges.length} anti-badges:`,
-      redeemedBadges,
-    );
-  }
 
-  // Apply streak freeze removal from new anti-badge debuffs
-  let freezesPenalty = 0;
-  for (const ab of newAntiBadges) {
-    const criteria = ANTI_BADGE_CRITERIA.find((c) => c.badgeType === ab);
-    if (criteria?.debuff.streakFreezesRemoved) {
-      freezesPenalty += criteria.debuff.streakFreezesRemoved;
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: updateInput,
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      console.error(
+        "[gamification] handleCheckBadges profile update error:",
+        err,
+      );
+      throw err; // Exhausted retries or a non-conflict error — surface it.
     }
-  }
-
-  // Write updated badges + debuffs to StudentProfile
-  const updateInput: any = {
-    id: profile.id,
-    badges: JSON.stringify(existingBadges),
-    activeDebuffs: JSON.stringify(activeDebuffs),
-    _version: profile._version ?? 1,
-  };
-  if (freezesPenalty > 0) {
-    const currentFreezes = profile.freezesRemaining || 0;
-    updateInput.freezesRemaining = Math.max(0, currentFreezes - freezesPenalty);
-  }
-
-  try {
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: { input: updateInput },
-    });
-  } catch (err) {
-    console.error(
-      "[gamification] handleCheckBadges profile update error:",
-      err,
-    );
   }
 
   // Create notifications for badge changes
@@ -1777,98 +1843,132 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
   const { studentId } = args;
   const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
 
-  // Read streak data from StudentProfile
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const existingStreak = profile.currentStreak || 0;
-  const existingLongest = profile.longestStreak || 0;
-  const lastActivity = profile.lastActivityDate || null;
-  let freezesRemaining = profile.freezesRemaining || 0;
-  let freezesUsed = profile.freezesUsed || 0;
-
-  if (!lastActivity && existingStreak === 0) {
-    // First activity ever — write streak to profile
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          currentStreak: 1,
-          longestStreak: 1,
-          lastActivityDate: today,
-          freezesRemaining: 0,
-          freezesUsed: 0,
-          _version: profile._version ?? 1,
-        },
-      },
-    });
-    return { currentStreak: 1, longestStreak: 1, lastActivityDate: today };
-  }
-
-  // Already active today
-  if (lastActivity === today) {
-    return {
-      currentStreak: existingStreak,
-      longestStreak: existingLongest,
-      lastActivityDate: today,
-    };
-  }
-
-  // Check days since last activity
-  const lastDate = new Date(lastActivity);
-  const todayDate = new Date(today);
-  const diffDays = Math.floor(
-    (todayDate.getTime() - lastDate.getTime()) / (86400 * 1000),
-  );
-
-  let newStreak: number;
+  let newStreak = 0;
+  let longestStreak = 0;
   let comebackTriggered = false;
   let streakXPReason: string | null = null;
+  let freezeUsed = false;
 
-  if (diffDays === 1) {
-    // Consecutive day
-    newStreak = existingStreak + 1;
-  } else if (diffDays === 2 && freezesRemaining > 0) {
-    // Missed exactly 1 day — use a freeze
-    newStreak = existingStreak + 1;
-    freezesRemaining -= 1;
-    freezesUsed += 1;
-  } else if (diffDays > 7) {
-    // Comeback — student returned after extended absence
-    newStreak = 1;
-    comebackTriggered = true;
-  } else {
-    // Streak broken (missed 2+ days without freeze)
-    newStreak = 1;
-  }
+  // Read-modify-write against currentStreak/longestStreak/freezes — re-read fresh
+  // and recompute every attempt so two near-simultaneous submissions can't
+  // double-consume a freeze or silently drop one day's increment.
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const existingStreak = profile.currentStreak || 0;
+    const existingLongest = profile.longestStreak || 0;
+    const lastActivity = profile.lastActivityDate || null;
+    let freezesRemaining = profile.freezesRemaining || 0;
+    let freezesUsed = profile.freezesUsed || 0;
+    const expectedVersion = profile._version ?? 1;
 
-  // Award streak freeze at 7-day milestones
-  if (newStreak > 0 && newStreak % 7 === 0) {
-    freezesRemaining += 1;
-  }
+    if (!lastActivity && existingStreak === 0) {
+      // First activity ever — write streak to profile
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_STUDENT_PROFILE,
+          variables: {
+            input: {
+              id: profile.id,
+              currentStreak: 1,
+              longestStreak: 1,
+              lastActivityDate: today,
+              freezesRemaining: 0,
+              freezesUsed: 0,
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        return { currentStreak: 1, longestStreak: 1, lastActivityDate: today };
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue;
+        }
+        throw err;
+      }
+    }
 
-  // Determine streak milestone XP
-  if (newStreak === 3) streakXPReason = "STREAK_3DAY";
-  else if (newStreak === 7) streakXPReason = "STREAK_7DAY";
-  else if (newStreak === 14) streakXPReason = "STREAK_14DAY";
-  else if (newStreak === 30) streakXPReason = "STREAK_30DAY";
-
-  const longestStreak = Math.max(existingLongest, newStreak);
-
-  // Write updated streak directly to StudentProfile
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        currentStreak: newStreak,
-        longestStreak,
+    // Already active today
+    if (lastActivity === today) {
+      return {
+        currentStreak: existingStreak,
+        longestStreak: existingLongest,
         lastActivityDate: today,
-        freezesRemaining,
-        freezesUsed,
-        _version: profile._version ?? 1,
-      },
-    },
-  });
+      };
+    }
+
+    // Check days since last activity
+    const lastDate = new Date(lastActivity);
+    const todayDate = new Date(today);
+    const diffDays = Math.floor(
+      (todayDate.getTime() - lastDate.getTime()) / (86400 * 1000),
+    );
+
+    comebackTriggered = false;
+    streakXPReason = null;
+    freezeUsed = false;
+
+    if (diffDays === 1) {
+      // Consecutive day
+      newStreak = existingStreak + 1;
+    } else if (diffDays === 2 && freezesRemaining > 0) {
+      // Missed exactly 1 day — use a freeze
+      newStreak = existingStreak + 1;
+      freezesRemaining -= 1;
+      freezesUsed += 1;
+      freezeUsed = true;
+    } else if (diffDays > 7) {
+      // Comeback — student returned after extended absence
+      newStreak = 1;
+      comebackTriggered = true;
+    } else {
+      // Streak broken (missed 2+ days without freeze)
+      newStreak = 1;
+    }
+
+    // Award streak freeze at 7-day milestones
+    if (newStreak > 0 && newStreak % 7 === 0) {
+      freezesRemaining += 1;
+    }
+
+    // Determine streak milestone XP
+    if (newStreak === 3) streakXPReason = "STREAK_3DAY";
+    else if (newStreak === 7) streakXPReason = "STREAK_7DAY";
+    else if (newStreak === 14) streakXPReason = "STREAK_14DAY";
+    else if (newStreak === 30) streakXPReason = "STREAK_30DAY";
+
+    longestStreak = Math.max(existingLongest, newStreak);
+
+    // Write updated streak directly to StudentProfile
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            currentStreak: newStreak,
+            longestStreak,
+            lastActivityDate: today,
+            freezesRemaining,
+            freezesUsed,
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
 
   // Award streak milestone XP (fire-and-forget)
   if (streakXPReason) {
@@ -1921,7 +2021,7 @@ async function handleUpdateStreak(gqlClient: any, args: { studentId: string }) {
     longestStreak,
     lastActivityDate: today,
     comebackTriggered,
-    freezeUsed: diffDays === 2 && freezesRemaining < profile.freezesRemaining,
+    freezeUsed,
   };
 }
 
@@ -2047,43 +2147,60 @@ async function handleRebuildLeaderboard(
       (l: any) => l.reason === "NAILED_IT",
     ).length;
 
-    // Update StudentProfile with computed leaderboard fields
+    // Update StudentProfile with computed leaderboard fields — full recompute from
+    // xpLogs/grades/avatar config, so a conflict just needs a fresh _version, not a merge.
     try {
-      const profile = await getOrCreateStudentProfile(
-        gqlClient,
-        studentId,
-        sectionID,
-      );
       const avatarConfig = avatarByStudent.get(studentId);
-      await gqlClient.graphql({
-        query: UPDATE_STUDENT_PROFILE,
-        variables: {
-          input: {
-            id: profile.id,
-            totalXP,
-            level,
-            completedAssignments,
-            nailedItCount,
-            lastUpdated: new Date().toISOString(),
-            ...(timeStats && {
-              reportCard: {
-                timeStats,
+      for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+        const profile = await getOrCreateStudentProfile(
+          gqlClient,
+          studentId,
+          sectionID,
+        );
+        const expectedVersion = profile._version ?? 1;
+        try {
+          await gqlClient.graphql({
+            query: UPDATE_STUDENT_PROFILE,
+            variables: {
+              input: {
+                id: profile.id,
+                totalXP,
+                level,
+                completedAssignments,
+                nailedItCount,
                 lastUpdated: new Date().toISOString(),
+                ...(timeStats && {
+                  reportCard: {
+                    timeStats,
+                    lastUpdated: new Date().toISOString(),
+                  },
+                }),
+                ...(avatarConfig?.avatarStyle && {
+                  avatarStyle: avatarConfig.avatarStyle,
+                }),
+                ...(avatarConfig?.avatarOverrides && {
+                  avatarOverrides: JSON.stringify(avatarConfig.avatarOverrides),
+                }),
+                ...(avatarConfig?.avatarSeed && {
+                  avatarSeed: avatarConfig.avatarSeed,
+                }),
+                _version: expectedVersion + 1,
               },
-            }),
-            ...(avatarConfig?.avatarStyle && {
-              avatarStyle: avatarConfig.avatarStyle,
-            }),
-            ...(avatarConfig?.avatarOverrides && {
-              avatarOverrides: JSON.stringify(avatarConfig.avatarOverrides),
-            }),
-            ...(avatarConfig?.avatarSeed && {
-              avatarSeed: avatarConfig.avatarSeed,
-            }),
-            _version: profile._version ?? 1,
-          },
-        },
-      });
+              condition: { _version: { eq: expectedVersion } },
+            },
+          });
+          break; // Success.
+        } catch (err) {
+          if (
+            isConditionalCheckFailure(err) &&
+            attempt < MAX_RETRY_ATTEMPTS - 1
+          ) {
+            await sleep(backoffMs(attempt));
+            continue; // Re-read and retry with fresh data.
+          }
+          throw err;
+        }
+      }
       updated++;
     } catch (err) {
       console.error(
@@ -2767,109 +2884,142 @@ async function handleCheckPersonalBest(
 ) {
   const { studentId, unitID, score } = args;
 
-  // Read personal bests from StudentProfile
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const personalBests: any[] = (() => {
-    try {
-      return JSON.parse(profile.personalBests || "[]");
-    } catch {
-      return [];
-    }
-  })();
-  const existingPB = personalBests.find((pb: any) => pb.unitID === unitID);
+  // Read-modify-write against personalBests — re-read fresh and recompute every
+  // attempt so two different units submitted close together don't lose an entry.
+  let isNewBest = false;
+  let firstAttempt = false;
+  let previousBest: number | null = null;
 
-  if (!existingPB) {
-    // First score for this unit — add PB entry
-    personalBests.push({
-      unitID,
-      bestScore: score,
-      achievedAt: new Date().toISOString(),
-      previousBest: null,
-    });
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const personalBests: any[] = (() => {
+      try {
+        return JSON.parse(profile.personalBests || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    const existingPB = personalBests.find((pb: any) => pb.unitID === unitID);
+    const expectedVersion = profile._version ?? 1;
 
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          personalBests: JSON.stringify(personalBests),
-          _version: profile._version ?? 1,
-        },
-      },
-    });
-
-    return {
-      isNewBest: true,
-      firstAttempt: true,
-      bestScore: score,
-      previousBest: null,
-    };
-  }
-
-  if (score > existingPB.bestScore) {
-    // New personal best! Update in-place
-    existingPB.previousBest = existingPB.bestScore;
-    existingPB.bestScore = score;
-    existingPB.achievedAt = new Date().toISOString();
-
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          personalBests: JSON.stringify(personalBests),
-          _version: profile._version ?? 1,
-        },
-      },
-    });
-
-    // Award PB XP (deduplicated by unit+date)
-    const today = new Date().toISOString().split("T")[0];
-    try {
-      await handleAwardXP(
-        gqlClient,
-        {
-          studentId,
-          reason: "PERSONAL_BEST",
-          referenceId: `pb-${unitID}-${today}`,
-        },
-        null,
-      );
-    } catch (err) {
-      console.error("[gamification] personal best XP error:", err);
-    }
-
-    // Notification: Personal Best
-    try {
-      await createNotification(gqlClient, {
-        recipientId: studentId,
-        type: "PERSONAL_BEST",
-        title: `New Personal Best: ${score}%!`,
-        body: `You beat your previous score of ${existingPB.previousBest}%. Keep it up!`,
-        referenceId: `pb-${unitID}`,
-        referenceType: "Unit",
-        senderName: "System",
-        linkPath: `/unit/${unitID}`,
-        linkLabel: "View Unit",
-        metadata: { unitID, score, previousBest: existingPB.previousBest },
+    if (!existingPB) {
+      // First score for this unit — add PB entry
+      personalBests.push({
+        unitID,
+        bestScore: score,
+        achievedAt: new Date().toISOString(),
+        previousBest: null,
       });
-    } catch (err) {
-      console.warn("[gamification] personal best notification failed:", err);
+
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_STUDENT_PROFILE,
+          variables: {
+            input: {
+              id: profile.id,
+              personalBests: JSON.stringify(personalBests),
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        isNewBest = true;
+        firstAttempt = true;
+        previousBest = null;
+        break; // Success.
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue;
+        }
+        throw err;
+      }
     }
 
-    return {
-      isNewBest: true,
-      firstAttempt: false,
-      bestScore: score,
-      previousBest: existingPB.previousBest,
-    };
+    if (score > existingPB.bestScore) {
+      // New personal best! Update in-place
+      existingPB.previousBest = existingPB.bestScore;
+      existingPB.bestScore = score;
+      existingPB.achievedAt = new Date().toISOString();
+
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_STUDENT_PROFILE,
+          variables: {
+            input: {
+              id: profile.id,
+              personalBests: JSON.stringify(personalBests),
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue;
+        }
+        throw err;
+      }
+
+      isNewBest = true;
+      firstAttempt = false;
+      previousBest = existingPB.previousBest;
+
+      // Award PB XP (deduplicated by unit+date)
+      const today = new Date().toISOString().split("T")[0];
+      try {
+        await handleAwardXP(
+          gqlClient,
+          {
+            studentId,
+            reason: "PERSONAL_BEST",
+            referenceId: `pb-${unitID}-${today}`,
+          },
+          null,
+        );
+      } catch (err) {
+        console.error("[gamification] personal best XP error:", err);
+      }
+
+      // Notification: Personal Best
+      try {
+        await createNotification(gqlClient, {
+          recipientId: studentId,
+          type: "PERSONAL_BEST",
+          title: `New Personal Best: ${score}%!`,
+          body: `You beat your previous score of ${existingPB.previousBest}%. Keep it up!`,
+          referenceId: `pb-${unitID}`,
+          referenceType: "Unit",
+          senderName: "System",
+          linkPath: `/unit/${unitID}`,
+          linkLabel: "View Unit",
+          metadata: { unitID, score, previousBest: existingPB.previousBest },
+        });
+      } catch (err) {
+        console.warn("[gamification] personal best notification failed:", err);
+      }
+
+      break; // Success.
+    }
+
+    isNewBest = false;
+    firstAttempt = false;
+    previousBest = existingPB.previousBest;
+    break; // Not a new best — nothing to write.
   }
 
   return {
-    isNewBest: false,
-    firstAttempt: false,
-    bestScore: existingPB.bestScore,
-    previousBest: existingPB.previousBest,
+    isNewBest,
+    firstAttempt,
+    bestScore: score,
+    previousBest,
   };
 }
 
@@ -2883,44 +3033,39 @@ async function handleRecomputeProgress(
 ) {
   const { studentId, moduleId } = args;
 
-  // Get all grades for this module (moduleId = sectionID in this context)
-  const { data: gradesResult } = await gqlClient.graphql({
-    query: LIST_GRADES_BY_SECTION,
-    variables: { sectionID: moduleId },
-  });
-  const allGrades = gradesResult?.listGradeBySectionID?.items || [];
+  // Bounded by this student's own grade rows (byOwnerAndSection index) and by
+  // the section's actual assignment count — never by every student's attempt
+  // history in the section.
+  const [gradesResult, assignmentsResult] = await Promise.all([
+    gqlClient.graphql({
+      query: LIST_GRADES_BY_OWNER_AND_SECTION,
+      variables: { owner: studentId, sectionID: moduleId },
+    }),
+    gqlClient.graphql({
+      query: LIST_ASSIGNMENTS_BY_SECTION,
+      variables: { sectionID: moduleId },
+    }),
+  ]);
+  const studentGrades =
+    gradesResult.data?.listGradeByOwnerAndSection?.items || [];
+  const assignments = assignmentsResult.data?.listAssignments?.items || [];
 
-  // Filter to this student's grades
-  const studentGrades = allGrades.filter((g: any) => g.owner === studentId);
-  const completedGrades = studentGrades.filter((g: any) => g.complete === true);
-
-  // Count total assignments for module (unique assignment IDs in all grades)
-  const allAssignmentOwners = new Set(
-    allGrades.map((g: any) => g.owner).filter(Boolean),
-  );
-  const totalWorkbooks = Math.max(
-    studentGrades.length,
-    Math.ceil(allGrades.length / Math.max(allAssignmentOwners.size, 1)),
-  );
-  const completedWorkbooks = completedGrades.length;
+  // Distinct units, not raw row counts — a retaken completed unit shouldn't
+  // inflate completedWorkbooks past totalWorkbooks.
+  const totalWorkbooks = new Set(
+    assignments.map((a: any) => a.unitID).filter(Boolean),
+  ).size;
+  const completedWorkbooks = new Set(
+    studentGrades
+      .filter((g: any) => g.complete === true)
+      .map((g: any) => g.unitID)
+      .filter(Boolean),
+  ).size;
   const completionPercent =
     totalWorkbooks > 0
       ? Math.round((completedWorkbooks / totalWorkbooks) * 100)
       : 0;
 
-  // Read existing moduleProgress from StudentProfile, upsert entry
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const moduleProgress: any[] = (() => {
-    try {
-      return JSON.parse(profile.moduleProgress || "[]");
-    } catch {
-      return [];
-    }
-  })();
-
-  const existingIdx = moduleProgress.findIndex(
-    (p: any) => p.moduleId === moduleId,
-  );
   const entry = {
     moduleId,
     completionPercent,
@@ -2929,24 +3074,51 @@ async function handleRecomputeProgress(
     lastUpdatedAt: new Date().toISOString(),
   };
 
-  if (existingIdx >= 0) {
-    moduleProgress[existingIdx] = entry;
-  } else {
-    moduleProgress.push(entry);
+  let created = false;
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const moduleProgress: any[] = (() => {
+      try {
+        return JSON.parse(profile.moduleProgress || "[]");
+      } catch {
+        return [];
+      }
+    })();
+
+    const existingIdx = moduleProgress.findIndex(
+      (p: any) => p.moduleId === moduleId,
+    );
+    created = existingIdx < 0;
+    if (existingIdx >= 0) {
+      moduleProgress[existingIdx] = entry;
+    } else {
+      moduleProgress.push(entry);
+    }
+
+    const expectedVersion = profile._version ?? 1;
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            moduleProgress: JSON.stringify(moduleProgress),
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err; // Exhausted retries or a non-conflict error — surface it.
+    }
   }
 
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        moduleProgress: JSON.stringify(moduleProgress),
-        _version: profile._version ?? 1,
-      },
-    },
-  });
-
-  return { ...entry, [existingIdx >= 0 ? "updated" : "created"]: true };
+  return { ...entry, [created ? "created" : "updated"]: true };
 }
 
 // ============================================================================
@@ -3210,20 +3382,50 @@ async function handleUpdateSquadXP(
   const updatedSquads: string[] = [];
 
   for (const squad of memberSquads) {
-    const newTotal = (squad.totalXP || 0) + xpAmount;
+    // Retried with a fresh re-read on optimistic-concurrency conflict — two
+    // squadmates earning XP at once would otherwise race on the same row.
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      let current = squad;
+      if (attempt > 0) {
+        const { data } = await gqlClient.graphql({
+          query: GET_SQUAD,
+          variables: { id: squad.id },
+        });
+        current = data?.getSquad;
+        if (!current) break; // Deleted concurrently.
+      }
 
-    await gqlClient.graphql({
-      query: UPDATE_SQUAD,
-      variables: {
-        input: {
-          id: squad.id,
-          totalXP: newTotal,
-          _version: squad._version ?? 1,
-        },
-      },
-    });
-
-    updatedSquads.push(squad.id);
+      const newTotal = (current.totalXP || 0) + xpAmount;
+      const expectedVersion = current._version ?? 1;
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_SQUAD,
+          variables: {
+            input: {
+              id: current.id,
+              totalXP: newTotal,
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        updatedSquads.push(squad.id);
+        break; // Success.
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue; // Re-read and retry with fresh data.
+        }
+        console.error(
+          `[gamification] squad XP update failed for ${squad.id}:`,
+          err,
+        );
+        break;
+      }
+    }
 
     // Check active group challenges for this squad's cohort
     try {
@@ -3275,27 +3477,66 @@ async function handleContributeToChallenge(
       continue; // expired
     }
 
-    // Update challenge total + embed contribution in aggregate array
-    const newTotal = (challenge.currentXP || 0) + xpContributed;
-    const goalReached = newTotal >= challenge.targetXP;
-    const existingContributions = challenge.contributions || [];
-    const updatedContributions = [
-      ...existingContributions,
-      { studentId, xpContributed, contributedAt: new Date().toISOString() },
-    ];
+    // Retried with a fresh re-read on optimistic-concurrency conflict — two
+    // contributors crediting the same challenge at once would otherwise race.
+    let updateSucceeded = false;
+    let goalReached = false;
+    let newTotal = challenge.currentXP || 0;
+    let updatedContributions: any[] = challenge.contributions || [];
 
-    await gqlClient.graphql({
-      query: UPDATE_CHALLENGE_WITH_CONTRIBUTIONS,
-      variables: {
-        input: {
-          id: challenge.id,
-          currentXP: newTotal,
-          active: goalReached ? false : true,
-          contributions: updatedContributions,
-          _version: challenge._version ?? 1,
-        },
-      },
-    });
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      let currentChallenge = challenge;
+      if (attempt > 0) {
+        const { data } = await gqlClient.graphql({
+          query: GET_GROUP_CHALLENGE,
+          variables: { id: challenge.id },
+        });
+        currentChallenge = data?.getGroupChallenge;
+        if (!currentChallenge) break; // Deleted concurrently.
+      }
+
+      newTotal = (currentChallenge.currentXP || 0) + xpContributed;
+      goalReached = newTotal >= currentChallenge.targetXP;
+      const existingContributions = currentChallenge.contributions || [];
+      updatedContributions = [
+        ...existingContributions,
+        { studentId, xpContributed, contributedAt: new Date().toISOString() },
+      ];
+
+      const expectedVersion = currentChallenge._version ?? 1;
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_CHALLENGE_WITH_CONTRIBUTIONS,
+          variables: {
+            input: {
+              id: currentChallenge.id,
+              currentXP: newTotal,
+              active: goalReached ? false : true,
+              contributions: updatedContributions,
+              _version: expectedVersion + 1,
+            },
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        updateSucceeded = true;
+        break; // Success.
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue; // Re-read and retry with fresh data.
+        }
+        console.error(
+          `[gamification] challenge XP update failed for ${challenge.id}:`,
+          err,
+        );
+        break;
+      }
+    }
+
+    if (!updateSucceeded) continue; // Exhausted retries — skip reward/tracking for this challenge.
 
     // If goal reached, award bonus to ALL contributors (not just the triggering student)
     if (goalReached) {
@@ -3404,33 +3645,10 @@ async function handleAdvanceSkillProgress(
     IN_PROGRESS: ["MASTERED"],
   };
 
-  // Get current skill progress from StudentProfile
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const allProgress: any[] = (() => {
-    try {
-      return JSON.parse(profile.skillProgress || "[]");
-    } catch {
-      return [];
-    }
-  })();
-  const existing = allProgress.find((p: any) => p.skillId === skillId);
-  const currentStatus = existing?.status || "LOCKED";
-
-  if (!validTransitions[currentStatus]?.includes(newStatus)) {
-    return { error: `Invalid transition: ${currentStatus} → ${newStatus}` };
-  }
-
-  // Update in-memory skillProgress array
-  if (existing) {
-    existing.status = newStatus;
-  } else {
-    allProgress.push({ skillId, status: newStatus });
-  }
-
-  // If MASTERED, unlock dependent skills
-  const unlocked: string[] = [];
+  // Skill-tree data for dependent unlocking doesn't depend on skillProgress
+  // state, so it's fetched once, outside the re-read retry loop below.
+  let skillTree: any[] = [];
   if (newStatus === "MASTERED") {
-    // Get the skill's cohort to find all skills in this tree
     const { data: skillResult } = await gqlClient.graphql({
       query: `query GetSkill($id: ID!) { getSkill(id: $id) { id sectionID _version _lastChangedAt _deleted } }`,
       variables: { id: skillId },
@@ -3441,58 +3659,96 @@ async function handleAdvanceSkillProgress(
         query: LIST_SKILLS_BY_SECTION,
         variables: { sectionID },
       });
-      const allSkills = skillsResult?.listSkillBySectionID?.items || [];
-
-      // Find skills that have this skillId as a prerequisite
-      for (const skill of allSkills) {
-        const prereqs = skill.prerequisites || [];
-        if (!prereqs.includes(skillId)) continue;
-
-        // Check if ALL prerequisites are MASTERED
-        const depProgress = allProgress.find(
-          (p: any) => p.skillId === skill.id,
-        );
-        if (
-          depProgress?.status === "AVAILABLE" ||
-          depProgress?.status === "IN_PROGRESS" ||
-          depProgress?.status === "MASTERED"
-        ) {
-          continue; // Already unlocked or beyond
-        }
-
-        const allPrereqsMastered = prereqs.every((prereqId: string) => {
-          if (prereqId === skillId) return true; // The one we just mastered
-          const p = allProgress.find((pr: any) => pr.skillId === prereqId);
-          return p?.status === "MASTERED";
-        });
-
-        if (allPrereqsMastered) {
-          // Unlock this dependent skill in-memory
-          const depExisting = allProgress.find(
-            (p: any) => p.skillId === skill.id,
-          );
-          if (depExisting) {
-            depExisting.status = "AVAILABLE";
-          } else {
-            allProgress.push({ skillId: skill.id, status: "AVAILABLE" });
-          }
-          unlocked.push(skill.id);
-        }
-      }
+      skillTree = skillsResult?.listSkillBySectionID?.items || [];
     }
   }
 
-  // Write updated skillProgress to StudentProfile
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        skillProgress: JSON.stringify(allProgress),
-        _version: profile._version ?? 1,
-      },
-    },
-  });
+  // Read-modify-write against skillProgress — shared with handleEvaluateSkillsForUnit
+  // — re-read fresh and recompute every attempt instead of merging a stale array.
+  let unlocked: string[] = [];
+
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const allProgress: any[] = (() => {
+      try {
+        return JSON.parse(profile.skillProgress || "[]");
+      } catch {
+        return [];
+      }
+    })();
+    const existing = allProgress.find((p: any) => p.skillId === skillId);
+    const currentStatus = existing?.status || "LOCKED";
+
+    if (!validTransitions[currentStatus]?.includes(newStatus)) {
+      return { error: `Invalid transition: ${currentStatus} → ${newStatus}` };
+    }
+
+    // Update in-memory skillProgress array
+    if (existing) {
+      existing.status = newStatus;
+    } else {
+      allProgress.push({ skillId, status: newStatus });
+    }
+
+    // If MASTERED, unlock dependent skills
+    unlocked = [];
+    for (const skill of skillTree) {
+      const prereqs = skill.prerequisites || [];
+      if (!prereqs.includes(skillId)) continue;
+
+      // Check if ALL prerequisites are MASTERED
+      const depProgress = allProgress.find((p: any) => p.skillId === skill.id);
+      if (
+        depProgress?.status === "AVAILABLE" ||
+        depProgress?.status === "IN_PROGRESS" ||
+        depProgress?.status === "MASTERED"
+      ) {
+        continue; // Already unlocked or beyond
+      }
+
+      const allPrereqsMastered = prereqs.every((prereqId: string) => {
+        if (prereqId === skillId) return true; // The one we just mastered
+        const p = allProgress.find((pr: any) => pr.skillId === prereqId);
+        return p?.status === "MASTERED";
+      });
+
+      if (allPrereqsMastered) {
+        // Unlock this dependent skill in-memory
+        const depExisting = allProgress.find(
+          (p: any) => p.skillId === skill.id,
+        );
+        if (depExisting) {
+          depExisting.status = "AVAILABLE";
+        } else {
+          allProgress.push({ skillId: skill.id, status: "AVAILABLE" });
+        }
+        unlocked.push(skill.id);
+      }
+    }
+
+    // Write updated skillProgress to StudentProfile
+    const expectedVersion = profile._version ?? 1;
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            skillProgress: JSON.stringify(allProgress),
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
 
   return { success: true, skillId, newStatus, unlocked };
 }
@@ -3559,87 +3815,109 @@ async function handleEvaluateSkillsForUnit(
     if (acc > current) unitAccuracyMap.set(grade.unitID, acc);
   }
 
-  // Get student profile for skill progress
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const allProgress: any[] = (() => {
-    try {
-      return profile.skillProgress ? JSON.parse(profile.skillProgress) : [];
-    } catch {
-      return [];
-    }
-  })();
-
+  // Get student profile for skill progress — shared with handleAdvanceSkillProgress —
+  // re-read fresh and recompute every attempt instead of merging against a stale array.
   const mastered: string[] = [];
   const inProgress: string[] = [];
 
-  for (const skill of relevantSkills) {
-    const requiredUnits: string[] = skill.unitIds || [];
-    const minAccuracy = skill.minimumAccuracy || 70;
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const allProgress: any[] = (() => {
+      try {
+        return profile.skillProgress ? JSON.parse(profile.skillProgress) : [];
+      } catch {
+        return [];
+      }
+    })();
 
-    // Check if all required units have been completed with sufficient accuracy
-    let completedCount = 0;
-    for (const reqUnit of requiredUnits) {
-      const bestAccuracy = unitAccuracyMap.get(reqUnit) || 0;
-      if (bestAccuracy >= minAccuracy) completedCount++;
-    }
+    mastered.length = 0;
+    inProgress.length = 0;
 
-    const existingProgress = allProgress.find(
-      (p: any) => p.skillId === skill.id,
-    );
-    const currentStatus = existingProgress?.status || "LOCKED";
+    for (const skill of relevantSkills) {
+      const requiredUnits: string[] = skill.unitIds || [];
+      const minAccuracy = skill.minimumAccuracy || 70;
 
-    if (completedCount === requiredUnits.length) {
-      // All units mastered — advance to MASTERED
-      if (currentStatus !== "MASTERED") {
-        if (existingProgress) {
-          existingProgress.status = "MASTERED";
-        } else {
-          allProgress.push({ skillId: skill.id, status: "MASTERED" });
-        }
-        mastered.push(skill.id);
+      // Check if all required units have been completed with sufficient accuracy
+      let completedCount = 0;
+      for (const reqUnit of requiredUnits) {
+        const bestAccuracy = unitAccuracyMap.get(reqUnit) || 0;
+        if (bestAccuracy >= minAccuracy) completedCount++;
+      }
 
-        // Award XP for mastering a skill
-        if (skill.xpReward && skill.xpReward > 0) {
-          try {
-            await handleAwardXP(
-              gqlClient,
-              {
-                studentId,
-                reason: "ALL_BLOCKS_COMPLETED",
-                referenceId: `skill-${skill.id}`,
-              },
-              null,
-            );
-          } catch (err) {
-            console.warn("[gamification] Skill mastery XP error:", err);
+      const existingProgress = allProgress.find(
+        (p: any) => p.skillId === skill.id,
+      );
+      const currentStatus = existingProgress?.status || "LOCKED";
+
+      if (completedCount === requiredUnits.length) {
+        // All units mastered — advance to MASTERED
+        if (currentStatus !== "MASTERED") {
+          if (existingProgress) {
+            existingProgress.status = "MASTERED";
+          } else {
+            allProgress.push({ skillId: skill.id, status: "MASTERED" });
           }
+          mastered.push(skill.id);
         }
-      }
-    } else if (completedCount > 0) {
-      // Some units done — mark IN_PROGRESS
-      if (currentStatus === "LOCKED" || currentStatus === "AVAILABLE") {
-        if (existingProgress) {
-          existingProgress.status = "IN_PROGRESS";
-        } else {
-          allProgress.push({ skillId: skill.id, status: "IN_PROGRESS" });
+      } else if (completedCount > 0) {
+        // Some units done — mark IN_PROGRESS
+        if (currentStatus === "LOCKED" || currentStatus === "AVAILABLE") {
+          if (existingProgress) {
+            existingProgress.status = "IN_PROGRESS";
+          } else {
+            allProgress.push({ skillId: skill.id, status: "IN_PROGRESS" });
+          }
+          inProgress.push(skill.id);
         }
-        inProgress.push(skill.id);
       }
     }
-  }
 
-  // Write updated skillProgress if anything changed
-  if (mastered.length > 0 || inProgress.length > 0) {
-    await gqlClient.graphql({
-      query: UPDATE_STUDENT_PROFILE,
-      variables: {
-        input: {
-          id: profile.id,
-          skillProgress: JSON.stringify(allProgress),
-          _version: profile._version ?? 1,
+    // Write updated skillProgress if anything changed
+    if (mastered.length === 0 && inProgress.length === 0) {
+      break; // Nothing to write.
+    }
+
+    const expectedVersion = profile._version ?? 1;
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            skillProgress: JSON.stringify(allProgress),
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
         },
-      },
-    });
+      });
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+
+    // Award XP for mastering a skill (dedup'd by referenceId — safe even if this
+    // whole attempt is later superseded by a conflict on a *different* field).
+    for (const skillId of mastered) {
+      const skill = relevantSkills.find((s: any) => s.id === skillId);
+      if (skill?.xpReward && skill.xpReward > 0) {
+        try {
+          await handleAwardXP(
+            gqlClient,
+            {
+              studentId,
+              reason: "ALL_BLOCKS_COMPLETED",
+              referenceId: `skill-${skillId}`,
+            },
+            null,
+          );
+        } catch (err) {
+          console.warn("[gamification] Skill mastery XP error:", err);
+        }
+      }
+    }
 
     // For mastered skills, unlock dependents
     for (const skillId of mastered) {
@@ -3654,6 +3932,8 @@ async function handleEvaluateSkillsForUnit(
         console.warn("[gamification] Unlock dependents error:", err);
       }
     }
+
+    break; // Success.
   }
 
   return { evaluated: relevantSkills.length, mastered, inProgress };
@@ -3808,29 +4088,44 @@ async function grantCosmeticReward(
     label: `${type}: ${value}`,
   };
 
-  // Fetch current profile
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  if (!profile) return;
+  // Read-modify-write against cosmeticRewards — re-read fresh and retry on
+  // conflict instead of merging against a stale array.
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    if (!profile) return;
 
-  // Avoid duplicate grants from same source
-  const existing = (profile.cosmeticRewards || []) as any[];
-  const alreadyGranted = existing.some(
-    (r: any) => r.sourceId === sourceId && r.type === type && r.value === value,
-  );
-  if (alreadyGranted) return;
+    // Avoid duplicate grants from same source
+    const existing = (profile.cosmeticRewards || []) as any[];
+    const alreadyGranted = existing.some(
+      (r: any) =>
+        r.sourceId === sourceId && r.type === type && r.value === value,
+    );
+    if (alreadyGranted) return;
 
-  const updatedRewards = [...existing, newReward];
+    const updatedRewards = [...existing, newReward];
+    const expectedVersion = profile._version ?? 1;
 
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        cosmeticRewards: updatedRewards,
-        _version: profile._version ?? 1,
-      },
-    },
-  });
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            cosmeticRewards: updatedRewards,
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      return; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
 }
 
 // ============================================================================
@@ -3848,37 +4143,52 @@ async function grantChallengeBadge(
   challengeId: string,
   sectionID: string,
 ): Promise<void> {
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  if (!profile) return;
+  // Shares the `badges` field with handleCheckBadges/handleClaimStorybookBadges —
+  // re-read fresh and retry on conflict instead of merging against a stale array.
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    if (!profile) return;
 
-  const existingBadges = (profile.badges || []) as any[];
+    const existingBadges = (profile.badges || []) as any[];
 
-  // Check for duplicate — same badge from same challenge
-  const alreadyGranted = existingBadges.some(
-    (b: any) =>
-      b.badgeType === badgeType && b.sourceId === `challenge-${challengeId}`,
-  );
-  if (alreadyGranted) return;
+    // Check for duplicate — same badge from same challenge
+    const alreadyGranted = existingBadges.some(
+      (b: any) =>
+        b.badgeType === badgeType && b.sourceId === `challenge-${challengeId}`,
+    );
+    if (alreadyGranted) return;
 
-  const newBadge = {
-    badgeType,
-    sourceId: `challenge-${challengeId}`,
-    awardedAt: new Date().toISOString(),
-    sectionID,
-  };
+    const newBadge = {
+      badgeType,
+      sourceId: `challenge-${challengeId}`,
+      awardedAt: new Date().toISOString(),
+      sectionID,
+    };
 
-  const updatedBadges = [...existingBadges, newBadge];
+    const updatedBadges = [...existingBadges, newBadge];
+    const expectedVersion = profile._version ?? 1;
 
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        badges: updatedBadges,
-        _version: profile._version ?? 1,
-      },
-    },
-  });
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            badges: updatedBadges,
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      return; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
 }
 
 async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
@@ -3889,7 +4199,6 @@ async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
   const allMemories = (
     memResult?.listStudentMemoryByStudentId?.items || []
   ).filter((m: any) => m != null && m.unitID != null);
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
   const unitMemoriesForProfile = allMemories.map((m: any) => ({
     unitID: m.unitID,
     averageAccuracy: m.averageAccuracy || 0,
@@ -3897,16 +4206,34 @@ async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
     reviewPriority: m.reviewPriority || 0,
     lastPracticedAt: m.lastPracticedAt || "",
   }));
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        unitMemories: unitMemoriesForProfile,
-        _version: profile._version ?? 1,
-      },
-    },
-  });
+
+  // Full-overwrite of this field from source data — only needs a fresh _version
+  // on conflict, not a merge, since unitMemoriesForProfile doesn't depend on
+  // the profile's prior state.
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    const profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    const expectedVersion = profile._version ?? 1;
+    try {
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            unitMemories: unitMemoriesForProfile,
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
+      });
+      return; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
+    }
+  }
 }
 
 // ============================================================================
@@ -4357,59 +4684,84 @@ async function handleClaimStorybookBadges(
   }
 
   // Read existing badges from StudentProfile
-  const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const existingBadges: any[] = (() => {
+  let profile = await getOrCreateStudentProfile(gqlClient, studentId);
+
+  // Shares the `badges` field with handleCheckBadges/grantChallengeBadge —
+  // re-read fresh and recompute every attempt instead of merging against a stale array.
+  let existingBadges: any[] = [];
+  let newBadges: string[] = [];
+  let updatedBadges: string[] = [];
+
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+    if (attempt > 0) {
+      profile = await getOrCreateStudentProfile(gqlClient, studentId);
+    }
+
+    existingBadges = (() => {
+      try {
+        return JSON.parse(profile.badges || "[]");
+      } catch {
+        return [];
+      }
+    })();
+
+    // Simple rate check: if too many promo badges were updated in the last hour, reject
+    const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
+    const recentPromoClaims = existingBadges.filter(
+      (b: any) =>
+        PROMO_BADGE_TYPES.has(b.badgeType) && b.awardedAt > oneHourAgo,
+    );
+    if (recentPromoClaims.length >= MAX_CLAIMS_PER_HOUR) {
+      throw new Error("Too many badge claims — please try again later");
+    }
+
+    const existingByType = new Map(
+      existingBadges.map((b: any) => [b.badgeType, b]),
+    );
+
+    newBadges = [];
+    updatedBadges = [];
+
+    for (const badgeType of badgesToAward) {
+      const existing = existingByType.get(badgeType);
+
+      if (existing) {
+        // Already have this badge — skip (idempotent, no increment for promo badges)
+        updatedBadges.push(badgeType);
+      } else {
+        // Award new badge — add to profile badges array
+        existingBadges.push({
+          badgeType,
+          awardedAt: new Date().toISOString(),
+          count: 1,
+        });
+        newBadges.push(badgeType);
+      }
+    }
+
+    // Write updated badges to StudentProfile
+    const expectedVersion = profile._version ?? 1;
     try {
-      return JSON.parse(profile.badges || "[]");
-    } catch {
-      return [];
-    }
-  })();
-
-  // Simple rate check: if too many promo badges were updated in the last hour, reject
-  const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
-  const recentPromoClaims = existingBadges.filter(
-    (b: any) => PROMO_BADGE_TYPES.has(b.badgeType) && b.awardedAt > oneHourAgo,
-  );
-  if (recentPromoClaims.length >= MAX_CLAIMS_PER_HOUR) {
-    throw new Error("Too many badge claims — please try again later");
-  }
-
-  const existingByType = new Map(
-    existingBadges.map((b: any) => [b.badgeType, b]),
-  );
-
-  const newBadges: string[] = [];
-  const updatedBadges: string[] = [];
-
-  for (const badgeType of badgesToAward) {
-    const existing = existingByType.get(badgeType);
-
-    if (existing) {
-      // Already have this badge — skip (idempotent, no increment for promo badges)
-      updatedBadges.push(badgeType);
-    } else {
-      // Award new badge — add to profile badges array
-      existingBadges.push({
-        badgeType,
-        awardedAt: new Date().toISOString(),
-        count: 1,
+      await gqlClient.graphql({
+        query: UPDATE_STUDENT_PROFILE,
+        variables: {
+          input: {
+            id: profile.id,
+            badges: JSON.stringify(existingBadges),
+            _version: expectedVersion + 1,
+          },
+          condition: { _version: { eq: expectedVersion } },
+        },
       });
-      newBadges.push(badgeType);
+      break; // Success.
+    } catch (err) {
+      if (isConditionalCheckFailure(err) && attempt < MAX_RETRY_ATTEMPTS - 1) {
+        await sleep(backoffMs(attempt));
+        continue; // Re-read and retry with fresh data.
+      }
+      throw err;
     }
   }
-
-  // Write updated badges to StudentProfile
-  await gqlClient.graphql({
-    query: UPDATE_STUDENT_PROFILE,
-    variables: {
-      input: {
-        id: profile.id,
-        badges: JSON.stringify(existingBadges),
-        _version: profile._version ?? 1,
-      },
-    },
-  });
 
   return {
     newBadges,
@@ -4538,175 +4890,207 @@ async function handleApplyBattleStakes(
 
   const results: Array<{ studentId: string; consequences: string[] }> = [];
 
-  for (const profile of profiles) {
-    const consequences: string[] = [];
-    const updates: Record<string, any> = {
-      id: profile.id,
-      _version: profile._version ?? 1,
-    };
+  for (const baseProfile of profiles) {
+    const studentId = baseProfile.studentId;
+    let consequences: string[] = [];
 
-    // Lose a streak freeze
-    if (stakes.loseStreakFreeze) {
-      const freezesRemaining = profile.freezesRemaining || 0;
-      if (freezesRemaining > 0) {
-        updates.freezesRemaining = freezesRemaining - 1;
-        updates.freezesUsed = (profile.freezesUsed || 0) + 1;
-        consequences.push("Lost a streak freeze");
-      } else {
-        consequences.push("No streak freeze to lose (skipped)");
-      }
-    }
+    // Each student's penalty bundle is a read-modify-write against several
+    // fields at once — re-read fresh and recompute every attempt so a
+    // concurrent XP/badge/streak update for the same student isn't lost.
+    for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
+      const profile =
+        attempt === 0
+          ? baseProfile
+          : await getOrCreateStudentProfile(gqlClient, studentId);
 
-    // Lose XP points
-    if (stakes.loseXP && stakes.xpLossAmount > 0) {
-      const currentXP = profile.totalXP || 0;
-      const newXP = Math.max(0, currentXP - stakes.xpLossAmount);
-      updates.totalXP = newXP;
-      updates.level = calculateLevel(newXP);
-      consequences.push(`Lost ${currentXP - newXP} XP`);
-    }
-
-    // Missed streaks cost XP — penalize per day of missed streak
-    if (stakes.streakMissXPPenalty && stakes.streakMissXPPerDay > 0) {
-      const lastActivity = profile.lastActivityDate;
-      if (lastActivity) {
-        const lastDate = new Date(lastActivity);
-        const today = new Date();
-        const missedDays = Math.max(
-          0,
-          Math.floor(
-            (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
-          ) - 1,
-        );
-        if (missedDays > 0) {
-          const penalty = missedDays * stakes.streakMissXPPerDay;
-          const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
-          const newXP = Math.max(0, currentXP - penalty);
-          updates.totalXP = newXP;
-          updates.level = calculateLevel(newXP);
-          consequences.push(
-            `Lost ${currentXP - newXP} XP for ${missedDays} missed streak day(s)`,
-          );
-        } else {
-          consequences.push("No missed streak days (skipped)");
-        }
-      }
-    }
-
-    // Lose a level (independent of XP loss — forces level down by 1)
-    if (stakes.loseLevel) {
-      const currentLevel = updates.level ?? profile.level ?? 1;
-      if (currentLevel > 1) {
-        updates.level = currentLevel - 1;
-        // Also adjust XP to match the top of the new level (prevent immediate re-level)
-        const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
-        if (
-          currentXP >=
-          (LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0)
-        ) {
-          const nextLevelThreshold =
-            LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0;
-          updates.totalXP = Math.min(currentXP, nextLevelThreshold - 1);
-        }
-        consequences.push(`Dropped to level ${updates.level}`);
-      } else {
-        consequences.push("Already at level 1 (skipped)");
-      }
-    }
-
-    // Reset streak
-    if (stakes.resetStreak) {
-      updates.currentStreak = 0;
-      consequences.push("Streak reset to 0");
-    }
-
-    // Lose most recent badge
-    if (stakes.loseBadge) {
-      try {
-        const badges: any[] = JSON.parse(profile.badges || "[]");
-        if (badges.length > 0) {
-          badges.sort(
-            (a: any, b: any) =>
-              new Date(b.awardedAt).getTime() - new Date(a.awardedAt).getTime(),
-          );
-          const removed = badges.shift();
-          updates.badges = JSON.stringify(badges);
-          consequences.push(`Lost badge: ${removed.badgeType}`);
-        } else {
-          consequences.push("No badges to lose (skipped)");
-        }
-      } catch {
-        consequences.push("Failed to parse badges (skipped)");
-      }
-    }
-
-    // Lose a badge of a specific rarity
-    if (stakes.loseBadgeByRarity && stakes.badgeRarityTarget) {
-      try {
-        const badges: any[] = updates.badges
-          ? JSON.parse(updates.badges)
-          : JSON.parse(profile.badges || "[]");
-        const targetRarity = stakes.badgeRarityTarget;
-        // Find badges matching the target rarity
-        const matchingIdx = badges.findIndex(
-          (b: any) =>
-            (BADGE_RARITY_MAP[b.badgeType] || "common") === targetRarity,
-        );
-        if (matchingIdx >= 0) {
-          const removed = badges.splice(matchingIdx, 1)[0];
-          updates.badges = JSON.stringify(badges);
-          consequences.push(`Lost ${targetRarity} badge: ${removed.badgeType}`);
-        } else {
-          consequences.push(`No ${targetRarity} badge to lose (skipped)`);
-        }
-      } catch {
-        consequences.push(
-          "Failed to parse badges for rarity removal (skipped)",
-        );
-      }
-    }
-
-    // Scramble cosmetics — mess with name display, border, and flair (NOT avatar color)
-    if (stakes.loseCosmetics && stakes.cosmeticPenaltyDays > 0) {
-      const randomBorder =
-        SCRAMBLE_BORDERS[Math.floor(Math.random() * SCRAMBLE_BORDERS.length)];
-      const randomFlair =
-        SCRAMBLE_FLAIRS[Math.floor(Math.random() * SCRAMBLE_FLAIRS.length)];
-      const randomNameEffect =
-        SCRAMBLE_NAME_EFFECTS[
-          Math.floor(Math.random() * SCRAMBLE_NAME_EFFECTS.length)
-        ];
-      const penaltyExpiry = new Date();
-      penaltyExpiry.setDate(
-        penaltyExpiry.getDate() + stakes.cosmeticPenaltyDays,
-      );
-      const cosmeticPenalty = {
-        active: true,
-        expiresAt: penaltyExpiry.toISOString(),
-        reason: "boss_battle_failure",
-        challengeId,
-        // Scrambled settings (avatar color untouched)
-        border: randomBorder,
-        flair: randomFlair,
-        nameEffect: randomNameEffect,
+      consequences = [];
+      const updates: Record<string, any> = {
+        id: profile.id,
       };
-      updates.cosmeticPenalty = JSON.stringify(cosmeticPenalty);
-      consequences.push(
-        `Cosmetics scrambled — flair: "${randomFlair}", border: ${randomBorder}, name: ${randomNameEffect} for ${stakes.cosmeticPenaltyDays} day(s)`,
-      );
-    }
 
-    // Apply updates if there are any real changes
-    const hasUpdates = Object.keys(updates).length > 2; // more than just id + _version
-    if (hasUpdates) {
+      // Lose a streak freeze
+      if (stakes.loseStreakFreeze) {
+        const freezesRemaining = profile.freezesRemaining || 0;
+        if (freezesRemaining > 0) {
+          updates.freezesRemaining = freezesRemaining - 1;
+          updates.freezesUsed = (profile.freezesUsed || 0) + 1;
+          consequences.push("Lost a streak freeze");
+        } else {
+          consequences.push("No streak freeze to lose (skipped)");
+        }
+      }
+
+      // Lose XP points
+      if (stakes.loseXP && stakes.xpLossAmount > 0) {
+        const currentXP = profile.totalXP || 0;
+        const newXP = Math.max(0, currentXP - stakes.xpLossAmount);
+        updates.totalXP = newXP;
+        updates.level = calculateLevel(newXP);
+        consequences.push(`Lost ${currentXP - newXP} XP`);
+      }
+
+      // Missed streaks cost XP — penalize per day of missed streak
+      if (stakes.streakMissXPPenalty && stakes.streakMissXPPerDay > 0) {
+        const lastActivity = profile.lastActivityDate;
+        if (lastActivity) {
+          const lastDate = new Date(lastActivity);
+          const today = new Date();
+          const missedDays = Math.max(
+            0,
+            Math.floor(
+              (today.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
+            ) - 1,
+          );
+          if (missedDays > 0) {
+            const penalty = missedDays * stakes.streakMissXPPerDay;
+            const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
+            const newXP = Math.max(0, currentXP - penalty);
+            updates.totalXP = newXP;
+            updates.level = calculateLevel(newXP);
+            consequences.push(
+              `Lost ${currentXP - newXP} XP for ${missedDays} missed streak day(s)`,
+            );
+          } else {
+            consequences.push("No missed streak days (skipped)");
+          }
+        }
+      }
+
+      // Lose a level (independent of XP loss — forces level down by 1)
+      if (stakes.loseLevel) {
+        const currentLevel = updates.level ?? profile.level ?? 1;
+        if (currentLevel > 1) {
+          updates.level = currentLevel - 1;
+          // Also adjust XP to match the top of the new level (prevent immediate re-level)
+          const currentXP = updates.totalXP ?? profile.totalXP ?? 0;
+          if (
+            currentXP >=
+            (LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0)
+          ) {
+            const nextLevelThreshold =
+              LEVELS.find((l) => l.level === currentLevel)?.xpRequired ?? 0;
+            updates.totalXP = Math.min(currentXP, nextLevelThreshold - 1);
+          }
+          consequences.push(`Dropped to level ${updates.level}`);
+        } else {
+          consequences.push("Already at level 1 (skipped)");
+        }
+      }
+
+      // Reset streak
+      if (stakes.resetStreak) {
+        updates.currentStreak = 0;
+        consequences.push("Streak reset to 0");
+      }
+
+      // Lose most recent badge
+      if (stakes.loseBadge) {
+        try {
+          const badges: any[] = JSON.parse(profile.badges || "[]");
+          if (badges.length > 0) {
+            badges.sort(
+              (a: any, b: any) =>
+                new Date(b.awardedAt).getTime() -
+                new Date(a.awardedAt).getTime(),
+            );
+            const removed = badges.shift();
+            updates.badges = JSON.stringify(badges);
+            consequences.push(`Lost badge: ${removed.badgeType}`);
+          } else {
+            consequences.push("No badges to lose (skipped)");
+          }
+        } catch {
+          consequences.push("Failed to parse badges (skipped)");
+        }
+      }
+
+      // Lose a badge of a specific rarity
+      if (stakes.loseBadgeByRarity && stakes.badgeRarityTarget) {
+        try {
+          const badges: any[] = updates.badges
+            ? JSON.parse(updates.badges)
+            : JSON.parse(profile.badges || "[]");
+          const targetRarity = stakes.badgeRarityTarget;
+          // Find badges matching the target rarity
+          const matchingIdx = badges.findIndex(
+            (b: any) =>
+              (BADGE_RARITY_MAP[b.badgeType] || "common") === targetRarity,
+          );
+          if (matchingIdx >= 0) {
+            const removed = badges.splice(matchingIdx, 1)[0];
+            updates.badges = JSON.stringify(badges);
+            consequences.push(
+              `Lost ${targetRarity} badge: ${removed.badgeType}`,
+            );
+          } else {
+            consequences.push(`No ${targetRarity} badge to lose (skipped)`);
+          }
+        } catch {
+          consequences.push(
+            "Failed to parse badges for rarity removal (skipped)",
+          );
+        }
+      }
+
+      // Scramble cosmetics — mess with name display, border, and flair (NOT avatar color)
+      if (stakes.loseCosmetics && stakes.cosmeticPenaltyDays > 0) {
+        const randomBorder =
+          SCRAMBLE_BORDERS[Math.floor(Math.random() * SCRAMBLE_BORDERS.length)];
+        const randomFlair =
+          SCRAMBLE_FLAIRS[Math.floor(Math.random() * SCRAMBLE_FLAIRS.length)];
+        const randomNameEffect =
+          SCRAMBLE_NAME_EFFECTS[
+            Math.floor(Math.random() * SCRAMBLE_NAME_EFFECTS.length)
+          ];
+        const penaltyExpiry = new Date();
+        penaltyExpiry.setDate(
+          penaltyExpiry.getDate() + stakes.cosmeticPenaltyDays,
+        );
+        const cosmeticPenalty = {
+          active: true,
+          expiresAt: penaltyExpiry.toISOString(),
+          reason: "boss_battle_failure",
+          challengeId,
+          // Scrambled settings (avatar color untouched)
+          border: randomBorder,
+          flair: randomFlair,
+          nameEffect: randomNameEffect,
+        };
+        updates.cosmeticPenalty = JSON.stringify(cosmeticPenalty);
+        consequences.push(
+          `Cosmetics scrambled — flair: "${randomFlair}", border: ${randomBorder}, name: ${randomNameEffect} for ${stakes.cosmeticPenaltyDays} day(s)`,
+        );
+      }
+
+      // Apply updates if there are any real changes
+      const hasUpdates = Object.keys(updates).length > 1; // more than just id
+      if (!hasUpdates) break; // Nothing to write for this student.
+
       updates.lastUpdated = new Date().toISOString();
-      await gqlClient.graphql({
-        query: UPDATE_STUDENT_PROFILE,
-        variables: { input: updates },
-      });
+      const expectedVersion = profile._version ?? 1;
+      updates._version = expectedVersion + 1;
+      try {
+        await gqlClient.graphql({
+          query: UPDATE_STUDENT_PROFILE,
+          variables: {
+            input: updates,
+            condition: { _version: { eq: expectedVersion } },
+          },
+        });
+        break; // Success.
+      } catch (err) {
+        if (
+          isConditionalCheckFailure(err) &&
+          attempt < MAX_RETRY_ATTEMPTS - 1
+        ) {
+          await sleep(backoffMs(attempt));
+          continue; // Re-read and retry with fresh data.
+        }
+        throw err;
+      }
     }
 
-    results.push({ studentId: profile.studentId, consequences });
+    results.push({ studentId, consequences });
   }
 
   // Mark the challenge as inactive (battle resolved)

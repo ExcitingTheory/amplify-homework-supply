@@ -11,6 +11,7 @@
 import React from "react";
 import Box from "@mui/material/Box";
 import Badge from "@mui/material/Badge";
+import Chip from "@mui/material/Chip";
 import Tooltip from "@mui/material/Tooltip";
 import AcUnitIcon from "@mui/icons-material/AcUnit";
 import { useTheme } from "@mui/material/styles";
@@ -19,7 +20,6 @@ import {
   getTinctures,
   getMetals,
   metalForTier,
-  readableInk,
   medallionBadgeSx,
 } from "@/themes/heraldry";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
@@ -33,6 +33,8 @@ export interface StreakShieldProps {
   size?: "small" | "medium";
   /** When true, renders a zero-state indicator instead of returning null when there are no freezes. */
   showEmpty?: boolean;
+  /** Renders a flat outlined Chip pill instead of the heraldic Medallion — for compact app-bar rows. */
+  pill?: boolean;
 }
 
 export function StreakShield({
@@ -40,6 +42,7 @@ export function StreakShield({
   freezesUsed = 0,
   size = "medium",
   showEmpty = false,
+  pill = false,
 }: StreakShieldProps) {
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
@@ -48,6 +51,22 @@ export function StreakShield({
   const isSmall = size === "small";
   const px = isSmall ? 30 : 42;
   const active = freezesRemaining > 0;
+  const ariaLabel = `${freezesRemaining} streak shields remaining`;
+  const tooltipText = `Streak Shields protect your streak if you miss a day. You have ${freezesRemaining} remaining. Earn 1 shield every 7-day streak.`;
+
+  if (pill) {
+    return (
+      <Tooltip title={tooltipText} arrow>
+        <Chip
+          size={isSmall ? "small" : "medium"}
+          variant="outlined"
+          icon={<AcUnitIcon fontSize="small" />}
+          label={freezesRemaining}
+          aria-label={ariaLabel}
+        />
+      </Tooltip>
+    );
+  }
 
   // Active shields read as azure with a progression rim; depleted reads sable/bronze.
   const tinctures = getTinctures(theme);
@@ -55,8 +74,7 @@ export function StreakShield({
   const metal = active
     ? metalForTier(freezesRemaining * 2500, theme)
     : getMetals(theme).bronze;
-  const textColor = readableInk(field.main);
-  const ariaLabel = `${freezesRemaining} streak shields remaining`;
+  const textColor = theme.palette.getContrastText(field.main);
 
   const charge = (
     <AcUnitIcon
@@ -69,10 +87,7 @@ export function StreakShield({
   );
 
   return (
-    <Tooltip
-      title={`Streak Shields protect your streak if you miss a day. You have ${freezesRemaining} remaining. Earn 1 shield every 7-day streak.`}
-      arrow
-    >
+    <Tooltip title={tooltipText} arrow>
       <Box sx={{ display: "inline-flex", cursor: "help" }}>
         <Badge
           aria-label={ariaLabel}

@@ -11,6 +11,10 @@
   "blocks": {
     "meaning_association": "Asociación de Significados"
   },
+  "customAIEditor": {
+    "title": "Ejercicio calificado por IA",
+    "description": "Crea un ejercicio calificado por IA en el que los estudiantes responden preguntas y la IA evalúa las respuestas según tus criterios de calificación personalizados."
+  },
   "customAnswerEditor": {
     "add": "Agregar",
     "addWordLabel": "Agregar palabra al ejercicio",

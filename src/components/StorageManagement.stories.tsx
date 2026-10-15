@@ -41,8 +41,10 @@ export const Default: Story = {
 export const EmptyState: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
-    // Component should render its card structure even without data
-    const cards = canvasElement.querySelectorAll('[class*="MuiCard"]');
-    expect(cards.length).toBeGreaterThan(0);
+    // Component should render its accordion structure even without data
+    const accordions = canvasElement.querySelectorAll(
+      '[class*="MuiAccordion-root"]',
+    );
+    expect(accordions.length).toBeGreaterThan(0);
   },
 };

@@ -7,7 +7,6 @@ import {
   pickTinctures,
   pickDivision,
   metalForTier,
-  readableInk,
 } from "../heraldry";
 
 const lightTheme = createTheme({ palette: { mode: "light" } });
@@ -98,22 +97,5 @@ describe("metalForTier", () => {
   it("clamps negatives and non-finite values to bronze", () => {
     expect(metalForTier(-500, lightTheme).name).toBe("bronze");
     expect(metalForTier(Number.NaN, lightTheme).name).toBe("bronze");
-  });
-});
-
-describe("readableInk", () => {
-  it("returns light ink over dark fields", () => {
-    expect(readableInk("#111417")).toBe("#f5f5f5");
-    expect(readableInk(getTinctures(lightTheme).sable.main)).toBe("#f5f5f5");
-  });
-
-  it("returns dark ink over light fields", () => {
-    expect(readableInk("#f2f5f8")).toBe("#1a1a1a");
-    expect(readableInk(getTinctures(lightTheme).argent.main)).toBe("#1a1a1a");
-  });
-
-  it("handles shorthand hex", () => {
-    expect(readableInk("#fff")).toBe("#1a1a1a");
-    expect(readableInk("#000")).toBe("#f5f5f5");
   });
 });

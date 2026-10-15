@@ -22,10 +22,10 @@ export const editorDataGridSx = (theme) => ({
     bgcolor: alpha(theme.palette.text.primary, 0.045),
   },
   "& .MuiDataGrid-row:not(.Mui-selected):hover": {
-    bgcolor: alpha(
-      theme.palette.text.primary,
-      theme.palette.mode === "dark" ? 0.18 : 0.11,
-    ),
+    bgcolor: alpha(theme.palette.text.primary, 0.11),
+    ...theme.applyStyles("dark", {
+      bgcolor: alpha(theme.palette.text.primary, 0.18),
+    }),
   },
   "& .MuiDataGrid-row[data-id='__empty__'] .MuiDataGrid-cell": {
     visibility: "hidden",

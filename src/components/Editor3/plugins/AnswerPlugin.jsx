@@ -15,8 +15,10 @@ import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode } from "lexical";
 import * as React from "react";
 import { useEffect } from "react";
 
-import AnswerEditor from "../components/AnswerEditor";
 import AnswerComponent from "../components/AnswerComponent";
+
+// Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
+const AnswerEditor = React.lazy(() => import("../components/AnswerEditor"));
 
 /**
  * Converts a DOM element with answer attributes into an AnswerNode.
@@ -246,15 +248,17 @@ export class AnswerNode extends DecoratorNode {
     return (
       <>
         {isEditable && (
-          <AnswerEditor
-            className={className}
-            format={this.__format}
-            nodeKey={this.getKey()}
-            wordIDs={this.__ids}
-            requestDefinition={this.__requestDefinition}
-            allowedInput={this.__allowedInput}
-            promptMethod={this.__promptMethod}
-          />
+          <React.Suspense fallback={null}>
+            <AnswerEditor
+              className={className}
+              format={this.__format}
+              nodeKey={this.getKey()}
+              wordIDs={this.__ids}
+              requestDefinition={this.__requestDefinition}
+              allowedInput={this.__allowedInput}
+              promptMethod={this.__promptMethod}
+            />
+          </React.Suspense>
         )}
 
         {!isEditable && (

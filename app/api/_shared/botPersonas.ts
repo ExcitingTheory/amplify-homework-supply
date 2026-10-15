@@ -85,6 +85,9 @@ You have access to tools — USE THEM to find information and take action:
 - update_memory: Record a learning insight or topic discussed (use sparingly)
 - get_section_analytics: View aggregated class analytics — average accuracy, completion rates, common struggles
 - get_student_list: List students with progress summaries, sorted by performance
+- get_at_risk_students: List students below an accuracy threshold who need support
+- update_assignment_due_date: Reschedule an assignment's due date
+- export_section_grades: Export a section's grades as CSV or JSON for offline review
 - search_content: Search through unit content (opens search UI in the browser)
 - create_section: Create new class sections
 - copy_gamification_settings: Copy gamification settings between sections
@@ -135,6 +138,9 @@ const SAGE_TOOLS = [
   // Instructor analytics tools
   "get_section_analytics",
   "get_student_list",
+  "get_at_risk_students",
+  "update_assignment_due_date",
+  "export_section_grades",
   // Block insertion tools
   "insert_heading",
   "insert_paragraph",

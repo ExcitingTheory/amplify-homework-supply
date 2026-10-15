@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SchoolIcon from "@mui/icons-material/School";
+import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import HourglassTopIcon from "@mui/icons-material/HourglassTop";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
@@ -274,6 +275,22 @@ export function SectionPanel({
                   : ""}
               </Typography>
             )}
+            {activeChapterTitle && (
+              <Typography
+                variant="caption"
+                color="primary.main"
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.5,
+                  mt: 0.25,
+                  fontWeight: 600,
+                }}
+              >
+                <AutoStoriesIcon sx={{ fontSize: 14 }} />
+                {activeChapterTitle}
+              </Typography>
+            )}
           </Box>
         </Box>
 
@@ -292,6 +309,14 @@ export function SectionPanel({
             useFlexGap
             sx={{ justifyContent: { xs: "center", sm: "flex-end" } }}
           >
+            {sectionLevel?.level != null && (
+              <Chip
+                label={`Level ${sectionLevel.level}`}
+                size="small"
+                variant="outlined"
+                sx={{ fontWeight: 700 }}
+              />
+            )}
             {pending.length > 0 && (
               <Chip
                 label={`${pending.length} pending`}

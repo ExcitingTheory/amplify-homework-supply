@@ -5,7 +5,7 @@ import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useTheme } from "@mui/material/styles";
 import LazyCardMedia from "./LazyCardMedia";
-import { pickTinctures, readableInk } from "@/themes/heraldry";
+import { pickTinctures } from "@/themes/heraldry";
 import { getGrainySheenSx } from "@/utils/grainySheen";
 
 export interface CardMediaThumbnailProps {
@@ -87,7 +87,7 @@ export default function CardMediaThumbnail({
       ) : title ? (
         (() => {
           const { field, charge } = pickTinctures(title, theme);
-          const ink = readableInk(field.main);
+          const ink = theme.palette.getContrastText(field.main);
           return (
             <Box
               role="img"

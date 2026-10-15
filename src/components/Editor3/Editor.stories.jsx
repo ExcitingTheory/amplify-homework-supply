@@ -6,6 +6,8 @@ import {
   waitForElementToBeRemoved,
   expect,
 } from "storybook/test";
+import AppBar from "@mui/material/AppBar";
+import Box from "@mui/material/Box";
 import Editor, { Workbook } from "./index";
 import CodeActionMenuPlugin from "./plugins/CodeActionMenuPlugin";
 import {
@@ -36,8 +38,28 @@ const MOCK_UNIT_ID = "story-unit-id";
  * so ToolBarPlugin can render its toolbar via createPortal.
  */
 function AppShellDecorator({ children }) {
+  const appBarRef = React.useRef(null);
   const toolbarPortalRef = React.useRef(null);
   const toolbarChildrenPortalRef = React.useRef(null);
+  const [appBarHeight, setAppBarHeight] = React.useState(48);
+
+  // Mirrors AppShell's own ResizeObserver: ToolBarPlugin portals the
+  // title/description editor + formatting row in here, which is taller than
+  // the 48px default, so the content offset below must track its real
+  // height instead of a static guess.
+  React.useEffect(() => {
+    if (!appBarRef.current) return;
+    const observer = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height =
+          entry.borderBoxSize?.[0]?.blockSize ?? entry.contentRect.height;
+        if (height > 0) setAppBarHeight(height);
+      }
+    });
+    observer.observe(appBarRef.current);
+    return () => observer.disconnect();
+  }, []);
+
   const contextValue = React.useMemo(
     () => ({
       drawerOpen: false,
@@ -46,11 +68,11 @@ function AppShellDecorator({ children }) {
       drawerWidth: 280,
       toolbarContent: null,
       setToolbarContent: () => {},
-      appBarHeight: 48,
+      appBarHeight,
       toolbarPortalRef,
       toolbarChildrenPortalRef,
     }),
-    [],
+    [appBarHeight],
   );
   return (
     <AppShellContext.Provider value={contextValue}>
@@ -58,18 +80,20 @@ function AppShellDecorator({ children }) {
           removed from document flow, since Editor3 sizes its own content as
           `calc(100vh - appBarHeight)` assuming the toolbar occupies no flow
           space. `sticky` would double-count the toolbar's height and force
-          an extra scrollbar on the outer .storybook-wrapper. */}
-      <div
-        ref={toolbarPortalRef}
-        style={{
-          position: "fixed",
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1100,
-        }}
-      />
-      {children}
+          an extra scrollbar on the outer .storybook-wrapper. The `Box`
+          below reserves that same height via `marginTop` — exactly like
+          AppShell's own main-content wrapper — otherwise the portaled
+          toolbar (title/description editor + formatting row) renders on
+          top of the editor's content instead of above it. */}
+      <AppBar
+        ref={appBarRef}
+        position="fixed"
+        color="default"
+        sx={{ zIndex: 1100 }}
+      >
+        <Box ref={toolbarPortalRef} />
+      </AppBar>
+      <Box sx={{ marginTop: `${appBarHeight}px` }}>{children}</Box>
     </AppShellContext.Provider>
   );
 }
