@@ -7,6 +7,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Chip from "@mui/material/Chip";
@@ -28,6 +29,7 @@ import { getLevelColors } from "./LevelBadge";
 import type { AvatarStyleTier, AvatarOverrides } from "./DiceBearAvatar";
 import type { GlowRingConfig } from "./AvatarGlowRing";
 import type { LevelInfo } from "../../utils/xpCalculation";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 // ============================================================================
 // Level icon config (colors come from LevelBadge's shared getLevelColors)
@@ -67,6 +69,8 @@ export interface AvatarBadge {
 }
 
 export interface AvatarDisplayProps {
+  /** Explicit identity for profile navigation; omit for previews and action controls. */
+  profileUsername?: string | null;
   /** Seed for DiceBear avatar generation */
   seed: string;
   /** DiceBear style tier */
@@ -217,6 +221,7 @@ function getEffectGlowConfig(
 // ============================================================================
 
 export function AvatarDisplay({
+  profileUsername,
   seed,
   style = "simple",
   size = 64,
@@ -237,6 +242,7 @@ export function AvatarDisplay({
   guildName,
   guildId,
 }: AvatarDisplayProps) {
+  const t = useTranslations("components");
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
   const ringColor = outline ? theme.palette.primary.main : undefined;
@@ -260,12 +266,14 @@ export function AvatarDisplay({
   const hasGuildBadge = Boolean(guildCrestSvg || guildName);
   const guildBadgeSize = Math.max(18, Math.round(size * 0.3));
   const guildBgColor = hashToColor(guildId || guildName || seed);
-  const guildInitials = getInitials(guildName || "Guild");
+  const guildInitials = getInitials(
+    guildName || t("avatarDisplay.guildFallbackName"),
+  );
 
   // Total width including border effect space
   const containerSize = size + 16;
 
-  return (
+  const content = (
     <Box
       sx={{
         display: "inline-flex",
@@ -294,7 +302,11 @@ export function AvatarDisplay({
       {/* Guild crest — 8 o'clock position */}
       {hasGuildBadge && (
         <Tooltip
-          title={guildName ? `Guild: ${guildName}` : "Guild crest"}
+          title={
+            guildName
+              ? t("avatarDisplay.guildTooltip", { guildName })
+              : t("avatarDisplay.guildCrest")
+          }
           arrow
         >
           <Box
@@ -346,7 +358,13 @@ export function AvatarDisplay({
 
       {/* Level indicator — 2 o'clock position */}
       {level && (
-        <Tooltip title={`Lv. ${level.level} · ${level.label}`} arrow>
+        <Tooltip
+          title={t("avatarDisplay.levelTooltip", {
+            level: level.level,
+            label: level.label,
+          })}
+          arrow
+        >
           <Box
             sx={{
               position: "absolute",
@@ -427,7 +445,7 @@ export function AvatarDisplay({
         <Chip
           label={
             <Box sx={{ display: "flex", alignItems: "center", gap: "3px" }}>
-              <span role="img" aria-label="badge">
+              <span role="img" aria-label={t("avatarDisplay.badgeLabel")}>
                 {badge.emoji}
               </span>
               <span>{badge.label}</span>
@@ -448,6 +466,12 @@ export function AvatarDisplay({
       )}
     </Box>
   );
+
+  return profileUsername ? (
+    <ProfileAvatarLink username={profileUsername} displayName={label}>
+      {content}
+    </ProfileAvatarLink>
+  ) : content;
 }
 
 export default AvatarDisplay;

@@ -37,18 +37,22 @@ export function useVerifyContext() {
 
   const studentMemory = useStudentMemory(session?.username);
 
+  const unitId = unit?.id;
+  const unitName = unit?.name;
+  const unitDescription = unit?.description;
+
   const contentContext = useMemo(() => {
     const docArray = documents
       ? Object.values(documents).filter(Boolean)
       : [];
     const base = buildContentContext({
-      unit,
+      unit: { id: unitId, name: unitName, description: unitDescription },
       files,
       documents: docArray,
     });
     const history = buildExerciseHistory(grade?.data);
     return history ? `${base}\n\n${history}` : base;
-  }, [unit?.id, files, documents, grade?.data]);
+  }, [unitId, unitName, unitDescription, files, documents, grade?.data]);
 
   return { studentMemory, contentContext };
 }

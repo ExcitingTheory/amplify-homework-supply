@@ -6,6 +6,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -24,13 +25,17 @@ export interface GroupChallengeCardProps {
   bonusMultiplier?: number;
 }
 
-function formatTimeRemaining(deadline: string): string {
+function formatTimeRemaining(
+  deadline: string,
+  t: ReturnType<typeof useTranslations>,
+): string {
   const diff = new Date(deadline).getTime() - Date.now();
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return t("groupChallengeCard.expired");
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ${hours % 24}h left`;
-  return `${hours}h left`;
+  if (days > 0)
+    return t("groupChallengeCard.daysHoursLeft", { days, hours: hours % 24 });
+  return t("groupChallengeCard.hoursLeft", { hours });
 }
 
 export function GroupChallengeCard({
@@ -41,6 +46,7 @@ export function GroupChallengeCard({
   active,
   bonusMultiplier = 1.5,
 }: GroupChallengeCardProps) {
+  const t = useTranslations("components");
   const progress =
     targetXP > 0 ? Math.min(100, Math.round((currentXP / targetXP) * 100)) : 0;
   const goalReached = currentXP >= targetXP;
@@ -71,7 +77,9 @@ export function GroupChallengeCard({
           </Box>
           {bonusMultiplier > 1 && (
             <Chip
-              label={`${bonusMultiplier}× bonus`}
+              label={t("groupChallengeCard.bonusMultiplier", {
+                bonusMultiplier,
+              })}
               size="small"
               variant="status"
               color="warning"
@@ -85,7 +93,10 @@ export function GroupChallengeCard({
             sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}
           >
             <Typography variant="body2" color="text.secondary">
-              {currentXP.toLocaleString()} / {targetXP.toLocaleString()} XP
+              {t("groupChallengeCard.xpProgress", {
+                currentXP: currentXP.toLocaleString(),
+                targetXP: targetXP.toLocaleString(),
+              })}
             </Typography>
             <Typography variant="body2" fontWeight={600}>
               {progress}%
@@ -104,13 +115,13 @@ export function GroupChallengeCard({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <TimerIcon sx={{ fontSize: 16, color: "text.secondary" }} />
               <Typography variant="caption" color="text.secondary">
-                {formatTimeRemaining(deadline)}
+                {formatTimeRemaining(deadline, t)}
               </Typography>
             </Box>
           )}
           {goalReached && (
             <Chip
-              label="Goal Reached!"
+              label={t("groupChallengeCard.goalReached")}
               size="small"
               variant="status"
               color="success"
@@ -119,7 +130,7 @@ export function GroupChallengeCard({
           )}
           {!active && !goalReached && (
             <Chip
-              label="Ended"
+              label={t("groupChallengeCard.ended")}
               size="small"
               sx={{ height: 20, fontSize: "0.7rem" }}
             />

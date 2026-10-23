@@ -27,16 +27,16 @@ describe('LogViewer', () => {
 
   it('shows empty state when no logs', () => {
     render(<LogViewer logs={[]} onClear={vi.fn()} />);
-    expect(screen.getByText('No logs captured yet')).toBeInTheDocument();
+    expect(screen.getByText('logViewer.noLogs')).toBeInTheDocument();
   });
 
   it('filters logs by level', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
 
-    const levelSelect = screen.getByLabelText('Level');
+    const levelSelect = screen.getByLabelText('logViewer.level');
     fireEvent.mouseDown(levelSelect);
 
-    const errorOption = screen.getByText(/Error \(1\)/);
+    const errorOption = screen.getByText('logViewer.levelError');
     fireEvent.click(errorOption);
 
     expect(screen.getByText('Error message')).toBeInTheDocument();
@@ -46,7 +46,7 @@ describe('LogViewer', () => {
   it('searches logs by text', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
 
-    const searchInput = screen.getByPlaceholderText('Search logs...');
+    const searchInput = screen.getByPlaceholderText('logViewer.searchPlaceholder');
     fireEvent.change(searchInput, { target: { value: 'Error' } });
 
     expect(screen.getByText('Error message')).toBeInTheDocument();
@@ -56,24 +56,24 @@ describe('LogViewer', () => {
   it('displays log counts by level', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
 
-    const levelSelect = screen.getByLabelText('Level');
+    const levelSelect = screen.getByLabelText('logViewer.level');
     fireEvent.mouseDown(levelSelect);
 
-    expect(screen.getByText(/Error \(1\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Warn \(1\)/)).toBeInTheDocument();
-    expect(screen.getByText(/Info \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText('logViewer.levelError')).toBeInTheDocument();
+    expect(screen.getByText('logViewer.levelWarn')).toBeInTheDocument();
+    expect(screen.getByText('logViewer.levelInfo')).toBeInTheDocument();
   });
 
   it('shows total count badge', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
-    expect(screen.getByText(/4 \/ 4 shown/)).toBeInTheDocument();
+    expect(screen.getByText('logViewer.shownCount')).toBeInTheDocument();
   });
 
   it('calls onClear when clear button clicked', () => {
     const onClear = vi.fn();
     render(<LogViewer logs={mockLogs} onClear={onClear} />);
 
-    const clearButton = screen.getByLabelText('Clear all logs');
+    const clearButton = screen.getByLabelText('logViewer.clearAll');
     fireEvent.click(clearButton);
 
     expect(onClear).toHaveBeenCalled();
@@ -116,13 +116,13 @@ describe('LogViewer', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
 
     // Filter by level
-    const levelSelect = screen.getByLabelText('Level');
+    const levelSelect = screen.getByLabelText('logViewer.level');
     fireEvent.mouseDown(levelSelect);
-    const infoOption = screen.getByText(/Info \(1\)/);
+    const infoOption = screen.getByText('logViewer.levelInfo');
     fireEvent.click(infoOption);
 
     // Search within filtered results
-    const searchInput = screen.getByPlaceholderText('Search logs...');
+    const searchInput = screen.getByPlaceholderText('logViewer.searchPlaceholder');
     fireEvent.change(searchInput, { target: { value: 'Info' } });
 
     expect(screen.getByText('Info message')).toBeInTheDocument();
@@ -133,9 +133,9 @@ describe('LogViewer', () => {
   it('shows "no logs match filters" when filtered to empty', () => {
     render(<LogViewer logs={mockLogs} onClear={vi.fn()} />);
 
-    const searchInput = screen.getByPlaceholderText('Search logs...');
+    const searchInput = screen.getByPlaceholderText('logViewer.searchPlaceholder');
     fireEvent.change(searchInput, { target: { value: 'nonexistent' } });
 
-    expect(screen.getByText('No logs match filters')).toBeInTheDocument();
+    expect(screen.getByText('logViewer.noMatches')).toBeInTheDocument();
   });
 });

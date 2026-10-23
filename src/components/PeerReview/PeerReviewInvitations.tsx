@@ -8,6 +8,7 @@
  */
 
 import React, { useEffect, useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -41,10 +42,10 @@ const statusColors: Record<string, 'success' | 'warning' | 'default'> = {
   REVIEW_COMPLETE: 'default',
 }
 
-const statusLabels: Record<string, string> = {
-  OPEN: 'Open',
-  IN_REVIEW: 'In Progress',
-  REVIEW_COMPLETE: 'Completed',
+const statusLabelKeys: Record<string, string> = {
+  OPEN: 'open',
+  IN_REVIEW: 'inProgress',
+  REVIEW_COMPLETE: 'completed',
 }
 
 export function PeerReviewInvitations({
@@ -52,6 +53,7 @@ export function PeerReviewInvitations({
   onJoinReview,
   loading = false,
 }: PeerReviewInvitationsProps) {
+  const t = useTranslations('components')
   const activeInvitations = invitations.filter(
     (inv) => inv.status !== 'REVIEW_COMPLETE'
   )
@@ -65,7 +67,7 @@ export function PeerReviewInvitations({
       <CardContent>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
           <RateReviewIcon color="primary" />
-          <Typography variant="h6">Peer Review Invitations</Typography>
+          <Typography variant="h6">{t('peerReviewInvitations.title')}</Typography>
           {activeInvitations.length > 0 && (
             <Chip
               label={activeInvitations.length}
@@ -78,14 +80,20 @@ export function PeerReviewInvitations({
           {activeInvitations.map((invitation) => (
             <ListItem key={invitation.id} divider sx={{ gap: 1 }}>
               <ListItemText
-                primary={invitation.unitName || 'Homework'}
-                secondary={`From: ${invitation.ownerDisplayName || invitation.ownerId}`}
+                primary={invitation.unitName || t('peerReviewInvitations.homeworkFallback')}
+                secondary={t('peerReviewInvitations.from', {
+                  name: invitation.ownerDisplayName || invitation.ownerId,
+                })}
                 sx={{ flex: 1, minWidth: 0 }}
                 primaryTypographyProps={{ noWrap: true }}
               />
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, flexShrink: 0 }}>
                 <Chip
-                  label={statusLabels[invitation.status] || invitation.status}
+                  label={
+                    statusLabelKeys[invitation.status]
+                      ? t(`peerReviewInvitations.status.${statusLabelKeys[invitation.status]}`)
+                      : invitation.status
+                  }
                   size="small"
                   color={statusColors[invitation.status] || 'default'}
                   variant="outlined"
@@ -96,7 +104,7 @@ export function PeerReviewInvitations({
                   onClick={() => onJoinReview(invitation.id)}
                   disabled={invitation.status === 'REVIEW_COMPLETE'}
                 >
-                  Join Review
+                  {t('peerReviewInvitations.joinReview')}
                 </Button>
               </Box>
             </ListItem>

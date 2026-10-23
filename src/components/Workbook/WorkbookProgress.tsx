@@ -7,6 +7,7 @@
 import React from "react";
 import { Box, LinearProgress, Typography, Paper } from "@mui/material";
 import { CheckCircle, TrendingUp } from "@mui/icons-material";
+import { useTranslations } from "next-intl";
 import UnitContext from "../../context/unitContext";
 
 export interface WorkbookProgressProps {
@@ -27,6 +28,7 @@ export function WorkbookProgress({
   detailed = false,
   variant = "default",
 }: WorkbookProgressProps) {
+  const t = useTranslations("components");
   const { workbookStats, workbookEnabled, workbook } =
     React.useContext(UnitContext);
 
@@ -53,7 +55,10 @@ export function WorkbookProgress({
           }}
         />
         <Typography variant="caption" color="text.secondary">
-          {completeBlocks}/{totalBlocks} complete
+          {t("workbookProgress.compactComplete", {
+            complete: completeBlocks,
+            total: totalBlocks,
+          })}
         </Typography>
       </Box>
     );
@@ -63,13 +68,13 @@ export function WorkbookProgress({
     return (
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
-          Progress
+          {t("workbookProgress.title")}
         </Typography>
 
         <Box mb={2}>
           <Box display="flex" justifyContent="space-between" mb={0.5}>
             <Typography variant="caption" color="text.secondary">
-              Completion
+              {t("workbookProgress.completion")}
             </Typography>
             <Typography variant="caption" fontWeight="medium">
               {Math.round(completion)}%
@@ -85,7 +90,7 @@ export function WorkbookProgress({
         <Box>
           <Box display="flex" justifyContent="space-between" mb={0.5}>
             <Typography variant="caption" color="text.secondary">
-              Accuracy
+              {t("workbookProgress.accuracy")}
             </Typography>
             <Typography variant="caption" fontWeight="medium">
               {Math.round(accuracy)}%
@@ -108,7 +113,10 @@ export function WorkbookProgress({
           alignItems="center"
         >
           <Typography variant="caption" color="text.secondary">
-            {completeBlocks} of {totalBlocks} questions
+            {t("workbookProgress.questionsComplete", {
+              complete: completeBlocks,
+              total: totalBlocks,
+            })}
           </Typography>
 
           {completion === 100 && (
@@ -119,7 +127,7 @@ export function WorkbookProgress({
                 color="success.main"
                 fontWeight="medium"
               >
-                Complete!
+                {t("workbookProgress.allComplete")}
               </Typography>
             </Box>
           )}
@@ -133,7 +141,10 @@ export function WorkbookProgress({
     <Box>
       <Box display="flex" justifyContent="space-between" mb={1}>
         <Typography variant="body2" fontWeight="medium">
-          Progress: {completeBlocks}/{totalBlocks}
+          {t("workbookProgress.progressFraction", {
+            complete: completeBlocks,
+            total: totalBlocks,
+          })}
         </Typography>
         <Typography variant="body2" color="text.secondary">
           {Math.round(completion)}%
@@ -150,7 +161,9 @@ export function WorkbookProgress({
         <Box display="flex" alignItems="center" gap={0.5} mt={1}>
           <TrendingUp sx={{ fontSize: 16, color: "text.secondary" }} />
           <Typography variant="caption" color="text.secondary">
-            Accuracy: {Math.round(accuracy)}%
+            {t("workbookProgress.accuracyPercent", {
+              percent: Math.round(accuracy),
+            })}
           </Typography>
         </Box>
       )}

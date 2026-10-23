@@ -7,6 +7,12 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import '@testing-library/jest-dom';
 import { DebugPanel } from '../DebugPanel';
 
+// Keep interpolated counts observable: render "key(value,...)" when values are passed.
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}(${Object.values(values).join(',')})` : key,
+}));
+
 // Mock Material-UI components for testing
 vi.mock('@mui/material', async () => {
   const actual = await vi.importActual('@mui/material');
@@ -33,7 +39,7 @@ describe('DebugPanel', () => {
 
   it('renders when open', () => {
     render(<DebugPanel open={true} onClose={() => {}} />);
-    expect(screen.getByText('Debug Panel')).toBeInTheDocument();
+    expect(screen.getByText('debugPanel.title')).toBeInTheDocument();
   });
 
   it('does not render when closed', () => {
@@ -45,10 +51,10 @@ describe('DebugPanel', () => {
   it('shows all tabs', () => {
     render(<DebugPanel open={true} onClose={() => {}} />);
     
-    expect(screen.getByText('Components')).toBeInTheDocument();
-    expect(screen.getByText(/Logs/)).toBeInTheDocument();
-    expect(screen.getByText('State')).toBeInTheDocument();
-    expect(screen.getByText('Performance')).toBeInTheDocument();
+    expect(screen.getByText('debugPanel.tabs.components')).toBeInTheDocument();
+    expect(screen.getByText(/debugPanel\.tabs\.logs/)).toBeInTheDocument();
+    expect(screen.getByText('debugPanel.tabs.state')).toBeInTheDocument();
+    expect(screen.getByText('debugPanel.tabs.performance')).toBeInTheDocument();
   });
 
   it('calls onClose when close button clicked', () => {
@@ -64,12 +70,12 @@ describe('DebugPanel', () => {
   it('switches tabs when clicked', async () => {
     render(<DebugPanel open={true} onClose={() => {}} />);
     
-    const logsTab = screen.getByText(/Logs/);
+    const logsTab = screen.getByText(/debugPanel\.tabs\.logs/);
     fireEvent.click(logsTab);
     
     await waitFor(() => {
       // LogViewer should be rendered
-      expect(screen.getByPlaceholderText('Search logs...')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('logViewer.searchPlaceholder')).toBeInTheDocument();
     });
   });
 
@@ -88,7 +94,7 @@ describe('DebugPanel', () => {
     
     render(<DebugPanel open={true} onClose={() => {}} />);
     
-    expect(screen.getByText(/Logs \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText('debugPanel.tabs.logs(1)')).toBeInTheDocument();
   });
 
   it('respects position prop', () => {
@@ -152,7 +158,7 @@ describe('DebugPanel', () => {
     render(<DebugPanel open={true} onClose={() => {}} />);
     
     // Switch to logs tab
-    const logsTab = screen.getByText(/Logs/);
+    const logsTab = screen.getByText(/debugPanel\.tabs\.logs/);
     fireEvent.click(logsTab);
     
     await waitFor(() => {

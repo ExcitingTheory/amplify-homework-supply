@@ -44,7 +44,12 @@ export interface AgentPermissionsConfig {
     terminalCommands: {
       allowed: Record<
         string,
-        { commands: string[]; blocked?: string[]; description?: string }
+        {
+          commands: string[];
+          requiresConfirmation?: string[];
+          blocked?: string[];
+          description?: string;
+        }
       >;
       blocked: Record<string, string[]>;
     };

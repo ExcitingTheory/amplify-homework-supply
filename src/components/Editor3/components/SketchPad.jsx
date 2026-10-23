@@ -8,6 +8,8 @@ import { useColorScheme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import ExerciseResponsePanel from "./ExerciseResponsePanel";
 
+const FREEDRAW_TOOL = "freedraw";
+
 let excalidrawModulePromise;
 const loadExcalidraw = () => {
   if (!excalidrawModulePromise) {
@@ -266,11 +268,6 @@ const SketchPad = ({
     }
   }, [excalidrawAPI]);
 
-  // set excalidrawData to the initial data passed in
-  useEffect(() => {
-    setExcalidrawData(excalidrawData);
-  }, []);
-
   // render canvas when not hovering, excalidraw when hovering
   if (!isHovering) {
     return (
@@ -314,7 +311,7 @@ const SketchPad = ({
           {imageData ? (
             <img
               src={`data:image/png;base64,${imageData}`}
-              alt="sketch"
+              alt={t("sketchPad.sketchAlt")}
               style={{ maxWidth: "100%", maxHeight: "100%" }}
             />
           ) : (
@@ -383,7 +380,7 @@ const SketchPad = ({
                 appState: {
                   ...excalidrawData?.appState,
                   activeTool: {
-                    type: "freedraw",
+                    type: FREEDRAW_TOOL,
                     locked: false,
                   },
                 },

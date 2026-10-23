@@ -502,6 +502,14 @@ const config: StorybookConfig = {
       ),
     };
 
+    // Keep navigation/routing subpaths real while mocking translation hooks.
+    config.resolve.alias = Object.entries(config.resolve.alias).map(
+      ([find, replacement]) => ({
+        find: find === "next-intl" ? /^next-intl$/ : find,
+        replacement,
+      }),
+    );
+
     // Deduplicate React to prevent multiple instances
     if (!config.resolve) {
       config.resolve = {};

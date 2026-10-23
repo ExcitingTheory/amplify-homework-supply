@@ -24,6 +24,7 @@ import Alert from '@mui/material/Alert'
 import SendIcon from '@mui/icons-material/Send'
 import GroupsIcon from '@mui/icons-material/Groups'
 import PreviewIcon from '@mui/icons-material/Preview'
+import { useTranslations } from 'next-intl'
 import { SquadMentionPill } from './SquadMentionPill'
 
 // ============================================================================
@@ -84,11 +85,12 @@ function resolveTemplate(
   template: string,
   squad: SquadInfo,
   rival: SquadInfo | undefined,
+  rivalFallback: string,
 ): string {
   let result = template
   result = result.replace(/\{\{SQUAD_NAME\}\}/g, squad.name)
   result = result.replace(/\{\{SQUAD_XP\}\}/g, squad.totalXP.toLocaleString())
-  result = result.replace(/\{\{SQUAD_RIVAL\}\}/g, rival?.name || 'a worthy opponent')
+  result = result.replace(/\{\{SQUAD_RIVAL\}\}/g, rival?.name || rivalFallback)
   return result
 }
 
@@ -96,28 +98,12 @@ function resolveTemplate(
 // Preset templates
 // ============================================================================
 
-const PRESET_TEMPLATES = [
-  {
-    label: 'Rivalry Taunt',
-    template:
-      '⚔️ {{SQUAD_NAME}}, your rival {{SQUAD_RIVAL}} is gaining on you! Show them what you\'re made of.',
-  },
-  {
-    label: 'Progress Update',
-    template:
-      '📊 {{SQUAD_NAME}} currently sits at {{SQUAD_XP}} XP. Keep pushing — every contribution counts!',
-  },
-  {
-    label: 'Boss Battle Rally',
-    template:
-      '🐉 {{SQUAD_NAME}}, the boss still stands! Rally your squad and bring it down before {{SQUAD_RIVAL}} claims the glory.',
-  },
-  {
-    label: 'Victory Congratulations',
-    template:
-      '🏆 Well done, {{SQUAD_NAME}}! You outperformed {{SQUAD_RIVAL}} and proved your dominance.',
-  },
-]
+/** Template variable tokens, passed into translated messages as ICU arguments */
+const TEMPLATE_TOKENS = {
+  squadName: '{{SQUAD_NAME}}',
+  squadRival: '{{SQUAD_RIVAL}}',
+  squadXp: '{{SQUAD_XP}}',
+}
 
 // ============================================================================
 // Component
@@ -128,7 +114,33 @@ export function SquadMessagePanel({
   onSend,
   submitting = false,
 }: SquadMessagePanelProps) {
+  const t = useTranslations('components')
   const [template, setTemplate] = useState('')
+  const presetTemplates = useMemo(
+    () => [
+      {
+        id: 'rivalryTaunt',
+        label: t('squadMessagePanel.presetRivalryTauntLabel'),
+        template: t('squadMessagePanel.presetRivalryTauntTemplate', TEMPLATE_TOKENS),
+      },
+      {
+        id: 'progressUpdate',
+        label: t('squadMessagePanel.presetProgressUpdateLabel'),
+        template: t('squadMessagePanel.presetProgressUpdateTemplate', TEMPLATE_TOKENS),
+      },
+      {
+        id: 'bossBattleRally',
+        label: t('squadMessagePanel.presetBossBattleRallyLabel'),
+        template: t('squadMessagePanel.presetBossBattleRallyTemplate', TEMPLATE_TOKENS),
+      },
+      {
+        id: 'victoryCongratulations',
+        label: t('squadMessagePanel.presetVictoryCongratulationsLabel'),
+        template: t('squadMessagePanel.presetVictoryCongratulationsTemplate', TEMPLATE_TOKENS),
+      },
+    ],
+    [t],
+  )
   const [selectedSquadIds, setSelectedSquadIds] = useState<Set<string>>(new Set())
   const [showPreview, setShowPreview] = useState(false)
 
@@ -164,12 +176,17 @@ export function SquadMessagePanel({
         return {
           squadId: squad.id,
           squadName: squad.name,
-          body: resolveTemplate(template, squad, rival),
+          body: resolveTemplate(
+            template,
+            squad,
+            rival,
+            t('squadMessagePanel.rivalFallback'),
+          ),
           rivalSquadId: rival?.id,
           rivalSquadName: rival?.name,
         }
       })
-  }, [template, selectedSquadIds, squads])
+  }, [template, selectedSquadIds, squads, t])
 
   const canSend = template.trim().length > 0 && !noneSelected
 
@@ -191,18 +208,18 @@ export function SquadMessagePanel({
         <Stack spacing={2}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <GroupsIcon color="primary" />
-            <Typography variant="h6">Squad Message</Typography>
+            <Typography variant="h6">{t('squadMessagePanel.title')}</Typography>
           </Stack>
 
           {/* Preset templates */}
           <Box>
             <Typography variant="caption" color="text.secondary" gutterBottom>
-              Presets:
+              {t('squadMessagePanel.presets')}
             </Typography>
             <Stack direction="row" flexWrap="wrap" gap={0.5} mt={0.5}>
-              {PRESET_TEMPLATES.map((preset) => (
+              {presetTemplates.map((preset) => (
                 <Chip
-                  key={preset.label}
+                  key={preset.id}
                   label={preset.label}
                   size="small"
                   variant={template === preset.template ? 'filled' : 'outlined'}
@@ -215,23 +232,23 @@ export function SquadMessagePanel({
 
           {/* Template input */}
           <TextField
-            label="Message Template"
+            label={t('squadMessagePanel.messageTemplate')}
             value={template}
             onChange={(e) => setTemplate(e.target.value)}
             multiline
             rows={3}
             fullWidth
-            placeholder="e.g., ⚔️ {{SQUAD_NAME}}, your rival {{SQUAD_RIVAL}} is gaining on you!"
-            helperText="Variables: {{SQUAD_NAME}}, {{SQUAD_RIVAL}} (closest XP), {{SQUAD_XP}}"
+            placeholder={t('squadMessagePanel.templatePlaceholder', TEMPLATE_TOKENS)}
+            helperText={t('squadMessagePanel.templateHelper', TEMPLATE_TOKENS)}
             disabled={submitting}
           />
 
           {/* Variable chips for easy insertion */}
           <Stack direction="row" spacing={0.5}>
             <Typography variant="caption" color="text.secondary" sx={{ alignSelf: 'center' }}>
-              Insert:
+              {t('squadMessagePanel.insert')}
             </Typography>
-            {['{{SQUAD_NAME}}', '{{SQUAD_RIVAL}}', '{{SQUAD_XP}}'].map((v) => (
+            {[TEMPLATE_TOKENS.squadName, TEMPLATE_TOKENS.squadRival, TEMPLATE_TOKENS.squadXp].map((v) => (
               <Chip
                 key={v}
                 label={v}
@@ -249,7 +266,10 @@ export function SquadMessagePanel({
           <Box>
             <Stack direction="row" justifyContent="space-between" alignItems="center" mb={1}>
               <Typography variant="subtitle2">
-                Recipients ({selectedSquadIds.size} of {squads.length})
+                {t('squadMessagePanel.recipients', {
+                  selected: selectedSquadIds.size,
+                  total: squads.length,
+                })}
               </Typography>
               <FormControlLabel
                 control={
@@ -260,7 +280,7 @@ export function SquadMessagePanel({
                     size="small"
                   />
                 }
-                label="All"
+                label={t('squadMessagePanel.all')}
               />
             </Stack>
             <Stack direction="row" flexWrap="wrap" gap={0.5}>
@@ -304,7 +324,7 @@ export function SquadMessagePanel({
             onClick={() => setShowPreview(!showPreview)}
             disabled={!canSend}
           >
-            {showPreview ? 'Hide Preview' : 'Preview Messages'}
+            {showPreview ? t('squadMessagePanel.hidePreview') : t('squadMessagePanel.previewMessages')}
           </Button>
 
           {showPreview && resolvedMessages.length > 0 && (
@@ -312,8 +332,12 @@ export function SquadMessagePanel({
               {resolvedMessages.map((msg) => (
                 <Alert key={msg.squadId} severity="info" icon={false} sx={{ py: 0.5 }}>
                   <Typography variant="caption" color="text.secondary" fontWeight={600}>
-                    → {msg.squadName}
-                    {msg.rivalSquadName && ` (rival: ${msg.rivalSquadName})`}
+                    {msg.rivalSquadName
+                      ? t('squadMessagePanel.previewRecipientWithRival', {
+                          squadName: msg.squadName,
+                          rivalName: msg.rivalSquadName,
+                        })
+                      : t('squadMessagePanel.previewRecipient', { squadName: msg.squadName })}
                   </Typography>
                   <Typography variant="body2">{msg.body}</Typography>
                 </Alert>
@@ -328,7 +352,9 @@ export function SquadMessagePanel({
             onClick={handleSend}
             disabled={!canSend || submitting}
           >
-            {submitting ? 'Sending...' : `Send to ${selectedSquadIds.size} Squad${selectedSquadIds.size !== 1 ? 's' : ''}`}
+            {submitting
+              ? t('squadMessagePanel.sending')
+              : t('squadMessagePanel.sendToSquads', { count: selectedSquadIds.size })}
           </Button>
         </Stack>
       </CardContent>

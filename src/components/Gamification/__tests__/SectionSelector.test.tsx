@@ -18,7 +18,7 @@ describe('SectionSelector', () => {
         onSectionChange={onSectionChange}
       />
     )
-    expect(screen.getByLabelText(/Section/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('sectionSelector.label')).toBeInTheDocument()
   })
 
   it('shows placeholder when no section selected', () => {
@@ -30,7 +30,7 @@ describe('SectionSelector', () => {
         onSectionChange={onSectionChange}
       />
     )
-    expect(screen.getByPlaceholderText(/Select a section/i)).toBeInTheDocument()
+    expect(screen.getByPlaceholderText('sectionSelector.placeholder')).toBeInTheDocument()
   })
 
   it('shows hint text when no section selected and sections available', () => {
@@ -42,7 +42,7 @@ describe('SectionSelector', () => {
         onSectionChange={onSectionChange}
       />
     )
-    expect(screen.getByText(/Select a section to scope/i)).toBeInTheDocument()
+    expect(screen.getByText('sectionSelector.helper')).toBeInTheDocument()
   })
 
   it('does not show hint when a section is selected', () => {
@@ -54,7 +54,7 @@ describe('SectionSelector', () => {
         onSectionChange={onSectionChange}
       />
     )
-    expect(screen.queryByText(/Select a section to scope/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('sectionSelector.helper')).not.toBeInTheDocument()
   })
 
   it('displays selected section name in the input', () => {
@@ -112,7 +112,7 @@ describe('SectionSelector', () => {
     expect(onSectionChange).toHaveBeenCalledWith(null)
   })
 
-  it('shows "No sections available" when sections array is empty', async () => {
+  it('shows the no-sections message when sections array is empty', async () => {
     const user = userEvent.setup()
     const onSectionChange = vi.fn()
     render(
@@ -125,7 +125,7 @@ describe('SectionSelector', () => {
     const input = screen.getByRole('combobox')
     await user.click(input)
 
-    expect(await screen.findByText('No sections available')).toBeInTheDocument()
+    expect(await screen.findByText('sectionSelector.noOptions')).toBeInTheDocument()
   })
 
   it('does not show hint text when sections is empty', () => {
@@ -137,7 +137,7 @@ describe('SectionSelector', () => {
         onSectionChange={onSectionChange}
       />
     )
-    expect(screen.queryByText(/Select a section to scope/i)).not.toBeInTheDocument()
+    expect(screen.queryByText('sectionSelector.helper')).not.toBeInTheDocument()
   })
 
   it('disables input when disabled prop is true', () => {
@@ -167,8 +167,7 @@ describe('SectionSelector', () => {
     const input = screen.getByRole('combobox')
     await user.click(input)
 
-    expect(await screen.findByText('25 students')).toBeInTheDocument()
-    expect(await screen.findByText('30 students')).toBeInTheDocument()
+    expect(await screen.findAllByText('sectionSelector.studentCount')).toHaveLength(3)
   })
 
   it('shows description in options when provided', async () => {

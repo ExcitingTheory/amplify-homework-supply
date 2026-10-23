@@ -3,6 +3,12 @@
  */
 import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+// pdfjs falls back to loading ./pdf.worker.mjs from disk, which isn't present in
+// the bundled Lambda. Registering the worker module keeps it in the bundle.
+// @ts-expect-error pdfjs ships no declarations for the worker entry point
+import * as pdfjsWorker from "pdfjs-dist/legacy/build/pdf.worker.mjs";
+
+(globalThis as { pdfjsWorker?: unknown }).pdfjsWorker = pdfjsWorker;
 
 export async function getS3Object(s3Key: string): Promise<Buffer> {
   const s3Client = new S3Client();
@@ -23,6 +29,49 @@ export async function getS3Object(s3Key: string): Promise<Buffer> {
   }
 
   return Buffer.concat(chunks);
+}
+
+export interface PdfTextItem {
+  str?: string;
+  hasEOL?: boolean;
+  height?: number;
+  transform?: number[];
+}
+
+/**
+ * Joins pdfjs text items in content-stream order, starting a new line when the
+ * baseline moves by more than half a text height or pdfjs reports an
+ * end-of-line. Preserving line structure lets labelled lines ("Path: 11") be
+ * recognised; stream order keeps each card's text together.
+ */
+export function joinPdfTextItems(items: PdfTextItem[]): string {
+  let text = "";
+  let lastBaseline: number | undefined;
+  let pendingBreak = false;
+
+  for (const item of items) {
+    const baseline = item.transform?.[5];
+    if (
+      baseline !== undefined &&
+      lastBaseline !== undefined &&
+      Math.abs(baseline - lastBaseline) > Math.max(2, (item.height ?? 8) * 0.5)
+    ) {
+      pendingBreak = true;
+    }
+    if (typeof item.str === "string" && item.str.length > 0) {
+      if (text) text += pendingBreak ? "\n" : " ";
+      text += item.str;
+      pendingBreak = false;
+      if (baseline !== undefined) lastBaseline = baseline;
+    }
+    if (item.hasEOL) pendingBreak = true;
+  }
+
+  return text
+    .split("\n")
+    .map((line) => line.replace(/\s+/g, " ").trim())
+    .filter(Boolean)
+    .join("\n");
 }
 
 /**
@@ -73,12 +122,10 @@ export async function extractPdfText(s3Key: string): Promise<{
             const page = await pdfDocument.getPage(num);
             const textContent = await page.getTextContent();
 
-            // Combine text items with proper spacing
-            const pageText = textContent.items
-              .map((item: any) => item.str)
-              .join(" ")
-              .replace(/\s+/g, " ")
-              .trim();
+            // Combine text items, keeping line structure
+            const pageText = joinPdfTextItems(
+              textContent.items as PdfTextItem[],
+            );
 
             page.cleanup();
 

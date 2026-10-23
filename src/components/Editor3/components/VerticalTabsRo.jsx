@@ -14,6 +14,9 @@ import GradeHistory from "./GradeHistory";
 import WorkbookSettings from "./WorkbookSettings";
 import TableOfContents from "./TableOfContents";
 
+const OVERFLOW_AUTO = "auto";
+const OVERFLOW_HIDDEN = "hidden";
+
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;
 
@@ -218,18 +221,18 @@ export default function VerticalTabsRo({
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
       </Tabs>
-      <TabPanel value={value} index={0} overflowY="auto">
+      <TabPanel value={value} index={0} overflowY={OVERFLOW_AUTO}>
         <TableOfContents />
       </TabPanel>
-      <TabPanel value={value} index={1} overflowY="auto">
+      <TabPanel value={value} index={1} overflowY={OVERFLOW_AUTO}>
         <GradeHistory />
       </TabPanel>
-      <TabPanel value={value} index={2} overflowY="hidden">
+      <TabPanel value={value} index={2} overflowY={OVERFLOW_HIDDEN}>
         <Box sx={{ height: "100%", display: "flex", flexDirection: "column" }}>
           <ChatSidebar />
         </Box>
       </TabPanel>
-      <TabPanel value={value} index={3} overflowY="auto">
+      <TabPanel value={value} index={3} overflowY={OVERFLOW_AUTO}>
         <WorkbookSettings />
       </TabPanel>
       {/* <TabPanel value={value} index={3} overflowY='hidden'>

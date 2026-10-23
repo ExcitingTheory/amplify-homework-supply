@@ -53,6 +53,56 @@ import { createHmac } from "node:crypto";
 import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import type { Schema } from "../data/resource";
+import { assertSourcePdfSha256 } from "../../scripts/thoth/verifySourcePdf";
+import { buildThothUnits } from "../../scripts/thoth/buildUnitContent";
+import { resolveThothSeedMode } from "../../scripts/thoth/resolveSeedMode";
+import { findFirstFilteredRecord } from "../../scripts/thoth/findFirstFilteredRecord";
+import {
+  scoreExtraction,
+  type ExtractionReport,
+  type ThothGroundTruth,
+} from "../../test/integration/thoth/scoreExtraction";
+import { buildCallResponseScript } from "../../src/utils/callResponse/buildCallResponseScript";
+
+const seedDir = dirname(fileURLToPath(import.meta.url));
+const mocksDir = resolve(seedDir, "../../test/mocks");
+const thothPdfName = "Thoth-Correspondence-Deck.pdf";
+const thothPdfBuffer = await readFile(resolve(mocksDir, thothPdfName));
+const thothGroundTruth = JSON.parse(
+  await readFile(
+    resolve(seedDir, "../../test/fixtures/thoth/thoth-ground-truth.json"),
+    "utf8",
+  ),
+) as ThothGroundTruth;
+const expectedThothPdfSha256: unknown = thothGroundTruth.source?.sha256;
+
+if (typeof expectedThothPdfSha256 !== "string") {
+  throw new Error("Thoth ground-truth fixture is missing source.sha256");
+}
+
+assertSourcePdfSha256(thothPdfBuffer, expectedThothPdfSha256);
+console.log(`✓ ${thothPdfName} SHA-256 matches ground truth`);
+
+const thothSnapshotPath = resolve(
+  seedDir,
+  "../../test/fixtures/thoth/parsed-content.snapshot.json",
+);
+const thothSnapshotText = await readFile(thothSnapshotPath, "utf8").catch(
+  (error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return null;
+    throw error;
+  },
+);
+const thothSeedMode = resolveThothSeedMode(
+  process.env.SEED_THOTH_MODE,
+  thothSnapshotText !== null,
+);
+if (thothSeedMode === "snapshot" && thothSnapshotText === null) {
+  throw new Error(
+    `SEED_THOTH_MODE=snapshot requires ${thothSnapshotPath}; run a live seed once to create it`,
+  );
+}
+console.log(`Thoth seed mode: ${thothSeedMode}`);
 
 // Load amplify_outputs.json from the workspace
 const url = new URL("../../amplify_outputs.json", import.meta.url);
@@ -1441,10 +1491,6 @@ console.log(
   "  (EventBridge will auto-trigger imageProcess, documentThumbnail, and documentAnalysis)",
 );
 
-// Path to the mocks directory containing sample files
-const seedDir = dirname(fileURLToPath(import.meta.url));
-const mocksDir = resolve(seedDir, "../../test/mocks");
-
 /**
  * Helper: Create a File record and upload the actual file to S3.
  * The S3 upload triggers EventBridge rules which invoke the processing Lambdas.
@@ -1488,7 +1534,10 @@ async function seedFileWithUpload(opts: {
 
     // Upload actual file to S3 (triggers EventBridge → processing Lambdas)
     try {
-      const fileBuffer = await readFile(resolve(mocksDir, localPath));
+      const fileBuffer =
+        localPath === thothPdfName
+          ? thothPdfBuffer
+          : await readFile(resolve(mocksDir, localPath));
       await uploadData({
         path: s3Path,
         data: fileBuffer,
@@ -2075,6 +2124,557 @@ if (documents.length > 0 && documents[0]) {
   console.log("✅ Created parsed content with vocabulary and questions");
 } else {
   console.log("⚠️ Skipping parsed content creation (no documents created)");
+}
+
+// ========================================================================
+// SECTION: Global PlatformSettings (created before Thoth analysis)
+// ========================================================================
+// Document analysis reads its provider limits from PlatformSettings. Creating
+// the singleton first keeps the live Thoth run from being throttled to the
+// 5 requests/minute defaults. Override for your OpenAI tier if needed.
+const analysisLimit = (name: string, fallback: number): number => {
+  const value = Number(process.env[name] ?? fallback);
+  if (!Number.isInteger(value) || value <= 0) {
+    throw new Error(`${name} must be a positive integer`);
+  }
+  return value;
+};
+
+console.log("\n🔐 Signing in as admin to create global PlatformSettings...");
+await signOut();
+await signInUser({
+  username: TEST_USERS.admin.username,
+  password: passwordFor(TEST_USERS.admin.username),
+  signInFlow: "Password",
+});
+
+const gsResponse = await client.models.PlatformSettings.create({
+  xpMultipliers: JSON.stringify({
+    HOMEWORK_SUBMITTED: 1.0,
+    ALL_BLOCKS_COMPLETED: 1.5,
+    NAILED_IT: 2.0,
+    STREAK_BONUS: 1.0,
+    PRACTICE_SESSION: 1.0,
+  }),
+  dailyCap: 500,
+  weeklyCap: 2000,
+  levelThresholds: [
+    { level: 1, xpRequired: 0, title: "Beginner" },
+    { level: 2, xpRequired: 150, title: "Explorer" },
+    { level: 3, xpRequired: 400, title: "Apprentice" },
+    { level: 4, xpRequired: 800, title: "Scholar" },
+    { level: 5, xpRequired: 1500, title: "Expert" },
+    { level: 6, xpRequired: 3000, title: "Master" },
+    { level: 7, xpRequired: 5000, title: "Grandmaster" },
+  ],
+  badgesEnabled: true,
+  antiBadgesEnabled: false,
+  streakFreezesAllowed: 2,
+  leaderboardEnabled: true,
+  leaderboardAnonymous: false,
+  avatarUnlockConfig: JSON.stringify({
+    unlocks: [
+      { minLevel: 1, tier: "thumbs" },
+      { minLevel: 2, tier: "initials" },
+      { minLevel: 3, tier: "lorelei" },
+      { minLevel: 4, tier: "notionists" },
+      { minLevel: 5, tier: "openPeeps" },
+      { minLevel: 6, tier: "adventurer" },
+      { minLevel: 7, tier: "personas" },
+    ],
+    glowOnLevelUp: true,
+  }),
+  autoAnalyzeDocuments: true,
+  documentAnalysisModel: "gpt-4o",
+  documentAnalysisOpenAiRequestsPerMinute: analysisLimit(
+    "SEED_ANALYSIS_OPENAI_RPM",
+    100,
+  ),
+  documentAnalysisOpenAiTokensPerMinute: analysisLimit(
+    "SEED_ANALYSIS_OPENAI_TPM",
+    200_000,
+  ),
+  documentAnalysisOpenAiMaxConcurrentRequests: analysisLimit(
+    "SEED_ANALYSIS_OPENAI_CONCURRENCY",
+    3,
+  ),
+  // Bot personas
+  kaiEnabled: true,
+  sageEnabled: true,
+});
+
+if (!gsResponse.data) {
+  console.error(
+    "  ✗ PlatformSettings creation failed:",
+    JSON.stringify(gsResponse.errors, null, 2),
+  );
+} else {
+  console.log(`✅ Created global PlatformSettings (id: ${gsResponse.data.id})`);
+}
+
+console.log("  Signing back in as instructor1...");
+await signOut();
+await signInUser({
+  username: TEST_USERS.instructor1.username,
+  password: passwordFor(TEST_USERS.instructor1.username),
+  signInFlow: "Password",
+});
+
+// ========================================================================
+// SECTION 11b: Thoth correspondence deck
+// ========================================================================
+
+type ThothParsedContentSnapshot = Pick<
+  Parameters<typeof client.models.ParsedContent.create>[0],
+  | "vocabularyJSON"
+  | "summariesJSON"
+  | "objectivesJSON"
+  | "conceptsJSON"
+  | "questionsJSON"
+  | "pendingMediaJSON"
+>;
+
+type ThothSeedFixture = {
+  fileId: string;
+  documentId: string;
+  parsedContentId: string;
+  sectionId: string;
+  units: Record<string, string>;
+  wordIdsByTerm: Record<string, string>;
+  questionIdsByCardField: Record<string, string>;
+  callResponse: { audioManifest: string };
+  extractionReport: string;
+};
+
+let thothSeedFixture: ThothSeedFixture | null = null;
+
+if (thothSeedMode !== "off") {
+  console.log("\n🃏 Seeding Thoth correspondence deck...");
+  const thothPath = `protected/${instructor1IdentityId}/files/thoth-correspondence-deck.pdf`;
+  const thothFileResponse = await client.models.File.create({
+    name: thothPdfName,
+    description: "Thoth correspondence deck source PDF",
+    mimeType: "application/pdf",
+    level: "PROTECTED",
+    path: thothPath,
+    size: thothPdfBuffer.length,
+    owner: instructor1OwnerSub,
+    identityId: instructor1IdentityId,
+    settings: JSON.stringify({
+      analysisProfile: "exhaustive",
+      skipAutoAnalysis: thothSeedMode === "snapshot",
+    }),
+  });
+  const thothFile = unwrap([thothFileResponse], "Thoth File")[0];
+
+  let thothDocumentID: string;
+  let thothParsedContentID: string;
+  let parsedSnapshot: ThothParsedContentSnapshot;
+  const analysisTimeoutMinutes = Number(
+    process.env.THOTH_ANALYSIS_TIMEOUT_MINUTES ?? 15,
+  );
+  if (!Number.isFinite(analysisTimeoutMinutes) || analysisTimeoutMinutes <= 0) {
+    throw new Error("THOTH_ANALYSIS_TIMEOUT_MINUTES must be a positive number");
+  }
+  const deadline = Date.now() + analysisTimeoutMinutes * 60 * 1000;
+
+  if (thothSeedMode === "snapshot") {
+    if (thothSnapshotText === null) {
+      throw new Error("Thoth snapshot mode selected without a snapshot file");
+    }
+    const snapshotFile = JSON.parse(thothSnapshotText) as
+      ThothParsedContentSnapshot & { sourceSha256?: unknown };
+    if (snapshotFile.sourceSha256 !== expectedThothPdfSha256) {
+      throw new Error(
+        "Thoth parsed-content snapshot source hash does not match the PDF",
+      );
+    }
+    const snapshot: ThothParsedContentSnapshot = {
+      vocabularyJSON: snapshotFile.vocabularyJSON,
+      summariesJSON: snapshotFile.summariesJSON,
+      objectivesJSON: snapshotFile.objectivesJSON,
+      conceptsJSON: snapshotFile.conceptsJSON,
+      questionsJSON: snapshotFile.questionsJSON,
+      pendingMediaJSON: snapshotFile.pendingMediaJSON,
+    };
+
+    const documentResponse = await client.models.Document.create({
+      filename: thothPdfName,
+      s3Key: thothPath,
+      status: "completed",
+      fileSize: thothPdfBuffer.length,
+      mimeType: "application/pdf",
+      sourceFormat: "pdf",
+      identityId: instructor1IdentityId,
+      owner: instructor1OwnerSub,
+    });
+    const thothDocument = unwrap(
+      [documentResponse],
+      "Thoth Document",
+    )[0];
+    thothDocumentID = thothDocument.id;
+
+    const linkedFileResponse = await client.models.File.update({
+      id: thothFile.id,
+      documentID: thothDocument.id,
+      _version: thothFile._version,
+    });
+    unwrap([linkedFileResponse], "Thoth File link");
+
+    await uploadData({
+      path: thothPath,
+      data: thothPdfBuffer,
+      options: { contentType: "application/pdf" },
+    }).result;
+
+    parsedSnapshot = snapshot;
+    const parsedResponse = await client.models.ParsedContent.create({
+      documentID: thothDocument.id,
+      fileID: thothFile.id,
+      ...parsedSnapshot,
+    });
+    const parsedRecord = unwrap(
+      [parsedResponse],
+      "Thoth ParsedContent",
+    )[0];
+    thothParsedContentID = parsedRecord.id;
+  } else {
+    await uploadData({
+      path: thothPath,
+      data: thothPdfBuffer,
+      options: { contentType: "application/pdf" },
+    }).result;
+
+    let completedDocumentID: string | null = null;
+    let completedParsedContentID: string | null = null;
+    let completedParsedSnapshot: ThothParsedContentSnapshot | null = null;
+    let lastAnalysisProgress: unknown = null;
+    let lastLoggedProgress = "";
+    while (Date.now() < deadline) {
+      const document = await findFirstFilteredRecord(
+        (nextToken) => client.models.Document.list({
+          filter: { s3Key: { eq: thothPath } },
+          limit: 5,
+          nextToken,
+        }),
+        "Thoth Document",
+      );
+      if (document) {
+        const metadata =
+          typeof document.metadata === "string"
+            ? JSON.parse(document.metadata || "{}")
+            : document.metadata ?? {};
+        lastAnalysisProgress =
+          metadata.analysis ?? document.resumeState ?? null;
+        const progressText = JSON.stringify(lastAnalysisProgress);
+        if (progressText !== lastLoggedProgress) {
+          console.log("[Thoth] Document analysis progress:", lastAnalysisProgress);
+          lastLoggedProgress = progressText;
+        }
+      }
+      if (
+        document?.status === "failed" ||
+        document?.status === "error" ||
+        document?.status === "cancelled"
+      ) {
+        throw new Error(
+          `Thoth document analysis ended with status ${document.status}`,
+        );
+      }
+      if (document?.status === "completed") {
+        const parsed = await findFirstFilteredRecord(
+          (nextToken) => client.models.ParsedContent.list({
+            filter: { documentID: { eq: document.id } },
+            limit: 5,
+            nextToken,
+          }),
+          "Thoth ParsedContent",
+        );
+        if (parsed) {
+          completedDocumentID = document.id;
+          completedParsedContentID = parsed.id;
+          completedParsedSnapshot = {
+            vocabularyJSON: parsed.vocabularyJSON,
+            summariesJSON: parsed.summariesJSON,
+            objectivesJSON: parsed.objectivesJSON,
+            conceptsJSON: parsed.conceptsJSON,
+            questionsJSON: parsed.questionsJSON,
+            pendingMediaJSON: parsed.pendingMediaJSON,
+          };
+          break;
+        }
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5000));
+    }
+
+    if (
+      !completedDocumentID ||
+      !completedParsedContentID ||
+      !completedParsedSnapshot
+    ) {
+      throw new Error(
+        `Timed out waiting for Thoth analysis; last progress: ${JSON.stringify(lastAnalysisProgress)}`,
+      );
+    }
+    thothDocumentID = completedDocumentID;
+    thothParsedContentID = completedParsedContentID;
+    parsedSnapshot = completedParsedSnapshot;
+    await writeFile(
+      thothSnapshotPath,
+      JSON.stringify(
+        { sourceSha256: expectedThothPdfSha256, ...parsedSnapshot },
+        null,
+        2,
+      ),
+    );
+  }
+
+  const extractionReport: ExtractionReport = scoreExtraction(thothGroundTruth, {
+    questions: (parsedSnapshot.questionsJSON ?? [])
+      .filter((question) => question != null)
+      .map((question) => ({
+        prompt: question.prompt ?? question.question ?? undefined,
+        answer: question.answer ?? question.expectedAnswer ?? undefined,
+        subject: question.subject ?? undefined,
+        field: question.field ?? undefined,
+        sourceText: question.sourceText ?? undefined,
+        page: question.page,
+      })),
+    words: (parsedSnapshot.vocabularyJSON ?? [])
+      .filter((word) => word != null)
+      .map((word) => ({
+        word: word.word,
+        definition: word.definition ?? undefined,
+        page: word.page,
+      })),
+  });
+  const extractionReportPath = resolve(
+    seedDir,
+    "../../test/integration/thoth/extraction-report.json",
+  );
+  await writeFile(
+    extractionReportPath,
+    JSON.stringify(extractionReport, null, 2),
+  );
+  const gatePassed =
+    extractionReport.vocabRecall === 1 &&
+    extractionReport.factRecall === 1 &&
+    extractionReport.pageCoverage.missing.every((page) => page === 2);
+  if (!gatePassed) {
+    const gateFailure = `Thoth extraction gate failed: vocabRecall=${extractionReport.vocabRecall}, factRecall=${extractionReport.factRecall}, missingPages=${JSON.stringify(extractionReport.pageCoverage.missing)}`;
+    if (process.env.SEED_THOTH_ALLOW_PARTIAL !== "1") {
+      throw new Error(`${gateFailure}. Set SEED_THOTH_ALLOW_PARTIAL=1 to continue.`);
+    }
+    console.warn(`${gateFailure}; continuing because SEED_THOTH_ALLOW_PARTIAL=1`);
+  }
+
+  async function createThothRecords<T, R>(
+    records: T[],
+    label: string,
+    create: (record: T) => Promise<{ data: R | null; errors?: unknown[] }>,
+  ): Promise<R[]> {
+    const created: R[] = [];
+    for (let index = 0; index < records.length; index += 25) {
+      const results = await Promise.all(
+        records.slice(index, index + 25).map(create),
+      );
+      created.push(...unwrap(results, label));
+    }
+    return created;
+  }
+
+  const thothWords = await createThothRecords(
+    thothGroundTruth.vocabulary,
+    "Thoth Word",
+    (entry) =>
+      client.models.Word.create({
+        phrase: entry.term,
+        definition: entry.definition,
+        identityId: instructor1IdentityId,
+      }),
+  );
+  const wordIdsByTerm = Object.fromEntries(
+    thothGroundTruth.vocabulary.map((entry, index) => [
+      entry.term,
+      thothWords[index]!.id,
+    ]),
+  );
+
+  const thothQuestionEntries = thothGroundTruth.cards.flatMap((card) =>
+    card.facts
+      .filter((fact) => !fact.sourceDefect)
+      .map((fact) => ({ card, fact })),
+  );
+  const thothQuestions = await createThothRecords(
+    thothQuestionEntries,
+    "Thoth Question",
+    ({ card, fact }) =>
+      client.models.Question.create({
+        prompt: `What is the ${fact.field} of ${card.title}?`,
+        answer: fact.value,
+        difficulty: "recall",
+        metadata: JSON.stringify({
+          source: "thoth",
+          card: card.key,
+          field: fact.field,
+          page: card.backPage,
+          accept: fact.accept ?? [],
+        }),
+        identityId: instructor1IdentityId,
+      }),
+  );
+  const questionIdsByCardField = Object.fromEntries(
+    thothQuestionEntries.map(({ card, fact }, index) => [
+      `${card.key}::${fact.field}`,
+      thothQuestions[index]!.id,
+    ]),
+  );
+
+  const unitContents = buildThothUnits(thothGroundTruth, {
+    wordIDsByTerm: wordIdsByTerm,
+    questionIDsByCardField: questionIdsByCardField,
+    callResponseBlock: (card) => ({
+      type: "call-response",
+      version: 1,
+      script: buildCallResponseScript(card, thothGroundTruth.vocabulary),
+    }),
+  });
+  const sectionCode = "THOTH-CORRESPONDENCE";
+  const thothSectionResponse = await client.models.Section.create({
+    name: "Thoth Tarot — The Correspondence System",
+    description:
+      "A correspondence-based study of the Thoth deck, its symbols, and its card attributions.",
+    code: sectionCode,
+    status: "PUBLISHED",
+    learner: "section-thoth-learners",
+    readableGroups: ["section-thoth-instructors", "section-thoth-learners"],
+    writableGroups: ["section-thoth-instructors"],
+  });
+  const thothSection = unwrap(
+    [thothSectionResponse],
+    "Thoth Section",
+  )[0];
+  for (const groupName of [
+    "section-thoth-instructors",
+    "section-thoth-learners",
+  ]) {
+    try {
+      await cognitoClient.send(
+        new CreateGroupCommand({ UserPoolId: userPoolId, GroupName: groupName }),
+      );
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        error.name !== "GroupExistsException"
+      ) {
+        throw error;
+      }
+    }
+  }
+  await Promise.all([
+    cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: TEST_USERS.instructor1.username,
+        GroupName: "section-thoth-instructors",
+      }),
+    ),
+    cognitoClient.send(
+      new AdminAddUserToGroupCommand({
+        UserPoolId: userPoolId,
+        Username: TEST_USERS.student1.username,
+        GroupName: "section-thoth-learners",
+      }),
+    ),
+  ]);
+
+  const thothUnits = await createThothRecords(
+    unitContents,
+    "Thoth Unit",
+    (unit) =>
+      client.models.Unit.create({
+        name: unit.name,
+        description: unit.description,
+        contentVersion: 1,
+        publishedContentVersion: 1,
+        identityId: instructor1IdentityId,
+        status: "PUBLISHED",
+        readableGroups: ["section-thoth-instructors", "section-thoth-learners"],
+        writableGroups: ["section-thoth-instructors"],
+      }),
+  );
+  const unitIds = Object.fromEntries(
+    unitContents.map((unit, index) => [unit.key, thothUnits[index]!.id]),
+  );
+  for (const [index, unit] of unitContents.entries()) {
+    const unitID = thothUnits[index]!.id;
+    const content = JSON.stringify(unit.content);
+    await Promise.all([
+      uploadData({
+        path: `protected/${instructor1IdentityId}/units/${unitID}/draft.json`,
+        data: content,
+        options: { contentType: "application/json" },
+      }).result,
+      uploadData({
+        path: `protected/units/${unitID}/published.json`,
+        data: content,
+        options: { contentType: "application/json" },
+      }).result,
+    ]);
+  }
+
+  await createThothRecords(
+    unitContents.flatMap((unit, index) =>
+      unit.wordIDs.map((wordID) => ({
+        unitID: thothUnits[index]!.id,
+        wordID,
+      })),
+    ),
+    "Thoth UnitWord",
+    (link) => client.models.UnitWord.create(link),
+  );
+  await createThothRecords(
+    unitContents.flatMap((unit, index) =>
+      unit.questionIDs.map((questionID) => ({
+        unitID: thothUnits[index]!.id,
+        questionID,
+      })),
+    ),
+    "Thoth QuestionUnit",
+    (link) => client.models.QuestionUnit.create(link),
+  );
+  await createThothRecords(
+    thothUnits.map((unit) => ({
+      sectionID: thothSection.id,
+      unitID: unit.id,
+    })),
+    "Thoth Assignment",
+    ({ sectionID, unitID }) =>
+      client.models.Assignment.create({
+        sectionID,
+        unitID,
+        status: "PUBLISHED",
+        readableGroups: ["section-thoth-instructors", "section-thoth-learners"],
+        writableGroups: ["section-thoth-instructors"],
+      }),
+  );
+
+  thothSeedFixture = {
+    fileId: thothFile.id,
+    documentId: thothDocumentID,
+    parsedContentId: thothParsedContentID,
+    sectionId: thothSection.id,
+    units: unitIds,
+    wordIdsByTerm,
+    questionIdsByCardField,
+    callResponse: {
+      audioManifest: "test/fixtures/thoth/audio-manifest.json",
+    },
+    extractionReport: "test/integration/thoth/extraction-report.json",
+  };
+  console.log(
+    `✅ Created Thoth section with ${thothUnits.length} units and ${thothQuestions.length} recall questions`,
+  );
 }
 
 // ========================================================================
@@ -3643,58 +4243,131 @@ await signInUser({
 const adminSession = await fetchAuthSession();
 console.log(`✅ Authenticated as admin (sub: ${adminSession.userSub})`);
 
-// Create the singleton PlatformSettings record with sensible defaults
-const gsResponse = await client.models.PlatformSettings.create({
-  xpMultipliers: JSON.stringify({
-    HOMEWORK_SUBMITTED: 1.0,
-    ALL_BLOCKS_COMPLETED: 1.5,
-    NAILED_IT: 2.0,
-    STREAK_BONUS: 1.0,
-    PRACTICE_SESSION: 1.0,
-  }),
-  dailyCap: 500,
-  weeklyCap: 2000,
-  levelThresholds: [
-    { level: 1, xpRequired: 0, title: "Beginner" },
-    { level: 2, xpRequired: 150, title: "Explorer" },
-    { level: 3, xpRequired: 400, title: "Apprentice" },
-    { level: 4, xpRequired: 800, title: "Scholar" },
-    { level: 5, xpRequired: 1500, title: "Expert" },
-    { level: 6, xpRequired: 3000, title: "Master" },
-    { level: 7, xpRequired: 5000, title: "Grandmaster" },
-  ],
-  badgesEnabled: true,
-  antiBadgesEnabled: false,
-  streakFreezesAllowed: 2,
-  leaderboardEnabled: true,
-  leaderboardAnonymous: false,
-  avatarUnlockConfig: JSON.stringify({
-    unlocks: [
-      { minLevel: 1, tier: "thumbs" },
-      { minLevel: 2, tier: "initials" },
-      { minLevel: 3, tier: "lorelei" },
-      { minLevel: 4, tier: "notionists" },
-      { minLevel: 5, tier: "openPeeps" },
-      { minLevel: 6, tier: "adventurer" },
-      { minLevel: 7, tier: "personas" },
-    ],
-    glowOnLevelUp: true,
-  }),
-  autoAnalyzeDocuments: true,
-  documentAnalysisModel: "gpt-4o",
-  // Bot personas
-  kaiEnabled: true,
-  sageEnabled: true,
-});
+// PlatformSettings was created earlier, before Thoth analysis.
 
-if (!gsResponse.data) {
-  console.error(
-    "  ✗ PlatformSettings creation failed:",
-    JSON.stringify(gsResponse.errors, null, 2),
-  );
-} else {
-  console.log(`✅ Created global PlatformSettings (id: ${gsResponse.data.id})`);
+// ========================================================================
+// SECTION: Seed Analytics Summary Data (30 days of mock data)
+// ========================================================================
+console.log("\n📈 Creating analytics summary seed data...");
+
+// AnalyticsSummary is Admins-only for writes, so this runs inside the admin
+// session above. Fail fast rather than surfacing opaque NoSignedUser errors
+// from every concurrent write.
+if (!adminSession.tokens?.accessToken) {
+  throw new Error("Admin session has no tokens for analytics seeding");
 }
+
+function randomBetween(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+const analyticsSeedData: Schema["AnalyticsSummary"]["createType"][] = [];
+const analyticsNow = new Date();
+for (let i = 29; i >= 0; i--) {
+  const d = new Date(analyticsNow);
+  d.setDate(d.getDate() - i);
+  const dateStr = d.toISOString().split("T")[0];
+
+  // Weekend days have lower engagement
+  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
+  const dauBase = isWeekend ? 5 : 20;
+  const dau = randomBetween(dauBase, dauBase + 15);
+  const sessions = randomBetween(dau, dau * 3);
+  const pageViews = randomBetween(sessions * 3, sessions * 8);
+  const gradesSubmitted = randomBetween(isWeekend ? 2 : 8, isWeekend ? 8 : 25);
+  const workbooksStarted = gradesSubmitted + randomBetween(2, 8);
+  const avgAccuracy = randomBetween(65, 95);
+  const avgSessionMs = randomBetween(180_000, 900_000); // 3-15 min
+  const avgEngagedMs = randomBetween(120_000, 600_000); // 2-10 min per grade
+
+  // Platform-wide summary (no sectionId)
+  analyticsSeedData.push({
+    date: dateStr,
+    scope: "platform",
+    scopeId: "all",
+    dailyActiveUsers: dau,
+    totalPageViews: pageViews,
+    totalSessions: sessions,
+    avgSessionDurationMs: avgSessionMs,
+    totalEngagedTimeMs: avgEngagedMs * gradesSubmitted,
+    avgEngagedTimeMs: avgEngagedMs,
+    gradesSubmitted,
+    avgAccuracy,
+    workbooksStarted,
+    workbooksCompleted: gradesSubmitted,
+    studentChatMessagesSent: randomBetween(4, 30),
+    instructorChatMessagesSent: randomBetween(1, 10),
+    documentsAnalyzed: randomBetween(0, 5),
+    topPages: JSON.stringify([
+      { path: "/workbook", views: randomBetween(20, 80) },
+      { path: "/", views: randomBetween(15, 50) },
+      { path: "/skills", views: randomBetween(5, 30) },
+      { path: "/section", views: randomBetween(5, 20) },
+    ]),
+  });
+
+  // Per-section summaries — each section gets proportional subset of platform data
+  for (const section of sections) {
+    const sectionDau = randomBetween(
+      Math.max(1, Math.floor(dau * 0.3)),
+      Math.floor(dau * 0.6),
+    );
+    const sectionGrades = randomBetween(
+      Math.max(1, Math.floor(gradesSubmitted * 0.2)),
+      Math.floor(gradesSubmitted * 0.5),
+    );
+    const sectionStarted = sectionGrades + randomBetween(1, 3);
+    const sectionEngagedMs = randomBetween(120_000, 600_000);
+
+    analyticsSeedData.push({
+      date: dateStr,
+      scope: "section",
+      scopeId: section.id,
+      sectionId: section.id,
+      dailyActiveUsers: sectionDau,
+      totalPageViews: randomBetween(sectionDau * 3, sectionDau * 8),
+      totalSessions: randomBetween(sectionDau, sectionDau * 2),
+      avgSessionDurationMs: randomBetween(180_000, 600_000),
+      totalEngagedTimeMs: sectionEngagedMs * sectionGrades,
+      avgEngagedTimeMs: sectionEngagedMs,
+      gradesSubmitted: sectionGrades,
+      avgAccuracy: randomBetween(60, 98),
+      workbooksStarted: sectionStarted,
+      workbooksCompleted: sectionGrades,
+      studentChatMessagesSent: randomBetween(1, 12),
+      instructorChatMessagesSent: randomBetween(0, 4),
+      documentsAnalyzed: randomBetween(0, 2),
+      topPages: JSON.stringify([
+        { path: "/workbook", views: randomBetween(5, 30) },
+        { path: `/section/${section.id}`, views: randomBetween(3, 15) },
+      ]),
+    });
+  }
+}
+
+const ANALYTICS_BATCH_SIZE = 10;
+const analyticsErrors: unknown[] = [];
+const analyticsSummaries: Schema["AnalyticsSummary"]["type"][] = [];
+for (let i = 0; i < analyticsSeedData.length; i += ANALYTICS_BATCH_SIZE) {
+  const batch = await Promise.all(
+    analyticsSeedData
+      .slice(i, i + ANALYTICS_BATCH_SIZE)
+      .map((input) => client.models.AnalyticsSummary.create(input)),
+  );
+  for (const response of batch) {
+    if (response.errors?.length) analyticsErrors.push(...response.errors);
+    if (response.data) analyticsSummaries.push(response.data);
+  }
+}
+if (analyticsErrors.length > 0) {
+  console.warn(
+    `  ⚠ ${analyticsErrors.length} analytics summary write error(s):`,
+    JSON.stringify(analyticsErrors.slice(0, 3), null, 2),
+  );
+}
+console.log(
+  `✅ Created ${analyticsSummaries.length}/${analyticsSeedData.length} analytics summary records (30 days, platform + per-section)`,
+);
 
 await signOut();
 
@@ -3742,6 +4415,7 @@ console.log("   • 1 AI chat session + 2 feedback records");
 console.log(`   • ${joinTablePromises.length} join table relationships`);
 console.log("   • 1 student memory + 1 unit memory");
 console.log("   • 1 global PlatformSettings (admin-owned)");
+console.log(`   • ${analyticsSummaries.length} analytics summary records`);
 console.log("\n🔐 Test Users Created:");
 console.log("   Admin: admin@example.com");
 console.log("   Instructors: instructor1@example.com, instructor2@example.com");
@@ -3753,113 +4427,6 @@ console.log("   3. Sign in with any test user to begin testing");
 console.log("   4. student1 has rich data (badges, streaks, XP, squad leader)");
 console.log("   5. student2 has minimal data (test empty/sparse UI states)\n");
 
-// ========================================================================
-// SECTION: Seed Analytics Summary Data (30 days of mock data)
-// ========================================================================
-console.log("\n📈 Creating analytics summary seed data...");
-
-// Re-authenticate as admin (signOut was called after PlatformSettings)
-await signInUser({
-  username: TEST_USERS.admin.username,
-  password: passwordFor(TEST_USERS.admin.username),
-  signInFlow: "Password",
-});
-
-function randomBetween(min: number, max: number): number {
-  return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-const analyticsSeedData = [];
-const analyticsNow = new Date();
-for (let i = 29; i >= 0; i--) {
-  const d = new Date(analyticsNow);
-  d.setDate(d.getDate() - i);
-  const dateStr = d.toISOString().split("T")[0];
-
-  // Weekend days have lower engagement
-  const isWeekend = d.getDay() === 0 || d.getDay() === 6;
-  const dauBase = isWeekend ? 5 : 20;
-  const dau = randomBetween(dauBase, dauBase + 15);
-  const sessions = randomBetween(dau, dau * 3);
-  const pageViews = randomBetween(sessions * 3, sessions * 8);
-  const gradesSubmitted = randomBetween(isWeekend ? 2 : 8, isWeekend ? 8 : 25);
-  const workbooksStarted = gradesSubmitted + randomBetween(2, 8);
-  const avgAccuracy = randomBetween(65, 95);
-  const avgSessionMs = randomBetween(180_000, 900_000); // 3-15 min
-  const avgEngagedMs = randomBetween(120_000, 600_000); // 2-10 min per grade
-
-  // Platform-wide summary (no sectionId)
-  analyticsSeedData.push(
-    client.models.AnalyticsSummary.create({
-      date: dateStr,
-      dailyActiveUsers: dau,
-      totalPageViews: pageViews,
-      totalSessions: sessions,
-      avgSessionDurationMs: avgSessionMs,
-      totalEngagedTimeMs: avgEngagedMs * gradesSubmitted,
-      avgEngagedTimeMs: avgEngagedMs,
-      gradesSubmitted,
-      avgAccuracy,
-      workbooksStarted,
-      workbooksCompleted: gradesSubmitted,
-      chatMessagesSent: randomBetween(5, 40),
-      documentsAnalyzed: randomBetween(0, 5),
-      topPages: JSON.stringify([
-        { path: "/workbook", views: randomBetween(20, 80) },
-        { path: "/", views: randomBetween(15, 50) },
-        { path: "/skills", views: randomBetween(5, 30) },
-        { path: "/section", views: randomBetween(5, 20) },
-      ]),
-    } as any),
-  );
-
-  // Per-section summaries — each section gets proportional subset of platform data
-  for (const section of sections) {
-    const sectionDau = randomBetween(
-      Math.max(1, Math.floor(dau * 0.3)),
-      Math.floor(dau * 0.6),
-    );
-    const sectionGrades = randomBetween(
-      Math.max(1, Math.floor(gradesSubmitted * 0.2)),
-      Math.floor(gradesSubmitted * 0.5),
-    );
-    const sectionStarted = sectionGrades + randomBetween(1, 3);
-    const sectionEngagedMs = randomBetween(120_000, 600_000);
-
-    analyticsSeedData.push(
-      client.models.AnalyticsSummary.create({
-        date: dateStr,
-        sectionId: section.id,
-        dailyActiveUsers: sectionDau,
-        totalPageViews: randomBetween(sectionDau * 3, sectionDau * 8),
-        totalSessions: randomBetween(sectionDau, sectionDau * 2),
-        avgSessionDurationMs: randomBetween(180_000, 600_000),
-        totalEngagedTimeMs: sectionEngagedMs * sectionGrades,
-        avgEngagedTimeMs: sectionEngagedMs,
-        gradesSubmitted: sectionGrades,
-        avgAccuracy: randomBetween(60, 98),
-        workbooksStarted: sectionStarted,
-        workbooksCompleted: sectionGrades,
-        chatMessagesSent: randomBetween(2, 15),
-        documentsAnalyzed: randomBetween(0, 2),
-        topPages: JSON.stringify([
-          { path: "/workbook", views: randomBetween(5, 30) },
-          { path: `/section/${section.id}`, views: randomBetween(3, 15) },
-        ]),
-      } as any),
-    );
-  }
-}
-
-const analyticsResponses = await Promise.all(analyticsSeedData);
-const analyticsSummaries = analyticsResponses
-  .filter((r) => r.data != null)
-  .map((r) => r.data!);
-console.log(
-  `✅ Created ${analyticsSummaries.length} days of analytics summary data`,
-);
-
-await signOut();
 
 // ========================================================================
 // EXPORT: Write seed IDs to a fixture file for integration tests
@@ -3913,6 +4480,26 @@ const seedFixture = {
     sectionID: a.sectionID,
     unitID: a.unitID,
   })),
+  thoth: thothSeedFixture ?? {
+    fileId: "",
+    documentId: "",
+    parsedContentId: "",
+    sectionId: "",
+    units: {
+      orientation: "",
+      trumps: "",
+      small: "",
+      courts: "",
+      glossary: "",
+      aces: "",
+      counterchange: "",
+      colourScales: "",
+    },
+    wordIdsByTerm: {},
+    questionIdsByCardField: {},
+    callResponse: { audioManifest: "test/fixtures/thoth/audio-manifest.json" },
+    extractionReport: "test/integration/thoth/extraction-report.json",
+  },
   grades: grades.map((g) => ({
     id: g.id,
     unitID: g.unitID,
@@ -3931,9 +4518,11 @@ const seedFixture = {
     s3Key: d!.s3Key,
     status: d!.status,
   })),
-  analyticsSummaries: analyticsSummaries.map((a: any) => ({
+  analyticsSummaries: analyticsSummaries.map((a) => ({
     id: a.id,
     date: a.date,
+    scope: a.scope,
+    scopeId: a.scopeId,
     dailyActiveUsers: a.dailyActiveUsers,
     gradesSubmitted: a.gradesSubmitted,
     avgAccuracy: a.avgAccuracy,

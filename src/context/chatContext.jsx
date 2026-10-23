@@ -247,7 +247,12 @@ export function ChatContextProvider({ children }) {
       cancelled = true;
       subscription.unsubscribe();
     };
-  }, [user, authLoading]);
+  }, [user, authLoading, client.models.AssistantChat]);
+
+  const nonArchivedChatCount = useMemo(
+    () => state.chatHistories.filter((chat) => !chat.archived).length,
+    [state.chatHistories],
+  );
 
   // Create AssistantChat if needed
   useEffect(() => {
@@ -274,13 +279,10 @@ export function ChatContextProvider({ children }) {
     }
 
     // If there are existing non-archived chats, use them instead of creating
-    const nonArchivedChats = state.chatHistories.filter(
-      (chat) => !chat.archived,
-    );
-    if (nonArchivedChats.length > 0) {
+    if (nonArchivedChatCount > 0) {
       console.log(
         "[ChatContext] Found",
-        nonArchivedChats.length,
+        nonArchivedChatCount,
         "non-archived chats, subscription will handle selection",
       );
       return;
@@ -365,9 +367,10 @@ export function ChatContextProvider({ children }) {
     state.subscriptionReady,
     state.assistantChat?.id,
     state.assistantChat?.archived,
-    state.chatHistories.length,
+    nonArchivedChatCount,
     user,
     authLoading,
+    client.models.AssistantChat,
   ]);
 
   // Stable dispatch-based setters for consumers
@@ -477,15 +480,13 @@ export function ChatContextProvider({ children }) {
       deletedChats,
     }),
     [
-      state.assistantChat?.id,
-      state.assistantChat?._version,
-      state.assistantChat?.archived,
-      state.chatHistories?.length,
+      state.assistantChat,
+      state.chatHistories,
       state.isLoadingChat,
       state.chatCreationError,
       state.isChatOpen,
       state.pageContext,
-      state.messages?.length,
+      state.messages,
       setCurrentChat,
       setIsChatOpen,
       setPageContext,

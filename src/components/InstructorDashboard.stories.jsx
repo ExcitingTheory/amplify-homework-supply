@@ -536,7 +536,16 @@ export const FlaggedContent = {
 // at-risk rollup and the per-section "Review all" action.
 export const AtRiskStudents = {
   args: {
-    sections: [mockSections[0]],
+    sections: [
+      {
+        ...mockSections[0],
+        studentProgress: JSON.stringify({
+          alice: { averageGrade: 40, unitsCompleted: 1 },
+          bob: { averageGrade: 40, unitsCompleted: 1 },
+          carol: { averageGrade: 90, unitsCompleted: 1 },
+        }),
+      },
+    ],
   },
   decorators: [
     (Story) => {

@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Alert from "@mui/material/Alert";
 import Autocomplete from "@mui/material/Autocomplete";
 import Box from "@mui/material/Box";
@@ -30,6 +31,9 @@ import {
   type GroupChallengeEditorData,
 } from "../../GroupChallengeEditor";
 
+const PRIMARY_COLOR = "primary";
+const DEFAULT_COLOR = "default";
+
 interface ChapterReference {
   id: string;
   title: string;
@@ -50,6 +54,7 @@ interface ChapterReference {
 }
 
 export default function CampaignPanel() {
+  const t = useTranslations("editor.authoring");
   const { unit } = React.useContext(UnitContext);
   const { sections } = React.useContext(SectionContext);
   const client = getAmplifyClient();
@@ -223,7 +228,7 @@ export default function CampaignPanel() {
     return (
       <Box sx={{ p: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          Save the unit first to manage campaign links.
+          {t("campaignPanel.saveUnitFirst")}
         </Typography>
       </Box>
     );
@@ -232,14 +237,14 @@ export default function CampaignPanel() {
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1.5 }}>
-        Campaign Chapters
+        {t("campaignPanel.heading")}
       </Typography>
 
       {loading && (
         <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 2 }}>
           <CircularProgress size={16} />
           <Typography variant="body2" color="text.secondary">
-            Loading chapters…
+            {t("campaignPanel.loadingChapters")}
           </Typography>
         </Box>
       )}
@@ -251,8 +256,7 @@ export default function CampaignPanel() {
           icon={<WarningAmberIcon fontSize="small" />}
           sx={{ mb: 2, fontSize: "0.8rem" }}
         >
-          This unit isn&apos;t linked to any campaign chapters. Students
-          won&apos;t see narrative framing for this content.
+          {t("campaignPanel.noLinkedChaptersWarning")}
         </Alert>
       )}
 
@@ -264,8 +268,9 @@ export default function CampaignPanel() {
             color="text.secondary"
             sx={{ display: "block", mb: 1 }}
           >
-            Linked to {linkedChapters.length} chapter
-            {linkedChapters.length > 1 ? "s" : ""}:
+            {t("campaignPanel.linkedToChapters", {
+              count: linkedChapters.length,
+            })}
           </Typography>
 
           {linkedChapters.map((ch) => (
@@ -291,7 +296,9 @@ export default function CampaignPanel() {
               >
                 {ch.chapterOrder != null && (
                   <Chip
-                    label={`Ch. ${ch.chapterOrder}`}
+                    label={t("campaignPanel.chapterNumber", {
+                      order: ch.chapterOrder,
+                    })}
                     size="small"
                     variant="outlined"
                     sx={{ height: 18, fontSize: "0.65rem" }}
@@ -306,9 +313,13 @@ export default function CampaignPanel() {
                   {ch.title}
                 </Typography>
                 <Chip
-                  label={ch.active ? "Active" : "Done"}
+                  label={
+                    ch.active
+                      ? t("campaignPanel.statusActive")
+                      : t("campaignPanel.statusDone")
+                  }
                   size="small"
-                  color={ch.active ? "primary" : "default"}
+                  color={ch.active ? PRIMARY_COLOR : DEFAULT_COLOR}
                   sx={{ height: 18, fontSize: "0.65rem" }}
                 />
               </Box>
@@ -319,7 +330,7 @@ export default function CampaignPanel() {
                   color="text.secondary"
                   sx={{ display: "block", fontStyle: "italic", mb: 0.75 }}
                 >
-                  &ldquo;{ch.setting}&rdquo;
+                  {t("campaignPanel.quotedSetting", { setting: ch.setting })}
                 </Typography>
               )}
 
@@ -329,7 +340,11 @@ export default function CampaignPanel() {
                   color="text.secondary"
                   sx={{ display: "block", mb: 0.75 }}
                 >
-                  {progressPct(ch)}% complete · {ch.currentXP}/{ch.targetXP} XP
+                  {t("campaignPanel.chapterProgress", {
+                    percent: progressPct(ch),
+                    currentXP: ch.currentXP,
+                    targetXP: ch.targetXP,
+                  })}
                 </Typography>
               )}
 
@@ -345,7 +360,9 @@ export default function CampaignPanel() {
                   }
                   sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
-                  {editingChapterId === ch.id ? "Close" : "Edit"}
+                  {editingChapterId === ch.id
+                    ? t("campaignPanel.close")
+                    : t("campaignPanel.edit")}
                 </Button>
                 <Button
                   size="small"
@@ -354,7 +371,7 @@ export default function CampaignPanel() {
                   onClick={() => setPreviewChapter(ch)}
                   sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
-                  Preview
+                  {t("campaignPanel.preview")}
                 </Button>
                 <Button
                   size="small"
@@ -364,7 +381,7 @@ export default function CampaignPanel() {
                   disabled={saving}
                   sx={{ fontSize: "0.7rem", py: 0.25 }}
                 >
-                  Unlink
+                  {t("campaignPanel.unlink")}
                 </Button>
               </Box>
 
@@ -389,7 +406,10 @@ export default function CampaignPanel() {
                     onSubmit={(data) => handleUpdateChapter(ch, data)}
                     submitting={saving}
                     availableUnits={[
-                      { id: unitId, name: unit?.name || "This unit" },
+                      {
+                        id: unitId,
+                        name: unit?.name || t("campaignPanel.thisUnit"),
+                      },
                     ]}
                   />
                 </Box>
@@ -404,20 +424,26 @@ export default function CampaignPanel() {
         <>
           <Divider sx={{ my: 2 }} />
           <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-            Add to existing chapter
+            {t("campaignPanel.addToExistingChapter")}
           </Typography>
           <Autocomplete
             size="small"
             options={unlinkedChapters}
             getOptionLabel={(ch) =>
               ch.chapterOrder != null
-                ? `Ch. ${ch.chapterOrder}: ${ch.title}`
+                ? t("campaignPanel.chapterOptionLabel", {
+                    order: ch.chapterOrder,
+                    title: ch.title,
+                  })
                 : ch.title
             }
             value={selectedChapter}
             onChange={(_e, v) => setSelectedChapter(v)}
             renderInput={(params) => (
-              <TextField {...params} placeholder="Select a chapter…" />
+              <TextField
+                {...params}
+                placeholder={t("campaignPanel.selectChapterPlaceholder")}
+              />
             )}
             sx={{ mb: 1 }}
           />
@@ -428,7 +454,9 @@ export default function CampaignPanel() {
             onClick={handleAddToChapter}
             disabled={!selectedChapter || saving}
           >
-            {saving ? "Saving…" : "Link unit to chapter"}
+            {saving
+              ? t("campaignPanel.saving")
+              : t("campaignPanel.linkUnitToChapter")}
           </Button>
         </>
       )}
@@ -442,7 +470,7 @@ export default function CampaignPanel() {
           startIcon={<AddIcon />}
           onClick={() => setShowCreate(true)}
         >
-          Create new chapter
+          {t("campaignPanel.createNewChapter")}
         </Button>
       ) : (
         <Box>
@@ -455,14 +483,14 @@ export default function CampaignPanel() {
             }}
           >
             <Typography variant="subtitle2" fontWeight={600}>
-              New Chapter
+              {t("campaignPanel.newChapter")}
             </Typography>
             <Button
               size="small"
               onClick={() => setShowCreate(false)}
               sx={{ fontSize: "0.7rem" }}
             >
-              Cancel
+              {t("campaignPanel.cancel")}
             </Button>
           </Box>
 
@@ -478,8 +506,8 @@ export default function CampaignPanel() {
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Section"
-                  placeholder="Select section for this chapter…"
+                  label={t("campaignPanel.sectionLabel")}
+                  placeholder={t("campaignPanel.selectSectionPlaceholder")}
                 />
               )}
               sx={{ mb: 2 }}
@@ -490,19 +518,21 @@ export default function CampaignPanel() {
             <GroupChallengeEditor
               onSubmit={handleCreateChapter}
               submitting={saving}
-              availableUnits={[{ id: unitId, name: unit?.name || "This unit" }]}
+              availableUnits={[
+                { id: unitId, name: unit?.name || t("campaignPanel.thisUnit") },
+              ]}
             />
           )}
 
           {!createSectionID && sections && sections.length > 0 && (
             <Typography variant="caption" color="text.secondary">
-              Select a section to create a chapter in.
+              {t("campaignPanel.selectSectionHint")}
             </Typography>
           )}
 
           {(!sections || sections.length === 0) && (
             <Typography variant="caption" color="text.secondary">
-              No sections available. Create a section first.
+              {t("campaignPanel.noSections")}
             </Typography>
           )}
         </Box>
@@ -515,13 +545,13 @@ export default function CampaignPanel() {
         fontWeight={600}
         sx={{ mb: 1, display: "flex", alignItems: "center", gap: 0.5 }}
       >
-        <LockIcon fontSize="small" /> Content Lock
+        <LockIcon fontSize="small" /> {t("campaignPanel.contentLock")}
       </Typography>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
         <TextField
           size="small"
           type="number"
-          label="Required XP"
+          label={t("campaignPanel.requiredXP")}
           value={requiredXPInput}
           onChange={(e) => setRequiredXPInput(e.target.value)}
           onBlur={handleSaveContentLock}
@@ -534,7 +564,9 @@ export default function CampaignPanel() {
           {unit?.requiredBadgeId && (
             <Chip
               size="small"
-              label={`Badge: ${unit.requiredBadgeId}`}
+              label={t("campaignPanel.badgeLock", {
+                badgeId: unit.requiredBadgeId,
+              })}
               variant="outlined"
               sx={{ fontSize: "0.65rem" }}
             />
@@ -542,7 +574,9 @@ export default function CampaignPanel() {
           {unit?.requiredModuleCompletion && (
             <Chip
               size="small"
-              label={`${unit.requiredModuleCompletion}% module completion`}
+              label={t("campaignPanel.moduleCompletionLock", {
+                percent: unit.requiredModuleCompletion,
+              })}
               variant="outlined"
               sx={{ fontSize: "0.65rem" }}
             />
@@ -550,8 +584,7 @@ export default function CampaignPanel() {
         </Box>
       )}
       <Typography variant="caption" color="text.secondary">
-        Badge and module-completion locks are managed in the section&apos;s
-        Advanced gamification settings.
+        {t("campaignPanel.locksManagedHint")}
       </Typography>
 
       {/* Preview student narrative (Phase 3.2 / 4.2) */}
@@ -568,7 +601,7 @@ export default function CampaignPanel() {
             justifyContent: "space-between",
           }}
         >
-          Student preview
+          {t("campaignPanel.studentPreview")}
           <IconButton size="small" onClick={() => setPreviewChapter(null)}>
             <CloseIcon fontSize="small" />
           </IconButton>

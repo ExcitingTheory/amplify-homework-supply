@@ -19,6 +19,7 @@ import WifiIcon from "@mui/icons-material/Wifi";
 import WifiOffIcon from "@mui/icons-material/WifiOff";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { useTranslations } from "next-intl";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 import type {
   PracticeUser,
   GroupStats,
@@ -135,6 +136,9 @@ export default function CollaborativePresenceBar({
         {allParticipants.map((p) => (
           <Tooltip key={p.username} title={p.displayName || p.username}>
             <Avatar
+              component={ProfileAvatarLink}
+              username={p.username}
+              displayName={p.displayName}
               sx={{
                 bgcolor: p.color || stringToColor(p.username),
                 width: 28,

@@ -16,12 +16,12 @@ describe("MediaPromptBand", () => {
     expect(
       screen.getByRole("heading", { name: "Listening prompt" }),
     ).toBeInTheDocument();
-    expect(screen.getByLabelText("Media timecodes")).toHaveTextContent(
-      "00:01:23",
-    );
-    expect(screen.getByLabelText("Media timecodes")).toHaveTextContent(
-      "-00:02:34",
-    );
+    expect(
+      screen.getByLabelText("mediaPromptBand.timecodes"),
+    ).toHaveTextContent("00:01:23");
+    expect(
+      screen.getByLabelText("mediaPromptBand.timecodes"),
+    ).toHaveTextContent("-00:02:34");
     expect(
       screen.getByText("video/mp4 • 00:03:57 • 12.40 MB"),
     ).toBeInTheDocument();

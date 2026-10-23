@@ -203,6 +203,11 @@ export default function MetadataEditor({
     
     const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
     const initialData = useRef(formData);
+    const handleSaveRef = useRef<(isAutoSave?: boolean) => Promise<void>>(async () => {});
+
+    useEffect(() => {
+        handleSaveRef.current = handleSave;
+    });
 
     // Track changes for auto-save (only name and description are editable)
     useEffect(() => {
@@ -222,7 +227,7 @@ export default function MetadataEditor({
                 clearTimeout(autoSaveTimer.current);
             }
             autoSaveTimer.current = setTimeout(() => {
-                handleSave(true);
+                handleSaveRef.current(true);
             }, autoSaveDelay);
         }
 
@@ -258,14 +263,14 @@ export default function MetadataEditor({
             
             setSnackbar({
                 open: true,
-                message: isAutoSave ? 'Auto-saved' : 'Saved successfully',
+                message: isAutoSave ? t('metadataEditor.autoSaved') : t('metadataEditor.savedSuccessfully'),
                 severity: 'success',
             });
         } catch (error: any) {
             console.error('Error updating file:', error);
             setSnackbar({
                 open: true,
-                message: `Error saving: ${error.message}`,
+                message: t('metadataEditor.errorSaving', { message: error.message }),
                 severity: 'error',
             });
         } finally {
@@ -300,14 +305,14 @@ export default function MetadataEditor({
                     </Typography>
                     {hasUnsavedChanges && (
                         <Chip 
-                            label="Unsaved" 
+                            label={t('metadataEditor.unsavedChip')} 
                             size="small" 
                             color="warning" 
                             variant="outlined"
                         />
                     )}
                     <Chip 
-                        label="Auto-save" 
+                        label={t('metadataEditor.autoSaveChip')} 
                         size="small" 
                         color="info" 
                         variant="outlined"
@@ -318,20 +323,20 @@ export default function MetadataEditor({
             {/* Form Fields with Lexical */}
             <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 <LexicalField
-                    label="File Name"
+                    label={t('metadataEditor.fileNameLabel')}
                     value={formData.name}
                     onChange={(value) => handleFieldChange('name', value)}
                     maxLength={CHAR_LIMITS.name}
-                    placeholder="Enter file name..."
+                    placeholder={t('metadataEditor.fileNamePlaceholder')}
                     required
                 />
 
                 <LexicalField
-                    label="Description"
+                    label={t('metadataEditor.descriptionLabel')}
                     value={formData.description}
                     onChange={(value) => handleFieldChange('description', value)}
                     maxLength={CHAR_LIMITS.description}
-                    placeholder="Add a description for this file..."
+                    placeholder={t('metadataEditor.descriptionPlaceholder')}
                     multiline
                 />
 

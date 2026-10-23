@@ -11,6 +11,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import Button from '@mui/material/Button'
+import { useTranslations } from 'next-intl'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface NailedItCelebrationProps {
@@ -24,6 +25,7 @@ export function NailedItCelebration({
   nailedItReason,
   onClose,
 }: NailedItCelebrationProps) {
+  const t = useTranslations('components')
   const reducedMotion = useReducedMotion()
 
   useEffect(() => {
@@ -48,18 +50,18 @@ export function NailedItCelebration({
           🎯
         </Typography>
         <Typography variant="h5" fontWeight={700} mt={2}>
-          Nailed It!
+          {t('nailedItCelebration.title')}
         </Typography>
         <Typography variant="body1" color="text.secondary" mt={1}>
           {nailedItReason}
         </Typography>
         <Chip
-          label="+20 XP"
+          label={t('nailedItCelebration.xpReward')}
           color="success"
           sx={{ mt: 2, fontSize: '1rem', p: 1 }}
         />
         <Button variant="contained" fullWidth sx={{ mt: 3 }} onClick={onClose}>
-          Keep Going
+          {t('nailedItCelebration.keepGoing')}
         </Button>
       </Box>
     </Dialog>

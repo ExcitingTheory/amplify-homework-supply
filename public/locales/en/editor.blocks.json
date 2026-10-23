@@ -1,19 +1,44 @@
 {
   "answerEditor": {
+    "actionsColumn": "Actions",
+    "addNewOption": "Add \"{value}\"",
     "addWordLabel": "Add label",
     "addWordToDict": "Add a new word to the dictionary.",
     "cancel": "Cancel",
     "dialogTitle": "Edit Answer",
     "emptyState": "No answer provided",
     "instructions": "Create your answer below",
-    "save": "Save"
+    "removeNamedWord": "Remove {phrase}",
+    "removeWord": "Remove word",
+    "removeWords": "Remove {count, plural, one {# word} other {# words}}",
+    "save": "Save",
+    "title": "Short Answer Exercise",
+    "titleByDefinition": "Short Answer Exercise by Definition",
+    "titleByWord": "Short Answer Exercise by Word"
   },
   "blocks": {
     "meaning_association": "Meaning Association"
   },
   "customAIEditor": {
     "title": "AI-Graded Exercise",
-    "description": "Create an AI-graded exercise where students respond to questions and the AI evaluates answers against your custom grading criteria."
+    "description": "Create an AI-graded exercise where students respond to questions and the AI evaluates answers against your custom grading criteria.",
+    "inputModeText": "Text",
+    "inputModeAudio": "Audio",
+    "inputModeImage": "Image",
+    "inputModeDrawing": "Drawing",
+    "questionPromptHeader": "Question Prompt",
+    "expectedAnswerHeader": "Expected Answer",
+    "removeQuestion": "Remove question",
+    "questionFallback": "Question {id}",
+    "secureGrading": "Secure Grading",
+    "studentInputModes": "Student Input Modes",
+    "allowedInputModes": "Allowed input modes",
+    "gradingCriteria": "Grading Criteria (AI Instructions)",
+    "criteriaPlaceholder": "Describe how the AI should grade student responses. E.g., 'Grade based on understanding of photosynthesis. Award full marks for mentioning light-dependent reactions, Calvin cycle, and role of chlorophyll.'",
+    "criteriaHelperText": "The AI will use these criteria to evaluate student submissions. Students cannot see this.",
+    "questionsCount": "Questions ({count})",
+    "searchQuestions": "Search and add questions from the question bank",
+    "securityNotice": "Security: The AI grading prompt is hardened against prompt injection, character-breaking, and data leakage. Student input is sanitized. Grading criteria are hidden from students. Output is validated and PII-filtered."
   },
   "customAnswerEditor": {
     "add": "Add",
@@ -23,6 +48,7 @@
     "audioPreview": "Audio Preview",
     "cancel": "Cancel",
     "columnHeaders": {
+      "actions": "Actions",
       "answer": "Answer",
       "answerAudio": "Answer Audio",
       "hint": "Hint",
@@ -41,12 +67,15 @@
     "hintPlaceholder": "Hint",
     "promptLabel": "Prompt",
     "remove": "remove",
+    "removeAnswers": "{count, plural, one {Remove # answer} other {Remove # answers}}",
     "successGeneratedAudio": "Successfully generated audio file",
     "title": "Custom Answer Exercise",
     "ttsPreview": "Text to Speech Preview"
   },
   "meaningAssociationEditor": {
+    "actionsColumn": "Actions",
     "add": "Add",
+    "addNewOption": "Add \"{value}\"",
     "addWordLabel": "Add word to exercise",
     "cancel": "Cancel",
     "columnHeaders": {
@@ -54,13 +83,17 @@
       "phrase": "Phrase",
       "pronunciation": "Pronunciation"
     },
+    "definitionAriaLabel": "Definition",
     "definitionPlaceholder": "definition",
     "dialogDescription": "Add a new word to the dictionary.",
     "dialogTitle": "Add a new word",
     "emptyState": "No words have been added yet. Use the input above to add words from the dictionary. If the word you want to add is not in the dictionary, you can add it by clicking the \"Add Word\" item in the dropdown or from the dictionary editor in the Sidebar.",
     "phraseLabel": "phrase",
     "pronunciationLabel": "pronunciation",
-    "removeFromAssignment": "Remove from Assignment"
+    "removeFromAssignment": "Remove from Assignment",
+    "removeNamedWord": "Remove {phrase}",
+    "removeWord": "Remove word",
+    "removeWords": "Remove {count, plural, one {# word} other {# words}}"
   },
   "questionEditor": {
     "cancel": "Cancel"

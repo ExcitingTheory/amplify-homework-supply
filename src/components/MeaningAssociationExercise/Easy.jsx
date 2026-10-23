@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import UnitContext from "../../context/unitContext";
 import { Grid, Box, IconButton, Button, Typography } from "@mui/material";
@@ -18,12 +19,16 @@ export const Easy = ({
   wordIDs,
   enabledModes = ["learn", "easy", "hard"],
   nextMode = "hard",
-  nextModeLabel = "Hard",
+  nextModeLabel,
   onProgressChange,
   promptFor = "definition",
   showAudio = true,
   showPronunciation = true,
 }) => {
+  const t = useTranslations("components");
+  const resolvedNextModeLabel =
+    nextModeLabel ||
+    (nextMode ? t(`meaningAssociationExercise.modes.${nextMode}`) : "");
   let [assignment, setAssignment] = React.useState([]);
   const [answers, setAnswers] = React.useState([]);
 
@@ -72,7 +77,10 @@ export const Easy = ({
     return grade.data;
   }, [grade?.data]);
 
-  const inProgress = gradeData[nodeKey] || {};
+  const inProgress = React.useMemo(
+    () => gradeData[nodeKey] || {},
+    [gradeData, nodeKey],
+  );
 
   // Show completion screen once when exercise completes — don't re-show after dismiss
   React.useEffect(() => {
@@ -379,7 +387,9 @@ export const Easy = ({
             }}
           >
             <Typography variant="body2" color="textSecondary">
-              Easy Mode Complete — {accuracyPercent}% accuracy
+              {t("meaningAssociationExercise.easyModeComplete", {
+                accuracy: accuracyPercent,
+              })}
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -387,7 +397,7 @@ export const Easy = ({
                 size="small"
                 onClick={handleDismissCompletion}
               >
-                Back
+                {t("meaningAssociationExercise.back")}
               </Button>
               <Button
                 variant="contained"
@@ -396,8 +406,10 @@ export const Easy = ({
                 onClick={handleContinueFromCompletion}
               >
                 {nextMode
-                  ? `Continue to ${nextModeLabel} Mode`
-                  : "Finish Exercise"}
+                  ? t("meaningAssociationExercise.continueToMode", {
+                      mode: resolvedNextModeLabel,
+                    })
+                  : t("meaningAssociationExercise.finishExercise")}
               </Button>
             </Box>
           </Box>
@@ -443,7 +455,9 @@ export const Easy = ({
                 }}
               >
                 <CheckCircleIcon
-                  aria-label="Completed"
+                  aria-label={t(
+                    "meaningAssociationExercise.completedAriaLabel",
+                  )}
                   sx={{
                     position: "absolute",
                     top: 12,
@@ -454,7 +468,7 @@ export const Easy = ({
                   }}
                 />
                 <Typography variant="body2" color="inherit" fontWeight={600}>
-                  Complete
+                  {t("meaningAssociationExercise.complete")}
                 </Typography>
               </Box>
             </Box>

@@ -8,6 +8,7 @@
  */
 
 import React, { useSyncExternalStore, useContext, useRef } from "react";
+import { IntlMessageFormat } from "intl-messageformat";
 import { TranslationModeContext } from "../addons/translation-mode/contexts/TranslationModeContext";
 import { TranslationCaptureContext } from "../addons/translation-mode/contexts/TranslationCaptureContext";
 import { TranslationOverlay } from "../addons/translation-mode/components/TranslationOverlay";
@@ -119,13 +120,41 @@ function resolveNamespaced(localeData, targetNs, key) {
 }
 
 /**
- * Interpolate {param} placeholders in a translated string.
+ * Format a translated string the way next-intl does (ICU MessageFormat:
+ * plural/select/number and rich-text tags). Messages that are not valid ICU,
+ * or that lack required values, fall back to simple {param} replacement.
  */
-function interpolate(str, params) {
-  if (!params || typeof str !== "string") return str;
-  return str.replace(/\{(\w+)\}/g, (_, key) => {
-    return params[key] !== undefined ? String(params[key]) : `{${key}}`;
-  });
+const formatterCache = new Map();
+function getFormatter(str, locale) {
+  const cacheKey = `${locale}\u0000${str}`;
+  let formatter = formatterCache.get(cacheKey);
+  if (!formatter) {
+    formatter = new IntlMessageFormat(str, locale);
+    formatterCache.set(cacheKey, formatter);
+  }
+  return formatter;
+}
+
+function interpolate(str, params, locale = "en") {
+  if (typeof str !== "string") return str;
+  try {
+    const formatted = getFormatter(str, locale).format(params || {});
+    if (Array.isArray(formatted)) {
+      return formatted.every((part) => typeof part === "string")
+        ? formatted.join("")
+        : React.createElement(
+            React.Fragment,
+            null,
+            ...React.Children.toArray(formatted),
+          );
+    }
+    return formatted;
+  } catch {
+    if (!params) return str;
+    return str.replace(/\{(\w+)\}/g, (_, key) => {
+      return params[key] !== undefined ? String(params[key]) : `{${key}}`;
+    });
+  }
 }
 
 export const useTranslations = (namespace) => {
@@ -165,154 +194,172 @@ export const useTranslations = (namespace) => {
   const localeData = allTranslations[locale] || {};
   const fallbackData = allTranslations["en"] || {};
 
-  const t = (key, paramsOrDefault) => {
-    let targetNs = namespaces[0]; // default to first namespace
-    let resolveKey = key;
-    let params = null;
-    let defaultValue = undefined;
+  // next-intl returns a stable translator per locale/namespace; mirror that so
+  // components that list `t` in effect/memo dependencies don't re-run every render.
+  const namespaceKey = namespaces.join("|");
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  return React.useMemo(() => {
+    const t = (key, paramsOrDefault) => {
+      let targetNs = namespaces[0]; // default to first namespace
+      let resolveKey = key;
+      let params = null;
+      let defaultValue = undefined;
 
-    // Handle second argument: string = default value, object = params/options
-    if (typeof paramsOrDefault === "string") {
-      defaultValue = paramsOrDefault;
-    } else if (paramsOrDefault && typeof paramsOrDefault === "object") {
-      params = { ...paramsOrDefault };
-      // Extract ns option (namespace override)
-      if (params.ns) {
-        targetNs = params.ns;
-        delete params.ns;
+      // Handle second argument: string = default value, object = params/options
+      if (typeof paramsOrDefault === "string") {
+        defaultValue = paramsOrDefault;
+      } else if (paramsOrDefault && typeof paramsOrDefault === "object") {
+        params = { ...paramsOrDefault };
+        // Extract ns option (namespace override)
+        if (params.ns) {
+          targetNs = params.ns;
+          delete params.ns;
+        }
+        // Extract defaultValue option
+        if (params.defaultValue !== undefined) {
+          defaultValue = params.defaultValue;
+          delete params.defaultValue;
+        }
       }
-      // Extract defaultValue option
-      if (params.defaultValue !== undefined) {
-        defaultValue = params.defaultValue;
-        delete params.defaultValue;
+
+      // Handle colon-separated namespace prefix: "common:navigation.home"
+      const colonIdx = resolveKey.indexOf(":");
+      if (colonIdx > -1) {
+        targetNs = resolveKey.slice(0, colonIdx);
+        resolveKey = resolveKey.slice(colonIdx + 1);
       }
-    }
 
-    // Handle colon-separated namespace prefix: "common:navigation.home"
-    const colonIdx = resolveKey.indexOf(":");
-    if (colonIdx > -1) {
-      targetNs = resolveKey.slice(0, colonIdx);
-      resolveKey = resolveKey.slice(colonIdx + 1);
-    }
+      // Try current locale first, then fall back to English
+      const nsData = localeData[targetNs] || {};
+      let value = resolve(nsData, resolveKey);
+      if (value === undefined) {
+        const fallbackNsData = fallbackData[targetNs] || {};
+        value = resolve(fallbackNsData, resolveKey);
+      }
+      // Nested namespace support (e.g. "components.assignmentCard" → components.json → assignmentCard)
+      if (value === undefined) {
+        value = resolveNamespaced(localeData, targetNs, resolveKey);
+      }
+      if (value === undefined) {
+        value = resolveNamespaced(fallbackData, targetNs, resolveKey);
+      }
 
-    // Try current locale first, then fall back to English
-    const nsData = localeData[targetNs] || {};
-    let value = resolve(nsData, resolveKey);
-    if (value === undefined) {
-      const fallbackNsData = fallbackData[targetNs] || {};
-      value = resolve(fallbackNsData, resolveKey);
-    }
-    // Nested namespace support (e.g. "components.assignmentCard" → components.json → assignmentCard)
-    if (value === undefined) {
-      value = resolveNamespaced(localeData, targetNs, resolveKey);
-    }
-    if (value === undefined) {
-      value = resolveNamespaced(fallbackData, targetNs, resolveKey);
-    }
-
-    let result;
-    if (value === undefined) {
-      // Use default value if provided
-      if (defaultValue !== undefined) {
-        result = interpolate(defaultValue, params);
+      let result;
+      if (value === undefined) {
+        // Use default value if provided
+        if (defaultValue !== undefined) {
+          result = interpolate(defaultValue, params, locale);
+        } else {
+          // Fallback: return "namespace.key" so missing keys are visible
+          result = targetNs ? `${targetNs}.${resolveKey}` : resolveKey;
+        }
+      } else if (typeof value === "string") {
+        result = interpolate(value, params, locale);
       } else {
-        // Fallback: return "namespace.key" so missing keys are visible
-        result = targetNs ? `${targetNs}.${resolveKey}` : resolveKey;
+        // If the resolved value is an object (nested namespace), return the key
+        result = key;
       }
-    } else if (typeof value === "string") {
-      result = interpolate(value, params);
-    } else {
-      // If the resolved value is an object (nested namespace), return the key
-      result = key;
-    }
 
-    // Apply live panel override for the current display locale (if any).
-    // This makes edits in the Translations panel reflect instantly in the story.
-    const panelOverride = getTranslationOverride(targetNs, resolveKey, locale);
-    if (panelOverride !== undefined) {
-      result = interpolate(panelOverride, params);
-    }
+      // Apply live panel override for the current display locale (if any).
+      // This makes edits in the Translations panel reflect instantly in the story.
+      const panelOverride = getTranslationOverride(
+        targetNs,
+        resolveKey,
+        locale,
+      );
+      if (panelOverride !== undefined) {
+        result = interpolate(panelOverride, params, locale);
+      }
 
-    // Translation mode: wrap in TranslationOverlay for highlight/edit modes
-    if (
-      (mode === "highlight" || mode === "edit") &&
-      typeof result === "string"
-    ) {
-      // Capture translation for the panel (only once per key).
-      // Deferred via queueMicrotask to avoid calling setState during render,
-      // which triggers the "Cannot update a component while rendering" warning.
-      const captureKey = `${targetNs}:${resolveKey}`;
-      if (captureTranslation && !capturedKeys.current.has(captureKey)) {
-        capturedKeys.current.add(captureKey);
-        queueMicrotask(() => {
-          captureTranslation({
-            key: resolveKey,
+      // Translation mode: wrap in TranslationOverlay for highlight/edit modes
+      if (
+        (mode === "highlight" || mode === "edit") &&
+        typeof result === "string"
+      ) {
+        // Capture translation for the panel (only once per key).
+        // Deferred via queueMicrotask to avoid calling setState during render,
+        // which triggers the "Cannot update a component while rendering" warning.
+        const captureKey = `${targetNs}:${resolveKey}`;
+        if (captureTranslation && !capturedKeys.current.has(captureKey)) {
+          capturedKeys.current.add(captureKey);
+          queueMicrotask(() => {
+            captureTranslation({
+              key: resolveKey,
+              namespace: targetNs,
+              value: result,
+              usedIn: storyName ? [storyName] : undefined,
+            });
+          });
+        }
+
+        const element = React.createElement(
+          TranslationOverlay,
+          {
+            tKey: resolveKey,
             namespace: targetNs,
             value: result,
-            usedIn: storyName ? [storyName] : undefined,
-          });
+            storyName,
+          },
+          result,
+        );
+        // Return a Proxy that renders as React element but coerces to string
+        // for non-JSX contexts (aria-label, title attributes, etc.)
+        return new Proxy(element, {
+          get(target, prop) {
+            if (prop === Symbol.toPrimitive) {
+              return () => String(result);
+            }
+            if (prop === "toString" || prop === "valueOf") {
+              return () => String(result);
+            }
+            // Prevent React from treating this as a thenable/async component
+            if (prop === "then") {
+              return undefined;
+            }
+            return target[prop];
+          },
         });
       }
 
-      const element = React.createElement(
-        TranslationOverlay,
-        {
-          tKey: resolveKey,
-          namespace: targetNs,
-          value: result,
-          storyName,
-        },
-        result,
-      );
-      // Return a Proxy that renders as React element but coerces to string
-      // for non-JSX contexts (aria-label, title attributes, etc.)
-      return new Proxy(element, {
-        get(target, prop) {
-          if (prop === Symbol.toPrimitive) {
-            return () => String(result);
-          }
-          if (prop === "toString" || prop === "valueOf") {
-            return () => String(result);
-          }
-          // Prevent React from treating this as a thenable/async component
-          if (prop === "then") {
-            return undefined;
-          }
-          return target[prop];
-        },
-      });
-    }
-
-    return result;
-  };
-  // next-intl t.rich() for rich text translations
-  t.rich = (key, paramsOrDefault) => t(key, paramsOrDefault);
-  // next-intl t.raw() for raw values
-  t.raw = (key) => {
-    let targetNs = namespaces[0];
-    let resolveKey = key;
-    const colonIdx = resolveKey.indexOf(":");
-    if (colonIdx > -1) {
-      targetNs = resolveKey.slice(0, colonIdx);
-      resolveKey = resolveKey.slice(colonIdx + 1);
-    }
-    const nsData = localeData[targetNs] || {};
-    let value = resolve(nsData, resolveKey);
-    if (value === undefined) {
-      const fallbackNsData = fallbackData[targetNs] || {};
-      value = resolve(fallbackNsData, resolveKey);
-    }
-    if (value === undefined) {
-      value = resolveNamespaced(localeData, targetNs, resolveKey);
-    }
-    if (value === undefined) {
-      value = resolveNamespaced(fallbackData, targetNs, resolveKey);
-    }
-    return value;
-  };
-  // next-intl t.has() — checks whether a key resolves to a value
-  t.has = (key) => t.raw(key) !== undefined;
-  return t;
+      return result;
+    };
+    // next-intl t.rich() for rich text translations
+    t.rich = (key, paramsOrDefault) => t(key, paramsOrDefault);
+    // next-intl t.raw() for raw values
+    t.raw = (key) => {
+      let targetNs = namespaces[0];
+      let resolveKey = key;
+      const colonIdx = resolveKey.indexOf(":");
+      if (colonIdx > -1) {
+        targetNs = resolveKey.slice(0, colonIdx);
+        resolveKey = resolveKey.slice(colonIdx + 1);
+      }
+      const nsData = localeData[targetNs] || {};
+      let value = resolve(nsData, resolveKey);
+      if (value === undefined) {
+        const fallbackNsData = fallbackData[targetNs] || {};
+        value = resolve(fallbackNsData, resolveKey);
+      }
+      if (value === undefined) {
+        value = resolveNamespaced(localeData, targetNs, resolveKey);
+      }
+      if (value === undefined) {
+        value = resolveNamespaced(fallbackData, targetNs, resolveKey);
+      }
+      return value;
+    };
+    // next-intl t.has() — checks whether a key resolves to a value
+    t.has = (key) => t.raw(key) !== undefined;
+    return t;
+  }, [
+    locale,
+    namespaceKey,
+    _overrideVersion,
+    mode,
+    storyName,
+    captureTranslation,
+    getTranslation,
+  ]);
 };
 
 export const useLocale = () => {

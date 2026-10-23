@@ -5,6 +5,7 @@
  */
 
 import React, { useState, useMemo, useRef, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   TextField,
@@ -63,6 +64,7 @@ function getLogColor(level: LogLevel): string {
  * LogViewer component
  */
 export function LogViewer({ logs, onClear, autoScroll = true }: LogViewerProps) {
+  const t = useTranslations('components');
   const [searchTerm, setSearchTerm] = useState('');
   const [levelFilter, setLevelFilter] = useState<LogLevel | 'all'>('all');
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -100,32 +102,32 @@ export function LogViewer({ logs, onClear, autoScroll = true }: LogViewerProps) 
       {/* Filters */}
       <Stack direction="row" spacing={1} sx={{ mb: 2 }} flexWrap="wrap">
         <FormControl size="small" sx={{ minWidth: 120 }}>
-          <InputLabel id="log-level-filter-label">Level</InputLabel>
+          <InputLabel id="log-level-filter-label">{t('logViewer.level')}</InputLabel>
           <Select
             labelId="log-level-filter-label"
             id="log-level-filter"
             value={levelFilter}
-            label="Level"
+            label={t('logViewer.level')}
             onChange={(e) => setLevelFilter(e.target.value as LogLevel | 'all')}
           >
-            <MenuItem value="all">All ({logs.length})</MenuItem>
-            <MenuItem value="log">Log ({counts.log || 0})</MenuItem>
-            <MenuItem value="info">Info ({counts.info || 0})</MenuItem>
-            <MenuItem value="warn">Warn ({counts.warn || 0})</MenuItem>
-            <MenuItem value="error">Error ({counts.error || 0})</MenuItem>
-            <MenuItem value="debug">Debug ({counts.debug || 0})</MenuItem>
+            <MenuItem value="all">{t('logViewer.levelAll', { count: logs.length })}</MenuItem>
+            <MenuItem value="log">{t('logViewer.levelLog', { count: counts.log || 0 })}</MenuItem>
+            <MenuItem value="info">{t('logViewer.levelInfo', { count: counts.info || 0 })}</MenuItem>
+            <MenuItem value="warn">{t('logViewer.levelWarn', { count: counts.warn || 0 })}</MenuItem>
+            <MenuItem value="error">{t('logViewer.levelError', { count: counts.error || 0 })}</MenuItem>
+            <MenuItem value="debug">{t('logViewer.levelDebug', { count: counts.debug || 0 })}</MenuItem>
           </Select>
         </FormControl>
 
         <TextField
           size="small"
-          placeholder="Search logs..."
+          placeholder={t('logViewer.searchPlaceholder')}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           sx={{ flexGrow: 1, minWidth: 200 }}
         />
 
-        <Tooltip title="Clear all logs">
+        <Tooltip title={t('logViewer.clearAll')}>
           <IconButton size="small" onClick={onClear} color="error">
             <ClearIcon />
           </IconButton>
@@ -153,7 +155,7 @@ export function LogViewer({ logs, onClear, autoScroll = true }: LogViewerProps) 
           />
         )}
         <Chip
-          label={`${filteredLogs.length} / ${logs.length} shown`}
+          label={t('logViewer.shownCount', { shown: filteredLogs.length, total: logs.length })}
           size="small"
           variant="outlined"
         />
@@ -173,7 +175,7 @@ export function LogViewer({ logs, onClear, autoScroll = true }: LogViewerProps) 
       >
         {filteredLogs.length === 0 ? (
           <Typography variant="body2" color="text.secondary" textAlign="center" sx={{ py: 4 }}>
-            {logs.length === 0 ? 'No logs captured yet' : 'No logs match filters'}
+            {logs.length === 0 ? t('logViewer.noLogs') : t('logViewer.noMatches')}
           </Typography>
         ) : (
           filteredLogs.map((log, index) => (

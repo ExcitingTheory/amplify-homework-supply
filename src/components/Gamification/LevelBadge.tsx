@@ -55,13 +55,13 @@ export function getLevelColors(theme: Theme): Record<number, string> {
   };
 }
 
-const LEVEL_ICONS: Record<number, React.ReactElement> = {
-  1: <AutoStoriesIcon fontSize="small" />, // Beginner — open book
-  2: <TravelExploreIcon fontSize="small" />, // Explorer — globe search
-  3: <HistoryEduIcon fontSize="small" />, // Practitioner — quill
-  4: <Diversity3Icon fontSize="small" />, // Contributor — group
-  5: <EmojiObjectsIcon fontSize="small" />, // Expert — lightbulb
-  6: <SchoolIcon fontSize="small" />, // Master — graduation cap
+const LEVEL_ICONS: Record<number, typeof AutoStoriesIcon> = {
+  1: AutoStoriesIcon,
+  2: TravelExploreIcon,
+  3: HistoryEduIcon,
+  4: Diversity3Icon,
+  5: EmojiObjectsIcon,
+  6: SchoolIcon,
 };
 
 export function LevelBadge({
@@ -73,7 +73,7 @@ export function LevelBadge({
   const LEVEL_COLORS = React.useMemo(() => getLevelColors(theme), [theme]);
   const color = LEVEL_COLORS[level.level] || LEVEL_COLORS[1];
   const textColor = theme.palette.getContrastText(color);
-  const icon = LEVEL_ICONS[level.level] || LEVEL_ICONS[1];
+  const LevelIcon = LEVEL_ICONS[level.level] || LEVEL_ICONS[1];
   const isSmall = size === "small";
 
   const tooltipText =
@@ -99,9 +99,7 @@ export function LevelBadge({
             size={30}
             rimMetal={metal}
             fieldColor={color}
-            charge={React.cloneElement(icon, {
-              sx: { fontSize: 16, color: textColor },
-            })}
+            charge={<LevelIcon sx={{ fontSize: 16, color: textColor }} />}
             ariaLabel={tooltipText}
           />
         </Badge>
@@ -123,7 +121,7 @@ export function LevelBadge({
         }}
       >
         <Chip
-          icon={icon}
+          icon={<LevelIcon fontSize="small" />}
           label={`Lvl. ${level.level}`}
           size={isSmall ? "small" : "medium"}
           sx={(theme) => ({

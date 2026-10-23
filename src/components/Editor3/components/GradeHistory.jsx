@@ -15,6 +15,8 @@ import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import TrendingFlatIcon from "@mui/icons-material/TrendingFlat";
 import { getGradeCompletionLabel } from "../../../utils/gradeTiming";
 
+const ATTEMPT_DATE_FORMAT = { dateStyle: "short", timeStyle: "short" };
+
 export default function GradeHistory() {
   const t = useTranslations("workbook");
   const { unit, grade, recentGrades } = React.useContext(UnitContext);
@@ -161,8 +163,7 @@ export default function GradeHistory() {
                 attemptGrade?.createdAt,
               ).toLocaleString(undefined, {
                 timeZone,
-                dateStyle: "short",
-                timeStyle: "short",
+                ...ATTEMPT_DATE_FORMAT,
               });
 
               const roundedAccuracy =

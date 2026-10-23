@@ -132,17 +132,22 @@
     "cancel": "Cancel",
     "changePassword": {
       "button": "Change Password",
+      "confirmPasswordLabel": "Confirm New Password",
       "description": "Update your account password for security",
-      "heading": "Change Password"
+      "heading": "Change Password",
+      "newPasswordLabel": "New Password",
+      "oldPasswordLabel": "Old Password"
     },
     "completePriorUnit": "Complete Prior Unit",
     "completionRequired": "Completion Required",
     "confirmEmail": {
       "button": "Confirm Email",
+      "codeLabel": "Confirmation Code",
       "message": "Please check your email and enter the confirmation code to verify your email address.",
       "title": "Confirm your email"
     },
     "description": "View and update your profile information",
+    "email": "Email",
     "heading": "Profile",
     "identityId": "Identity Id",
     "languagePreference": {
@@ -327,5 +332,29 @@
     "start": "Start",
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
     "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?"
+  },
+  "gradeReviewDrawer": {
+    "cancel": "Cancel",
+    "currentLabel": "Current:",
+    "drop": "Drop",
+    "gradeLabel": "Grade (%)",
+    "gradeUpdated": "Grade updated to {score}%",
+    "keep": "Keep",
+    "lateDropped": "Late submission dropped",
+    "lateKept": "Late submission kept",
+    "lateRequiresReview": "Late submission requires review.",
+    "lateStatus": "Late: {status}",
+    "lateUpdateError": "Failed to update late submission",
+    "nextTooltip": "Next (→)",
+    "noGradeData": "No grade data found.",
+    "override": "Override",
+    "overrideError": "Failed to save grade override",
+    "overrideTitle": "Override Grade",
+    "position": "({current}/{total})",
+    "previousTooltip": "Previous (←)",
+    "save": "Save",
+    "saving": "Saving...",
+    "scoreRangeError": "Score must be between 0 and 100",
+    "studentLabel": "Student:"
   }
 }

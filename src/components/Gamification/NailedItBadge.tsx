@@ -8,6 +8,7 @@
 import React from 'react'
 import Chip from '@mui/material/Chip'
 import StarIcon from '@mui/icons-material/Star'
+import { useTranslations } from 'next-intl'
 
 export interface NailedItBadgeProps {
   /** Size variant. Defaults to 'small'. */
@@ -15,10 +16,11 @@ export interface NailedItBadgeProps {
 }
 
 export function NailedItBadge({ size = 'small' }: NailedItBadgeProps) {
+  const t = useTranslations('components')
   return (
     <Chip
       icon={<StarIcon />}
-      label="Nailed It"
+      label={t('nailedItBadge.label')}
       color="success"
       variant="filled"
       size={size}

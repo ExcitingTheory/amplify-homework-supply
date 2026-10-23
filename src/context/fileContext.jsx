@@ -361,9 +361,13 @@ const FilesProvider = ({ children }) => {
   // reload the current user attributes when the auth event is triggered
   // NOTE: This is now handled by the centralized AuthContext
 
+  // Subscribe on session identity changes only, not on every session object refresh.
+  const hasSession = !!session;
+  const sessionIdentityId = session?.identityId;
+
   React.useEffect(() => {
     // Wait for auth to be ready
-    if (authLoading || !user || !session) {
+    if (authLoading || !user || !hasSession) {
       return;
     }
 
@@ -420,7 +424,7 @@ const FilesProvider = ({ children }) => {
       console.log("[FilesContext] fetchFiles called");
       try {
         console.log("[FilesContext] User authenticated:", user.attributes.sub);
-        console.log("[FilesContext] Identity ID:", session.identityId);
+        console.log("[FilesContext] Identity ID:", sessionIdentityId);
         const myUserId = user.attributes.sub;
 
         if (!myUserId) {
@@ -565,7 +569,7 @@ const FilesProvider = ({ children }) => {
       }
       filesFetchedRef.current = false;
     };
-  }, [user, authLoading, session?.identityId]);
+  }, [user, authLoading, hasSession, sessionIdentityId]);
 
   // Subscribe to Document status changes
   React.useEffect(() => {
@@ -577,11 +581,35 @@ const FilesProvider = ({ children }) => {
         typeof doc.pageEmbeddings === "string"
           ? JSON.parse(doc.pageEmbeddings)
           : doc.pageEmbeddings;
+      let analysis;
+      if (doc.metadata) {
+        try {
+          const metadata =
+            typeof doc.metadata === "string"
+              ? JSON.parse(doc.metadata)
+              : doc.metadata;
+          const progress = metadata?.analysis;
+          if (progress && typeof progress === "object") {
+            analysis = {
+              state: progress.state,
+              done: progress.done,
+              totalPages: progress.totalPages,
+              failed: progress.failed,
+            };
+          }
+        } catch (error) {
+          console.error(
+            `[FilesContext] Invalid analysis metadata for Document ${doc.id}:`,
+            error,
+          );
+        }
+      }
 
       return {
         id: doc.id,
         s3Key: doc.s3Key,
         status: doc.status,
+        analysis,
         pageCount: doc.pageCount,
         pageEmbeddings: pageEmbeddings,
         embeddingsS3Key: doc.embeddingsS3Key,
@@ -606,7 +634,7 @@ const FilesProvider = ({ children }) => {
     }
 
     // Single observeQuery replaces list() + 3 manual subscriptions
-    // Exclude heavy fields: metadata, yjsSnapshot (extractedText moved to S3)
+    // Exclude heavy fields; metadata is included to expose lightweight analysis progress.
     const subscription = client.models.Document.observeQuery({
       selectionSet: [
         "id",
@@ -619,6 +647,7 @@ const FilesProvider = ({ children }) => {
         "filename",
         "s3Key",
         "status",
+        "metadata",
         "textExtractedAt",
         "pageCount",
         "fileSize",
@@ -753,7 +782,7 @@ const FilesProvider = ({ children }) => {
       state.documents,
       session,
       state.filesVersion,
-      // vectorStore is intentionally excluded - it's a ref and never changes
+      vectorStore, // stable instance from a ref, never changes
       state.vectorStoreReady,
       bumpFileVersion,
       bumpDocumentVersion,

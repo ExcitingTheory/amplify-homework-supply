@@ -18,7 +18,37 @@
     "noDictionaryAvailable": "Aucun dictionnaire disponible",
     "submit": "Soumettre",
     "inputMethodSelector": "Méthode de saisie",
-    "placeholder": "Saisissez votre réponse ici"
+    "placeholder": "Saisissez votre réponse ici",
+    "loadingAudio": "Chargement de l'audio...",
+    "progressDescription": "Pourcentage de consignes auxquelles il a été répondu.",
+    "accuracyDescription": "Pourcentage de réponses soumises marquées comme correctes.",
+    "inputMethodLabels": {
+      "audio": "Répondre à l'oral",
+      "text": "Saisir la réponse",
+      "writing": "Dessiner la réponse"
+    },
+    "recordYourAnswer": "Enregistrez votre réponse",
+    "defaultPromptByDefinition": "Indiquez les mots qui correspondent le mieux à la ou aux définitions suivantes :",
+    "defaultPromptByWord": "Veuillez définir le ou les mots suivants :"
+  },
+  "customAIComponent": {
+    "accuracyDescription": "Pourcentage de réponses soumises considérées comme correctes par l'IA.",
+    "completed": "Terminé",
+    "correct": "Correct",
+    "grading": "L'IA corrige votre réponse...",
+    "gradingError": "Une erreur s'est produite lors de la correction. Veuillez réessayer.",
+    "imageUploadHint": "Champ de téléversement d'image : soumettez une image pour une évaluation par l'IA",
+    "inputMethod": "Méthode de saisie",
+    "loading": "Chargement en cours...",
+    "modeAudio": "Répondre à l'oral",
+    "modeDrawing": "Dessiner la réponse",
+    "modeImage": "Téléverser une image",
+    "modeText": "Saisir la réponse",
+    "needsImprovement": "À améliorer",
+    "progressDescription": "Pourcentage de questions corrigées par l'IA auxquelles il a été répondu.",
+    "questionFallback": "Question {id}",
+    "score": "Score : {score}/100",
+    "yourAnswer": "Votre réponse"
   },
   "toolBarRoPlugin": {
     "fallbackText": "Format",
@@ -38,7 +68,10 @@
     "nextAssignment": "Devoir suivant",
     "retrying": "Nouveau essai en cours...",
     "sectionHeading": "Prochaines étapes",
-    "tryAgain": "Réessayer"
+    "tryAgain": "Réessayer",
+    "completedIn": "Terminé en {duration}",
+    "timeLimit": "Durée limite : {duration}",
+    "timeLimitWithCompletion": "Durée limite : {duration} • {completion}"
   },
   "quizComponent": {
     "gradeDisplay": "Note : {score} %"
@@ -59,7 +92,8 @@
     "submit": "Soumettre",
     "text": "Texte",
     "writing": "Écriture",
-    "yourAnswer": "Votre réponse"
+    "yourAnswer": "Votre réponse",
+    "answerVerifiedAndAccepted": "Réponse vérifiée et acceptée"
   },
   "gradeHistory": {
     "title": "Historique des notes",
@@ -91,6 +125,7 @@
     "showWaveformsDescription": "Afficher les formes d'onde visuelles pour le contenu audio",
     "feedbackPreferences": "Préférences de commentaires",
     "immediateFeedback": "Retour immédiat",
-    "immediateFeedbackDescription": "Afficher les commentaires corrects/incorrects immédiatement"
+    "immediateFeedbackDescription": "Afficher les commentaires corrects/incorrects immédiatement",
+    "accessibilityMoved": "Les paramètres d'accessibilité (mouvement réduit, contraste élevé) ont été déplacés vers votre <link>page des paramètres généraux</link>."
   }
 }

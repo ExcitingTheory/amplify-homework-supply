@@ -10,6 +10,7 @@
 import React from 'react'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
+import { useTranslations } from 'next-intl'
 import { SquadCrest } from './SquadCrest'
 import { sanitizeSvg } from '../../utils/sanitizeHtml'
 
@@ -37,6 +38,7 @@ export function ArmoriaShield({
   onEditCrest,
   showName = true,
 }: ArmoriaShieldProps) {
+  const t = useTranslations('components')
   // If we have a custom SVG, render it
   if (crestSvg) {
     return (
@@ -48,7 +50,7 @@ export function ArmoriaShield({
             '& svg': { width: '100%', height: '100%' },
           }}
           dangerouslySetInnerHTML={{ __html: sanitizeSvg(crestSvg) }}
-          aria-label={`${squadName} coat of arms`}
+          aria-label={t('armoriaShield.coatOfArmsLabel', { squadName })}
           role="img"
         />
         {showName && (
@@ -58,7 +60,7 @@ export function ArmoriaShield({
         )}
         {armoriaUnlocked && onEditCrest && (
           <Button size="small" onClick={onEditCrest} variant="text">
-            Edit Crest
+            {t('armoriaShield.editCrest')}
           </Button>
         )}
       </Box>
@@ -76,7 +78,7 @@ export function ArmoriaShield({
       />
       {armoriaUnlocked && onEditCrest && (
         <Button size="small" onClick={onEditCrest} variant="outlined" sx={{ mt: 0.5 }}>
-          Design Coat of Arms
+          {t('armoriaShield.designCoatOfArms')}
         </Button>
       )}
     </Box>

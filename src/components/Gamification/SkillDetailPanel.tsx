@@ -19,6 +19,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle'
 import LockIcon from '@mui/icons-material/Lock'
 import MenuBookIcon from '@mui/icons-material/MenuBook'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import { useTranslations } from 'next-intl'
 import type { SkillNodeData, SkillStatus } from './SkillTree'
 
 export interface UnitProgress {
@@ -47,18 +48,24 @@ const NEXT_STATUS: Partial<Record<SkillStatus, SkillStatus>> = {
   IN_PROGRESS: 'MASTERED',
 }
 
-const ACTION_LABELS: Partial<Record<SkillStatus, string>> = {
-  AVAILABLE: 'Start Learning',
-  IN_PROGRESS: 'Mark as Mastered',
-}
-
 export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [], allSkills = [], totalXP }: SkillDetailPanelProps) {
+  const t = useTranslations('components')
   const [loading, setLoading] = useState(false)
+  const actionLabels: Partial<Record<SkillStatus, string>> = {
+    AVAILABLE: t('skillDetailPanel.startLearning'),
+    IN_PROGRESS: t('skillDetailPanel.markAsMastered'),
+  }
+  const statusLabels: Record<SkillStatus, string> = {
+    LOCKED: t('skillDetailPanel.statusLocked'),
+    AVAILABLE: t('skillDetailPanel.statusAvailable'),
+    IN_PROGRESS: t('skillDetailPanel.statusInProgress'),
+    MASTERED: t('skillDetailPanel.statusMastered'),
+  }
 
   if (!skill) return null
 
   const nextStatus = NEXT_STATUS[skill.status]
-  const actionLabel = ACTION_LABELS[skill.status]
+  const actionLabel = actionLabels[skill.status]
 
   const handleAdvance = async () => {
     if (!nextStatus || !onAdvance) return
@@ -83,7 +90,7 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
           {skill.title}
         </Typography>
         <Chip
-          label={skill.status.replace('_', ' ')}
+          label={statusLabels[skill.status] ?? skill.status.replace('_', ' ')}
           size="small"
           color={
             skill.status === 'MASTERED' ? 'success' :
@@ -105,10 +112,13 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
           <EmojiEventsIcon sx={{ color: 'warning.main', fontSize: 20 }} />
           <Typography variant="body2">
-            Reward: <strong>+{skill.xpReward} XP</strong>
+            {t.rich('skillDetailPanel.reward', {
+              xp: skill.xpReward,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </Typography>
           {skill.status === 'MASTERED' && (
-            <Chip label="Earned!" size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
+            <Chip label={t('skillDetailPanel.earned')} size="small" color="success" variant="outlined" sx={{ height: 20, fontSize: '0.7rem' }} />
           )}
         </Box>
       )}
@@ -117,14 +127,14 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
       {skill.status === 'LOCKED' && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'text.disabled', mb: 2 }}>
           <LockIcon fontSize="small" />
-          <Typography variant="body2">Complete prerequisites to unlock</Typography>
+          <Typography variant="body2">{t('skillDetailPanel.completePrerequisites')}</Typography>
         </Box>
       )}
 
       {skill.status === 'MASTERED' && (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, color: 'success.main', mb: 2 }}>
           <CheckCircleIcon fontSize="small" />
-          <Typography variant="body2">Mastered!</Typography>
+          <Typography variant="body2">{t('skillDetailPanel.mastered')}</Typography>
         </Box>
       )}
 
@@ -133,7 +143,7 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
         <>
           <Divider sx={{ my: 1 }} />
           <Typography variant="overline" color="text.secondary" sx={{ mb: 0.5 }}>
-            Prerequisites
+            {t('skillDetailPanel.prerequisites')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
             {prereqNames.map((prereq) => (
@@ -156,7 +166,7 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
         <>
           <Divider sx={{ my: 1 }} />
           <Typography variant="overline" color="text.secondary" sx={{ mb: 1 }}>
-            Related Units
+            {t('skillDetailPanel.relatedUnits')}
           </Typography>
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5, mb: 2 }}>
             {unitProgress.map((unit) => (
@@ -183,7 +193,7 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
                   </Typography>
                   {unit.xpEarned > 0 && (
                     <Chip
-                      label={`+${unit.xpEarned} XP`}
+                      label={t('skillDetailPanel.xpEarned', { xp: unit.xpEarned })}
                       size="small"
                       sx={{ height: 18, fontSize: '0.65rem', bgcolor: 'warning.main', color: 'white' }}
                     />
@@ -205,12 +215,12 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
                     color={unit.completionPercent >= 100 ? 'success' : unit.completionPercent >= 50 ? 'primary' : 'warning'}
                   />
                   <Typography variant="caption" fontWeight={600} sx={{ minWidth: 36, textAlign: 'right' }}>
-                    {Math.round(unit.completionPercent)}%
+                    {t('skillDetailPanel.percent', { percent: Math.round(unit.completionPercent) })}
                   </Typography>
                 </Box>
                 {unit.highestGrade > 0 && (
                   <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    Best grade: {Math.round(unit.highestGrade)}%
+                    {t('skillDetailPanel.bestGrade', { grade: Math.round(unit.highestGrade) })}
                   </Typography>
                 )}
               </Box>
@@ -226,7 +236,10 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
             <EmojiEventsIcon sx={{ color: 'warning.main' }} />
             <Typography variant="body2">
-              Total XP earned: <strong>{totalXP}</strong>
+              {t.rich('skillDetailPanel.totalXpEarned', {
+                xp: totalXP,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </Typography>
           </Box>
         </>
@@ -249,7 +262,7 @@ export function SkillDetailPanel({ skill, onAdvance, onClose, unitProgress = [],
 
       {onClose && (
         <Button size="small" onClick={onClose} sx={{ display: 'block', mx: 'auto' }}>
-          Close
+          {t('skillDetailPanel.close')}
         </Button>
       )}
     </Box>

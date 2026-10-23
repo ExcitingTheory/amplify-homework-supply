@@ -61,6 +61,8 @@ import {
   TableNode,
 } from "./TableNode";
 
+const ZERO_WIDTH_SPACE = "\u200B";
+
 const NO_CELLS = [];
 
 function $createSelectAll() {
@@ -301,7 +303,7 @@ function TableActionMenu({
   sortingOptions,
 }) {
   const t = useTranslations("editor.shared");
-  const dropDownRef = (useRef < null) | (HTMLDivElement > null);
+  const dropDownRef = useRef(null);
   const coords = cellCoordMap.get(cell.id);
   const [x, y] = coords || [0, 0];
 
@@ -1145,6 +1147,7 @@ export default function TableComponent({ nodeKey, rows: rawRows, theme }) {
     rows,
     primarySelectedCellID,
     cellCoordMap,
+    updateTableNode,
   ]);
 
   const updateCellsByID = useCallback(
@@ -2149,7 +2152,7 @@ export default function TableComponent({ nodeKey, rows: rawRows, theme }) {
           onClick={addColumns}
           aria-label={t("table.addColumn")}
         >
-          {"\u200B"}
+          {ZERO_WIDTH_SPACE}
         </button>
       )}
       {isEditable && (
@@ -2159,7 +2162,7 @@ export default function TableComponent({ nodeKey, rows: rawRows, theme }) {
           ref={addRowsRef}
           aria-label={t("table.addRow")}
         >
-          {"\u200B"}
+          {ZERO_WIDTH_SPACE}
         </button>
       )}
       {resizingID !== null && (

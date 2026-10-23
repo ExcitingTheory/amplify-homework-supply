@@ -8,6 +8,7 @@ import React, { useState, useCallback, useMemo } from 'react'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import { useLexicalNodeSelection } from '@lexical/react/useLexicalNodeSelection'
 import { $getNodeByKey } from 'lexical'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
@@ -31,6 +32,7 @@ export default function ArmorEditorBlock({
   isEditable,
   className,
 }: ArmorEditorBlockProps) {
+  const t = useTranslations('editor.shared')
   const [editor] = useLexicalComposerContext()
   const [isSelected, setSelected, clearSelection] = useLexicalNodeSelection(nodeKey)
   const [dialogOpen, setDialogOpen] = useState(false)
@@ -92,7 +94,7 @@ export default function ArmorEditorBlock({
           sx={{ '& svg': { width: 120, height: 120 } }}
         />
         {isEditable && (
-          <Tooltip title="Edit coat of arms">
+          <Tooltip title={t('armorEditorBlock.editCoatOfArms')}>
             <IconButton
               onClick={(e) => {
                 e.stopPropagation()

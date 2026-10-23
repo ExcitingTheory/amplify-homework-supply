@@ -120,6 +120,16 @@ function requireAuth(event: any) {
 }
 
 export const handler: Handler = async (event: any, context: any) => {
+  if (event.workflowMode === "generateEmbeddingsForAnalysis") {
+    if (typeof event.fileID !== "string" || !event.fileID) {
+      throw new Error("Workflow embedding request is missing fileID");
+    }
+    return handleGenerateEmbeddings({
+      fileID: event.fileID,
+      updateDocumentStatus: false,
+    });
+  }
+
   // Extract operation name from AppSync event
   const operationName = event.info?.fieldName || event.fieldName;
   const args = event.arguments || {};
@@ -176,7 +186,7 @@ async function handleGenerateEmbedding(args: any): Promise<any> {
 }
 
 async function handleGenerateEmbeddings(args: any): Promise<any> {
-  const { fileID } = args;
+  const { fileID, updateDocumentStatus = true } = args;
 
   try {
     console.log("[Generate Embeddings] Starting for fileID:", fileID);
@@ -465,10 +475,10 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       }
     }
 
-    // 5. Update Document status
-    console.log(
-      '[Generate Embeddings] Updating document status to "embedded"...',
-    );
+    if (updateDocumentStatus) {
+      console.log(
+        '[Generate Embeddings] Updating document status to "embedded"...',
+      );
 
     const updateDocumentMutation = /* GraphQL */ `
       mutation UpdateDocument($input: UpdateDocumentInput!) {
@@ -515,6 +525,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
         error,
       );
       // Don't fail the whole operation if status update fails
+    }
     }
 
     console.log(

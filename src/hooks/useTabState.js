@@ -163,7 +163,7 @@ export function useTabState(options = {}) {
     }, 300); // 300ms debounce
 
     return () => clearTimeout(timeoutId);
-  }, [state, syncToURL, pathname, queryObject]);
+  }, [state, syncToURL, pathname, queryObject, router]);
 
   // Listen for URL changes from external sources (browser back/forward, manual URL edits)
   useEffect(() => {

@@ -39,6 +39,7 @@ import {
     QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
 import { getAmplifyClient } from '../utils/amplifyClient';
+import { getParsedContentModeration } from '../utils/parsedContentModeration';
 import DictionaryContext from '../context/dictionaryContext';
 import { importQuestionsToUnit, updateQuestionItem } from '../utils/questionImportUtils';
 
@@ -424,6 +425,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         objectives,
     } = state;
     const importing = importStatus === 'importing';
+    const moderation = getParsedContentModeration(document);
     
     // Use DictionaryContext to access existing questions
     const { questionBank } = useContext(DictionaryContext) || { questionBank: {} };
@@ -454,23 +456,6 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         estimateSize: () => 60,
         overscan: 5,
     });
-
-    // Fetch ParsedContent and Document
-    useEffect(() => {
-        loadParsedContent();
-        
-        const client = getAmplifyClient();
-        const subscription = client.models.ParsedContent.observeQuery().subscribe({
-            next: ({ items }) => {
-                // Filter out null items that can appear during subscription updates
-                const validItems = items.filter((item: any) => item != null && item.id != null);
-                loadParsedContent();
-            },
-            error: (error: any) => console.error('[QuestionsReview2] ParsedContent subscription error:', error)
-        });
-        
-        return () => subscription.unsubscribe();
-    }, [documentId]);
 
     const loadParsedContent = useCallback(async () => {
         try {
@@ -557,6 +542,23 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         }
     }, [documentId]);
 
+    // Fetch ParsedContent and Document
+    useEffect(() => {
+        loadParsedContent();
+        
+        const client = getAmplifyClient();
+        const subscription = client.models.ParsedContent.observeQuery().subscribe({
+            next: ({ items }) => {
+                // Filter out null items that can appear during subscription updates
+                const validItems = items.filter((item: any) => item != null && item.id != null);
+                loadParsedContent();
+            },
+            error: (error: any) => console.error('[QuestionsReview2] ParsedContent subscription error:', error)
+        });
+        
+        return () => subscription.unsubscribe();
+    }, [loadParsedContent]);
+
     const toggleItem = useCallback((index: number) => {
         dispatch({ type: 'TOGGLE_SELECT', index });
     }, []);
@@ -590,6 +592,12 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             console.error('Missing parsedContent or unitId');
             return;
         }
+        if (moderation.blocked) {
+            console.error(
+                moderation.error || 'Moderation flagged this document; import is blocked',
+            );
+            return;
+        }
         
         dispatch({ type: 'IMPORT_START' });
         
@@ -615,7 +623,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         
         // Reload to show updated status
         loadParsedContent();
-    }, [parsedContent, unitId, selectedItems, owner, identityId, onImportComplete, loadParsedContent]);
+    }, [parsedContent, unitId, selectedItems, owner, identityId, onImportComplete, loadParsedContent, moderation.blocked, moderation.error]);
 
     if (loading) {
         return (
@@ -652,6 +660,18 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         {t('questionsReview.from')}: {document.filename}
                         {document.pageCount && ` (${document.pageCount} ${t('questionsReview.pages')})`}
                     </Typography>
+                )}
+
+                {moderation.blocked && (
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                        {moderation.error
+                            ? t('moderationPanel.alertMessage')
+                            : moderation.categories.length > 0
+                                ? t('moderationBadge.flaggedWithCategories', {
+                                    categories: moderation.categories.join(', '),
+                                })
+                                : t('moderationPanel.alertMessage')}
+                    </Alert>
                 )}
                 
                 {alreadyImported && (
@@ -740,7 +760,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                         variant="contained"
                         startIcon={<ImportIcon />}
                         onClick={handleImport}
-                        disabled={importing || selectedItems.size === 0}
+                        disabled={moderation.blocked || importing || selectedItems.size === 0}
                     >
                         {t('questionsReview.importToQuestionBank')}
                     </Button>

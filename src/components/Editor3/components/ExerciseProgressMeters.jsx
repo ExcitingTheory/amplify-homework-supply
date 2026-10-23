@@ -4,6 +4,7 @@ import Tooltip from "@mui/material/Tooltip";
 import Typography from "@mui/material/Typography";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import DonutLargeIcon from "@mui/icons-material/DonutLarge";
+import { useTranslations } from "next-intl";
 
 import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
@@ -12,8 +13,14 @@ function clampPercent(value) {
 }
 
 function MeterRow({ icon, value, color, neutral, label, description }) {
+  const t = useTranslations("editor.shared");
   const percent = clampPercent(value);
-  const valueDescription = `${label}: ${Math.round(percent)}%. ${description}`;
+  const roundedPercent = Math.round(percent);
+  const valueDescription = t("exerciseProgressMeters.valueDescription", {
+    label,
+    percent: roundedPercent,
+    description,
+  });
 
   return (
     <Box
@@ -24,7 +31,13 @@ function MeterRow({ icon, value, color, neutral, label, description }) {
         columnGap: 2,
       }}
     >
-      <Tooltip title={`${label}. ${description}`} arrow>
+      <Tooltip
+        title={t("exerciseProgressMeters.meterDescription", {
+          label,
+          description,
+        })}
+        arrow
+      >
         <Box
           component="span"
           sx={{ display: "inline-flex", justifySelf: "center" }}
@@ -52,20 +65,24 @@ function MeterRow({ icon, value, color, neutral, label, description }) {
           color="text.secondary"
           sx={{ minWidth: 34, textAlign: "right" }}
         >
-          {Math.round(percent)}%
+          {t("exerciseProgressMeters.percentValue", {
+            percent: roundedPercent,
+          })}
         </Typography>
       </Tooltip>
     </Box>
   );
 }
 
+/** @param {{ percentComplete?: number, accuracy?: number, hasAttempts?: boolean, progressDescription?: string, accuracyDescription?: string }} props */
 export function ExerciseProgressMeters({
   percentComplete = 0,
   accuracy = 0,
   hasAttempts = false,
-  progressDescription = "Percentage of required answers attempted.",
-  accuracyDescription = "Percentage of required answers selected correctly.",
+  progressDescription,
+  accuracyDescription,
 }) {
+  const t = useTranslations("editor.shared");
   const accuracyColor =
     accuracy >= 80 ? "success" : accuracy >= 60 ? "warning" : "error";
 
@@ -75,8 +92,11 @@ export function ExerciseProgressMeters({
         icon={<DonutLargeIcon sx={{ fontSize: 16, color: "text.disabled" }} />}
         value={percentComplete}
         color="primary"
-        label="Progress"
-        description={progressDescription}
+        label={t("exerciseProgressMeters.progressLabel")}
+        description={
+          progressDescription ??
+          t("exerciseProgressMeters.defaultProgressDescription")
+        }
       />
       <Box sx={{ height: 4 }} />
       <MeterRow
@@ -84,8 +104,11 @@ export function ExerciseProgressMeters({
         value={accuracy}
         color={accuracyColor}
         neutral={!hasAttempts}
-        label="Correct"
-        description={accuracyDescription}
+        label={t("exerciseProgressMeters.correctLabel")}
+        description={
+          accuracyDescription ??
+          t("exerciseProgressMeters.defaultAccuracyDescription")
+        }
       />
     </Box>
   );

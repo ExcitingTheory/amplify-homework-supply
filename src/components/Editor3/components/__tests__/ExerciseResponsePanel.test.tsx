@@ -16,10 +16,14 @@ describe("ExerciseResponsePanel", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Cancel submission" }),
+      screen.getByRole("button", {
+        name: "exerciseResponsePanel.cancelSubmission",
+      }),
     ).toBeEnabled();
     expect(screen.getByText("Playback controls")).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /Submit/ })).toBeEnabled();
+    expect(
+      screen.getByRole("button", { name: /exerciseResponsePanel\.submit/ }),
+    ).toBeEnabled();
     expect(screen.getByText("7")).toBeInTheDocument();
   });
 
@@ -37,8 +41,14 @@ describe("ExerciseResponsePanel", () => {
       </ExerciseResponsePanel>,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: "Cancel submission" }));
-    fireEvent.click(screen.getByRole("button", { name: /Submit/ }));
+    fireEvent.click(
+      screen.getByRole("button", {
+        name: "exerciseResponsePanel.cancelSubmission",
+      }),
+    );
+    fireEvent.click(
+      screen.getByRole("button", { name: /exerciseResponsePanel\.submit/ }),
+    );
 
     expect(onCancel).toHaveBeenCalledOnce();
     expect(onSubmit).toHaveBeenCalledOnce();
@@ -52,7 +62,9 @@ describe("ExerciseResponsePanel", () => {
     );
 
     expect(
-      screen.getByRole("button", { name: "Cancel submission" }),
+      screen.getByRole("button", {
+        name: "exerciseResponsePanel.cancelSubmission",
+      }),
     ).toBeDisabled();
   });
 });

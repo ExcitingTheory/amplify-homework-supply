@@ -20,20 +20,28 @@ import Button from "@mui/material/Button";
 import Collapse from "@mui/material/Collapse";
 import AutoStoriesIcon from "@mui/icons-material/AutoStories";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import { useTranslations } from "next-intl";
 import { NarrativeReader } from "../Editor3/NarrativeReader";
 
-const stakeLabels: Record<string, string> = {
-  loseStreakFreeze: "Lose a streak freeze",
-  loseXP: "Lose XP on failure",
-  resetStreak: "Reset streak",
-  loseLevel: "Lose a level",
-  loseBadge: "Lose most recent badge",
-  loseBadgeByRarity: "Lose badge by rarity",
-  streakMissXPPenalty: "Missed streak days cost XP",
-  loseCosmetics: "Cosmetic penalty",
-};
+type Translate = ReturnType<typeof useTranslations<"components">>;
 
-function normalizeStakes(stakes?: string): {
+function getStakeLabels(t: Translate): Record<string, string> {
+  return {
+    loseStreakFreeze: t("campaignBriefing.stakeLoseStreakFreeze"),
+    loseXP: t("campaignBriefing.stakeLoseXP"),
+    resetStreak: t("campaignBriefing.stakeResetStreak"),
+    loseLevel: t("campaignBriefing.stakeLoseLevel"),
+    loseBadge: t("campaignBriefing.stakeLoseBadge"),
+    loseBadgeByRarity: t("campaignBriefing.stakeLoseBadgeByRarity"),
+    streakMissXPPenalty: t("campaignBriefing.stakeStreakMissXPPenalty"),
+    loseCosmetics: t("campaignBriefing.stakeLoseCosmetics"),
+  };
+}
+
+function normalizeStakes(
+  t: Translate,
+  stakes?: string,
+): {
   plain?: string;
   items?: string[];
 } {
@@ -44,12 +52,14 @@ function normalizeStakes(stakes?: string): {
     if (!parsed || typeof parsed !== "object") return { plain: stakes };
 
     const items: string[] = [];
-    for (const [key, label] of Object.entries(stakeLabels)) {
+    for (const [key, label] of Object.entries(getStakeLabels(t))) {
       if (parsed[key] === true) items.push(label);
     }
 
     if (parsed.loseXP === true && typeof parsed.xpLossAmount === "number") {
-      items.push(`XP loss amount: ${parsed.xpLossAmount}`);
+      items.push(
+        t("campaignBriefing.xpLossAmount", { amount: parsed.xpLossAmount }),
+      );
     }
 
     if (
@@ -57,7 +67,9 @@ function normalizeStakes(stakes?: string): {
       typeof parsed.cosmeticPenaltyDays === "number"
     ) {
       items.push(
-        `Cosmetic penalty duration: ${parsed.cosmeticPenaltyDays} day(s)`,
+        t("campaignBriefing.cosmeticPenaltyDuration", {
+          days: parsed.cosmeticPenaltyDays,
+        }),
       );
     }
 
@@ -67,14 +79,18 @@ function normalizeStakes(stakes?: string): {
       parsed.badgeRarityTarget.trim()
     ) {
       const rarity = parsed.badgeRarityTarget.trim();
-      items.push(`Badge rarity target: ${rarity}`);
+      items.push(t("campaignBriefing.badgeRarityTarget", { rarity }));
     }
 
     if (
       parsed.streakMissXPPenalty === true &&
       typeof parsed.streakMissXPPerDay === "number"
     ) {
-      items.push(`Missed streak penalty: ${parsed.streakMissXPPerDay} XP/day`);
+      items.push(
+        t("campaignBriefing.missedStreakPenalty", {
+          xpPerDay: parsed.streakMissXPPerDay,
+        }),
+      );
     }
 
     if (items.length > 0) return { items };
@@ -134,9 +150,10 @@ export function CampaignBriefing({
   collapsible = false,
   defaultExpanded = false,
 }: CampaignBriefingProps) {
+  const t = useTranslations("components");
   const normalizedStakes = React.useMemo(
-    () => normalizeStakes(stakes),
-    [stakes],
+    () => normalizeStakes(t, stakes),
+    [t, stakes],
   );
   const [expanded, setExpanded] = React.useState(defaultExpanded);
 
@@ -189,7 +206,9 @@ export function CampaignBriefing({
               onClick={() => setExpanded((v) => !v)}
               sx={{ mt: 0.5, p: 0, fontSize: "0.75rem" }}
             >
-              {expanded ? "Collapse" : "Read more"}
+              {expanded
+                ? t("campaignBriefing.collapse")
+                : t("campaignBriefing.readMore")}
             </Button>
             <Collapse in={expanded}>
               <Box
@@ -212,10 +231,10 @@ export function CampaignBriefing({
                       color="text.secondary"
                       sx={{ fontSize: "0.65rem" }}
                     >
-                      Stakes
+                      {t("campaignBriefing.stakes")}
                     </Typography>
                     {(() => {
-                      const ns = normalizeStakes(stakes);
+                      const ns = normalizeStakes(t, stakes);
                       return ns.items ? (
                         <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
                           {ns.items.map((item) => (
@@ -269,7 +288,7 @@ export function CampaignBriefing({
               color="text.secondary"
               sx={{ letterSpacing: 1.5, fontSize: "0.65rem" }}
             >
-              Setting
+              {t("campaignBriefing.setting")}
             </Typography>
             <Typography
               variant="body1"
@@ -287,7 +306,7 @@ export function CampaignBriefing({
               color="text.secondary"
               sx={{ letterSpacing: 1.5, fontSize: "0.65rem" }}
             >
-              Stakes
+              {t("campaignBriefing.stakes")}
             </Typography>
             {normalizedStakes.items ? (
               <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
@@ -322,7 +341,7 @@ export function CampaignBriefing({
                 color="text.secondary"
                 sx={{ letterSpacing: 1.5, fontSize: "0.65rem" }}
               >
-                Mission Briefing
+                {t("campaignBriefing.missionBriefing")}
               </Typography>
               <Typography
                 variant="body1"
@@ -344,7 +363,7 @@ export function CampaignBriefing({
             <NarrativeReader
               contentJson={contentJson}
               maxHeight={contentMaxHeight}
-              ariaLabel={`${title} narrative content`}
+              ariaLabel={t("campaignBriefing.narrativeContentLabel", { title })}
               padding="0.5rem 0"
             />
           </>

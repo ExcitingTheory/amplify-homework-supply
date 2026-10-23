@@ -6,6 +6,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -22,6 +23,7 @@ import PauseIcon from "@mui/icons-material/Pause";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 // ============================================================================
 // Types
@@ -54,21 +56,36 @@ export interface BossBattleProgressProps {
 // Helpers
 // ============================================================================
 
-function getTimeRemaining(deadline: string): string {
+function getTimeRemaining(
+  deadline: string,
+  t: ReturnType<typeof useTranslations>,
+): { expired: boolean; text: string } {
   const now = new Date();
   const end = new Date(deadline);
   const diffMs = end.getTime() - now.getTime();
 
-  if (diffMs <= 0) return "Expired";
+  if (diffMs <= 0)
+    return { expired: true, text: t("bossBattleProgress.expired") };
 
   const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diffMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
 
-  if (days > 0) return `${days}d ${hours}h remaining`;
-  if (hours > 0) return `${hours}h remaining`;
+  if (days > 0)
+    return {
+      expired: false,
+      text: t("bossBattleProgress.daysHoursRemaining", { days, hours }),
+    };
+  if (hours > 0)
+    return {
+      expired: false,
+      text: t("bossBattleProgress.hoursRemaining", { hours }),
+    };
 
   const minutes = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-  return `${minutes}m remaining`;
+  return {
+    expired: false,
+    text: t("bossBattleProgress.minutesRemaining", { minutes }),
+  };
 }
 
 // ============================================================================
@@ -91,11 +108,13 @@ export function BossBattleProgress({
   onDelete,
   onEdit,
 }: BossBattleProgressProps) {
+  const t = useTranslations("components");
   const progress =
     targetXP > 0 ? Math.min((currentXP / targetXP) * 100, 100) : 0;
   const isComplete = currentXP >= targetXP;
-  const timeRemaining = deadline ? getTimeRemaining(deadline) : null;
-  const isExpired = timeRemaining === "Expired";
+  const remaining = deadline ? getTimeRemaining(deadline, t) : null;
+  const timeRemaining = remaining?.text ?? null;
+  const isExpired = remaining?.expired ?? false;
   const hasStarted = !startDate || new Date(startDate).getTime() <= Date.now();
 
   // Sort contributors by XP desc, take top 5
@@ -115,7 +134,7 @@ export function BossBattleProgress({
           {isComplete && (
             <Chip
               icon={<EmojiEventsIcon />}
-              label="Complete!"
+              label={t("bossBattleProgress.complete")}
               size="small"
               variant="status"
               color="success"
@@ -124,7 +143,11 @@ export function BossBattleProgress({
           )}
 
           <Chip
-            label={active ? "Active" : "Inactive"}
+            label={
+              active
+                ? t("bossBattleProgress.active")
+                : t("bossBattleProgress.inactive")
+            }
             size="small"
             color={active ? "primary" : "default"}
             sx={{ height: 22, fontSize: "0.65rem" }}
@@ -139,11 +162,21 @@ export function BossBattleProgress({
             />
           )}
 
-          <Tooltip title={active ? "Pause" : "Activate"}>
+          <Tooltip
+            title={
+              active
+                ? t("bossBattleProgress.pause")
+                : t("bossBattleProgress.activate")
+            }
+          >
             <IconButton
               size="small"
               onClick={() => onToggleActive?.(id, !active)}
-              aria-label={active ? "Pause battle" : "Activate battle"}
+              aria-label={
+                active
+                  ? t("bossBattleProgress.pauseBattle")
+                  : t("bossBattleProgress.activateBattle")
+              }
             >
               {active ? (
                 <PauseIcon fontSize="small" />
@@ -153,22 +186,22 @@ export function BossBattleProgress({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Delete">
+          <Tooltip title={t("bossBattleProgress.delete")}>
             <IconButton
               size="small"
               onClick={() => onDelete?.(id)}
-              aria-label="Delete battle"
+              aria-label={t("bossBattleProgress.deleteBattle")}
             >
               <DeleteIcon fontSize="small" />
             </IconButton>
           </Tooltip>
 
           {onEdit && (
-            <Tooltip title="Edit">
+            <Tooltip title={t("bossBattleProgress.edit")}>
               <IconButton
                 size="small"
                 onClick={() => onEdit(id)}
-                aria-label="Edit battle"
+                aria-label={t("bossBattleProgress.editBattle")}
               >
                 <EditIcon fontSize="small" />
               </IconButton>
@@ -184,7 +217,10 @@ export function BossBattleProgress({
             sx={{ mb: 0.5 }}
           >
             <Typography variant="caption" color="text.secondary">
-              {currentXP.toLocaleString()} / {targetXP.toLocaleString()} XP
+              {t("bossBattleProgress.xpProgress", {
+                currentXP: currentXP.toLocaleString(),
+                targetXP: targetXP.toLocaleString(),
+              })}
             </Typography>
             <Typography variant="caption" color="text.secondary">
               {Math.round(progress)}%
@@ -206,7 +242,9 @@ export function BossBattleProgress({
           <Stack direction="row" spacing={1} sx={{ mb: 1 }} flexWrap="wrap">
             {startDate && !hasStarted && (
               <Typography variant="caption" color="info.main">
-                🚀 Starts {new Date(startDate).toLocaleDateString()}
+                {t("bossBattleProgress.starts", {
+                  date: new Date(startDate).toLocaleDateString(),
+                })}
               </Typography>
             )}
             {timeRemaining && (
@@ -214,7 +252,9 @@ export function BossBattleProgress({
                 variant="caption"
                 color={isExpired ? "error.main" : "text.secondary"}
               >
-                {isExpired ? "⏰ Deadline passed" : `⏳ ${timeRemaining}`}
+                {isExpired
+                  ? t("bossBattleProgress.deadlinePassed")
+                  : t("bossBattleProgress.timeRemaining", { timeRemaining })}
               </Typography>
             )}
           </Stack>
@@ -236,7 +276,7 @@ export function BossBattleProgress({
             color="warning.main"
             sx={{ display: "block", mb: 1 }}
           >
-            Stakes: {stakes}
+            {t("bossBattleProgress.stakes", { stakes })}
           </Typography>
         )}
 
@@ -248,18 +288,23 @@ export function BossBattleProgress({
               fontWeight={600}
               sx={{ display: "block", mb: 0.5 }}
             >
-              Top Contributors
+              {t("bossBattleProgress.topContributors")}
             </Typography>
             <Stack direction="row" spacing={1} flexWrap="wrap">
               {topContributors.map((c) => (
                 <Chip
                   key={c.studentId}
                   avatar={
-                    <Avatar sx={{ width: 20, height: 20, fontSize: "0.6rem" }}>
+                    <Avatar component={ProfileAvatarLink} username={c.studentId} displayName={c.displayName} sx={{ width: 20, height: 20, fontSize: "0.6rem" }}>
                       {c.displayName?.[0] ?? "?"}
                     </Avatar>
                   }
-                  label={`${c.displayName ?? "Unknown"} (${c.xpContributed} XP)`}
+                  label={t("bossBattleProgress.contributorLabel", {
+                    name:
+                      c.displayName ??
+                      t("bossBattleProgress.unknownContributor"),
+                    xp: c.xpContributed,
+                  })}
                   size="small"
                   variant="outlined"
                   sx={{ height: 24, fontSize: "0.65rem" }}

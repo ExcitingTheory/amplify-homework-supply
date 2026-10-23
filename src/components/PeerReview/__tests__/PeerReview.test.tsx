@@ -9,6 +9,12 @@ import { PeerReviewChat } from '../PeerReviewChat'
 import { RoomInvite } from '../RoomInvite'
 import type { RoomMessage } from '../../../yjs/PeerReviewRoomProvider'
 
+// Keep interpolated values observable: render "key(value,...)" when values are passed.
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}(${Object.values(values).join(',')})` : key,
+}))
+
 describe('PeerReviewChat', () => {
   const baseProps = {
     messages: [] as RoomMessage[],
@@ -21,7 +27,7 @@ describe('PeerReviewChat', () => {
 
   it('renders empty state when no messages', () => {
     render(<PeerReviewChat {...baseProps} />)
-    expect(screen.getByText(/No messages yet/)).toBeDefined()
+    expect(screen.getByText('peerReview.noMessages')).toBeDefined()
   })
 
   it('renders chat messages', () => {
@@ -68,7 +74,7 @@ describe('PeerReviewChat', () => {
       },
     ]
     render(<PeerReviewChat {...baseProps} messages={messages} />)
-    expect(screen.getByText('AI Assistant')).toBeDefined()
+    expect(screen.getByText('peerReview.aiAssistant')).toBeDefined()
     expect(screen.getByText('Consider checking your formula.')).toBeDefined()
   })
 
@@ -79,7 +85,7 @@ describe('PeerReviewChat', () => {
         typingPeers={[{ username: 'bob@test.com', role: 'student', displayName: 'Bob' }]}
       />,
     )
-    expect(screen.getByText(/Bob is typing/)).toBeDefined()
+    expect(screen.getByText('peerReview.typing(Bob,1)')).toBeDefined()
   })
 
   it('shows multiple typing peers', () => {
@@ -92,14 +98,14 @@ describe('PeerReviewChat', () => {
         ]}
       />,
     )
-    expect(screen.getByText(/Bob, Carol are typing/)).toBeDefined()
+    expect(screen.getByText('peerReview.typing(Bob, Carol,2)')).toBeDefined()
   })
 
   it('calls onSendMessage when send button clicked', () => {
     const onSendMessage = vi.fn()
     render(<PeerReviewChat {...baseProps} onSendMessage={onSendMessage} />)
 
-    const input = screen.getByPlaceholderText(/Type a message/)
+    const input = screen.getByPlaceholderText('peerReview.messagePlaceholder')
     fireEvent.change(input, { target: { value: 'Hello!' } })
     fireEvent.click(screen.getByLabelText('actions.send'))
 
@@ -110,7 +116,7 @@ describe('PeerReviewChat', () => {
     const onSendMessage = vi.fn()
     render(<PeerReviewChat {...baseProps} onSendMessage={onSendMessage} />)
 
-    const input = screen.getByPlaceholderText(/Type a message/)
+    const input = screen.getByPlaceholderText('peerReview.messagePlaceholder')
     fireEvent.change(input, { target: { value: 'Hi there' } })
     fireEvent.keyDown(input, { key: 'Enter', shiftKey: false })
 
@@ -127,8 +133,8 @@ describe('PeerReviewChat', () => {
 
   it('shows closed state when room is closed', () => {
     render(<PeerReviewChat {...baseProps} isClosed={true} />)
-    expect(screen.getByText(/review session has ended/)).toBeDefined()
-    expect(screen.queryByPlaceholderText(/Type a message/)).toBeNull()
+    expect(screen.getByText('peerReview.sessionEnded')).toBeDefined()
+    expect(screen.queryByPlaceholderText('peerReview.messagePlaceholder')).toBeNull()
   })
 
   it('renders referenced block chip', () => {
@@ -145,7 +151,7 @@ describe('PeerReviewChat', () => {
       },
     ]
     render(<PeerReviewChat {...baseProps} messages={messages} />)
-    expect(screen.getByText('Block: block-q3')).toBeDefined()
+    expect(screen.getByText('peerReview.blockReference(block-q3)')).toBeDefined()
   })
 })
 
@@ -164,18 +170,18 @@ describe('RoomInvite', () => {
 
   it('renders invite form', () => {
     render(<RoomInvite {...baseProps} />)
-    expect(screen.getByText('Invite Peers')).toBeDefined()
-    expect(screen.getByPlaceholderText(/username or email/)).toBeDefined()
-    expect(screen.getByText('Invite')).toBeDefined()
+    expect(screen.getByText('roomInvite.title')).toBeDefined()
+    expect(screen.getByPlaceholderText('roomInvite.usernamePlaceholder')).toBeDefined()
+    expect(screen.getByText('roomInvite.invite')).toBeDefined()
   })
 
   it('calls onInvite with username', () => {
     const onInvite = vi.fn()
     render(<RoomInvite {...baseProps} onInvite={onInvite} />)
 
-    const input = screen.getByPlaceholderText(/username or email/)
+    const input = screen.getByPlaceholderText('roomInvite.usernamePlaceholder')
     fireEvent.change(input, { target: { value: 'bob@test.com' } })
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('roomInvite.invite'))
 
     expect(onInvite).toHaveBeenCalledWith('bob@test.com')
   })
@@ -183,9 +189,9 @@ describe('RoomInvite', () => {
   it('clears input after invite', () => {
     render(<RoomInvite {...baseProps} onInvite={vi.fn()} />)
 
-    const input = screen.getByPlaceholderText(/username or email/) as HTMLInputElement
+    const input = screen.getByPlaceholderText('roomInvite.usernamePlaceholder') as HTMLInputElement
     fireEvent.change(input, { target: { value: 'bob@test.com' } })
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('roomInvite.invite'))
 
     expect(input.value).toBe('')
   })
@@ -207,7 +213,7 @@ describe('RoomInvite', () => {
   it('does not submit empty input', () => {
     const onInvite = vi.fn()
     render(<RoomInvite {...baseProps} onInvite={onInvite} />)
-    fireEvent.click(screen.getByText('Invite'))
+    fireEvent.click(screen.getByText('roomInvite.invite'))
     expect(onInvite).not.toHaveBeenCalled()
   })
 })

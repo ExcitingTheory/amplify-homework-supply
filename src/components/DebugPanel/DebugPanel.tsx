@@ -147,7 +147,7 @@ export function DebugPanel({
     a.download = `state-snapshot-${snapshot.timestamp}.json`;
     a.click();
     URL.revokeObjectURL(url);
-    setSnackbar({ open: true, message: 'Diagnostic snapshot downloaded', severity: 'success' });
+    setSnackbar({ open: true, message: t('debugPanel.snapshotDownloaded'), severity: 'success' });
   };
 
   const handleSendToDiscord = async (snapshot: StateSnapshot) => {
@@ -158,11 +158,11 @@ export function DebugPanel({
     if (!stateSnapshot) return;
 
     setDiscordDialog(false);
-    setSnackbar({ open: true, message: 'Uploading diagnostic artifact to S3...', severity: 'info' });
+    setSnackbar({ open: true, message: t('debugPanel.uploadingArtifact'), severity: 'info' });
 
     const webhookUrl = getDiscordWebhookUrl();
     if (!webhookUrl) {
-      setSnackbar({ open: true, message: 'Discord webhook not configured', severity: 'error' });
+      setSnackbar({ open: true, message: t('debugPanel.webhookNotConfigured'), severity: 'error' });
       return;
     }
 
@@ -171,7 +171,7 @@ export function DebugPanel({
       const { url: artifactUrl, key } = await uploadDebugArtifact(stateSnapshot);
       console.log('[DebugPanel] Artifact uploaded to S3:', key);
       
-      setSnackbar({ open: true, message: 'Sending to Discord...', severity: 'info' });
+      setSnackbar({ open: true, message: t('debugPanel.sendingToDiscord'), severity: 'info' });
 
       // Send to Discord with S3 URL
       const result = await sendToDiscord(
@@ -187,19 +187,25 @@ export function DebugPanel({
       if (result.success) {
         setSnackbar({ 
           open: true, 
-          message: '✅ Diagnostic sent to support team! (S3 link expires in 30 days)', 
+          message: t('debugPanel.diagnosticSent'),
           severity: 'success' 
         });
         setUserDescription('');
         setUserContact('');
       } else {
-        setSnackbar({ open: true, message: `Failed to send: ${result.error}`, severity: 'error' });
+        setSnackbar({
+          open: true,
+          message: t('debugPanel.sendFailed', { error: String(result.error) }),
+          severity: 'error',
+        });
       }
     } catch (error) {
       console.error('[DebugPanel] Error uploading/sending diagnostic:', error);
       setSnackbar({ 
         open: true, 
-        message: `Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`, 
+        message: t('debugPanel.uploadFailed', {
+          error: error instanceof Error ? error.message : t('debugPanel.unknownError'),
+        }),
         severity: 'error' 
       });
     }
@@ -224,7 +230,7 @@ export function DebugPanel({
       {/* Header */}
       <Toolbar sx={{ minHeight: 48 }}>
         <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          Debug Panel
+          {t('debugPanel.title')}
         </Typography>
         <IconButton edge="end" onClick={onClose} aria-label={t('actions.close')}>
           <CloseIcon />
@@ -244,28 +250,28 @@ export function DebugPanel({
         <Tab
           value="components"
           icon={<AccountTreeIcon />}
-          label="Components"
+          label={t('debugPanel.tabs.components')}
           iconPosition="start"
           sx={{ minHeight: 40 }}
         />
         <Tab
           value="logs"
           icon={<ListAltIcon />}
-          label={`Logs (${logs.length})`}
+          label={t('debugPanel.tabs.logs', { count: logs.length })}
           iconPosition="start"
           sx={{ minHeight: 40 }}
         />
         <Tab
           value="state"
           icon={<StorageIcon />}
-          label="State"
+          label={t('debugPanel.tabs.state')}
           iconPosition="start"
           sx={{ minHeight: 40 }}
         />
         <Tab
           value="performance"
           icon={<SpeedIcon />}
-          label="Performance"
+          label={t('debugPanel.tabs.performance')}
           iconPosition="start"
           sx={{ minHeight: 40 }}
         />
@@ -292,7 +298,7 @@ export function DebugPanel({
 
         <TabPanel value="performance" currentValue={currentTab}>
           <Typography variant="body2" color="text.secondary">
-            Performance metrics coming soon...
+            {t('debugPanel.performanceComingSoon')}
           </Typography>
         </TabPanel>
       </Box>
@@ -300,34 +306,33 @@ export function DebugPanel({
 
     {/* Discord send dialog */}
     <Dialog open={discordDialog} onClose={() => setDiscordDialog(false)} maxWidth="sm" fullWidth>
-      <DialogTitle>Send Diagnostic to Support</DialogTitle>
+      <DialogTitle>{t('debugPanel.sendDialogTitle')}</DialogTitle>
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          This will send your diagnostic snapshot to our support team via Discord.
-          Your data will be sanitized to remove sensitive information.
+          {t('debugPanel.sendDialogDescription')}
         </Typography>
         <TextField
           fullWidth
-          label="Describe the issue (optional)"
+          label={t('debugPanel.describeIssueLabel')}
           multiline
           rows={3}
           value={userDescription}
           onChange={(e) => setUserDescription(e.target.value)}
-          placeholder="What were you doing when the problem occurred?"
+          placeholder={t('debugPanel.describeIssuePlaceholder')}
           sx={{ mb: 2, mt: 1 }}
         />
         <TextField
           fullWidth
-          label="Your email or contact (optional)"
+          label={t('debugPanel.contactLabel')}
           value={userContact}
           onChange={(e) => setUserContact(e.target.value)}
-          placeholder="So we can follow up with you"
+          placeholder={t('debugPanel.contactPlaceholder')}
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={() => setDiscordDialog(false)}>Cancel</Button>
+        <Button onClick={() => setDiscordDialog(false)}>{t('actions.cancel')}</Button>
         <Button onClick={handleConfirmSendToDiscord} variant="contained" color="primary">
-          Send to Support
+          {t('debugPanel.sendToSupport')}
         </Button>
       </DialogActions>
     </Dialog>

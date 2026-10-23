@@ -18,17 +18,17 @@ describe('SkillForm', () => {
   it('renders all form fields', () => {
     render(<SkillForm onSubmit={vi.fn()} availableUnits={mockUnits} availableSkills={mockSkills} />)
 
-    expect(screen.getByLabelText(/Skill Title/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Description/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/XP Reward/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Minimum accuracy/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Required Units/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Prerequisites/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.titleLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.descriptionLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.xpRewardLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.minAccuracyLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.requiredUnitsLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/skillForm\.prerequisitesLabel/)).toBeInTheDocument()
   })
 
   it('submit button is disabled when title is empty', () => {
     render(<SkillForm onSubmit={vi.fn()} />)
-    const btn = screen.getByRole('button', { name: /Add Skill/i })
+    const btn = screen.getByRole('button', { name: 'skillForm.addSkill' })
     expect(btn).toBeDisabled()
   })
 
@@ -36,9 +36,9 @@ describe('SkillForm', () => {
     const user = userEvent.setup()
     render(<SkillForm onSubmit={vi.fn()} />)
 
-    await user.type(screen.getByLabelText(/Skill Title/i), 'New Skill')
+    await user.type(screen.getByLabelText(/skillForm\.titleLabel/), 'New Skill')
 
-    const btn = screen.getByRole('button', { name: /Add Skill/i })
+    const btn = screen.getByRole('button', { name: 'skillForm.addSkill' })
     expect(btn).not.toBeDisabled()
   })
 
@@ -47,15 +47,15 @@ describe('SkillForm', () => {
     const onSubmit = vi.fn()
     render(<SkillForm onSubmit={onSubmit} availableUnits={mockUnits} availableSkills={mockSkills} />)
 
-    await user.type(screen.getByLabelText(/Skill Title/i), 'Async Mastery')
-    await user.type(screen.getByLabelText(/Description/i), 'Master async patterns')
+    await user.type(screen.getByLabelText(/skillForm\.titleLabel/), 'Async Mastery')
+    await user.type(screen.getByLabelText(/skillForm\.descriptionLabel/), 'Master async patterns')
 
     // Clear default XP and set new value
-    const xpInput = screen.getByLabelText(/XP Reward/i)
+    const xpInput = screen.getByLabelText(/skillForm\.xpRewardLabel/)
     await user.clear(xpInput)
     await user.type(xpInput, '100')
 
-    const btn = screen.getByRole('button', { name: /Add Skill/i })
+    const btn = screen.getByRole('button', { name: 'skillForm.addSkill' })
     await user.click(btn)
 
     expect(onSubmit).toHaveBeenCalledWith(
@@ -74,19 +74,19 @@ describe('SkillForm', () => {
     const user = userEvent.setup()
     render(<SkillForm onSubmit={vi.fn()} />)
 
-    await user.type(screen.getByLabelText(/Skill Title/i), 'Test Skill')
+    await user.type(screen.getByLabelText(/skillForm\.titleLabel/), 'Test Skill')
 
-    const btn = screen.getByRole('button', { name: /Add Skill/i })
+    const btn = screen.getByRole('button', { name: 'skillForm.addSkill' })
     await user.click(btn)
 
-    expect(screen.getByLabelText(/Skill Title/i)).toHaveValue('')
+    expect(screen.getByLabelText(/skillForm\.titleLabel/)).toHaveValue('')
   })
 
   it('disables fields when submitting', () => {
     render(<SkillForm onSubmit={vi.fn()} submitting />)
-    expect(screen.getByLabelText(/Skill Title/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Description/i)).toBeDisabled()
-    expect(screen.getByLabelText(/XP Reward/i)).toBeDisabled()
+    expect(screen.getByLabelText(/skillForm\.titleLabel/)).toBeDisabled()
+    expect(screen.getByLabelText(/skillForm\.descriptionLabel/)).toBeDisabled()
+    expect(screen.getByLabelText(/skillForm\.xpRewardLabel/)).toBeDisabled()
   })
 
   it('shows Generate button when onGenerateFromUnit is provided', () => {
@@ -97,21 +97,21 @@ describe('SkillForm', () => {
         availableUnits={mockUnits}
       />
     )
-    expect(screen.getByRole('button', { name: /Generate/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'skillForm.generate' })).toBeInTheDocument()
   })
 
   it('does not show Generate button when onGenerateFromUnit is not provided', () => {
     render(<SkillForm onSubmit={vi.fn()} availableUnits={mockUnits} />)
-    expect(screen.queryByRole('button', { name: /Generate/i })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'skillForm.generate' })).not.toBeInTheDocument()
   })
 
   it('default minimum accuracy is 70', () => {
     render(<SkillForm onSubmit={vi.fn()} />)
-    expect(screen.getByText(/Min Accuracy: 70%/i)).toBeInTheDocument()
+    expect(screen.getByText('skillForm.minAccuracy')).toBeInTheDocument()
   })
 
   it('shows "Adding..." when submitting', () => {
     render(<SkillForm onSubmit={vi.fn()} submitting />)
-    expect(screen.getByRole('button', { name: /Adding/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'skillForm.adding' })).toBeInTheDocument()
   })
 })

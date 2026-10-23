@@ -18,6 +18,7 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { ChatMessage, ChatUser } from "../../yjs/ChatCollaborationProvider";
 import { MentionChip } from "./MentionChip";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 // ============================================================================
 // Types
@@ -211,6 +212,9 @@ function MessageBubble({
     >
       {!compact && (
         <Avatar
+          component={ProfileAvatarLink}
+          username={isBot ? undefined : message.authorId}
+          displayName={message.authorName}
           sx={{
             width: 32,
             height: 32,

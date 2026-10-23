@@ -17,21 +17,34 @@ import Slider from "@mui/material/Slider";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
+import { useTranslations } from "next-intl";
 
 const CLEANUP_LEVELS = [
-  { value: 0, label: "Off", key: "off" },
-  { value: 1, label: "Light", key: "light" },
-  { value: 2, label: "Standard", key: "standard" },
-  { value: 3, label: "Aggressive", key: "aggressive" },
+  {
+    value: 0,
+    key: "off",
+    getLabel: (t) => t("recordingSettings.levelOff"),
+    getDescription: (t) => t("recordingSettings.levelOffDescription"),
+  },
+  {
+    value: 1,
+    key: "light",
+    getLabel: (t) => t("recordingSettings.levelLight"),
+    getDescription: (t) => t("recordingSettings.levelLightDescription"),
+  },
+  {
+    value: 2,
+    key: "standard",
+    getLabel: (t) => t("recordingSettings.levelStandard"),
+    getDescription: (t) => t("recordingSettings.levelStandardDescription"),
+  },
+  {
+    value: 3,
+    key: "aggressive",
+    getLabel: (t) => t("recordingSettings.levelAggressive"),
+    getDescription: (t) => t("recordingSettings.levelAggressiveDescription"),
+  },
 ];
-
-const LEVEL_DESCRIPTIONS = {
-  off: "No audio cleanup. Raw recording is uploaded as-is.",
-  light: "Removes low-frequency rumble (desk vibration, handling noise).",
-  standard: "Removes rumble, evens volume, normalizes loudness.",
-  aggressive:
-    "ML noise suppression (removes fan, AC, keyboard noise) + compression + normalization.",
-};
 
 /**
  * Map a cleanup strength key to the Set of filter names to apply.
@@ -52,6 +65,7 @@ export function getCleanupFilters(strength) {
 }
 
 export default function RecordingSettings({ value, onChange }) {
+  const t = useTranslations("components");
   const currentLevel =
     CLEANUP_LEVELS.find((l) => l.key === value) || CLEANUP_LEVELS[2]; // default to standard
 
@@ -66,9 +80,9 @@ export default function RecordingSettings({ value, onChange }) {
     <Box sx={{ px: 2, py: 1 }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}>
         <Typography variant="subtitle2" color="text.secondary">
-          Recording Cleanup
+          {t("recordingSettings.title")}
         </Typography>
-        <Tooltip title={LEVEL_DESCRIPTIONS[currentLevel.key]} arrow>
+        <Tooltip title={currentLevel.getDescription(t)} arrow>
           <InfoOutlinedIcon sx={{ fontSize: 16, color: "text.disabled" }} />
         </Tooltip>
       </Box>
@@ -80,14 +94,14 @@ export default function RecordingSettings({ value, onChange }) {
         step={1}
         marks={CLEANUP_LEVELS.map((l) => ({
           value: l.value,
-          label: l.label,
+          label: l.getLabel(t),
         }))}
         size="small"
         sx={{ maxWidth: 240 }}
-        aria-label="Recording cleanup strength"
+        aria-label={t("recordingSettings.strengthAriaLabel")}
       />
       <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
-        {LEVEL_DESCRIPTIONS[currentLevel.key]}
+        {currentLevel.getDescription(t)}
       </Typography>
     </Box>
   );

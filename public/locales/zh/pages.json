@@ -130,12 +130,16 @@
     "changePassword": {
       "button": "修改密码",
       "description": "更新您的账户密码以确保安全",
-      "heading": "更改密码"
+      "heading": "更改密码",
+      "confirmPasswordLabel": "确认新密码",
+      "newPasswordLabel": "新密码",
+      "oldPasswordLabel": "旧密码"
     },
     "confirmEmail": {
       "button": "确认邮箱",
       "message": "请检查您的电子邮件并输入确认码以验证您的电子邮件地址。",
-      "title": "确认您的邮箱"
+      "title": "确认您的邮箱",
+      "codeLabel": "验证码"
     },
     "description": "查看和更新您的个人资料信息",
     "heading": "我的资料",
@@ -151,7 +155,8 @@
     "progress": "进度",
     "title": "我的资料",
     "updateProfile": "更新资料",
-    "userId": "用户ID"
+    "userId": "用户ID",
+    "email": "电子邮箱"
   },
   "sectionDetail": {
     "actionsHeader": "操作",
@@ -303,5 +308,29 @@
     "start": "开始",
     "timerInstructions": "这是一个限时练习，请点击开始按钮启动计时器并回答问题。",
     "unitUpdated": "本单元已由教师更新。您是否希望重新加载最新版本?"
+  },
+  "gradeReviewDrawer": {
+    "cancel": "取消",
+    "currentLabel": "当前:",
+    "drop": "舍弃",
+    "gradeLabel": "成绩(%)",
+    "gradeUpdated": "成绩已更新为{score}%",
+    "keep": "保留",
+    "lateDropped": "逾期提交已被舍弃",
+    "lateKept": "保留逾期提交",
+    "lateRequiresReview": "逾期提交的作业需要审核。",
+    "lateStatus": "逾期:{status}",
+    "lateUpdateError": "更新逾期提交失败",
+    "nextTooltip": "下一个 (→)",
+    "noGradeData": "未找到成绩数据。",
+    "override": "覆盖成绩",
+    "overrideError": "成绩覆盖保存失败",
+    "overrideTitle": "覆盖成绩",
+    "position": "（{current}/{total}）",
+    "previousTooltip": "上一个 (←)",
+    "save": "保存",
+    "saving": "正在保存...",
+    "scoreRangeError": "分数必须在 0 到 100 之间",
+    "studentLabel": "学生："
   }
 }

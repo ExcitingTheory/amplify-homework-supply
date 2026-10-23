@@ -7,6 +7,7 @@
  */
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import IconButton from '@mui/material/IconButton'
 import Badge from '@mui/material/Badge'
 import ChatBubbleOutlineIcon from '@mui/icons-material/ChatBubbleOutline'
@@ -23,13 +24,14 @@ export function CommentGutterIcon({
   unresolvedCount,
   onClick,
 }: CommentGutterIconProps) {
+  const t = useTranslations('components')
   if (commentCount === 0) {
     return (
       <IconButton
         size="small"
         onClick={onClick}
         sx={{ opacity: 0.3, '&:hover': { opacity: 1 } }}
-        title="Add comment"
+        title={t('commentGutterIcon.addComment')}
       >
         <ChatBubbleOutlineIcon fontSize="small" />
       </IconButton>
@@ -37,7 +39,12 @@ export function CommentGutterIcon({
   }
 
   return (
-    <IconButton size="small" onClick={onClick} color="primary" title={`${unresolvedCount} unresolved comments`}>
+    <IconButton
+      size="small"
+      onClick={onClick}
+      color="primary"
+      title={t('commentGutterIcon.unresolvedCount', { count: unresolvedCount })}
+    >
       <Badge badgeContent={unresolvedCount} color="primary" max={9}>
         <ChatBubbleIcon fontSize="small" />
       </Badge>

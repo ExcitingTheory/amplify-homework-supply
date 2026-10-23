@@ -65,8 +65,8 @@ export default function ImageMaskEditor({
             // Initialize mask canvas with transparent background
             maskCtx.clearRect(0, 0, maskCanvas.width, maskCanvas.height);
             
-            // Save initial state
-            saveToHistory();
+            setHistory([maskCanvas.toDataURL()]);
+            setHistoryIndex(0);
         };
         img.src = imageUrl;
     }, [imageUrl]);
@@ -248,7 +248,7 @@ export default function ImageMaskEditor({
                     />
                 </Box>
                 
-                <Tooltip title="Undo">
+                <Tooltip title={t('imageMaskEditor.undo')}>
                     <span>
                         <IconButton
                             onClick={undo}
@@ -260,7 +260,7 @@ export default function ImageMaskEditor({
                     </span>
                 </Tooltip>
                 
-                <Tooltip title="Redo">
+                <Tooltip title={t('imageMaskEditor.redo')}>
                     <span>
                         <IconButton
                             onClick={redo}
@@ -272,19 +272,19 @@ export default function ImageMaskEditor({
                     </span>
                 </Tooltip>
                 
-                <Tooltip title="Clear mask">
+                <Tooltip title={t('imageMaskEditor.clearMask')}>
                     <IconButton onClick={clearMask} size="small">
                         <ClearIcon />
                     </IconButton>
                 </Tooltip>
                 
-                <Tooltip title="Zoom in">
+                <Tooltip title={t('imageMaskEditor.zoomIn')}>
                     <IconButton onClick={handleZoomIn} size="small">
                         <ZoomInIcon />
                     </IconButton>
                 </Tooltip>
                 
-                <Tooltip title="Zoom out">
+                <Tooltip title={t('imageMaskEditor.zoomOut')}>
                     <IconButton onClick={handleZoomOut} size="small">
                         <ZoomOutIcon />
                     </IconButton>

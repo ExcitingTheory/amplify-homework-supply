@@ -12,6 +12,7 @@ import Dialog from '@mui/material/Dialog'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Button from '@mui/material/Button'
+import { useTranslations } from 'next-intl'
 import { BadgeIcon } from './BadgeIcon'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
@@ -34,6 +35,7 @@ export function BadgeCoinFlip({
   badgeDescription,
   onClose,
 }: BadgeCoinFlipProps) {
+  const t = useTranslations('components')
   const [flipped, setFlipped] = useState(false)
   const reducedMotion = useReducedMotion()
 
@@ -99,7 +101,7 @@ export function BadgeCoinFlip({
         </Box>
 
         <Typography variant="h6" fontWeight={700} sx={{ mt: 2 }}>
-          Badge Earned!
+          {t('badgeCoinFlip.title')}
         </Typography>
         <Typography variant="subtitle1" fontWeight={600} color="primary.main">
           {badgeName}
@@ -109,7 +111,7 @@ export function BadgeCoinFlip({
         </Typography>
 
         <Button variant="contained" onClick={onClose} sx={{ mt: 3 }}>
-          Awesome!
+          {t('badgeCoinFlip.closeButton')}
         </Button>
       </Box>
     </Dialog>

@@ -1,32 +1,46 @@
 /**
  * @fileoverview CustomAnswerPlugin - Creates custom question-answer exercises.
- * 
+ *
  * This plugin allows educators to create flexible Q&A exercises with
  * custom questions, validation rules, and prompting strategies.
- * 
+ *
  * @module CustomAnswerPlugin
  */
 
-import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $insertNodeToNearestRoot } from '@lexical/utils';
-import { COMMAND_PRIORITY_EDITOR, createCommand, DecoratorNode, $getSelection } from 'lexical';
-import * as React from 'react';
-import { useEffect } from 'react';
-import CustomAnswerComponent from '../nodes/CustomAnswerNode/CustomAnswerComponent';
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $insertNodeToNearestRoot } from "@lexical/utils";
+import {
+  COMMAND_PRIORITY_EDITOR,
+  createCommand,
+  DecoratorNode,
+  $getSelection,
+} from "lexical";
+import * as React from "react";
+import { useEffect } from "react";
+import CustomAnswerComponent from "../nodes/CustomAnswerNode/CustomAnswerComponent";
 
 // Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
-const CustomAnswerEditor = React.lazy(() => import('../nodes/CustomAnswerNode/CustomAnswerEditor'));
+const CustomAnswerEditor = React.lazy(
+  () => import("../nodes/CustomAnswerNode/CustomAnswerEditor"),
+);
 
 /**
  * Converts a DOM element into a CustomAnswerNode.
- * 
+ *
  * @param {HTMLElement} domNode - DOM element with custom answer data
  * @returns {{node: CustomAnswerNode} | null} Created node or null
  */
 function convertCustomAnswerElement(domNode) {
-  const ids = domNode.getAttribute('data-lexical-custom-answer').split(',') || [];
-  const allowedInput = JSON.parse(domNode.getAttribute('data-lexical-custom-answer-allowed-input')) || {};
-  const promptMethod = JSON.parse(domNode.getAttribute('data-lexical-custom-answer-prompt-method')) || {};
+  const ids =
+    domNode.getAttribute("data-lexical-custom-answer").split(",") || [];
+  const allowedInput =
+    JSON.parse(
+      domNode.getAttribute("data-lexical-custom-answer-allowed-input"),
+    ) || {};
+  const promptMethod =
+    JSON.parse(
+      domNode.getAttribute("data-lexical-custom-answer-prompt-method"),
+    ) || {};
 
   if (ids) {
     const node = $createCustomAnswerNode(ids, allowedInput, promptMethod);
@@ -37,10 +51,10 @@ function convertCustomAnswerElement(domNode) {
 
 /**
  * CustomAnswerNode - Lexical DecoratorNode for custom Q&A exercises.
- * 
+ *
  * Provides flexible question-answer exercises with custom validation,
  * input methods, and prompting strategies defined by educators.
- * 
+ *
  * @class CustomAnswerNode
  * @extends {DecoratorNode}
  */
@@ -51,15 +65,26 @@ export class CustomAnswerNode extends DecoratorNode {
   __format;
 
   static getType() {
-    return 'custom-answer';
+    return "custom-answer";
   }
 
   static clone(node) {
-    return new CustomAnswerNode(node.__ids, node.__allowedInput, node.__promptMethod, node.__format, node.__key);
+    return new CustomAnswerNode(
+      node.__ids,
+      node.__allowedInput,
+      node.__promptMethod,
+      node.__format,
+      node.__key,
+    );
   }
 
   static importJSON(serializedNode) {
-    const node = $createCustomAnswerNode(serializedNode.ids, serializedNode.allowedInput, serializedNode.promptMethod, serializedNode.format);
+    const node = $createCustomAnswerNode(
+      serializedNode.ids,
+      serializedNode.allowedInput,
+      serializedNode.promptMethod,
+      serializedNode.format,
+    );
     if (serializedNode.format !== undefined) {
       node.setFormat(serializedNode.format);
     }
@@ -68,7 +93,7 @@ export class CustomAnswerNode extends DecoratorNode {
 
   exportJSON() {
     return {
-      type: 'custom-answer',
+      type: "custom-answer",
       version: 1,
       ids: [...this.__ids],
       promptMethod: this.__promptMethod,
@@ -77,7 +102,13 @@ export class CustomAnswerNode extends DecoratorNode {
     };
   }
 
-  constructor(ids = [], allowedInput = [], promptMethod = [], format = '', key) {
+  constructor(
+    ids = [],
+    allowedInput = [],
+    promptMethod = [],
+    format = "",
+    key,
+  ) {
     super(key);
     this.__ids = ids;
     this.__promptMethod = promptMethod;
@@ -86,18 +117,30 @@ export class CustomAnswerNode extends DecoratorNode {
   }
 
   exportDOM() {
-    const element = document.createElement('div');
-    element.setAttribute('data-lexical-custom-answer', this.__ids.join(','));
-    element.setAttribute('data-lexical-custom-answer-allowed-input', JSON.stringify(this.__allowedInput));
-    element.setAttribute('data-lexical-custom-answer-prompt-method', JSON.stringify(this.__promptMethod));
+    const element = document.createElement("div");
+    element.setAttribute("data-lexical-custom-answer", this.__ids.join(","));
+    element.setAttribute(
+      "data-lexical-custom-answer-allowed-input",
+      JSON.stringify(this.__allowedInput),
+    );
+    element.setAttribute(
+      "data-lexical-custom-answer-prompt-method",
+      JSON.stringify(this.__promptMethod),
+    );
     return { element };
   }
 
   createDOM(config) {
-    const div = document.createElement('div');
-    div.setAttribute('data-lexical-custom-answer', this.__ids.join(','));
-    div.setAttribute('data-lexical-custom-answer-allowed-input', JSON.stringify(this.__allowedInput));
-    div.setAttribute('data-lexical-custom-answer-prompt-method', JSON.stringify(this.__promptMethod));
+    const div = document.createElement("div");
+    div.setAttribute("data-lexical-custom-answer", this.__ids.join(","));
+    div.setAttribute(
+      "data-lexical-custom-answer-allowed-input",
+      JSON.stringify(this.__allowedInput),
+    );
+    div.setAttribute(
+      "data-lexical-custom-answer-prompt-method",
+      JSON.stringify(this.__promptMethod),
+    );
     const theme = config.theme;
     const className = theme.image;
     if (className !== undefined) {
@@ -109,7 +152,7 @@ export class CustomAnswerNode extends DecoratorNode {
   static importDOM() {
     return {
       div: (domNode) => {
-        if (!domNode.hasAttribute('data-lexical-custom-answer')) {
+        if (!domNode.hasAttribute("data-lexical-custom-answer")) {
           return null;
         }
         return {
@@ -141,22 +184,23 @@ export class CustomAnswerNode extends DecoratorNode {
   }
 
   appendId(id) {
-    console.log('appendId', id);
+    console.log("appendId", id);
     const writable = this.getWritable();
     writable.__ids = [...new Set([...writable.__ids, id])];
   }
 
-
   removeIntersection(questionIDs) {
     const writable = this.getWritable();
-    const idsArray = Array.isArray(questionIDs) ? questionIDs : [...questionIDs];
+    const idsArray = Array.isArray(questionIDs)
+      ? questionIDs
+      : [...questionIDs];
 
     let intersection = this.__ids.filter((x) => {
       return !idsArray.includes(x);
     });
 
     // if intersection is undefined, set it to empty array
-    intersection? intersection : [];    
+    intersection ? intersection : [];
     writable.__ids = [...intersection];
   }
 
@@ -208,8 +252,8 @@ export class CustomAnswerNode extends DecoratorNode {
     const isEditable = _editor.isEditable();
     const embedBlockTheme = config.theme.embedBlock || {};
     const className = {
-      base: embedBlockTheme.base || '',
-      focus: embedBlockTheme.focus || '',
+      base: embedBlockTheme.base || "",
+      focus: embedBlockTheme.focus || "",
     };
     return (
       <>
@@ -243,20 +287,25 @@ export class CustomAnswerNode extends DecoratorNode {
 
 /**
  * Factory function to create a CustomAnswerNode.
- * 
+ *
  * @param {string[]} ids - Array of Question IDs
  * @param {Object} allowedInput - Input validation configuration
  * @param {Array} promptMethod - Prompting strategy
  * @param {string} format - Node format
  * @returns {CustomAnswerNode} New custom answer node instance
  */
-export function $createCustomAnswerNode(ids, allowedInput, promptMethod, format) {
+export function $createCustomAnswerNode(
+  ids,
+  allowedInput,
+  promptMethod,
+  format,
+) {
   return new CustomAnswerNode(ids, allowedInput, promptMethod, format);
 }
 
 /**
  * Type guard for CustomAnswerNode.
- * 
+ *
  * @param {LexicalNode} node - Node to check
  * @returns {boolean} True if node is a CustomAnswerNode
  */
@@ -268,11 +317,13 @@ export function $isCustomAnswerNode(node) {
  * Command to insert a custom answer exercise.
  * @type {LexicalCommand}
  */
-export const INSERT_CUSTOM_ANSWER_BLOCK_COMMAND = createCommand('INSERT_CUSTOM_ANSWER_BLOCK_COMMAND');
+export const INSERT_CUSTOM_ANSWER_BLOCK_COMMAND = createCommand(
+  "INSERT_CUSTOM_ANSWER_BLOCK_COMMAND",
+);
 
 /**
  * CustomAnswerPlugin - Registers custom answer functionality.
- * 
+ *
  * @returns {null} Plugin returns null
  */
 export default function CustomAnswerPlugin() {
@@ -280,7 +331,9 @@ export default function CustomAnswerPlugin() {
 
   useEffect(() => {
     if (!editor.hasNodes([CustomAnswerNode])) {
-      throw new Error('CustomAnswerPlugin: CustomAnswerNode not registered on editor');
+      throw new Error(
+        "CustomAnswerPlugin: CustomAnswerNode not registered on editor",
+      );
     }
 
     return editor.registerCommand(
@@ -289,7 +342,7 @@ export default function CustomAnswerPlugin() {
         // Check if there's a currently selected CustomAnswerNode
         const selection = $getSelection();
         let selectedCustomAnswerNode = null;
-        
+
         if (selection) {
           const nodes = selection.getNodes();
           for (const node of nodes) {
@@ -309,10 +362,10 @@ export default function CustomAnswerPlugin() {
             if (selectedCustomAnswerNode) break;
           }
         }
-        
+
         if (selectedCustomAnswerNode) {
           // Append to existing CustomAnswerNode
-          payload.forEach(id => {
+          payload.forEach((id) => {
             selectedCustomAnswerNode.appendId(id);
           });
         } else {

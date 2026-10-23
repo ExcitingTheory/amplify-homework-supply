@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "@mui/material";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
+import { useTranslations } from "next-intl";
 import StaticWaveform from "./StaticWaveform";
 
 export interface AudioTakeSummary {
@@ -52,6 +53,7 @@ export default function AudioTakePlaylist({
   selectedTakeId,
   takes,
 }: AudioTakePlaylistProps) {
+  const t = useTranslations("editor.shared");
   if (takes.length === 0 && !recording) return null;
 
   const rowMinHeight = compact ? 36 : 64;
@@ -70,7 +72,7 @@ export default function AudioTakePlaylist({
       <List
         dense
         disablePadding
-        aria-label="Recorded takes"
+        aria-label={t("audioTakePlaylist.recordedTakes")}
         sx={{ position: "relative", zIndex: 1 }}
       >
         {recording && compact && (
@@ -156,13 +158,15 @@ export default function AudioTakePlaylist({
             <ListItemText
               primary={
                 compact
-                  ? `Take ${index + 1} · ${formatDuration(take.duration)} · ${new Date(
-                      take.createdAt,
-                    ).toLocaleTimeString([], {
-                      hour: "2-digit",
-                      minute: "2-digit",
-                    })}`
-                  : `Take ${index + 1}`
+                  ? t("audioTakePlaylist.compactTakeLabel", {
+                      number: index + 1,
+                      duration: formatDuration(take.duration),
+                      time: new Date(take.createdAt).toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      }),
+                    })
+                  : t("audioTakePlaylist.takeLabel", { number: index + 1 })
               }
               secondary={
                 compact
@@ -180,9 +184,9 @@ export default function AudioTakePlaylist({
               sx={{ position: "relative", zIndex: 1 }}
             />
             {onDelete && (
-              <Tooltip title="Delete take">
+              <Tooltip title={t("audioTakePlaylist.deleteTake")}>
                 <IconButton
-                  aria-label="Delete take"
+                  aria-label={t("audioTakePlaylist.deleteTake")}
                   size="small"
                   sx={{ position: "relative", zIndex: 1 }}
                   onClick={(event) => {

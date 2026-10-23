@@ -19,7 +19,8 @@
     "sectionLabel": "セクション",
     "selectSectionHelper": "期限を設定するセクションを選択してください",
     "timerDescription": "タイマーはユーザーが「開始」ボタンをクリックした後に開始されます。ユーザーはタイマーが終了した後も継続することができ、課題の開始時刻と完了時刻が記録されます。タイマーの動作中は、画面上部にカウントダウンが表示されます。",
-    "timerLabel": "タイマー"
+    "timerLabel": "タイマー",
+    "wholeSection": "セクション全体"
   },
   "configurationManager": {
     "autoAnalyzeDescription": "有効にすると、アップロード直後にPDFがOpenAIに送信され、語彙抽出が実行されます。",
@@ -36,7 +37,8 @@
     "setFeaturedImage": "アイキャッチ画像を設定",
     "uploadImagePrompt": "画像をアップロードしてください",
     "uploadingImage": "画像をアップロードしています",
-    "uploadingVideo": "動画を変換しています"
+    "uploadingVideo": "動画を変換しています",
+    "setVideoUrl": "設定"
   },
   "mainToolbar": {
     "menuAttribute": "メニュー",
@@ -156,7 +158,9 @@
     "underline": "下線",
     "undo": "元に戻す",
     "untitledUnit": "無題のユニット",
-    "wordBlock": "ワードブロック"
+    "wordBlock": "ワードブロック",
+    "layout": "レイアウト",
+    "aiGradedExercise": "AI採点式エクササイズ"
   },
   "toolbar": {
     "align_center": "中央揃え",
@@ -174,5 +178,60 @@
     "paragraph": "段落",
     "strikethrough": "取り消し線",
     "underline": "下線"
+  },
+  "save": {
+    "permissionError": "エラー:このユニットを編集する権限がありません。",
+    "savedSuccessfully": "正常に保存されました",
+    "saveFailed": "保存に失敗しました",
+    "saveNowTitle": "今すぐ保存(入力を止めてから2秒後に自動保存されます)"
+  },
+  "campaignPanel": {
+    "addToExistingChapter": "既存のチャプターに追加",
+    "badgeLock": "バッジ: {badgeId}",
+    "cancel": "キャンセル",
+    "chapterNumber": "第{order}章",
+    "chapterOptionLabel": "第{order}章: {title}",
+    "chapterProgress": "{percent}% 完了 · {currentXP}/{targetXP} XP",
+    "close": "閉じる",
+    "contentLock": "コンテンツロック",
+    "createNewChapter": "新しいチャプターを作成",
+    "edit": "編集",
+    "heading": "キャンペーンの章",
+    "linkedToChapters": "{count, plural, one {#件のチャプター} other {#件のチャプター}}にリンクされています：",
+    "linkUnitToChapter": "ユニットをチャプターにリンクする",
+    "loadingChapters": "チャプターを読み込んでいます…",
+    "locksManagedHint": "バッジおよびモジュール完了のロックは、セクションの「高度なゲーミフィケーション設定」で管理されます。",
+    "moduleCompletionLock": "モジュール修了率 {percent}%",
+    "newChapter": "新しいチャプター",
+    "noLinkedChaptersWarning": "このユニットはキャンペーンのチャプターにリンクされていません。受講者にはこのコンテンツのストーリー上の導入が表示されません。",
+    "noSections": "利用可能なセクションがありません。まずセクションを作成してください。",
+    "preview": "プレビュー",
+    "quotedSetting": "「{setting}」",
+    "requiredXP": "必要XP",
+    "saveUnitFirst": "キャンペーンリンクを管理するには、まずユニットを保存してください。",
+    "saving": "保存中…",
+    "sectionLabel": "セクション",
+    "selectChapterPlaceholder": "チャプターを選択…",
+    "selectSectionHint": "チャプターを作成するセクションを選択してください。",
+    "selectSectionPlaceholder": "このチャプターのセクションを選択してください…",
+    "statusActive": "有効",
+    "statusDone": "完了",
+    "studentPreview": "受講者プレビュー",
+    "thisUnit": "このユニット",
+    "unlink": "リンクを解除"
+  },
+  "floatingToolbarPlugin": {
+    "code": "コード",
+    "fontColor": "フォントの色",
+    "insertBlock": "ブロックを挿入",
+    "insertColumnsLayout": "列レイアウトを挿入",
+    "insertLink": "リンクを挿入",
+    "layoutFourEqual": "4列(均等)",
+    "layoutThreeEqual": "3列(均等)",
+    "layoutThreeQuarterHalfQuarter": "3列(25% - 50% - 25%)",
+    "layoutTwoEqual": "2列(均等)",
+    "layoutTwoQuarterThreeQuarters": "2列(25% - 75%)",
+    "shortAnswerCustom": "記述式（カスタム）",
+    "shortAnswerVocabulary": "短答式(語彙)"
   }
 }

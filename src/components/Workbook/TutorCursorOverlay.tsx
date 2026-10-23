@@ -9,6 +9,7 @@ import React from "react";
 import { Box, Avatar, Tooltip } from "@mui/material";
 import UnitContext from "../../context/unitContext";
 import { useTutorPresence } from "@/yjs/workbookHooks";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 export function TutorCursorOverlay() {
   const { workbook, workbookEnabled } = React.useContext(UnitContext);
@@ -53,7 +54,7 @@ function TutorBlockMarker({
   tutors,
 }: {
   blockId: string;
-  tutors: Array<{ displayName?: string; color?: string; clientId: number }>;
+  tutors: Array<{ username: string; displayName?: string; color?: string; clientId: number }>;
 }) {
   const [position, setPosition] = React.useState<{
     top: number;
@@ -134,6 +135,9 @@ function TutorBlockMarker({
           arrow
         >
           <Avatar
+            component={ProfileAvatarLink}
+            username={tutor.username}
+            displayName={tutor.displayName}
             sx={{
               width: 24,
               height: 24,

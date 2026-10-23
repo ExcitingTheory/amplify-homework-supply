@@ -8,6 +8,7 @@
  */
 
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 import { Box, Button, Typography, LinearProgress } from '@mui/material';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 
@@ -42,6 +43,7 @@ export const CompletionScreen = ({
   onRetry = null,
   vocabularyList = null,
 }) => {
+  const t = useTranslations('components');
   const [timeRemaining, setTimeRemaining] = React.useState(AUTO_ADVANCE_DELAY / 1000);
   const [autoAdvanceEnabled, setAutoAdvanceEnabled] = React.useState(!disableAutoAdvance);
   const hasAutoAdvanced = React.useRef(false);
@@ -92,6 +94,11 @@ export const CompletionScreen = ({
     [timeRemaining]
   );
 
+  const readyForNextText = t.rich('completionScreen.readyForNext', {
+    nextLevelName,
+    strong: (chunks) => <strong>{chunks}</strong>,
+  });
+
   return (
     <Box sx={containerStyle}>
       <Box sx={{ textAlign: 'center', maxWidth: '500px', width: '100%' }}>
@@ -106,12 +113,12 @@ export const CompletionScreen = ({
           fontWeight: 600,
           fontSize: { xs: '1.5rem', sm: '2.125rem' },
         }}>
-          {levelName} Complete!
+          {t('completionScreen.levelComplete', { levelName })}
         </Typography>
 
         <Box my={{ xs: 2, sm: 3 }}>
           <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-            Your Score
+            {t('completionScreen.yourScore')}
           </Typography>
           <Typography variant="h3" sx={{ 
             color: 'primary.main', 
@@ -121,14 +128,14 @@ export const CompletionScreen = ({
             {accuracyPercent}%
           </Typography>
           <Typography variant="body2" color="textSecondary">
-            {attempts} total attempt{attempts !== 1 ? 's' : ''}
+            {t('completionScreen.totalAttempts', { count: attempts ?? 0 })}
           </Typography>
         </Box>
 
         {vocabularyList && (
           <Box my={{ xs: 2, sm: 3 }} sx={{ maxHeight: '200px', overflowY: 'auto' }}>
             <Typography variant="h6" gutterBottom sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }}>
-              Vocabulary Learned
+              {t('completionScreen.vocabularyLearned')}
             </Typography>
             <Box sx={{ textAlign: 'left', paddingLeft: 2 }}>
               {vocabularyList}
@@ -139,11 +146,11 @@ export const CompletionScreen = ({
         {!isLastLevel && !disableAutoAdvance && (
           <Box my={{ xs: 2, sm: 3 }}>
             <Typography variant="body1" gutterBottom>
-              Ready for <strong>{nextLevelName}</strong>?
+              {readyForNextText}
             </Typography>
             {autoAdvanceEnabled && (
               <Typography variant="body2" color="textSecondary" gutterBottom>
-                Auto-advancing in {timeRemaining}s...
+                {t('completionScreen.autoAdvancing', { seconds: timeRemaining })}
               </Typography>
             )}
           </Box>
@@ -161,7 +168,7 @@ export const CompletionScreen = ({
                 fontSize: { xs: '1rem', sm: '1.1rem' },
               }}
             >
-              Back
+              {t('completionScreen.back')}
             </Button>
           )}
           {showRetry && onRetry && (
@@ -175,7 +182,7 @@ export const CompletionScreen = ({
                 fontSize: { xs: '1rem', sm: '1.1rem' },
               }}
             >
-              Try Again
+              {t('completionScreen.tryAgain')}
             </Button>
           )}
           {!isLastLevel ? (
@@ -189,7 +196,9 @@ export const CompletionScreen = ({
                 fontSize: { xs: '1rem', sm: '1.1rem' },
               }}
             >
-              {disableAutoAdvance ? nextLevelName : `Continue to ${nextLevelName}`}
+              {disableAutoAdvance
+                ? nextLevelName
+                : t('completionScreen.continueTo', { nextLevelName })}
             </Button>
           ) : (
             <Button
@@ -202,7 +211,7 @@ export const CompletionScreen = ({
                 fontSize: { xs: '1rem', sm: '1.1rem' },
               }}
             >
-              Finish Exercise
+              {t('completionScreen.finishExercise')}
             </Button>
           )}
         </Box>
@@ -214,7 +223,7 @@ export const CompletionScreen = ({
             onClick={() => setAutoAdvanceEnabled(false)}
             sx={{ marginTop: '1rem' }}
           >
-            Cancel auto-advance
+            {t('completionScreen.cancelAutoAdvance')}
           </Button>
         )}
       </Box>

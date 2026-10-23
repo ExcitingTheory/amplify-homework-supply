@@ -16,7 +16,7 @@ import {
   DecoratorNode,
 } from 'lexical';
 import { BlockWithAlignableContents } from '@lexical/react/LexicalBlockWithAlignableContents';
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense, useCallback, useEffect } from 'react';
 import Skeleton from '@mui/material/Skeleton';
 import { getAmplifyClient } from '../../../utils/amplifyClient';
 import UnitContext from '../../../context/unitContext';
@@ -260,28 +260,31 @@ export default function ConversationPlaylistPlugin() {
   const [editor] = useLexicalComposerContext();
   const { unit } = React.useContext(UnitContext);
 
-  const createUnitFileRelationship = async (fileId) => {
-    try {
-      if (!unit) return;
-      const client = getAmplifyClient();
-      const { data: existing } = await client.models.UnitFile.list({
-        filter: {
-          and: [
-            { unitID: { eq: unit.id } },
-            { fileID: { eq: fileId } },
-          ],
-        },
-      });
-      if (!existing || existing.length === 0) {
-        await client.models.UnitFile.create({
-          unitID: unit.id,
-          fileID: fileId,
+  const createUnitFileRelationship = useCallback(
+    async (fileId) => {
+      try {
+        if (!unit) return;
+        const client = getAmplifyClient();
+        const { data: existing } = await client.models.UnitFile.list({
+          filter: {
+            and: [
+              { unitID: { eq: unit.id } },
+              { fileID: { eq: fileId } },
+            ],
+          },
         });
+        if (!existing || existing.length === 0) {
+          await client.models.UnitFile.create({
+            unitID: unit.id,
+            fileID: fileId,
+          });
+        }
+      } catch (error) {
+        console.error('[ConversationPlaylistPlugin] UnitFile create error:', error);
       }
-    } catch (error) {
-      console.error('[ConversationPlaylistPlugin] UnitFile create error:', error);
-    }
-  };
+    },
+    [unit],
+  );
 
   useEffect(() => {
     if (!editor.hasNodes([ConversationPlaylistNode])) {
@@ -311,7 +314,7 @@ export default function ConversationPlaylistPlugin() {
       },
       COMMAND_PRIORITY_EDITOR,
     );
-  }, [editor, unit]);
+  }, [editor, createUnitFileRelationship]);
 
   return null;
 }

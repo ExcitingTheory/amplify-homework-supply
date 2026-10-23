@@ -6,14 +6,39 @@
     "dialogTitle": "Antwort bearbeiten",
     "emptyState": "Keine Antwort angegeben",
     "instructions": "Erstellen Sie Ihre Antwort unten",
-    "save": "Speichern"
+    "save": "Speichern",
+    "actionsColumn": "Aktionen",
+    "addNewOption": "„{value}“ hinzufügen",
+    "removeNamedWord": "{phrase} entfernen",
+    "removeWord": "Wort entfernen",
+    "removeWords": "Remove {count, plural, one {# Wort} other {# Wörter}} entfernen\n\nWait, that's wrong. Correct form:\n\n{count, plural, one {# Wort entfernen} other {# Wörter entfernen}}",
+    "title": "Übung mit Kurzantwort",
+    "titleByDefinition": "Kurzantwortaufgabe nach Definition",
+    "titleByWord": "Kurzantwortübung nach Wörtern"
   },
   "blocks": {
     "meaning_association": "Bedeutungszuordnung"
   },
   "customAIEditor": {
     "title": "KI-bewertete Übung",
-    "description": "Erstellen Sie eine KI-bewertete Übung, bei der Lernende auf Fragen antworten und die KI die Antworten anhand Ihrer eigenen Bewertungskriterien auswertet."
+    "description": "Erstellen Sie eine KI-bewertete Übung, bei der Lernende auf Fragen antworten und die KI die Antworten anhand Ihrer eigenen Bewertungskriterien auswertet.",
+    "inputModeText": "Text",
+    "inputModeAudio": "Audio",
+    "inputModeImage": "Bild",
+    "inputModeDrawing": "Zeichnung",
+    "questionPromptHeader": "Fragenvorgabe",
+    "expectedAnswerHeader": "Erwartete Antwort",
+    "removeQuestion": "Frage entfernen",
+    "questionFallback": "Frage {id}",
+    "secureGrading": "Sichere Bewertung",
+    "studentInputModes": "Eingabemodi für Lernende",
+    "allowedInputModes": "Zulässige Eingabemodi",
+    "gradingCriteria": "Bewertungskriterien (KI-Anweisungen)",
+    "criteriaPlaceholder": "Beschreiben Sie, wie die KI die Antworten der Lernenden bewerten soll. Z. B.: 'Bewertung anhand des Verständnisses der Photosynthese. Volle Punktzahl für die Nennung der lichtabhängigen Reaktionen, des Calvin-Zyklus und der Rolle des Chlorophylls.",
+    "criteriaHelperText": "Die KI verwendet diese Kriterien, um die Abgaben der Lernenden zu bewerten. Die Lernenden können sie nicht einsehen.",
+    "questionsCount": "Fragen ({count})",
+    "searchQuestions": "Fragen im Fragenpool suchen und hinzufügen",
+    "securityNotice": "Sicherheit: Der Prompt für die KI-Bewertung ist gegen Prompt-Injection, Rollenbruch und Datenlecks abgesichert. Eingaben von Lernenden werden bereinigt. Bewertungskriterien sind für Lernende nicht sichtbar. Die Ausgabe wird validiert und von personenbezogenen Daten (PII) befreit."
   },
   "customAnswerEditor": {
     "add": "Hinzufügen",
@@ -28,7 +53,8 @@
       "hint": "Hinweis",
       "id": "ID",
       "prompt": "Eingabeaufforderung",
-      "promptAudio": "Eingabeaufforderung Audio"
+      "promptAudio": "Eingabeaufforderung Audio",
+      "actions": "Aktionen"
     },
     "description": "Erstellen Sie eine Kurze-Antwort-Aufgabe, die dem Benutzer eine Frage stellen und eine kurze Antwort erwarten kann.",
     "dialogDescription": "Fügen Sie ein neues Frage-und-Antwort-Paar hinzu.",
@@ -43,7 +69,8 @@
     "remove": "entfernen",
     "successGeneratedAudio": "Audiodatei erfolgreich generiert",
     "title": "Benutzerdefinierte Antwortübung",
-    "ttsPreview": "Text-zu-Sprache-Vorschau"
+    "ttsPreview": "Text-zu-Sprache-Vorschau",
+    "removeAnswers": "{count, plural, one {# Antwort entfernen} other {# Antworten entfernen}}"
   },
   "meaningAssociationEditor": {
     "add": "Hinzufügen",
@@ -60,7 +87,13 @@
     "emptyState": "Noch wurden keine Wörter hinzugefügt. Verwenden Sie die Eingabe oben, um Wörter aus dem Wörterbuch hinzuzufügen. Wenn das Wort, das Sie hinzufügen möchten, nicht im Wörterbuch enthalten ist, können Sie es hinzufügen, indem Sie auf „Wort hinzufügen\" im Dropdown-Menü klicken oder den Wörterbuch-Editor in der Seitenleiste verwenden.",
     "phraseLabel": "Phrase",
     "pronunciationLabel": "Aussprache",
-    "removeFromAssignment": "Aus Aufgabe entfernen"
+    "removeFromAssignment": "Aus Aufgabe entfernen",
+    "actionsColumn": "Aktionen",
+    "addNewOption": "„{value}“ hinzufügen",
+    "definitionAriaLabel": "Definition",
+    "removeNamedWord": "{phrase} entfernen",
+    "removeWord": "Wort entfernen",
+    "removeWords": "Remove {count, plural, one {# word} other {# words}} → German: \"{count, plural, one {# Wort} other {# Wörter}} entfernen\"\n\n{count, plural, one {# Wort} other {# Wörter}} entfernen"
   },
   "questionEditor": {
     "cancel": "Abbrechen"

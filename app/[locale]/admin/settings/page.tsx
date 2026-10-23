@@ -87,6 +87,8 @@ function GamificationAdmin() {
   const [xpConfig, setXpConfig] = React.useState<any>(null);
   const [platformSettingsRecord, setPlatformSettingsRecord] =
     React.useState<any>(null);
+  const [platformSettingsLoadError, setPlatformSettingsLoadError] =
+    React.useState<string | null>(null);
   const [linearLockEnabled, setLinearLockEnabled] = React.useState(false);
   const [unitLockRequirements, setUnitLockRequirements] = React.useState<
     Record<string, any>
@@ -159,6 +161,7 @@ function GamificationAdmin() {
         const valid = (items || []).filter((i) => i != null && i.id != null);
         const record = valid[0] || null;
         setPlatformSettingsRecord(record);
+        setPlatformSettingsLoadError(null);
         if (record) {
           // Reconstruct XPTunerConfig shape from the flat PlatformSettings fields
           const multipliers = record.xpMultipliers
@@ -190,11 +193,15 @@ function GamificationAdmin() {
           setXpConfig(null);
         }
       },
-      error: (err) =>
-        console.warn(
+      error: (err) => {
+        console.error(
           "[GamificationAdmin] PlatformSettings subscription error:",
           err,
-        ),
+        );
+        setPlatformSettingsLoadError(
+          "Unable to load platform settings. Reload the page and try again.",
+        );
+      },
     });
     return () => sub.unsubscribe();
   }, [client]);
@@ -845,6 +852,7 @@ function GamificationAdmin() {
       >
         <AdminAIConfig
           platformSettings={platformSettingsRecord}
+          settingsError={platformSettingsLoadError}
           client={client}
         />
       </Box>
@@ -858,13 +866,16 @@ function GamificationAdmin() {
 
 function AdminAIConfig({
   platformSettings,
+  settingsError,
   client,
 }: {
   platformSettings: any;
+  settingsError: string | null;
   client: any;
 }) {
   const [values, setValues] = React.useState<any>({});
   const [saving, setSaving] = React.useState(false);
+  const [saveError, setSaveError] = React.useState<string | null>(null);
 
   // Hydrate from PlatformSettings record
   React.useEffect(() => {
@@ -898,11 +909,27 @@ function AdminAIConfig({
       sageToolResultBudget: platformSettings.sageToolResultBudget ?? null,
       kaiTotalTurnBudget: platformSettings.kaiTotalTurnBudget ?? null,
       sageTotalTurnBudget: platformSettings.sageTotalTurnBudget ?? null,
+      documentAnalysisOpenAiRequestsPerMinute:
+        platformSettings.documentAnalysisOpenAiRequestsPerMinute ?? 5,
+      documentAnalysisOpenAiTokensPerMinute:
+        platformSettings.documentAnalysisOpenAiTokensPerMinute ?? 20000,
+      documentAnalysisOpenAiMaxConcurrentRequests:
+        platformSettings.documentAnalysisOpenAiMaxConcurrentRequests ?? 1,
+      documentAnalysisAnthropicRequestsPerMinute:
+        platformSettings.documentAnalysisAnthropicRequestsPerMinute ?? 5,
+      documentAnalysisAnthropicTokensPerMinute:
+        platformSettings.documentAnalysisAnthropicTokensPerMinute ?? 20000,
+      documentAnalysisAnthropicMaxConcurrentRequests:
+        platformSettings.documentAnalysisAnthropicMaxConcurrentRequests ?? 1,
     });
   }, [platformSettings]);
 
   const handleSave = React.useCallback(async () => {
-    if (!platformSettings?.id || !client?.models?.PlatformSettings) return;
+    setSaveError(null);
+    if (!platformSettings?.id || !client?.models?.PlatformSettings) {
+      setSaveError("Platform settings are not available to save.");
+      return;
+    }
     setSaving(true);
     try {
       const updatePayload: any = {
@@ -963,14 +990,45 @@ function AdminAIConfig({
         updatePayload.kaiTotalTurnBudget = values.kaiTotalTurnBudget;
       if (values.sageTotalTurnBudget != null)
         updatePayload.sageTotalTurnBudget = values.sageTotalTurnBudget;
+      updatePayload.documentAnalysisOpenAiRequestsPerMinute =
+        values.documentAnalysisOpenAiRequestsPerMinute;
+      updatePayload.documentAnalysisOpenAiTokensPerMinute =
+        values.documentAnalysisOpenAiTokensPerMinute;
+      updatePayload.documentAnalysisOpenAiMaxConcurrentRequests =
+        values.documentAnalysisOpenAiMaxConcurrentRequests;
+      updatePayload.documentAnalysisAnthropicRequestsPerMinute =
+        values.documentAnalysisAnthropicRequestsPerMinute;
+      updatePayload.documentAnalysisAnthropicTokensPerMinute =
+        values.documentAnalysisAnthropicTokensPerMinute;
+      updatePayload.documentAnalysisAnthropicMaxConcurrentRequests =
+        values.documentAnalysisAnthropicMaxConcurrentRequests;
 
-      await client.models.PlatformSettings.update(updatePayload);
+      const result = await client.models.PlatformSettings.update(updatePayload);
+      if (result.errors?.length) {
+        throw new Error(
+          result.errors.map((error: { message: string }) => error.message).join("; "),
+        );
+      }
+      if (!result.data) {
+        throw new Error("Platform settings were not updated.");
+      }
     } catch (err) {
       console.error("[AdminAIConfig] Save failed:", err);
+      setSaveError(
+        err instanceof Error ? err.message : "Unable to save AI settings.",
+      );
     } finally {
       setSaving(false);
     }
   }, [platformSettings, client, values]);
+
+  if (settingsError) {
+    return (
+      <Typography variant="body2" color="error" role="alert">
+        {settingsError}
+      </Typography>
+    );
+  }
 
   if (!platformSettings) {
     return (
@@ -986,6 +1044,7 @@ function AdminAIConfig({
       onChange={setValues}
       onSave={handleSave}
       saving={saving}
+      error={saveError}
       mode="platform"
     />
   );

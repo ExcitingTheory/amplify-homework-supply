@@ -42,7 +42,7 @@ import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import {
   formatGradeDuration,
-  getGradeCompletionLabel,
+  getGradeCompletionSeconds,
 } from "../../../utils/gradeTiming";
 import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
@@ -85,9 +85,14 @@ export default function UnitCompletedPlugin() {
   // Most recent completed grade for peer review
   const latestCompletedGrade = recentGrades[0];
   const timeLimitSeconds = unit?.timeLimitSeconds || 0;
-  const completionTimeLabel = getGradeCompletionLabel(
-    latestCompletedGrade || grade,
-  );
+  const getCompletionLabel = (targetGrade) => {
+    const completionSeconds = getGradeCompletionSeconds(targetGrade);
+    if (completionSeconds == null) return null;
+    return t("unitCompletedPlugin.completedIn", {
+      duration: formatGradeDuration(completionSeconds),
+    });
+  };
+  const completionTimeLabel = getCompletionLabel(latestCompletedGrade || grade);
 
   // Fire a workbook-completed analytics event once when the completion modal appears
   const completionTrackedRef = React.useRef(null);
@@ -273,8 +278,14 @@ export default function UnitCompletedPlugin() {
             component="p"
             sx={{ textAlign: "center", color: "text.secondary", mt: 1 }}
           >
-            Time limit: {formatGradeDuration(timeLimitSeconds)}
-            {completionTimeLabel ? ` • ${completionTimeLabel}` : ""}
+            {completionTimeLabel
+              ? t("unitCompletedPlugin.timeLimitWithCompletion", {
+                  duration: formatGradeDuration(timeLimitSeconds),
+                  completion: completionTimeLabel,
+                })
+              : t("unitCompletedPlugin.timeLimit", {
+                  duration: formatGradeDuration(timeLimitSeconds),
+                })}
           </Typography>
         )}
 
@@ -327,7 +338,7 @@ export default function UnitCompletedPlugin() {
             );
 
             const _roundedAccuracy = Math.round(grade?.accuracy * 100) / 100;
-            const completionLabel = getGradeCompletionLabel(grade);
+            const completionLabel = getCompletionLabel(grade);
 
             return (
               <li key={index}>

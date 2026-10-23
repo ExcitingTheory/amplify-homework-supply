@@ -7,25 +7,25 @@ describe('BossBattleForm', () => {
   it('renders all form fields', () => {
     render(<BossBattleForm onSubmit={vi.fn()} />)
 
-    expect(screen.getByLabelText(/Title/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Target XP/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Bonus Multiplier/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Deadline/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Narrative Setting/i)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^bossBattleForm\.titleLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/)).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.bonusMultiplierLabel')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.endDateLabel')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.settingLabel')).toBeInTheDocument()
     // Stakes switches
-    expect(screen.getByLabelText(/Lose a streak freeze/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Lose XP points/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Lose a level/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Reset streak to zero/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Lose most recent badge/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Lose a badge by rarity/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Missed streaks cost XP/i)).toBeInTheDocument()
-    expect(screen.getByLabelText(/Scramble cosmetics/i)).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseStreakFreeze')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseXp')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseLevel')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.resetStreak')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseBadge')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseBadgeByRarity')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.streakMissPenalty')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleForm.loseCosmetics')).toBeInTheDocument()
   })
 
   it('submit button is disabled when title is empty', () => {
     render(<BossBattleForm onSubmit={vi.fn()} />)
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     expect(btn).toBeDisabled()
   })
 
@@ -33,9 +33,9 @@ describe('BossBattleForm', () => {
     const user = userEvent.setup()
     render(<BossBattleForm onSubmit={vi.fn()} />)
 
-    await user.type(screen.getByLabelText(/Title/i), 'Dragon')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.titleLabel/), 'Dragon')
     
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     expect(btn).toBeDisabled()
   })
 
@@ -43,10 +43,10 @@ describe('BossBattleForm', () => {
     const user = userEvent.setup()
     render(<BossBattleForm onSubmit={vi.fn()} />)
 
-    await user.type(screen.getByLabelText(/Title/i), 'Dragon')
-    await user.type(screen.getByLabelText(/Target XP/i), '1000')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.titleLabel/), 'Dragon')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/), '1000')
 
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     expect(btn).not.toBeDisabled()
   })
 
@@ -55,11 +55,11 @@ describe('BossBattleForm', () => {
     const onSubmit = vi.fn()
     render(<BossBattleForm onSubmit={onSubmit} />)
 
-    await user.type(screen.getByLabelText(/Title/i), 'The Dragon')
-    await user.type(screen.getByLabelText(/Target XP/i), '2000')
-    await user.type(screen.getByLabelText(/Narrative Setting/i), 'A dark cave')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.titleLabel/), 'The Dragon')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/), '2000')
+    await user.type(screen.getByLabelText('bossBattleForm.settingLabel'), 'A dark cave')
 
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     await user.click(btn)
 
     expect(onSubmit).toHaveBeenCalledWith({
@@ -78,13 +78,13 @@ describe('BossBattleForm', () => {
     const onSubmit = vi.fn()
     render(<BossBattleForm onSubmit={onSubmit} />)
 
-    await user.type(screen.getByLabelText(/Title/i), 'The Dragon')
-    await user.type(screen.getByLabelText(/Target XP/i), '2000')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.titleLabel/), 'The Dragon')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/), '2000')
 
     // Toggle loseLevel on
-    await user.click(screen.getByLabelText(/Lose a level/i))
+    await user.click(screen.getByLabelText('bossBattleForm.loseLevel'))
 
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     await user.click(btn)
 
     const submittedStakes = JSON.parse(onSubmit.mock.calls[0][0].stakes)
@@ -97,39 +97,39 @@ describe('BossBattleForm', () => {
     const onSubmit = vi.fn()
     render(<BossBattleForm onSubmit={onSubmit} />)
 
-    await user.type(screen.getByLabelText(/Title/i), 'The Dragon')
-    await user.type(screen.getByLabelText(/Target XP/i), '2000')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.titleLabel/), 'The Dragon')
+    await user.type(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/), '2000')
 
-    const btn = screen.getByRole('button', { name: /Create Boss Battle/i })
+    const btn = screen.getByRole('button', { name: 'bossBattleForm.createBattle' })
     await user.click(btn)
 
-    expect(screen.getByLabelText(/Title/i)).toHaveValue('')
+    expect(screen.getByLabelText(/^bossBattleForm\.titleLabel/)).toHaveValue('')
   })
 
   it('disables all fields when submitting', () => {
     render(<BossBattleForm onSubmit={vi.fn()} submitting />)
 
-    expect(screen.getByLabelText(/Title/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Target XP/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Bonus Multiplier/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Deadline/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Narrative Setting/i)).toBeDisabled()
-    expect(screen.getByLabelText(/Lose a streak freeze/i)).toBeDisabled()
+    expect(screen.getByLabelText(/^bossBattleForm\.titleLabel/)).toBeDisabled()
+    expect(screen.getByLabelText(/^bossBattleForm\.targetXpLabel/)).toBeDisabled()
+    expect(screen.getByLabelText('bossBattleForm.bonusMultiplierLabel')).toBeDisabled()
+    expect(screen.getByLabelText('bossBattleForm.endDateLabel')).toBeDisabled()
+    expect(screen.getByLabelText('bossBattleForm.settingLabel')).toBeDisabled()
+    expect(screen.getByLabelText('bossBattleForm.loseStreakFreeze')).toBeDisabled()
   })
 
   it('shows "Creating..." text on button when submitting', () => {
     render(<BossBattleForm onSubmit={vi.fn()} submitting />)
-    expect(screen.getByRole('button', { name: /Creating/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'bossBattleForm.creating' })).toBeInTheDocument()
   })
 
   it('bonus multiplier defaults to 1.5', () => {
     render(<BossBattleForm onSubmit={vi.fn()} />)
-    expect(screen.getByLabelText(/Bonus Multiplier/i)).toHaveValue(1.5)
+    expect(screen.getByLabelText('bossBattleForm.bonusMultiplierLabel')).toHaveValue(1.5)
   })
 
   it('loseStreakFreeze is on by default', () => {
     render(<BossBattleForm onSubmit={vi.fn()} />)
-    const toggle = screen.getByLabelText(/Lose a streak freeze/i)
+    const toggle = screen.getByLabelText('bossBattleForm.loseStreakFreeze')
     expect(toggle).toBeChecked()
   })
 })

@@ -9,6 +9,7 @@
  */
 
 import Box from "@mui/material/Box";
+import { useTranslations } from "next-intl";
 
 interface WorkbookSSRSkeletonProps {
   /** Pre-rendered HTML string from the headless Lexical editor */
@@ -16,6 +17,7 @@ interface WorkbookSSRSkeletonProps {
 }
 
 export function WorkbookSSRSkeleton({ html }: WorkbookSSRSkeletonProps) {
+  const t = useTranslations("editor.shared");
   if (!html) {
     return (
       <Box
@@ -27,7 +29,7 @@ export function WorkbookSSRSkeleton({ html }: WorkbookSSRSkeletonProps) {
           opacity: 0.5,
         }}
       >
-        Loading content...
+        {t("workbookSSRSkeleton.loadingContent")}
       </Box>
     );
   }

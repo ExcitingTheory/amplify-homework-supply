@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Card, Chip, Typography } from "@mui/material";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import { DASHBOARD_TOKENS } from "./constants";
@@ -35,6 +36,7 @@ export function UpNextCard({
   onOpenDrill,
   onRequestGuidance,
 }: UpNextCardProps) {
+  const t = useTranslations("components");
   return (
     <Box
       sx={{
@@ -56,7 +58,7 @@ export function UpNextCard({
       >
         <Chip
           icon={<RocketLaunchIcon />}
-          label="Up Next"
+          label={t("upNextCard.badge")}
           color="primary"
           size="small"
           sx={{ fontWeight: 700, fontSize: "0.75rem" }}
@@ -65,7 +67,7 @@ export function UpNextCard({
 
       <Card
         component="section"
-        aria-label={`Your next step in ${sectionName}`}
+        aria-label={t("upNextCard.ariaLabel", { sectionName })}
         elevation={0}
         sx={{
           // MUI's sx multiplies bare numeric borderRadius by theme.shape.borderRadius

@@ -258,13 +258,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
     return null;
   }, [pathname]);
 
-  const groups = session?.groups || [];
+  const sessionGroups = session?.groups;
   const isPrivileged = React.useMemo(
     () =>
-      groups.some((g: string) =>
+      (sessionGroups || []).some((g: string) =>
         ["Admins", "Moderators", "Instructors"].includes(g),
       ),
-    [groups],
+    [sessionGroups],
   );
 
   const loadLearnerScope =
@@ -443,29 +443,6 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       cancelled = true;
     };
   }, [loadBestBundle, loadLearnerScope, isPrivileged]);
-
-  // Read initial query from URL
-  React.useEffect(() => {
-    const q = searchParams.get("q");
-    if (q && q !== state.query) {
-      setState((prev) => ({ ...prev, query: q }));
-      executeSearch(q);
-    }
-  }, []);
-
-  const setQuery = React.useCallback((query: string) => {
-    setState((prev) => ({ ...prev, query, open: true }));
-
-    // Debounce search execution
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      if (query.trim().length >= 2) {
-        executeSearch(query);
-      } else {
-        setState((prev) => ({ ...prev, results: [], searching: false }));
-      }
-    }, 300);
-  }, []);
 
   const executeSearch = React.useCallback(
     async (query: string) => {
@@ -728,6 +705,39 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
       }
     },
     [searchChatMessagesAsync, loadBestBundle, loadLearnerScope, isPrivileged],
+  );
+
+  // Read initial query from URL (mount only; later changes are driven by setQuery)
+  const initialUrlStateRef = React.useRef({
+    q: searchParams.get("q"),
+    query: state.query,
+    executeSearch,
+  });
+  initialUrlStateRef.current.executeSearch = executeSearch;
+
+  React.useEffect(() => {
+    const { q, query, executeSearch: runSearch } = initialUrlStateRef.current;
+    if (q && q !== query) {
+      setState((prev) => ({ ...prev, query: q }));
+      runSearch(q);
+    }
+  }, []);
+
+  const setQuery = React.useCallback(
+    (query: string) => {
+      setState((prev) => ({ ...prev, query, open: true }));
+
+      // Debounce search execution
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      debounceRef.current = setTimeout(() => {
+        if (query.trim().length >= 2) {
+          executeSearch(query);
+        } else {
+          setState((prev) => ({ ...prev, results: [], searching: false }));
+        }
+      }, 300);
+    },
+    [executeSearch],
   );
 
   const clearSearch = React.useCallback(() => {

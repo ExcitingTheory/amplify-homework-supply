@@ -94,7 +94,7 @@ export default function CollaboratorManager({
       setError(result.error || t("collaboratorManager.failedToLoad"));
     }
     setLoading(false);
-  }, [unitId]);
+  }, [unitId, t]);
 
   useEffect(() => {
     loadCollaborators();

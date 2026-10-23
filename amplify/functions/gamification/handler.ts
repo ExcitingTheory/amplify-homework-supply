@@ -2888,6 +2888,7 @@ async function handleCheckPersonalBest(
   // attempt so two different units submitted close together don't lose an entry.
   let isNewBest = false;
   let firstAttempt = false;
+  let bestScore = score;
   let previousBest: number | null = null;
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
@@ -3011,6 +3012,7 @@ async function handleCheckPersonalBest(
 
     isNewBest = false;
     firstAttempt = false;
+    bestScore = existingPB.bestScore;
     previousBest = existingPB.previousBest;
     break; // Not a new best — nothing to write.
   }
@@ -3018,7 +3020,7 @@ async function handleCheckPersonalBest(
   return {
     isNewBest,
     firstAttempt,
-    bestScore: score,
+    bestScore,
     previousBest,
   };
 }

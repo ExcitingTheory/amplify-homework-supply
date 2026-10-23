@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
@@ -67,6 +68,7 @@ export function SkillForm({
   onGenerateFromUnit,
   submitting = false,
 }: SkillFormProps) {
+  const t = useTranslations("components");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [xpReward, setXpReward] = useState(0);
@@ -104,37 +106,39 @@ export function SkillForm({
       <Stack spacing={2}>
         <TextField
           size="small"
-          label="Skill Title"
+          label={t("skillForm.titleLabel")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
           fullWidth
-          placeholder="e.g. Variables & Types"
+          placeholder={t("skillForm.titlePlaceholder")}
           disabled={submitting}
         />
 
         <TextField
           size="small"
-          label="Description"
+          label={t("skillForm.descriptionLabel")}
           value={description}
           onChange={(e) => setDescription(e.target.value)}
           multiline
           rows={2}
           fullWidth
-          placeholder="What students learn by mastering this skill..."
+          placeholder={t("skillForm.descriptionPlaceholder")}
           disabled={submitting}
         />
 
         <Stack direction="row" spacing={1}>
           <TextField
             size="small"
-            label="XP Reward"
+            label={t("skillForm.xpRewardLabel")}
             type="number"
             value={xpReward}
             onChange={(e) => setXpReward(Number(e.target.value))}
             InputProps={{
               startAdornment: (
-                <InputAdornment position="start">XP</InputAdornment>
+                <InputAdornment position="start">
+                  {t("skillForm.xpAdornment")}
+                </InputAdornment>
               ),
               inputProps: { min: 0 },
             }}
@@ -144,7 +148,7 @@ export function SkillForm({
 
           <Box sx={{ flex: 1 }}>
             <Typography variant="caption" color="text.secondary" gutterBottom>
-              Min Accuracy: {minimumAccuracy}%
+              {t("skillForm.minAccuracy", { minimumAccuracy })}
             </Typography>
             <Slider
               value={minimumAccuracy}
@@ -156,7 +160,7 @@ export function SkillForm({
               valueLabelDisplay="auto"
               valueLabelFormat={(val) => `${val}%`}
               disabled={submitting}
-              aria-label="Minimum accuracy"
+              aria-label={t("skillForm.minAccuracyLabel")}
             />
           </Box>
         </Stack>
@@ -179,7 +183,7 @@ export function SkillForm({
                 <Box sx={{ flex: 1 }}>{option.name}</Box>
                 {option.status === "DRAFT" && (
                   <Chip
-                    label="Draft"
+                    label={t("skillForm.draft")}
                     size="small"
                     color="warning"
                     variant="outlined"
@@ -196,7 +200,7 @@ export function SkillForm({
                 key={option.id}
                 label={
                   option.status === "DRAFT"
-                    ? `${option.name} (Draft)`
+                    ? t("skillForm.draftUnitName", { name: option.name })
                     : option.name
                 }
                 size="small"
@@ -208,13 +212,13 @@ export function SkillForm({
             <TextField
               {...params}
               size="small"
-              label="Required Units"
-              placeholder="Select units required for mastery..."
-              helperText="Units marked Draft aren't published yet — students can't complete them until you publish."
+              label={t("skillForm.requiredUnitsLabel")}
+              placeholder={t("skillForm.requiredUnitsPlaceholder")}
+              helperText={t("skillForm.requiredUnitsHelper")}
             />
           )}
           disabled={submitting}
-          noOptionsText="No units available for this section"
+          noOptionsText={t("skillForm.noUnits")}
         />
 
         <Autocomplete
@@ -239,12 +243,12 @@ export function SkillForm({
             <TextField
               {...params}
               size="small"
-              label="Prerequisites"
-              placeholder="Skills required before this one..."
+              label={t("skillForm.prerequisitesLabel")}
+              placeholder={t("skillForm.prerequisitesPlaceholder")}
             />
           )}
           disabled={submitting}
-          noOptionsText="No other skills available"
+          noOptionsText={t("skillForm.noSkills")}
         />
 
         <Stack direction="row" spacing={1}>
@@ -256,7 +260,7 @@ export function SkillForm({
             disabled={!isValid || submitting}
             sx={{ flex: 1 }}
           >
-            {submitting ? "Adding..." : "Add Skill"}
+            {submitting ? t("skillForm.adding") : t("skillForm.addSkill")}
           </Button>
 
           {onGenerateFromUnit && (
@@ -278,7 +282,7 @@ export function SkillForm({
                       <Box sx={{ flex: 1 }}>{option.name}</Box>
                       {option.status === "DRAFT" && (
                         <Chip
-                          label="Draft"
+                          label={t("skillForm.draft")}
                           size="small"
                           color="warning"
                           variant="outlined"
@@ -292,8 +296,8 @@ export function SkillForm({
                   <TextField
                     {...params}
                     size="small"
-                    label="Generate from..."
-                    placeholder="Select unit"
+                    label={t("skillForm.generateFromLabel")}
+                    placeholder={t("skillForm.generateFromPlaceholder")}
                   />
                 )}
                 sx={{ flex: 1 }}
@@ -312,7 +316,7 @@ export function SkillForm({
                   }
                 }}
               >
-                Generate
+                {t("skillForm.generate")}
               </Button>
             </Stack>
           )}

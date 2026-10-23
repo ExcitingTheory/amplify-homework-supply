@@ -153,10 +153,9 @@ describe('DictionaryEditor2 Integration Tests', () => {
   // Toolbar
   // ==========================================================================
 
-  it('renders toolbar with search input', async () => {
+  it('does not render a local search input because search is global', async () => {
     renderDictionaryEditor();
-    const searchInput = screen.getByPlaceholderText('Search words...');
-    expect(searchInput).toBeInTheDocument();
+    expect(screen.queryByPlaceholderText('Search words...')).not.toBeInTheDocument();
   });
 
   it('renders new word button', async () => {
@@ -181,11 +180,12 @@ describe('DictionaryEditor2 Integration Tests', () => {
   // Search
   // ==========================================================================
 
-  it('allows typing in search input', async () => {
-    renderDictionaryEditor();
-    const searchInput = screen.getByPlaceholderText('Search words...');
-    await user.type(searchInput, 'hello');
-    expect(searchInput).toHaveValue('hello');
+  it('renders words supplied by the global search filter', async () => {
+    renderDictionaryEditor({
+      filteredDictionary: { 'word-2': mockWords[1] },
+    });
+    expect(await screen.findByText('ありがとう')).toBeInTheDocument();
+    expect(screen.queryByText('こんにちは')).not.toBeInTheDocument();
   });
 
   // ==========================================================================
@@ -206,9 +206,9 @@ describe('DictionaryEditor2 Integration Tests', () => {
     const newWordButton = screen.getByRole('button', { name: /newWordButton/i });
     await user.click(newWordButton);
     await waitFor(() => {
-      expect(screen.getByLabelText(/Phrase/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Pronunciation/i)).toBeInTheDocument();
-      expect(screen.getByLabelText(/Definition/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/dictionaryEditor\.phraseField/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/dictionaryEditor\.pronunciationField/)).toBeInTheDocument();
+      expect(screen.getByLabelText(/dictionaryEditor\.definitionField/)).toBeInTheDocument();
     });
   });
 
@@ -222,12 +222,12 @@ describe('DictionaryEditor2 Integration Tests', () => {
     await user.click(newWordButton);
 
     await waitFor(() => {
-      expect(screen.getByLabelText(/Phrase/i)).toBeInTheDocument();
+      expect(screen.getByLabelText(/dictionaryEditor\.phraseField/)).toBeInTheDocument();
     });
 
-    await user.type(screen.getByLabelText(/Phrase/i), 'さようなら');
-    await user.type(screen.getByLabelText(/Pronunciation/i), 'sayounara');
-    await user.type(screen.getByLabelText(/Definition/i), 'goodbye');
+    await user.type(screen.getByLabelText(/dictionaryEditor\.phraseField/), 'さようなら');
+    await user.type(screen.getByLabelText(/dictionaryEditor\.pronunciationField/), 'sayounara');
+    await user.type(screen.getByLabelText(/dictionaryEditor\.definitionField/), 'goodbye');
 
     const submitButton = screen.getByRole('button', { name: /createWordButton/i });
     await user.click(submitButton);

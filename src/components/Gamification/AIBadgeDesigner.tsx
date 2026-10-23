@@ -11,6 +11,7 @@
  */
 
 import React, { useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
@@ -98,6 +99,7 @@ interface AIBadgeDesignerProps {
 }
 
 export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadgeDesignerProps) {
+  const t = useTranslations('components')
   const [prompt, setPrompt] = useState(initialPrompt)
   const [generating, setGenerating] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -156,7 +158,7 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
       }
 
       setResult({
-        name: parsed.name || 'Custom Badge',
+        name: parsed.name || t('aiBadgeDesigner.defaultBadgeName'),
         description: parsed.description || prompt.trim(),
         rarity: RARITIES.includes(parsed.rarity) ? parsed.rarity : 'uncommon',
         visual: {
@@ -171,11 +173,11 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
       })
     } catch (err: any) {
       console.error('[AIBadgeDesigner] Generation error:', err)
-      setError(err.message || 'Failed to generate badge')
+      setError(err.message || t('aiBadgeDesigner.generateError'))
     } finally {
       setGenerating(false)
     }
-  }, [prompt])
+  }, [prompt, t])
 
   const handleAccept = useCallback(() => {
     if (!result) return
@@ -195,12 +197,12 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
       <Stack spacing={2}>
         <Typography variant="subtitle1" fontWeight={600}>
           <AutoAwesomeIcon sx={{ fontSize: 18, mr: 0.5, verticalAlign: 'text-bottom' }} />
-          AI Badge Designer
+          {t('aiBadgeDesigner.title')}
         </Typography>
 
         <TextField
-          label="Describe your badge concept"
-          placeholder="e.g., A badge for students who complete 10 reading assignments, with a book theme and gold colors"
+          label={t('aiBadgeDesigner.promptLabel')}
+          placeholder={t('aiBadgeDesigner.promptPlaceholder')}
           multiline
           rows={2}
           value={prompt}
@@ -216,7 +218,7 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
             onClick={generate}
             disabled={generating || !prompt.trim()}
           >
-            {generating ? 'Generating...' : 'Generate Badge'}
+            {generating ? t('aiBadgeDesigner.generating') : t('aiBadgeDesigner.generate')}
           </Button>
           {result && (
             <Button
@@ -225,7 +227,7 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
               onClick={generate}
               disabled={generating}
             >
-              Regenerate
+              {t('aiBadgeDesigner.regenerate')}
             </Button>
           )}
         </Stack>
@@ -285,7 +287,7 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
                 startIcon={<CheckIcon />}
                 onClick={handleAccept}
               >
-                Use This Badge
+                {t('aiBadgeDesigner.accept')}
               </Button>
             </Stack>
           </Box>
@@ -293,8 +295,7 @@ export default function AIBadgeDesigner({ onAccept, initialPrompt = '' }: AIBadg
 
         {!result && !generating && !error && (
           <Typography variant="body2" color="text.secondary" sx={{ fontStyle: 'italic' }}>
-            Describe what the badge should represent and the AI will generate a visual design
-            with appropriate icon, colors, shape, and animation.
+            {t('aiBadgeDesigner.hint')}
           </Typography>
         )}
       </Stack>

@@ -31,6 +31,7 @@ import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import { generateClient } from "aws-amplify/data";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 const client = generateClient();
@@ -55,6 +56,7 @@ export function CampaignContextWidget({
   unitId,
   locale = "en",
 }: CampaignContextWidgetProps) {
+  const t = useTranslations("components");
   const router = useRouter();
   const reducedMotion = useReducedMotion();
   const [expanded, setExpanded] = useState(false);
@@ -128,7 +130,7 @@ export function CampaignContextWidget({
         boxShadow: 4,
       }}
       role="complementary"
-      aria-label="Campaign context for this unit"
+      aria-label={t("campaignContextWidget.ariaLabel")}
     >
       {/* Toggle header */}
       <Box
@@ -153,7 +155,7 @@ export function CampaignContextWidget({
         <CampaignIcon color="primary" fontSize="small" />
         {expanded && (
           <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
-            Campaign Context
+            {t("campaignContextWidget.title")}
           </Typography>
         )}
         <ExpandMoreIcon
@@ -173,7 +175,7 @@ export function CampaignContextWidget({
             <Box sx={{ display: "flex", alignItems: "center", gap: 1, py: 1 }}>
               <CircularProgress size={16} />
               <Typography variant="body2" color="text.secondary">
-                Loading…
+                {t("campaignContextWidget.loading")}
               </Typography>
             </Box>
           )}
@@ -184,8 +186,7 @@ export function CampaignContextWidget({
               icon={<WarningAmberIcon fontSize="small" />}
               sx={{ mb: 1, fontSize: "0.8rem" }}
             >
-              This unit isn&apos;t linked to any campaign chapters. Students
-              won&apos;t see narrative framing here.
+              {t("campaignContextWidget.noChaptersWarning")}
             </Alert>
           )}
 
@@ -196,8 +197,9 @@ export function CampaignContextWidget({
                 color="text.secondary"
                 sx={{ display: "block", mb: 1 }}
               >
-                Linked to {chapters.length} chapter
-                {chapters.length > 1 ? "s" : ""}:
+                {t("campaignContextWidget.linkedCount", {
+                  count: chapters.length,
+                })}
               </Typography>
 
               {chapters.map((ch) => (
@@ -223,7 +225,9 @@ export function CampaignContextWidget({
                   >
                     {ch.chapterOrder != null && (
                       <Chip
-                        label={`Ch. ${ch.chapterOrder}`}
+                        label={t("campaignContextWidget.chapterOrder", {
+                          order: ch.chapterOrder,
+                        })}
                         size="small"
                         variant="outlined"
                         sx={{ height: 18, fontSize: "0.65rem" }}
@@ -238,7 +242,11 @@ export function CampaignContextWidget({
                       {ch.challengeTitle}
                     </Typography>
                     <Chip
-                      label={ch.active ? "Active" : "Done"}
+                      label={
+                        ch.active
+                          ? t("campaignContextWidget.statusActive")
+                          : t("campaignContextWidget.statusDone")
+                      }
                       size="small"
                       color={ch.active ? "primary" : "default"}
                       sx={{ height: 18, fontSize: "0.65rem" }}
@@ -261,12 +269,15 @@ export function CampaignContextWidget({
                       color="text.secondary"
                       sx={{ display: "block", mb: 0.75 }}
                     >
-                      {progressPct(ch)}% complete · {ch.currentXP}/
-                      {ch.targetXP} XP
+                      {t("campaignContextWidget.progress", {
+                        percent: progressPct(ch),
+                        current: ch.currentXP,
+                        target: ch.targetXP,
+                      })}
                     </Typography>
                   )}
 
-                  <Tooltip title="Open gamification settings for this section">
+                  <Tooltip title={t("campaignContextWidget.editTooltip")}>
                     <Button
                       size="small"
                       variant="outlined"
@@ -278,7 +289,7 @@ export function CampaignContextWidget({
                       }
                       sx={{ textTransform: "none", fontSize: "0.7rem", py: 0.25 }}
                     >
-                      Edit campaign
+                      {t("campaignContextWidget.editCampaign")}
                     </Button>
                   </Tooltip>
                 </Box>
@@ -292,9 +303,9 @@ export function CampaignContextWidget({
               color="text.secondary"
               sx={{ display: "block", mt: 1 }}
             >
-              To link this unit to a chapter, open the campaign settings for the
-              relevant section and add it under{" "}
-              <em>Linked Units</em>.
+              {t.rich("campaignContextWidget.linkHelp", {
+                em: (chunks) => <em>{chunks}</em>,
+              })}
             </Typography>
           )}
         </CardContent>

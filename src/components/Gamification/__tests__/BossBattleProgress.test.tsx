@@ -24,22 +24,22 @@ describe('BossBattleProgress', () => {
 
   it('renders XP counts', () => {
     render(<BossBattleProgress {...baseProps} />)
-    expect(screen.getByText('500 / 1,000 XP')).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.xpProgress')).toBeInTheDocument()
   })
 
   it('shows Active chip when active', () => {
     render(<BossBattleProgress {...baseProps} active={true} />)
-    expect(screen.getByText('Active')).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.active')).toBeInTheDocument()
   })
 
   it('shows Inactive chip when not active', () => {
     render(<BossBattleProgress {...baseProps} active={false} />)
-    expect(screen.getByText('Inactive')).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.inactive')).toBeInTheDocument()
   })
 
   it('shows Complete! chip when currentXP >= targetXP', () => {
     render(<BossBattleProgress {...baseProps} currentXP={1000} targetXP={1000} />)
-    expect(screen.getByText('Complete!')).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.complete')).toBeInTheDocument()
   })
 
   it('shows bonus multiplier chip', () => {
@@ -59,19 +59,19 @@ describe('BossBattleProgress', () => {
 
   it('shows stakes text', () => {
     render(<BossBattleProgress {...baseProps} stakes="Everyone loses a freeze" />)
-    expect(screen.getByText(/Everyone loses a freeze/)).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.stakes')).toBeInTheDocument()
   })
 
   it('shows deadline countdown for future date', () => {
     const futureDate = new Date(Date.now() + 2 * 24 * 60 * 60 * 1000).toISOString()
     render(<BossBattleProgress {...baseProps} deadline={futureDate} />)
-    expect(screen.getByText(/remaining/)).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.timeRemaining')).toBeInTheDocument()
   })
 
   it('shows expired for past deadline', () => {
     const pastDate = new Date(Date.now() - 1000).toISOString()
     render(<BossBattleProgress {...baseProps} deadline={pastDate} />)
-    expect(screen.getByText(/Deadline passed/)).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.deadlinePassed')).toBeInTheDocument()
   })
 
   it('shows top contributors', () => {
@@ -80,9 +80,10 @@ describe('BossBattleProgress', () => {
       { studentId: 's2', displayName: 'Bob', xpContributed: 150 },
     ]
     render(<BossBattleProgress {...baseProps} contributors={contributors} />)
-    expect(screen.getByText('Top Contributors')).toBeInTheDocument()
-    expect(screen.getByText(/Alice \(200 XP\)/)).toBeInTheDocument()
-    expect(screen.getByText(/Bob \(150 XP\)/)).toBeInTheDocument()
+    expect(screen.getByText('bossBattleProgress.topContributors')).toBeInTheDocument()
+    expect(screen.getAllByText('bossBattleProgress.contributorLabel')).toHaveLength(2)
+    expect(screen.getByText('A')).toBeInTheDocument()
+    expect(screen.getByText('B')).toBeInTheDocument()
   })
 
   it('limits contributors to top 5', () => {
@@ -93,9 +94,7 @@ describe('BossBattleProgress', () => {
     }))
     render(<BossBattleProgress {...baseProps} contributors={contributors} />)
     // Should only show 5
-    expect(screen.queryByText(/Student5/)).not.toBeInTheDocument()
-    expect(screen.getByText(/Student0/)).toBeInTheDocument()
-    expect(screen.getByText(/Student4/)).toBeInTheDocument()
+    expect(screen.getAllByText('bossBattleProgress.contributorLabel')).toHaveLength(5)
   })
 
   it('calls onToggleActive with correct args', async () => {
@@ -103,7 +102,7 @@ describe('BossBattleProgress', () => {
     const onToggleActive = vi.fn()
     render(<BossBattleProgress {...baseProps} onToggleActive={onToggleActive} />)
 
-    const pauseBtn = screen.getByLabelText('Pause battle')
+    const pauseBtn = screen.getByLabelText('bossBattleProgress.pauseBattle')
     await user.click(pauseBtn)
 
     expect(onToggleActive).toHaveBeenCalledWith('boss-1', false)
@@ -114,7 +113,7 @@ describe('BossBattleProgress', () => {
     const onDelete = vi.fn()
     render(<BossBattleProgress {...baseProps} onDelete={onDelete} />)
 
-    const deleteBtn = screen.getByLabelText('Delete battle')
+    const deleteBtn = screen.getByLabelText('bossBattleProgress.deleteBattle')
     await user.click(deleteBtn)
 
     expect(onDelete).toHaveBeenCalledWith('boss-1')
@@ -122,7 +121,7 @@ describe('BossBattleProgress', () => {
 
   it('shows play icon when inactive', () => {
     render(<BossBattleProgress {...baseProps} active={false} />)
-    expect(screen.getByLabelText('Activate battle')).toBeInTheDocument()
+    expect(screen.getByLabelText('bossBattleProgress.activateBattle')).toBeInTheDocument()
   })
 
   it('caps progress at 100% visually', () => {

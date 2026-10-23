@@ -1,6 +1,7 @@
 "use client";
 import React from "react";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import {
   Accordion,
   AccordionDetails,
@@ -29,6 +30,12 @@ import {
   NailedItWall,
   type NailedItBlock,
 } from "@/components/Gamification/NailedItWall";
+
+const SHORT_DATE_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+};
+const SECTION_DISCUSSION_SCOPE = "section";
 
 function gradeColor(pct = 0) {
   if (pct >= 80) return "success";
@@ -126,6 +133,7 @@ export function SectionPanel({
   onCreateReviewRoom,
   onRoomCreated,
 }: SectionPanelProps) {
+  const t = useTranslations("components");
   const [showCompleted, setShowCompleted] = React.useState(false);
   const [showNailedIt, setShowNailedIt] = React.useState(false);
   const [isExpanded, setIsExpanded] = React.useState(defaultExpanded);
@@ -187,17 +195,25 @@ export function SectionPanel({
     const completedIds = new Set(completed.map((a) => a.id));
     const prior = priorCompletedIdsRef.current;
     if (prior && completedIds.size > prior.size) {
-      const nextStepText = upNext
-        ? ` Your next step is ${units[upNext.unitID]?.name || "your next assignment"}${
-            upNext.dueDate
-              ? `, due ${new Date(upNext.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-              : ""
-          }.`
-        : " You're all caught up in this section.";
-      setAnnouncement(`Assignment completed.${nextStepText}`);
+      const nextName =
+        units[upNext?.unitID ?? ""]?.name ||
+        t("sectionPanel.yourNextAssignment");
+      setAnnouncement(
+        !upNext
+          ? t("sectionPanel.announceCaughtUp")
+          : upNext.dueDate
+            ? t("sectionPanel.announceNextStepDue", {
+                name: nextName,
+                date: new Date(upNext.dueDate).toLocaleDateString(
+                  undefined,
+                  SHORT_DATE_FORMAT,
+                ),
+              })
+            : t("sectionPanel.announceNextStep", { name: nextName }),
+      );
     }
     priorCompletedIdsRef.current = completedIds;
-  }, [completed, upNext, units]);
+  }, [completed, upNext, units, t]);
 
   // Stats
   const completionPct = assignments.length
@@ -212,7 +228,17 @@ export function SectionPanel({
     : null;
 
   // Summary line for screen readers and quick scanning
-  const summaryText = `${pending.length} pending · ${completed.length} completed${avgAccuracy !== null ? ` · ${avgAccuracy}% avg` : ""}`;
+  const summaryText =
+    avgAccuracy !== null
+      ? t("sectionPanel.summaryWithAvg", {
+          pending: pending.length,
+          completed: completed.length,
+          avg: avgAccuracy,
+        })
+      : t("sectionPanel.summary", {
+          pending: pending.length,
+          completed: completed.length,
+        });
 
   return (
     <Accordion
@@ -252,7 +278,7 @@ export function SectionPanel({
           <SchoolIcon color="primary" sx={{ mr: 1, mt: 0.25 }} />
           <Box sx={{ minWidth: 0 }}>
             <Typography variant="subtitle1" sx={{ fontWeight: 700 }}>
-              {section.name || "Untitled Section"}
+              {section.name || t("sectionPanel.untitledSection")}
             </Typography>
             {section.description && (
               <Typography
@@ -269,10 +295,20 @@ export function SectionPanel({
                 color="text.secondary"
                 sx={{ display: "block", mt: 0.25 }}
               >
-                Next: {units[nextDueAssignment.unitID]?.name || "Assignment"}
                 {nextDueAssignment.dueDate
-                  ? ` · Due ${new Date(nextDueAssignment.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-                  : ""}
+                  ? t("sectionPanel.nextAssignmentDue", {
+                      name:
+                        units[nextDueAssignment.unitID]?.name ||
+                        t("sectionPanel.assignmentFallback"),
+                      date: new Date(
+                        nextDueAssignment.dueDate,
+                      ).toLocaleDateString(undefined, SHORT_DATE_FORMAT),
+                    })
+                  : t("sectionPanel.nextAssignment", {
+                      name:
+                        units[nextDueAssignment.unitID]?.name ||
+                        t("sectionPanel.assignmentFallback"),
+                    })}
               </Typography>
             )}
             {activeChapterTitle && (
@@ -311,7 +347,7 @@ export function SectionPanel({
           >
             {sectionLevel?.level != null && (
               <Chip
-                label={`Level ${sectionLevel.level}`}
+                label={t("sectionPanel.level", { level: sectionLevel.level })}
                 size="small"
                 variant="outlined"
                 sx={{ fontWeight: 700 }}
@@ -319,7 +355,9 @@ export function SectionPanel({
             )}
             {pending.length > 0 && (
               <Chip
-                label={`${pending.length} pending`}
+                label={t("sectionPanel.pendingCount", {
+                  count: pending.length,
+                })}
                 size="small"
                 variant="status"
                 color="warning"
@@ -329,7 +367,7 @@ export function SectionPanel({
             )}
             {completed.length > 0 && (
               <Chip
-                label={`${completed.length} done`}
+                label={t("sectionPanel.doneCount", { count: completed.length })}
                 size="small"
                 variant="status"
                 color="success"
@@ -339,7 +377,7 @@ export function SectionPanel({
             )}
             {overdueCount > 0 && (
               <Chip
-                label={`${overdueCount} overdue`}
+                label={t("sectionPanel.overdueCount", { count: overdueCount })}
                 size="small"
                 variant="status"
                 color="error"
@@ -356,7 +394,11 @@ export function SectionPanel({
                 justifyContent: { xs: "center", sm: "flex-end" },
               }}
             >
-              <GradeDonut value={completionPct} size={36} label="Completion" />
+              <GradeDonut
+                value={completionPct}
+                size={36}
+                label={t("sectionPanel.completion")}
+              />
             </Box>
           )}
         </Stack>
@@ -390,12 +432,37 @@ export function SectionPanel({
             aria-live="polite"
           >
             {completed.length === assignments.length
-              ? `All ${assignments.length} assignment${assignments.length !== 1 ? "s" : ""} completed in ${section.name || "this section"}.`
-              : `${completed.length} of ${assignments.length} completed in ${section.name || "this section"}.${
-                  upNext
-                    ? ` Next: ${units[upNext.unitID]?.name || "next assignment"}${upNext.dueDate ? `, due ${new Date(upNext.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}` : ""}.`
-                    : ""
-                }`}
+              ? t("sectionPanel.allCompleted", {
+                  count: assignments.length,
+                  section: section.name || t("sectionPanel.thisSection"),
+                })
+              : !upNext
+                ? t("sectionPanel.progress", {
+                    completed: completed.length,
+                    total: assignments.length,
+                    section: section.name || t("sectionPanel.thisSection"),
+                  })
+                : upNext.dueDate
+                  ? t("sectionPanel.progressNextDue", {
+                      completed: completed.length,
+                      total: assignments.length,
+                      section: section.name || t("sectionPanel.thisSection"),
+                      name:
+                        units[upNext.unitID]?.name ||
+                        t("sectionPanel.nextAssignmentFallback"),
+                      date: new Date(upNext.dueDate).toLocaleDateString(
+                        undefined,
+                        SHORT_DATE_FORMAT,
+                      ),
+                    })
+                  : t("sectionPanel.progressNext", {
+                      completed: completed.length,
+                      total: assignments.length,
+                      section: section.name || t("sectionPanel.thisSection"),
+                      name:
+                        units[upNext.unitID]?.name ||
+                        t("sectionPanel.nextAssignmentFallback"),
+                    })}
           </Typography>
         )}
 
@@ -452,7 +519,7 @@ export function SectionPanel({
                 color: "text.secondary",
               }}
             >
-              Completed ({completed.length})
+              {t("sectionPanel.completedToggle", { count: completed.length })}
             </Button>
             <Collapse in={showCompleted}>
               <Stack spacing={1.5}>
@@ -500,7 +567,9 @@ export function SectionPanel({
                 color: "text.secondary",
               }}
             >
-              Nailed It ({nailedItBlocks.length})
+              {t("sectionPanel.nailedItToggle", {
+                count: nailedItBlocks.length,
+              })}
             </Button>
             <Collapse in={showNailedIt}>
               <NailedItWall blocks={nailedItBlocks} />
@@ -511,7 +580,7 @@ export function SectionPanel({
         {/* Section-aware empty state */}
         {pending.length === 0 && completed.length > 0 && (
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            All caught up! Review your completed work or try practice drills.
+            {t("sectionPanel.allCaughtUp")}
           </Typography>
         )}
 
@@ -537,12 +606,13 @@ export function SectionPanel({
               onClick={() =>
                 openDiscussion({
                   sectionID: section.id,
-                  scope: "section",
-                  topicName: section.name || "Class discussion",
+                  scope: SECTION_DISCUSSION_SCOPE,
+                  topicName:
+                    section.name || t("sectionPanel.classDiscussionFallback"),
                 })
               }
             >
-              Discuss
+              {t("sectionPanel.discuss")}
             </Button>
             <SkillTreePopupButton
               sectionId={section.id}
@@ -557,7 +627,7 @@ export function SectionPanel({
             variant="contained"
             endIcon={<ArrowForwardIcon />}
           >
-            View Class
+            {t("sectionPanel.viewClass")}
           </Button>
         </Box>
       </AccordionDetails>

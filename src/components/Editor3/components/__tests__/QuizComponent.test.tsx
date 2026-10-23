@@ -15,6 +15,8 @@ import UnitContext from '../../../../context/unitContext';
 vi.mock('next-intl', () => ({
   useTranslations: () => (key: string, params?: any) => {
     if (key === 'quizComponent.gradeDisplay') return `Score: ${params?.score ?? 0}%`;
+    if (key === 'exerciseProgressMeters.valueDescription')
+      return `${params?.label}: ${params?.percent}%. ${params?.description}`;
     return key;
   },
 }));
@@ -74,12 +76,12 @@ describe('QuestionBlockRo (QuizComponent)', () => {
 
     it('renders score display showing 0% initially', () => {
       renderQuiz({ data: sampleQuiz, saveGrade });
-      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 0%/ })).toBeDefined();
     });
 
     it('renders empty state when data is empty', () => {
       renderQuiz({ data: [], saveGrade });
-      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 0%/ })).toBeDefined();
     });
 
     it('renders quiz block data-tour attribute', () => {
@@ -166,7 +168,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
         },
       });
 
-      expect(screen.getByRole('progressbar', { name: /^Correct: 75%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 75%/ })).toBeDefined();
     });
   });
 
@@ -197,12 +199,12 @@ describe('QuestionBlockRo (QuizComponent)', () => {
           'quiz-1': { accuracy: 50, complete: false, attemptedAnswers: {}, correctAnswers: {}, percentComplete: 0 },
         },
       });
-      expect(screen.getByRole('progressbar', { name: /^Correct: 50%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 50%/ })).toBeDefined();
     });
 
     it('handles empty grade data', () => {
       renderQuiz({ data: sampleQuiz, saveGrade, gradeData: {} });
-      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 0%/ })).toBeDefined();
     });
 
     it('handles null grade', () => {
@@ -211,7 +213,7 @@ describe('QuestionBlockRo (QuizComponent)', () => {
           <QuestionBlockRo nodeKey="quiz-1" data={sampleQuiz} />
         </UnitContext.Provider>
       );
-      expect(screen.getByRole('progressbar', { name: /^Correct: 0%/ })).toBeDefined();
+      expect(screen.getByRole('progressbar', { name: /^exerciseProgressMeters\.correctLabel: 0%/ })).toBeDefined();
     });
   });
 });

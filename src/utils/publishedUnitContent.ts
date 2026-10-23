@@ -19,7 +19,7 @@ function getBucketName(): string | undefined {
     return process.env.STORAGE_BUCKET_NAME;
   }
   try {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
+     
     const outputs = require("../../amplify_outputs.json");
     return outputs?.storage?.bucket_name;
   } catch {

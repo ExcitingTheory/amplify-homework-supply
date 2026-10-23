@@ -41,7 +41,7 @@ export default function NotificationPanel() {
         <Box sx={{ display: "flex", justifyContent: "flex-end", p: 1 }}>
           <IconButton
             onClick={handleClose}
-            aria-label={t("actions.close", "Close")}
+            aria-label={t("actions.close")}
           >
             <CloseIcon />
           </IconButton>

@@ -20,24 +20,28 @@ Audit of every `page.tsx`/`page.jsx` under `app/[locale]/**` against every
 - `/admin/files` and `/admin/questions` didn't exist — created (see §2) and
   linked from the nav drawer.
 
-### Still orphaned (not addressed yet)
+### Navigation follow-ups implemented
 
 | Route | Notes |
 | --- | --- |
-| `/section/[id]/settings/ai` | Zero links anywhere, including from `SectionDetailClient.jsx` itself (which has no "settings" references at all). Only reachable by typing the URL. |
-| `/xp-history` | No `href`/`router.push` in real components — only in Storybook stories. |
-| `/privacy` | No footer/legal link anywhere; only appears in `PUBLIC_PATHS` allow-lists (`app/providers.tsx`, `proxy.ts`). |
-| `/profile/[username]` (other users) | Nothing links to a classmate's/student's profile — leaderboard rows, student tables, gradebook names are plain text. Only reachable for your **own** profile via `/profile` → redirect. |
-| `/instructor/grade/[id]` | Reachable only indirectly, via the moderation list and notification links — not from the section gradebook itself. |
+| `/section/[id]/settings/ai` and `/section/[id]/settings/gamification` | Linked from the section detail page for owners/teachers outside student-preview mode, and as secondary actions on section-list cards for instructors/owners. Both settings pages link back to the section. |
+| `/xp-history` | Linked from the user's avatar menu. |
+| `/privacy` | Linked from the shared application footer, including logged-out public pages. |
+| `/profile/[username]` (other users) | `ProfileAvatarLink` provides localized, keyboard-accessible links for user avatars in leaderboards, instructor/student tables, squads, chat, peer review, workbook collaboration, and boss-battle contributions. Profile IDs are explicit, not inferred from customizable avatar seeds. Anonymous leaderboard entries remain unlinked. |
+| `/instructor/grade/[id]` | Completed gradebook cells provide a direct “Open grade review” action, with section context and previous/next navigation across students. Moderation and notification links remain available too. |
+
+Avatar previews/customization controls, bots, squad crests, and change-type icons
+are not profile links. The toolbar avatar retains its menu action, with the
+existing Profile menu item providing navigation. Already-linked avatars do not
+gain nested links.
 
 ### Intentionally unlinked (not bugs)
 
 - `/offline` — service worker fallback page.
 - `/workbook-offline` — service worker redirect target for a specific unit.
 
-**Open follow-up**: decide whether to add a Settings entry point into
-`SectionDetailClient` for `/section/[id]/settings/ai`, a footer `/privacy`
-link, and student-name links to `/profile/[username]` from leaderboards/gradebooks.
+The settings, privacy, XP history, avatar-profile, and instructor-grade
+navigation follow-ups above are implemented.
 
 ## 2. Admin maintenance pages — Words/Files/Questions pattern
 
@@ -201,8 +205,8 @@ Which piece to build first once approved:
 
 ## Next steps checklist
 
-- [ ] Decide on orphaned-route follow-ups (§1): AI settings entry point,
-      `/privacy` footer link, profile links from leaderboards/gradebooks.
+- [x] Add section settings entry points and back links, an avatar-menu XP
+      history link, a `/privacy` footer link, and shared avatar-profile links (§1).
 - [ ] Build `/admin/chats` + add `AssistantChat` to the moderation queue (§2).
 - [ ] Approve scope/sequencing for Manage Users (§2) and the full-account
       archive/replay system (§3), then begin with the agreed first piece.

@@ -9,7 +9,14 @@
     "lostWarning": "Tu {type} generado se perderá si cancelas ahora.",
     "preview": "Vista previa",
     "saveClose": "Guardar y cerrar",
-    "takeMoments": "Esto puede tardar unos momentos"
+    "takeMoments": "Esto puede tardar unos momentos",
+    "defaultInputPlaceholder": "Introduzca una descripción...",
+    "defaultTitle": "Generar contenido",
+    "editPrompt": "Editar indicación",
+    "enterDescriptionError": "Introduzca una descripción",
+    "generateFailed": "Error al generar el contenido",
+    "regenerate": "Regenerar",
+    "regenerateFailed": "Error al regenerar el contenido"
   },
   "promptMethodSelector": {
     "inputButton": "Entrada",
@@ -20,7 +27,53 @@
       "text": "Texto",
       "video": "Video"
     },
-    "outputButton": "Salida"
+    "outputButton": "Salida",
+    "configure": "Configurar",
+    "displaySettings": "Configuración de visualización",
+    "displaySettingsDescription": "Controle el texto y el audio del vocabulario de apoyo.",
+    "enableAudioPlayback": "Habilitar reproducción de audio",
+    "enableAudioPlaybackDescription": "Permitir controles de audio para las palabras y las definiciones.",
+    "inputDescription": "Cómo envía el alumno una respuesta.",
+    "invalidConfig": "Seleccione al menos un método de entrada y uno de salida",
+    "meaningModes": {
+      "easy": {
+        "description": "Relacione las palabras con sus significados.",
+        "label": "Fácil"
+      },
+      "hard": {
+        "description": "Relacione sin las pistas de significado guiadas.",
+        "label": "Difícil"
+      },
+      "learn": {
+        "description": "Estudie con emparejamiento guiado y retroalimentación.",
+        "label": "Aprender"
+      }
+    },
+    "methodDescriptions": {
+      "audio": "Utilice audio grabado o generado.",
+      "image": "Muestre una imagen como indicación o respuesta.",
+      "text": "Mostrar el mensaje o la respuesta como texto.",
+      "video": "Utilice un video como pregunta o respuesta.",
+      "writing": "Permitir una respuesta escrita a mano en una superficie de dibujo."
+    },
+    "outputDescription": "Cómo se presenta la pregunta al alumno.",
+    "practiceModes": "Modos de práctica",
+    "practiceModesDescription": "Elija qué actividades de emparejamiento deben completar los alumnos.",
+    "promptDescription": "Elija si los alumnos ven palabras o definiciones.",
+    "promptFor": {
+      "definition": {
+        "description": "Mostrar la definición como objetivo.",
+        "label": "Solicitar una definición"
+      },
+      "word": {
+        "description": "Muestre la palabra de vocabulario como objetivo.",
+        "label": "Prompt para palabra"
+      }
+    },
+    "promptForAriaLabel": "Solicitar palabra o definición",
+    "promptHeading": "Instrucción",
+    "showPronunciations": "Mostrar pronunciaciones",
+    "showPronunciationsDescription": "Muestra el texto de pronunciación junto con el vocabulario."
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "Ingresa texto para convertir a voz...",
@@ -29,7 +82,9 @@
     "generateAudio": "Generar Audio",
     "generateImage": "Generar imagen",
     "imagePromptPlaceholder": "Describe la imagen que quieres generar...",
-    "openRecordingStudio": "Abrir en Estudio de Grabación"
+    "openRecordingStudio": "Abrir en Estudio de Grabación",
+    "generatedAlt": "Generado",
+    "regeneratedAlt": "Regenerado"
   },
   "blockSuggestionMenu": {
     "aiTitle": "Sugerencias impulsadas por IA",
@@ -45,6 +100,20 @@
     "ownerPlaceholder": "ID del propietario"
   },
   "aiContentSuggestion": {
-    "tabToAccept": "Pestaña para aceptar"
+    "tabToAccept": "Pestaña para aceptar",
+    "generating": "Generando...",
+    "tabToAcceptHint": "(Pulse Tab para aceptar)"
+  },
+  "blockSuggestionPlugin": {
+    "addCustomPractice": "Agregar práctica personalizada",
+    "addExplanation": "Agregar explicación",
+    "addHeading": "Añadir encabezado",
+    "addQuiz": "Agregar cuestionario",
+    "addSummary": "Agregar resumen",
+    "addVocabularyPractice": "Añadir práctica de vocabulario",
+    "moreSuggestions": "↑↓ {count} más",
+    "newSection": "Nueva sección",
+    "questionCount": "{count, plural, one {# pregunta} other {# preguntas}}",
+    "tabKey": "Tab"
   }
 }

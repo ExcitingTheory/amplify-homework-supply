@@ -74,10 +74,21 @@ import {
 
 const filter = createFilterOptions();
 
-const columns = [
+const EMPTY_ROW_CELL_SX = {
+  width: "100%",
+  textAlign: "center",
+  fontStyle: "italic",
+};
+const AUTO_ROW_HEIGHT = "auto";
+const INCLUDE_SELECTION_TYPE = "include";
+const ANSWER_BLOCK_TYPE = "answer";
+const PROMPT_FOR_WORD = "word";
+const PROMPT_FOR_DEFINITION = "definition";
+
+const getColumns = (t) => [
   {
     field: "phrase",
-    headerName: "Phrase",
+    headerName: t("meaningAssociationEditor.columnHeaders.phrase"),
     flex: 1,
     minWidth: 100,
     colSpan: (params) => (params.id === "__empty__" ? 4 : 1),
@@ -86,8 +97,7 @@ const columns = [
         <Typography
           variant="body2"
           color="text.secondary"
-          fontStyle="italic"
-          sx={{ width: "100%", textAlign: "center" }}
+          sx={EMPTY_ROW_CELL_SX}
         >
           {params.value}
         </Typography>
@@ -97,20 +107,21 @@ const columns = [
   },
   {
     field: "pronunciation",
-    headerName: "Pronunciation",
+    headerName: t("meaningAssociationEditor.columnHeaders.pronunciation"),
     flex: 1,
     minWidth: 100,
   },
   {
     field: "definition",
-    headerName: "Definition",
+    headerName: t("meaningAssociationEditor.columnHeaders.definition"),
     flex: 1,
     minWidth: 200,
   },
 ];
 
 export function ActionsMenu({ ids, removeWordIDs }) {
-  const removeLabel = `Remove ${ids.length} ${ids.length === 1 ? "word" : "words"}`;
+  const t = useTranslations("editor.blocks");
+  const removeLabel = t("answerEditor.removeWords", { count: ids.length });
 
   return (
     <Button
@@ -149,13 +160,15 @@ const AnswerEditor = React.memo(function AnswerEditor({
     pronunciation: "",
   });
 
-  const [title, setTitle] = React.useState("Short Answer Exercise");
+  const [title, setTitle] = React.useState(t("answerEditor.title"));
 
   React.useEffect(() => {
-    let titleSuffix = requestDefinition ? "Definition" : "Word";
-    let _title = "Short Answer Exercise by " + titleSuffix;
-    setTitle(_title);
-  }, [requestDefinition]);
+    setTitle(
+      requestDefinition
+        ? t("answerEditor.titleByDefinition")
+        : t("answerEditor.titleByWord"),
+    );
+  }, [requestDefinition, t]);
 
   const { wordMapId } = React.useContext(DictionaryContext);
 
@@ -317,11 +330,16 @@ const AnswerEditor = React.memo(function AnswerEditor({
     });
   };
 
+  const removeRowLabel = (row) =>
+    row.phrase
+      ? t("answerEditor.removeNamedWord", { phrase: row.phrase })
+      : t("answerEditor.removeWord");
+
   const gridColumns = [
-    ...columns,
+    ...getColumns(t),
     {
       field: "actions",
-      headerName: "Actions",
+      headerName: t("answerEditor.actionsColumn"),
       width: 80,
       sortable: false,
       filterable: false,
@@ -330,10 +348,10 @@ const AnswerEditor = React.memo(function AnswerEditor({
       renderCell: (params) => {
         if (params.row.id === "__empty__") return null;
         return (
-          <Tooltip title={`Remove ${params.row.phrase || "word"}`}>
+          <Tooltip title={removeRowLabel(params.row)}>
             <IconButton
               size="small"
-              aria-label={`Remove ${params.row.phrase || "word"}`}
+              aria-label={removeRowLabel(params.row)}
               sx={{ color: "common.black" }}
               onClick={(event) => {
                 event.stopPropagation();
@@ -435,7 +453,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
   return (
     <div ref={answerRef} style={{ cursor: "pointer" }}>
       <ExerciseBlockCard
-        blockType="answer"
+        blockType={ANSWER_BLOCK_TYPE}
         selected={isSelected}
         sx={{ maxWidth: "72rem" }}
       >
@@ -500,7 +518,9 @@ const AnswerEditor = React.memo(function AnswerEditor({
               if (params.inputValue !== "") {
                 filtered.push({
                   inputValue: params.inputValue,
-                  phrase: `Add "${params.inputValue}"`,
+                  phrase: t("answerEditor.addNewOption", {
+                    value: params.inputValue,
+                  }),
                 });
               }
 
@@ -573,7 +593,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     phrase: event.target.value,
                   })
                 }
-                label="phrase"
+                label={t("meaningAssociationEditor.phraseLabel")}
                 type="text"
                 variant="standard"
               />
@@ -587,7 +607,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     pronunciation: event.target.value,
                   })
                 }
-                label="pronunciation"
+                label={t("meaningAssociationEditor.pronunciationLabel")}
                 type="text"
                 variant="standard"
               />
@@ -605,8 +625,10 @@ const AnswerEditor = React.memo(function AnswerEditor({
                     definition: event.target.value,
                   })
                 }
-                aria-label="Definition"
-                placeholder="definition"
+                aria-label={t("meaningAssociationEditor.definitionAriaLabel")}
+                placeholder={t(
+                  "meaningAssociationEditor.definitionPlaceholder",
+                )}
                 type="text"
                 variant="standard"
               />
@@ -636,7 +658,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
             rows={gridRows}
             columns={gridColumns}
             getRowHeight={(params) =>
-              params.id === "__empty__" ? "auto" : null
+              params.id === "__empty__" ? AUTO_ROW_HEIGHT : null
             }
             getRowClassName={getEditorDataGridRowClassName}
             hideFooter
@@ -645,7 +667,7 @@ const AnswerEditor = React.memo(function AnswerEditor({
             disableRowSelectionExcludeModel
             slotProps={{ baseCheckbox: roundedCheckboxIcons }}
             rowSelectionModel={{
-              type: "include",
+              type: INCLUDE_SELECTION_TYPE,
               ids: new Set(gridSelection),
             }}
             onRowSelectionModelChange={(model) => {
@@ -673,7 +695,9 @@ const AnswerEditor = React.memo(function AnswerEditor({
             }}
           >
             <MeaningAssociationPromptSelector
-              promptFor={requestDefinition ? "word" : "definition"}
+              promptFor={
+                requestDefinition ? PROMPT_FOR_WORD : PROMPT_FOR_DEFINITION
+              }
               setPromptFor={(promptFor) =>
                 setRequestDefinition(promptFor === "word")
               }

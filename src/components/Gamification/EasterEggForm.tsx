@@ -23,6 +23,7 @@ import Autocomplete from '@mui/material/Autocomplete'
 import Typography from '@mui/material/Typography'
 import InputAdornment from '@mui/material/InputAdornment'
 import AddIcon from '@mui/icons-material/Add'
+import { useTranslations } from 'next-intl'
 import type { UnitOption } from './SkillForm'
 
 // ============================================================================
@@ -72,19 +73,7 @@ export interface EasterEggFormProps {
 // Constants
 // ============================================================================
 
-const TRIGGER_LABELS: Record<EasterEggTriggerType, string> = {
-  KEYWORD: 'Keyword Sequence',
-  SCHEDULE: 'Scheduled Window',
-  SECRET_LINK: 'Hidden Link on Unit',
-  ACHIEVEMENT: 'Achievement Condition',
-}
-
-const TRIGGER_HELP: Record<EasterEggTriggerType, string> = {
-  KEYWORD: 'Students type a secret key sequence (case-insensitive) to discover this egg.',
-  SCHEDULE: 'Automatically reveals to all students within the date window.',
-  SECRET_LINK: 'A hidden icon appears on the selected unit\'s workbook page.',
-  ACHIEVEMENT: 'Triggers automatically when a student meets the condition after any XP/grade event.',
-}
+const TRIGGER_TYPES: EasterEggTriggerType[] = ['KEYWORD', 'SCHEDULE', 'SECRET_LINK', 'ACHIEVEMENT']
 
 const METRICS: AchievementMetric[] = ['accuracy', 'streak', 'xp']
 const COMPARATORS: AchievementComparator[] = ['>=', '>', '=']
@@ -99,6 +88,19 @@ export function EasterEggForm({
   availableBadges = [],
   submitting = false,
 }: EasterEggFormProps) {
+  const t = useTranslations('components')
+  const triggerLabels: Record<EasterEggTriggerType, string> = {
+    KEYWORD: t('easterEggForm.triggerKeyword'),
+    SCHEDULE: t('easterEggForm.triggerSchedule'),
+    SECRET_LINK: t('easterEggForm.triggerSecretLink'),
+    ACHIEVEMENT: t('easterEggForm.triggerAchievement'),
+  }
+  const triggerHelp: Record<EasterEggTriggerType, string> = {
+    KEYWORD: t('easterEggForm.helpKeyword'),
+    SCHEDULE: t('easterEggForm.helpSchedule'),
+    SECRET_LINK: t('easterEggForm.helpSecretLink'),
+    ACHIEVEMENT: t('easterEggForm.helpAchievement'),
+  }
   const [type, setType] = useState<EasterEggTriggerType>('KEYWORD')
   const [message, setMessage] = useState('')
   const [xpReward, setXpReward] = useState(50)
@@ -182,22 +184,22 @@ export function EasterEggForm({
       <Stack spacing={2}>
         {/* Trigger type selector */}
         <FormControl size="small" fullWidth>
-          <InputLabel>Trigger Type</InputLabel>
+          <InputLabel>{t('easterEggForm.triggerType')}</InputLabel>
           <Select
             value={type}
-            label="Trigger Type"
+            label={t('easterEggForm.triggerType')}
             onChange={(e) => setType(e.target.value as EasterEggTriggerType)}
             disabled={submitting}
           >
-            {(Object.keys(TRIGGER_LABELS) as EasterEggTriggerType[]).map((t) => (
-              <MenuItem key={t} value={t}>{TRIGGER_LABELS[t]}</MenuItem>
+            {TRIGGER_TYPES.map((triggerType) => (
+              <MenuItem key={triggerType} value={triggerType}>{triggerLabels[triggerType]}</MenuItem>
             ))}
           </Select>
         </FormControl>
 
         {/* Help text for selected type */}
         <Typography variant="caption" color="text.secondary" sx={{ mt: -1 }}>
-          {TRIGGER_HELP[type]}
+          {triggerHelp[type]}
         </Typography>
 
         {/* ---- Type-conditional fields ---- */}
@@ -205,13 +207,13 @@ export function EasterEggForm({
         {type === 'KEYWORD' && (
           <TextField
             size="small"
-            label="Keyword / Sequence"
+            label={t('easterEggForm.keywordLabel')}
             value={keyword}
             onChange={(e) => setKeyword(e.target.value)}
             required
             fullWidth
-            placeholder='e.g. "konami" or "xyzzy"'
-            helperText="Case-insensitive. Students type this sequence anywhere on the page."
+            placeholder={t('easterEggForm.keywordPlaceholder')}
+            helperText={t('easterEggForm.keywordHelper')}
             disabled={submitting}
           />
         )}
@@ -220,7 +222,7 @@ export function EasterEggForm({
           <Stack direction="row" spacing={1}>
             <TextField
               size="small"
-              label="Reveal Start"
+              label={t('easterEggForm.revealStart')}
               type="datetime-local"
               value={scheduleStart}
               onChange={(e) => setScheduleStart(e.target.value)}
@@ -231,7 +233,7 @@ export function EasterEggForm({
             />
             <TextField
               size="small"
-              label="Reveal End"
+              label={t('easterEggForm.revealEnd')}
               type="datetime-local"
               value={scheduleEnd}
               onChange={(e) => setScheduleEnd(e.target.value)}
@@ -254,37 +256,37 @@ export function EasterEggForm({
               <TextField
                 {...params}
                 size="small"
-                label="Target Unit"
+                label={t('easterEggForm.targetUnit')}
                 required
-                placeholder="Select unit where icon appears"
+                placeholder={t('easterEggForm.targetUnitPlaceholder')}
               />
             )}
             disabled={submitting}
-            noOptionsText="No units available"
+            noOptionsText={t('easterEggForm.noUnits')}
           />
         )}
 
         {type === 'ACHIEVEMENT' && (
           <Stack direction="row" spacing={1} alignItems="center">
             <FormControl size="small" sx={{ minWidth: 110 }}>
-              <InputLabel>Metric</InputLabel>
+              <InputLabel>{t('easterEggForm.metric')}</InputLabel>
               <Select
                 value={metric}
-                label="Metric"
+                label={t('easterEggForm.metric')}
                 onChange={(e) => setMetric(e.target.value as AchievementMetric)}
                 disabled={submitting}
               >
-                <MenuItem value="accuracy">Accuracy %</MenuItem>
-                <MenuItem value="streak">Streak Days</MenuItem>
-                <MenuItem value="xp">Total XP</MenuItem>
+                <MenuItem value="accuracy">{t('easterEggForm.metricAccuracy')}</MenuItem>
+                <MenuItem value="streak">{t('easterEggForm.metricStreak')}</MenuItem>
+                <MenuItem value="xp">{t('easterEggForm.metricXp')}</MenuItem>
               </Select>
             </FormControl>
 
             <FormControl size="small" sx={{ minWidth: 70 }}>
-              <InputLabel>Op</InputLabel>
+              <InputLabel>{t('easterEggForm.operator')}</InputLabel>
               <Select
                 value={comparator}
-                label="Op"
+                label={t('easterEggForm.operator')}
                 onChange={(e) => setComparator(e.target.value as AchievementComparator)}
                 disabled={submitting}
               >
@@ -296,7 +298,7 @@ export function EasterEggForm({
 
             <TextField
               size="small"
-              label="Value"
+              label={t('easterEggForm.value')}
               type="number"
               value={threshold}
               onChange={(e) => {
@@ -320,25 +322,25 @@ export function EasterEggForm({
 
         <TextField
           size="small"
-          label="Reveal Message"
+          label={t('easterEggForm.revealMessage')}
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           required
           fullWidth
           multiline
           rows={2}
-          placeholder="You found a secret! 🥚"
+          placeholder={t('easterEggForm.revealMessagePlaceholder')}
           disabled={submitting}
         />
 
         <TextField
           size="small"
-          label="XP Reward"
+          label={t('easterEggForm.xpReward')}
           type="number"
           value={xpReward}
           onChange={(e) => setXpReward(Number(e.target.value))}
           InputProps={{
-            startAdornment: <InputAdornment position="start">XP</InputAdornment>,
+            startAdornment: <InputAdornment position="start">{t('easterEggForm.xpUnit')}</InputAdornment>,
             inputProps: { min: 0 },
           }}
           sx={{ width: 150 }}
@@ -356,12 +358,12 @@ export function EasterEggForm({
               <TextField
                 {...params}
                 size="small"
-                label="Award Badge (optional)"
-                placeholder="Select badge to award on discovery"
+                label={t('easterEggForm.awardBadge')}
+                placeholder={t('easterEggForm.awardBadgePlaceholder')}
               />
             )}
             disabled={submitting}
-            noOptionsText="No badges available"
+            noOptionsText={t('easterEggForm.noBadges')}
           />
         )}
 
@@ -372,7 +374,7 @@ export function EasterEggForm({
           startIcon={<AddIcon />}
           disabled={!isValid || submitting}
         >
-          {submitting ? 'Creating...' : 'Add Easter Egg'}
+          {submitting ? t('easterEggForm.creating') : t('easterEggForm.addEasterEgg')}
         </Button>
       </Stack>
     </Box>

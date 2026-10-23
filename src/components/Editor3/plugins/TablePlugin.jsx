@@ -138,6 +138,7 @@ export function InsertNewTableDialog({editor, onClose}) {
                             label={t('tablePlugin.rows')}
                             onChange={onRowsChange}
                             value={rows}
+                            // eslint-disable-next-line i18next/no-literal-string -- test id
                             data-test-id="table-modal-rows"
                             type="number"
                         />
@@ -146,12 +147,14 @@ export function InsertNewTableDialog({editor, onClose}) {
                             label={t('tablePlugin.columns')}
                             onChange={onColumnsChange}
                             value={columns}
+                            // eslint-disable-next-line i18next/no-literal-string -- test id
                             data-test-id="table-modal-columns"
                             type="number"
                         />
 
                         <Stack
                             direction="row"
+                            // eslint-disable-next-line i18next/no-literal-string -- CSS value
                             justifyContent="center"
                             alignItems="center"
                             spacing={2}

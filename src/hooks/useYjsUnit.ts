@@ -296,7 +296,7 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
 
       console.log("[useYjsUnit] Updated metadata:", updates);
     },
-    [provider],
+    [provider, unitId],
   );
 
   // Force save helper

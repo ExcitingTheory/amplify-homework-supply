@@ -87,6 +87,21 @@ export function EasterEggLayer({ studentId: studentIdProp }: EasterEggLayerProps
       .catch((err: any) => console.warn('[EasterEggLayer] fetch error:', err));
   }, [studentId]);
 
+  const handleDiscover = useCallback(
+    async (eggId: string, message: string, xpReward: number) => {
+      if (!studentId || discoveredRef.current.has(eggId)) return;
+      discoveredRef.current.add(eggId);
+      setToast({ open: true, message, xpReward });
+
+      try {
+        await (getClient() as any).mutations?.discoverEasterEgg?.({ studentId, eggId });
+      } catch (err) {
+        console.error('[EasterEggLayer] discoverEasterEgg error:', err);
+      }
+    },
+    [studentId],
+  );
+
   // Poll SCHEDULE eggs every 60 seconds
   useEffect(() => {
     if (!studentId || scheduleEggs.length === 0) return;
@@ -107,22 +122,7 @@ export function EasterEggLayer({ studentId: studentIdProp }: EasterEggLayerProps
     checkSchedules();
     const interval = setInterval(checkSchedules, 60000);
     return () => clearInterval(interval);
-  }, [studentId, scheduleEggs]);
-
-  const handleDiscover = useCallback(
-    async (eggId: string, message: string, xpReward: number) => {
-      if (!studentId || discoveredRef.current.has(eggId)) return;
-      discoveredRef.current.add(eggId);
-      setToast({ open: true, message, xpReward });
-
-      try {
-        await (getClient() as any).mutations?.discoverEasterEgg?.({ studentId, eggId });
-      } catch (err) {
-        console.error('[EasterEggLayer] discoverEasterEgg error:', err);
-      }
-    },
-    [studentId],
-  );
+  }, [studentId, scheduleEggs, handleDiscover]);
 
   return (
     <>

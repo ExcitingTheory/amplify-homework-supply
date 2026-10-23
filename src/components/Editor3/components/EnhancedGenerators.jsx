@@ -27,7 +27,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
                 <Box>
                     <img
                         src={presignedUrl}
-                        alt="Generated"
+                        alt={t('enhancedGenerators.generatedAlt')}
                         style={{
                             width: '100%',
                             maxHeight: '600px',
@@ -67,7 +67,7 @@ export function EnhancedImageGenerator({ open, onClose }) {
                 <Box>
                     <img
                         src={presignedUrl}
-                        alt="Regenerated"
+                        alt={t('enhancedGenerators.regeneratedAlt')}
                         style={{
                             width: '100%',
                             maxHeight: '600px',
@@ -198,7 +198,7 @@ export function ImageGeneratorButton({ open, onSuccess }) {
                 <Box>
                     <img
                         src={presignedUrl}
-                        alt="Generated"
+                        alt={t('enhancedGenerators.generatedAlt')}
                         style={{
                             width: '100%',
                             maxHeight: '600px',
@@ -225,8 +225,8 @@ export function ImageGeneratorButton({ open, onSuccess }) {
             onClose={handleClose}
             onGenerate={handleGenerate}
             onRegenerate={handleGenerate}
-            title="Generate Image"
-            inputPlaceholder="Describe the image you want to generate..."
+            title={t('enhancedGenerators.generateImage')}
+            inputPlaceholder={t('enhancedGenerators.imagePromptPlaceholder')}
             type="image"
         />
     );
@@ -236,6 +236,7 @@ export function ImageGeneratorButton({ open, onSuccess }) {
  * Button component for audio generation that can be embedded in FileManager
  */
 export function AudioGeneratorButton({ open, onSuccess }) {
+    const t = useTranslations('editor.ai');
     const [modalOpen, setModalOpen] = useState(false);
 
     React.useEffect(() => {
@@ -280,8 +281,8 @@ export function AudioGeneratorButton({ open, onSuccess }) {
             onClose={handleClose}
             onGenerate={handleGenerate}
             onRegenerate={handleGenerate}
-            title="Generate Audio"
-            inputPlaceholder="Enter text to convert to speech..."
+            title={t('enhancedGenerators.generateAudio')}
+            inputPlaceholder={t('enhancedGenerators.audioPromptPlaceholder')}
             type="audio"
         />
     );

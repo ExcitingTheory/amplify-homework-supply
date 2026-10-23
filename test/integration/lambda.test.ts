@@ -38,6 +38,7 @@ import { parseAmplifyConfig } from "aws-amplify/utils";
 import { generateClient } from "aws-amplify/api";
 import { post } from "aws-amplify/api";
 import { signIn, signOut, fetchAuthSession } from "aws-amplify/auth";
+import { downloadData, remove } from "aws-amplify/storage";
 import type { Schema } from "../../amplify/data/resource";
 import amplifyOutputs from "../../amplify_outputs.json";
 import seedData from "./seed-data.json";
@@ -85,6 +86,43 @@ Amplify.configure(
 
 // Create typed GraphQL client
 const client = generateClient<Schema>();
+
+async function waitForGeneratedMedia(
+  fileId: string,
+  completedDescription: string,
+): Promise<{ path: string; description: string | null | undefined }> {
+  const deadline = Date.now() + 5 * 60_000;
+  while (Date.now() < deadline) {
+    const { data, errors } = await client.models.File.get({ id: fileId });
+    if (errors?.length) {
+      throw new Error(
+        `Unable to read generated media File ${fileId}: ${JSON.stringify(errors)}`,
+      );
+    }
+    if (!data) throw new Error(`Generated media File ${fileId} was not found`);
+    if (data.description?.startsWith("Error:")) {
+      throw new Error(`Media generation failed: ${data.description}`);
+    }
+    if (data.description === completedDescription && data.path) {
+      return { path: data.path, description: data.description };
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  throw new Error(`Timed out waiting for generated media File ${fileId}`);
+}
+
+async function deleteGeneratedMedia(
+  fileId: string,
+  path: string | undefined,
+): Promise<void> {
+  if (path) await remove({ path }).result;
+  const { errors } = await client.models.File.delete({ id: fileId });
+  if (errors?.length) {
+    throw new Error(
+      `Unable to delete generated media File ${fileId}: ${JSON.stringify(errors)}`,
+    );
+  }
+}
 
 // Helper: Clean up test data after each test
 async function cleanup() {
@@ -855,6 +893,93 @@ describe("C. Lambda Handler Integration Tests", () => {
       expect(typeof data).toBe("string");
     }, 30000);
 
+    test("Generate audio File and store playable audio in S3", async () => {
+      await signInAs("instructor1");
+
+      let fileId: string | undefined;
+      let path: string | undefined;
+      let completed = false;
+      try {
+        const { data, errors } = await client.mutations.generateAudioFile({
+          phrase: "Integration test audio.",
+          voice: "alloy",
+          model: "tts-1",
+        });
+        expect(errors).toBeUndefined();
+        if (!data?.id || !data.path) {
+          throw new Error("TTS mutation returned no File ID or S3 path");
+        }
+        fileId = data.id;
+        path = data.path;
+        expect(data.mimeType).toBe("audio/mpeg");
+        expect(path).toMatch(/^public\/audio\//);
+
+        const generated = await waitForGeneratedMedia(
+          fileId,
+          "Generated audio - completed",
+        );
+        path = generated.path;
+        completed = true;
+        const stored = await downloadData({ path }).result;
+        const bytes = new Uint8Array(
+          await (await stored.body.blob()).arrayBuffer(),
+        );
+
+        expect(bytes.byteLength).toBeGreaterThan(1000);
+        const hasId3Header =
+          bytes[0] === 0x49 && bytes[1] === 0x44 && bytes[2] === 0x33;
+        const hasMpegFrameHeader =
+          bytes[0] === 0xff && (bytes[1]! & 0xe0) === 0xe0;
+        expect(hasId3Header || hasMpegFrameHeader).toBe(true);
+      } finally {
+        if (fileId) {
+          await deleteGeneratedMedia(fileId, completed ? path : undefined);
+        }
+      }
+    }, 360000);
+
+    test("Generate image File and store valid image data in S3", async () => {
+      await signInAs("instructor1");
+
+      let fileId: string | undefined;
+      let path: string | undefined;
+      let completed = false;
+      try {
+        const { data, errors } = await client.mutations.generateImageFile({
+          phrase: "A simple blue circle on a white background for an integration test.",
+          model: "dall-e-3",
+        });
+        expect(errors).toBeUndefined();
+        if (!data?.id || !data.path) {
+          throw new Error("Image mutation returned no File ID or S3 path");
+        }
+        fileId = data.id;
+        path = data.path;
+        expect(data.mimeType).toBe("image/png");
+        expect(path).toMatch(/^public\/images\//);
+
+        const generated = await waitForGeneratedMedia(
+          fileId,
+          "Generated image - completed",
+        );
+        path = generated.path;
+        completed = true;
+        const stored = await downloadData({ path }).result;
+        const bytes = new Uint8Array(
+          await (await stored.body.blob()).arrayBuffer(),
+        );
+
+        expect(bytes.byteLength).toBeGreaterThan(1000);
+        expect([...bytes.subarray(0, 8)]).toEqual([
+          0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+        ]);
+      } finally {
+        if (fileId) {
+          await deleteGeneratedMedia(fileId, completed ? path : undefined);
+        }
+      }
+    }, 360000);
+
     // Speech-to-Text (Whisper)
     test("Transcribe audio URL (Whisper)", async () => {
       await signInAs("instructor1");
@@ -1228,6 +1353,7 @@ describe("C. Lambda Handler Integration Tests", () => {
           "https://upload.wikimedia.org/wikipedia/commons/c/c8/Example.ogg",
         model: "whisper-1",
         chatModel: "gpt-3.5-turbo",
+        prompt: "Mercury, Beth, Tzaddi",
       });
 
       expect(errors).toBeUndefined();

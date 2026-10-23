@@ -87,7 +87,7 @@ export default function JoinPeerReviewDialog({
       const result = await joinPeerReviewAction(code);
 
       if (!result.success) {
-        throw new Error(result.error || "Failed to join peer review");
+        throw new Error(result.error || t("peerReview.joinDialog.joinFailed"));
       }
 
       onJoin({ roomId: result.roomId! });

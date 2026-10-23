@@ -94,7 +94,6 @@ export const Default: Story = {
 };
 
 export const WithResults: Story = {
-  name: "With Results",
   decorators: [
     (Story) => (
       <div style={{ width: 500 }}>

@@ -9,6 +9,7 @@ import Grid from "@mui/material/Grid";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
+import { useTranslations } from "next-intl";
 import { EmptyState } from "../EmptyState";
 
 export interface NailedItBlock {
@@ -32,8 +33,9 @@ function formatDate(dateStr: string): string {
 }
 
 export function NailedItWall({ blocks }: NailedItWallProps) {
+  const t = useTranslations("components");
   if (!blocks || blocks.length === 0) {
-    return <EmptyState dense title="No Nailed It moments yet — keep going!" />;
+    return <EmptyState dense title={t("nailedItWall.emptyTitle")} />;
   }
 
   return (
@@ -43,7 +45,7 @@ export function NailedItWall({ blocks }: NailedItWallProps) {
           <Card sx={{ borderLeft: "4px solid", borderColor: "success.main" }}>
             <CardContent>
               <Typography variant="overline" color="success.main">
-                🎯 Nailed It
+                {t("nailedItWall.heading")}
               </Typography>
               <Typography variant="body2" fontWeight={600}>
                 {block.question}
@@ -62,7 +64,10 @@ export function NailedItWall({ blocks }: NailedItWallProps) {
                 color="text.disabled"
                 mt={0.5}
               >
-                {block.homeworkTitle} · {formatDate(block.createdAt)}
+                {t("nailedItWall.meta", {
+                  homeworkTitle: block.homeworkTitle,
+                  date: formatDate(block.createdAt),
+                })}
               </Typography>
             </CardContent>
           </Card>

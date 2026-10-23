@@ -9,6 +9,7 @@
 
 import { DecoratorNode } from "lexical";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 export const AI_SUGGESTION_UUID = Math.random()
   .toString(36)
@@ -137,6 +138,7 @@ export function $createAILoadingNode(uuid) {
 }
 
 function AILoadingComponent() {
+  const t = useTranslations("editor.ai");
   return (
     <span
       style={{
@@ -163,7 +165,7 @@ function AILoadingComponent() {
           animation: "spin 0.8s linear infinite",
         }}
       />
-      Generating...
+      {t("aiContentSuggestion.generating")}
       <style>{`
         @keyframes spin {
           to { transform: rotate(360deg); }
@@ -174,6 +176,7 @@ function AILoadingComponent() {
 }
 
 function AIContentSuggestionComponent({ suggestion }) {
+  const t = useTranslations("editor.ai");
   console.log(
     "AIContentSuggestionComponent rendering with suggestion:",
     suggestion,
@@ -203,7 +206,7 @@ function AIContentSuggestionComponent({ suggestion }) {
           opacity: 0.95,
         }}
       >
-        (Tab to accept)
+        {t("aiContentSuggestion.tabToAcceptHint")}
       </span>
     </span>
   );

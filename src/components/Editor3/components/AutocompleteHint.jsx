@@ -2,8 +2,10 @@ import * as React from 'react';
 import TextField from '@mui/material/TextField';
 import Autocomplete from '@mui/material/Autocomplete';
 import { Box, Typography } from '@mui/material';
+import { useTranslations } from 'next-intl';
 
 export default function AutocompleteHint() {
+  const t = useTranslations('editor.shared');
   const hint = React.useRef('');
   const [inputValue, setInputValue] = React.useState('');
   return (
@@ -57,7 +59,7 @@ export default function AutocompleteHint() {
                   hint.current = '';
                 }
               }}
-              label="Movie"
+              label={t('autocompleteHint.movieLabel')}
             />
           </Box>
         );

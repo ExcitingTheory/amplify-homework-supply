@@ -46,6 +46,7 @@ import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import RadioButtonUncheckedIcon from "@mui/icons-material/RadioButtonUnchecked";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import { useTranslations } from "next-intl";
 import { generateSkillTreeFromUnit } from "../../../app/actions/gamification";
 
 // ============================================================================
@@ -136,6 +137,7 @@ const SkillNodeContent = memo(function SkillNodeContent({
 }: {
   data: SkillNodeData;
 }) {
+  const t = useTranslations("components");
   const status = data.status || "LOCKED";
   const isSelected = data.selected === true;
 
@@ -217,7 +219,7 @@ const SkillNodeContent = memo(function SkillNodeContent({
         )}
         {data.xpReward != null && data.xpReward > 0 && (
           <Chip
-            label={`+${data.xpReward} XP`}
+            label={t("skillTree.xpReward", { xp: data.xpReward })}
             size="small"
             sx={{
               height: 24,
@@ -645,6 +647,8 @@ function usePhysicsPositions(
 // SkillTree Inner (needs ReactFlowProvider parent for useReactFlow)
 // ============================================================================
 
+const DELETE_KEY_CODE = "Backspace";
+
 const nodeTypes = {
   skillNode: SkillNodeContent,
 };
@@ -661,6 +665,7 @@ function SkillTreeInner({
   onPrerequisiteChange,
   selectedSkillId,
 }: Omit<SkillTreeProps, "compact">) {
+  const t = useTranslations("components");
   const { nodes: initialNodes, edges: initialEdges } = useMemo(
     () => layoutSkills(skills),
     [skills],
@@ -767,14 +772,14 @@ function SkillTreeInner({
       if (result?.generated) {
         onGenerated?.({ skillCount: result.skillCount ?? 0 });
       } else {
-        setError(result?.reason ?? "Failed to generate skill tree");
+        setError(result?.reason ?? t("skillTree.generateFailed"));
       }
     } catch {
-      setError("An unexpected error occurred");
+      setError(t("skillTree.unexpectedError"));
     } finally {
       setGenerating(false);
     }
-  }, [unitId, sectionID, onGenerated]);
+  }, [unitId, sectionID, onGenerated, t]);
 
   // Node click: fire onSkillClick AND trigger physics impulse
   const handleNodeClick: NodeMouseHandler = useCallback(
@@ -819,7 +824,9 @@ function SkillTreeInner({
   if (skills.length === 0) {
     return (
       <Box data-tour="skills-empty-state" sx={{ p: 3, textAlign: "center" }}>
-        <Typography color="text.secondary">No skills defined yet.</Typography>
+        <Typography color="text.secondary">
+          {t("skillTree.noSkills")}
+        </Typography>
         {canGenerate && unitId && (
           <Box sx={{ mt: 2 }}>
             <Button
@@ -834,7 +841,9 @@ function SkillTreeInner({
               onClick={handleGenerate}
               disabled={generating}
             >
-              {generating ? "Generating…" : "Generate from Unit Content"}
+              {generating
+                ? t("skillTree.generating")
+                : t("skillTree.generateFromUnit")}
             </Button>
             {error && (
               <Typography
@@ -894,8 +903,7 @@ function SkillTreeInner({
             borderRadius: 0.5,
           }}
         >
-          Drag nodes to reposition • Draw edges to add prerequisites • Select +
-          Backspace to remove
+          {t("skillTree.editHint")}
         </Typography>
       )}
       <ReactFlow
@@ -916,7 +924,7 @@ function SkillTreeInner({
         nodesDraggable
         nodesConnectable={editable}
         elementsSelectable={editable}
-        deleteKeyCode={editable ? "Backspace" : null}
+        deleteKeyCode={editable ? DELETE_KEY_CODE : null}
         panOnDrag={panEnabled}
         zoomOnScroll
         zoomOnPinch
@@ -931,8 +939,8 @@ function SkillTreeInner({
         <Tooltip
           title={
             generating
-              ? "Generating…"
-              : "Regenerate skill tree from unit content"
+              ? t("skillTree.generating")
+              : t("skillTree.regenerateFromUnit")
           }
         >
           <Box sx={{ position: "absolute", top: 8, right: 8, zIndex: 10 }}>
@@ -942,8 +950,8 @@ function SkillTreeInner({
               disabled={generating}
               aria-label={
                 generating
-                  ? "Generating…"
-                  : "Regenerate skill tree from unit content"
+                  ? t("skillTree.generating")
+                  : t("skillTree.regenerateFromUnit")
               }
               sx={{
                 bgcolor: "background.paper",

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Button from '@mui/material/Button'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
@@ -29,6 +30,7 @@ export function OpenPeerReviewButton({
   onCreateRoom,
   onRoomCreated,
 }: OpenPeerReviewButtonProps) {
+  const t = useTranslations('components')
   const [dialogOpen, setDialogOpen] = useState(false)
   const [invitedUsers, setInvitedUsers] = useState<string[]>([])
   const [creating, setCreating] = useState(false)
@@ -66,7 +68,7 @@ export function OpenPeerReviewButton({
       setInvitedUsers([])
       onRoomCreated?.(roomId)
     } catch (err: any) {
-      setError(err?.message || 'Failed to create review room')
+      setError(err?.message || t('openPeerReviewButton.createFailed'))
     } finally {
       setCreating(false)
     }
@@ -81,15 +83,14 @@ export function OpenPeerReviewButton({
         onClick={handleOpen}
         disabled={disabled}
       >
-        Open for Peer Review
+        {t('openPeerReviewButton.openForPeerReview')}
       </Button>
 
       <Dialog open={dialogOpen} onClose={handleClose} maxWidth="sm" fullWidth>
-        <DialogTitle>Open Peer Review</DialogTitle>
+        <DialogTitle>{t('openPeerReviewButton.dialogTitle')}</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Invite classmates to review your homework. They will be able to view
-            your answers and provide feedback through a chat room.
+            {t('openPeerReviewButton.dialogDescription')}
           </Typography>
 
           <RoomInvite
@@ -106,7 +107,7 @@ export function OpenPeerReviewButton({
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} disabled={creating}>
-            Cancel
+            {t('openPeerReviewButton.cancel')}
           </Button>
           <Button
             variant="contained"
@@ -114,7 +115,7 @@ export function OpenPeerReviewButton({
             disabled={creating}
             startIcon={creating ? <Skeleton variant="circular" width={16} height={16} /> : undefined}
           >
-            {creating ? 'Creating...' : 'Create Room'}
+            {creating ? t('openPeerReviewButton.creating') : t('openPeerReviewButton.createRoom')}
           </Button>
         </DialogActions>
       </Dialog>

@@ -1,6 +1,6 @@
 # Thoth Correspondence Deck — Pipeline Accuracy, Course Section & Call-and-Response Plan
 
-Status: **Planning** · Owner: TBD · Created 2026-10-15
+Status: **Implemented in code through Phase 6; live-sandbox validation pending** (see §11) · Owner: TBD · Created 2026-10-15
 
 ## 0. Goals
 
@@ -8,7 +8,7 @@ Status: **Planning** · Owner: TBD · Created 2026-10-15
 2. **Build a Section of Units** from the extracted data: Trumps, Small Cards, Court Cards, Reference/Glossary, and special-topic units for interesting card groups.
 3. **Add a new "call and response" exercise.** It is a conversation playlist that alternates three parts: prompt, a response window filled with room tone, and the spoken answer. It records the learner only during response windows and grades each answer for accuracy. One conversation per card.
 4. **Add a media-player variant for call and response.** It shows a slide synced to the speaker. A slide is either flashed text or read-only Lexical content.
-5. **Render a "language-learning CD" audio album.** This is the same scripts baked into continuous audio with timed room-tone gaps, one track per card.
+5. **Build a spoken playlist.** Generate and store audio for each prompt and answer through the authenticated OpenAI TTS mutation. Keep learner response windows and their silence timing in playlist cue metadata; do not bake silence into speech or stitch a local audio album.
 6. **Save everything to the seed fixture** (`test/integration/seed-data.json`) so later record-building can reuse the IDs and extracted data without calling the LLM again.
 
 ---
@@ -30,7 +30,7 @@ Status: **Planning** · Owner: TBD · Created 2026-10-15
 | Mic + analyser | [useAudioRecordingTakes.ts](../src/components/Editor3/hooks/useAudioRecordingTakes.ts#L154-L158), [AudioWaveformPlayer.jsx](../src/components/Editor3/components/AudioWaveformPlayer.jsx#L909-L1018) | `getUserMedia` + `createAnalyser` patterns already exist | Reuse them; don't write a third mic stack. |
 | Visualizers | [FrequencyRingVisualizer.jsx](../src/components/Editor3/components/FrequencyRingVisualizer.jsx), [PlaybackWaveformVisualizer.jsx](../src/components/Editor3/components/PlaybackWaveformVisualizer.jsx) | Take an analyser or stream | Mount them only during response windows. |
 | Read-only Lexical | [NarrativeReader.tsx](../src/components/Editor3/NarrativeReader.tsx) | Read-only renderer with no context | Use it for slide rendering. |
-| Transcription | [amplify/data/resource.ts](../amplify/data/resource.ts#L3065) `verifyAudioUrl`, `generateAudioFile` (L3168), `analyzeDocument` (L3213) | Whisper STT and TTS already exposed | Grading and TTS need no new backend operations. Confirm whether `verifyAudioUrl` accepts a Whisper `prompt` (vocabulary bias). |
+| Transcription | [amplify/data/resource.ts](../amplify/data/resource.ts#L3065) `verifyAudioUrl`, `generateAudioFile` (L3168), `analyzeDocument` (L3213) | Whisper STT and TTS are exposed; `verifyAudioUrl` accepts an optional Whisper `prompt` | Vocabulary-biased transcription is supported by the schema and handler; callers that omit the prompt retain the existing behavior. |
 | Mic mocking | [AudioWaveformPlayer.stories.jsx](../src/components/Editor3/components/AudioWaveformPlayer.stories.jsx#L289-L298) | A tone stream replaces `getUserMedia` | Reuse this for player stories. |
 
 ---
@@ -117,8 +117,10 @@ Normalise with case-folding, diacritics stripped and plural→singular, plus an 
 Inputs: ground truth plus the `ParsedContent` (+ `DocumentQuestion`/`DocumentWord` if they are populated).
 
 Each ground-truth fact is matched to an extracted question in this order:
-1. Card scoping: the extracted item's `page` or text must reference the card.
-2. Answer match: normalised exact, then `accept[]`, then token-set ratio ≥ 0.9.
+1. **Card and field scoping.** The question's `page` must be one of the card's pages and its structured `subject` (card key or normalised title) and `field` must identify this card and fact. For legacy items without those fields, both the prompt and page must identify the card and the prompt must identify the fact field. A shared page alone is never enough: pages can contain several cards, and identical answers must not cross-satisfy facts.
+2. **Answer match.** Normalised exact, then `accept[]`, then token-set ratio ≥ 0.9. Apply fuzzy matching only after the card and field have been established.
+
+Facts marked `sourceDefect: true` are documentation of a known source limitation, not extractable truth. They must not count in required `factRecall` or the pass/fail gate, and the pipeline must not infer or invent their answer. Report them separately if useful. Keep page coverage separate: page 42 still needs other extracted content.
 
 Outputs `test/integration/thoth/extraction-report.json`:
 
@@ -136,7 +138,7 @@ Outputs `test/integration/thoth/extraction-report.json`:
 
 Keep the defaults as they are for other documents. Add an opt-in **exhaustive** profile:
 
-1. **Profile selection.** Add `analysisProfile: "standard" | "exhaustive"` as an argument to the `analyzeDocument` mutation. This changes `resource.ts` and **needs schema permission**. The alternative, with no schema change, is reading it from the `File.settings` JSON. **Recommend `File.settings`.**
+1. **Profile selection.** Read `analysisProfile: "standard" | "exhaustive"` from the `File.settings` JSON. This avoids changing the `analyzeDocument` mutation schema; keep the standard profile as the default when the setting is absent or invalid, and log invalid values explicitly.
 2. **Page-sized batches.** Exhaustive uses `PAGES_PER_BATCH = 1` (2 at most), so each card back gets its own call. Keep `MAX_PARALLEL_BATCHES` at 5 and add 429 backoff.
 3. **Structured Outputs.** Use `response_format: { type: "json_schema", strict: true }` with a recall-item schema: `{ facts: [{ subject, field, answer, accept[], page, sourceText }] }`. Map each fact into `questionsJSON` as `questionType: "recall"`, `prompt` = templated question and `answer` = short value. This adds no new model field, because `questionsJSON` is already `a.json()`.
 4. **Exhaustive instructions.** Ask for: "Every labelled line (`Label: value`) and every enumerated statement becomes one fact. Do not summarise. Do not omit repeated boilerplate the first time it appears."
@@ -146,9 +148,9 @@ Keep the defaults as they are for other documents. Add an opt-in **exhaustive** 
 6. **Truncation safety.** On `finish_reason === "length"` or a JSON parse error, split the batch (or the page in halves) and retry. A batch is never dropped silently. Record `failedPages` in `ParsedContent` metadata or logs.
 7. **Vocabulary.** Exhaustive asks for every defined term, including glossary cards and `Terms —` lines, and dedupes across pages by normalised term (keeping the first page seen).
 8. **Front/back pairing.** Pass `pageRole` hints (front/back/reference) found by header text. Keep the **`page`** on every item so the scorer and unit builder can join on card title.
-9. **Question-shape reconciliation.** Standardise on the Lambda shape `{prompt, answer, hint?, difficulty?, questionType, page}`. Update the seed mock and any readers (find them via the `questionsJSON` consumers).
+9. **Question-shape reconciliation.** Standardise on `{prompt, answer, hint?, difficulty?, questionType, page, subject, field, sourceText}`. Preserve the structured `subject` and `field` emitted by extraction as metadata on each question; the scorer needs them to avoid cross-card and cross-field matches. Update the seed mock and any readers (find them via the `questionsJSON` consumers).
 
-Tests: unit-test the coverage regex and the batch splitter (`npm run test:unit -- amplify/functions/documentAnalysis`).
+Tests: unit-test the coverage regex and batch splitter. Phase 0 scorer tests live in `test/unit/thoth/scoreExtraction.test.ts`; run them with `npm run test:unit -- test/unit/thoth/scoreExtraction.test.ts`. Include regressions where two cards share a page and a wrong-card or wrong-field answer has the same value as the expected fact.
 
 ---
 
@@ -156,7 +158,7 @@ Tests: unit-test the coverage regex and the batch splitter (`npm run test:unit -
 
 New section **"SECTION 11b: Thoth correspondence deck"**, run as instructor1:
 
-1. Read `test/mocks/Thoth-Correspondence-Deck.pdf`. Compute its sha256 and check it against the ground truth.
+1. Read `test/mocks/Thoth-Correspondence-Deck.pdf`. Compute SHA-256 from its bytes and compare it with the ground-truth `source.sha256`; fail before upload or analysis on mismatch in either `live` or `snapshot` mode.
 2. Set the mode with `SEED_THOTH_MODE=live|snapshot|off`. The default is `snapshot` if a snapshot exists, otherwise `live`.
    - **live:**
      1. `uploadData` to `protected/{identityId}/files/thoth-….pdf`.
@@ -164,7 +166,7 @@ New section **"SECTION 11b: Thoth correspondence deck"**, run as instructor1:
      3. Wait for the S3/EventBridge auto-trigger. **Do not also call `analyzeDocument`**, because that would run analysis twice.
      4. Poll `Document.status` with a timeout (e.g. 15 min) and handle `resumeState`.
      5. Fetch `ParsedContent` and write `test/fixtures/thoth/parsed-content.snapshot.json`.
-   - **snapshot:** Upload the PDF anyway, so the File exists. Create `ParsedContent` from the snapshot. No LLM cost.
+   - **snapshot:** Upload the PDF so the File exists. Create `ParsedContent` from the snapshot. No LLM cost.
 3. Run the scorer, write the report, and apply the gate from §3.3.
 4. Build records (see §6): `Word`s from vocabulary, `Question`s from recall facts (tagged `card:<key>`, `field:<field>`), `Section`, `Unit`s with `UnitWord` links, an `Assignment` per unit, and student1 enrolled.
 5. Add a `thoth` block to `seed-data.json`:
@@ -205,6 +207,11 @@ Wipe/reset already uses a DynamoDB scan, so no extra cleanup is needed. Check th
 - None of this is in the PDF. If it is added later, tag its questions `provenance: "authored"` so the extraction scorer leaves them out.
 
 Each unit's Lexical JSON is built by pure builder functions (`scripts/thoth/buildUnitContent.ts`). The seed and tests both use them. The builders produce standard nodes (`WordBlock`, `Quiz`, `CustomAnswer`, `MeaningAssociation`) plus one `call-response` node per card.
+
+Live Thoth analysis polling follows filtered `Document` and `ParsedContent`
+continuation tokens, including empty scan pages, before concluding that no
+matching record exists. Each poll starts a fresh scan; GraphQL/network failures
+and repeated continuation tokens stop the seed explicitly.
 
 ---
 
@@ -274,11 +281,11 @@ Requirements, mapped to the brief:
    - MIME fallback: `audio/webm;codecs=opus` → `audio/mp4`.
 2. **Visualizer only in response windows.** Mount `FrequencyRingVisualizer` (live mic analyser) only when `state === "Response"`. In other states show the slide and subtitle.
 3. **Capture only during responses.**
-   - Use a new `MediaRecorder` per response window: start on entry, stop on exit, with 150 ms pre-roll and a ≤ 500 ms post-roll extension while VAD still hears speech.
-   - Nothing is kept from prompt or answer playback, which avoids recording speaker bleed.
+   - Use a new `MediaRecorder` per response window: start on entry and stop on exit, with no pre-roll. A recorder started at response entry cannot capture audio from before that entry.
+   - Allow a ≤ 500 ms post-roll only while VAD still hears speech. Stop and discard the take before prompt or answer playback begins; never preserve prompt/answer audio.
 4. **Grading (async, doesn't block playback, CD-style).**
-   1. Upload the blob to `protected/{identityId}/call-response/{unitId}/{blockId}/{cueId}-{attempt}.webm`.
-   2. Call `verifyAudioUrl`, with a Whisper `prompt` of expected terms if supported (a Lambda change otherwise, which needs confirmation).
+   1. Upload the blob to `protected/{identityId}/call-response/{unitId}/{blockId}/{cueId}-{attempt}.{ext}`, choosing the extension and `contentType` from the recorder's actual MIME type (`audio/webm;codecs=opus` or `audio/mp4` fallback).
+   2. Call `verifyAudioUrl` with a Whisper `prompt` of expected terms when available; omit it when no useful bias terms exist.
    3. Score the transcript with `scoreSpokenAnswer(transcript, expected, accept)`: normalise, then numeral/roman/word equivalence, then token-set ratio, then a phonetic fallback (Double Metaphone) for Hebrew/Qabalistic names.
 5. **Grade storage.** `Grade.data[blockId] = { complete, accuracy, cues: { [cueId]: { transcript, score, audioPath, attempts } } }`. Save via the existing UnitContext grade update with `_version`.
 6. **Hooks.**
@@ -304,24 +311,44 @@ Requirements, mapped to the brief:
 
 ---
 
-## 8. Rendered Audio Album ("language-learning CD")
+## 8. Thoth Spoken Playlist
 
 `scripts/thoth/render-call-response-album.mts` (dev script; not shipped):
 
 1. Build scripts for all 100 cards in deck order. Glossary cards are read term → pause → definition.
-2. TTS every distinct cue text via `generateAudioFile`, with two voices: narrator for prompts, answer voice for answers. Cache the files in S3 and record them in `test/fixtures/thoth/audio-manifest.json` (text hash → File ID/path).
-3. Concatenate prompt → room tone (`responseWindow` from §7.2) → answer per cue with `ffmpeg` (check availability with `which ffmpeg`; nothing is installed by the agent). Output one track per card plus a full album with chapter markers.
-4. Upload the tracks as `File`s and attach them to the cards' `call-response` nodes as `albumTrackFileID` for passive listening.
+2. Generate each distinct prompt/answer cue through the authenticated `generateAudioFile` mutation. The handler uploads the returned bytes to S3 and marks the `File` complete; cache the text hash → File ID/path in `test/fixtures/thoth/audio-manifest.json`.
+3. Attach each generated audio File to its prompt/answer cue with `audioFileID`. Response cues do not contain generated audio.
+4. Keep response silence programmatic: the player uses each response cue's `minMs`, `maxMs`, and `silenceEndMs` to manage the microphone response window. Do not speak pause markers or concatenate silence into an audio track.
 
-Rough cost: about 1,000 facts gives about 2,000 cue texts, which deduping cuts to about 1,200 TTS calls. This fits inside the $200 budget (see Decisions).
+TTS generation is paid and persists files in S3; running the script requires explicit confirmation.
+
+Use `--card trump-0-the-fool` to limit a dry run or execution to one card.
+Before any paid generation, the renderer downloads seeded unit content and
+checks that every selected card exists with matching spoken cue IDs, text, and
+voices. Missing or stale scripts stop the run before TTS; response-window timing
+and existing audio references are preserved during this preflight.
+The renderer saves each returned File ID/path atomically before polling, so a
+timeout or interruption resumes the same generation request on the next run.
+Cached cues are checked against their File records and downloaded from S3 to
+verify an MP3 header before reuse. Missing records, missing objects, and invalid
+audio stop the run rather than silently charging for replacement TTS. A full
+sandbox reseed deletes File records; preserve the audio manifest and S3 objects
+and restore those records before retrying. The standalone renderer signs in
+with Amplify Auth; it does not require the sandbox seed CLI authentication helper.
 
 ---
 
 ## 9. Phases & Validation
 
+Typecheck the complete seed without executing it:
+`npx tsc --project amplify/seed/tsconfig.json`.
+This config inherits the backend's strict settings. Passing source files directly
+to `tsc` bypasses project settings; disabling strict null checks causes misleading
+scalar-to-`string[]` errors in Amplify Grade and AnalyticsSummary input types.
+
 | Phase | Scope | Confirmation? | Validation |
 |---|---|---|---|
-| 0 | Ground-truth JSON, scorer, scorer unit tests | No (tests/fixtures) | `npm run test:unit -- test/integration/thoth` |
+| 0 | Ground-truth JSON, scorer, scorer unit tests | No (tests/fixtures) | `npm run test:unit -- test/unit/thoth/scoreExtraction.test.ts`; assert wrong-card/field answers cannot satisfy a fact and known source defects do not gate recall |
 | 1 | Pipeline exhaustive profile, coverage pass, truncation retry, question-shape reconcile | **Yes** (`amplify/`) | unit tests + sandbox run on the PDF; gate passes |
 | 2 | Seed section 11b, snapshot mode, fixture block | **Yes** (`amplify/seed`) | `npm run sandbox:seed`; report at 100% |
 | 3 | Unit content builders + Section/Units/Words/Questions | **Yes** (seed) + scripts | Units open in Workbook; story snapshots |
@@ -336,7 +363,38 @@ Rough cost: about 1,000 facts gives about 2,000 cue texts, which deduping cuts t
 1. **PDF:** `test/mocks/Thoth-Correspondence-Deck.pdf`.
 2. **Three Magus cards:** dropped from scope (see §6).
 3. **Chakra [overlay] facts:** required for the 100% gate.
-4. **Transcription:** `verifyAudioUrl` gains an optional Whisper `prompt`. Extraction improves the existing pipeline: unit-sized chunks, a mechanical checklist (vocabulary counts, minimum questions per topic) and sub-tasks to avoid context exhaustion.
+4. **Transcription:** `verifyAudioUrl` accepts an optional Whisper `prompt` for vocabulary bias; calls without it retain existing behavior. Extraction improves the existing pipeline: unit-sized chunks, a mechanical checklist (vocabulary counts, minimum questions per topic) and sub-tasks to avoid context exhaustion.
 5. **Budget:** up to $200 for live extraction and TTS; use snapshots wherever they save money.
 6. **Audio storage:** S3 only, with the manifest in the repo.
 7. **Production changes:** approved; no further confirmation needed.
+
+---
+
+## 11. Implementation Status
+
+| Phase | State | Evidence |
+|---|---|---|
+| 0 | Done | `test/unit/thoth/scoreExtraction.test.ts` and the other `test/unit/thoth/` suites pass |
+| 1 | Code + unit tests done; **live gate not yet passed** | `test/unit/documentAnalysis.test.ts`, `test/unit/documentAnalysisCoverage.test.ts`. The workflow ran end to end in the sandbox until OpenAI returned `credit_balance_exhausted` |
+| 2 | Done in snapshot mode; **live gate not run** | Seeded with a throwaway synthetic snapshot built from the ground truth (deleted afterwards), so this exercised the seed, not extraction accuracy |
+| 3 | Done | 8 units and 1,255 recall questions seeded; the Trumps unit opens in the Workbook; `test/unit/thoth/buildUnitContent.test.ts` |
+| 4 | Done | Node, player, hooks, authoring, insert command, stories, and `test/e2e/call-response.spec.ts` passing against the sandbox (details below) |
+| 5 | Dry run done; **paid TTS not executed** | `npx tsx scripts/thoth/render-call-response-album.mts` plans 100 cards and 2,080 unique TTS cues; blocked on OpenAI credits |
+| 6 | Done | Graded lexical slides (details below) |
+
+Phase 4 and 6 details:
+
+- `src/utils/callResponse/responseWindow.ts` implements §7.2 (`computeResponseWindow`, VAD frame evaluation, at most 500 ms of post-roll). `buildCallResponseScript` sizes each response window from the expected answer.
+- `roomTone.ts` synthesises pink noise at -50 dBFS; the player plays it only during response windows.
+- `CallResponseSlideView` renders `text` slides (flashed title) and `lexical` slides (read-only `NarrativeReader`, loaded lazily to avoid an import cycle through `editorConfig`).
+- **Graded slides (Phase 6):** a `lexical` slide with `graded: true` on a *response* cue overrides `UnitContext` for its nested blocks. Their grades are saved under `Grade.data[blockId].cues[cueId].slide`. A cue counts as complete only when it has a spoken score and a complete slide; its accuracy is the mean of the two (`gradeCues.ts`).
+- Authoring (`CallResponsePlugin`): the toolbar inserts an empty script (`INSERT_CALL_RESPONSE_COMMAND`). The editor offers voice selects, timing overrides, cues generated from selected Questions (grouped by `card:` metadata), **Generate audio** (`generateCueAudio`, deduped by voice + text hash and polled until the `File` is complete), and a **Preview** that records nothing. Lexical slides are authored through the Advanced JSON panel, which validates them.
+- Tests: `test/unit/callResponseWindow.test.ts`, `test/unit/callResponseAuthoring.test.ts`, `CallResponsePlayer.stories.tsx` (Idle, Arming, Prompt, Response, Answer, Done, PermissionDenied, text/lexical/graded slides), `CallResponsePlugin.stories.tsx`, and `test/e2e/call-response.spec.ts` (skips until the seed populates `thoth.units.trumps`; run it with `BASE_URL` pointing at your dev server).
+
+Pipeline fixes found by running the workflow live (all in `amplify/`): the file lookup in the analysis handler pages its scan; the pdfjs worker is bundled; Step Functions ARNs use colons and the workflow Lambda can `s3:ListBucket`; provider limits load through raw GraphQL; PDF text keeps its line breaks (previously each page was one line, so the coverage check could never succeed); the coverage check is token-based, since values wrap across PDF lines; malformed verifier output and limiter timeouts are retried. The seed now creates `PlatformSettings` before the Thoth section with analysis limits you can override (`SEED_ANALYSIS_OPENAI_RPM`, `SEED_ANALYSIS_OPENAI_TPM`, `SEED_ANALYSIS_OPENAI_CONCURRENCY`).
+
+Remaining, blocked on OpenAI credits:
+
+1. Run `THOTH_ANALYSIS_TIMEOUT_MINUTES=60 npm run sandbox:seed` (live mode, with no snapshot file present) to prove the §3.3 gate.
+2. Run `render-call-response-album.mts --execute` with `THOTH_AUDIO_CONFIRM=1`, then listen through three cards.
+

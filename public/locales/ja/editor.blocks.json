@@ -6,14 +6,39 @@
     "dialogTitle": "回答を編集",
     "emptyState": "回答が入力されていません",
     "instructions": "以下に回答を作成してください",
-    "save": "保存"
+    "save": "保存",
+    "actionsColumn": "操作",
+    "addNewOption": "「{value}」を追加",
+    "removeNamedWord": "{phrase}を削除",
+    "removeWord": "単語を削除",
+    "removeWords": "{count, plural, one {#語を削除} other {#語を削除}}",
+    "title": "記述式問題",
+    "titleByDefinition": "定義による記述式問題",
+    "titleByWord": "単語別の短答式演習"
   },
   "blocks": {
     "meaning_association": "意味の関連付け"
   },
   "customAIEditor": {
     "title": "AI採点演習",
-    "description": "学習者が質問に回答し、AIが独自の採点基準に基づいて回答を評価するAI採点演習を作成します。"
+    "description": "学習者が質問に回答し、AIが独自の採点基準に基づいて回答を評価するAI採点演習を作成します。",
+    "inputModeText": "テキスト",
+    "inputModeAudio": "音声",
+    "inputModeImage": "画像",
+    "inputModeDrawing": "描画",
+    "questionPromptHeader": "問題プロンプト",
+    "expectedAnswerHeader": "期待される回答",
+    "removeQuestion": "質問を削除",
+    "questionFallback": "質問 {id}",
+    "secureGrading": "セキュア採点",
+    "studentInputModes": "受講者の入力モード",
+    "allowedInputModes": "許可する入力モード",
+    "gradingCriteria": "評価基準(AIへの指示)",
+    "criteriaPlaceholder": "AIが学生の回答をどのように採点するかを記述してください。例：「光合成の理解度に基づいて採点してください。明反応、カルビン回路、クロロフィルの役割に言及している場合は満点を与えてください。」",
+    "criteriaHelperText": "AIはこれらの基準を使用して学生の提出物を評価します。学生には表示されません。",
+    "questionsCount": "問題 ({count})",
+    "searchQuestions": "問題バンクから問題を検索して追加します",
+    "securityNotice": "セキュリティ: AI採点プロンプトは、プロンプトインジェクション、キャラクター逸脱、データ漏えいに対して強化されています。学生の入力はサニタイズされます。採点基準は学生には表示されません。出力は検証され、個人を特定できる情報(PII)はフィルタリングされます。"
   },
   "customAnswerEditor": {
     "add": "追加します",
@@ -28,7 +53,8 @@
       "hint": "ヒント",
       "id": "ID",
       "prompt": "プロンプト",
-      "promptAudio": "プロンプト音声"
+      "promptAudio": "プロンプト音声",
+      "actions": "操作"
     },
     "description": "ユーザーに質問を提示し、短い回答を求める短答問題を作成します。",
     "dialogDescription": "新しい質問と回答のペアを追加してください。",
@@ -43,7 +69,8 @@
     "remove": "削除します",
     "successGeneratedAudio": "音声ファイルの生成が完了しました",
     "title": "カスタム回答演習",
-    "ttsPreview": "読み上げプレビュー"
+    "ttsPreview": "読み上げプレビュー",
+    "removeAnswers": "{count, plural, one {#件の回答を削除} other {#件の回答を削除}}"
   },
   "meaningAssociationEditor": {
     "add": "追加します",
@@ -60,7 +87,13 @@
     "emptyState": "まだ単語が追加されていません。上の入力欄を使用して辞書から単語を追加してください。追加したい単語が辞書にない場合は、ドロップダウンの「単語を追加」項目をクリックするか、サイドバーの辞書エディターから追加できます。",
     "phraseLabel": "フレーズ",
     "pronunciationLabel": "発音",
-    "removeFromAssignment": "課題から削除します"
+    "removeFromAssignment": "課題から削除します",
+    "actionsColumn": "操作",
+    "addNewOption": "「{value}」を追加",
+    "definitionAriaLabel": "定義",
+    "removeNamedWord": "{phrase}を削除",
+    "removeWord": "単語を削除",
+    "removeWords": "{count, plural, one {#個の単語を削除} other {#個の単語を削除}}"
   },
   "questionEditor": {
     "cancel": "キャンセル"

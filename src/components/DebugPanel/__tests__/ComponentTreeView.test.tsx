@@ -46,19 +46,19 @@ const mockTree: ComponentMetadata[] = [
 describe('ComponentTreeView', () => {
   it('renders empty state when no components', () => {
     render(<ComponentTreeView tree={[]} />);
-    expect(screen.getByText('No components registered')).toBeInTheDocument();
-    expect(screen.getByText('Use useComponentInspector() hook to register components')).toBeInTheDocument();
+    expect(screen.getByText('componentTreeView.noComponents')).toBeInTheDocument();
+    expect(screen.getByText('componentTreeView.registerHint')).toBeInTheDocument();
   });
 
   it('groups components by name', () => {
     render(<ComponentTreeView tree={mockTree} />);
 
-    expect(screen.getByText(/TestComponent \(2 instances\)/)).toBeInTheDocument();
+    expect(screen.getByText(/TestComponentcomponentTreeView\.instanceCount/)).toBeInTheDocument();
     // OtherComponent appears twice (header and instance), verify both exist
     const otherCompElements = screen.getAllByText('OtherComponent');
     expect(otherCompElements.length).toBeGreaterThanOrEqual(1);
-    expect(screen.getByText('3 components')).toBeInTheDocument();
-    expect(screen.getByText('2 types')).toBeInTheDocument();
+    expect(screen.getByText('componentTreeView.componentCount')).toBeInTheDocument();
+    expect(screen.getByText('componentTreeView.typeCount')).toBeInTheDocument();
   });
 
   it('expands component details when clicked', () => {
@@ -94,8 +94,8 @@ describe('ComponentTreeView', () => {
       fireEvent.click(testCompButton);
 
       // Should show props and state labels (without colons)
-      expect(screen.getByText('Props')).toBeInTheDocument();
-      expect(screen.getByText('State')).toBeInTheDocument();
+      expect(screen.getByText('componentTreeView.props')).toBeInTheDocument();
+      expect(screen.getByText('componentTreeView.state')).toBeInTheDocument();
     }
   });
 
@@ -140,7 +140,7 @@ describe('ComponentTreeView', () => {
     if (instanceButton) {
       fireEvent.click(instanceButton);
       // Component should render without errors even with undefined props/state
-      expect(screen.getByText('Props')).toBeInTheDocument();
+      expect(screen.getByText('componentTreeView.props')).toBeInTheDocument();
     }
   });
 

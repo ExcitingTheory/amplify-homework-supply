@@ -8,6 +8,13 @@ const takes = [
 ];
 
 describe("AudioTakePlaylist", () => {
+  it("labels the recorded takes list", () => {
+    render(<AudioTakePlaylist takes={takes} onSelect={vi.fn()} />);
+    expect(
+      screen.getByRole("list", { name: "audioTakePlaylist.recordedTakes" }),
+    ).toBeInTheDocument();
+  });
+
   it("renders takes and marks the selected take", () => {
     render(
       <AudioTakePlaylist
@@ -17,12 +24,12 @@ describe("AudioTakePlaylist", () => {
       />,
     );
 
-    expect(screen.getByRole("button", { name: /Take 1/ })).not.toHaveClass(
-      "Mui-selected",
-    );
-    expect(screen.getByRole("button", { name: /Take 2/ })).toHaveClass(
-      "Mui-selected",
-    );
+    const takeButtons = screen.getAllByRole("button", {
+      name: /audioTakePlaylist\.takeLabel/,
+    });
+    expect(takeButtons).toHaveLength(2);
+    expect(takeButtons[0]).not.toHaveClass("Mui-selected");
+    expect(takeButtons[1]).toHaveClass("Mui-selected");
     expect(screen.getByText("1:05", { exact: false })).toBeInTheDocument();
   });
 
@@ -36,7 +43,11 @@ describe("AudioTakePlaylist", () => {
       />,
     );
 
-    fireEvent.click(screen.getByRole("button", { name: /Take 2/ }));
+    fireEvent.click(
+      screen.getAllByRole("button", {
+        name: /audioTakePlaylist\.takeLabel/,
+      })[1],
+    );
     expect(onSelect).toHaveBeenCalledWith("take-2");
   });
 
@@ -51,7 +62,11 @@ describe("AudioTakePlaylist", () => {
       />,
     );
 
-    fireEvent.click(screen.getAllByRole("button", { name: "Delete take" })[0]);
+    fireEvent.click(
+      screen.getAllByRole("button", {
+        name: "audioTakePlaylist.deleteTake",
+      })[0],
+    );
     expect(onDelete).toHaveBeenCalledWith("take-1");
     expect(onSelect).not.toHaveBeenCalled();
   });

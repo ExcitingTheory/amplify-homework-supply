@@ -14,6 +14,7 @@ import Popover from "@mui/material/Popover";
 import Stack from "@mui/material/Stack";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import { useTranslations } from "next-intl";
 import { BadgeIcon } from "./BadgeIcon";
 import { getBadgeConfig } from "./badgeRegistry";
 import { getAntiBadgeConfig } from "./antiBadgeRegistry";
@@ -50,111 +51,142 @@ export type BadgeType =
   | "A11Y_CHAMPION"
   | "DOCS_CHAMPION";
 
+type Translate = ReturnType<typeof useTranslations<"components">>;
+
 interface BadgeDefinition {
   name: string;
   description: string;
 }
 
-const BADGE_DEFINITIONS: Record<BadgeType, BadgeDefinition> = {
-  FIRST_SUBMISSION: {
-    name: "First Submission",
-    description: "Submitted your first homework",
-  },
-  GOOD_EYE: { name: "Good Eye", description: "Revised work after AI feedback" },
-  QUICK_DRAW: {
-    name: "Quick Draw",
-    description: "Submitted before the due date",
-  },
-  SHARPSHOOTER: {
-    name: "Sharpshooter",
-    description: "Scored 90%+ on an assignment",
-  },
-  CONSISTENT: { name: "Consistent", description: "Maintained a 7-day streak" },
-  TEAM_PLAYER: { name: "Team Player", description: "Completed a peer review" },
-  DEEP_THINKER: {
-    name: "Deep Thinker",
-    description: "Completed all blocks in a unit",
-  },
-  TOP_OF_CLASS: {
-    name: "Top of Class",
-    description: "Reached #1 on the leaderboard",
-  },
-  PERFECTIONIST: {
-    name: "Perfectionist",
-    description: "Scored 100% on an assignment",
-  },
-  // Avatar unlock badges
-  AVATAR_COLORS: {
-    name: "Color Unlocked",
-    description: "Reached Level 2 — unlock avatar color picker",
-  },
-  AVATAR_DETAILED: {
-    name: "New Look",
-    description: "Reached Level 3 — unlocked detailed avatar style",
-  },
-  AVATAR_ACCESSORIES: {
-    name: "Accessorized",
-    description: "Reached Level 4 — unlock avatar accessories",
-  },
-  AVATAR_PORTRAIT: {
-    name: "Portrait Mode",
-    description:
-      "Reached Level 5 — unlocked portrait avatar style & full customizer",
-  },
-  // Bot Whisperer tiered badges
-  BOT_WHISPERER_I: {
-    name: "Bot Whisperer I",
-    description: "Had your first real conversation with the AI tutor",
-  },
-  BOT_WHISPERER_II: {
-    name: "Bot Whisperer II",
-    description: "Earned Deep Thinker — upgraded your bot's style",
-  },
-  BOT_WHISPERER_III: {
-    name: "Bot Whisperer III",
-    description: "Used AI across 5 units — choose your bot's eyes & mouth",
-  },
-  BOT_WHISPERER_IV: {
-    name: "Bot Whisperer IV",
-    description: "AI mastery achieved — full bot customization unlocked",
-  },
-  // Avatar powerup badges
-  AVATAR_GLOW: {
-    name: "Glow Ring",
-    description:
-      "Level up! — rotating gradient ring around your avatar for 24 hours",
-  },
-  // Storybook documentation promo badges
-  DOCS_EXPLORER: {
-    name: "Docs Explorer",
-    description: "Visited the Storybook documentation and started onboarding",
-  },
-  INSTRUCTOR_ONBOARD: {
-    name: "Instructor Certified",
-    description: "Completed the instructor onboarding in Storybook",
-  },
-  LEARNER_ONBOARD: {
-    name: "Learner Certified",
-    description: "Completed the learner onboarding in Storybook",
-  },
-  TRANSLATOR_ONBOARD: {
-    name: "Translator Certified",
-    description: "Completed the translator onboarding in Storybook",
-  },
-  A11Y_CHAMPION: {
-    name: "Accessibility Champion",
-    description: "Completed accessibility-related tasks in Storybook",
-  },
-  DOCS_CHAMPION: {
-    name: "Documentation Champion",
-    description:
-      "Completed all onboarding paths — instructor, learner, and translator",
-  },
-};
+const BADGE_TYPE_ORDER: BadgeType[] = [
+  "FIRST_SUBMISSION",
+  "GOOD_EYE",
+  "QUICK_DRAW",
+  "SHARPSHOOTER",
+  "CONSISTENT",
+  "TEAM_PLAYER",
+  "DEEP_THINKER",
+  "TOP_OF_CLASS",
+  "PERFECTIONIST",
+  "AVATAR_COLORS",
+  "AVATAR_DETAILED",
+  "AVATAR_ACCESSORIES",
+  "AVATAR_PORTRAIT",
+  "BOT_WHISPERER_I",
+  "BOT_WHISPERER_II",
+  "BOT_WHISPERER_III",
+  "BOT_WHISPERER_IV",
+  "AVATAR_GLOW",
+  "DOCS_EXPLORER",
+  "INSTRUCTOR_ONBOARD",
+  "LEARNER_ONBOARD",
+  "TRANSLATOR_ONBOARD",
+  "A11Y_CHAMPION",
+  "DOCS_CHAMPION",
+];
 
-const ALL_BADGE_TYPES: BadgeType[] = Object.keys(
-  BADGE_DEFINITIONS,
-) as BadgeType[];
+function getBadgeDefinitions(t: Translate): Record<BadgeType, BadgeDefinition> {
+  return {
+    FIRST_SUBMISSION: {
+      name: t("badgeShelf.badges.firstSubmissionName"),
+      description: t("badgeShelf.badges.firstSubmissionDescription"),
+    },
+    GOOD_EYE: {
+      name: t("badgeShelf.badges.goodEyeName"),
+      description: t("badgeShelf.badges.goodEyeDescription"),
+    },
+    QUICK_DRAW: {
+      name: t("badgeShelf.badges.quickDrawName"),
+      description: t("badgeShelf.badges.quickDrawDescription"),
+    },
+    SHARPSHOOTER: {
+      name: t("badgeShelf.badges.sharpshooterName"),
+      description: t("badgeShelf.badges.sharpshooterDescription"),
+    },
+    CONSISTENT: {
+      name: t("badgeShelf.badges.consistentName"),
+      description: t("badgeShelf.badges.consistentDescription"),
+    },
+    TEAM_PLAYER: {
+      name: t("badgeShelf.badges.teamPlayerName"),
+      description: t("badgeShelf.badges.teamPlayerDescription"),
+    },
+    DEEP_THINKER: {
+      name: t("badgeShelf.badges.deepThinkerName"),
+      description: t("badgeShelf.badges.deepThinkerDescription"),
+    },
+    TOP_OF_CLASS: {
+      name: t("badgeShelf.badges.topOfClassName"),
+      description: t("badgeShelf.badges.topOfClassDescription"),
+    },
+    PERFECTIONIST: {
+      name: t("badgeShelf.badges.perfectionistName"),
+      description: t("badgeShelf.badges.perfectionistDescription"),
+    },
+    AVATAR_COLORS: {
+      name: t("badgeShelf.badges.avatarColorsName"),
+      description: t("badgeShelf.badges.avatarColorsDescription"),
+    },
+    AVATAR_DETAILED: {
+      name: t("badgeShelf.badges.avatarDetailedName"),
+      description: t("badgeShelf.badges.avatarDetailedDescription"),
+    },
+    AVATAR_ACCESSORIES: {
+      name: t("badgeShelf.badges.avatarAccessoriesName"),
+      description: t("badgeShelf.badges.avatarAccessoriesDescription"),
+    },
+    AVATAR_PORTRAIT: {
+      name: t("badgeShelf.badges.avatarPortraitName"),
+      description: t("badgeShelf.badges.avatarPortraitDescription"),
+    },
+    BOT_WHISPERER_I: {
+      name: t("badgeShelf.badges.botWhispererIName"),
+      description: t("badgeShelf.badges.botWhispererIDescription"),
+    },
+    BOT_WHISPERER_II: {
+      name: t("badgeShelf.badges.botWhispererIiName"),
+      description: t("badgeShelf.badges.botWhispererIiDescription"),
+    },
+    BOT_WHISPERER_III: {
+      name: t("badgeShelf.badges.botWhispererIiiName"),
+      description: t("badgeShelf.badges.botWhispererIiiDescription"),
+    },
+    BOT_WHISPERER_IV: {
+      name: t("badgeShelf.badges.botWhispererIvName"),
+      description: t("badgeShelf.badges.botWhispererIvDescription"),
+    },
+    AVATAR_GLOW: {
+      name: t("badgeShelf.badges.avatarGlowName"),
+      description: t("badgeShelf.badges.avatarGlowDescription"),
+    },
+    DOCS_EXPLORER: {
+      name: t("badgeShelf.badges.docsExplorerName"),
+      description: t("badgeShelf.badges.docsExplorerDescription"),
+    },
+    INSTRUCTOR_ONBOARD: {
+      name: t("badgeShelf.badges.instructorOnboardName"),
+      description: t("badgeShelf.badges.instructorOnboardDescription"),
+    },
+    LEARNER_ONBOARD: {
+      name: t("badgeShelf.badges.learnerOnboardName"),
+      description: t("badgeShelf.badges.learnerOnboardDescription"),
+    },
+    TRANSLATOR_ONBOARD: {
+      name: t("badgeShelf.badges.translatorOnboardName"),
+      description: t("badgeShelf.badges.translatorOnboardDescription"),
+    },
+    A11Y_CHAMPION: {
+      name: t("badgeShelf.badges.a11yChampionName"),
+      description: t("badgeShelf.badges.a11yChampionDescription"),
+    },
+    DOCS_CHAMPION: {
+      name: t("badgeShelf.badges.docsChampionName"),
+      description: t("badgeShelf.badges.docsChampionDescription"),
+    },
+  };
+}
+
+const ALL_BADGE_TYPES: BadgeType[] = BADGE_TYPE_ORDER;
 
 export interface EarnedBadge {
   badgeType: BadgeType | string;
@@ -178,6 +210,8 @@ export function BadgeShelf({
   earnedBadges,
   earnedOnly = false,
 }: BadgeShelfProps) {
+  const t = useTranslations("components");
+  const badgeDefinitions = getBadgeDefinitions(t);
   // Split earned badges into regular and anti
   const regularEarned = earnedBadges.filter((b) => !b.isAnti);
   const antiEarned = earnedBadges.filter((b) => b.isAnti);
@@ -218,7 +252,7 @@ export function BadgeShelf({
 
   const activeDef =
     activeBadge && !activeIsAnti
-      ? BADGE_DEFINITIONS[activeBadge as BadgeType]
+      ? badgeDefinitions[activeBadge as BadgeType]
       : null;
   const activeAntiConfig =
     activeBadge && activeIsAnti ? getAntiBadgeConfig(activeBadge) : null;
@@ -243,7 +277,7 @@ export function BadgeShelf({
         }}
       >
         {badgesToShow.map((type) => {
-          const def = BADGE_DEFINITIONS[type];
+          const def = badgeDefinitions[type];
           const isEarned = earnedSet.has(type);
           const count = earnedCounts[type] || 0;
 
@@ -298,7 +332,7 @@ export function BadgeShelf({
         <>
           <Divider sx={{ my: 2 }}>
             <Chip
-              label="Anti-Badges"
+              label={t("badgeShelf.antiBadges")}
               size="small"
               color="error"
               variant="outlined"
@@ -408,7 +442,9 @@ export function BadgeShelf({
             </Typography>
             {activeIsEarned && activeEarned && (
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Earned {new Date(activeEarned.awardedAt).toLocaleDateString()}
+                {t("badgeShelf.earnedOn", {
+                  date: new Date(activeEarned.awardedAt).toLocaleDateString(),
+                })}
               </Typography>
             )}
             {activeIsEarned && activeCount > 1 && (
@@ -417,7 +453,7 @@ export function BadgeShelf({
                 fontWeight={700}
                 color="primary.main"
               >
-                Earned {activeCount} times
+                {t("badgeShelf.earnedTimes", { count: activeCount })}
               </Typography>
             )}
             {!activeIsEarned && (
@@ -426,7 +462,7 @@ export function BadgeShelf({
                 color="text.disabled"
                 fontStyle="italic"
               >
-                Locked
+                {t("badgeShelf.locked")}
               </Typography>
             )}
           </Stack>
@@ -463,7 +499,11 @@ export function BadgeShelf({
             )}
             {activeAntiConfig.debuff.xpMultiplier != null && (
               <Chip
-                label={`XP ×${activeAntiConfig.debuff.xpMultiplier} for ${activeAntiConfig.debuff.xpMultiplierDurationHours || 24}h`}
+                label={t("badgeShelf.xpMultiplierDebuff", {
+                  multiplier: activeAntiConfig.debuff.xpMultiplier,
+                  hours:
+                    activeAntiConfig.debuff.xpMultiplierDurationHours || 24,
+                })}
                 size="small"
                 color="error"
                 variant="outlined"
@@ -472,7 +512,9 @@ export function BadgeShelf({
             )}
             {activeAntiConfig.debuff.temporaryTitle && (
               <Chip
-                label={`Title: "${activeAntiConfig.debuff.temporaryTitle}"`}
+                label={t("badgeShelf.temporaryTitle", {
+                  title: activeAntiConfig.debuff.temporaryTitle,
+                })}
                 size="small"
                 variant="outlined"
                 sx={{ fontSize: "0.65rem" }}
@@ -485,17 +527,21 @@ export function BadgeShelf({
                 textAlign="center"
                 sx={{ mt: 0.5 }}
               >
-                Redeemable: {activeAntiConfig.redemptionHint}
+                {t("badgeShelf.redeemable", {
+                  hint: activeAntiConfig.redemptionHint,
+                })}
               </Typography>
             )}
             {activeIsEarned && activeEarned && (
               <Typography variant="caption" sx={{ opacity: 0.7 }}>
-                Received {new Date(activeEarned.awardedAt).toLocaleDateString()}
+                {t("badgeShelf.receivedOn", {
+                  date: new Date(activeEarned.awardedAt).toLocaleDateString(),
+                })}
               </Typography>
             )}
             {activeCount > 1 && (
               <Typography variant="caption" fontWeight={700} color="error.main">
-                Received {activeCount} times
+                {t("badgeShelf.receivedTimes", { count: activeCount })}
               </Typography>
             )}
           </Stack>

@@ -45,7 +45,8 @@ export function AssignmentCard({
   onRoomCreated,
   hideThumbnail = false,
 }: AssignmentCardProps) {
-  const t = useTranslations("components.assignmentCard");
+  const t = useTranslations("components");
+  const tCard = useTranslations("components.assignmentCard");
   const isCompleted = !!latestGrade;
   const reducedMotion = useReducedMotion();
   const router = useRouter();
@@ -75,7 +76,7 @@ export function AssignmentCard({
       accommodation={accommodation}
       onOpenDrill={onOpenDrill}
       onRequestGuidance={onRequestGuidance}
-      t={t}
+      t={tCard}
       reducedMotion={reducedMotion}
       reviewInvitation={reviewInvitation}
       onJoinReview={(path) => router.push(path)}
@@ -86,16 +87,20 @@ export function AssignmentCard({
               ? latestGrade.sectionID
               : assignment.sectionID) || undefined,
           scope: `unit:${assignment.unitID}`,
-          topicName: unit?.name || "Assignment discussion",
+          topicName: unit?.name || t("assignmentCard.discussionTopicFallback"),
         })
       }
       thumbnail={
         hideThumbnail ? undefined : (
           <PublishedUnitHtmlThumbnail
             unitId={assignment.unitID}
+            thumbnailS3Key={unit?.thumbnail}
+            fallbackS3Key={unit?.featuredImage}
+            fallbackIdentityId={unit?.identityId}
             title={unit?.name}
             size={56}
             desktopWidth={120}
+            aspectRatio="1/1"
             fillHeight
           />
         )
@@ -130,7 +135,9 @@ export function AssignmentCard({
               }),
             }}
           >
-            {isCompleted ? t("review") : t("startWorkbook")}
+            {isCompleted
+              ? t("assignmentCard.review")
+              : t("assignmentCard.startWorkbook")}
           </PrefetchButton>
         );
 

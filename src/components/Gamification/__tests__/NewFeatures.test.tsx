@@ -100,7 +100,7 @@ describe('CampaignBriefing', () => {
     )
     const reader = screen.getByTestId('narrative-reader')
     expect(reader).toBeDefined()
-    expect(reader.getAttribute('aria-label')).toBe('With Content narrative content')
+    expect(reader.getAttribute('aria-label')).toBe('campaignBriefing.narrativeContentLabel')
   })
 
   it('does not render NarrativeReader when contentJson is absent', () => {
@@ -197,15 +197,15 @@ describe('getStyleTierStatus', () => {
 describe('CosmeticSelector', () => {
   it('renders editor themes', () => {
     render(<CosmeticSelector level={5} />)
-    expect(screen.getByText('Editor Theme')).toBeDefined()
-    expect(screen.getByText('Default')).toBeDefined()
-    expect(screen.getByText('Midnight')).toBeDefined()
-    expect(screen.getByText('Aurora')).toBeDefined()
+    expect(screen.getByText('cosmeticSelector.editorTheme')).toBeDefined()
+    expect(screen.getByText('cosmeticSelector.themeDefault')).toBeDefined()
+    expect(screen.getByText('cosmeticSelector.themeMidnight')).toBeDefined()
+    expect(screen.getByText('cosmeticSelector.themeAurora')).toBeDefined()
   })
 
   it('renders avatar style section', () => {
     render(<CosmeticSelector level={3} />)
-    expect(screen.getByText('Avatar Style')).toBeDefined()
+    expect(screen.getByText('cosmeticSelector.avatarStyle')).toBeDefined()
   })
 })
 
@@ -246,7 +246,7 @@ describe('BossBattleCard', () => {
       />,
     )
     expect(screen.getByText('65%')).toBeDefined()
-    expect(screen.getByText(/650/)).toBeDefined()
+    expect(screen.getByText('bossBattleCard.bossHp')).toBeDefined()
   })
 
   it('shows phase stepper', () => {
@@ -290,7 +290,7 @@ describe('BossBattleCard', () => {
         active
       />,
     )
-    expect(screen.getByText(/Defeated/)).toBeDefined()
+    expect(screen.getByText('bossBattleCard.defeated')).toBeDefined()
     expect(screen.getByText('100%')).toBeDefined()
   })
 
@@ -340,12 +340,12 @@ describe('HiddenEasterEgg', () => {
 describe('InstructorGamificationPanel', () => {
   it('renders all admin sections', () => {
     render(<InstructorGamificationPanel />)
-    expect(screen.getByText('Gamification Admin')).toBeDefined()
-    expect(screen.getByText(/Skill Tree \(/)).toBeDefined()
-    expect(screen.getByText(/Campaign \(/)).toBeDefined()
-    expect(screen.getByText(/Squads \(/)).toBeDefined()
-    expect(screen.getByText(/Easter Eggs \(/)).toBeDefined()
-    expect(screen.getByText(/Boss Battles \(/)).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.title')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.skillTreeHeading')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.campaignHeading')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.squadsHeading')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.easterEggsHeading')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.bossBattlesHeading')).toBeDefined()
   })
 
   it('renders existing skills', () => {
@@ -355,7 +355,7 @@ describe('InstructorGamificationPanel', () => {
       />,
     )
     // Expand Skill Tree accordion
-    fireEvent.click(screen.getByText(/Skill Tree/))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.skillTreeHeading'))
     expect(screen.getAllByText('Variables').length).toBeGreaterThanOrEqual(1)
   })
 
@@ -363,11 +363,11 @@ describe('InstructorGamificationPanel', () => {
     const onAddSkill = vi.fn()
     render(<InstructorGamificationPanel onAddSkill={onAddSkill} />)
     // Expand Skill Tree accordion
-    fireEvent.click(screen.getByText(/Skill Tree/))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.skillTreeHeading'))
     // Use placeholder to find the input (MUI label association can be tricky in collapsed accordions)
-    const input = screen.getByPlaceholderText('e.g. Variables & Types')
+    const input = screen.getByPlaceholderText('skillForm.titlePlaceholder')
     fireEvent.change(input, { target: { value: 'Loops' } })
-    fireEvent.click(screen.getByRole('button', { name: /Add Skill/i }))
+    fireEvent.click(screen.getByRole('button', { name: 'skillForm.addSkill' }))
     expect(onAddSkill).toHaveBeenCalledWith(expect.objectContaining({ title: 'Loops' }))
   })
 
@@ -377,24 +377,24 @@ describe('InstructorGamificationPanel', () => {
         squads={[{ id: 'g1', name: 'Code Warriors', memberCount: 5 }]}
       />,
     )
-    fireEvent.click(screen.getByText(/Squads/))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.squadsHeading'))
     expect(screen.getByText('Code Warriors')).toBeDefined()
-    expect(screen.getByText('5 members')).toBeDefined()
+    expect(screen.getByText('instructorGamificationPanel.memberCount')).toBeDefined()
   })
 
   it('calls onCreateSquad with squad name and sectionID', () => {
     const onCreateSquad = vi.fn()
     const sections = [{ id: 'sec-1', name: 'Biology 101', description: 'Intro to biology' }]
     render(<InstructorGamificationPanel sections={sections} onCreateSquad={onCreateSquad} />)
-    fireEvent.click(screen.getByText(/Squads/))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.squadsHeading'))
     // Select a section from the autocomplete
-    const sectionInput = screen.getByLabelText('Section')
+    const sectionInput = screen.getByLabelText('instructorGamificationPanel.sectionLabel')
     fireEvent.change(sectionInput, { target: { value: 'Biology' } })
     fireEvent.click(screen.getByText('Biology 101'))
     // Enter squad name
-    const input = screen.getByLabelText('Squad name')
+    const input = screen.getByLabelText('instructorGamificationPanel.squadNameLabel')
     fireEvent.change(input, { target: { value: 'Phoenix' } })
-    fireEvent.click(screen.getByText('Create'))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.create'))
     expect(onCreateSquad).toHaveBeenCalledWith('Phoenix', 'sec-1')
   })
 
@@ -406,7 +406,7 @@ describe('InstructorGamificationPanel', () => {
         onDeleteEasterEgg={onDeleteEasterEgg}
       />,
     )
-    fireEvent.click(screen.getByText(/Easter Eggs/))
+    fireEvent.click(screen.getByText('instructorGamificationPanel.easterEggsHeading'))
     expect(screen.getByText('Found the bug!')).toBeDefined()
   })
 })
@@ -421,10 +421,10 @@ describe('AvatarCustomizer', () => {
     render(
       <AvatarCustomizer open={true} onClose={() => {}} level={1} seed="test" onSave={onSave} />,
     )
-    expect(screen.getByText('Background')).toBeDefined()
-    expect(screen.getByText('Eyebrows')).toBeDefined()
-    expect(screen.getByText('Eyes')).toBeDefined()
-    expect(screen.getByText('Mouth')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.background')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.eyebrows')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.eyes')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.mouth')).toBeDefined()
   })
 
   it('renders color pickers at level 2', () => {
@@ -432,7 +432,7 @@ describe('AvatarCustomizer', () => {
     render(
       <AvatarCustomizer open={true} onClose={() => {}} level={2} seed="test" onSave={onSave} />,
     )
-    expect(screen.getByText('Background')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.background')).toBeDefined()
   })
 
   it('renders detailed customization at level 5 (all features unlocked)', () => {
@@ -440,12 +440,12 @@ describe('AvatarCustomizer', () => {
     render(
       <AvatarCustomizer open={true} onClose={() => {}} level={5} seed="test" selectedStyle="detailed" onSave={onSave} />,
     )
-    expect(screen.getByText('Hair / Top')).toBeDefined()
-    expect(screen.getByText('Clothing')).toBeDefined()
-    expect(screen.getByText('Eyes')).toBeDefined()
-    expect(screen.getByText('Mouth')).toBeDefined()
-    expect(screen.getByText('Facial Hair')).toBeDefined()
-    expect(screen.getByText('Accessories')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.hairTop')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.clothing')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.eyes')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.mouth')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.facialHair')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.accessories')).toBeDefined()
   })
 
   it('renders toon head customization at level 3', () => {
@@ -453,12 +453,12 @@ describe('AvatarCustomizer', () => {
     render(
       <AvatarCustomizer open={true} onClose={() => {}} level={3} seed="test" selectedStyle="toonhead" onSave={onSave} />,
     )
-    expect(screen.getByText('Hair')).toBeDefined()
-    expect(screen.getByText('Eyes')).toBeDefined()
-    expect(screen.getByText('Eyebrows')).toBeDefined()
-    expect(screen.getByText('Mouth')).toBeDefined()
-    expect(screen.getByText('Beard')).toBeDefined()
-    expect(screen.getByText('Clothes')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.hair')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.eyes')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.eyebrows')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.mouth')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.beard')).toBeDefined()
+    expect(screen.getByText('avatarCustomizer.clothes')).toBeDefined()
   })
 
   it('calls onSave with overrides and style on Save click', () => {
@@ -467,7 +467,7 @@ describe('AvatarCustomizer', () => {
     render(
       <AvatarCustomizer open={true} onClose={onClose} level={2} seed="test" onSave={onSave} />,
     )
-    fireEvent.click(screen.getByText('Save'))
+    fireEvent.click(screen.getByText('avatarCustomizer.save'))
     expect(onSave).toHaveBeenCalledWith({}, 'detailed', null)
     expect(onClose).toHaveBeenCalled()
   })
@@ -497,7 +497,7 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    expect(screen.getByText('Join a Squad')).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.joinTitle')).toBeDefined()
     expect(screen.getByText('Code Warriors')).toBeDefined()
     expect(screen.getByText('Phoenix Rising')).toBeDefined()
   })
@@ -511,7 +511,7 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    expect(screen.getByText(/No squads available/)).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.emptyTitle')).toBeDefined()
   })
 
   it('shows current squad when student is a member', () => {
@@ -526,9 +526,9 @@ describe('SquadJoinPanel', () => {
       />,
     )
     expect(screen.getByText('Code Warriors')).toBeDefined()
-    expect(screen.getByText('Members')).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.members')).toBeDefined()
     expect(screen.getByText('Alice')).toBeDefined()
-    expect(screen.getByText('Leave Squad')).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.leaveSquad')).toBeDefined()
   })
 
   it('shows Leader chip for squad leader', () => {
@@ -542,7 +542,7 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    expect(screen.getByText('Leader')).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.leader')).toBeDefined()
   })
 
   it('opens join confirmation dialog on Join click', () => {
@@ -554,9 +554,9 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    const joinButtons = screen.getAllByText('Join')
+    const joinButtons = screen.getAllByText('squadJoinPanel.join')
     fireEvent.click(joinButtons[0])
-    expect(screen.getByText('Join Code Warriors?')).toBeDefined()
+    expect(screen.getByText('squadJoinPanel.joinDialogTitle')).toBeDefined()
   })
 
   it('calls onJoinSquad when confirming join', () => {
@@ -569,9 +569,9 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    const joinButtons = screen.getAllByText('Join')
+    const joinButtons = screen.getAllByText('squadJoinPanel.join')
     fireEvent.click(joinButtons[0])
-    fireEvent.click(screen.getByText('Join Squad'))
+    fireEvent.click(screen.getByText('squadJoinPanel.joinSquad'))
     expect(onJoinSquad).toHaveBeenCalledWith('g1')
   })
 
@@ -586,8 +586,8 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={() => {}}
       />,
     )
-    fireEvent.click(screen.getByText('Leave Squad'))
-    expect(screen.getByText('Leave Code Warriors?')).toBeDefined()
+    fireEvent.click(screen.getByText('squadJoinPanel.leaveSquad'))
+    expect(screen.getByText('squadJoinPanel.leaveTitle')).toBeDefined()
   })
 
   it('calls onLeaveSquad when confirming leave', () => {
@@ -602,8 +602,8 @@ describe('SquadJoinPanel', () => {
         onLeaveSquad={onLeaveSquad}
       />,
     )
-    fireEvent.click(screen.getByText('Leave Squad'))
-    fireEvent.click(screen.getByText('Leave'))
+    fireEvent.click(screen.getByText('squadJoinPanel.leaveSquad'))
+    fireEvent.click(screen.getByText('squadJoinPanel.leave'))
     expect(onLeaveSquad).toHaveBeenCalled()
   })
 })

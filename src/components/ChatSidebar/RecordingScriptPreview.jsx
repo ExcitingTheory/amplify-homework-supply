@@ -8,6 +8,7 @@
  */
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Box, Typography, Button, Chip, Divider, Alert } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import MicIcon from "@mui/icons-material/Mic";
@@ -17,15 +18,15 @@ import AbcIcon from "@mui/icons-material/Abc";
 import { getAmplifyClient } from "../../utils/amplifyClient";
 
 const PRESET_CONFIG = {
-  word: { icon: AbcIcon, label: "Vocabulary Word", color: "secondary" },
+  word: { icon: AbcIcon, labelKey: "vocabularyWord", color: "secondary" },
   conversation: {
     icon: QuestionAnswerIcon,
-    label: "Conversation",
+    labelKey: "conversation",
     color: "primary",
   },
   question: {
     icon: RecordVoiceOverIcon,
-    label: "Q&A Recording",
+    labelKey: "qaRecording",
     color: "info",
   },
 };
@@ -45,6 +46,7 @@ export default function RecordingScriptPreview({
   owner,
   identityId,
 }) {
+  const t = useTranslations("components");
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState(null);
@@ -144,7 +146,7 @@ export default function RecordingScriptPreview({
       setSaved(true);
     } catch (err) {
       console.error("[RecordingScriptPreview] Error creating record:", err);
-      setError(err.message || "Failed to create record");
+      setError(err.message || t("recordingScriptPreview.createFailed"));
     } finally {
       setSaving(false);
     }
@@ -165,7 +167,7 @@ export default function RecordingScriptPreview({
           {scriptData.metadata.title}
         </Typography>
         <Chip
-          label={config.label}
+          label={t(`recordingScriptPreview.presets.${config.labelKey}`)}
           size="small"
           color={config.color}
           variant="outlined"
@@ -176,7 +178,7 @@ export default function RecordingScriptPreview({
       {warnings && warnings.length > 0 && (
         <Alert severity="warning" sx={{ mb: 1, py: 0 }}>
           {warnings.map((w, i) => (
-            <Typography key={i} variant="caption" display="block">
+            <Typography key={i} variant="caption" sx={{ display: "block" }}>
               {w}
             </Typography>
           ))}
@@ -194,19 +196,19 @@ export default function RecordingScriptPreview({
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Phrase:
+            {t("recordingScriptPreview.phrase")}
           </Typography>
           <Typography variant="body2" sx={{ fontWeight: 500 }}>
             {wordData.phrase}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            Definition:
+            {t("recordingScriptPreview.definition")}
           </Typography>
           <Typography variant="body2">{wordData.definition}</Typography>
           {wordData.pronunciation && (
             <>
               <Typography variant="caption" color="text.secondary">
-                Pronunciation:
+                {t("recordingScriptPreview.pronunciation")}
               </Typography>
               <Typography variant="body2">{wordData.pronunciation}</Typography>
             </>
@@ -234,22 +236,24 @@ export default function RecordingScriptPreview({
           color="text.secondary"
           sx={{ mb: 0.5, display: "block" }}
         >
-          {preview?.dialogueCount} line{preview?.dialogueCount !== 1 ? "s" : ""}
-          :
+          {t("recordingScriptPreview.lineCount", {
+            count: preview?.dialogueCount ?? 0,
+          })}
         </Typography>
         {preview?.dialoguePreview?.map((line, i) => (
           <Typography
             key={i}
             variant="caption"
-            display="block"
-            sx={{ pl: 1, mb: 0.25 }}
+            sx={{ display: "block", pl: 1, mb: 0.25 }}
           >
             <strong>{line.speaker}:</strong> {line.text}
           </Typography>
         ))}
         {preview?.dialogueCount > 5 && (
           <Typography variant="caption" color="text.secondary" sx={{ pl: 1 }}>
-            ...and {preview.dialogueCount - 5} more
+            {t("recordingScriptPreview.moreLines", {
+              count: preview.dialogueCount - 5,
+            })}
           </Typography>
         )}
       </Box>
@@ -268,8 +272,12 @@ export default function RecordingScriptPreview({
           <CheckCircleIcon color="success" sx={{ fontSize: 18 }} />
           <Typography variant="caption" color="success.dark">
             {createdRecord?.type === "word"
-              ? `Word "${wordData?.phrase}" created`
-              : `Script file "${fileData?.name}" created`}
+              ? t("recordingScriptPreview.wordCreated", {
+                  phrase: wordData?.phrase,
+                })
+              : t("recordingScriptPreview.scriptFileCreated", {
+                  name: fileData?.name,
+                })}
           </Typography>
           {onOpenStudio && (
             <Button
@@ -279,7 +287,7 @@ export default function RecordingScriptPreview({
               onClick={handleOpenStudio}
               sx={{ ml: "auto" }}
             >
-              Open in Studio
+              {t("recordingScriptPreview.openInStudio")}
             </Button>
           )}
         </Box>
@@ -292,10 +300,10 @@ export default function RecordingScriptPreview({
             disabled={saving}
           >
             {saving
-              ? "Creating..."
+              ? t("recordingScriptPreview.creating")
               : preset === "word"
-                ? "Create Word"
-                : "Save Script"}
+                ? t("recordingScriptPreview.createWord")
+                : t("recordingScriptPreview.saveScript")}
           </Button>
           {onOpenStudio && (
             <Button
@@ -305,7 +313,7 @@ export default function RecordingScriptPreview({
               onClick={handleOpenStudio}
               disabled={saving}
             >
-              Open in Studio
+              {t("recordingScriptPreview.openInStudio")}
             </Button>
           )}
         </Box>

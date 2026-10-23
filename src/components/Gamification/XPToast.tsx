@@ -8,6 +8,7 @@ import React from 'react'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
 import EmojiObjectsIcon from '@mui/icons-material/EmojiObjects'
+import { useTranslations } from 'next-intl'
 
 export interface XPToastProps {
   open: boolean
@@ -24,6 +25,7 @@ export function XPToast({
   onClose,
   autoHideDuration = 2500,
 }: XPToastProps) {
+  const t = useTranslations('components')
   return (
     <>
       {/* Visually-hidden live region so screen readers announce XP gains */}
@@ -32,7 +34,7 @@ export function XPToast({
         aria-atomic="true"
         style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden', clip: 'rect(0,0,0,0)', whiteSpace: 'nowrap' }}
       >
-        {open ? `+${xpAmount} XP — ${xpReason}` : ''}
+        {open ? t('xpToast.message', { xpAmount, xpReason }) : ''}
       </span>
       <Snackbar
         open={open}
@@ -41,7 +43,7 @@ export function XPToast({
         onClose={onClose}
       >
         <Alert severity="success" icon={<EmojiObjectsIcon />} sx={{ fontWeight: 600 }}>
-          +{xpAmount} XP — {xpReason}
+          {t('xpToast.message', { xpAmount, xpReason })}
         </Alert>
       </Snackbar>
     </>

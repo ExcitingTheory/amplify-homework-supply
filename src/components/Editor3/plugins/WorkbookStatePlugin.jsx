@@ -66,7 +66,7 @@ export default function WorkbookStatePlugin() {
         error.message,
       );
     }
-  }, [unit?.data, unit?.id, editor]);
+  }, [unit?.data, unit?.id, unit?._version, editor]);
 
   // Detect version changes after initial load
   useEffect(() => {

@@ -37,13 +37,13 @@ describe('Save', () => {
   describe('Rendering', () => {
     it('renders a save button', () => {
       renderSave();
-      const button = screen.getByTitle(/Save now/);
+      const button = screen.getByTitle('save.saveNowTitle');
       expect(button).toBeDefined();
     });
 
     it('button is enabled by default', () => {
       renderSave();
-      const button = screen.getByTitle(/Save now/);
+      const button = screen.getByTitle('save.saveNowTitle');
       expect(button).not.toBeDisabled();
     });
   });
@@ -51,7 +51,7 @@ describe('Save', () => {
   describe('Manual save', () => {
     it('calls saveEditorContent on click', async () => {
       renderSave();
-      fireEvent.click(screen.getByTitle(/Save now/));
+      fireEvent.click(screen.getByTitle('save.saveNowTitle'));
       await waitFor(() => {
         expect(saveEditorContent).toHaveBeenCalledTimes(1);
       });
@@ -59,27 +59,27 @@ describe('Save', () => {
 
     it('shows success message after save', async () => {
       renderSave();
-      fireEvent.click(screen.getByTitle(/Save now/));
+      fireEvent.click(screen.getByTitle('save.saveNowTitle'));
       await waitFor(() => {
-        expect(screen.getByText('Saved successfully')).toBeDefined();
+        expect(screen.getByText('save.savedSuccessfully')).toBeDefined();
       });
     });
 
     it('shows permission error when saveEditorContent returns false', async () => {
       saveEditorContent.mockResolvedValue(false);
       renderSave();
-      fireEvent.click(screen.getByTitle(/Save now/));
+      fireEvent.click(screen.getByTitle('save.saveNowTitle'));
       await waitFor(() => {
-        expect(screen.getByText(/do not have permission/)).toBeDefined();
+        expect(screen.getByText('save.permissionError')).toBeDefined();
       });
     });
 
     it('shows failure message when saveEditorContent throws', async () => {
       saveEditorContent.mockRejectedValue(new Error('Network error'));
       renderSave();
-      fireEvent.click(screen.getByTitle(/Save now/));
+      fireEvent.click(screen.getByTitle('save.saveNowTitle'));
       await waitFor(() => {
-        expect(screen.getByText('Save failed')).toBeDefined();
+        expect(screen.getByText('save.saveFailed')).toBeDefined();
       });
     });
 
@@ -87,7 +87,7 @@ describe('Save', () => {
       renderSave({ isSaving: true });
 
       // Button should be disabled when context isSaving is true
-      expect(screen.getByTitle(/Save now/)).toBeDisabled();
+      expect(screen.getByTitle('save.saveNowTitle')).toBeDisabled();
     });
   });
 

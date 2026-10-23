@@ -22,6 +22,13 @@ import { isPlaceholderDueDate } from "@/utils/dueDate";
 import { ExerciseProgressMeters } from "@/components/Editor3/components/ExerciseProgressMeters";
 import { DASHBOARD_TOKENS } from "./constants";
 
+const OPENS_AT_FORMAT: Intl.DateTimeFormatOptions = {
+  month: "short",
+  day: "numeric",
+  hour: "numeric",
+  minute: "2-digit",
+};
+
 export function gradeColor(pct = 0) {
   if (pct >= 80) return "success" as const;
   if (pct >= 60) return "warning" as const;
@@ -45,17 +52,17 @@ export function gradeLabel(pct = 0, t?: (key: string) => string) {
 
 // Lightweight time estimate derived from unit difficulty metadata — no
 // dedicated schema field exists yet, so this is a heuristic, not exact.
-function estimateMinutesLabel(difficulty?: string): string | null {
-  if (difficulty === "easy") return "~10 min";
-  if (difficulty === "medium") return "~20 min";
-  if (difficulty === "hard") return "~30 min";
+function estimateMinutes(difficulty?: string): number | null {
+  if (difficulty === "easy") return 10;
+  if (difficulty === "medium") return 20;
+  if (difficulty === "hard") return 30;
   return null;
 }
 
-function getDueStatus(dueDate?: string, t?: (key: string) => string) {
+function getDueStatus(dueDate: string | undefined, t: (key: string) => string) {
   if (!dueDate)
     return {
-      label: t ? t("noDueDate") : "No due date",
+      label: t("noDueDate"),
       color: "default" as const,
     };
 
@@ -63,11 +70,10 @@ function getDueStatus(dueDate?: string, t?: (key: string) => string) {
   const now = Date.now();
   const twoDays = 2 * 24 * 60 * 60 * 1000;
 
-  if (dueTime < now)
-    return { label: t ? t("overdue") : "Overdue", color: "error" as const };
+  if (dueTime < now) return { label: t("overdue"), color: "error" as const };
   if (dueTime - now <= twoDays)
-    return { label: "Due soon", color: "warning" as const };
-  return { label: "Due", color: "default" as const };
+    return { label: t("dueSoon"), color: "warning" as const };
+  return { label: t("due"), color: "default" as const };
 }
 
 export interface AssignmentCardData {
@@ -122,8 +128,8 @@ export interface AssignmentCardData {
 }
 
 export interface AssignmentCardViewProps extends AssignmentCardData {
-  /** Translation function (resolved from context by the wrapper). */
-  t: (key: string) => string;
+  /** Translation function scoped to `components.assignmentCard` (resolved from context by the wrapper). */
+  t: (key: string, values?: Record<string, string | number>) => string;
   /** Whether reduced-motion is preferred (disables completion animations). */
   reducedMotion?: boolean;
   /** Pending peer-review invitation, if any (drives the "Join Review" button). */
@@ -226,6 +232,7 @@ export function AssignmentCardView({
   });
   const isOverdue =
     !isCompleted && effectiveDueDate && new Date(effectiveDueDate) < new Date();
+  const estimatedMinutes = estimateMinutes(unit?.difficulty);
   const dueStatus = !isCompleted
     ? getDueStatus(effectiveDueDate, (key) => t(key))
     : null;
@@ -265,7 +272,13 @@ export function AssignmentCardView({
     <Box sx={{ position: "relative" }}>
       <Card
         component="article"
-        aria-label={`${unit?.name || "Assignment"}${locked ? " (locked)" : ""}${isCompleted ? ` — ${pct}% ${gradeLabel(pct, (key) => t(key))}` : ""}`}
+        aria-label={t("cardAriaLabel", {
+          name: unit?.name || t("assignmentFallback"),
+          locked: String(!!locked),
+          completed: String(isCompleted),
+          pct,
+          grade: gradeLabel(pct, (key) => t(key)),
+        })}
         data-tour={
           isCompleted ? "assignment-card-completed" : "assignment-card-pending"
         }
@@ -377,10 +390,19 @@ export function AssignmentCardView({
                 <Chip
                   label={
                     windowState.opensAt
-                      ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                      ? t("opensAt", {
+                          date: new Date(windowState.opensAt).toLocaleString(
+                            undefined,
+                            OPENS_AT_FORMAT,
+                          ),
+                        })
                       : lockStatus?.unlockDate
-                        ? `Unlocks ${new Date(lockStatus.unlockDate).toLocaleDateString()}`
-                        : "Locked"
+                        ? t("unlocksAt", {
+                            date: new Date(
+                              lockStatus.unlockDate,
+                            ).toLocaleDateString(),
+                          })
+                        : t("locked")
                   }
                   size="small"
                   color="default"
@@ -433,9 +455,9 @@ export function AssignmentCardView({
             }}
           >
             {unit?.difficulty && (
-              <Tooltip title={`Difficulty: ${unit.difficulty}`}>
+              <Tooltip title={t("difficulty", { level: unit.difficulty })}>
                 <Box
-                  aria-label={`Difficulty: ${unit.difficulty}`}
+                  aria-label={t("difficulty", { level: unit.difficulty })}
                   sx={{
                     display: "flex",
                     gap: "3px",
@@ -474,14 +496,14 @@ export function AssignmentCardView({
                 </Box>
               </Tooltip>
             )}
-            {!isCompleted && estimateMinutesLabel(unit?.difficulty) && (
+            {!isCompleted && estimatedMinutes !== null && (
               <Typography
                 variant="caption"
                 sx={{
                   color: onGradient ? alpha("#fff", 0.75) : "text.secondary",
                 }}
               >
-                {estimateMinutesLabel(unit?.difficulty)}
+                {t("estimatedMinutes", { minutes: estimatedMinutes })}
               </Typography>
             )}
             <Box sx={{ display: { xs: "none", sm: "block" } }}>
@@ -509,10 +531,10 @@ export function AssignmentCardView({
             const isExtended = !isCompleted && hasDueExtension;
             if (!isLate && !isDropped && !isExtended) return null;
             const text = isDropped
-              ? "Dropped by instructor"
+              ? t("dropped")
               : isExtended
-                ? "Extended due date"
-                : "Late";
+                ? t("extendedDueDate")
+                : t("late");
             const content = (
               <Typography
                 variant="caption"
@@ -534,7 +556,7 @@ export function AssignmentCardView({
             );
             return isExtended ? (
               <Tooltip
-                title={accommodation?.note || "Extended due date accommodation"}
+                title={accommodation?.note || t("extendedDueDateAccommodation")}
               >
                 {content}
               </Tooltip>
@@ -557,10 +579,17 @@ export function AssignmentCardView({
             >
               <LockIcon fontSize="small" />
               {windowState.opensAt
-                ? `Opens ${new Date(windowState.opensAt).toLocaleString(undefined, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })}`
+                ? t("opensAt", {
+                    date: new Date(windowState.opensAt).toLocaleString(
+                      undefined,
+                      OPENS_AT_FORMAT,
+                    ),
+                  })
                 : lockStatus?.requiredPriorUnitName
-                  ? `Complete "${lockStatus.requiredPriorUnitName}" first`
-                  : "Complete the previous assignment to unlock"}
+                  ? t("completePriorUnitFirst", {
+                      name: lockStatus.requiredPriorUnitName,
+                    })
+                  : t("completePreviousToUnlock")}
             </Typography>
           ) : (
             <Stack

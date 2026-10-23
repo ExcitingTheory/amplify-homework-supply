@@ -270,8 +270,12 @@ describe("BadgeShelf", () => {
     if (firstBadge) {
       fireEvent.click(firstBadge);
       // Popover should show badge details
-      expect(screen.getByText("First Submission")).toBeDefined();
-      expect(screen.getByText("Submitted your first homework")).toBeDefined();
+      expect(
+        screen.getByText("badgeShelf.badges.firstSubmissionName"),
+      ).toBeDefined();
+      expect(
+        screen.getByText("badgeShelf.badges.firstSubmissionDescription"),
+      ).toBeDefined();
     }
   });
 
@@ -281,7 +285,7 @@ describe("BadgeShelf", () => {
     const firstBadge = grid?.children[0] as HTMLElement;
     if (firstBadge) {
       fireEvent.click(firstBadge);
-      expect(screen.getByText("Locked")).toBeDefined();
+      expect(screen.getByText("badgeShelf.locked")).toBeDefined();
     }
   });
 });

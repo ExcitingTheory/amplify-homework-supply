@@ -28,8 +28,8 @@ export default function UnifiedGenerateModal({
     onClose,
     onGenerate,
     onRegenerate,
-    title = 'Generate Content',
-    inputPlaceholder = 'Enter description...',
+    title,
+    inputPlaceholder,
     type = 'image', // 'image', 'audio', 'video'
     children, // Custom form inputs if needed
 }) {
@@ -41,7 +41,7 @@ export default function UnifiedGenerateModal({
 
     const handleGenerate = async () => {
         if (!prompt.trim()) {
-            setError('Please enter a description');
+            setError(t('unifiedGenerateModal.enterDescriptionError'));
             return;
         }
 
@@ -54,7 +54,7 @@ export default function UnifiedGenerateModal({
             setMode('preview');
         } catch (err) {
             console.error('Generation error:', err);
-            setError(err.message || 'Failed to generate content');
+            setError(err.message || t('unifiedGenerateModal.generateFailed'));
             setMode('input');
         }
     };
@@ -69,7 +69,7 @@ export default function UnifiedGenerateModal({
             setMode('preview');
         } catch (err) {
             console.error('Regeneration error:', err);
-            setError(err.message || 'Failed to regenerate content');
+            setError(err.message || t('unifiedGenerateModal.regenerateFailed'));
             setMode('preview');
         }
     };
@@ -114,8 +114,10 @@ export default function UnifiedGenerateModal({
             disableEscapeKeyDown={mode === 'generating'}
         >
             <DialogTitle>
-                <Box display="flex" justifyContent="space-between" alignItems="center">
-                    <Typography variant="h6">{title}</Typography>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Typography variant="h6">
+                        {title ?? t('unifiedGenerateModal.defaultTitle')}
+                    </Typography>
                     <IconButton
                         onClick={handleClose}
                         disabled={mode === 'generating'}
@@ -136,7 +138,10 @@ export default function UnifiedGenerateModal({
                             rows={4}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
-                            placeholder={inputPlaceholder}
+                            placeholder={
+                                inputPlaceholder ??
+                                t('unifiedGenerateModal.defaultInputPlaceholder')
+                            }
                             variant="outlined"
                             error={!!error}
                             helperText={error}
@@ -150,11 +155,13 @@ export default function UnifiedGenerateModal({
                 {/* Generating Mode */}
                 {mode === 'generating' && (
                     <Box
-                        display="flex"
-                        flexDirection="column"
-                        alignItems="center"
-                        justifyContent="center"
-                        minHeight="200px"
+                        sx={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            minHeight: '200px',
+                        }}
                     >
                         <Skeleton variant="circular" width={60} height={60} sx={{ mb: 2 }} />
                         <Skeleton variant="text" width={200} height={24} />
@@ -166,10 +173,12 @@ export default function UnifiedGenerateModal({
                 {mode === 'preview' && generatedContent && (
                     <Box>
                         <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            mb={2}
+                            sx={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center',
+                                mb: 2,
+                            }}
                         >
                             <Typography variant="subtitle2" color="text.secondary">
                                 {t('unifiedGenerateModal.preview')}
@@ -178,7 +187,7 @@ export default function UnifiedGenerateModal({
                                 <IconButton
                                     size="small"
                                     onClick={handleEditPrompt}
-                                    title="Edit prompt"
+                                    title={t('unifiedGenerateModal.editPrompt')}
                                 >
                                     <EditIcon />
                                 </IconButton>
@@ -186,7 +195,7 @@ export default function UnifiedGenerateModal({
                                     <IconButton
                                         size="small"
                                         onClick={() => handleRegenerate()}
-                                        title="Regenerate"
+                                        title={t('unifiedGenerateModal.regenerate')}
                                     >
                                         <RefreshIcon />
                                     </IconButton>

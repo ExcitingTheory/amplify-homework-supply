@@ -7,6 +7,7 @@
 import React from 'react'
 import Snackbar from '@mui/material/Snackbar'
 import Alert from '@mui/material/Alert'
+import { useTranslations } from 'next-intl'
 import SearchIcon from '@mui/icons-material/Search'
 
 export interface EasterEggToastProps {
@@ -24,6 +25,7 @@ export function EasterEggToast({
   onClose,
   autoHideDuration = 4000,
 }: EasterEggToastProps) {
+  const t = useTranslations('components')
   return (
     <Snackbar
       open={open}
@@ -37,7 +39,7 @@ export function EasterEggToast({
         onClose={onClose}
         sx={{ fontWeight: 600, border: '1px solid', borderColor: 'info.main' }}
       >
-        🔍 Secret Unlocked! {message} (+{xpReward} XP)
+        {t('easterEggToast.message', { message, xpReward })}
       </Alert>
     </Snackbar>
   )

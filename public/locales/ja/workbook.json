@@ -18,7 +18,37 @@
     "noDictionaryAvailable": "辞書は利用できません",
     "submit": "提出する",
     "inputMethodSelector": "入力方法",
-    "placeholder": "こちらに回答を入力してください"
+    "placeholder": "こちらに回答を入力してください",
+    "loadingAudio": "音声を読み込んでいます...",
+    "progressDescription": "回答済みのプロンプトの割合です。",
+    "accuracyDescription": "提出された解答のうち、正解と判定された割合です。",
+    "inputMethodLabels": {
+      "audio": "音声で回答する",
+      "text": "回答を入力",
+      "writing": "手書きで回答する"
+    },
+    "recordYourAnswer": "回答を録音する",
+    "defaultPromptByDefinition": "次の定義に最もよく当てはまる単語を入力してください。",
+    "defaultPromptByWord": "次の単語の意味を説明してください:"
+  },
+  "customAIComponent": {
+    "accuracyDescription": "AIによって正解と判定された、提出済みの回答の割合です。",
+    "completed": "完了",
+    "correct": "正解",
+    "grading": "AIが回答を採点しています...",
+    "gradingError": "採点中にエラーが発生しました。もう一度お試しください。",
+    "imageUploadHint": "画像アップロード入力 - AIによる評価のために画像を送信してください",
+    "inputMethod": "入力方法",
+    "loading": "読み込み中...",
+    "modeAudio": "音声で回答する",
+    "modeDrawing": "手書きで解答する",
+    "modeImage": "画像をアップロード",
+    "modeText": "回答を入力",
+    "needsImprovement": "要改善",
+    "progressDescription": "AI採点問題のうち、回答済みの問題の割合です。",
+    "questionFallback": "質問 {id}",
+    "score": "スコア: {score}/100",
+    "yourAnswer": "あなたの回答"
   },
   "toolBarRoPlugin": {
     "fallbackText": "フォーマット",
@@ -38,7 +68,10 @@
     "nextAssignment": "次の課題",
     "retrying": "新しい試行を開始しています...",
     "sectionHeading": "次のステップ",
-    "tryAgain": "もう一度"
+    "tryAgain": "もう一度",
+    "completedIn": "{duration}で完了しました",
+    "timeLimit": "制限時間: {duration}",
+    "timeLimitWithCompletion": "制限時間: {duration} • {completion}"
   },
   "quizComponent": {
     "gradeDisplay": "成績: {score}%"
@@ -59,7 +92,8 @@
     "submit": "送信する",
     "text": "テキスト",
     "writing": "ライティング",
-    "yourAnswer": "あなたの回答"
+    "yourAnswer": "あなたの回答",
+    "answerVerifiedAndAccepted": "回答が確認され、承認されました"
   },
   "workbookSettings": {
     "title": "設定",
@@ -75,7 +109,8 @@
     "autoPlayAudio": "オーディオを自動再生します",
     "immediateFeedbackDescription": "正解・不正解のフィードバックをすぐに表示します",
     "reducedMotion": "モーションを減らす",
-    "feedbackPreferences": "フィードバック設定"
+    "feedbackPreferences": "フィードバック設定",
+    "accessibilityMoved": "アクセシビリティ設定(モーション軽減、ハイコントラスト)は、<link>グローバル設定ページ</link>に移動しました。"
   },
   "gradeHistory": {
     "title": "成績履歴",

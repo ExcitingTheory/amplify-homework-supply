@@ -162,7 +162,7 @@ export default function PracticeDrillWorkbook({
               contentEditable={
                 <Box sx={{ p: 2 }}>
                   <ContentEditable
-                    data-lexical-editor="true"
+                    data-lexical-editor={true}
                     aria-label={t('practiceDrill.workbook.label')}
                     style={{
                       width: '100%',

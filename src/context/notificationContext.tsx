@@ -493,7 +493,6 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         const item = state.notifications.find((n) => n.id === notificationId);
         await client.models.Notification.delete({
           id: notificationId,
-          _version: item?._version ?? 0,
         });
       } catch (err) {
         console.error(
@@ -513,10 +512,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         const results = await Promise.allSettled(
           notificationIds.map((id) => {
             const item = state.notifications.find((n) => n.id === id);
-            return client.models.Notification.delete({
-              id,
-              _version: item?._version ?? 0,
-            });
+            return client.models.Notification.delete({ id });
           }),
         );
         const failures = results.filter((r) => r.status === "rejected");

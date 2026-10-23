@@ -37,6 +37,8 @@ import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext
 import { useLexicalNodeSelection } from "@lexical/react/useLexicalNodeSelection";
 import { mergeRegister } from "@lexical/utils";
 
+const QUIZ_BLOCK_TYPE = "quiz";
+
 const QuizEditor = ({ className, nodeKey, data }) => {
   const t = useTranslations("editor.blocks");
   const [editMode, setEditMode] = useState(false);
@@ -458,7 +460,7 @@ const QuizEditor = ({ className, nodeKey, data }) => {
         }
       `}</style>
       <ExerciseBlockCard
-        blockType="quiz"
+        blockType={QUIZ_BLOCK_TYPE}
         selected={isSelected}
         accuracy={grade}
         graded={isLocked}

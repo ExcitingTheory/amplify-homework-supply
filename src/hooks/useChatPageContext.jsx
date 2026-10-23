@@ -28,7 +28,7 @@
  * @see docs/GLOBAL_CHAT_INTEGRATION_PLAN.md
  */
 
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useRef } from "react";
 import ChatContext from "../context/chatContext";
 
 /**
@@ -59,6 +59,27 @@ export function useChatPageContext(context = {}, options = {}) {
     vectorStoreSearch = null,
   } = context;
 
+  // Register on identity/size changes only: callers commonly pass fresh array
+  // references every render, so depending on them directly would loop.
+  const latestContextRef = useRef(null);
+  useEffect(() => {
+    latestContextRef.current = {
+      unit,
+      files,
+      dictionary,
+      questions,
+      sections,
+      editorRef,
+    };
+  });
+
+  const unitId = unit?.id;
+  const filesCount = files?.length;
+  const dictionaryCount = dictionary?.length;
+  const questionsCount = questions?.length;
+  const sectionsCount = sections?.length;
+  const editorInstance = editorRef?.current;
+
   useEffect(() => {
     if (!enabled) {
       setPageContext({
@@ -73,23 +94,25 @@ export function useChatPageContext(context = {}, options = {}) {
       return;
     }
 
+    const latest = latestContextRef.current;
+
     console.log("[useChatPageContext] Registering page context:", {
-      hasUnit: !!unit,
-      filesCount: files?.length || 0,
-      dictionaryCount: dictionary?.length || 0,
-      questionsCount: questions?.length || 0,
-      sectionsCount: sections?.length || 0,
-      hasEditorRef: !!editorRef,
+      hasUnit: !!latest.unit,
+      filesCount: latest.files?.length || 0,
+      dictionaryCount: latest.dictionary?.length || 0,
+      questionsCount: latest.questions?.length || 0,
+      sectionsCount: latest.sections?.length || 0,
+      hasEditorRef: !!latest.editorRef,
       hasVectorStoreSearch: !!vectorStoreSearch,
     });
 
     setPageContext({
-      unit,
-      files,
-      dictionary,
-      questions,
-      sections,
-      editorRef,
+      unit: latest.unit,
+      files: latest.files,
+      dictionary: latest.dictionary,
+      questions: latest.questions,
+      sections: latest.sections,
+      editorRef: latest.editorRef,
       vectorStoreSearch,
     });
 
@@ -108,12 +131,12 @@ export function useChatPageContext(context = {}, options = {}) {
     };
   }, [
     // Dependencies - update when any context changes
-    unit?.id,
-    files?.length,
-    dictionary?.length,
-    questions?.length,
-    sections?.length,
-    editorRef?.current,
+    unitId,
+    filesCount,
+    dictionaryCount,
+    questionsCount,
+    sectionsCount,
+    editorInstance,
     vectorStoreSearch,
     enabled,
     setPageContext,

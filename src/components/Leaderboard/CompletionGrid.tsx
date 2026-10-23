@@ -11,6 +11,7 @@
  */
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -45,31 +46,36 @@ export interface CompletionGridProps {
 
 const STATUS_CONFIG: Record<
   CompletionStatus,
-  { label: string; color: 'success' | 'warning' | 'default'; icon: React.ReactElement }
+  {
+    getLabel: (t: ReturnType<typeof useTranslations>) => string
+    color: 'success' | 'warning' | 'default'
+    icon: React.ReactElement
+  }
 > = {
   completed: {
-    label: 'Completed',
+    getLabel: (t) => t('completionGrid.statusCompleted'),
     color: 'success',
     icon: <CheckCircleIcon fontSize="small" />,
   },
   in_progress: {
-    label: 'In Progress',
+    getLabel: (t) => t('completionGrid.statusInProgress'),
     color: 'warning',
     icon: <HourglassBottomIcon fontSize="small" />,
   },
   not_started: {
-    label: 'Not Started',
+    getLabel: (t) => t('completionGrid.statusNotStarted'),
     color: 'default',
     icon: <RadioButtonUncheckedIcon fontSize="small" />,
   },
 }
 
 function StatusChip({ status }: { status: CompletionStatus }) {
+  const t = useTranslations('components')
   const config = STATUS_CONFIG[status]
   return (
     <Chip
       icon={config.icon}
-      label={config.label}
+      label={config.getLabel(t)}
       color={config.color}
       size="small"
       variant={status === 'not_started' ? 'outlined' : 'filled'}
@@ -87,13 +93,14 @@ function SingleStudentGrid({
   assignments: AssignmentColumn[]
   student: StudentRow
 }) {
+  const t = useTranslations('components')
   return (
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Assignment</TableCell>
-            <TableCell align="right">Status</TableCell>
+            <TableCell>{t('completionGrid.assignmentHeader')}</TableCell>
+            <TableCell align="right">{t('completionGrid.statusHeader')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -125,6 +132,7 @@ function MultiStudentGrid({
   students,
   currentStudentId,
 }: CompletionGridProps) {
+  const t = useTranslations('components')
   return (
     <TableContainer component={Paper} variant="outlined" sx={{ overflowX: 'auto' }}>
       <Table size="small" sx={{ minWidth: 400 }}>
@@ -139,7 +147,7 @@ function MultiStudentGrid({
                 minWidth: 140,
               }}
             >
-              Student
+              {t('completionGrid.studentHeader')}
             </TableCell>
             {assignments.map((a) => (
               <TableCell

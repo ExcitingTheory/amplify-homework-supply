@@ -244,12 +244,16 @@
     "changePassword": {
       "button": "Cambiar contraseña",
       "description": "Actualiza la contraseña de tu cuenta por seguridad",
-      "heading": "Cambiar contraseña"
+      "heading": "Cambiar contraseña",
+      "confirmPasswordLabel": "Confirmar nueva contraseña",
+      "newPasswordLabel": "Nueva contraseña",
+      "oldPasswordLabel": "Contraseña anterior"
     },
     "confirmEmail": {
       "button": "Confirmar Correo Electrónico",
       "message": "Por favor, revisa tu correo electrónico e ingresa el código de confirmación para verificar tu dirección de correo electrónico.",
-      "title": "Confirma tu correo electrónico"
+      "title": "Confirma tu correo electrónico",
+      "codeLabel": "Código de confirmación"
     },
     "description": "Ver y actualizar la información de tu perfil",
     "heading": "Mi perfil",
@@ -269,7 +273,8 @@
     },
     "title": "Mi perfil",
     "updateProfile": "Actualizar perfil",
-    "userId": "ID de Usuario"
+    "userId": "ID de Usuario",
+    "email": "Correo electrónico"
   },
   "sectionDetail": {
     "actionsHeader": "Acciones",
@@ -501,5 +506,29 @@
     "unitUpdated": {
       "value": "Esta unidad ha sido actualizada por el instructor. ¿Desea recargar con la versión más reciente?"
     }
+  },
+  "gradeReviewDrawer": {
+    "cancel": "Cancelar",
+    "currentLabel": "Actual:",
+    "drop": "Descartar",
+    "gradeLabel": "Calificación (%)",
+    "gradeUpdated": "Calificación actualizada a {score}%",
+    "keep": "Mantener",
+    "lateDropped": "Entrega tardía descartada",
+    "lateKept": "Entrega tardía conservada",
+    "lateRequiresReview": "La entrega tardía requiere revisión.",
+    "lateStatus": "Tarde: {status}",
+    "lateUpdateError": "No se pudo actualizar la entrega tardía",
+    "nextTooltip": "Siguiente (→)",
+    "noGradeData": "No se encontraron datos de calificaciones.",
+    "override": "Anular",
+    "overrideError": "No se pudo guardar la anulación de la calificación",
+    "overrideTitle": "Anular calificación",
+    "position": "({current}/{total})",
+    "previousTooltip": "Anterior (←)",
+    "save": "Guardar",
+    "saving": "Guardando...",
+    "scoreRangeError": "La puntuación debe estar entre 0 y 100",
+    "studentLabel": "Estudiante:"
   }
 }

@@ -8,6 +8,7 @@
 
 import {useEffect, useMemo, useRef, useState} from 'react';
 import * as React from 'react';
+import { useTranslations } from 'next-intl';
 
 import {
     TextField
@@ -39,6 +40,7 @@ export default function ColorPicker({
   color,
   onChange,
 }){
+  const t = useTranslations('editor.shared');
   const [selfColor, setSelfColor] = useState(transformColor('hex', color));
   const [inputColor, setInputColor] = useState(color);
   const innerDivRef = useRef(null);
@@ -196,7 +198,7 @@ export default function ColorPicker({
         sx={{
             margin: '0px 0px 10px 0px',
         }}
-        label="Hexadecimal Color" onChange={onSetHex} value={inputColor} />
+        label={t('colorPicker.hexadecimalColor')} onChange={onSetHex} value={inputColor} />
       <div className="color-picker-basic-color">
         {basicColors.map((basicColor) => (
           <button

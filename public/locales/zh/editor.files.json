@@ -4,7 +4,9 @@
       "deleteConfirmMessage": "删除选中的{count}个文件？",
       "deleteSelected": "删除选中项 ({count})",
       "deselectAll": "取消全选",
-      "reAnalyzeSelected": "重新分析所选 ({count})"
+      "reAnalyzeSelected": "重新分析所选 ({count})",
+      "confirmMoveSelected": "将 {count} 个文件移至回收站?",
+      "moveSelectedFailed": "未能将 {count} 个文件移至回收站:{files}"
     },
     "expandedContent": {
       "descriptionLabel": "描述：",
@@ -17,7 +19,11 @@
       "noVocabularyExtracted": "未提取词汇",
       "reviewQuestionsMessage": "审查并从文档中导入问题",
       "reviewVocabularyMessage": "从文档中审核并导入词汇",
-      "transcriptionLabel": "转录："
+      "transcriptionLabel": "转录：",
+      "bloomLevelChip": "布鲁姆层级:{level}",
+      "durationSeconds": "{duration}秒",
+      "pagesChip": "页码：{range}",
+      "relatedChip": "相关：{related}"
     },
     "fileDetails": {
       "deleteTooltip": "删除",
@@ -25,7 +31,10 @@
       "insertTooltip": "插入编辑器",
       "noWaveformAvailable": "无可用波形",
       "reAnalyzeTooltip": "重新分析",
-      "videoNotSupported": "您的浏览器不支持视频标签。"
+      "videoNotSupported": "您的浏览器不支持视频标签。",
+      "confirmMoveToRecycleBin": "是否将“{name}”移至回收站?",
+      "moveToRecycleBinFailed": "无法将 {name} 移至回收站:{error}",
+      "reAnalyzeError": "重新分析 {name} 时出错:{error}"
     },
     "generators": {
       "audioPromptPlaceholder": "要转换为音频文件的文本。",
@@ -35,10 +44,13 @@
       "generatingImage": "正在生成图像文件...",
       "imagePromptPlaceholder": "要转换为图像文件的文本。",
       "successfullyGeneratedAudio": "音频文件生成成功",
-      "successfullyGeneratedImage": "成功生成图像文件"
+      "successfullyGeneratedImage": "成功生成图像文件",
+      "audioPreviewTitle": "音频预览",
+      "noDescriptionPlaceholder": "暂无描述"
     },
     "mainView": {
-      "noFilesMessage": "没有可用文件。请上传文件以开始使用。"
+      "noFilesMessage": "没有可用文件。请上传文件以开始使用。",
+      "updateFileNameFailed": "更新文件名失败:{error}"
     },
     "metadataEditor": {
       "cancelButton": "取消",
@@ -54,7 +66,8 @@
       "sizeLabel": "大小",
       "typeLabel": "类型",
       "unknown": "未知",
-      "variantLabel": "变体"
+      "variantLabel": "变体",
+      "sizeKB": "{size} KB"
     },
     "selectedFileDetails": {
       "emptyState": "选择文件以查看详细信息和元数据"
@@ -64,11 +77,25 @@
       "searchPlaceholder": "搜索文件...",
       "selectAllTooltip": "全选",
       "uploadTooltip": "上传文件",
-      "recordConversation": "记录对话"
+      "recordConversation": "记录对话",
+      "generateConversation": "生成对话",
+      "generateConversationForUnit": "生成对话:{unitName}",
+      "recordConversationForUnit": "录制对话:{unitName}"
     },
     "dragDrop": {
       "dropFilesHere": "拖放文件到此处以上传",
       "supportedFormats": "音频、图片、PDF、文档等"
+    },
+    "documentStatus": {
+      "analyzed": "已分析",
+      "analyzing": "正在分析...",
+      "extracted": "已提取",
+      "extracting": "正在解压…",
+      "failed": "失败",
+      "ready": "已就绪"
+    },
+    "inlineEditor": {
+      "fieldAriaLabel": "文件元数据字段"
     }
   },
   "fileMetadataComponent": {

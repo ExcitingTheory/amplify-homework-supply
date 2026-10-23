@@ -144,7 +144,7 @@ describe('AnswerComponent', () => {
   describe('Rendering', () => {
     it('renders the prompt text', () => {
       renderAnswerComponent({ saveGrade });
-      expect(screen.getByText(/define the following word/i)).toBeDefined();
+      expect(screen.getByText('answerComponent.defaultPromptByWord')).toBeDefined();
     });
 
     it('renders custom prompt when provided', () => {
@@ -225,7 +225,7 @@ describe('AnswerComponent', () => {
         },
       });
       // Component should render without errors with pre-existing data
-      expect(screen.getByText(/define the following word/i)).toBeDefined();
+      expect(screen.getByText('answerComponent.defaultPromptByWord')).toBeDefined();
     });
   });
 });

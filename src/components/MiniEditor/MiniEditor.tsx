@@ -28,7 +28,7 @@
  *   mode="editable"
  *   chatMode
  *   compact
- *   placeholder="Message your class..."
+ *   placeholder={t('chatPanel.richInputPlaceholder')}
  *   onSubmit={(json, text) => sendMessage(json, text)}
  *   showBlockInserter
  * />
@@ -38,7 +38,7 @@
  *   mode="editable"
  *   content={existingContent}
  *   onChange={(json) => saveDraft(json)}
- *   placeholder="Write your post..."
+ *   placeholder={postPlaceholder}
  *   showBlockInserter
  * />
  * ```

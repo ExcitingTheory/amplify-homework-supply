@@ -45,6 +45,7 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
+import { Link } from "../i18n/navigation";
 import { EmptyState } from "./EmptyState";
 import { SkillTreePopupButton } from "./SkillTreePopupButton";
 import { listSectionStudents } from "../../app/actions/section";
@@ -60,7 +61,6 @@ import { UnitDifficultyList } from "./Dashboard/UnitDifficultyList";
 import { TrendSparkline } from "./Dashboard/TrendSparkline";
 import { SubmissionTimingBar } from "./Dashboard/SubmissionTimingBar";
 import { GradeRangeBar, CompletionBar } from "./Dashboard/GradeRangeBar";
-import { GRADE_AGGREGATION_LABELS } from "../utils/gradeAggregation";
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 function gradeColor(pct) {
@@ -131,15 +131,17 @@ function parseJsonMaybe(value) {
 }
 
 // Formats Grade.engagedTimeMs-derived durations (e.g. "4m 30s", "1h 12m") for display.
-function formatEngagedTime(ms) {
+function formatEngagedTime(ms, t) {
   if (ms == null || !(ms > 0)) return null;
   const totalSeconds = Math.round(ms / 1000);
   const hours = Math.floor(totalSeconds / 3600);
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   const seconds = totalSeconds % 60;
-  if (hours > 0) return `${hours}h ${minutes}m`;
-  if (minutes > 0) return `${minutes}m ${seconds}s`;
-  return `${seconds}s`;
+  if (hours > 0)
+    return t("instructorDashboard.engagedHoursMinutes", { hours, minutes });
+  if (minutes > 0)
+    return t("instructorDashboard.engagedMinutesSeconds", { minutes, seconds });
+  return t("instructorDashboard.engagedSeconds", { seconds });
 }
 
 // Mirrors SectionDetailClient's per-assignment curve methods so the instructor
@@ -156,9 +158,14 @@ function applyCurveToGrade(grade, method, maxScore, avgScore) {
   return grade;
 }
 
+const HERO_STAT_ICON_SX = { fontSize: "1rem" };
+const DUE_DATE_FORMAT = { month: "short", day: "numeric" };
+const TOOLTIP_SEGMENT_SEPARATOR = " · ";
+
 // ── Section footer actions ────────────────────────────────────────────────
 /** Secondary actions (Skills, overflow menu) stay left; Manage Section is the sole primary action, right-aligned. */
 function SectionFooterActions({ section }) {
+  const t = useTranslations("components");
   const [anchorEl, setAnchorEl] = useState(null);
   return (
     <Box
@@ -184,7 +191,7 @@ function SectionFooterActions({ section }) {
           size="small"
           sx={{ color: "text.secondary", borderColor: "divider" }}
         />
-        <Tooltip title="More actions">
+        <Tooltip title={t("instructorDashboard.moreActions")}>
           <IconButton
             size="small"
             onClick={(event) => setAnchorEl(event.currentTarget)}
@@ -203,7 +210,7 @@ function SectionFooterActions({ section }) {
             onClick={() => setAnchorEl(null)}
           >
             <RateReviewIcon fontSize="small" sx={{ mr: 1 }} />
-            Peer Review
+            {t("instructorDashboard.peerReview")}
           </MenuItem>
         </Menu>
       </Box>
@@ -214,7 +221,7 @@ function SectionFooterActions({ section }) {
         variant="contained"
         endIcon={<ArrowForwardIcon />}
       >
-        Manage Section
+        {t("instructorDashboard.manageSection")}
       </Button>
     </Box>
   );
@@ -222,6 +229,12 @@ function SectionFooterActions({ section }) {
 
 export default function InstructorDashboard({ sections = [] }) {
   const t = useTranslations("components");
+  const gradeAggregationLabels = {
+    MIN: t("instructorDashboard.gradeAggregationLowest"),
+    MAX: t("instructorDashboard.gradeAggregationHighest"),
+    AVG: t("instructorDashboard.gradeAggregationAverage"),
+    MEDIAN: t("instructorDashboard.gradeAggregationMedian"),
+  };
   const client = getAmplifyClient();
   const theme = useTheme();
 
@@ -278,14 +291,17 @@ export default function InstructorDashboard({ sections = [] }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sections.length, client.models.Grade]);
+
+  const sectionIDKey = sections
+    .filter((s) => s != null && s.id != null)
+    .map((s) => s.id)
+    .join(",");
 
   // Fetch assignments for all instructor sections (for per-unit completion rates)
   useEffect(() => {
-    if (sections.length === 0) return;
-    const validSections = sections.filter((s) => s != null && s.id != null);
-    if (validSections.length === 0) return;
-    const sectionIDs = validSections.map((s) => s.id);
+    if (!sectionIDKey) return;
+    const sectionIDs = sectionIDKey.split(",");
 
     const subscription = client.models.Assignment.observeQuery({
       filter: { or: sectionIDs.map((id) => ({ sectionID: { eq: id } })) },
@@ -310,7 +326,7 @@ export default function InstructorDashboard({ sections = [] }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sectionIDKey, client.models.Assignment]);
 
   // Fetch flagged chats
   useEffect(() => {
@@ -337,7 +353,7 @@ export default function InstructorDashboard({ sections = [] }) {
     });
 
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sections.length, client.models.AssistantChat]);
 
   // Fetch student names
   useEffect(() => {
@@ -379,7 +395,7 @@ export default function InstructorDashboard({ sections = [] }) {
         console.warn("[InstructorDashboard] Unit subscription error:", err),
     });
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sections.length, client.models.Unit]);
 
   // Fetch skills + group challenges (to detect gamification linked to draft units)
   useEffect(() => {
@@ -392,7 +408,7 @@ export default function InstructorDashboard({ sections = [] }) {
         console.warn("[InstructorDashboard] Skill subscription error:", err),
     });
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sections.length, client.models.Skill]);
 
   useEffect(() => {
     if (sections.length === 0) return;
@@ -407,7 +423,7 @@ export default function InstructorDashboard({ sections = [] }) {
         ),
     });
     return () => subscription.unsubscribe();
-  }, [sections.length]);
+  }, [sections.length, client.models.GroupChallenge]);
 
   // Gamification items (skills, campaigns, unit gates) that reference a Unit still in DRAFT.
   // One issue per (source item, draft unit) pair so each chip can deep-link to that unit.
@@ -423,7 +439,10 @@ export default function InstructorDashboard({ sections = [] }) {
         issues.push({
           key: `skill-${skill.id}-${unitId}`,
           unitId,
-          label: `Skill "${skill.title}" requires draft unit "${unitName(unitId)}"`,
+          label: t("instructorDashboard.draftIssueSkill", {
+            skill: skill.title,
+            unit: unitName(unitId),
+          }),
         });
       }
     }
@@ -442,7 +461,10 @@ export default function InstructorDashboard({ sections = [] }) {
         issues.push({
           key: `challenge-${challenge.id}-${unitId}`,
           unitId,
-          label: `Campaign "${challenge.title}" links draft unit "${unitName(unitId)}"`,
+          label: t("instructorDashboard.draftIssueCampaign", {
+            campaign: challenge.title,
+            unit: unitName(unitId),
+          }),
         });
       }
     }
@@ -457,13 +479,15 @@ export default function InstructorDashboard({ sections = [] }) {
         issues.push({
           key: `unit-gate-${unit.id}`,
           unitId: unit.id,
-          label: `Unlock gate configured on draft unit "${unit.name || unit.id}" — won't apply until published`,
+          label: t("instructorDashboard.draftIssueUnlockGate", {
+            unit: unit.name || unit.id,
+          }),
         });
       }
     }
 
     return issues;
-  }, [allSkills, allGroupChallenges, allUnits]);
+  }, [allSkills, allGroupChallenges, allUnits, t]);
 
   // Calculate per-section analytics
   useEffect(() => {
@@ -725,14 +749,14 @@ export default function InstructorDashboard({ sections = [] }) {
         const stats = sectionStats[section.id];
         return {
           id: section.id,
-          name: section.name || "Untitled section",
+          name: section.name || t("instructorDashboard.untitledSection"),
           avgGrade: stats?.averageGrade ?? 0,
           completionRate: stats?.completionRate ?? 0,
           studentCount: stats?.studentCount ?? 0,
         };
       })
       .filter((section) => section.studentCount > 0);
-  }, [sections, sectionStats]);
+  }, [sections, sectionStats, t]);
 
   // Hardest units across every section (lowest avg accuracy first) — the same unit taught in multiple sections is merged into one entry.
   const unitDifficulty = React.useMemo(() => {
@@ -769,8 +793,8 @@ export default function InstructorDashboard({ sections = [] }) {
     return (
       <EmptyState
         icon={<PeopleIcon fontSize="inherit" />}
-        title="No sections yet"
-        description="Create a class section to start assigning units, tracking grades, and seeing class health at a glance."
+        title={t("instructorDashboard.noSectionsTitle")}
+        description={t("instructorDashboard.noSectionsDescription")}
         action={
           <Button
             component="a"
@@ -784,7 +808,7 @@ export default function InstructorDashboard({ sections = [] }) {
               px: 4,
             }}
           >
-            Create a section
+            {t("instructorDashboard.createSection")}
           </Button>
         }
         sx={{ mb: 4, mx: "auto", width: "90vw", maxWidth: "80rem" }}
@@ -851,7 +875,7 @@ export default function InstructorDashboard({ sections = [] }) {
                 mb: 0.5,
               }}
             >
-              All sections · {todayLabel}
+              {t("instructorDashboard.allSectionsDate", { date: todayLabel })}
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <TrendingUpIcon sx={{ color: "inherit" }} />
@@ -859,22 +883,24 @@ export default function InstructorDashboard({ sections = [] }) {
                 variant="h5"
                 sx={{ fontWeight: 800, color: "inherit", lineHeight: 1.2 }}
               >
-                Class health
+                {t("instructorDashboard.classHealth")}
               </Typography>
             </Box>
             <Typography
               variant="body2"
               sx={{ color: "inherit", opacity: 0.85, mt: 0.5, maxWidth: 520 }}
             >
-              {aggregateStats.totalStudents} student
-              {aggregateStats.totalStudents !== 1 ? "s" : ""} across{" "}
-              {validSections.length} section
-              {validSections.length !== 1 ? "s" : ""}, averaging{" "}
-              {aggregateStats.avgGrade}%.
+              {t("instructorDashboard.classHealthSummary", {
+                studentCount: aggregateStats.totalStudents,
+                sectionCount: validSections.length,
+                avgGrade: aggregateStats.avgGrade,
+              })}
             </Typography>
           </Box>
           <Chip
-            label={`${validSections.length} section${validSections.length !== 1 ? "s" : ""}`}
+            label={t("instructorDashboard.sectionCount", {
+              count: validSections.length,
+            })}
             size="small"
             sx={{
               bgcolor: alpha(ink, 0.18),
@@ -905,7 +931,7 @@ export default function InstructorDashboard({ sections = [] }) {
             },
             {
               icon: <BoltIcon />,
-              label: "Active This Week",
+              label: t("instructorDashboard.activeThisWeek"),
               value: aggregateStats.activeThisWeek,
             },
             {
@@ -915,12 +941,12 @@ export default function InstructorDashboard({ sections = [] }) {
             },
             {
               icon: <AssignmentTurnedInIcon />,
-              label: "Completion Rate",
+              label: t("instructorDashboard.completionRate"),
               value: `${aggregateStats.completionRate}%`,
             },
             {
               icon: <FlagIcon />,
-              label: "Moderation Alerts",
+              label: t("instructorDashboard.moderationAlerts"),
               value: aggregateStats.moderationAlerts,
             },
           ].map(({ icon, label, value }) => (
@@ -947,7 +973,7 @@ export default function InstructorDashboard({ sections = [] }) {
                   color: "inherit",
                 }}
               >
-                {React.cloneElement(icon, { sx: { fontSize: "1rem" } })}
+                {React.cloneElement(icon, { sx: HERO_STAT_ICON_SX })}
                 <Typography
                   variant="h5"
                   sx={{ fontWeight: 800, lineHeight: 1, color: "inherit" }}
@@ -967,6 +993,7 @@ export default function InstructorDashboard({ sections = [] }) {
         <Stack
           direction="row"
           spacing={1}
+          // eslint-disable-next-line i18next/no-literal-string -- CSS flex-wrap value
           flexWrap="wrap"
           useFlexGap
           sx={{ mt: 2 }}
@@ -986,7 +1013,7 @@ export default function InstructorDashboard({ sections = [] }) {
               "&:hover": { borderColor: ink, bgcolor: alpha(ink, 0.22) },
             }}
           >
-            Review flagged content
+            {t("instructorDashboard.reviewFlaggedContent")}
           </Button>
           {validSections[0] && (
             <Button
@@ -1004,7 +1031,7 @@ export default function InstructorDashboard({ sections = [] }) {
                 "&:hover": { borderColor: ink, bgcolor: alpha(ink, 0.22) },
               }}
             >
-              Open grade review
+              {t("instructorDashboard.openGradeReview")}
             </Button>
           )}
           <Button
@@ -1023,7 +1050,7 @@ export default function InstructorDashboard({ sections = [] }) {
               "&:hover": { bgcolor: heroPopBg, opacity: 0.88 },
             }}
           >
-            Manage sections
+            {t("instructorDashboard.manageSections")}
           </Button>
         </Stack>
       </Paper>
@@ -1049,7 +1076,7 @@ export default function InstructorDashboard({ sections = [] }) {
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
             <WarningAmberIcon color="warning" />
             <Typography variant="h6" sx={{ fontWeight: 800 }}>
-              Needs attention
+              {t("instructorDashboard.needsAttention")}
             </Typography>
           </Box>
           <Box
@@ -1065,15 +1092,16 @@ export default function InstructorDashboard({ sections = [] }) {
             {aggregateStats.moderationAlerts > 0 && (
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {aggregateStats.moderationAlerts} flagged item
-                  {aggregateStats.moderationAlerts !== 1 ? "s" : ""}
+                  {t("instructorDashboard.flaggedItemCount", {
+                    count: aggregateStats.moderationAlerts,
+                  })}
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "block", mb: 1 }}
                 >
-                  Submissions or chats pending moderation review.
+                  {t("instructorDashboard.flaggedItemDescription")}
                 </Typography>
                 <TrendSparkline data={flaggedTrend} />
                 <Button
@@ -1083,23 +1111,23 @@ export default function InstructorDashboard({ sections = [] }) {
                   variant="outlined"
                   sx={{ mt: 1 }}
                 >
-                  Review flagged content
+                  {t("instructorDashboard.reviewFlaggedContent")}
                 </Button>
               </Box>
             )}
             {needsAttentionSummary.atRiskStudents > 0 && (
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {needsAttentionSummary.atRiskStudents} student
-                  {needsAttentionSummary.atRiskStudents !== 1 ? "s" : ""} at
-                  risk
+                  {t("instructorDashboard.atRiskStudentCount", {
+                    count: needsAttentionSummary.atRiskStudents,
+                  })}
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "block", mb: 1 }}
                 >
-                  Averaging below 60% in their section.
+                  {t("instructorDashboard.atRiskDescription")}
                 </Typography>
                 {validSections[0] && (
                   <Button
@@ -1108,7 +1136,7 @@ export default function InstructorDashboard({ sections = [] }) {
                     size="small"
                     variant="outlined"
                   >
-                    Open grade review
+                    {t("instructorDashboard.openGradeReview")}
                   </Button>
                 )}
               </Box>
@@ -1116,25 +1144,32 @@ export default function InstructorDashboard({ sections = [] }) {
             {needsAttentionSummary.lowCompletionSections.length > 0 && (
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {needsAttentionSummary.lowCompletionSections.length} section
-                  {needsAttentionSummary.lowCompletionSections.length !== 1
-                    ? "s"
-                    : ""}{" "}
-                  behind
+                  {t("instructorDashboard.sectionsBehindCount", {
+                    count: needsAttentionSummary.lowCompletionSections.length,
+                  })}
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "block", mb: 1 }}
                 >
-                  Below 50% completion across assignments.
+                  {t("instructorDashboard.sectionsBehindDescription")}
                 </Typography>
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  useFlexGap
+                  // eslint-disable-next-line i18next/no-literal-string -- CSS flex-wrap value
+                  flexWrap="wrap"
+                >
                   {needsAttentionSummary.lowCompletionSections.map(
                     (section) => (
                       <Chip
                         key={section.id}
-                        label={section.name || "Untitled section"}
+                        label={
+                          section.name ||
+                          t("instructorDashboard.untitledSection")
+                        }
                         size="small"
                         variant="outlined"
                         component="a"
@@ -1149,22 +1184,28 @@ export default function InstructorDashboard({ sections = [] }) {
             {linkedDraftIssues.length > 0 && (
               <Box>
                 <Typography variant="body2" sx={{ fontWeight: 700 }}>
-                  {linkedDraftIssues.length} gamification issue
-                  {linkedDraftIssues.length !== 1 ? "s" : ""}
+                  {t("instructorDashboard.gamificationIssueCount", {
+                    count: linkedDraftIssues.length,
+                  })}
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "block", mb: 1 }}
                 >
-                  References unpublished units — students can't satisfy these
-                  yet.
+                  {t("instructorDashboard.gamificationIssueDescription")}
                 </Typography>
-                <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
+                <Stack
+                  direction="row"
+                  spacing={0.5}
+                  useFlexGap
+                  // eslint-disable-next-line i18next/no-literal-string -- CSS flex-wrap value
+                  flexWrap="wrap"
+                >
                   {linkedDraftIssues.map((issue) => (
                     <Tooltip
                       key={issue.key}
-                      title="Open the unit editor to publish it"
+                      title={t("instructorDashboard.openUnitEditorToPublish")}
                     >
                       <Chip
                         label={issue.label}
@@ -1217,7 +1258,7 @@ export default function InstructorDashboard({ sections = [] }) {
                   mb: 1.5,
                 }}
               >
-                Section Comparison
+                {t("instructorDashboard.sectionComparison")}
               </Typography>
               <SectionComparisonChart sections={sectionComparison} />
             </Paper>
@@ -1243,7 +1284,7 @@ export default function InstructorDashboard({ sections = [] }) {
                   mb: 1.5,
                 }}
               >
-                Hardest Units
+                {t("instructorDashboard.hardestUnits")}
               </Typography>
               <UnitDifficultyList units={unitDifficulty} />
             </Paper>
@@ -1292,6 +1333,7 @@ export default function InstructorDashboard({ sections = [] }) {
             // Default to the Needs Support tab when there's something to triage.
             const activeTab =
               sectionTabs[section.id] ||
+              // eslint-disable-next-line i18next/no-literal-string -- tab value identifiers
               (atRisk.length > 0 ? "needs-support" : "overview");
 
             return (
@@ -1336,12 +1378,14 @@ export default function InstructorDashboard({ sections = [] }) {
                       variant="body2"
                       sx={{ fontWeight: 600, mb: 0.5 }}
                     >
-                      Content flagged for review ({sectionFlaggedTotal} item
-                      {sectionFlaggedTotal !== 1 ? "s" : ""})
+                      {t("instructorDashboard.contentFlaggedForReview", {
+                        count: sectionFlaggedTotal,
+                      })}
                     </Typography>
                     <Stack
                       direction="row"
                       spacing={0.5}
+                      // eslint-disable-next-line i18next/no-literal-string -- CSS flex-wrap value
                       flexWrap="wrap"
                       useFlexGap
                     >
@@ -1350,18 +1394,33 @@ export default function InstructorDashboard({ sections = [] }) {
                           key={grade.id}
                           avatar={
                             <AvatarDisplay
+                              profileUsername={grade.owner}
                               seed={grade.owner}
                               size={20}
                               style="simple"
                             />
                           }
-                          label={`${formatLastFirst(sectionStudents[grade.owner] || { id: grade.owner })} — ${allUnits[grade.unitID]?.name || "Submission"}`}
+                          label={
+                            <Link
+                              href={`/section/${grade.sectionID}#grade-${grade.id}`}
+                              style={{ color: "inherit", textDecoration: "none" }}
+                            >
+                              {t("instructorDashboard.flaggedGradeChip", {
+                                student: formatLastFirst(
+                                  sectionStudents[grade.owner] || {
+                                    id: grade.owner,
+                                  },
+                                ),
+                                unit:
+                                  allUnits[grade.unitID]?.name ||
+                                  t("instructorDashboard.submissionFallback"),
+                              })}
+                            </Link>
+                          }
                           size="small"
                           color="error"
                           variant="outlined"
-                          component="a"
-                          href={`/section/${grade.sectionID}#grade-${grade.id}`}
-                          clickable
+                          component="div"
                         />
                       ))}
                       {sectionFlaggedChats.map((chat) => (
@@ -1369,20 +1428,28 @@ export default function InstructorDashboard({ sections = [] }) {
                           key={chat.id}
                           avatar={
                             <AvatarDisplay
+                              profileUsername={chat.owner}
                               seed={chat.owner}
                               size={20}
                               style="simple"
                             />
                           }
-                          label={`${formatLastFirst(sectionStudents[chat.owner] || { id: chat.owner })} — Chat session flagged`}
+                          label={
+                            <Link
+                              href={chat.sectionID ? `/section/${chat.sectionID}` : "#"}
+                              style={{ color: "inherit", textDecoration: "none" }}
+                            >
+                              {t("instructorDashboard.flaggedChatChip", {
+                                student: formatLastFirst(
+                                  sectionStudents[chat.owner] || { id: chat.owner },
+                                ),
+                              })}
+                            </Link>
+                          }
                           size="small"
                           color="error"
                           variant="outlined"
-                          component="a"
-                          href={
-                            chat.sectionID ? `/section/${chat.sectionID}` : "#"
-                          }
-                          clickable
+                          component="div"
                         />
                       ))}
                     </Stack>
@@ -1431,7 +1498,10 @@ export default function InstructorDashboard({ sections = [] }) {
                           },
                         }}
                       >
-                        <Tab value="overview" label="Overview" />
+                        <Tab
+                          value="overview"
+                          label={t("instructorDashboard.tabOverview")}
+                        />
                         <Tab
                           value="needs-support"
                           label={
@@ -1440,10 +1510,10 @@ export default function InstructorDashboard({ sections = [] }) {
                                 color="warning"
                                 badgeContent={atRisk.length}
                               >
-                                Needs Support
+                                {t("instructorDashboard.tabNeedsSupport")}
                               </Badge>
                             ) : (
-                              "Needs Support"
+                              t("instructorDashboard.tabNeedsSupport")
                             )
                           }
                         />
@@ -1455,10 +1525,10 @@ export default function InstructorDashboard({ sections = [] }) {
                                 color="error"
                                 badgeContent={sectionFlaggedTotal}
                               >
-                                Activity
+                                {t("instructorDashboard.tabActivity")}
                               </Badge>
                             ) : (
-                              "Activity"
+                              t("instructorDashboard.tabActivity")
                             )
                           }
                         />
@@ -1470,10 +1540,10 @@ export default function InstructorDashboard({ sections = [] }) {
                                 color="success"
                                 badgeContent={perfect.length}
                               >
-                                Top Students
+                                {t("instructorDashboard.tabTopStudents")}
                               </Badge>
                             ) : (
-                              "Top Students"
+                              t("instructorDashboard.tabTopStudents")
                             )
                           }
                         />
@@ -1512,19 +1582,35 @@ export default function InstructorDashboard({ sections = [] }) {
                                   mb: 1,
                                 }}
                               >
-                                Class Health
+                                {t("instructorDashboard.classHealthHeading")}
                               </Typography>
                               <GradeDistributionDonut
                                 distribution={stats.distribution}
                               />
                               <Stack spacing={0.5} sx={{ mt: 2 }}>
                                 <Typography variant="body2">
-                                  <strong>{stats.averageGrade}%</strong> average
-                                  grade
+                                  {t.rich(
+                                    // eslint-disable-next-line i18next/no-literal-string -- next-intl rich-text key
+                                    "instructorDashboard.averageGradeSummary",
+                                    {
+                                      value: stats.averageGrade,
+                                      strong: (chunks) => (
+                                        <strong>{chunks}</strong>
+                                      ),
+                                    },
+                                  )}
                                 </Typography>
                                 <Typography variant="body2">
-                                  <strong>{stats.completionRate}%</strong>{" "}
-                                  completion rate
+                                  {t.rich(
+                                    // eslint-disable-next-line i18next/no-literal-string -- next-intl rich-text key
+                                    "instructorDashboard.completionRateSummary",
+                                    {
+                                      value: stats.completionRate,
+                                      strong: (chunks) => (
+                                        <strong>{chunks}</strong>
+                                      ),
+                                    },
+                                  )}
                                 </Typography>
                               </Stack>
                             </Paper>
@@ -1555,7 +1641,7 @@ export default function InstructorDashboard({ sections = [] }) {
                                   <AssignmentTurnedInIcon
                                     sx={{ fontSize: "0.85rem" }}
                                   />
-                                  Class Progress by Unit
+                                  {t("instructorDashboard.classProgressByUnit")}
                                 </Typography>
                                 <Stack spacing={0.75}>
                                   {stats.unitCompletion.map((uc) => {
@@ -1570,16 +1656,57 @@ export default function InstructorDashboard({ sections = [] }) {
                                     const unitName =
                                       allUnits[uc.unitID]?.name ||
                                       uc.unitID?.slice(0, 8) ||
-                                      "Unit";
-                                    const completionTooltip = `Completion: ${uc.submittedCount}/${uc.totalStudents} (${pct}%)${
-                                      uc.dueDate
-                                        ? ` · due ${new Date(uc.dueDate).toLocaleDateString(undefined, { month: "short", day: "numeric" })}`
-                                        : ""
-                                    }${
-                                      formatEngagedTime(uc.avgEngagedTimeMs)
-                                        ? ` · avg engagement ${formatEngagedTime(uc.avgEngagedTimeMs)}`
-                                        : ""
-                                    }`;
+                                      t("instructorDashboard.unitFallback");
+                                    const engagedTime = formatEngagedTime(
+                                      uc.avgEngagedTimeMs,
+                                      t,
+                                    );
+                                    const completionTooltip = [
+                                      t(
+                                        "instructorDashboard.completionTooltip",
+                                        {
+                                          submitted: uc.submittedCount,
+                                          total: uc.totalStudents,
+                                          pct,
+                                        },
+                                      ),
+                                      uc.dueDate &&
+                                        t(
+                                          "instructorDashboard.completionTooltipDue",
+                                          {
+                                            date: new Date(
+                                              uc.dueDate,
+                                            ).toLocaleDateString(
+                                              undefined,
+                                              DUE_DATE_FORMAT,
+                                            ),
+                                          },
+                                        ),
+                                      engagedTime &&
+                                        t(
+                                          "instructorDashboard.completionTooltipEngagement",
+                                          { time: engagedTime },
+                                        ),
+                                    ]
+                                      .filter(Boolean)
+                                      .join(TOOLTIP_SEGMENT_SEPARATOR);
+                                    const gradeBarBaseLabel = uc.curvedGrades
+                                      ? t("instructorDashboard.rawGradesLabel")
+                                      : t("instructorDashboard.gradesLabel");
+                                    const gradeBarLabel =
+                                      uc.gradeAggMethod &&
+                                      uc.gradeAggMethod !== "MAX"
+                                        ? t(
+                                            "instructorDashboard.gradeBarLabelWithMethod",
+                                            {
+                                              label: gradeBarBaseLabel,
+                                              method:
+                                                gradeAggregationLabels[
+                                                  uc.gradeAggMethod
+                                                ] || uc.gradeAggMethod,
+                                            },
+                                          )
+                                        : gradeBarBaseLabel;
                                     return (
                                       <Box key={uc.assignmentId}>
                                         <Typography
@@ -1619,15 +1746,7 @@ export default function InstructorDashboard({ sections = [] }) {
                                                 sx={{ fontSize: 16 }}
                                               />
                                             }
-                                            label={
-                                              (uc.curvedGrades
-                                                ? "Raw"
-                                                : "Grades") +
-                                              (uc.gradeAggMethod &&
-                                              uc.gradeAggMethod !== "MAX"
-                                                ? ` (${GRADE_AGGREGATION_LABELS[uc.gradeAggMethod] || uc.gradeAggMethod})`
-                                                : "")
-                                            }
+                                            label={gradeBarLabel}
                                             values={uc.rawGrades}
                                           />
                                         )}
@@ -1636,7 +1755,9 @@ export default function InstructorDashboard({ sections = [] }) {
                                             icon={
                                               <TuneIcon sx={{ fontSize: 16 }} />
                                             }
-                                            label="Curved"
+                                            label={t(
+                                              "instructorDashboard.curvedLabel",
+                                            )}
                                             values={uc.curvedGrades}
                                           />
                                         )}
@@ -1691,7 +1812,7 @@ export default function InstructorDashboard({ sections = [] }) {
                                 size="small"
                                 color="warning"
                               >
-                                Review all
+                                {t("instructorDashboard.reviewAll")}
                               </Button>
                             }
                             sx={{
@@ -1706,11 +1827,12 @@ export default function InstructorDashboard({ sections = [] }) {
                               variant="body2"
                               sx={{ fontWeight: 600 }}
                             >
-                              Students needing support:
+                              {t("instructorDashboard.studentsNeedingSupport")}
                             </Typography>
                             <Stack
                               direction="row"
                               spacing={0.5}
+                              // eslint-disable-next-line i18next/no-literal-string -- CSS flex-wrap value
                               flexWrap="wrap"
                               useFlexGap
                               sx={{ mt: 0.5 }}
@@ -1720,25 +1842,41 @@ export default function InstructorDashboard({ sections = [] }) {
                                   key={s.studentId}
                                   avatar={
                                     <AvatarDisplay
+                                      profileUsername={s.studentId}
                                       seed={s.studentId}
                                       size={20}
                                       style="simple"
                                     />
                                   }
-                                  label={`${formatLastFirst(sectionStudents[s.studentId] || { id: s.studentId })} · ${Math.round(s.average)}%`}
+                                  label={
+                                    <Link
+                                      href={`/section/${section.id}#nav-section-gradebook`}
+                                      style={{ color: "inherit", textDecoration: "none" }}
+                                    >
+                                      {t(
+                                        "instructorDashboard.atRiskStudentChip",
+                                        {
+                                          student: formatLastFirst(
+                                            sectionStudents[s.studentId] || {
+                                              id: s.studentId,
+                                            },
+                                          ),
+                                          average: Math.round(s.average),
+                                        },
+                                      )}
+                                    </Link>
+                                  }
                                   size="small"
                                   color="warning"
                                   variant="outlined"
-                                  component="a"
-                                  href={`/section/${section.id}#nav-section-gradebook`}
-                                  clickable
+                                  component="div"
                                 />
                               ))}
                             </Stack>
                           </Alert>
                         ) : (
                           <Typography color="text.secondary" sx={{ py: 2 }}>
-                            No students currently need extra support.
+                            {t("instructorDashboard.noStudentsNeedSupport")}
                           </Typography>
                         ))}
 
@@ -1755,21 +1893,23 @@ export default function InstructorDashboard({ sections = [] }) {
                           >
                             <Table
                               size="small"
-                              aria-label="recent activity table"
+                              aria-label={t(
+                                "instructorDashboard.recentActivityTableLabel",
+                              )}
                             >
                               <TableHead sx={{ bgcolor: "action.hover" }}>
                                 <TableRow>
                                   <TableCell sx={{ fontWeight: 700 }}>
-                                    Student
+                                    {t("instructorDashboard.student")}
                                   </TableCell>
                                   <TableCell sx={{ fontWeight: 700 }}>
-                                    Unit
+                                    {t("instructorDashboard.unitColumn")}
                                   </TableCell>
                                   <TableCell
                                     sx={{ fontWeight: 700 }}
                                     align="right"
                                   >
-                                    Score
+                                    {t("instructorDashboard.scoreColumn")}
                                   </TableCell>
                                 </TableRow>
                               </TableHead>
@@ -1783,6 +1923,7 @@ export default function InstructorDashboard({ sections = [] }) {
                                         spacing={1.5}
                                       >
                                         <AvatarDisplay
+                                          profileUsername={grade.owner}
                                           seed={grade.owner}
                                           size={22}
                                           style="simple"
@@ -1827,7 +1968,7 @@ export default function InstructorDashboard({ sections = [] }) {
                           </TableContainer>
                         ) : (
                           <Typography color="text.secondary" sx={{ py: 2 }}>
-                            No recent activity yet.
+                            {t("instructorDashboard.noRecentActivity")}
                           </Typography>
                         ))}
 

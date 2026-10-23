@@ -205,6 +205,7 @@ async function uploadToS3(
   key: string,
   data: Buffer,
   contentType: string,
+  temporaryAnalysisArtifact = false,
 ): Promise<void> {
   await s3Client.send(
     new PutObjectCommand({
@@ -212,6 +213,7 @@ async function uploadToS3(
       Key: key,
       Body: data,
       ContentType: contentType,
+      ...(temporaryAnalysisArtifact ? { Tagging: "analysis-run=true" } : {}),
     }),
   );
 }
@@ -280,18 +282,25 @@ function convertToPdf(inputPath: string): string {
 /**
  * Render the first page of a PDF to a WebP thumbnail.
  */
-async function pdfPageToWebp(pdfBuffer: Buffer): Promise<Buffer> {
+async function pdfPageToWebp(
+  pdfBuffer: Buffer,
+  pageNumber = 1,
+): Promise<Buffer> {
   const { pdf } = await import("pdf-to-img");
   const pages = await pdf(pdfBuffer, { scale: 2 });
 
   let firstPageBuffer: Buffer | null = null;
+  let currentPage = 0;
   for await (const page of pages) {
-    firstPageBuffer = Buffer.from(page);
-    break;
+    currentPage += 1;
+    if (currentPage === pageNumber) {
+      firstPageBuffer = Buffer.from(page);
+      break;
+    }
   }
 
   if (!firstPageBuffer) {
-    throw new Error("PDF has no pages");
+    throw new Error(`PDF does not contain page ${pageNumber}`);
   }
 
   // Convert to WebP with Sharp
@@ -477,7 +486,7 @@ async function generateDocumentThumbnail(
 
     // Upload thumbnail
     const outputKey = `protected/${identityId}/${fileId}/thumbnail.webp`;
-    await uploadToS3(outputKey, webpBuffer, "image/webp");
+    await uploadToS3(outputKey, webpBuffer, "image/webp", true);
 
     console.log(
       `[DocumentThumbnail] Thumbnail uploaded: ${outputKey} (${webpBuffer.length} bytes)`,
@@ -617,6 +626,40 @@ async function handleS3Event(event: any): Promise<void> {
 // ---------------------------------------------------------------------------
 
 export const handler: Handler = async (event, _context) => {
+  if (event.workflowMode === "renderPage") {
+    const { s3Key, pageNumber, outputKey, runId } = event;
+    if (
+      typeof s3Key !== "string" ||
+      !Number.isInteger(pageNumber) ||
+      pageNumber < 1 ||
+      typeof outputKey !== "string" ||
+      typeof runId !== "string"
+    ) {
+      throw new Error("Invalid renderPage request");
+    }
+    const sourceBuffer = await downloadFromS3(s3Key);
+    const fileName = s3Key.split("/").pop() || `document-${runId}.pdf`;
+    const preprocessedPath = preprocessEduFormat(
+      sourceBuffer,
+      fileName,
+      `${runId}-${pageNumber}`,
+    );
+    const inputPath =
+      preprocessedPath ??
+      join(TMP_DIR, `analysis-${runId}-${pageNumber}-${fileName}`);
+    if (!preprocessedPath) writeFileSync(inputPath, sourceBuffer);
+    const pdfPath =
+      extname(inputPath).toLowerCase() === ".pdf"
+        ? inputPath
+        : convertToPdf(inputPath);
+    const webpBuffer = await pdfPageToWebp(
+      readFileSync(pdfPath),
+      pageNumber,
+    );
+    await uploadToS3(outputKey, webpBuffer, "image/webp");
+    return { imageKey: outputKey };
+  }
+
   console.log("[DocumentThumbnail] Event:", JSON.stringify(event, null, 2));
 
   // 1. EventBridge S3 Object Created event

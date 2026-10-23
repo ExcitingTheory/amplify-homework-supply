@@ -294,6 +294,7 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
   nodeKey,
   wordID,
 }) {
+  const t = useTranslations("editor.shared");
   const [editor] = useLexicalComposerContext();
   const containerRef = useRef(null);
   const [isSelected, setSelected, clearSelection] =
@@ -448,7 +449,7 @@ const WordBlockEditor = React.memo(function WordBlockEditor({
               <TextField
                 {...params}
                 autoFocus
-                placeholder="Select a vocabulary word…"
+                placeholder={t("wordBlockPlugin.selectVocabularyWord")}
               />
             )}
           />

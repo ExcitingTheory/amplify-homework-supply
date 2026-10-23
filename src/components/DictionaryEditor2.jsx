@@ -205,6 +205,7 @@ function getTextWidth(text) {
 // =============================================================================
 
 function RubyTagEditor({ inPhrase, inPronunciation, word }) {
+  const t = useTranslations("components");
   const { bumpWordVersion } = React.useContext(DictionaryContext);
   const [phrase, setPhrase] = React.useState(inPhrase ?? "");
   const [pronunciation, setPronunciation] = React.useState(
@@ -518,7 +519,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
             justifyContent: "center",
           }}
         >
-          <Tooltip title="Add selection">
+          <Tooltip title={t("dictionaryEditor.addSelection")}>
             <span>
               <IconButton
                 size="large"
@@ -534,7 +535,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="Clear and reset">
+          <Tooltip title={t("dictionaryEditor.clearAndReset")}>
             <span>
               <IconButton
                 size="large"
@@ -553,7 +554,7 @@ function RubyTagEditor({ inPhrase, inPronunciation, word }) {
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="Save ruby tags">
+          <Tooltip title={t("dictionaryEditor.saveRubyTags")}>
             <span>
               <IconButton
                 size="large"
@@ -1109,6 +1110,18 @@ function WordRowComponent({
   const audioUrls = audio || [];
   const hasAudio = audioUrls.length > 0;
 
+  // Upload effect must only fire on new files, so read everything else from the latest render
+  const uploadContextRef = React.useRef({});
+  React.useEffect(() => {
+    uploadContextRef.current = {
+      identityId,
+      onUpdate,
+      wordId,
+      version,
+      audioUrls,
+    };
+  });
+
   // Handle audio file uploads
   React.useEffect(() => {
     const asyncFunc = async () => {
@@ -1120,7 +1133,7 @@ function WordRowComponent({
 
         try {
           // Gen 2 API requires full path with protection level prefix
-          const s3Path = `protected/${identityId}/audio/${name}`;
+          const s3Path = `protected/${uploadContextRef.current.identityId}/audio/${name}`;
 
           const result = await uploadData({
             path: s3Path,
@@ -1148,6 +1161,7 @@ function WordRowComponent({
         }
       }
 
+      const { onUpdate, wordId, version, audioUrls } = uploadContextRef.current;
       if (_audio.length > 0 && onUpdate) {
         const newAudio = deduplicateUrls([...audioUrls, ..._audio]);
         await onUpdate(wordId, { audio: newAudio }, version);
@@ -1344,6 +1358,7 @@ function WordRowComponent({
           }
         }}
         title={`${t("dictionaryEditor.audioStudioTitle")} - ${phrase}`}
+        // eslint-disable-next-line i18next/no-literal-string -- preset identifier
         preset="word"
         scriptData={wordPreset.scriptData}
         lockedTracks={wordPreset.lockedTracks}
@@ -1487,6 +1502,7 @@ function WordsPlugin({
   setConfirmDialog,
   fullDictionary,
 }) {
+  const t = useTranslations("components");
   const { bumpWordVersion } = React.useContext(DictionaryContext);
   const { softDelete } = useRecycleBin();
   const [editor] = useLexicalComposerContext();
@@ -1502,52 +1518,6 @@ function WordsPlugin({
     estimateSize: () => 100,
     overscan: 5,
   });
-
-  // Update words when dictionary changes
-  React.useEffect(() => {
-    if (!dictionary) return;
-
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
-
-      Object.entries(dictionary).forEach(([key, word], index) => {
-        const node = $createWordDecoratorNode(
-          word.id,
-          word.phrase,
-          word.pronunciation,
-          word.definition,
-          word.audio || [],
-          word.rubyTags || "",
-          word._version || 1,
-          expandedItems.has(word.id),
-          selectedItems.has(word.id),
-          searchTerm,
-          sharedHistory,
-          handleUpdateWord,
-          handleDeleteWord,
-          onToggleExpand,
-          onToggleSelect,
-          onOpenRubyDialog,
-          audioFiles,
-          identityId,
-          index,
-          word.documentID,
-          word.fileID,
-          word.filename,
-          word.page,
-        );
-        root.append(node);
-      });
-    });
-  }, [
-    dictionary,
-    searchTerm,
-    expandedItems,
-    selectedItems,
-    audioFiles,
-    editor,
-  ]);
 
   const handleUpdateWord = async (wordId, updates, currentVersion) => {
     try {
@@ -1583,7 +1553,7 @@ function WordsPlugin({
     // Show confirmation dialog before soft-deleting
     setConfirmDialog({
       open: true,
-      message: `Move to Recycle Bin: "${phrase}"?`,
+      message: t("dictionaryEditor.confirmMoveToRecycleBin", { phrase }),
       severity: "warning",
       onConfirm: async () => {
         try {
@@ -1620,6 +1590,82 @@ function WordsPlugin({
       },
     });
   };
+
+  // Nodes hold these callbacks, so keep their identity stable and always call the latest closures
+  const latestHandlersRef = React.useRef({});
+  React.useEffect(() => {
+    latestHandlersRef.current = {
+      handleUpdateWord,
+      handleDeleteWord,
+      onToggleExpand,
+      onToggleSelect,
+      onOpenRubyDialog,
+    };
+  });
+  const stableHandlers = React.useMemo(
+    () => ({
+      handleUpdateWord: (...args) =>
+        latestHandlersRef.current.handleUpdateWord(...args),
+      handleDeleteWord: (...args) =>
+        latestHandlersRef.current.handleDeleteWord(...args),
+      onToggleExpand: (...args) =>
+        latestHandlersRef.current.onToggleExpand(...args),
+      onToggleSelect: (...args) =>
+        latestHandlersRef.current.onToggleSelect(...args),
+      onOpenRubyDialog: (...args) =>
+        latestHandlersRef.current.onOpenRubyDialog(...args),
+    }),
+    [],
+  );
+
+  // Update words when dictionary changes
+  React.useEffect(() => {
+    if (!dictionary) return;
+
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+
+      Object.entries(dictionary).forEach(([key, word], index) => {
+        const node = $createWordDecoratorNode(
+          word.id,
+          word.phrase,
+          word.pronunciation,
+          word.definition,
+          word.audio || [],
+          word.rubyTags || "",
+          word._version || 1,
+          expandedItems.has(word.id),
+          selectedItems.has(word.id),
+          searchTerm,
+          sharedHistory,
+          stableHandlers.handleUpdateWord,
+          stableHandlers.handleDeleteWord,
+          stableHandlers.onToggleExpand,
+          stableHandlers.onToggleSelect,
+          stableHandlers.onOpenRubyDialog,
+          audioFiles,
+          identityId,
+          index,
+          word.documentID,
+          word.fileID,
+          word.filename,
+          word.page,
+        );
+        root.append(node);
+      });
+    });
+  }, [
+    dictionary,
+    searchTerm,
+    expandedItems,
+    selectedItems,
+    audioFiles,
+    editor,
+    sharedHistory,
+    identityId,
+    stableHandlers,
+  ]);
 
   return null;
 }
@@ -1719,7 +1765,9 @@ export function DictionaryEditor2() {
 
     setConfirmDialog({
       open: true,
-      message: `Move ${selectedItems.size} selected word(s) to Recycle Bin?`,
+      message: t("dictionaryEditor.confirmBulkMoveToRecycleBin", {
+        count: selectedItems.size,
+      }),
       severity: "warning",
       onConfirm: async () => {
         try {
@@ -1858,7 +1906,7 @@ export function DictionaryEditor2() {
         }}
       >
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-          <Tooltip title="Select/Deselect All">
+          <Tooltip title={t("dictionaryEditor.selectDeselectAll")}>
             <Checkbox
               size="small"
               checked={
@@ -1890,7 +1938,11 @@ export function DictionaryEditor2() {
           </Tooltip>
 
           <Tooltip
-            title={expandedItems.size === 0 ? "Expand All" : "Collapse All"}
+            title={
+              expandedItems.size === 0
+                ? t("dictionaryEditor.expandAll")
+                : t("dictionaryEditor.collapseAll")
+            }
           >
             <IconButton
               size="small"
@@ -1916,7 +1968,7 @@ export function DictionaryEditor2() {
           </Tooltip>
         </Box>
 
-        <Tooltip title="New Word">
+        <Tooltip title={t("dictionaryEditor.newWord")}>
           <IconButton
             onClick={toggleNewWordFormOpen}
             color="primary"
@@ -1928,7 +1980,7 @@ export function DictionaryEditor2() {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Actions">
+        <Tooltip title={t("dictionaryEditor.actions")}>
           <IconButton
             onClick={(e) =>
               setContextMenu(
@@ -2012,7 +2064,7 @@ export function DictionaryEditor2() {
               onChange={(e) => setNewPhrase(e.target.value)}
               fullWidth
               margin="normal"
-              label="Phrase"
+              label={t("dictionaryEditor.phraseField")}
               variant="outlined"
               name="phrase"
             />
@@ -2022,7 +2074,7 @@ export function DictionaryEditor2() {
               onChange={(e) => setNewPronunciation(e.target.value)}
               fullWidth
               margin="normal"
-              label="Pronunciation"
+              label={t("dictionaryEditor.pronunciationField")}
               variant="outlined"
               name="pronunciation"
             />
@@ -2032,7 +2084,7 @@ export function DictionaryEditor2() {
               onChange={(e) => setNewDefinition(e.target.value)}
               fullWidth
               margin="normal"
-              label="Definition"
+              label={t("dictionaryEditor.definitionField")}
               variant="outlined"
               multiline
               rows={3}

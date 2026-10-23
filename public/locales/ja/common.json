@@ -59,6 +59,20 @@
       "disableNotifications": "通知を無効にする",
       "experimentalFeatures": "実験的機能",
       "studentMode": "学習者モード"
+    },
+    "debugModeEnabled": "🐛 デバッグモードが有効になりました。ページを再読み込みすると、デバッグパネルが有効になります。\n\nCmd/Ctrl + Shift + D キーでデバッグパネルを開くことができます。",
+    "nav": {
+      "adminDashboard": "管理者ダッシュボード",
+      "analytics": "アナリティクス",
+      "archives": "アーカイブ",
+      "collapseNavigation": "ナビゲーションを折りたたむ",
+      "expandNavigation": "ナビゲーションを展開",
+      "files": "ファイル",
+      "moderation": "モデレーション",
+      "questions": "質問",
+      "recycleBin": "ごみ箱",
+      "showNavigation": "ナビゲーションを表示",
+      "words": "単語"
     }
   },
   "navigation": {
@@ -81,13 +95,23 @@
   },
   "peerReview": {
     "helpful": "ピアレビューは役に立ちました",
-    "notHelpful": "ピアレビューは役に立ちませんでした"
+    "notHelpful": "ピアレビューは役に立ちませんでした",
+    "aiAssistant": "AIアシスタント",
+    "blockReference": "ブロック: {blockId}",
+    "didItHelp": "ピアレビューは役に立ちましたか?",
+    "messagePlaceholder": "メッセージを入力… (AIのサポートが必要な場合は @AI を使用してください)",
+    "noMessages": "まだメッセージがありません。ピアレビューの会話を始めましょう!",
+    "sessionEnded": "このレビューセッションは終了しました。",
+    "thanksForFeedback": "フィードバックをありがとうございます!",
+    "typing": "{count, plural, one {{names}さんが入力中です…} other {{names}さんが入力中です…}}"
   },
   "quizComponent": {
     "grade": "成績: {grade}"
   },
   "sectionDetail": {
-    "studentHeader": "学生"
+    "studentHeader": "学生",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "受講生の登録に失敗しました"
   },
   "status": {
     "complete": "完了しました",
@@ -134,5 +158,42 @@
     "increase": "選択した時間セグメントを増やす",
     "minutes": "分",
     "seconds": "秒"
+  },
+  "debugPanel": {
+    "contactLabel": "メールアドレスまたはご連絡先(任意)",
+    "contactPlaceholder": "こちらからご連絡できるようにするためです",
+    "describeIssueLabel": "問題の内容をご記入ください(任意)",
+    "describeIssuePlaceholder": "問題が発生したとき、何をしていましたか?",
+    "diagnosticSent": "✅ 診断情報をサポートチームに送信しました!(S3リンクの有効期限は30日間です)",
+    "performanceComingSoon": "パフォーマンス指標は近日公開予定です...",
+    "sendDialogDescription": "この操作により、診断スナップショットがDiscord経由でサポートチームに送信されます。機密情報を削除するため、データはサニタイズ処理されます。",
+    "sendDialogTitle": "診断情報をサポートに送信",
+    "sendFailed": "送信に失敗しました: {error}",
+    "sendingToDiscord": "Discordに送信しています...",
+    "sendToSupport": "サポートに送信",
+    "snapshotDownloaded": "診断スナップショットをダウンロードしました",
+    "tabs": {
+      "components": "コンポーネント",
+      "logs": "ログ ({count})",
+      "performance": "パフォーマンス",
+      "state": "状態"
+    },
+    "title": "デバッグパネル",
+    "unknownError": "不明なエラー",
+    "uploadFailed": "アップロードに失敗しました: {error}",
+    "uploadingArtifact": "診断用アーティファクトをS3にアップロードしています...",
+    "webhookNotConfigured": "Discordのウェブフックが設定されていません"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "有効な練習モードでの、複数回の挑戦を通した正答率です。",
+    "modes": {
+      "easy": "かんたん",
+      "hard": "難しい",
+      "learn": "学習"
+    },
+    "progressDescription": "有効な練習モード全体の平均達成率です。"
+  },
+  "editor": {
+    "anonymousUser": "匿名ユーザー"
   }
 }

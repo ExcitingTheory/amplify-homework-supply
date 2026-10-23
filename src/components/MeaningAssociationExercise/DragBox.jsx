@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useDrag } from "react-dnd";
 import { Box } from "@mui/material";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
@@ -11,6 +12,7 @@ const onTouchMove = () => {
 };
 
 export const DragBox = ({ answer, wordID, cardWidth = 140 }) => {
+  const t = useTranslations("components");
   const [{ isDragging }, drag] = useDrag({
     type: "box",
     item: { answer, wordID },
@@ -59,7 +61,7 @@ export const DragBox = ({ answer, wordID, cardWidth = 140 }) => {
       data-word-id={wordID}
       data-answer={answer}
       role="button"
-      aria-label={`Drag ${answer}`}
+      aria-label={t("meaningAssociationExercise.dragAriaLabel", { answer })}
       sx={(theme) => ({
         minHeight: 48,
         m: 0.5,
@@ -115,7 +117,7 @@ export const DragBox = ({ answer, wordID, cardWidth = 140 }) => {
       })}
     >
       <DragIndicatorIcon
-        aria-hidden="true"
+        aria-hidden
         sx={{ fontSize: 18, color: "text.disabled", flexShrink: 0 }}
       />
       <Box component="span" sx={{ minWidth: 0 }}>

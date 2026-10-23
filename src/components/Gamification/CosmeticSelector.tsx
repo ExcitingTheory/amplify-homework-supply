@@ -15,6 +15,7 @@ import LockIcon from "@mui/icons-material/Lock";
 import CheckIcon from "@mui/icons-material/Check";
 import PaletteIcon from "@mui/icons-material/Palette";
 import FaceIcon from "@mui/icons-material/Face";
+import { useTranslations } from "next-intl";
 import {
   DiceBearAvatar,
   getStyleTierStatus,
@@ -136,7 +137,23 @@ export function CosmeticSelector({
   avatarUnlockConfig,
   robotStylesUnlocked = false,
 }: CosmeticSelectorProps) {
+  const t = useTranslations("components");
   const [customizerOpen, setCustmizerOpen] = useState(false);
+  const defaultThemeLabels: Record<string, string> = {
+    default: t("cosmeticSelector.themeDefault"),
+    midnight: t("cosmeticSelector.themeMidnight"),
+    forest: t("cosmeticSelector.themeForest"),
+    sunset: t("cosmeticSelector.themeSunset"),
+    aurora: t("cosmeticSelector.themeAurora"),
+    highContrast: t("cosmeticSelector.themeHighContrast"),
+    custom: t("cosmeticSelector.themeCustom"),
+  };
+  const getThemeLabel = (theme: EditorTheme) => {
+    const defaultTheme = DEFAULT_EDITOR_THEMES.find((d) => d.id === theme.id);
+    return defaultTheme && defaultTheme.name === theme.name
+      ? (defaultThemeLabels[theme.id] ?? theme.name)
+      : theme.name;
+  };
   const levelingTierStatuses = getStyleTierStatus(level, avatarUnlockConfig);
   const robotTierStatuses = (
     ["bottts", "bottts-neutral"] as AvatarStyleTier[]
@@ -156,7 +173,7 @@ export function CosmeticSelector({
           gutterBottom
           sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
         >
-          <FaceIcon sx={{ fontSize: 18 }} /> Avatar Style
+          <FaceIcon sx={{ fontSize: 18 }} /> {t("cosmeticSelector.avatarStyle")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={1.5} sx={{ mb: 2 }}>
           {tierStatuses.map(({ tier, unlocked, displayName }) => {
@@ -207,7 +224,7 @@ export function CosmeticSelector({
             variant="outlined"
             onClick={() => setCustmizerOpen(true)}
           >
-            Customize Avatar
+            {t("cosmeticSelector.customizeAvatar")}
           </Button>
         )}
         <AvatarCustomizer
@@ -232,7 +249,8 @@ export function CosmeticSelector({
           gutterBottom
           sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
         >
-          <PaletteIcon sx={{ fontSize: 18 }} /> Editor Theme
+          <PaletteIcon sx={{ fontSize: 18 }} />{" "}
+          {t("cosmeticSelector.editorTheme")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={1}>
           {editorThemes.map((theme) => {
@@ -286,7 +304,7 @@ export function CosmeticSelector({
                 >
                   <Typography variant="caption" noWrap>
                     {!unlocked && "🔒 "}
-                    {theme.name}
+                    {getThemeLabel(theme)}
                   </Typography>
                 </CardContent>
               </Card>

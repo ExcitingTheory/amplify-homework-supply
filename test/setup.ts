@@ -33,24 +33,77 @@ afterEach(() => {
 });
 
 // Mock next-intl globally for all component tests
-vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string, values?: Record<string, any>) => {
-    if (values) {
-      return Object.entries(values).reduce(
-        (str, [k, v]) => str.replace(`{${k}}`, String(v)),
-        key,
-      );
-    }
-    return key;
-  },
-  useLocale: () => "en",
-  useMessages: () => ({}),
-  useFormatter: () => ({
-    number: (n: number) => String(n),
-    dateTime: (d: Date) => d.toISOString(),
-  }),
-  NextIntlClientProvider: ({ children }: any) => children,
-}));
+vi.mock("next-intl", () => {
+  const interpolate = (key: string, values?: Record<string, any>) =>
+    values
+      ? Object.entries(values).reduce(
+          (str, [k, v]) =>
+            typeof v === "function" ? str : str.replace(`{${k}}`, String(v)),
+          key,
+        )
+      : key;
+  const createT = () => {
+    const t = (key: string, values?: Record<string, any>) =>
+      interpolate(key, values);
+    // Rich/markup variants return the key too, so tests can query by key.
+    t.rich = (key: string, values?: Record<string, any>) =>
+      interpolate(key, values);
+    t.markup = (key: string, values?: Record<string, any>) =>
+      interpolate(key, values);
+    t.raw = (key: string) => key;
+    t.has = () => true;
+    return t;
+  };
+  // Stable translator per namespace, like next-intl, so effects/memos that
+  // depend on `t` don't re-run on every render.
+  const translators = new Map<string, ReturnType<typeof createT>>();
+  return {
+    useTranslations: (namespace?: string) => {
+      const cacheKey = namespace ?? "";
+      if (!translators.has(cacheKey)) translators.set(cacheKey, createT());
+      return translators.get(cacheKey)!;
+    },
+    useLocale: () => "en",
+    useMessages: () => ({}),
+    useFormatter: () => ({
+      number: (n: number) => String(n),
+      dateTime: (d: Date) => d.toISOString(),
+    }),
+    NextIntlClientProvider: ({ children }: any) => children,
+  };
+});
+
+// next-intl's createNavigation needs an intl provider and imports extensionless
+// "next/navigation", which Node ESM can't resolve. Components only need plain
+// anchors/router stubs in unit tests; suites can override with their own mock.
+vi.mock("@/i18n/navigation", async () => {
+  const React = await import("react");
+  return {
+    Link: React.forwardRef<
+      HTMLAnchorElement,
+      React.AnchorHTMLAttributes<HTMLAnchorElement> & {
+        href?: string | { pathname?: string };
+        prefetch?: boolean;
+        locale?: string;
+      }
+    >(function Link({ href, prefetch: _prefetch, locale: _locale, ...props }, ref) {
+      const resolved =
+        typeof href === "string" ? href : (href?.pathname ?? undefined);
+      return React.createElement("a", { ...props, href: resolved, ref });
+    }),
+    redirect: vi.fn(),
+    usePathname: () => "/",
+    useRouter: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      prefetch: vi.fn(),
+      back: vi.fn(),
+      forward: vi.fn(),
+      refresh: vi.fn(),
+    }),
+    getPathname: ({ href }: { href: string }) => href,
+  };
+});
 
 // Extend Vitest matchers with TypeScript support
 declare module "vitest" {

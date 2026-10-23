@@ -78,19 +78,22 @@ const CATEGORY_COLORS = {
   SYSTEM: "error",
 } as const;
 
-function timeAgo(dateString?: string): string {
-  if (!dateString) return "Just now";
+function timeAgo(
+  t: ReturnType<typeof useTranslations>,
+  dateString?: string,
+): string {
+  if (!dateString) return t("notification.justNow");
   const now = Date.now();
   const dateMs = new Date(dateString).getTime();
-  if (!Number.isFinite(dateMs)) return "Just now";
+  if (!Number.isFinite(dateMs)) return t("notification.justNow");
   const diffMs = now - dateMs;
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "Just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return t("notification.justNow");
+  if (diffMin < 60) return t("notification.minutesAgo", { count: diffMin });
   const diffHrs = Math.floor(diffMin / 60);
-  if (diffHrs < 24) return `${diffHrs}h ago`;
+  if (diffHrs < 24) return t("notification.hoursAgo", { count: diffHrs });
   const diffDays = Math.floor(diffHrs / 24);
-  if (diffDays < 7) return `${diffDays}d ago`;
+  if (diffDays < 7) return t("notification.daysAgo", { count: diffDays });
   return new Date(dateMs).toLocaleDateString();
 }
 
@@ -199,7 +202,7 @@ export default function NotificationCard({
             color="text.secondary"
             sx={{ flexShrink: 0 }}
           >
-            {timeAgo(notification.createdAt)}
+            {timeAgo(t, notification.createdAt)}
           </Typography>
         </Box>
 
@@ -243,7 +246,9 @@ export default function NotificationCard({
           )}
           {notification.senderName && (
             <Typography variant="caption" color="text.disabled">
-              from {notification.senderName}
+              {t("notification.fromSender", {
+                sender: notification.senderName,
+              })}
             </Typography>
           )}
         </Box>

@@ -49,6 +49,7 @@ import { CampaignSetupWizard } from "@/components/Gamification/CampaignSetupWiza
 import { AssignmentComposer } from "@/components/AssignmentComposer";
 import { CadenceCopyDialog } from "@/components/CadenceCopyDialog";
 import UnitContext from "@/context/unitContext";
+import { SectionSettingsNavigation } from "@/components/SectionSettingsNavigation";
 
 function getUserGroups(user) {
   return (
@@ -602,6 +603,7 @@ function Sections({ user }) {
                         display: "flex",
                         alignItems: "center",
                         gap: 1,
+                        flexWrap: "wrap",
                         pl: 2,
                         pb: 1.5,
                       }}
@@ -632,6 +634,7 @@ function Sections({ user }) {
 
                       {(isInstructor || section.owner === userId) && (
                         <>
+                          <SectionSettingsNavigation sectionId={section.id} />
                           <Button
                             variant="contained"
                             color="primary"

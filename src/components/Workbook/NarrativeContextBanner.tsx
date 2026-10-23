@@ -10,6 +10,7 @@
  */
 
 import React, { useState, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -42,6 +43,7 @@ export function NarrativeContextBanner({
   unitId,
 }: NarrativeContextBannerProps) {
   const { activeChallenges, isLoading } = useCampaign();
+  const t = useTranslations("components");
   const [collapsed, setCollapsed] = useState(getCollapsedState);
 
   const toggleCollapse = useCallback(() => {
@@ -78,7 +80,7 @@ export function NarrativeContextBanner({
   return (
     <Box
       role="complementary"
-      aria-label="Campaign chapter context"
+      aria-label={t("narrativeContextBanner.ariaLabel")}
       sx={{
         mb: 2,
         p: 2,
@@ -96,7 +98,9 @@ export function NarrativeContextBanner({
         {linkedChallenge.chapterOrder != null && (
           <Chip
             size="small"
-            label={`Ch. ${linkedChallenge.chapterOrder}`}
+            label={t("narrativeContextBanner.chapterOrder", {
+              order: linkedChallenge.chapterOrder,
+            })}
             sx={{
               height: 20,
               fontSize: "0.7rem",
@@ -108,7 +112,9 @@ export function NarrativeContextBanner({
           size="small"
           onClick={toggleCollapse}
           aria-label={
-            collapsed ? "Expand chapter context" : "Collapse chapter context"
+            collapsed
+              ? t("narrativeContextBanner.expand")
+              : t("narrativeContextBanner.collapse")
           }
           aria-expanded={!collapsed}
         >
@@ -148,7 +154,10 @@ export function NarrativeContextBanner({
             color="text.secondary"
             sx={{ minWidth: 60 }}
           >
-            {linkedChallenge.currentXP}/{linkedChallenge.targetXP} XP
+            {t("narrativeContextBanner.xpProgress", {
+              current: linkedChallenge.currentXP,
+              target: linkedChallenge.targetXP,
+            })}
           </Typography>
         </Box>
       </Collapse>

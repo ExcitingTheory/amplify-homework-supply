@@ -150,13 +150,14 @@ export function useYjsQuestion(
         }
 
         // Initialize metadata if empty (first time or no snapshot)
-        if (metadata && metadata.size === 0) {
-          metadata.set("id", data.id);
-          metadata.set("prompt", data.prompt || "");
-          metadata.set("hint", data.hint || "");
-          metadata.set("answer", data.answer || "");
-          metadata.set("audio", data.audio || []);
-          metadata.set("updatedAt", new Date().toISOString());
+        const docMetadata = provider?.getDoc().getMap("metadata");
+        if (docMetadata && docMetadata.size === 0) {
+          docMetadata.set("id", data.id);
+          docMetadata.set("prompt", data.prompt || "");
+          docMetadata.set("hint", data.hint || "");
+          docMetadata.set("answer", data.answer || "");
+          docMetadata.set("audio", data.audio || []);
+          docMetadata.set("updatedAt", new Date().toISOString());
           console.log(
             `[useYjsQuestion] Initialized metadata for question ${questionId}`,
           );

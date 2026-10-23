@@ -65,6 +65,15 @@ import { getAmplifyClient } from "../../../utils/amplifyClient";
 
 const filter = createFilterOptions();
 
+const EMPTY_ROW_CELL_SX = {
+  width: "100%",
+  textAlign: "center",
+  fontStyle: "italic",
+};
+const AUTO_ROW_HEIGHT = "auto";
+const INCLUDE_SELECTION_TYPE = "include";
+const MEANING_ASSOCIATION_BLOCK_TYPE = "meaning-association";
+
 const getColumns = (t) => [
   {
     field: "phrase",
@@ -77,8 +86,7 @@ const getColumns = (t) => [
         <Typography
           variant="body2"
           color="text.secondary"
-          fontStyle="italic"
-          sx={{ width: "100%", textAlign: "center" }}
+          sx={EMPTY_ROW_CELL_SX}
         >
           {params.value}
         </Typography>
@@ -101,7 +109,10 @@ const getColumns = (t) => [
 ];
 
 export function RemoveWordsButton({ ids, removeWordIDs }) {
-  const removeLabel = `Remove ${ids.length} ${ids.length === 1 ? "word" : "words"}`;
+  const t = useTranslations("editor.blocks");
+  const removeLabel = t("meaningAssociationEditor.removeWords", {
+    count: ids.length,
+  });
 
   return (
     <Button
@@ -268,11 +279,16 @@ export default function MeaningAssociationEditor({
     });
   };
 
+  const removeRowLabel = (row) =>
+    row.phrase
+      ? t("meaningAssociationEditor.removeNamedWord", { phrase: row.phrase })
+      : t("meaningAssociationEditor.removeWord");
+
   const gridColumns = [
     ...getColumns(t),
     {
       field: "actions",
-      headerName: "Actions",
+      headerName: t("meaningAssociationEditor.actionsColumn"),
       width: 80,
       sortable: false,
       filterable: false,
@@ -281,10 +297,10 @@ export default function MeaningAssociationEditor({
       renderCell: (params) => {
         if (params.row.id === "__empty__") return null;
         return (
-          <Tooltip title={`Remove ${params.row.phrase || "word"}`}>
+          <Tooltip title={removeRowLabel(params.row)}>
             <IconButton
               size="small"
-              aria-label={`Remove ${params.row.phrase || "word"}`}
+              aria-label={removeRowLabel(params.row)}
               sx={{ color: "common.black" }}
               onClick={(event) => {
                 event.stopPropagation();
@@ -395,7 +411,7 @@ export default function MeaningAssociationEditor({
   return (
     <div ref={meaningAssociationRef} style={{ cursor: "pointer" }}>
       <ExerciseBlockCard
-        blockType="meaning-association"
+        blockType={MEANING_ASSOCIATION_BLOCK_TYPE}
         selected={isSelected}
         sx={{ maxWidth: "72rem" }}
       >
@@ -454,7 +470,9 @@ export default function MeaningAssociationEditor({
               if (params.inputValue !== "") {
                 filtered.push({
                   inputValue: params.inputValue,
-                  phrase: `Add "${params.inputValue}"`,
+                  phrase: t("meaningAssociationEditor.addNewOption", {
+                    value: params.inputValue,
+                  }),
                 });
               }
 
@@ -561,7 +579,7 @@ export default function MeaningAssociationEditor({
                     definition: event.target.value,
                   })
                 }
-                aria-label="Definition"
+                aria-label={t("meaningAssociationEditor.definitionAriaLabel")}
                 placeholder={t(
                   "meaningAssociationEditor.definitionPlaceholder",
                 )}
@@ -594,7 +612,7 @@ export default function MeaningAssociationEditor({
             rows={gridRows}
             columns={gridColumns}
             getRowHeight={(params) =>
-              params.id === "__empty__" ? "auto" : null
+              params.id === "__empty__" ? AUTO_ROW_HEIGHT : null
             }
             getRowClassName={getEditorDataGridRowClassName}
             hideFooter
@@ -603,7 +621,7 @@ export default function MeaningAssociationEditor({
             disableRowSelectionExcludeModel
             slotProps={{ baseCheckbox: roundedCheckboxIcons }}
             rowSelectionModel={{
-              type: "include",
+              type: INCLUDE_SELECTION_TYPE,
               ids: new Set(gridSelection),
             }}
             onRowSelectionModelChange={(model) => {

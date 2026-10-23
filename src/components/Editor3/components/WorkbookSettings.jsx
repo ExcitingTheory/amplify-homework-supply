@@ -29,6 +29,14 @@ export default function WorkbookSettings() {
   const loadingSettings = settingsContext?.isLoading || false;
   const updateSettings = settingsContext?.updateSettings;
 
+  const accessibilityMovedNotice = t.rich('workbookSettings.accessibilityMoved', {
+    link: (chunks) => (
+      <a href="/settings" style={{ color: 'inherit', fontWeight: 600 }}>
+        {chunks}
+      </a>
+    ),
+  });
+
   const handleSettingChange = async (field, value) => {
     if (!updateSettings) return;
     try {
@@ -65,10 +73,7 @@ export default function WorkbookSettings() {
           color="text.secondary"
           sx={{ mb: 1 }}
         >
-          Accessibility settings (reduced motion, high contrast) have moved to your{' '}
-          <a href="/settings" style={{ color: 'inherit', fontWeight: 600 }}>
-            global Settings page
-          </a>.
+          {accessibilityMovedNotice}
         </Typography>
       </Box>
 
@@ -101,9 +106,8 @@ export default function WorkbookSettings() {
         />
         <Typography
           variant="caption"
-          display="block"
           color="text.secondary"
-          sx={{ ml: 4, mb: 2 }}
+          sx={{ display: 'block', ml: 4, mb: 2 }}
         >
           {t('workbookSettings.autoPlayAudioDescription')}
         </Typography>
@@ -129,9 +133,8 @@ export default function WorkbookSettings() {
         />
         <Typography
           variant="caption"
-          display="block"
           color="text.secondary"
-          sx={{ ml: 4 }}
+          sx={{ display: 'block', ml: 4 }}
         >
           {t('workbookSettings.showWaveformsDescription')}
         </Typography>
@@ -166,9 +169,8 @@ export default function WorkbookSettings() {
         />
         <Typography
           variant="caption"
-          display="block"
           color="text.secondary"
-          sx={{ ml: 4 }}
+          sx={{ display: 'block', ml: 4 }}
         >
           {t('workbookSettings.immediateFeedbackDescription')}
         </Typography>

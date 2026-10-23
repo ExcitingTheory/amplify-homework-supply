@@ -27,6 +27,7 @@ import Typography from "@mui/material/Typography";
 import GroupIcon from "@mui/icons-material/Group";
 import ExitToAppIcon from "@mui/icons-material/ExitToApp";
 import StarIcon from "@mui/icons-material/Star";
+import { useTranslations } from "next-intl";
 import { SquadCrest } from "./SquadCrest";
 import { AvatarDisplay } from "./AvatarDisplay";
 import { EmptyState } from "../EmptyState";
@@ -92,6 +93,7 @@ export function SquadJoinPanel({
   isLoading = false,
   level = 1,
 }: SquadJoinPanelProps) {
+  const t = useTranslations("components");
   const [confirmLeave, setConfirmLeave] = useState(false);
   const [selectedSquad, setSelectedSquad] = useState<SquadListEntry | null>(
     null,
@@ -134,11 +136,13 @@ export function SquadJoinPanel({
               <Stack direction="row" spacing={1} alignItems="center">
                 <Chip
                   icon={<GroupIcon />}
-                  label={`${mySquad.memberCount} members`}
+                  label={t("squadJoinPanel.memberCount", {
+                    count: mySquad.memberCount,
+                  })}
                   size="small"
                 />
                 <Chip
-                  label={`${mySquad.totalXP} XP`}
+                  label={t("squadJoinPanel.totalXp", { xp: mySquad.totalXP })}
                   size="small"
                   color="primary"
                   variant="outlined"
@@ -146,7 +150,7 @@ export function SquadJoinPanel({
                 {isLeader && (
                   <Chip
                     icon={<StarIcon />}
-                    label="Leader"
+                    label={t("squadJoinPanel.leader")}
                     size="small"
                     color="warning"
                   />
@@ -156,7 +160,7 @@ export function SquadJoinPanel({
                 (mySquad.description.trim().startsWith("{") ? (
                   <NarrativeReader
                     contentJson={mySquad.description}
-                    ariaLabel="Squad description"
+                    ariaLabel={t("squadJoinPanel.squadDescriptionLabel")}
                     padding="0.25rem 0"
                   />
                 ) : (
@@ -184,13 +188,15 @@ export function SquadJoinPanel({
 
           {/* Members list */}
           <Typography variant="subtitle2" gutterBottom>
-            Members
+            {t("squadJoinPanel.members")}
           </Typography>
           <List dense>
             {mySquadMembers.map((member) => (
               <ListItem key={member.id} disablePadding sx={{ py: 0.5 }}>
                 <ListItemAvatar sx={{ minWidth: 36 }}>
                   <AvatarDisplay
+                    profileUsername={member.studentId}
+                    label={member.displayName}
                     seed={member.studentId}
                     size={32}
                     style={member.avatarStyle}
@@ -199,7 +205,11 @@ export function SquadJoinPanel({
                 </ListItemAvatar>
                 <ListItemText
                   primary={member.displayName || member.studentId}
-                  secondary={member.role === "LEADER" ? "⭐ Leader" : "Member"}
+                  secondary={
+                    member.role === "LEADER"
+                      ? t("squadJoinPanel.leaderRole")
+                      : t("squadJoinPanel.memberRole")
+                  }
                 />
               </ListItem>
             ))}
@@ -213,23 +223,24 @@ export function SquadJoinPanel({
             onClick={() => setConfirmLeave(true)}
             disabled={isLoading}
           >
-            Leave Squad
+            {t("squadJoinPanel.leaveSquad")}
           </Button>
         </CardActions>
 
         {/* Leave confirmation */}
         <Dialog open={confirmLeave} onClose={() => setConfirmLeave(false)}>
-          <DialogTitle>Leave {mySquad.name}?</DialogTitle>
+          <DialogTitle>
+            {t("squadJoinPanel.leaveTitle", { name: mySquad.name })}
+          </DialogTitle>
           <DialogContent>
-            <Typography>
-              Are you sure you want to leave this squad? You can rejoin later if
-              space is available.
-            </Typography>
+            <Typography>{t("squadJoinPanel.leaveConfirm")}</Typography>
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setConfirmLeave(false)}>Cancel</Button>
+            <Button onClick={() => setConfirmLeave(false)}>
+              {t("squadJoinPanel.cancel")}
+            </Button>
             <Button onClick={handleLeave} color="error" variant="contained">
-              Leave
+              {t("squadJoinPanel.leave")}
             </Button>
           </DialogActions>
         </Dialog>
@@ -241,11 +252,10 @@ export function SquadJoinPanel({
   return (
     <Box>
       <Typography variant="h6" gutterBottom>
-        Join a Squad
+        {t("squadJoinPanel.joinTitle")}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Join a squad to collaborate with peers, earn bonus XP, and compete on
-        the leaderboard.
+        {t("squadJoinPanel.joinDescription")}
       </Typography>
 
       {/* Create Squad section */}
@@ -253,8 +263,8 @@ export function SquadJoinPanel({
       {availableSquads.length === 0 ? (
         <EmptyState
           dense
-          title="No squads available yet"
-          description="Check back soon or create your own squad to get started."
+          title={t("squadJoinPanel.emptyTitle")}
+          description={t("squadJoinPanel.emptyDescription")}
         />
       ) : (
         <Stack spacing={1.5}>
@@ -279,17 +289,21 @@ export function SquadJoinPanel({
                   <Typography variant="subtitle2">{squad.name}</Typography>
                   <Stack direction="row" spacing={1}>
                     <Typography variant="caption" color="text.secondary">
-                      {squad.memberCount} members
+                      {t("squadJoinPanel.memberCount", {
+                        count: squad.memberCount,
+                      })}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      {squad.totalXP} XP
+                      {t("squadJoinPanel.totalXp", { xp: squad.totalXP })}
                     </Typography>
                   </Stack>
                   {squad.description &&
                     (squad.description.trim().startsWith("{") ? (
                       <NarrativeReader
                         contentJson={squad.description}
-                        ariaLabel={`${squad.name} description`}
+                        ariaLabel={t("squadJoinPanel.namedDescriptionLabel", {
+                          name: squad.name,
+                        })}
                         padding="0.25rem 0"
                       />
                     ) : (
@@ -304,7 +318,7 @@ export function SquadJoinPanel({
                   onClick={() => handleJoin(squad)}
                   disabled={isLoading}
                 >
-                  Join
+                  {t("squadJoinPanel.join")}
                 </Button>
               </CardContent>
             </Card>
@@ -314,7 +328,11 @@ export function SquadJoinPanel({
 
       {/* Join confirmation dialog */}
       <Dialog open={!!selectedSquad} onClose={() => setSelectedSquad(null)}>
-        <DialogTitle>Join {selectedSquad?.name}?</DialogTitle>
+        <DialogTitle>
+          {t("squadJoinPanel.joinDialogTitle", {
+            name: selectedSquad?.name ?? "",
+          })}
+        </DialogTitle>
         <DialogContent>
           <Stack alignItems="center" spacing={2} sx={{ pt: 1 }}>
             {selectedSquad && (
@@ -324,20 +342,19 @@ export function SquadJoinPanel({
                 size="large"
               />
             )}
-            <Typography>
-              You&apos;ll join as a member and start contributing XP to this
-              squad.
-            </Typography>
+            <Typography>{t("squadJoinPanel.joinConfirm")}</Typography>
           </Stack>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setSelectedSquad(null)}>Cancel</Button>
+          <Button onClick={() => setSelectedSquad(null)}>
+            {t("squadJoinPanel.cancel")}
+          </Button>
           <Button
             onClick={handleConfirmJoin}
             variant="contained"
             disabled={isLoading}
           >
-            Join Squad
+            {t("squadJoinPanel.joinSquad")}
           </Button>
         </DialogActions>
       </Dialog>

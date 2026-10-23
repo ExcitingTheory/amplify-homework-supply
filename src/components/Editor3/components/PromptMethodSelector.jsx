@@ -25,19 +25,14 @@ const METHOD_OPTIONS = [
   ["video", "video"],
 ];
 
-const METHOD_DESCRIPTIONS = {
-  text: "Display the prompt or response as text.",
-  audio: "Use recorded or generated audio.",
-  image: "Display an image as the prompt or response.",
-  writing: "Allow a handwritten response on a drawing surface.",
-  video: "Use video as the prompt or response.",
+const MEANING_MODE_OPTIONS = ["learn", "easy", "hard"];
+const PROMPT_FOR_OPTIONS = ["word", "definition"];
+const ARIA_TRUE = "true";
+const MENU_IDS = {
+  meaningModes: "meaning-modes-menu",
+  allowedInputs: "allowed-inputs-menu",
+  promptMethods: "prompt-methods-menu",
 };
-
-const MEANING_MODE_OPTIONS = [
-  ["learn", "Learn", "Study with guided matching and feedback."],
-  ["easy", "Easy", "Match words with their meanings."],
-  ["hard", "Hard", "Match without the guided meaning cues."],
-];
 
 function SelectorMenuItem({ value, selected, label, onSelect }) {
   return (
@@ -80,6 +75,7 @@ export const MeaningAssociationModeSelector = React.memo(
     showPronunciation = true,
     setShowPronunciation,
   }) => {
+    const t = useTranslations("editor.ai");
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
 
@@ -102,13 +98,13 @@ export const MeaningAssociationModeSelector = React.memo(
           size="small"
           startIcon={<ViewModuleIcon />}
           endIcon={<ArrowDropDownIcon />}
-          aria-controls={open ? "meaning-modes-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
+          aria-controls={open ? MENU_IDS.meaningModes : undefined}
+          aria-haspopup={ARIA_TRUE}
+          aria-expanded={open ? ARIA_TRUE : undefined}
           onClick={(event) => setAnchorEl(open ? null : event.currentTarget)}
           sx={selectorButtonSx}
         >
-          Configure
+          {t("promptMethodSelector.configure")}
         </Button>
         <Menu
           id="meaning-modes-menu"
@@ -123,12 +119,12 @@ export const MeaningAssociationModeSelector = React.memo(
         >
           <ListItemText
             sx={{ px: 2, pt: 1, pb: 0.75, minWidth: 300 }}
-            primary="Practice Modes"
-            secondary="Choose which matching activities learners complete."
+            primary={t("promptMethodSelector.practiceModes")}
+            secondary={t("promptMethodSelector.practiceModesDescription")}
             primaryTypographyProps={{ fontWeight: 700 }}
             secondaryTypographyProps={{ fontSize: "0.75rem" }}
           />
-          {MEANING_MODE_OPTIONS.map(([value, label, description]) => {
+          {MEANING_MODE_OPTIONS.map((value) => {
             const selected = enabledModes.includes(value);
             return (
               <MenuItem
@@ -148,8 +144,12 @@ export const MeaningAssociationModeSelector = React.memo(
                   />
                 </ListItemIcon>
                 <ListItemText
-                  primary={label}
-                  secondary={description}
+                  primary={t(
+                    `promptMethodSelector.meaningModes.${value}.label`,
+                  )}
+                  secondary={t(
+                    `promptMethodSelector.meaningModes.${value}.description`,
+                  )}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
               </MenuItem>
@@ -158,8 +158,8 @@ export const MeaningAssociationModeSelector = React.memo(
           <Divider />
           <ListItemText
             sx={{ px: 2, pt: 1, pb: 0.75, minWidth: 300 }}
-            primary="Display Settings"
-            secondary="Control supporting vocabulary text and audio."
+            primary={t("promptMethodSelector.displaySettings")}
+            secondary={t("promptMethodSelector.displaySettingsDescription")}
             primaryTypographyProps={{ fontWeight: 700 }}
             secondaryTypographyProps={{ fontSize: "0.75rem" }}
           />
@@ -177,8 +177,10 @@ export const MeaningAssociationModeSelector = React.memo(
               />
             </ListItemIcon>
             <ListItemText
-              primary="Show Pronunciations"
-              secondary="Display pronunciation text alongside vocabulary."
+              primary={t("promptMethodSelector.showPronunciations")}
+              secondary={t(
+                "promptMethodSelector.showPronunciationsDescription",
+              )}
               secondaryTypographyProps={{ fontSize: "0.75rem" }}
             />
           </MenuItem>
@@ -196,8 +198,10 @@ export const MeaningAssociationModeSelector = React.memo(
               />
             </ListItemIcon>
             <ListItemText
-              primary="Enable Audio Playback"
-              secondary="Allow audio controls for words and definitions."
+              primary={t("promptMethodSelector.enableAudioPlayback")}
+              secondary={t(
+                "promptMethodSelector.enableAudioPlaybackDescription",
+              )}
               secondaryTypographyProps={{ fontSize: "0.75rem" }}
             />
           </MenuItem>
@@ -208,27 +212,27 @@ export const MeaningAssociationModeSelector = React.memo(
 );
 
 export const MeaningAssociationPromptSelector = React.memo(
-  ({ promptFor = "definition", setPromptFor }) => (
-    <ButtonGroup
-      size="small"
-      variant="outlined"
-      color="secondary"
-      aria-label="Prompt for word or definition"
-    >
-      <Button
-        variant={promptFor === "word" ? "contained" : "outlined"}
-        onClick={() => setPromptFor("word")}
+  ({ promptFor = "definition", setPromptFor }) => {
+    const t = useTranslations("editor.ai");
+    return (
+      <ButtonGroup
+        size="small"
+        variant="outlined"
+        color="secondary"
+        aria-label={t("promptMethodSelector.promptForAriaLabel")}
       >
-        Prompt for word
-      </Button>
-      <Button
-        variant={promptFor === "definition" ? "contained" : "outlined"}
-        onClick={() => setPromptFor("definition")}
-      >
-        Prompt for definition
-      </Button>
-    </ButtonGroup>
-  ),
+        {PROMPT_FOR_OPTIONS.map((value) => (
+          <Button
+            key={value}
+            variant={promptFor === value ? "contained" : "outlined"}
+            onClick={() => setPromptFor(value)}
+          >
+            {t(`promptMethodSelector.promptFor.${value}.label`)}
+          </Button>
+        ))}
+      </ButtonGroup>
+    );
+  },
 );
 
 export const AnswerConfigurationSelector = React.memo(
@@ -262,11 +266,11 @@ export const AnswerConfigurationSelector = React.memo(
           startIcon={<ViewModuleIcon />}
           endIcon={<ArrowDropDownIcon />}
           onClick={(event) => setAnchorEl(event.currentTarget)}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
+          aria-haspopup={ARIA_TRUE}
+          aria-expanded={open ? ARIA_TRUE : undefined}
           sx={selectorButtonSx}
         >
-          Configure
+          {t("promptMethodSelector.configure")}
         </Button>
         {!isValid && (
           <Typography
@@ -274,7 +278,7 @@ export const AnswerConfigurationSelector = React.memo(
             color="error.main"
             sx={{ fontSize: "0.7rem", lineHeight: 1.2 }}
           >
-            Select at least one input and output method
+            {t("promptMethodSelector.invalidConfig")}
           </Typography>
         )}
         <Menu
@@ -285,8 +289,8 @@ export const AnswerConfigurationSelector = React.memo(
         >
           <ListItemText
             sx={configureSectionSx}
-            primary="Output"
-            secondary="How the question is presented to the learner."
+            primary={t("promptMethodSelector.outputButton")}
+            secondary={t("promptMethodSelector.outputDescription")}
             primaryTypographyProps={configureSectionTitleProps}
             secondaryTypographyProps={configureSectionDescriptionProps}
           />
@@ -294,12 +298,12 @@ export const AnswerConfigurationSelector = React.memo(
             <>
               <ListItemText
                 sx={configureSectionSx}
-                primary="Prompt"
-                secondary="Choose whether learners see words or definitions."
+                primary={t("promptMethodSelector.promptHeading")}
+                secondary={t("promptMethodSelector.promptDescription")}
                 primaryTypographyProps={configureSectionTitleProps}
                 secondaryTypographyProps={configureSectionDescriptionProps}
               />
-              {["word", "definition"].map((value) => (
+              {PROMPT_FOR_OPTIONS.map((value) => (
                 <MenuItem
                   key={`prompt-${value}`}
                   dense
@@ -314,16 +318,10 @@ export const AnswerConfigurationSelector = React.memo(
                     />
                   </ListItemIcon>
                   <ListItemText
-                    primary={
-                      value === "word"
-                        ? "Prompt for word"
-                        : "Prompt for definition"
-                    }
-                    secondary={
-                      value === "word"
-                        ? "Show the vocabulary word as the target."
-                        : "Show the definition as the target."
-                    }
+                    primary={t(`promptMethodSelector.promptFor.${value}.label`)}
+                    secondary={t(
+                      `promptMethodSelector.promptFor.${value}.description`,
+                    )}
                     secondaryTypographyProps={{ fontSize: "0.75rem" }}
                   />
                 </MenuItem>
@@ -345,7 +343,9 @@ export const AnswerConfigurationSelector = React.memo(
                 </ListItemIcon>
                 <ListItemText
                   primary={t(`promptMethodSelector.menuItems.${labelKey}`)}
-                  secondary={METHOD_DESCRIPTIONS[value]}
+                  secondary={t(
+                    `promptMethodSelector.methodDescriptions.${value}`,
+                  )}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
               </MenuItem>
@@ -354,8 +354,8 @@ export const AnswerConfigurationSelector = React.memo(
           <Divider />
           <ListItemText
             sx={configureSectionSx}
-            primary="Input"
-            secondary="How the learner submits an answer."
+            primary={t("promptMethodSelector.inputButton")}
+            secondary={t("promptMethodSelector.inputDescription")}
             primaryTypographyProps={configureSectionTitleProps}
             secondaryTypographyProps={configureSectionDescriptionProps}
           />
@@ -373,7 +373,9 @@ export const AnswerConfigurationSelector = React.memo(
                 </ListItemIcon>
                 <ListItemText
                   primary={t(`promptMethodSelector.menuItems.${labelKey}`)}
-                  secondary={METHOD_DESCRIPTIONS[value]}
+                  secondary={t(
+                    `promptMethodSelector.methodDescriptions.${value}`,
+                  )}
                   secondaryTypographyProps={{ fontSize: "0.75rem" }}
                 />
               </MenuItem>
@@ -408,7 +410,7 @@ export const AllowedInputSelector = React.memo(
           setAllowedInputLocal(selected);
         }
       }
-    }, [allowedInput]);
+    }, [allowedInput, _allowedInput]);
 
     const handleClick = (event) => {
       setAnchorEl(event.currentTarget);
@@ -435,9 +437,9 @@ export const AllowedInputSelector = React.memo(
           size="small"
           startIcon={<InputIcon />}
           endIcon={<ArrowDropDownIcon />}
-          aria-controls={open ? "allowed-inputs-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
+          aria-controls={open ? MENU_IDS.allowedInputs : undefined}
+          aria-haspopup={ARIA_TRUE}
+          aria-expanded={open ? ARIA_TRUE : undefined}
           onClick={open ? handleClose : handleClick}
           sx={selectorButtonSx}
         >
@@ -503,7 +505,7 @@ export const PromptMethodSelector = React.memo(
           setPromptMethods(promptMethod);
         }
       }
-    }, [promptMethod]);
+    }, [promptMethod, _promptMethods]);
 
     // if the working methods change, update the promptMethod
     // React.useEffect(() => {
@@ -536,9 +538,9 @@ export const PromptMethodSelector = React.memo(
           size="small"
           startIcon={<VideoSettingsIcon />}
           endIcon={<ArrowDropDownIcon />}
-          aria-controls={open ? "prompt-methods-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={open ? "true" : undefined}
+          aria-controls={open ? MENU_IDS.promptMethods : undefined}
+          aria-haspopup={ARIA_TRUE}
+          aria-expanded={open ? ARIA_TRUE : undefined}
           onClick={open ? handleClose : handleClick}
           sx={selectorButtonSx}
         >

@@ -28,6 +28,8 @@ describe('applyLeaderboardPrivacy', () => {
 
     expect(result[0].studentName).toBe('Alice')
     expect(result[1].studentName).toBe('Anonymous Student')
+    expect(result[1].profileHidden).toBe(true)
+    expect(result[0].profileHidden).not.toBe(true)
     expect(result[1].avatarColor).toBe('#9e9e9e')
     expect(result[2].studentName).toBe('Charlie')
   })

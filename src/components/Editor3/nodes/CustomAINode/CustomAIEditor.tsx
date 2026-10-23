@@ -64,11 +64,11 @@ interface CustomAIEditorProps {
   allowedInput: CustomAIInputMode[];
 }
 
-const INPUT_MODE_OPTIONS: { value: CustomAIInputMode; label: string }[] = [
-  { value: "text", label: "Text" },
-  { value: "audio", label: "Audio" },
-  { value: "image", label: "Image" },
-  { value: "drawing", label: "Drawing" },
+const INPUT_MODE_OPTIONS: { value: CustomAIInputMode; labelKey: string }[] = [
+  { value: "text", labelKey: "customAIEditor.inputModeText" },
+  { value: "audio", labelKey: "customAIEditor.inputModeAudio" },
+  { value: "image", labelKey: "customAIEditor.inputModeImage" },
+  { value: "drawing", labelKey: "customAIEditor.inputModeDrawing" },
 ];
 
 export default React.memo(function CustomAIEditor({
@@ -91,7 +91,10 @@ export default React.memo(function CustomAIEditor({
   >(allowedInput?.length > 0 ? allowedInput : ["text"]);
 
   const { questionBank } = React.useContext(DictionaryContext);
-  const questionBankMap = (questionBank || {}) as Record<string, any>;
+  const questionBankMap = React.useMemo(
+    () => (questionBank || {}) as Record<string, any>,
+    [questionBank],
+  );
 
   // Build rows from question IDs
   const rows = React.useMemo(() => {
@@ -113,17 +116,29 @@ export default React.memo(function CustomAIEditor({
       );
   }, [questionIDs, questionBankMap]);
 
+  const removeQuestion = React.useCallback(
+    (questionId: string) => {
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isCustomAINode(node)) {
+          node.removeId(questionId);
+        }
+      });
+    },
+    [editor, nodeKey],
+  );
+
   const columns = React.useMemo<GridColDef[]>(
     () => [
       {
         field: "prompt",
-        headerName: "Question Prompt",
+        headerName: t("customAIEditor.questionPromptHeader"),
         flex: 2,
         minWidth: 200,
       },
       {
         field: "answer",
-        headerName: "Expected Answer",
+        headerName: t("customAIEditor.expectedAnswerHeader"),
         flex: 1,
         minWidth: 150,
       },
@@ -136,14 +151,14 @@ export default React.memo(function CustomAIEditor({
           <IconButton
             size="small"
             onClick={() => removeQuestion(params.row.id)}
-            aria-label="Remove question"
+            aria-label={t("customAIEditor.removeQuestion")}
           >
             <DeleteIcon fontSize="small" />
           </IconButton>
         ),
       },
     ],
-    [],
+    [t, removeQuestion],
   );
 
   // Available questions for the autocomplete
@@ -153,9 +168,12 @@ export default React.memo(function CustomAIEditor({
       .filter((q: any) => q && !usedIds.has(q.id))
       .map((q: any) => ({
         id: q.id,
-        prompt: q.prompt || q.question || `Question ${q.id}`,
+        prompt:
+          q.prompt ||
+          q.question ||
+          t("customAIEditor.questionFallback", { id: q.id }),
       }));
-  }, [questionBankMap, questionIDs]);
+  }, [questionBankMap, questionIDs, t]);
 
   const addQuestion = React.useCallback(
     (questionId: string) => {
@@ -163,18 +181,6 @@ export default React.memo(function CustomAIEditor({
         const node = $getNodeByKey(nodeKey);
         if ($isCustomAINode(node)) {
           node.appendId(questionId);
-        }
-      });
-    },
-    [editor, nodeKey],
-  );
-
-  const removeQuestion = React.useCallback(
-    (questionId: string) => {
-      editor.update(() => {
-        const node = $getNodeByKey(nodeKey);
-        if ($isCustomAINode(node)) {
-          node.removeId(questionId);
         }
       });
     },
@@ -246,6 +252,7 @@ export default React.memo(function CustomAIEditor({
 
   return (
     <ExerciseBlockCard
+      // eslint-disable-next-line i18next/no-literal-string -- block type identifier
       blockType="custom-ai"
       selected={isSelected}
       sx={{ maxWidth: "72rem" }}
@@ -257,29 +264,31 @@ export default React.memo(function CustomAIEditor({
         </Typography>
         <Chip
           icon={<SecurityIcon />}
-          label="Secure Grading"
+          label={t("customAIEditor.secureGrading")}
           size="small"
           color="success"
           variant="outlined"
         />
       </Box>
 
-      <Typography variant="p">{t("customAIEditor.description")}</Typography>
+      <Typography variant="body1" component="p">
+        {t("customAIEditor.description")}
+      </Typography>
 
       {/* Allowed Input Modes */}
       <Box sx={{ mt: 1.5, mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
-          Student Input Modes
+          {t("customAIEditor.studentInputModes")}
         </Typography>
         <ToggleButtonGroup
           value={localAllowedInput}
           onChange={handleAllowedInputChange}
-          aria-label="Allowed input modes"
+          aria-label={t("customAIEditor.allowedInputModes")}
           size="small"
         >
           {INPUT_MODE_OPTIONS.map((opt) => (
             <ToggleButton key={opt.value} value={opt.value}>
-              {opt.label}
+              {t(opt.labelKey)}
             </ToggleButton>
           ))}
         </ToggleButtonGroup>
@@ -288,7 +297,7 @@ export default React.memo(function CustomAIEditor({
       {/* Grading Criteria */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
-          Grading Criteria (AI Instructions)
+          {t("customAIEditor.gradingCriteria")}
         </Typography>
         <TextField
           multiline
@@ -298,17 +307,19 @@ export default React.memo(function CustomAIEditor({
           value={localCriteria}
           onChange={handleCriteriaChange}
           onBlur={saveCriteria}
-          placeholder="Describe how the AI should grade student responses. E.g., 'Grade based on understanding of photosynthesis. Award full marks for mentioning light-dependent reactions, Calvin cycle, and role of chlorophyll.'"
+          placeholder={t("customAIEditor.criteriaPlaceholder")}
           variant="outlined"
           size="small"
-          helperText="The AI will use these criteria to evaluate student submissions. Students cannot see this."
+          helperText={t("customAIEditor.criteriaHelperText")}
         />
       </Box>
 
       {/* Question Selector */}
       <Box sx={{ mb: 2 }}>
         <Typography variant="subtitle2" gutterBottom>
-          Questions ({questionIDs?.length || 0})
+          {t("customAIEditor.questionsCount", {
+            count: questionIDs?.length || 0,
+          })}
         </Typography>
         <Autocomplete
           options={availableQuestions}
@@ -319,7 +330,7 @@ export default React.memo(function CustomAIEditor({
           renderInput={(params) => (
             <TextField
               {...params}
-              placeholder="Search and add questions from the question bank"
+              placeholder={t("customAIEditor.searchQuestions")}
               size="small"
             />
           )}
@@ -362,10 +373,7 @@ export default React.memo(function CustomAIEditor({
             fontSize="inherit"
             sx={{ verticalAlign: "middle", mr: 0.5 }}
           />
-          Security: The AI grading prompt is hardened against prompt injection,
-          character-breaking, and data leakage. Student input is sanitized.
-          Grading criteria are hidden from students. Output is validated and
-          PII-filtered.
+          {t("customAIEditor.securityNotice")}
         </Typography>
       </Box>
     </ExerciseBlockCard>

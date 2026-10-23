@@ -58,6 +58,9 @@ MessageHeader.propTypes = {
   ]),
 };
 
+const TOOL_PART_PREFIX = "tool-";
+const JSON_LANGUAGE = "json";
+
 /**
  * Tool Results Component
  * Displays results from tool/function calls
@@ -69,7 +72,7 @@ const ToolResults = ({ parts }) => {
     <div style={{ marginTop: "8px" }}>
       {parts.map((part, idx) => {
         if (
-          part.type?.startsWith("tool-") &&
+          part.type?.startsWith(TOOL_PART_PREFIX) &&
           part.state === "output-available"
         ) {
           return (
@@ -91,11 +94,11 @@ const ToolResults = ({ parts }) => {
                   color: "var(--text-secondary, #666)",
                 }}
               >
-                {part.type.replace("tool-", "")}
+                {part.type.replace(TOOL_PART_PREFIX, "")}
               </div>
               {typeof part.output === "object" ? (
                 <SyntaxHighlight
-                  language="json"
+                  language={JSON_LANGUAGE}
                   code={JSON.stringify(part.output, null, 2)}
                 />
               ) : (
@@ -241,7 +244,9 @@ export const VirtualizedMessageList = ({
 
             // Extract tool parts
             const toolParts =
-              message.parts?.filter((p) => p.type?.startsWith("tool-")) || [];
+              message.parts?.filter((p) =>
+                p.type?.startsWith(TOOL_PART_PREFIX),
+              ) || [];
 
             return (
               <div

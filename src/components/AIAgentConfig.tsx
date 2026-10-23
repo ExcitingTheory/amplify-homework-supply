@@ -13,6 +13,7 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import Button from "@mui/material/Button";
 import Stack from "@mui/material/Stack";
+import Alert from "@mui/material/Alert";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -61,6 +62,12 @@ export interface AIAgentConfigValues {
   sageToolResultBudget?: number | null;
   kaiTotalTurnBudget?: number | null;
   sageTotalTurnBudget?: number | null;
+  documentAnalysisOpenAiRequestsPerMinute?: number | null;
+  documentAnalysisOpenAiTokensPerMinute?: number | null;
+  documentAnalysisOpenAiMaxConcurrentRequests?: number | null;
+  documentAnalysisAnthropicRequestsPerMinute?: number | null;
+  documentAnalysisAnthropicTokensPerMinute?: number | null;
+  documentAnalysisAnthropicMaxConcurrentRequests?: number | null;
   // Enforcement toggle
   enforceTokenBudget?: boolean;
 }
@@ -95,6 +102,7 @@ interface AIAgentConfigProps {
   onSave: () => void;
   /** Whether save is in progress */
   saving?: boolean;
+  error?: string | null;
   /** "platform" shows full controls, "section" shows override subset */
   mode: "platform" | "section";
 }
@@ -104,31 +112,59 @@ export function AIAgentConfig({
   onChange,
   onSave,
   saving,
+  error,
   mode,
 }: AIAgentConfigProps) {
-  const t = useTranslations("components.aiAgentConfig");
+  const t = useTranslations("components");
   const update = (key: string, value: any) => {
     onChange({ ...values, [key]: value });
   };
+  const documentAnalysisLimitKeys = [
+    "documentAnalysisOpenAiRequestsPerMinute",
+    "documentAnalysisOpenAiTokensPerMinute",
+    "documentAnalysisOpenAiMaxConcurrentRequests",
+    "documentAnalysisAnthropicRequestsPerMinute",
+    "documentAnalysisAnthropicTokensPerMinute",
+    "documentAnalysisAnthropicMaxConcurrentRequests",
+  ] as const;
+  const hasInvalidDocumentAnalysisLimits =
+    mode === "platform" &&
+    documentAnalysisLimitKeys.some((key) => {
+      const value = values[key];
+      return (
+        typeof value !== "number" ||
+        !Number.isSafeInteger(value) ||
+        value <= 0 ||
+        (key.endsWith("MaxConcurrentRequests") && value > 100)
+      );
+    });
 
   return (
     <Box sx={{ mt: 2 }}>
       <Typography variant="h6" gutterBottom>
-        {t("title")}
+        {t("aiAgentConfig.title")}
       </Typography>
+
+      {error && (
+        <Alert severity="error" role="alert" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
       {/* Model Selection */}
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">{t("modelSelection")}</Typography>
+          <Typography variant="subtitle1">
+            {t("aiAgentConfig.modelSelection")}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2}>
             {mode === "platform" && (
               <FormControl fullWidth size="small">
-                <InputLabel>{t("defaultModel")}</InputLabel>
+                <InputLabel>{t("aiAgentConfig.defaultModel")}</InputLabel>
                 <Select
-                  label={t("defaultModel")}
+                  label={t("aiAgentConfig.defaultModel")}
                   value={values.defaultAIModel || "gpt-4o"}
                   onChange={(e) => update("defaultAIModel", e.target.value)}
                 >
@@ -141,9 +177,9 @@ export function AIAgentConfig({
               </FormControl>
             )}
             <FormControl fullWidth size="small">
-              <InputLabel>{t("kaiModel")}</InputLabel>
+              <InputLabel>{t("aiAgentConfig.kaiModel")}</InputLabel>
               <Select
-                label={t("kaiModel")}
+                label={t("aiAgentConfig.kaiModel")}
                 value={values.kaiModel || ""}
                 onChange={(e) => update("kaiModel", e.target.value || null)}
                 displayEmpty
@@ -156,9 +192,9 @@ export function AIAgentConfig({
               </Select>
             </FormControl>
             <FormControl fullWidth size="small">
-              <InputLabel>{t("sageModel")}</InputLabel>
+              <InputLabel>{t("aiAgentConfig.sageModel")}</InputLabel>
               <Select
-                label={t("sageModel")}
+                label={t("aiAgentConfig.sageModel")}
                 value={values.sageModel || ""}
                 onChange={(e) => update("sageModel", e.target.value || null)}
                 displayEmpty
@@ -174,16 +210,130 @@ export function AIAgentConfig({
         </AccordionDetails>
       </Accordion>
 
+      {mode === "platform" && (
+        <Accordion>
+          <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+            <Typography variant="subtitle1">
+              {t("aiAgentConfig.documentAnalysisRateLimits")}
+            </Typography>
+          </AccordionSummary>
+          <AccordionDetails>
+            <Stack spacing={2}>
+              <Typography variant="body2" color="text.secondary">
+                {t("aiAgentConfig.documentAnalysisRateLimitsDescription")}
+              </Typography>
+              {/* eslint-disable-next-line i18next/no-literal-string -- Provider trademarks are not translated. */}
+              <Typography variant="subtitle2">OpenAI</Typography>
+              <TextField
+                label={t("aiAgentConfig.requestsPerMinuteLabel")}
+                type="number"
+                size="small"
+                value={values.documentAnalysisOpenAiRequestsPerMinute ?? ""}
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisOpenAiRequestsPerMinute",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                helperText={t("aiAgentConfig.requestsPerMinuteHint")}
+              />
+              <TextField
+                label={t("aiAgentConfig.tokensPerMinuteLabel")}
+                type="number"
+                size="small"
+                value={values.documentAnalysisOpenAiTokensPerMinute ?? ""}
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisOpenAiTokensPerMinute",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                helperText={t("aiAgentConfig.tokensPerMinuteHint")}
+              />
+              <TextField
+                label={t("aiAgentConfig.maxConcurrentRequestsLabel")}
+                type="number"
+                size="small"
+                value={
+                  values.documentAnalysisOpenAiMaxConcurrentRequests ?? ""
+                }
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisOpenAiMaxConcurrentRequests",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, max: 100, step: 1 } }}
+                helperText={t("aiAgentConfig.maxConcurrentRequestsHint")}
+              />
+              {/* eslint-disable-next-line i18next/no-literal-string -- Provider trademarks are not translated. */}
+              <Typography variant="subtitle2" sx={{ mt: 1 }}>
+                Anthropic
+              </Typography>
+              <TextField
+                label={t("aiAgentConfig.requestsPerMinuteLabel")}
+                type="number"
+                size="small"
+                value={values.documentAnalysisAnthropicRequestsPerMinute ?? ""}
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisAnthropicRequestsPerMinute",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                helperText={t("aiAgentConfig.requestsPerMinuteHint")}
+              />
+              <TextField
+                label={t("aiAgentConfig.tokensPerMinuteLabel")}
+                type="number"
+                size="small"
+                value={values.documentAnalysisAnthropicTokensPerMinute ?? ""}
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisAnthropicTokensPerMinute",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                helperText={t("aiAgentConfig.tokensPerMinuteHint")}
+              />
+              <TextField
+                label={t("aiAgentConfig.maxConcurrentRequestsLabel")}
+                type="number"
+                size="small"
+                value={
+                  values.documentAnalysisAnthropicMaxConcurrentRequests ?? ""
+                }
+                onChange={(e) =>
+                  update(
+                    "documentAnalysisAnthropicMaxConcurrentRequests",
+                    e.target.value ? Number(e.target.value) : null,
+                  )
+                }
+                slotProps={{ htmlInput: { min: 1, max: 100, step: 1 } }}
+                helperText={t("aiAgentConfig.maxConcurrentRequestsHint")}
+              />
+            </Stack>
+          </AccordionDetails>
+        </Accordion>
+      )}
+
       {/* Behavior Tuning */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">{t("behaviorTuning")}</Typography>
+          <Typography variant="subtitle1">
+            {t("aiAgentConfig.behaviorTuning")}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Box>
               <Typography variant="body2" gutterBottom>
-                {t("kaiTemperatureLabel")} {values.kaiTemperature ?? 0.7}
+                {t("aiAgentConfig.kaiTemperatureLabel")}{" "}
+                {values.kaiTemperature ?? 0.7}
               </Typography>
               <Slider
                 value={values.kaiTemperature ?? 0.7}
@@ -201,7 +351,8 @@ export function AIAgentConfig({
             </Box>
             <Box>
               <Typography variant="body2" gutterBottom>
-                {t("sageTemperatureLabel")} {values.sageTemperature ?? 0.7}
+                {t("aiAgentConfig.sageTemperatureLabel")}{" "}
+                {values.sageTemperature ?? 0.7}
               </Typography>
               <Slider
                 value={values.sageTemperature ?? 0.7}
@@ -218,7 +369,7 @@ export function AIAgentConfig({
               />
             </Box>
             <TextField
-              label={t("kaiMaxTokensLabel")}
+              label={t("aiAgentConfig.kaiMaxTokensLabel")}
               type="number"
               size="small"
               value={values.kaiMaxTokens ?? 2000}
@@ -231,7 +382,7 @@ export function AIAgentConfig({
               slotProps={{ htmlInput: { min: 100, max: 8000 } }}
             />
             <TextField
-              label={t("sageMaxTokensLabel")}
+              label={t("aiAgentConfig.sageMaxTokensLabel")}
               type="number"
               size="small"
               value={values.sageMaxTokens ?? 4000}
@@ -244,7 +395,7 @@ export function AIAgentConfig({
               slotProps={{ htmlInput: { min: 100, max: 8000 } }}
             />
             <TextField
-              label={t("maxAgentStepsLabel")}
+              label={t("aiAgentConfig.maxAgentStepsLabel")}
               type="number"
               size="small"
               value={values.agentMaxSteps ?? 5}
@@ -255,7 +406,7 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 1, max: 10 } }}
-              helperText={t("maxAgentStepsHint")}
+              helperText={t("aiAgentConfig.maxAgentStepsHint")}
             />
           </Stack>
         </AccordionDetails>
@@ -264,13 +415,16 @@ export function AIAgentConfig({
       {/* Search Tuning */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">{t("searchTuning")}</Typography>
+          <Typography variant="subtitle1">
+            {t("aiAgentConfig.searchTuning")}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Box>
               <Typography variant="body2" gutterBottom>
-                {t("similarityThresholdLabel")} {values.searchThreshold ?? 0.3}
+                {t("aiAgentConfig.similarityThresholdLabel")}{" "}
+                {values.searchThreshold ?? 0.3}
               </Typography>
               <Slider
                 value={values.searchThreshold ?? 0.3}
@@ -288,7 +442,7 @@ export function AIAgentConfig({
             </Box>
             {mode === "platform" && (
               <TextField
-                label={t("defaultResultLimitLabel")}
+                label={t("aiAgentConfig.defaultResultLimitLabel")}
                 type="number"
                 size="small"
                 value={values.searchDefaultLimit ?? 5}
@@ -308,7 +462,9 @@ export function AIAgentConfig({
       {/* Memory */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">{t("conversationMemory")}</Typography>
+          <Typography variant="subtitle1">
+            {t("aiAgentConfig.conversationMemory")}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2}>
@@ -319,13 +475,15 @@ export function AIAgentConfig({
                   onChange={(e) => update("memoryEnabled", e.target.checked)}
                 />
               }
-              label={t("enableConversationMemory")}
+              label={t("aiAgentConfig.enableConversationMemory")}
             />
             {mode === "platform" && (
               <FormControl fullWidth size="small">
-                <InputLabel>{t("summarizationModelLabel")}</InputLabel>
+                <InputLabel>
+                  {t("aiAgentConfig.summarizationModelLabel")}
+                </InputLabel>
                 <Select
-                  label={t("summarizationModelLabel")}
+                  label={t("aiAgentConfig.summarizationModelLabel")}
                   value={values.memorySummarizationModel || "gpt-4o-mini"}
                   onChange={(e) =>
                     update("memorySummarizationModel", e.target.value)
@@ -346,12 +504,14 @@ export function AIAgentConfig({
       {/* Token Budgets */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle1">{t("tokenBudgets")}</Typography>
+          <Typography variant="subtitle1">
+            {t("aiAgentConfig.tokenBudgets")}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={3}>
             <Typography variant="body2" color="text.secondary">
-              {t("tokenBudgetsDescription")}
+              {t("aiAgentConfig.tokenBudgetsDescription")}
             </Typography>
             <FormControlLabel
               control={
@@ -362,17 +522,17 @@ export function AIAgentConfig({
                   }
                 />
               }
-              label={t("enforceTokenBudget")}
+              label={t("aiAgentConfig.enforceTokenBudget")}
             />
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ mt: -2 }}
             >
-              {t("enforceTokenBudgetNote")}
+              {t("aiAgentConfig.enforceTokenBudgetNote")}
             </Typography>
             <TextField
-              label={t("systemPromptBudgetLabel")}
+              label={t("aiAgentConfig.systemPromptBudgetLabel")}
               type="number"
               size="small"
               value={values.systemPromptBudget ?? 2000}
@@ -383,10 +543,10 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-              helperText={t("systemPromptBudgetHint")}
+              helperText={t("aiAgentConfig.systemPromptBudgetHint")}
             />
             <TextField
-              label={t("toolResultBudgetLabel")}
+              label={t("aiAgentConfig.toolResultBudgetLabel")}
               type="number"
               size="small"
               value={values.toolResultBudget ?? 4000}
@@ -397,10 +557,10 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 500, max: 16000 } }}
-              helperText={t("toolResultBudgetHint")}
+              helperText={t("aiAgentConfig.toolResultBudgetHint")}
             />
             <TextField
-              label={t("totalTurnBudgetLabel")}
+              label={t("aiAgentConfig.totalTurnBudgetLabel")}
               type="number"
               size="small"
               value={values.totalTurnBudget ?? 16000}
@@ -411,16 +571,16 @@ export function AIAgentConfig({
                 )
               }
               slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
-              helperText={t("totalTurnBudgetHint")}
+              helperText={t("aiAgentConfig.totalTurnBudgetHint")}
             />
             {mode === "platform" && (
               <>
                 <Typography variant="subtitle2" sx={{ mt: 1, fontWeight: 600 }}>
-                  {t("perPersonaOverrides")}
+                  {t("aiAgentConfig.perPersonaOverrides")}
                 </Typography>
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label={t("kaiSystemPromptLabel")}
+                    label={t("aiAgentConfig.kaiSystemPromptLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -432,11 +592,11 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-                    placeholder={t("useDefaultPlaceholder")}
-                    helperText={t("tokensUnit")}
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                   <TextField
-                    label={t("sageSystemPromptLabel")}
+                    label={t("aiAgentConfig.sageSystemPromptLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -448,13 +608,13 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 8000 } }}
-                    placeholder={t("useDefaultPlaceholder")}
-                    helperText={t("tokensUnit")}
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                 </Stack>
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label={t("kaiToolResultLabel")}
+                    label={t("aiAgentConfig.kaiToolResultLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -466,11 +626,11 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 16000 } }}
-                    placeholder={t("useDefaultPlaceholder")}
-                    helperText={t("tokensUnit")}
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                   <TextField
-                    label={t("sageToolResultLabel")}
+                    label={t("aiAgentConfig.sageToolResultLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -482,13 +642,13 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 500, max: 16000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                 </Stack>
                 <Stack direction="row" spacing={2}>
                   <TextField
-                    label="Kai Total Turn"
+                    label={t("aiAgentConfig.kaiTotalTurnLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -500,11 +660,11 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                   <TextField
-                    label="Sage Total Turn"
+                    label={t("aiAgentConfig.sageTotalTurnLabel")}
                     type="number"
                     size="small"
                     fullWidth
@@ -516,8 +676,8 @@ export function AIAgentConfig({
                       )
                     }
                     slotProps={{ htmlInput: { min: 2000, max: 64000 } }}
-                    placeholder="Use default"
-                    helperText="tokens"
+                    placeholder={t("aiAgentConfig.useDefaultPlaceholder")}
+                    helperText={t("aiAgentConfig.tokensUnit")}
                   />
                 </Stack>
               </>
@@ -530,7 +690,9 @@ export function AIAgentConfig({
       {mode === "platform" && (
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-            <Typography variant="subtitle1">Persona Toggles</Typography>
+            <Typography variant="subtitle1">
+              {t("aiAgentConfig.personaToggles")}
+            </Typography>
           </AccordionSummary>
           <AccordionDetails>
             <Stack spacing={2}>
@@ -541,7 +703,7 @@ export function AIAgentConfig({
                     onChange={(e) => update("kaiEnabled", e.target.checked)}
                   />
                 }
-                label="Enable Kai (student tutor bot)"
+                label={t("aiAgentConfig.enableKai")}
               />
               <FormControlLabel
                 control={
@@ -550,7 +712,7 @@ export function AIAgentConfig({
                     onChange={(e) => update("sageEnabled", e.target.checked)}
                   />
                 }
-                label="Enable Sage (instructor assistant bot)"
+                label={t("aiAgentConfig.enableSage")}
               />
             </Stack>
           </AccordionDetails>
@@ -562,8 +724,8 @@ export function AIAgentConfig({
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle1">
             {mode === "section"
-              ? "Section-Specific Instructions"
-              : "Prompt Overrides"}
+              ? t("aiAgentConfig.sectionSpecificInstructions")
+              : t("aiAgentConfig.promptOverrides")}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -571,8 +733,8 @@ export function AIAgentConfig({
             <TextField
               label={
                 mode === "section"
-                  ? "Kai instructions (appended to system prompt)"
-                  : "Kai System Prompt Override"
+                  ? t("aiAgentConfig.kaiInstructionsAppend")
+                  : t("aiAgentConfig.kaiSystemPromptOverride")
               }
               multiline
               minRows={3}
@@ -595,8 +757,8 @@ export function AIAgentConfig({
             <TextField
               label={
                 mode === "section"
-                  ? "Sage instructions (appended to system prompt)"
-                  : "Sage System Prompt Override"
+                  ? t("aiAgentConfig.sageInstructionsAppend")
+                  : t("aiAgentConfig.sageSystemPromptOverride")
               }
               multiline
               minRows={3}
@@ -621,8 +783,12 @@ export function AIAgentConfig({
       </Accordion>
 
       <Box sx={{ mt: 2, display: "flex", justifyContent: "flex-end" }}>
-        <Button variant="contained" onClick={onSave} disabled={saving}>
-          {saving ? "Saving..." : "Save Changes"}
+        <Button
+          variant="contained"
+          onClick={onSave}
+          disabled={saving || hasInvalidDocumentAnalysisLimits}
+        >
+          {saving ? t("aiAgentConfig.saving") : t("aiAgentConfig.saveChanges")}
         </Button>
       </Box>
     </Box>

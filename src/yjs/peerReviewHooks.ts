@@ -60,12 +60,9 @@ export function usePeerReviewRoom(
 ): UsePeerReviewRoomReturn {
   const {
     roomId,
-    gradeId,
     user,
-    wsUrl,
-    connect = false,
-    persistence = false,
   } = options || ({} as UsePeerReviewRoomOptions);
+  const username = user?.username;
 
   const providerRef = useRef<PeerReviewRoomProvider | null>(null);
   const [messages, setMessages] = useState<RoomMessage[]>([]);
@@ -75,16 +72,24 @@ export function usePeerReviewRoom(
   const [typingPeers, setTypingPeers] = useState<PeerReviewUser[]>([]);
   const [isConnected, setIsConnected] = useState(false);
 
+  // Latest options are read when the provider is created; only the room/user
+  // identity should recreate the provider.
+  const optionsRef = useRef(options);
   useEffect(() => {
-    if (!options || !roomId || !user) return;
+    optionsRef.current = options;
+  });
+
+  useEffect(() => {
+    const latest = optionsRef.current;
+    if (!latest || !roomId || !latest.user) return;
 
     const provider = new PeerReviewRoomProvider({
       roomId,
-      gradeId,
-      user,
-      wsUrl,
-      connect,
-      persistence,
+      gradeId: latest.gradeId,
+      user: latest.user,
+      wsUrl: latest.wsUrl,
+      connect: latest.connect ?? false,
+      persistence: latest.persistence ?? false,
     });
 
     providerRef.current = provider;
@@ -139,7 +144,7 @@ export function usePeerReviewRoom(
       roomStateMap.unobserve(handleRoomStateChange);
       unsubscribeAwareness();
     };
-  }, [roomId, user?.username]);
+  }, [roomId, username]);
 
   const sendMessage = useCallback(
     (

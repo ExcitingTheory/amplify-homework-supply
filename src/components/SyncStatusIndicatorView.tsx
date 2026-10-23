@@ -73,18 +73,14 @@ export function SyncStatusIndicatorView({
   onResolveOp,
 }: SyncStatusIndicatorViewProps) {
   const t = useTranslations("components");
-  const td = (key: string, fallback: string) =>
-    t.has(key) ? t(key) : fallback;
 
   if (pendingCount === 0) {
     if (!isOnline) {
       return (
-        <Tooltip
-          title={td("offline.offlineNoPending", "Offline — no pending changes")}
-        >
+        <Tooltip title={t("syncStatusIndicatorView.offlineNoPending")}>
           <Chip
             icon={<CloudOff />}
-            label={td("offline.offline", "Offline")}
+            label={t("syncStatusIndicatorView.offline")}
             size="small"
             variant="outlined"
           />
@@ -97,15 +93,16 @@ export function SyncStatusIndicatorView({
   return (
     <>
       <Tooltip
-        title={td(
-          "offline.pendingSync",
-          `${pendingCount} changes pending sync`,
-        )}
+        title={t("syncStatusIndicatorView.pendingSync", {
+          count: pendingCount,
+        })}
       >
         <Badge badgeContent={pendingCount} color="warning">
           <Chip
             icon={isOnline ? <CloudSync /> : <CloudOff />}
-            label={td("offline.pendingLabel", `${pendingCount} pending`)}
+            label={t("syncStatusIndicatorView.pendingLabel", {
+              count: pendingCount,
+            })}
             size="small"
             variant="outlined"
             color={isOnline ? "primary" : "default"}
@@ -117,7 +114,7 @@ export function SyncStatusIndicatorView({
 
       <Dialog open={dialogOpen} onClose={onCloseDialog} maxWidth="sm" fullWidth>
         <DialogTitle>
-          {td("offline.pendingOperations", "Pending sync operations")}
+          {t("syncStatusIndicatorView.pendingOperations")}
           <IconButton
             onClick={onSync}
             disabled={!isOnline || syncing}
@@ -138,15 +135,14 @@ export function SyncStatusIndicatorView({
             sx={{ mb: 1 }}
           >
             {lastSyncedAt
-              ? td(
-                  "offline.lastSynced",
-                  `Last synced ${new Date(lastSyncedAt).toLocaleString()}`,
-                )
-              : td("offline.notSynced", "Not synced in this session")}
+              ? t("syncStatusIndicatorView.lastSynced", {
+                  time: new Date(lastSyncedAt).toLocaleString(),
+                })
+              : t("syncStatusIndicatorView.notSynced")}
           </Typography>
           {pendingOps.length === 0 ? (
             <Typography color="text.secondary">
-              {td("offline.noPendingOperations", "No pending operations")}
+              {t("syncStatusIndicatorView.noPendingOperations")}
             </Typography>
           ) : (
             <List dense>
@@ -164,7 +160,7 @@ export function SyncStatusIndicatorView({
                         startIcon={<CompareArrows />}
                         onClick={() => onResolveOp(op)}
                       >
-                        {td("offline.resolve", "Resolve")}
+                        {t("syncStatusIndicatorView.resolve")}
                       </Button>
                     )
                   }
@@ -181,7 +177,10 @@ export function SyncStatusIndicatorView({
                     secondary={
                       <>
                         {new Date(op.createdAt).toLocaleString()}
-                        {op.retryCount > 0 && ` · ${op.retryCount} retries`}
+                        {op.retryCount > 0 &&
+                          t("syncStatusIndicatorView.retryCount", {
+                            count: op.retryCount,
+                          })}
                         {op.lastError && (
                           <Typography
                             component="span"
@@ -201,7 +200,7 @@ export function SyncStatusIndicatorView({
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={onCloseDialog}>{td("common.close", "Close")}</Button>
+          <Button onClick={onCloseDialog}>{t("common.close")}</Button>
           <Button
             onClick={onSync}
             disabled={!isOnline || syncing}
@@ -214,7 +213,7 @@ export function SyncStatusIndicatorView({
               )
             }
           >
-            {td("offline.syncNow", "Sync now")}
+            {t("syncStatusIndicatorView.syncNow")}
           </Button>
         </DialogActions>
       </Dialog>

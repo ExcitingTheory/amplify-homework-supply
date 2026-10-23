@@ -198,20 +198,22 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
     [selectedDialogue],
   );
 
+  const activeTakeFileId = useMemo(() => {
+    const takes = selectedDialogue?.takes || [];
+    return takes[selectedDialogue?.activeTakeIndex ?? takes.length - 1]
+      ?.fileId;
+  }, [selectedDialogue?.takes, selectedDialogue?.activeTakeIndex]);
+
   // Load saved filters from the active take's File record when selection changes
   useEffect(() => {
-    if (!selectedDialogue) return;
-    const takes = selectedDialogue.takes || [];
-    const activeTake =
-      takes[selectedDialogue.activeTakeIndex ?? takes.length - 1];
-    if (!activeTake?.fileId) return;
+    if (!activeTakeFileId) return;
 
     let cancelled = false;
     (async () => {
       try {
         const client = getAmplifyClient();
         const { data: fileRecord } = await client.models.File.get({
-          id: activeTake.fileId,
+          id: activeTakeFileId,
         });
         if (cancelled) return;
         const settings =
@@ -230,7 +232,7 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
     return () => {
       cancelled = true;
     };
-  }, [selectedDialogue?.id, selectedDialogue?.activeTakeIndex]);
+  }, [activeTakeFileId]);
 
   // Check if track is locked
   const isTrackLocked = useCallback(
@@ -399,6 +401,9 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
     }
   };
 
+  // handleRecordingComplete is recreated every render; call the latest one without churning callbacks
+  const handleRecordingCompleteRef = useRef(null);
+
   // Handle recording from AudioWaveformPlayer
   const handleAudioWaveformRecordingComplete = useCallback(
     async (file) => {
@@ -408,7 +413,7 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
       try {
         const response = await fetch(file.path);
         const audioBlob = await response.blob();
-        await handleRecordingComplete(audioBlob, "human");
+        await handleRecordingCompleteRef.current(audioBlob, "human");
       } catch (error) {
         console.error("Error processing AudioWaveformPlayer recording:", error);
       }
@@ -539,6 +544,10 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
     }
   };
 
+  useEffect(() => {
+    handleRecordingCompleteRef.current = handleRecordingComplete;
+  });
+
   // Generate TTS for dialogue line
   const handleGenerateTTS = async (dialogueId) => {
     const dialogue = scriptData.dialogue.find((d) => d.id === dialogueId);
@@ -647,12 +656,16 @@ const RecordingStudio3Content = forwardRef(function RecordingStudio3(
   };
 
   // Expose imperative API for parent (e.g., RecordingStudio3Modal)
+  const handleBatchGenerateTTSRef = useRef(null);
+  useEffect(() => {
+    handleBatchGenerateTTSRef.current = handleBatchGenerateTTS;
+  });
   useImperativeHandle(
     ref,
     () => ({
-      triggerBatchTTS: handleBatchGenerateTTS,
+      triggerBatchTTS: () => handleBatchGenerateTTSRef.current(),
     }),
-    [handleBatchGenerateTTS],
+    [],
   );
 
   // Set active take

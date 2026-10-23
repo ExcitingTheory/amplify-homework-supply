@@ -59,7 +59,19 @@
     "sectionHeading": "Aufnahmestudio"
   },
   "audioWaveformPlayer": {
-    "noAudioSource": "Keine Audioquelle bereitgestellt"
+    "noAudioSource": "Keine Audioquelle bereitgestellt",
+    "elapsedTime": "Verstrichene Zeit",
+    "inputVolume": "Eingangslautstärke",
+    "muteInput": "Eingang stummschalten",
+    "muteOutput": "Ausgabe stummschalten",
+    "outputVolume": "Ausgabelautstärke",
+    "pause": "Pausieren",
+    "play": "Abspielen",
+    "remainingTime": "Verbleibende Zeit",
+    "startRecording": "Aufnahme starten",
+    "stopRecording": "Aufnahme beenden",
+    "unmuteInput": "Eingang aktivieren",
+    "unmuteOutput": "Ausgabe einschalten"
   },
   "staticWaveform": {
     "errorLoading": "Fehler beim Laden der Wellenform"
@@ -67,7 +79,8 @@
   "sketchPad": {
     "cancelSubmission": "Übermittlung abbrechen",
     "hoverToStartDrawing": "Zum Zeichnen mit der Maus darüberfahren",
-    "submittingInSeconds": "Zeichnung wird in {countdown} Sekunden zur Bewertung eingereicht..."
+    "submittingInSeconds": "Zeichnung wird in {countdown} Sekunden zur Bewertung eingereicht...",
+    "sketchAlt": "Skizze"
   },
   "autoSubmit": {
     "cancelSubmission": "Abbrechen",
@@ -100,6 +113,62 @@
     "alertMessage": "Einbettungen werden generiert",
     "successConfirmation": "Embeddings erfolgreich generiert"
   },
+  "workbookSSRSkeleton": {
+    "loadingContent": "Inhalt wird geladen ..."
+  },
+  "imagePromptMedia": {
+    "help": "Hilfe",
+    "noImage": "Kein Bild",
+    "playlist": "Playlist"
+  },
+  "mediaPromptBand": {
+    "timecodes": "Medien-Timecodes"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "Richtig",
+    "defaultAccuracyDescription": "Prozentsatz der korrekt ausgewählten erforderlichen Antworten.",
+    "defaultProgressDescription": "Prozentsatz der erforderlichen Antworten, die bearbeitet wurden.",
+    "meterDescription": "{label}. {description}",
+    "percentValue": "{percent} %",
+    "progressLabel": "Fortschritt",
+    "valueDescription": "{label}: {percent} %. {description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "Film"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "Aufnahme {number} · {duration} · {time}",
+    "deleteTake": "Aufnahme löschen",
+    "recordedTakes": "Aufgenommene Takes",
+    "takeLabel": "Aufnahme {number}"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "Abbrechen",
+    "cancelSubmission": "Abgabe abbrechen",
+    "submit": "Absenden"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "Spaltenüberschrift hinzufügen",
+    "addRowHeader": "Zeilenkopf hinzufügen",
+    "deleteColumn": "Spalte löschen",
+    "deleteRow": "Zeile löschen",
+    "deleteTable": "Tabelle löschen",
+    "insertColumnsLeft": "Links {count, plural, one {eine Spalte} other {# Spalten}} einfügen",
+    "insertColumnsRight": "{count, plural, one {Eine Spalte} other {# Spalten}} rechts einfügen",
+    "insertRowsAbove": "Oberhalb {count, plural, one {eine Zeile} other {# Zeilen}} einfügen",
+    "insertRowsBelow": "Unterhalb {count, plural, one {eine Zeile} other {# Zeilen}} einfügen",
+    "removeColumnHeader": "Spaltenkopf entfernen",
+    "removeRowHeader": "Zeilenkopf entfernen"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "Wappen bearbeiten"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "Hexadezimalfarbe"
+  },
+  "youTubePlugin": {
+    "videoTitle": "YouTube-Video"
+  },
   "imagesPlugin": {
     "altText": "Alternativtext",
     "altTextDescriptive": "Beschreibender Alternativtext",
@@ -128,7 +197,8 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio nicht verfügbar",
     "loadingAudio": "Audio wird geladen...",
-    "wordNotFound": "Wort nicht gefunden: {wordID}"
+    "wordNotFound": "Wort nicht gefunden: {wordID}",
+    "selectVocabularyWord": "Vokabel auswählen…"
   },
   "vocabularyReview": {
     "alertMessage": "Vokabeln vor dem Fortfahren wiederholen",
@@ -186,7 +256,16 @@
     "typeLabel": "Typ:",
     "unknown": "Unbekannt",
     "updatedLabel": "Aktualisiert:",
-    "variantLabel": "Variante"
+    "variantLabel": "Variante",
+    "autoSaveChip": "Automatisch speichern",
+    "autoSaved": "Automatisch gespeichert",
+    "descriptionLabel": "Beschreibung",
+    "descriptionPlaceholder": "Fügen Sie eine Beschreibung für diese Datei hinzu...",
+    "errorSaving": "Fehler beim Speichern: {message}",
+    "fileNameLabel": "Dateiname",
+    "fileNamePlaceholder": "Dateinamen eingeben ...",
+    "savedSuccessfully": "Erfolgreich gespeichert",
+    "unsavedChip": "Nicht gespeichert"
   },
   "metadataField": {
     "unsavedChanges": "nicht gespeicherte Änderungen"
@@ -207,7 +286,12 @@
     "instructions": "**Anweisungen:** Übermalen Sie die Bereiche, die Sie regenerieren möchten. Verwenden Sie den Radierer, um Teile der Maske zu entfernen. Halten Sie die Umschalttaste gedrückt und ziehen Sie, um zu schwenken. Nutzen Sie die Zoom-Schaltflächen für detailliertere Ansichten.",
     "save": "Speichern",
     "brushSize": "Pinselgröße: {size}",
-    "zoomInfo": "Zoom: {level}% | Umschalttaste halten zum Verschieben"
+    "zoomInfo": "Zoom: {level}% | Umschalttaste halten zum Verschieben",
+    "clearMask": "Maske löschen",
+    "redo": "Wiederholen",
+    "undo": "Rückgängig",
+    "zoomIn": "Vergrößern",
+    "zoomOut": "Verkleinern"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "Abbrechen",
@@ -249,7 +333,16 @@
   "playlistEditor": {
     "emptyState": "Keine Elemente in der Playlist",
     "menuAttribute": "Menü",
-    "noFilesMessage": "Es wurden noch keine Dateien hinzugefügt. Verwenden Sie das Eingabefeld oben, um Dateien zur Playlist hinzuzufügen."
+    "noFilesMessage": "Es wurden noch keine Dateien hinzugefügt. Verwenden Sie das Eingabefeld oben, um Dateien zur Playlist hinzuzufügen.",
+    "addFiles": "Dateien hinzufügen",
+    "addFilesToPlaylist": "Dateien zur Wiedergabeliste hinzufügen",
+    "columnHeaders": {
+      "size": "Größe",
+      "title": "Titel"
+    },
+    "dragMediaHere": "Audio- oder Videodateien hierher ziehen",
+    "dropToAddFiles": "Zum Hinzufügen von Dateien hier ablegen",
+    "removeFromPlaylist": "Aus Playlist entfernen"
   },
   "wordEmbedding": {
     "embeddingGenerated": "Einbettung generiert: {count} Wörter verarbeitet"

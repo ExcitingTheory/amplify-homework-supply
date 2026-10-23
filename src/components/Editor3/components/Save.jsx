@@ -13,8 +13,10 @@ import UnitContext from "../../../context/unitContext";
 import SaveIcon from "@mui/icons-material/Save";
 import Skeleton from "@mui/material/Skeleton";
 import Snackbar from "@mui/material/Snackbar";
+import { useTranslations } from "next-intl";
 
 export function Save() {
+  const t = useTranslations("editor.authoring");
   const [saveMessage, setSaveMessage] = useState("");
 
   const { saveEditorContent, editorStateRef, unit, isSaving } =
@@ -48,13 +50,13 @@ export function Save() {
       console.log("[Save] Manual save completed:", response);
 
       if (response === false) {
-        setSaveMessage("Error: You do not have permission to edit this unit.");
+        setSaveMessage(t("save.permissionError"));
       } else {
-        setSaveMessage("Saved successfully");
+        setSaveMessage(t("save.savedSuccessfully"));
       }
     } catch (error) {
       console.error("[Save] Manual save failed:", error);
-      setSaveMessage("Save failed");
+      setSaveMessage(t("save.saveFailed"));
     }
   };
 
@@ -78,7 +80,7 @@ export function Save() {
           minWidth: "3rem",
         }}
         onClick={handleManualSave}
-        title="Save now (automatic save happens 2 seconds after you stop typing)"
+        title={t("save.saveNowTitle")}
       >
         {isSaving ? (
           <Skeleton variant="circular" width={20} height={20} />

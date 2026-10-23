@@ -35,15 +35,16 @@ import { Hub } from "aws-amplify/utils";
 import { signIn, signOut } from "aws-amplify/auth";
 import AuthContext from "@/context/authContext";
 
-const ROLE_LABELS = {
-  admin: "Admin",
-  instructor: "Instructor",
-  student: "Student",
+const ROLE_LABEL_KEYS = {
+  admin: "devQuickLogin.roleAdmin",
+  instructor: "devQuickLogin.roleInstructor",
+  student: "devQuickLogin.roleStudent",
 };
 
 // Dev-only one-click sign-in for seeded demo users; requires TEST_USER_PASSWORD_SEED
 // in .env.local and a seeded sandbox (see amplify/seed/seed.ts for the user list).
 function DevQuickLogin() {
+  const t = useTranslations("components");
   const [users, setUsers] = React.useState([]);
   const [selectedUsername, setSelectedUsername] = React.useState("");
   const [loading, setLoading] = React.useState(false);
@@ -59,12 +60,12 @@ function DevQuickLogin() {
         if (body.users?.length) setSelectedUsername(body.users[0].username);
       })
       .catch(() => {
-        if (!cancelled) setError("Quick login unavailable");
+        if (!cancelled) setError(t("devQuickLogin.unavailable"));
       });
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   const handleQuickLogin = async () => {
     if (!selectedUsername) return;
@@ -75,7 +76,8 @@ function DevQuickLogin() {
         `/api/dev/quick-login?username=${encodeURIComponent(selectedUsername)}`,
       );
       const body = await res.json();
-      if (!res.ok) throw new Error(body.error || "Quick login unavailable");
+      if (!res.ok)
+        throw new Error(body.error || t("devQuickLogin.unavailable"));
       await signOut().catch(() => {});
       await signIn({ username: body.username, password: body.password });
     } catch (err) {
@@ -98,17 +100,21 @@ function DevQuickLogin() {
       <Typography
         variant="caption"
         color="text.secondary"
+        // eslint-disable-next-line i18next/no-literal-string -- CSS value
         display="block"
         mb={1}
       >
-        Dev quick sign-in (seeded demo users)
+        {t("devQuickLogin.heading")}
       </Typography>
+      {/* eslint-disable-next-line i18next/no-literal-string -- CSS value */}
       <Stack direction="row" spacing={1} justifyContent="center">
         <FormControl size="small" sx={{ minWidth: 220 }}>
-          <InputLabel id="dev-quick-login-label">Seeded user</InputLabel>
+          <InputLabel id="dev-quick-login-label">
+            {t("devQuickLogin.seededUserLabel")}
+          </InputLabel>
           <Select
             labelId="dev-quick-login-label"
-            label="Seeded user"
+            label={t("devQuickLogin.seededUserLabel")}
             value={selectedUsername}
             onChange={(e) => setSelectedUsername(e.target.value)}
             renderValue={(value) =>
@@ -118,7 +124,7 @@ function DevQuickLogin() {
           >
             {Object.entries(usersByRole).map(([role, roleUsers]) => [
               <ListSubheader key={`header-${role}`}>
-                {ROLE_LABELS[role] || role}
+                {ROLE_LABEL_KEYS[role] ? t(ROLE_LABEL_KEYS[role]) : role}
               </ListSubheader>,
               ...roleUsers.map((user) => (
                 <MenuItem
@@ -141,11 +147,17 @@ function DevQuickLogin() {
           disabled={loading || !selectedUsername}
           onClick={handleQuickLogin}
         >
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? t("devQuickLogin.signingIn") : t("devQuickLogin.signIn")}
         </Button>
       </Stack>
       {error && (
-        <Typography variant="caption" color="error" display="block" mt={1}>
+        <Typography
+          variant="caption"
+          color="error"
+          // eslint-disable-next-line i18next/no-literal-string -- CSS value
+          display="block"
+          mt={1}
+        >
           {error}
         </Typography>
       )}
@@ -315,6 +327,7 @@ export default function MyAuth({ children }) {
       <Authenticator
         variant="modal"
         formFields={formFields}
+        // eslint-disable-next-line i18next/no-literal-string -- Amplify login mechanism identifiers
         loginMechanisms={isDevelopment ? ["email"] : ["email", "phone_number"]}
       >
         {({ signOut, user }) =>

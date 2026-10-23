@@ -93,6 +93,8 @@ import Inventory2Icon from "@mui/icons-material/Inventory2";
 import SpellcheckIcon from "@mui/icons-material/Spellcheck";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import QuizIcon from "@mui/icons-material/Quiz";
+import HistoryIcon from "@mui/icons-material/History";
+import { Link } from "../i18n/navigation";
 import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -103,6 +105,8 @@ import GlobalSearchBar from "./GlobalSearchBar";
 const blackNotificationBadgeSx = {
   "& .MuiBadge-badge": { bgcolor: "common.black", color: "common.white" },
 };
+
+const DRAWER_ANCHORS = ["left"];
 
 function ToggleMenuItem(props) {
   const [checked, setChecked] = React.useState(true);
@@ -150,8 +154,11 @@ export function SettingsMenu() {
         id="settings-button"
         color="inherit"
         aria-label={t("common.settings")}
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA id reference
         aria-controls={open ? "settings-menu" : undefined}
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA boolean value
         aria-haspopup="true"
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA boolean value
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
       >
@@ -167,15 +174,10 @@ export function SettingsMenu() {
         }}
       >
         <ToggleMenuItem
-          label={t(
-            "mainToolbar.settings.disableNotifications",
-            "Disable notifications",
-          )}
+          label={t("mainToolbar.settings.disableNotifications")}
         />
         <MenuItem>
-          <ListItemText
-            primary={t("mainToolbar.settings.colorMode", "Color mode")}
-          />
+          <ListItemText primary={t("mainToolbar.settings.colorMode")} />
           <ToggleButtonGroup
             value={colorMode}
             exclusive
@@ -195,14 +197,9 @@ export function SettingsMenu() {
           </ToggleButtonGroup>
         </MenuItem>
         <ToggleMenuItem
-          label={t(
-            "mainToolbar.settings.experimentalFeatures",
-            "Experimental features",
-          )}
+          label={t("mainToolbar.settings.experimentalFeatures")}
         />
-        <ToggleMenuItem
-          label={t("mainToolbar.settings.studentMode", "Student mode")}
-        />
+        <ToggleMenuItem label={t("mainToolbar.settings.studentMode")} />
 
         {/* <MenuItem onClick={handleSettings}>Change password</MenuItem> */}
       </Menu>
@@ -235,8 +232,11 @@ export function HelpMenu() {
         id="help-button"
         color="inherit"
         aria-label={t("common.help")}
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA id reference
         aria-controls={open ? "help-menu" : undefined}
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA boolean value
         aria-haspopup="true"
+        // eslint-disable-next-line i18next/no-literal-string -- ARIA boolean value
         aria-expanded={open ? "true" : undefined}
         onClick={handleClick}
         data-tour="help-menu"
@@ -252,9 +252,7 @@ export function HelpMenu() {
           "aria-labelledby": "basic-button",
         }}
       >
-        <MenuItem onClick={handleHelp}>
-          {t("mainToolbar.help", "Help")}
-        </MenuItem>
+        <MenuItem onClick={handleHelp}>{t("mainToolbar.help")}</MenuItem>
       </Menu>
     </div>
   );
@@ -342,6 +340,15 @@ export function UserMenu({ onJoinSection }) {
             &nbsp;{tCommon("navigation.profile")}
           </MenuItem>,
           <MenuItem
+            key="xp-history"
+            component={Link}
+            href="/xp-history"
+            onClick={handleClose}
+          >
+            <HistoryIcon />
+            &nbsp;{tCommon("navigation.xpHistory")}
+          </MenuItem>,
+          <MenuItem
             key="join-section"
             data-tour="join-section-button"
             onClick={() => {
@@ -362,7 +369,7 @@ export function UserMenu({ onJoinSection }) {
             <NotificationBadge sx={blackNotificationBadgeSx}>
               <NotificationsIcon />
             </NotificationBadge>
-            &nbsp;{tCommon("navigation.notifications", "Notifications")}
+            &nbsp;{tCommon("navigation.notifications")}
           </MenuItem>,
           <MenuItem
             key="settings"
@@ -391,7 +398,7 @@ export function UserMenu({ onJoinSection }) {
 }
 
 export default function MainToolbar({ children }) {
-  const tCommon = useTranslations("common");
+  const t = useTranslations("common");
   const tComponents = useTranslations("components");
   const tEditorAuth = useTranslations("editor.authoring");
   const { level, sectionLevel } = useXP();
@@ -409,7 +416,7 @@ export default function MainToolbar({ children }) {
   const displayName =
     user?.attributes?.name ||
     user?.attributes?.email?.split("@")[0] ||
-    tCommon("navigation.profile");
+    t("navigation.profile");
   const isInstructorOrAdmin = React.useMemo(() => {
     const groups = authSession?.groups || [];
     return groups.some((g) =>
@@ -520,6 +527,7 @@ export default function MainToolbar({ children }) {
   const router = useRouter();
   const currentPathname = usePathname();
   const currentSearchParams = useSearchParams();
+  const hasSectionParam = Boolean(currentSearchParams.get("sectionId"));
   const usesContextualToolbarSearch =
     currentPathname?.includes("/workbook/") ||
     currentPathname?.includes("/unit/");
@@ -611,6 +619,7 @@ export default function MainToolbar({ children }) {
     currentUnitId,
     navDataLoaded,
     authSession,
+    isInstructorOrAdmin,
   ]);
 
   // Section detail headings for scroll navigation
@@ -651,11 +660,9 @@ export default function MainToolbar({ children }) {
     if (clickTimestamps.current.length >= 7) {
       localStorage.setItem("debug-mode-enabled", "true");
       clickTimestamps.current = [];
-      alert(
-        "🐛 Debug mode enabled! Refresh the page to activate the debug panel.\n\nUse Cmd/Ctrl + Shift + D to open the debug panel.",
-      );
+      alert(t("mainToolbar.debugModeEnabled"));
     }
-  }, []);
+  }, [t]);
 
   const toggleDrawer = (anchor, open) => (event) => {
     if (
@@ -781,7 +788,7 @@ export default function MainToolbar({ children }) {
             <ListItemIcon sx={{ color: "text.primary" }}>
               <HomeIcon />
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.home")} />
+            <ListItemText primary={t("navigation.home")} />
           </ListItemButton>
         </ListItem>
 
@@ -798,7 +805,7 @@ export default function MainToolbar({ children }) {
               </NotificationBadge>
             </ListItemIcon>
             <ListItemText
-              primary={tCommon("navigation.sections")}
+              primary={t("navigation.sections")}
               primaryTypographyProps={{ noWrap: true }}
             />
           </ListItemButton>
@@ -912,7 +919,7 @@ export default function MainToolbar({ children }) {
                 <MenuBookIcon />
               </ListItemIcon>
               <ListItemText
-                primary={tCommon("navigation.units")}
+                primary={t("navigation.units")}
                 primaryTypographyProps={{ noWrap: true }}
               />
             </ListItemButton>
@@ -951,7 +958,7 @@ export default function MainToolbar({ children }) {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={tCommon("navigation.published", "Published")}
+                      primary={t("navigation.published")}
                       primaryTypographyProps={{
                         fontSize: "0.7rem",
                         fontWeight: 600,
@@ -1010,7 +1017,7 @@ export default function MainToolbar({ children }) {
                       />
                     </ListItemIcon>
                     <ListItemText
-                      primary={tCommon("navigation.drafts", "Drafts")}
+                      primary={t("navigation.drafts")}
                       primaryTypographyProps={{
                         fontSize: "0.7rem",
                         fontWeight: 600,
@@ -1068,7 +1075,7 @@ export default function MainToolbar({ children }) {
                 <LeaderboardIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.leaderboard")} />
+            <ListItemText primary={t("navigation.leaderboard")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -1078,7 +1085,7 @@ export default function MainToolbar({ children }) {
                 <GroupsIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.squads")} />
+            <ListItemText primary={t("navigation.squads")} />
           </ListItemButton>
         </ListItem>
         {isInstructorOrAdmin && (
@@ -1087,7 +1094,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <DashboardIcon />
               </ListItemIcon>
-              <ListItemText primary="Admin Dashboard" />
+              <ListItemText primary={t("mainToolbar.nav.adminDashboard")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1097,7 +1104,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <FlagIcon />
               </ListItemIcon>
-              <ListItemText primary="Moderation" />
+              <ListItemText primary={t("mainToolbar.nav.moderation")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1107,7 +1114,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <InsightsIcon />
               </ListItemIcon>
-              <ListItemText primary="Analytics" />
+              <ListItemText primary={t("mainToolbar.nav.analytics")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1117,7 +1124,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <SpellcheckIcon />
               </ListItemIcon>
-              <ListItemText primary="Words" />
+              <ListItemText primary={t("mainToolbar.nav.words")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1127,7 +1134,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <InsertDriveFileIcon />
               </ListItemIcon>
-              <ListItemText primary="Files" />
+              <ListItemText primary={t("mainToolbar.nav.files")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1137,7 +1144,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <QuizIcon />
               </ListItemIcon>
-              <ListItemText primary="Questions" />
+              <ListItemText primary={t("mainToolbar.nav.questions")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1147,7 +1154,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <Inventory2Icon />
               </ListItemIcon>
-              <ListItemText primary="Archives" />
+              <ListItemText primary={t("mainToolbar.nav.archives")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1157,7 +1164,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <TuneIcon />
               </ListItemIcon>
-              <ListItemText primary={tCommon("navigation.gamification")} />
+              <ListItemText primary={t("navigation.gamification")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1167,7 +1174,7 @@ export default function MainToolbar({ children }) {
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <DeleteOutlineIcon />
               </ListItemIcon>
-              <ListItemText primary="Recycle Bin" />
+              <ListItemText primary={t("mainToolbar.nav.recycleBin")} />
             </ListItemButton>
           </ListItem>
         )}
@@ -1179,7 +1186,7 @@ export default function MainToolbar({ children }) {
             <ListItemIcon sx={{ color: "text.primary" }}>
               <UserIcon />
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.profile")} />
+            <ListItemText primary={t("navigation.profile")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
@@ -1194,9 +1201,7 @@ export default function MainToolbar({ children }) {
                 <NotificationsIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText
-              primary={tCommon("navigation.notifications", "Notifications")}
-            />
+            <ListItemText primary={t("navigation.notifications")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
@@ -1212,7 +1217,7 @@ export default function MainToolbar({ children }) {
                 <PersonAddIcon />
               </NotificationBadge>
             </ListItemIcon>
-            <ListItemText primary={tCommon("mainToolbar.addToSection.title")} />
+            <ListItemText primary={t("mainToolbar.addToSection.title")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding sx={{ display: { xs: "block", md: "none" } }}>
@@ -1220,7 +1225,7 @@ export default function MainToolbar({ children }) {
             <ListItemIcon sx={{ color: "text.primary" }}>
               <SettingsBrightnessIcon />
             </ListItemIcon>
-            <ListItemText primary={tCommon("navigation.settings")} />
+            <ListItemText primary={t("navigation.settings")} />
           </ListItemButton>
         </ListItem>
         <ListItem disablePadding>
@@ -1234,8 +1239,8 @@ export default function MainToolbar({ children }) {
               <HandshakeIcon />
             </ListItemIcon>
             <ListItemText
-              primary={tCommon("navigation.collaboration")}
-              secondary={tCommon("navigation.collaborationDesc")}
+              primary={t("navigation.collaboration")}
+              secondary={t("navigation.collaborationDesc")}
             />
           </ListItemButton>
         </ListItem>
@@ -1316,12 +1321,12 @@ export default function MainToolbar({ children }) {
           showEmpty={!isInstructorOrAdmin}
         />
         <LevelBadge
-          level={currentSearchParams.get("sectionId") ? sectionLevel : level}
+          level={hasSectionParam ? sectionLevel : level}
           showProgress={false}
         />
         <IconButton
           color="inherit"
-          aria-label="Notifications"
+          aria-label={t("navigation.notifications")}
           size="small"
           onClick={() => openPanel()}
         >
@@ -1344,7 +1349,7 @@ export default function MainToolbar({ children }) {
     <>
       <List sx={{ color: "text.primary" }}>
         <ListItem disablePadding>
-          <Tooltip title={tCommon("navigation.home")} placement="right" arrow>
+          <Tooltip title={t("navigation.home")} placement="right" arrow>
             <ListItemButton component="a" href="/" sx={railItemSx}>
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <HomeIcon />
@@ -1353,11 +1358,7 @@ export default function MainToolbar({ children }) {
           </Tooltip>
         </ListItem>
         <ListItem disablePadding>
-          <Tooltip
-            title={tCommon("navigation.sections")}
-            placement="right"
-            arrow
-          >
+          <Tooltip title={t("navigation.sections")} placement="right" arrow>
             <ListItemButton component="a" href="/sections" sx={railItemSx}>
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <NotificationBadge category="ASSIGNMENT">
@@ -1369,11 +1370,7 @@ export default function MainToolbar({ children }) {
         </ListItem>
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip
-              title={tCommon("navigation.units")}
-              placement="right"
-              arrow
-            >
+            <Tooltip title={t("navigation.units")} placement="right" arrow>
               <ListItemButton component="a" href="/units" sx={railItemSx}>
                 <ListItemIcon sx={{ color: "text.primary" }}>
                   <MenuBookIcon />
@@ -1383,11 +1380,7 @@ export default function MainToolbar({ children }) {
           </ListItem>
         )}
         <ListItem disablePadding>
-          <Tooltip
-            title={tCommon("navigation.leaderboard")}
-            placement="right"
-            arrow
-          >
+          <Tooltip title={t("navigation.leaderboard")} placement="right" arrow>
             <ListItemButton component="a" href="/leaderboard" sx={railItemSx}>
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <NotificationBadge category="GAMIFICATION">
@@ -1398,7 +1391,7 @@ export default function MainToolbar({ children }) {
           </Tooltip>
         </ListItem>
         <ListItem disablePadding>
-          <Tooltip title={tCommon("navigation.squads")} placement="right" arrow>
+          <Tooltip title={t("navigation.squads")} placement="right" arrow>
             <ListItemButton component="a" href="/squads" sx={railItemSx}>
               <ListItemIcon sx={{ color: "text.primary" }}>
                 <NotificationBadge category="SQUAD">
@@ -1410,7 +1403,11 @@ export default function MainToolbar({ children }) {
         </ListItem>
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Admin Dashboard" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.adminDashboard")}
+              placement="right"
+              arrow
+            >
               <ListItemButton component="a" href="/admin" sx={railItemSx}>
                 <ListItemIcon sx={{ color: "text.primary" }}>
                   <DashboardIcon />
@@ -1421,7 +1418,11 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Moderation" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.moderation")}
+              placement="right"
+              arrow
+            >
               <ListItemButton
                 component="a"
                 href="/admin/moderation"
@@ -1436,7 +1437,11 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Analytics" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.analytics")}
+              placement="right"
+              arrow
+            >
               <ListItemButton
                 component="a"
                 href="/admin/analytics"
@@ -1451,7 +1456,7 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Words" placement="right" arrow>
+            <Tooltip title={t("mainToolbar.nav.words")} placement="right" arrow>
               <ListItemButton component="a" href="/admin/words" sx={railItemSx}>
                 <ListItemIcon sx={{ color: "text.primary" }}>
                   <SpellcheckIcon />
@@ -1462,7 +1467,7 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Files" placement="right" arrow>
+            <Tooltip title={t("mainToolbar.nav.files")} placement="right" arrow>
               <ListItemButton component="a" href="/admin/files" sx={railItemSx}>
                 <ListItemIcon sx={{ color: "text.primary" }}>
                   <InsertDriveFileIcon />
@@ -1473,7 +1478,11 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Questions" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.questions")}
+              placement="right"
+              arrow
+            >
               <ListItemButton
                 component="a"
                 href="/admin/questions"
@@ -1488,7 +1497,11 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Archives" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.archives")}
+              placement="right"
+              arrow
+            >
               <ListItemButton
                 component="a"
                 href="/admin/archives"
@@ -1504,7 +1517,7 @@ export default function MainToolbar({ children }) {
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
             <Tooltip
-              title={tCommon("navigation.gamification")}
+              title={t("navigation.gamification")}
               placement="right"
               arrow
             >
@@ -1522,7 +1535,11 @@ export default function MainToolbar({ children }) {
         )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
-            <Tooltip title="Recycle Bin" placement="right" arrow>
+            <Tooltip
+              title={t("mainToolbar.nav.recycleBin")}
+              placement="right"
+              arrow
+            >
               <ListItemButton component="a" href="/recycle-bin" sx={railItemSx}>
                 <ListItemIcon sx={{ color: "text.primary" }}>
                   <DeleteOutlineIcon />
@@ -1536,7 +1553,7 @@ export default function MainToolbar({ children }) {
       <List sx={{ color: "text.primary" }}>
         <ListItem disablePadding>
           <Tooltip
-            title={tCommon("navigation.collaboration")}
+            title={t("navigation.collaboration")}
             placement="right"
             arrow
           >
@@ -1620,13 +1637,13 @@ export default function MainToolbar({ children }) {
             showEmpty={!isInstructorOrAdmin}
           />
           <LevelBadge
-            level={currentSearchParams.get("sectionId") ? sectionLevel : level}
+            level={hasSectionParam ? sectionLevel : level}
             showProgress={false}
           />
         </Box>
         <IconButton
           color="inherit"
-          aria-label="Notifications"
+          aria-label={t("navigation.notifications")}
           data-tour="notification-bell"
           onClick={() => openPanel()}
           sx={{ display: { xs: "none", md: "inline-flex" } }}
@@ -1651,7 +1668,7 @@ export default function MainToolbar({ children }) {
          * Dropdown for the user.
          */}
       </Toolbar>
-      {["left"].map((anchor) => (
+      {DRAWER_ANCHORS.map((anchor) => (
         <React.Fragment key={anchor}>
           {/* Desktop with AppShell: persistent sidebar as fixed Box portaled to body */}
           {hasAppShell &&
@@ -1702,14 +1719,15 @@ export default function MainToolbar({ children }) {
             createPortal(
               <Box
                 role="separator"
+                // eslint-disable-next-line i18next/no-literal-string -- ARIA orientation value
                 aria-orientation="vertical"
                 tabIndex={0}
                 aria-label={
                   appShell.hidden
-                    ? "Show navigation"
+                    ? t("mainToolbar.nav.showNavigation")
                     : appShell.collapsed
-                      ? "Expand navigation"
-                      : "Collapse navigation"
+                      ? t("mainToolbar.nav.expandNavigation")
+                      : t("mainToolbar.nav.collapseNavigation")
                 }
                 onPointerDown={handleNavHandleDown}
                 onDoubleClick={() => {
@@ -1880,11 +1898,11 @@ export default function MainToolbar({ children }) {
           >
             <form onSubmit={addStudentToSection}>
               <DialogTitle id="form-dialog-title">
-                {tCommon("mainToolbar.addToSection.title")}
+                {t("mainToolbar.addToSection.title")}
               </DialogTitle>
               <DialogContent>
                 <DialogContentText>
-                  {tCommon("mainToolbar.addToSection.description")}
+                  {t("mainToolbar.addToSection.description")}
                 </DialogContentText>
                 <br />
 
@@ -1894,7 +1912,7 @@ export default function MainToolbar({ children }) {
                   id="code"
                   name="code"
                   data-tour="join-code-input"
-                  label={tCommon("mainToolbar.addToSection.codeLabel")}
+                  label={t("mainToolbar.addToSection.codeLabel")}
                   variant="outlined"
                 />
                 <br />
@@ -1914,10 +1932,10 @@ export default function MainToolbar({ children }) {
                   color="primary"
                   variant="outlined"
                 >
-                  {tCommon("actions.cancel")}
+                  {t("actions.cancel")}
                 </Button>
                 <Button disabled={work} type="submit" variant="contained">
-                  {tCommon("mainToolbar.addToSection.add")}
+                  {t("mainToolbar.addToSection.add")}
                 </Button>
               </DialogActions>
             </form>

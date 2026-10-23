@@ -39,6 +39,7 @@ export function applyLeaderboardPrivacy(
       return {
         ...entry,
         studentName: ANONYMOUS_NAME,
+        profileHidden: true,
         avatarColor: '#9e9e9e',
       }
     }

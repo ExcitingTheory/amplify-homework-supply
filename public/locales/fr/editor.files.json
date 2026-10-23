@@ -4,7 +4,9 @@
       "deleteConfirmMessage": "Supprimer {count} fichier(s) sélectionné(s) ?",
       "deleteSelected": "Supprimer la sélection ({count})",
       "deselectAll": "Tout désélectionner",
-      "reAnalyzeSelected": "Ré-analyser la sélection ({count})"
+      "reAnalyzeSelected": "Ré-analyser la sélection ({count})",
+      "confirmMoveSelected": "Déplacer {count} fichier(s) vers la corbeille ?",
+      "moveSelectedFailed": "Échec du déplacement de {count} fichier(s) vers la corbeille : {files}"
     },
     "expandedContent": {
       "descriptionLabel": "Description :",
@@ -17,7 +19,11 @@
       "noVocabularyExtracted": "Aucun vocabulaire extrait",
       "reviewQuestionsMessage": "Réviser et importer les questions du document",
       "reviewVocabularyMessage": "Réviser et importer le vocabulaire du document",
-      "transcriptionLabel": "Transcription :"
+      "transcriptionLabel": "Transcription :",
+      "bloomLevelChip": "Niveau de Bloom : {level}",
+      "durationSeconds": "{duration} s",
+      "pagesChip": "Pages : {range}",
+      "relatedChip": "Associé : {related}"
     },
     "fileDetails": {
       "deleteTooltip": "Supprimer",
@@ -25,7 +31,10 @@
       "insertTooltip": "Insérer dans l'éditeur",
       "noWaveformAvailable": "Aucune forme d'onde disponible",
       "reAnalyzeTooltip": "Réanalyser",
-      "videoNotSupported": "Votre navigateur ne prend pas en charge la balise vidéo."
+      "videoNotSupported": "Votre navigateur ne prend pas en charge la balise vidéo.",
+      "confirmMoveToRecycleBin": "Déplacer vers la corbeille : {name} ?",
+      "moveToRecycleBinFailed": "Échec du déplacement de {name} vers la corbeille : {error}",
+      "reAnalyzeError": "Erreur lors de la nouvelle analyse de {name} : {error}"
     },
     "generators": {
       "audioPromptPlaceholder": "Texte à transformer en fichier audio.",
@@ -35,10 +44,13 @@
       "generatingImage": "Génération du fichier image...",
       "imagePromptPlaceholder": "Texte à transformer en fichier image.",
       "successfullyGeneratedAudio": "Fichier audio généré avec succès",
-      "successfullyGeneratedImage": "Fichier image généré avec succès"
+      "successfullyGeneratedImage": "Fichier image généré avec succès",
+      "audioPreviewTitle": "Aperçu audio",
+      "noDescriptionPlaceholder": "Aucune description"
     },
     "mainView": {
-      "noFilesMessage": "Aucun fichier disponible. Téléchargez des fichiers pour commencer."
+      "noFilesMessage": "Aucun fichier disponible. Téléchargez des fichiers pour commencer.",
+      "updateFileNameFailed": "Échec de la mise à jour du nom du fichier : {error}"
     },
     "metadataEditor": {
       "cancelButton": "Annuler",
@@ -54,7 +66,8 @@
       "sizeLabel": "Taille",
       "typeLabel": "Type",
       "unknown": "Inconnu",
-      "variantLabel": "Variante"
+      "variantLabel": "Variante",
+      "sizeKB": "{size} Ko"
     },
     "selectedFileDetails": {
       "emptyState": "Sélectionnez un fichier pour afficher les détails et les métadonnées"
@@ -64,11 +77,25 @@
       "searchPlaceholder": "Rechercher des fichiers...",
       "selectAllTooltip": "Tout sélectionner",
       "uploadTooltip": "Téléverser des fichiers",
-      "recordConversation": "Enregistrer la conversation"
+      "recordConversation": "Enregistrer la conversation",
+      "generateConversation": "Générer une conversation",
+      "generateConversationForUnit": "Générer une conversation : {unitName}",
+      "recordConversationForUnit": "Enregistrer une conversation : {unitName}"
     },
     "dragDrop": {
       "dropFilesHere": "Déposez les fichiers ici pour les téléverser",
       "supportedFormats": "Audio, Images, PDFs, Documents et plus"
+    },
+    "documentStatus": {
+      "analyzed": "Analysé",
+      "analyzing": "Analyse en cours...",
+      "extracted": "Extrait",
+      "extracting": "Extraction en cours...",
+      "failed": "Échec",
+      "ready": "Prêt"
+    },
+    "inlineEditor": {
+      "fieldAriaLabel": "Champ de métadonnées du fichier"
     }
   },
   "fileMetadataComponent": {

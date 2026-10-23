@@ -203,7 +203,7 @@ export function GradeReviewDrawer({
     return () => {
       cancelled = true;
     };
-  }, [gradeId, unitId, open]);
+  }, [gradeId, unitId, open, client]);
 
   // Keyboard navigation
   useEffect(() => {
@@ -235,7 +235,7 @@ export function GradeReviewDrawer({
     if (isNaN(score) || score < 0 || score > 100) {
       setSnackbar({
         open: true,
-        message: "Score must be between 0 and 100",
+        message: t("gradeReviewDrawer.scoreRangeError"),
         severity: "error",
       });
       return;
@@ -260,14 +260,14 @@ export function GradeReviewDrawer({
       );
       setSnackbar({
         open: true,
-        message: `Grade updated to ${score}%`,
+        message: t("gradeReviewDrawer.gradeUpdated", { score }),
         severity: "success",
       });
       setOverrideOpen(false);
     } catch (err: any) {
       setSnackbar({
         open: true,
-        message: "Failed to save grade override",
+        message: t("gradeReviewDrawer.overrideError"),
         severity: "error",
       });
     } finally {
@@ -287,13 +287,16 @@ export function GradeReviewDrawer({
       setLateAssignment(data || { ...lateAssignment, lateStatus });
       setSnackbar({
         open: true,
-        message: lateStatus === "KEPT" ? "Late submission kept" : "Late submission dropped",
+        message:
+          lateStatus === "KEPT"
+            ? t("gradeReviewDrawer.lateKept")
+            : t("gradeReviewDrawer.lateDropped"),
         severity: "success",
       });
     } catch {
       setSnackbar({
         open: true,
-        message: "Failed to update late submission",
+        message: t("gradeReviewDrawer.lateUpdateError"),
         severity: "error",
       });
     }
@@ -326,7 +329,7 @@ export function GradeReviewDrawer({
             <CloseIcon />
           </IconButton>
           {gradeIds.length > 1 && (
-            <Tooltip title="Previous (←)">
+            <Tooltip title={t("gradeReviewDrawer.previousTooltip")}>
               <span>
                 <IconButton
                   onClick={() => onNavigate(currentIndex - 1)}
@@ -346,12 +349,15 @@ export function GradeReviewDrawer({
                 variant="body2"
                 sx={{ ml: 1, opacity: 0.7 }}
               >
-                ({currentIndex + 1}/{gradeIds.length})
+                {t("gradeReviewDrawer.position", {
+                  current: currentIndex + 1,
+                  total: gradeIds.length,
+                })}
               </Typography>
             )}
           </Typography>
           {gradeIds.length > 1 && (
-            <Tooltip title="Next (→)">
+            <Tooltip title={t("gradeReviewDrawer.nextTooltip")}>
               <span>
                 <IconButton
                   onClick={() => onNavigate(currentIndex + 1)}
@@ -372,11 +378,13 @@ export function GradeReviewDrawer({
             }}
             disabled={grades.length === 0}
           >
-            Override
+            {t("gradeReviewDrawer.override")}
           </Button>
           {lateAssignment?.lateStatus && (
             <Chip
-              label={`Late: ${lateAssignment.lateStatus}`}
+              label={t("gradeReviewDrawer.lateStatus", {
+                status: lateAssignment.lateStatus,
+              })}
               color={lateAssignment.lateStatus === "DROPPED" ? "default" : "warning"}
               size="small"
             />
@@ -392,15 +400,15 @@ export function GradeReviewDrawer({
               action={
                 <Box sx={{ display: "flex", gap: 1 }}>
                   <Button color="inherit" size="small" onClick={() => updateLateStatus("KEPT")}>
-                    Keep
+                    {t("gradeReviewDrawer.keep")}
                   </Button>
                   <Button color="inherit" size="small" onClick={() => updateLateStatus("DROPPED")}>
-                    Drop
+                    {t("gradeReviewDrawer.drop")}
                   </Button>
                 </Box>
               }
             >
-              Late submission requires review.
+              {t("gradeReviewDrawer.lateRequiresReview")}
             </Alert>
           )}
           {loading ? (
@@ -424,22 +432,23 @@ export function GradeReviewDrawer({
               grades={grades}
               moderation={moderation}
               onModerationAction={() => {}}
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               maxHeight="calc(100vh - 120px)"
             />
           ) : (
-            <Alert severity="info">No grade data found.</Alert>
+            <Alert severity="info">{t("gradeReviewDrawer.noGradeData")}</Alert>
           )}
         </Box>
       </Drawer>
 
       {/* Override Dialog */}
       <Dialog open={overrideOpen} onClose={() => setOverrideOpen(false)}>
-        <DialogTitle>Override Grade</DialogTitle>
+        <DialogTitle>{t("gradeReviewDrawer.overrideTitle")}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            Student: <strong>{studentName}</strong>
+            {t("gradeReviewDrawer.studentLabel")} <strong>{studentName}</strong>
             <br />
-            Current:{" "}
+            {t("gradeReviewDrawer.currentLabel")}{" "}
             <strong>
               {grades[0]?.accuracy != null
                 ? `${Math.round(grades[0].accuracy)}%`
@@ -449,7 +458,7 @@ export function GradeReviewDrawer({
           <TextField
             autoFocus
             margin="dense"
-            label="Grade (%)"
+            label={t("gradeReviewDrawer.gradeLabel")}
             type="number"
             fullWidth
             variant="outlined"
@@ -463,14 +472,16 @@ export function GradeReviewDrawer({
             onClick={() => setOverrideOpen(false)}
             disabled={overrideSaving}
           >
-            Cancel
+            {t("gradeReviewDrawer.cancel")}
           </Button>
           <Button
             onClick={handleOverrideSave}
             variant="contained"
             disabled={overrideSaving}
           >
-            {overrideSaving ? "Saving..." : "Save"}
+            {overrideSaving
+              ? t("gradeReviewDrawer.saving")
+              : t("gradeReviewDrawer.save")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -22,6 +22,7 @@ import InputAdornment from '@mui/material/InputAdornment'
 import Alert from '@mui/material/Alert'
 import SaveIcon from '@mui/icons-material/Save'
 import SchoolIcon from '@mui/icons-material/School'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -70,6 +71,7 @@ export function SkillTreeEditor({
   onSubmit,
   submitting = false,
 }: SkillTreeEditorProps) {
+  const t = useTranslations('components')
   const [title, setTitle] = useState(initialData?.title || '')
   const [description, setDescription] = useState(initialData?.description || '')
   const [selectedUnits, setSelectedUnits] = useState<UnitOption[]>(
@@ -108,25 +110,27 @@ export function SkillTreeEditor({
             <Stack direction="row" spacing={1} alignItems="center">
               <SchoolIcon color="primary" />
               <Typography variant="h6">
-                {initialData?.title ? 'Edit Skill' : 'Create Multi-Unit Skill'}
+                {initialData?.title
+                  ? t('skillTreeEditor.editTitle')
+                  : t('skillTreeEditor.createTitle')}
               </Typography>
             </Stack>
 
             <TextField
-              label="Skill Title"
+              label={t('skillTreeEditor.titleLabel')}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              placeholder="e.g., Async Programming Mastery"
+              placeholder={t('skillTreeEditor.titlePlaceholder')}
             />
 
             <TextField
-              label="Description"
+              label={t('skillTreeEditor.descriptionLabel')}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               multiline
               rows={2}
-              placeholder="Optional description of what this skill represents"
+              placeholder={t('skillTreeEditor.descriptionPlaceholder')}
             />
 
             {/* Multi-unit selection */}
@@ -150,24 +154,26 @@ export function SkillTreeEditor({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Required Units"
+                  label={t('skillTreeEditor.requiredUnitsLabel')}
                   required
-                  helperText="All selected units must be completed to master this skill"
+                  helperText={t('skillTreeEditor.requiredUnitsHelper')}
                 />
               )}
             />
 
             {selectedUnits.length > 0 && (
               <Alert severity="info" icon={false}>
-                Student must complete {selectedUnits.length} unit{selectedUnits.length > 1 ? 's' : ''} with
-                at least {minimumAccuracy}% accuracy to master this skill.
+                {t('skillTreeEditor.masteryRequirement', {
+                  count: selectedUnits.length,
+                  accuracy: minimumAccuracy,
+                })}
               </Alert>
             )}
 
             {/* Minimum accuracy slider */}
             <Box>
               <Typography gutterBottom>
-                Minimum Accuracy: {minimumAccuracy}%
+                {t('skillTreeEditor.minimumAccuracy', { accuracy: minimumAccuracy })}
               </Typography>
               <Slider
                 value={minimumAccuracy}
@@ -187,14 +193,14 @@ export function SkillTreeEditor({
 
             {/* XP Reward */}
             <TextField
-              label="XP Reward"
+              label={t('skillTreeEditor.xpRewardLabel')}
               type="number"
               value={xpReward}
               onChange={(e) => setXpReward(Math.max(0, parseInt(e.target.value) || 0))}
               InputProps={{
                 startAdornment: <InputAdornment position="start">⚡</InputAdornment>,
               }}
-              helperText="XP awarded when the skill is mastered"
+              helperText={t('skillTreeEditor.xpRewardHelper')}
             />
 
             {/* Prerequisites */}
@@ -217,8 +223,8 @@ export function SkillTreeEditor({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Prerequisite Skills"
-                  helperText="Skills that must be mastered before this one becomes available"
+                  label={t('skillTreeEditor.prerequisitesLabel')}
+                  helperText={t('skillTreeEditor.prerequisitesHelper')}
                 />
               )}
             />
@@ -230,7 +236,9 @@ export function SkillTreeEditor({
               startIcon={<SaveIcon />}
               disabled={!isValid || submitting}
             >
-              {initialData?.title ? 'Save Skill' : 'Create Skill'}
+              {initialData?.title
+                ? t('skillTreeEditor.saveSkill')
+                : t('skillTreeEditor.createSkill')}
             </Button>
           </Stack>
         </Box>

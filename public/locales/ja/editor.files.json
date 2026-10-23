@@ -4,7 +4,9 @@
       "deleteConfirmMessage": "選択した{count}個のファイルを削除しますか？",
       "deleteSelected": "選択項目を削除 ({count})",
       "deselectAll": "すべて選択解除",
-      "reAnalyzeSelected": "選択したファイルを再分析します（{count}）"
+      "reAnalyzeSelected": "選択したファイルを再分析します（{count}）",
+      "confirmMoveSelected": "{count}個のファイルをごみ箱に移動しますか?",
+      "moveSelectedFailed": "{count}件のファイルをごみ箱に移動できませんでした: {files}"
     },
     "expandedContent": {
       "descriptionLabel": "説明:",
@@ -17,7 +19,11 @@
       "noVocabularyExtracted": "語彙が抽出されませんでした",
       "reviewQuestionsMessage": "ドキュメントから質問を確認してインポートしてください",
       "reviewVocabularyMessage": "ドキュメントから語彙を確認してインポートしてください",
-      "transcriptionLabel": "文字起こし："
+      "transcriptionLabel": "文字起こし：",
+      "bloomLevelChip": "ブルームレベル: {level}",
+      "durationSeconds": "{duration}秒",
+      "pagesChip": "ページ: {range}",
+      "relatedChip": "関連項目: {related}"
     },
     "fileDetails": {
       "deleteTooltip": "削除します",
@@ -25,7 +31,10 @@
       "insertTooltip": "エディターに挿入します",
       "noWaveformAvailable": "波形が利用できません",
       "reAnalyzeTooltip": "再分析します",
-      "videoNotSupported": "ご利用のブラウザはvideoタグをサポートしていません。"
+      "videoNotSupported": "ご利用のブラウザはvideoタグをサポートしていません。",
+      "confirmMoveToRecycleBin": "{name} をごみ箱に移動しますか？",
+      "moveToRecycleBinFailed": "{name} をごみ箱に移動できませんでした: {error}",
+      "reAnalyzeError": "{name}の再分析中にエラーが発生しました: {error}"
     },
     "generators": {
       "audioPromptPlaceholder": "音声ファイルに変換するテキストを入力してください。",
@@ -35,10 +44,13 @@
       "generatingImage": "画像ファイルを生成しています...",
       "imagePromptPlaceholder": "画像ファイルに変換するテキストを入力してください。",
       "successfullyGeneratedAudio": "音声ファイルが正常に生成されました",
-      "successfullyGeneratedImage": "画像ファイルが正常に生成されました"
+      "successfullyGeneratedImage": "画像ファイルが正常に生成されました",
+      "audioPreviewTitle": "音声プレビュー",
+      "noDescriptionPlaceholder": "説明なし"
     },
     "mainView": {
-      "noFilesMessage": "ファイルがありません。開始するにはファイルをアップロードしてください。"
+      "noFilesMessage": "ファイルがありません。開始するにはファイルをアップロードしてください。",
+      "updateFileNameFailed": "ファイル名の更新に失敗しました: {error}"
     },
     "metadataEditor": {
       "cancelButton": "キャンセル",
@@ -54,7 +66,8 @@
       "sizeLabel": "サイズ",
       "typeLabel": "タイプ",
       "unknown": "不明です",
-      "variantLabel": "バリアント"
+      "variantLabel": "バリアント",
+      "sizeKB": "{size} KB"
     },
     "selectedFileDetails": {
       "emptyState": "ファイルを選択して詳細情報とメタデータを表示してください"
@@ -64,11 +77,25 @@
       "searchPlaceholder": "ファイルを検索...",
       "selectAllTooltip": "すべて選択します",
       "uploadTooltip": "ファイルをアップロードします",
-      "recordConversation": "会話を録音する"
+      "recordConversation": "会話を録音する",
+      "generateConversation": "会話を生成",
+      "generateConversationForUnit": "会話を生成: {unitName}",
+      "recordConversationForUnit": "会話を録音: {unitName}"
     },
     "dragDrop": {
       "dropFilesHere": "ここにファイルをドロップしてアップロード",
       "supportedFormats": "音声、画像、PDF、ドキュメントなど"
+    },
+    "documentStatus": {
+      "analyzed": "分析済み",
+      "analyzing": "分析中...",
+      "extracted": "抽出済み",
+      "extracting": "抽出中です...",
+      "failed": "失敗しました",
+      "ready": "準備完了"
+    },
+    "inlineEditor": {
+      "fieldAriaLabel": "ファイルのメタデータフィールド"
     }
   },
   "fileMetadataComponent": {

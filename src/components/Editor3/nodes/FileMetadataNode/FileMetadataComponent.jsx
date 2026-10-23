@@ -287,6 +287,7 @@ export default function FileMetadataComponent({
             </AccordionSummary>
             <AccordionDetails>
               <List dense>
+                {/* eslint-disable-next-line i18next/no-literal-string -- field name */}
                 {filterAndHighlight(parsedContent.vocabulary, "term").map(
                   (vocab, index) => (
                     <ListItem key={index} divider>
@@ -321,6 +322,7 @@ export default function FileMetadataComponent({
             </AccordionSummary>
             <AccordionDetails>
               <Stack spacing={2}>
+                {/* eslint-disable-next-line i18next/no-literal-string -- field name */}
                 {filterAndHighlight(parsedContent.summaries, "content").map(
                   (summary, index) => (
                     <Box key={index}>
@@ -362,6 +364,7 @@ export default function FileMetadataComponent({
               <List dense>
                 {filterAndHighlight(
                   parsedContent.objectives,
+                  // eslint-disable-next-line i18next/no-literal-string -- field name
                   "description",
                 ).map((objective, index) => (
                   <ListItem key={index} divider>
@@ -395,6 +398,7 @@ export default function FileMetadataComponent({
             </AccordionSummary>
             <AccordionDetails>
               <List dense>
+                {/* eslint-disable-next-line i18next/no-literal-string -- field name */}
                 {filterAndHighlight(parsedContent.concepts, "name").map(
                   (concept, index) => (
                     <ListItem key={index} divider>
@@ -429,6 +433,7 @@ export default function FileMetadataComponent({
             </AccordionSummary>
             <AccordionDetails>
               <List dense>
+                {/* eslint-disable-next-line i18next/no-literal-string -- field name */}
                 {filterAndHighlight(parsedContent.questions, "question").map(
                   (q, index) => (
                     <ListItem key={index} divider>

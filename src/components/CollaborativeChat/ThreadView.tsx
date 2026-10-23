@@ -33,11 +33,13 @@ import {
   Collapse,
   CircularProgress,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import ReplyIcon from "@mui/icons-material/Reply";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
 import { MiniEditorReadOnly } from "../MiniEditor";
 import type { ChatMessage, ChatUser } from "./types";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 export interface ThreadViewProps {
   messages: ChatMessage[];
@@ -49,15 +51,18 @@ export interface ThreadViewProps {
 }
 
 /** Format timestamp to relative or absolute */
-function formatTime(iso: string): string {
+function formatTime(
+  iso: string,
+  t: ReturnType<typeof useTranslations>,
+): string {
   const d = new Date(iso);
   const now = new Date();
   const diffMs = now.getTime() - d.getTime();
   const diffMin = Math.floor(diffMs / 60000);
-  if (diffMin < 1) return "just now";
-  if (diffMin < 60) return `${diffMin}m ago`;
+  if (diffMin < 1) return t("threadView.justNow");
+  if (diffMin < 60) return t("threadView.minutesAgo", { minutes: diffMin });
   const diffHr = Math.floor(diffMin / 60);
-  if (diffHr < 24) return `${diffHr}h ago`;
+  if (diffHr < 24) return t("threadView.hoursAgo", { hours: diffHr });
   return d.toLocaleDateString(undefined, { month: "short", day: "numeric" });
 }
 
@@ -74,11 +79,12 @@ function MessageBubble({
   onReply?: (messageId: string) => void;
   onReaction?: (messageId: string, emoji: string) => void;
 }) {
+  const t = useTranslations("components");
   const [showReplies, setShowReplies] = useState(replies.length > 0);
   const isBot = message.authorId === "kai-bot" || message.authorId === "kai";
 
   return (
-    <Box sx={{ mb: 1.5 }} {...(isBot && { "data-testid": "ai-participant" })}>
+    <Box sx={{ mb: 1.5 }} data-testid={isBot ? "ai-participant" : undefined}>
       {/* Message header */}
       <Box sx={{ display: "flex", alignItems: "flex-start", gap: 1 }}>
         {isBot ? (
@@ -87,6 +93,9 @@ function MessageBubble({
           </Avatar>
         ) : (
           <Avatar
+            component={ProfileAvatarLink}
+            username={message.authorId}
+            displayName={message.authorName}
             sx={{
               width: 28,
               height: 28,
@@ -100,14 +109,14 @@ function MessageBubble({
         <Box sx={{ flex: 1, minWidth: 0 }}>
           <Box sx={{ display: "flex", alignItems: "baseline", gap: 1 }}>
             <Typography variant="body2" fontWeight={600} component="span">
-              {isBot ? "Kai" : message.authorName}
+              {isBot ? t("threadView.botName") : message.authorName}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {formatTime(message.createdAt)}
+              {formatTime(message.createdAt, t)}
             </Typography>
             {message.editedAt && (
               <Typography variant="caption" color="text.secondary">
-                (edited)
+                {t("threadView.edited")}
               </Typography>
             )}
           </Box>
@@ -117,7 +126,9 @@ function MessageBubble({
               content={message.contentJson}
               compact
               namespace={`msg-${message.id}`}
-              ariaLabel={`Message from ${message.authorName}`}
+              ariaLabel={t("threadView.messageFrom", {
+                name: message.authorName,
+              })}
             />
           ) : (
             <Typography
@@ -135,7 +146,7 @@ function MessageBubble({
             >
               <CircularProgress size={12} />
               <Typography variant="caption" color="text.secondary">
-                Kai is thinking...
+                {t("threadView.kaiThinking")}
               </Typography>
             </Box>
           )}
@@ -171,12 +182,12 @@ function MessageBubble({
               "&:hover": { opacity: 1 },
             }}
           >
-            <Tooltip title="Reply">
+            <Tooltip title={t("threadView.reply")}>
               <IconButton size="small" onClick={() => onReply?.(message.id)}>
                 <ReplyIcon sx={{ fontSize: 14 }} />
               </IconButton>
             </Tooltip>
-            <Tooltip title="React">
+            <Tooltip title={t("threadView.react")}>
               <IconButton
                 size="small"
                 onClick={() => onReaction?.(message.id, "👍")}
@@ -204,7 +215,7 @@ function MessageBubble({
                   sx={{ cursor: "pointer" }}
                   onClick={() => setShowReplies(true)}
                 >
-                  {replies.length} {replies.length === 1 ? "reply" : "replies"}
+                  {t("threadView.replyCountLabel", { count: replies.length })}
                 </Typography>
               ) : (
                 replies.map((reply) => (
@@ -215,11 +226,11 @@ function MessageBubble({
                       <Typography variant="caption" fontWeight={600}>
                         {reply.authorId === "kai-bot" ||
                         reply.authorId === "kai"
-                          ? "Kai"
+                          ? t("threadView.botName")
                           : reply.authorName}
                       </Typography>
                       <Typography variant="caption" color="text.secondary">
-                        {formatTime(reply.createdAt)}
+                        {formatTime(reply.createdAt, t)}
                       </Typography>
                     </Box>
                     {reply.contentJson ? (
@@ -227,7 +238,9 @@ function MessageBubble({
                         content={reply.contentJson}
                         compact
                         namespace={`reply-${reply.id}`}
-                        ariaLabel={`Reply from ${reply.authorName}`}
+                        ariaLabel={t("threadView.replyFrom", {
+                          name: reply.authorName,
+                        })}
                       />
                     ) : (
                       <Typography
@@ -256,6 +269,7 @@ export default function ThreadView({
   typingUsers = [],
   topicName,
 }: ThreadViewProps) {
+  const t = useTranslations("components");
   const bottomRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [autoScroll, setAutoScroll] = useState(true);
@@ -315,7 +329,7 @@ export default function ThreadView({
         {topLevelMessages.length === 0 && (
           <Box sx={{ textAlign: "center", py: 4 }}>
             <Typography variant="body2" color="text.secondary">
-              No messages yet. Start the conversation!
+              {t("threadView.emptyState")}
             </Typography>
           </Box>
         )}
@@ -340,8 +354,10 @@ export default function ThreadView({
             color="text.secondary"
             fontStyle="italic"
           >
-            {typingUsers.map((u) => u.displayName).join(", ")}{" "}
-            {typingUsers.length === 1 ? "is" : "are"} typing...
+            {t("threadView.typingIndicator", {
+              names: typingUsers.map((u) => u.displayName).join(", "),
+              count: typingUsers.length,
+            })}
           </Typography>
         </Box>
       )}

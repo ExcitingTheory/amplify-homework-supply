@@ -121,7 +121,7 @@ describe("NotificationInvitations", () => {
         onJoin={vi.fn()}
       />,
     );
-    expect(screen.getByText("New")).toBeInTheDocument();
+    expect(screen.getByText("notificationInvitations.new")).toBeInTheDocument();
   });
 
   it("renders sender name when present", () => {
@@ -131,7 +131,9 @@ describe("NotificationInvitations", () => {
         onJoin={vi.fn()}
       />,
     );
-    expect(screen.getByText(/From: Alice/)).toBeInTheDocument();
+    expect(
+      screen.getByText("notificationInvitations.from"),
+    ).toBeInTheDocument();
   });
 
   it("supports multiple types filter", () => {

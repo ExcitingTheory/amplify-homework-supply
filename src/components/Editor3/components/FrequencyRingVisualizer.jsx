@@ -6,6 +6,16 @@ import { hexToRgb } from "../../../utils/hexToRgb";
 const FFT_SIZE = 256;
 const SPIKE_COUNT = 128;
 
+/**
+ * @typedef {Object} VisualizerPlayer
+ * @property {() => boolean} isDisposed
+ * @property {(forwarded?: boolean) => ({el: () => HTMLMediaElement | null} | null)} tech
+ * @property {(event: string, handler: () => void) => void} on
+ * @property {(event: string, handler: () => void) => void} off
+ * @property {() => boolean} paused
+ * @property {() => boolean} muted
+ */
+
 export function buildSpikePoints({
   cx,
   cy,
@@ -39,8 +49,18 @@ export function buildSpikePoints({
   ];
 }
 
+/**
+ * @param {{
+ *   player?: VisualizerPlayer | null,
+ *   analyser?: AnalyserNode | null,
+ *   visible?: boolean,
+ *   designMode?: string,
+ *   onLevelChange?: (level: number) => void
+ * }} props
+ */
 export default function FrequencyRingVisualizer({
-  player,
+  player = null,
+  analyser: analyserProp = null,
   visible = true,
   designMode: designModeProp = "rings",
   onLevelChange,
@@ -62,28 +82,34 @@ export default function FrequencyRingVisualizer({
   }, [onLevelChange]);
 
   React.useEffect(() => {
-    if (!player || player.isDisposed()) return undefined;
+    if ((!player && !analyserProp) || (player && player.isDisposed()))
+      return undefined;
 
-    const mediaElement = player.tech(true)?.el();
+    const mediaElement = player?.tech(true)?.el();
     const canvas = canvasRef.current;
     const AudioContextClass = window.AudioContext || window.webkitAudioContext;
 
-    if (!mediaElement || !canvas || !AudioContextClass) return undefined;
-
-    const audioContext = new AudioContextClass();
-    const analyser = audioContext.createAnalyser();
-    analyser.fftSize = FFT_SIZE;
-    analyser.smoothingTimeConstant = 0.85;
-
-    let source;
-    try {
-      source = audioContext.createMediaElementSource(mediaElement);
-      source.connect(analyser);
-      analyser.connect(audioContext.destination);
-    } catch (error) {
-      console.warn("Unable to connect media visualization:", error);
-      void audioContext.close();
+    if (!canvas || (!analyserProp && (!mediaElement || !AudioContextClass)))
       return undefined;
+
+    const audioContext = analyserProp ? null : new AudioContextClass();
+    const analyser = analyserProp || audioContext.createAnalyser();
+    if (!analyserProp) {
+      analyser.fftSize = FFT_SIZE;
+      analyser.smoothingTimeConstant = 0.85;
+    }
+
+    let source = null;
+    if (!analyserProp) {
+      try {
+        source = audioContext.createMediaElementSource(mediaElement);
+        source.connect(analyser);
+        analyser.connect(audioContext.destination);
+      } catch (error) {
+        console.warn("Unable to connect media visualization:", error);
+        void audioContext.close();
+        return undefined;
+      }
     }
 
     const frequencyData = new Uint8Array(analyser.frequencyBinCount);
@@ -106,7 +132,7 @@ export default function FrequencyRingVisualizer({
     resizeCanvas();
 
     const resumeAudioContext = () => {
-      if (audioContext.state === "suspended") {
+      if (audioContext?.state === "suspended") {
         void audioContext.resume();
       }
     };
@@ -115,8 +141,8 @@ export default function FrequencyRingVisualizer({
       ringHeights.current.fill(0);
       onLevelChangeRef.current?.(0);
     };
-    player.on("play", resumeAudioContext);
-    player.on("loadstart", resetSpikes);
+    player?.on("play", resumeAudioContext);
+    player?.on("loadstart", resetSpikes);
 
     const draw = () => {
       const width = canvas.clientWidth;
@@ -136,7 +162,7 @@ export default function FrequencyRingVisualizer({
       context.fillStyle = backgroundColor;
       context.fillRect(0, 0, width, height);
 
-      const isActive = !player.paused() && !player.muted();
+      const isActive = analyserProp || (player && !player.paused() && !player.muted());
       const peakLevel = frequencyData.reduce(
         (maxValue, value) => Math.max(maxValue, value / 255),
         0,
@@ -304,13 +330,15 @@ export default function FrequencyRingVisualizer({
     return () => {
       cancelAnimationFrame(frameRef.current);
       resizeObserver.disconnect();
-      player.off("play", resumeAudioContext);
-      player.off("loadstart", resetSpikes);
-      source.disconnect();
-      analyser.disconnect();
-      void audioContext.close();
+      player?.off("play", resumeAudioContext);
+      player?.off("loadstart", resetSpikes);
+      source?.disconnect();
+      if (!analyserProp) {
+        analyser.disconnect();
+        void audioContext.close();
+      }
     };
-  }, [player]);
+  }, [analyserProp, player]);
 
   return (
     <Box

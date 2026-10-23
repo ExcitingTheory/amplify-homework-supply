@@ -19,6 +19,7 @@ import React, {
   useEffect,
   useRef,
 } from "react";
+import { useTranslations } from "next-intl";
 import { useTheme, type Theme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
@@ -205,6 +206,7 @@ function SquadDescriptionEditor({
   value,
   onChange,
 }: SquadDescriptionEditorProps) {
+  const t = useTranslations("components");
   const initialConfig = useMemo(
     () => ({
       namespace: "SquadDescription",
@@ -224,7 +226,7 @@ function SquadDescriptionEditor({
         color="text.secondary"
         sx={{ mb: 0.5, display: "block" }}
       >
-        Description
+        {t("squadEditor.descriptionLabel")}
       </Typography>
       <DndWrapper>
         <AutocompleteProvider>
@@ -250,7 +252,7 @@ function SquadDescriptionEditor({
                 <RichTextPlugin
                   contentEditable={
                     <ContentEditable
-                      aria-label="Squad description"
+                      aria-label={t("squadEditor.descriptionAriaLabel")}
                       style={{
                         width: "100%",
                         minHeight: 100,
@@ -261,7 +263,7 @@ function SquadDescriptionEditor({
                   }
                   placeholder={
                     <Placeholder className="Placeholder__root">
-                      Squad description — add rich content, media, quizzes…
+                      {t("squadEditor.descriptionPlaceholder")}
                     </Placeholder>
                   }
                   ErrorBoundary={LexicalErrorBoundary}
@@ -318,6 +320,7 @@ export function SquadEditor({
   showSaveStatus = true,
   level = 1,
 }: SquadEditorProps) {
+  const t = useTranslations("components");
   const [armorDialogOpen, setArmorDialogOpen] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "saving" | "saved">(
     "idle",
@@ -448,11 +451,11 @@ export function SquadEditor({
                 startIcon={<EditIcon />}
                 onClick={() => setArmorDialogOpen(true)}
               >
-                Edit Crest
+                {t("squadEditor.editCrest")}
               </Button>
             ) : (
               <Chip
-                label="Unlock at Level 2"
+                label={t("squadEditor.unlockAtLevel", { level: 2 })}
                 size="small"
                 variant="outlined"
                 sx={{ fontSize: "0.7rem" }}
@@ -467,9 +470,9 @@ export function SquadEditor({
               onChange={(text) =>
                 pushAndUpdate((prev) => ({ ...prev, name: text }))
               }
-              label="Squad Name"
-              placeholder="Enter squad name…"
-              ariaLabel="Squad name"
+              label={t("squadEditor.nameLabel")}
+              placeholder={t("squadEditor.namePlaceholder")}
+              ariaLabel={t("squadEditor.nameAriaLabel")}
               maxLength={50}
             />
             <SquadDescriptionEditor

@@ -27,6 +27,7 @@ import AuthContext from "@/context/authContext";
 import SectionContext from "@/context/sectionContext";
 import { SkillTreeEditor } from "@/components/SkillTreeEditor";
 import { getAmplifyClient } from "@/utils/amplifyClient";
+import { useTranslations } from "next-intl";
 
 // Lazy-load SkillTree component only when the dialog opens (avoids loading @xyflow/react on every page)
 const SkillTree = lazy(() =>
@@ -47,14 +48,17 @@ export function SkillTreePopupButton({
   open: openProp = undefined,
   onOpenChange = undefined,
 }) {
+  const t = useTranslations("components");
   const [openState, setOpenState] = useState(false);
   const open = openProp !== undefined ? openProp : openState;
   const setOpen = (value) => {
     onOpenChange?.(value);
     if (openProp === undefined) setOpenState(value);
   };
-  const buttonLabel = "Skills";
-  const dialogTitle = label ? `Skill Tree — ${label}` : "Skill Tree";
+  const buttonLabel = t("skillTreePopupButton.buttonLabel");
+  const dialogTitle = label
+    ? t("skillTreePopupButton.dialogTitleWithLabel", { label })
+    : t("skillTreePopupButton.dialogTitle");
   return (
     <>
       {!hideTrigger && (
@@ -97,7 +101,7 @@ export function SkillTreePopupButton({
               />
             </GamificationProviderWrapper>
           ) : (
-            <div>No section selected.</div>
+            <div>{t("skillTreePopupButton.noSectionSelected")}</div>
           )}
         </DialogContent>
       </Dialog>
@@ -106,6 +110,7 @@ export function SkillTreePopupButton({
 }
 
 function SkillTreeModalContent({ sectionId, isInstructorProp }) {
+  const t = useTranslations("components");
   const { skillNodes, isLoading } = useSkillTree();
   const { session } = useContext(AuthContext) || {};
   const { assignments = [] } = useContext(SectionContext) || {};
@@ -134,7 +139,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
     if (sectionAssignments.length > 0) {
       const units = sectionAssignments.map((a) => ({
         id: a.unit.id || a.unitID,
-        name: a.unit.name || "Untitled Unit",
+        name: a.unit.name || t("skillTreePopupButton.untitledUnit"),
       }));
       setAvailableUnits(units);
       return;
@@ -151,7 +156,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
                 .filter((u) => u != null && u.id)
                 .map((u) => ({
                   id: u.id,
-                  name: u.name || "Untitled Unit",
+                  name: u.name || t("skillTreePopupButton.untitledUnit"),
                 })),
             );
           }
@@ -164,7 +169,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
     return () => {
       isMounted = false;
     };
-  }, [assignments, isInstructor, sectionId]);
+  }, [assignments, isInstructor, sectionId, t]);
 
   const availableSkills = useMemo(() => {
     return (skillNodes || []).map((node) => ({
@@ -195,9 +200,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
       setShowEditor(false);
     } catch (err) {
       console.error("[SkillTreePopupButton] Failed to create skill:", err);
-      setCreateError(
-        err?.message || "Failed to create skill. Please try again.",
-      );
+      setCreateError(err?.message || t("skillTreePopupButton.createError"));
     } finally {
       setSubmitting(false);
     }
@@ -217,8 +220,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
         <Box sx={{ p: 2 }}>
           <Stack spacing={2}>
             <Alert severity="info">
-              No skills have been created for this section yet. Create your
-              first skill below to build the section's skill tree!
+              {t("skillTreePopupButton.noSkillsInstructor")}
             </Alert>
             {createError && (
               <Alert severity="error" onClose={() => setCreateError(null)}>
@@ -237,7 +239,7 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
     }
     return (
       <Box sx={{ p: 3, textAlign: "center" }}>
-        No skills available for this section.
+        {t("skillTreePopupButton.noSkillsAvailable")}
       </Box>
     );
   }
@@ -252,7 +254,9 @@ function SkillTreeModalContent({ sectionId, isInstructorProp }) {
             startIcon={showEditor ? <AccountTreeIcon /> : <AddIcon />}
             onClick={() => setShowEditor((prev) => !prev)}
           >
-            {showEditor ? "View Skill Tree" : "Add Skill"}
+            {showEditor
+              ? t("skillTreePopupButton.viewSkillTree")
+              : t("skillTreePopupButton.addSkill")}
           </Button>
         </Box>
       )}

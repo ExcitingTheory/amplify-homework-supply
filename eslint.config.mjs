@@ -130,6 +130,7 @@ const i18nextRuleConfig = [
         "alt",
         "role",
         "data-testid",
+        "data-tour",
         "contentType",
         "accept",
         "method",

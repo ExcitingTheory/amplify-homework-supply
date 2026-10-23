@@ -57,6 +57,56 @@
     "aiAssistant": "AI Assistant",
     "openAssistant": "Open AI Assistant"
   },
+  "callResponse": {
+    "albumTrack": "Listen to {title} audio track",
+    "authoring": {
+      "acceptedAlternatives": "Accepted alternatives (comma separated)",
+      "addQuestionResponse": "Add question and response",
+      "addSelectedQuestions": "Add selected questions as cues",
+      "advancedJson": "Advanced JSON",
+      "applyJson": "Apply JSON changes",
+      "answerText": "Answer text",
+      "answerVoice": "Answer voice",
+      "audioFailed": "Unable to generate audio",
+      "cueNumber": "Cue {number}: {kind}",
+      "expectedResponse": "Expected response",
+      "generateAudio": "Generate audio",
+      "generateFromQuestions": "Generate cues from questions",
+      "generatingAudio": "Generating audio ({completed} of {total})…",
+      "hideAdvanced": "Hide advanced JSON",
+      "hidePreview": "Hide preview",
+      "invalidScript": "Check that every cue, voice, and response timing is valid",
+      "invalidJson": "Enter valid JSON",
+      "kinds": {
+        "answer": "Answer",
+        "prompt": "Prompt",
+        "response": "Response"
+      },
+      "maximumResponse": "Maximum response (ms)",
+      "minimumResponse": "Minimum response (ms)",
+      "preview": "Preview",
+      "promptText": "Prompt text",
+      "promptVoice": "Prompt voice",
+      "remove": "Remove",
+      "removeCue": "Remove {kind} cue {number}",
+      "responseField": "Field",
+      "saveScript": "Save script",
+      "silenceToFinish": "Silence to finish (ms)",
+      "title": "Edit call-and-response script",
+      "ungroupedQuestions": "Other questions"
+    },
+    "completed": "Call and response complete. {graded} of {total} responses graded.",
+    "finishResponse": "Finish response",
+    "groupLabel": "Call and response: {title}",
+    "microphoneActivity": "Microphone activity",
+    "microphoneRequired": "Microphone access is required for spoken responses.",
+    "pause": "Pause",
+    "preparingMic": "Preparing microphone…",
+    "resume": "Resume",
+    "slideLabel": "Slide for {title}",
+    "start": "Start call and response",
+    "yourResponse": "Your response: {field}"
+  },
   "close": "Close",
   "colors": {
     "gold": "Gold",
@@ -133,7 +183,21 @@
       "title": "Add to Section"
     },
     "collaboration": "Collaboration",
+    "debugModeEnabled": "🐛 Debug mode enabled! Refresh the page to activate the debug panel.\n\nUse Cmd/Ctrl + Shift + D to open the debug panel.",
     "help": "Help",
+    "nav": {
+      "adminDashboard": "Admin Dashboard",
+      "analytics": "Analytics",
+      "archives": "Archives",
+      "collapseNavigation": "Collapse navigation",
+      "expandNavigation": "Expand navigation",
+      "files": "Files",
+      "moderation": "Moderation",
+      "questions": "Questions",
+      "recycleBin": "Recycle Bin",
+      "showNavigation": "Show navigation",
+      "words": "Words"
+    },
     "settings": {
       "colorMode": "Color mode",
       "darkMode": "Dark Mode",
@@ -148,6 +212,7 @@
   "missingMetadata": "Missing Metadata",
   "modelSelection": "Model Selection",
   "navigation": {
+    "backToSection": "Back to section",
     "collaboration": "Collaboration",
     "collaborationDesc": "Invitations & join sessions",
     "drafts": "Drafts",
@@ -159,11 +224,15 @@
     "profile": "Profile",
     "published": "Published",
     "sections": "Sections",
+    "sectionAISettings": "AI settings",
+    "sectionGamificationSettings": "Gamification settings",
     "settings": "Settings",
     "skills": "Skill Tree",
     "squads": "Squads",
     "units": "Units",
-    "workbook": "Workbook"
+    "workbook": "Workbook",
+    "userProfile": "View {name}'s public profile",
+    "xpHistory": "XP history"
   },
   "needsWork": "Needs Work",
   "newTopicPlaceholder": "New Topic Placeholder",
@@ -172,8 +241,16 @@
   "onlineCount": "Online Count",
   "overdue": "Overdue",
   "peerReview": {
+    "aiAssistant": "AI Assistant",
+    "blockReference": "Block: {blockId}",
+    "didItHelp": "Did peer review help?",
     "helpful": "Peer review was helpful",
-    "notHelpful": "Peer review was not helpful"
+    "messagePlaceholder": "Type a message… (use @AI for AI help)",
+    "noMessages": "No messages yet. Start the peer review conversation!",
+    "notHelpful": "Peer review was not helpful",
+    "sessionEnded": "This review session has ended.",
+    "thanksForFeedback": "Thanks for your feedback!",
+    "typing": "{count, plural, one {{names} is typing…} other {{names} are typing…}}"
   },
   "perPersonaOverrides": "Per Persona Overrides",
   "practice": "Practice",
@@ -235,7 +312,9 @@
     "studentHeader": "Student",
     "studentsMissingAssignment": "Students Missing Assignment",
     "unreviewedSubmissions": "Unreviewed Submissions",
-    "viewRooms": "View Rooms"
+    "viewRooms": "View Rooms",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "Failed to enroll students"
   },
   "similarityThresholdLabel": "Similarity Threshold Label",
   "startWorkbook": "Start Workbook",
@@ -314,5 +393,42 @@
   "useDefaultPlaceholder": "Use Default Placeholder",
   "weeklyMeetingHint": "Weekly Meeting Hint",
   "weeklyMeetingLabel": "Weekly Meeting Label",
-  "weeksLabel": "Weeks Label"
+  "weeksLabel": "Weeks Label",
+  "debugPanel": {
+    "contactLabel": "Your email or contact (optional)",
+    "contactPlaceholder": "So we can follow up with you",
+    "describeIssueLabel": "Describe the issue (optional)",
+    "describeIssuePlaceholder": "What were you doing when the problem occurred?",
+    "diagnosticSent": "✅ Diagnostic sent to support team! (S3 link expires in 30 days)",
+    "performanceComingSoon": "Performance metrics coming soon...",
+    "sendDialogDescription": "This will send your diagnostic snapshot to our support team via Discord. Your data will be sanitized to remove sensitive information.",
+    "sendDialogTitle": "Send Diagnostic to Support",
+    "sendFailed": "Failed to send: {error}",
+    "sendingToDiscord": "Sending to Discord...",
+    "sendToSupport": "Send to Support",
+    "snapshotDownloaded": "Diagnostic snapshot downloaded",
+    "tabs": {
+      "components": "Components",
+      "logs": "Logs ({count})",
+      "performance": "Performance",
+      "state": "State"
+    },
+    "title": "Debug Panel",
+    "unknownError": "Unknown error",
+    "uploadFailed": "Upload failed: {error}",
+    "uploadingArtifact": "Uploading diagnostic artifact to S3...",
+    "webhookNotConfigured": "Discord webhook not configured"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "Accuracy across attempts in enabled practice modes.",
+    "modes": {
+      "easy": "Easy",
+      "hard": "Hard",
+      "learn": "Learn"
+    },
+    "progressDescription": "Average completion across enabled practice modes."
+  },
+  "editor": {
+    "anonymousUser": "Anonymous"
+  }
 }

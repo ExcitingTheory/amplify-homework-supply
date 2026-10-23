@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import DictionaryContext from "../../context/dictionaryContext";
 import UnitContext from "../../context/unitContext";
@@ -24,12 +25,16 @@ export const Learn = ({
   wordIDs,
   enabledModes = ["learn", "easy", "hard"],
   nextMode = "easy",
-  nextModeLabel = "Easy",
+  nextModeLabel,
   onProgressChange,
   promptFor = "definition",
   showAudio = true,
   showPronunciation = true,
 }) => {
+  const t = useTranslations("components");
+  const resolvedNextModeLabel =
+    nextModeLabel ||
+    (nextMode ? t(`meaningAssociationExercise.modes.${nextMode}`) : "");
   const [answers, setAnswers] = React.useState([]);
   const [length, setLength] = React.useState();
   const [vocabulary, setVocabulary] = React.useState([]);
@@ -79,7 +84,10 @@ export const Learn = ({
     }
     return grade.data;
   }, [grade?.data]);
-  const inProgress = gradeData[nodeKey] || {};
+  const inProgress = React.useMemo(
+    () => gradeData[nodeKey] || {},
+    [gradeData, nodeKey],
+  );
 
   // Show completion screen once when exercise completes — don't re-show after dismiss
   React.useEffect(() => {
@@ -370,7 +378,9 @@ export const Learn = ({
             }}
           >
             <Typography variant="body2" color="textSecondary">
-              Learn Mode Complete — {accuracyPercent}% accuracy
+              {t("meaningAssociationExercise.learnModeComplete", {
+                accuracy: accuracyPercent,
+              })}
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -378,7 +388,7 @@ export const Learn = ({
                 size="small"
                 onClick={handleDismissCompletion}
               >
-                Back
+                {t("meaningAssociationExercise.back")}
               </Button>
               <Button
                 variant="contained"
@@ -387,8 +397,10 @@ export const Learn = ({
                 onClick={handleContinueFromCompletion}
               >
                 {nextMode
-                  ? `Continue to ${nextModeLabel} Mode`
-                  : "Finish Exercise"}
+                  ? t("meaningAssociationExercise.continueToMode", {
+                      mode: resolvedNextModeLabel,
+                    })
+                  : t("meaningAssociationExercise.finishExercise")}
               </Button>
             </Box>
           </Box>

@@ -4,6 +4,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Typography, Button, Paper, Chip, Divider } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -23,10 +24,18 @@ import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
 import { HeadingNode } from "@lexical/rich-text";
 
+const DEFAULT_ANSWER_INPUT = ["text", "audio", "writing"];
+const DEFAULT_TEXT_METHOD = ["text"];
+const DEFAULT_MEANING_MODES = ["learn", "easy", "hard"];
+const ANSWER_PREVIEW_KEY = "preview-answer";
+const MEANING_ASSOCIATION_PREVIEW_KEY = "preview-meaning-association";
+const CUSTOM_ANSWER_PREVIEW_KEY = "preview-custom-answer";
+
 /**
  * Renders a preview of a quiz block with actual quiz interaction
  */
 const QuizBlockPreview = ({ preview, blockData }) => {
+  const t = useTranslations("components");
   // Group quiz data by question to display them properly
   const questionGroups = [];
   const questionMap = new Map();
@@ -49,11 +58,15 @@ const QuizBlockPreview = ({ preview, blockData }) => {
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <QuizIcon color="primary" />
-        <Typography variant="h6">{preview?.title || "Quiz"}</Typography>
+        <Typography variant="h6">
+          {preview?.title || t("blockInsertPreview.quizTitle")}
+        </Typography>
       </Box>
       <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
         <Chip
-          label={`${questionGroups.length} questions`}
+          label={t("blockInsertPreview.questionCount", {
+            count: questionGroups.length,
+          })}
           size="small"
           color="primary"
           variant="outlined"
@@ -76,70 +89,88 @@ const QuizBlockPreview = ({ preview, blockData }) => {
 /**
  * Renders a preview of an answer block with actual answer component
  */
-const AnswerBlockPreview = ({ preview, blockData }) => (
-  <Box>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-      <EditIcon color="primary" />
-      <Typography variant="h6">Answer Block</Typography>
-    </Box>
-    <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
-      <Chip
-        label={`${preview?.wordCount || blockData?.wordIDs?.length || 0} words`}
-        size="small"
-        color="primary"
-        variant="outlined"
+const AnswerBlockPreview = ({ preview, blockData }) => {
+  const t = useTranslations("components");
+
+  return (
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+        <EditIcon color="primary" />
+        <Typography variant="h6">
+          {t("blockInsertPreview.answerBlockTitle")}
+        </Typography>
+      </Box>
+      <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
+        <Chip
+          label={t("blockInsertPreview.wordCount", {
+            count: preview?.wordCount || blockData?.wordIDs?.length || 0,
+          })}
+          size="small"
+          color="primary"
+          variant="outlined"
+        />
+        {preview?.mode && (
+          <Chip
+            label={preview.mode}
+            size="small"
+            color="info"
+            variant="outlined"
+          />
+        )}
+        {preview?.inputMethods && (
+          <Chip
+            label={t("blockInsertPreview.inputMethods", {
+              methods: preview.inputMethods.join(", "),
+            })}
+            size="small"
+            variant="outlined"
+          />
+        )}
+      </Box>
+      <AnswerComponent
+        nodeKey={ANSWER_PREVIEW_KEY}
+        wordIDs={blockData?.wordIDs || []}
+        requestDefinition={blockData?.requestDefinition}
+        allowedInput={
+          blockData?.allowedInput ||
+          preview?.inputMethods ||
+          DEFAULT_ANSWER_INPUT
+        }
+        promptMethod={blockData?.promptMethod || DEFAULT_TEXT_METHOD}
       />
-      {preview?.mode && (
-        <Chip
-          label={preview.mode}
-          size="small"
-          color="info"
-          variant="outlined"
-        />
-      )}
-      {preview?.inputMethods && (
-        <Chip
-          label={`Input: ${preview.inputMethods.join(", ")}`}
-          size="small"
-          variant="outlined"
-        />
-      )}
     </Box>
-    <AnswerComponent
-      nodeKey="preview-answer"
-      wordIDs={blockData?.wordIDs || []}
-      requestDefinition={blockData?.requestDefinition}
-      allowedInput={
-        blockData?.allowedInput ||
-        preview?.inputMethods || ["text", "audio", "writing"]
-      }
-      promptMethod={blockData?.promptMethod || ["text"]}
-    />
-  </Box>
-);
+  );
+};
 
 /**
  * Renders a preview of a meaning association block with actual exercise
  */
 const MeaningAssociationPreview = ({ preview, blockData }) => {
+  const t = useTranslations("components");
   const [tabIndex, setTabIndex] = React.useState(0);
 
   return (
     <Box>
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <LinkIcon color="primary" />
-        <Typography variant="h6">Meaning Association</Typography>
+        <Typography variant="h6">
+          {t("blockInsertPreview.meaningAssociationTitle")}
+        </Typography>
       </Box>
       <Box sx={{ display: "flex", gap: 1, mb: 2 }}>
         <Chip
-          label={`${preview?.wordCount || blockData?.length || 0} words`}
+          label={t("blockInsertPreview.wordCount", {
+            count: preview?.wordCount || blockData?.length || 0,
+          })}
           size="small"
           color="primary"
           variant="outlined"
         />
         {preview?.modes && (
           <Chip
-            label={`Modes: ${preview.modes.join(", ")}`}
+            label={t("blockInsertPreview.modes", {
+              modes: preview.modes.join(", "),
+            })}
             size="small"
             color="info"
             variant="outlined"
@@ -152,11 +183,11 @@ const MeaningAssociationPreview = ({ preview, blockData }) => {
         </Typography>
       )}
       <MeaningAssociationExercise
-        nodeKey="preview-meaning-association"
+        nodeKey={MEANING_ASSOCIATION_PREVIEW_KEY}
         wordIDs={blockData || []}
         tabIndex={tabIndex}
         setTabIndex={setTabIndex}
-        enabledModes={preview?.modes || ["learn", "easy", "hard"]}
+        enabledModes={preview?.modes || DEFAULT_MEANING_MODES}
       />
     </Box>
   );
@@ -165,65 +196,82 @@ const MeaningAssociationPreview = ({ preview, blockData }) => {
 /**
  * Renders a preview of a custom answer block with actual component
  */
-const CustomAnswerPreview = ({ preview, blockData }) => (
-  <Box>
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
-      <HelpOutlineIcon color="primary" />
-      <Typography variant="h6">Custom Answer</Typography>
-    </Box>
-    {preview?.prompt && (
-      <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
-        {preview.prompt}
-      </Typography>
-    )}
-    <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
-      <Chip
-        label={`${preview?.questionCount || blockData?.length || 0} questions`}
-        size="small"
-        color="primary"
-        variant="outlined"
+const CustomAnswerPreview = ({ preview, blockData }) => {
+  const t = useTranslations("components");
+
+  return (
+    <Box>
+      <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
+        <HelpOutlineIcon color="primary" />
+        <Typography variant="h6">
+          {t("blockInsertPreview.customAnswerTitle")}
+        </Typography>
+      </Box>
+      {preview?.prompt && (
+        <Typography variant="body1" sx={{ mb: 2, fontWeight: 500 }}>
+          {preview.prompt}
+        </Typography>
+      )}
+      <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
+        <Chip
+          label={t("blockInsertPreview.questionCount", {
+            count: preview?.questionCount || blockData?.length || 0,
+          })}
+          size="small"
+          color="primary"
+          variant="outlined"
+        />
+        {preview?.inputMethods && (
+          <Chip
+            label={t("blockInsertPreview.inputMethods", {
+              methods: preview.inputMethods.join(", "),
+            })}
+            size="small"
+            variant="outlined"
+          />
+        )}
+        {preview?.promptMethods && (
+          <Chip
+            label={t("blockInsertPreview.promptMethods", {
+              methods: preview.promptMethods.join(", "),
+            })}
+            size="small"
+            color="info"
+            variant="outlined"
+          />
+        )}
+        {preview?.allowMultipleAttempts && (
+          <Chip
+            label={t("blockInsertPreview.multipleAttempts")}
+            size="small"
+            color="success"
+            variant="outlined"
+          />
+        )}
+      </Box>
+      <CustomAnswerComponent
+        nodeKey={CUSTOM_ANSWER_PREVIEW_KEY}
+        ids={blockData?.questionIDs || []}
+        allowedInput={
+          blockData?.allowedInput ||
+          preview?.inputMethods ||
+          DEFAULT_TEXT_METHOD
+        }
+        promptMethod={
+          blockData?.promptMethod ||
+          preview?.promptMethods ||
+          DEFAULT_TEXT_METHOD
+        }
       />
-      {preview?.inputMethods && (
-        <Chip
-          label={`Input: ${preview.inputMethods.join(", ")}`}
-          size="small"
-          variant="outlined"
-        />
-      )}
-      {preview?.promptMethods && (
-        <Chip
-          label={`Prompt: ${preview.promptMethods.join(", ")}`}
-          size="small"
-          color="info"
-          variant="outlined"
-        />
-      )}
-      {preview?.allowMultipleAttempts && (
-        <Chip
-          label="Multiple attempts"
-          size="small"
-          color="success"
-          variant="outlined"
-        />
-      )}
     </Box>
-    <CustomAnswerComponent
-      nodeKey="preview-custom-answer"
-      ids={blockData?.questionIDs || []}
-      allowedInput={
-        blockData?.allowedInput || preview?.inputMethods || ["text"]
-      }
-      promptMethod={
-        blockData?.promptMethod || preview?.promptMethods || ["text"]
-      }
-    />
-  </Box>
-);
+  );
+};
 
 /**
  * Renders a preview of content block with Lexical editor
  */
 const ContentBlockPreview = ({ preview, blockData }) => {
+  const t = useTranslations("components");
   const initialConfig = {
     namespace: "ContentBlockPreview",
     theme: LanguageEditorTheme,
@@ -238,7 +286,7 @@ const ContentBlockPreview = ({ preview, blockData }) => {
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 2 }}>
         <ArticleIcon color="primary" />
         <Typography variant="h6">
-          {preview?.title || "Content Block"}
+          {preview?.title || t("blockInsertPreview.contentBlockTitle")}
         </Typography>
       </Box>
       <Box sx={{ display: "flex", gap: 1, mb: 2, flexWrap: "wrap" }}>
@@ -252,7 +300,9 @@ const ContentBlockPreview = ({ preview, blockData }) => {
         )}
         {preview?.nodeCount && (
           <Chip
-            label={`${preview.nodeCount} elements`}
+            label={t("blockInsertPreview.elementCount", {
+              count: preview.nodeCount,
+            })}
             size="small"
             variant="outlined"
           />
@@ -290,6 +340,8 @@ const ContentBlockPreview = ({ preview, blockData }) => {
  * Main component - displays block preview with approve/reject actions
  */
 const BlockInsertPreview = ({ toolOutput, onInsertBlock, onReject }) => {
+  const t = useTranslations("components");
+
   if (
     !toolOutput ||
     !toolOutput.success ||
@@ -347,7 +399,7 @@ const BlockInsertPreview = ({ toolOutput, onInsertBlock, onReject }) => {
           onClick={handleReject}
           size="small"
         >
-          Reject
+          {t("blockInsertPreview.reject")}
         </Button>
         <Button
           variant="contained"
@@ -356,7 +408,7 @@ const BlockInsertPreview = ({ toolOutput, onInsertBlock, onReject }) => {
           onClick={handleApprove}
           size="small"
         >
-          Insert into Editor
+          {t("blockInsertPreview.insertIntoEditor")}
         </Button>
       </Box>
 

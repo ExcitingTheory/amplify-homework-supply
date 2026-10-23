@@ -2,7 +2,7 @@
   "$schema": "./schemas/agent-permissions-schema.json",
   "version": "1.0.0",
   "description": "Non-destructive agent CLI permissions configuration",
-  "lastUpdated": "2026-03-14",
+  "lastUpdated": "2026-10-17",
 
   "permissions": {
     "fileOperations": {
@@ -198,6 +198,12 @@
         "testing": {
           "commands": ["npx cypress run", "npx cypress open"],
           "description": "Allow running Cypress E2E tests"
+        },
+
+        "thothAudioDryRun": {
+          "commands": ["npx tsx scripts/thoth/render-call-response-album.mts"],
+          "blocked": ["--execute", "--local-preview"],
+          "description": "Allow the Thoth playlist renderer dry run only; block paid TTS execution and local speech generation"
         },
 
         "fileDeletion": {

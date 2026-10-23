@@ -134,6 +134,117 @@ function getChatErrorMessage(error, t) {
   );
 }
 
+// Action types for the reducer
+const ACTIONS = {
+  SET_DRAGGING: "SET_DRAGGING",
+  SET_UPLOADED_FILES: "SET_UPLOADED_FILES",
+  ADD_UPLOADED_FILES: "ADD_UPLOADED_FILES",
+  REMOVE_UPLOADED_FILE: "REMOVE_UPLOADED_FILE",
+  SET_DOCUMENT_PROCESSING_STATUS: "SET_DOCUMENT_PROCESSING_STATUS",
+  UPDATE_DOCUMENT_PROCESSING_STATUS: "UPDATE_DOCUMENT_PROCESSING_STATUS",
+  SET_DOCUMENT_STATUSES: "SET_DOCUMENT_STATUSES",
+  SET_VOCABULARY_REVIEW_DIALOG: "SET_VOCABULARY_REVIEW_DIALOG",
+  SET_REVIEW_DOCUMENT_ID: "SET_REVIEW_DOCUMENT_ID",
+  SET_CONFIRM_DIALOG: "SET_CONFIRM_DIALOG",
+  SET_TOOL_EXECUTION_STATES: "SET_TOOL_EXECUTION_STATES",
+  UPDATE_TOOL_EXECUTION_STATES: "UPDATE_TOOL_EXECUTION_STATES",
+  SET_HISTORY_DRAWER_OPEN: "SET_HISTORY_DRAWER_OPEN",
+  SET_INPUT: "SET_INPUT",
+  SET_LAST_CHAT_ID: "SET_LAST_CHAT_ID",
+  RESET_FOR_NEW_CHAT: "RESET_FOR_NEW_CHAT",
+};
+
+// Initial state for the reducer
+const initialState = {
+  isDragging: false,
+  uploadedFiles: [],
+  documentProcessingStatus: {},
+  documentStatuses: {},
+  vocabularyReviewDialogOpen: false,
+  reviewDocumentId: null,
+  confirmDialog: {
+    open: false,
+    message: "",
+    onConfirm: null,
+    severity: "info",
+  },
+  toolExecutionStates: {},
+  historyDrawerOpen: false,
+  input: "",
+  lastChatId: null,
+};
+
+// Reducer function
+function chatSidebarReducer(state, action) {
+  switch (action.type) {
+    case ACTIONS.SET_DRAGGING:
+      return { ...state, isDragging: action.payload };
+    case ACTIONS.SET_UPLOADED_FILES:
+      return { ...state, uploadedFiles: action.payload };
+    case ACTIONS.ADD_UPLOADED_FILES:
+      return {
+        ...state,
+        uploadedFiles: [...state.uploadedFiles, ...action.payload],
+      };
+    case ACTIONS.REMOVE_UPLOADED_FILE:
+      return {
+        ...state,
+        uploadedFiles: state.uploadedFiles.filter(
+          (_, i) => i !== action.payload,
+        ),
+        documentProcessingStatus: Object.fromEntries(
+          Object.entries(state.documentProcessingStatus).filter(
+            ([index]) => parseInt(index) !== action.payload,
+          ),
+        ),
+      };
+    case ACTIONS.SET_DOCUMENT_PROCESSING_STATUS:
+      return { ...state, documentProcessingStatus: action.payload };
+    case ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS:
+      return {
+        ...state,
+        documentProcessingStatus: {
+          ...state.documentProcessingStatus,
+          ...action.payload,
+        },
+      };
+    case ACTIONS.SET_DOCUMENT_STATUSES:
+      return { ...state, documentStatuses: action.payload };
+    case ACTIONS.SET_VOCABULARY_REVIEW_DIALOG:
+      return { ...state, vocabularyReviewDialogOpen: action.payload };
+    case ACTIONS.SET_REVIEW_DOCUMENT_ID:
+      return { ...state, reviewDocumentId: action.payload };
+    case ACTIONS.SET_CONFIRM_DIALOG:
+      return { ...state, confirmDialog: action.payload };
+    case ACTIONS.SET_TOOL_EXECUTION_STATES:
+      return { ...state, toolExecutionStates: action.payload };
+    case ACTIONS.UPDATE_TOOL_EXECUTION_STATES:
+      return {
+        ...state,
+        toolExecutionStates: {
+          ...state.toolExecutionStates,
+          ...action.payload,
+        },
+      };
+    case ACTIONS.SET_HISTORY_DRAWER_OPEN:
+      return { ...state, historyDrawerOpen: action.payload };
+    case ACTIONS.SET_INPUT:
+      return { ...state, input: action.payload };
+    case ACTIONS.SET_LAST_CHAT_ID:
+      return { ...state, lastChatId: action.payload };
+    case ACTIONS.RESET_FOR_NEW_CHAT:
+      return {
+        ...state,
+        uploadedFiles: [],
+        input: "",
+        documentProcessingStatus: {},
+        toolExecutionStates: {},
+      };
+    default:
+      return state;
+  }
+}
+
 const ChatSidebarContent = ({ onClose }) => {
   const t = useTranslations("components");
   const tCommon = useTranslations("common");
@@ -175,117 +286,6 @@ const ChatSidebarContent = ({ onClose }) => {
       return [];
     }
   }, []);
-
-  // Action types for the reducer
-  const ACTIONS = {
-    SET_DRAGGING: "SET_DRAGGING",
-    SET_UPLOADED_FILES: "SET_UPLOADED_FILES",
-    ADD_UPLOADED_FILES: "ADD_UPLOADED_FILES",
-    REMOVE_UPLOADED_FILE: "REMOVE_UPLOADED_FILE",
-    SET_DOCUMENT_PROCESSING_STATUS: "SET_DOCUMENT_PROCESSING_STATUS",
-    UPDATE_DOCUMENT_PROCESSING_STATUS: "UPDATE_DOCUMENT_PROCESSING_STATUS",
-    SET_DOCUMENT_STATUSES: "SET_DOCUMENT_STATUSES",
-    SET_VOCABULARY_REVIEW_DIALOG: "SET_VOCABULARY_REVIEW_DIALOG",
-    SET_REVIEW_DOCUMENT_ID: "SET_REVIEW_DOCUMENT_ID",
-    SET_CONFIRM_DIALOG: "SET_CONFIRM_DIALOG",
-    SET_TOOL_EXECUTION_STATES: "SET_TOOL_EXECUTION_STATES",
-    UPDATE_TOOL_EXECUTION_STATES: "UPDATE_TOOL_EXECUTION_STATES",
-    SET_HISTORY_DRAWER_OPEN: "SET_HISTORY_DRAWER_OPEN",
-    SET_INPUT: "SET_INPUT",
-    SET_LAST_CHAT_ID: "SET_LAST_CHAT_ID",
-    RESET_FOR_NEW_CHAT: "RESET_FOR_NEW_CHAT",
-  };
-
-  // Initial state for the reducer
-  const initialState = {
-    isDragging: false,
-    uploadedFiles: [],
-    documentProcessingStatus: {},
-    documentStatuses: {},
-    vocabularyReviewDialogOpen: false,
-    reviewDocumentId: null,
-    confirmDialog: {
-      open: false,
-      message: "",
-      onConfirm: null,
-      severity: "info",
-    },
-    toolExecutionStates: {},
-    historyDrawerOpen: false,
-    input: "",
-    lastChatId: null,
-  };
-
-  // Reducer function
-  function chatSidebarReducer(state, action) {
-    switch (action.type) {
-      case ACTIONS.SET_DRAGGING:
-        return { ...state, isDragging: action.payload };
-      case ACTIONS.SET_UPLOADED_FILES:
-        return { ...state, uploadedFiles: action.payload };
-      case ACTIONS.ADD_UPLOADED_FILES:
-        return {
-          ...state,
-          uploadedFiles: [...state.uploadedFiles, ...action.payload],
-        };
-      case ACTIONS.REMOVE_UPLOADED_FILE:
-        return {
-          ...state,
-          uploadedFiles: state.uploadedFiles.filter(
-            (_, i) => i !== action.payload,
-          ),
-          documentProcessingStatus: Object.fromEntries(
-            Object.entries(state.documentProcessingStatus).filter(
-              ([index]) => parseInt(index) !== action.payload,
-            ),
-          ),
-        };
-      case ACTIONS.SET_DOCUMENT_PROCESSING_STATUS:
-        return { ...state, documentProcessingStatus: action.payload };
-      case ACTIONS.UPDATE_DOCUMENT_PROCESSING_STATUS:
-        return {
-          ...state,
-          documentProcessingStatus: {
-            ...state.documentProcessingStatus,
-            ...action.payload,
-          },
-        };
-      case ACTIONS.SET_DOCUMENT_STATUSES:
-        return { ...state, documentStatuses: action.payload };
-      case ACTIONS.SET_VOCABULARY_REVIEW_DIALOG:
-        return { ...state, vocabularyReviewDialogOpen: action.payload };
-      case ACTIONS.SET_REVIEW_DOCUMENT_ID:
-        return { ...state, reviewDocumentId: action.payload };
-      case ACTIONS.SET_CONFIRM_DIALOG:
-        return { ...state, confirmDialog: action.payload };
-      case ACTIONS.SET_TOOL_EXECUTION_STATES:
-        return { ...state, toolExecutionStates: action.payload };
-      case ACTIONS.UPDATE_TOOL_EXECUTION_STATES:
-        return {
-          ...state,
-          toolExecutionStates: {
-            ...state.toolExecutionStates,
-            ...action.payload,
-          },
-        };
-      case ACTIONS.SET_HISTORY_DRAWER_OPEN:
-        return { ...state, historyDrawerOpen: action.payload };
-      case ACTIONS.SET_INPUT:
-        return { ...state, input: action.payload };
-      case ACTIONS.SET_LAST_CHAT_ID:
-        return { ...state, lastChatId: action.payload };
-      case ACTIONS.RESET_FOR_NEW_CHAT:
-        return {
-          ...state,
-          uploadedFiles: [],
-          input: "",
-          documentProcessingStatus: {},
-          toolExecutionStates: {},
-        };
-      default:
-        return state;
-    }
-  }
 
   // UI State - now using reducer
   const [state, dispatch] = useReducer(chatSidebarReducer, initialState);
@@ -333,9 +333,11 @@ const ChatSidebarContent = ({ onClose }) => {
     isLoadingChat,
     chatCreationError,
   } = React.useContext(ChatContext);
+  const assistantChatId = assistantChat?.id;
 
   // Get tab context (optional - only available in Editor)
-  const tabContext = useTabContext() || {};
+  const rawTabContext = useTabContext();
+  const tabContext = React.useMemo(() => rawTabContext || {}, [rawTabContext]);
 
   // Get auth state
   const { user, isLoading: authLoading } = React.useContext(AuthContext);
@@ -434,58 +436,6 @@ const ChatSidebarContent = ({ onClose }) => {
     },
     [editorRef, assistantChat?.id],
   );
-
-  // Load chat data when chat changes
-  useEffect(() => {
-    if (!assistantChat || isLoadingChat) return;
-    const chatChanged = lastChatIdRef.current !== assistantChat.id;
-
-    if (chatChanged) {
-      lastChatIdRef.current = assistantChat.id;
-
-      // Load messages - ensure it's always an array
-      // Messages are stored as JSON string in database
-      let messagesArray = [];
-      const rawMessages = assistantChat.messages;
-      if (Array.isArray(rawMessages)) {
-        messagesArray = rawMessages;
-      } else if (typeof rawMessages === "string" && rawMessages) {
-        try {
-          messagesArray = JSON.parse(rawMessages);
-          if (!Array.isArray(messagesArray)) messagesArray = [];
-        } catch (e) {
-          console.error("[ChatSidebar] Failed to parse messages:", e);
-          messagesArray = [];
-        }
-      }
-      console.log(
-        "[ChatSidebar] Loading messages for chat:",
-        assistantChat.id,
-        "count:",
-        messagesArray.length,
-      );
-      setMessages(deepCloneMessages(messagesArray));
-
-      // Load draft (only on chat change, not version updates)
-      dispatch({ type: ACTIONS.SET_INPUT, payload: assistantChat.draft || "" });
-
-      // Load files via direct list() call instead of lazy loader to avoid
-      // auto-pagination (which fires 11+ separate GraphQL queries)
-      const client = getAmplifyClient();
-      client.models.AssistantChatFile.list({
-        filter: { chatID: { eq: assistantChat.id } },
-      })
-        .then((result) =>
-          dispatch({
-            type: ACTIONS.SET_UPLOADED_FILES,
-            payload: result?.data || [],
-          }),
-        )
-        .catch((err) =>
-          console.error("[ChatSidebar] Error loading files:", err),
-        );
-    }
-  }, [assistantChat?.id, isLoadingChat]);
 
   const vectorStoreCtx = React.useContext(VectorStoreContext);
 
@@ -684,7 +634,7 @@ const ChatSidebarContent = ({ onClose }) => {
                 controller.close();
               } catch (err) {
                 console.error("[ChatSidebar] Offline chat error:", err);
-                const errorChunk = `0:${JSON.stringify("Sorry, offline AI is not available right now.")}\n`;
+                const errorChunk = `0:${JSON.stringify(t("chatSidebar.offlineAiUnavailable"))}\n`;
                 controller.enqueue(encoder.encode(errorChunk));
                 const finishEvent = `d:{"finishReason":"stop"}\n`;
                 controller.enqueue(encoder.encode(finishEvent));
@@ -742,7 +692,7 @@ const ChatSidebarContent = ({ onClose }) => {
         throw error;
       }
     },
-    [contextData],
+    [contextData, t],
   );
 
   // Memoize the transport object to prevent recreation on every render
@@ -811,7 +761,7 @@ const ChatSidebarContent = ({ onClose }) => {
     });
 
     return tools;
-  }, []);
+  }, [assistantChat?.id, sectionId]);
 
   // Debounced save — coalesces rapid draft/message saves into a single write
   const pendingSaveRef = useRef(null); // { chatId, fields: { draft?, messages? } }
@@ -848,7 +798,7 @@ const ChatSidebarContent = ({ onClose }) => {
     } catch (error) {
       console.error("[ChatSidebar] Error in debounced save:", error);
     }
-  }, []);
+  }, [chatVersionRef]);
 
   // Cleanup timer on unmount
   useEffect(() => {
@@ -1016,6 +966,65 @@ const ChatSidebarContent = ({ onClose }) => {
     status === "streaming" ||
     status === "submitted";
 
+  // Chat data is only loaded when the chat id changes, so the effect reads the latest chat object from a ref
+  const assistantChatRef = useRef(assistantChat);
+  useEffect(() => {
+    assistantChatRef.current = assistantChat;
+  });
+
+  // Load chat data when chat changes
+  useEffect(() => {
+    const currentChat = assistantChatRef.current;
+    if (!currentChat || isLoadingChat) return;
+    const chatChanged = lastChatIdRef.current !== currentChat.id;
+
+    if (chatChanged) {
+      lastChatIdRef.current = currentChat.id;
+
+      // Load messages - ensure it's always an array
+      // Messages are stored as JSON string in database
+      let messagesArray = [];
+      const rawMessages = currentChat.messages;
+      if (Array.isArray(rawMessages)) {
+        messagesArray = rawMessages;
+      } else if (typeof rawMessages === "string" && rawMessages) {
+        try {
+          messagesArray = JSON.parse(rawMessages);
+          if (!Array.isArray(messagesArray)) messagesArray = [];
+        } catch (e) {
+          console.error("[ChatSidebar] Failed to parse messages:", e);
+          messagesArray = [];
+        }
+      }
+      console.log(
+        "[ChatSidebar] Loading messages for chat:",
+        currentChat.id,
+        "count:",
+        messagesArray.length,
+      );
+      setMessages(deepCloneMessages(messagesArray));
+
+      // Load draft (only on chat change, not version updates)
+      dispatch({ type: ACTIONS.SET_INPUT, payload: currentChat.draft || "" });
+
+      // Load files via direct list() call instead of lazy loader to avoid
+      // auto-pagination (which fires 11+ separate GraphQL queries)
+      const client = getAmplifyClient();
+      client.models.AssistantChatFile.list({
+        filter: { chatID: { eq: currentChat.id } },
+      })
+        .then((result) =>
+          dispatch({
+            type: ACTIONS.SET_UPLOADED_FILES,
+            payload: result?.data || [],
+          }),
+        )
+        .catch((err) =>
+          console.error("[ChatSidebar] Error loading files:", err),
+        );
+    }
+  }, [assistantChatId, isLoadingChat, deepCloneMessages, setMessages]);
+
   // Monitor messages for tool actions and execute them
   useEffect(() => {
     if (!messages || messages.length === 0) return;
@@ -1102,7 +1111,7 @@ const ChatSidebarContent = ({ onClose }) => {
         console.error("[ChatSidebar] Error sending message:", error);
       }
     },
-    [input, sendMessage, assistantChat, enqueueSave],
+    [input, sendMessage, assistantChat, enqueueSave, sectionId],
   );
 
   // Auto-scroll to bottom when messages change
@@ -1115,10 +1124,10 @@ const ChatSidebarContent = ({ onClose }) => {
 
   // Save file associations when files change
   useEffect(() => {
-    if (assistantChat && uploadedFiles) {
-      saveFileAssociations(uploadedFiles, assistantChat);
+    if (assistantChatId && uploadedFiles) {
+      saveFileAssociations(uploadedFiles, { id: assistantChatId });
     }
-  }, [uploadedFiles, assistantChat?.id, saveFileAssociations]);
+  }, [uploadedFiles, assistantChatId, saveFileAssociations]);
 
   // Note: Section data is now provided by SectionContext
   // Removed redundant Section observer to reduce subscription overhead
@@ -1168,8 +1177,9 @@ const ChatSidebarContent = ({ onClose }) => {
             ...status,
             status: "analyzed",
             progress: 100,
-            message:
-              `Analysis complete! ${pageCount ? `${pageCount} pages analyzed.` : ""}`.trim(),
+            message: pageCount
+              ? t("chatSidebar.analysisCompleteWithPages", { count: pageCount })
+              : t("chatSidebar.analysisComplete"),
           };
           hasChanges = true;
           trackDocumentAnalyzed(status.documentId, {
@@ -1179,7 +1189,7 @@ const ChatSidebarContent = ({ onClose }) => {
           updated[index] = {
             ...status,
             status: "analyzing",
-            message: "Analyzing content...",
+            message: t("chatSidebar.analyzingContent"),
           };
           hasChanges = true;
         } else if (
@@ -1189,7 +1199,7 @@ const ChatSidebarContent = ({ onClose }) => {
           updated[index] = {
             ...status,
             status: "extracting",
-            message: "Extracting text...",
+            message: t("chatSidebar.extractingText"),
           };
           hasChanges = true;
         } else if (
@@ -1207,7 +1217,7 @@ const ChatSidebarContent = ({ onClose }) => {
           updated[index] = {
             ...status,
             status: "error",
-            message: "Analysis failed",
+            message: t("chatSidebar.analysisFailed"),
           };
           hasChanges = true;
         }
@@ -1220,7 +1230,7 @@ const ChatSidebarContent = ({ onClose }) => {
         payload: updated,
       });
     }
-  }, [Object.keys(documentStatuses).length]);
+  }, [documentStatuses, documentProcessingStatus, t]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -1300,7 +1310,7 @@ const ChatSidebarContent = ({ onClose }) => {
         payload: {
           [index]: {
             ...documentProcessingStatus[index],
-            message: `Cancel failed: ${error.message}`,
+            message: t("chatSidebar.cancelFailed", { error: error.message }),
           },
         },
       });
@@ -1348,7 +1358,7 @@ const ChatSidebarContent = ({ onClose }) => {
           [index]: {
             status: "uploading",
             progress: 0,
-            message: "Uploading document...",
+            message: t("chatSidebar.uploadingDocument"),
           },
         },
       });
@@ -1374,7 +1384,7 @@ const ChatSidebarContent = ({ onClose }) => {
               [index]: {
                 status: "uploading",
                 progress,
-                message: `Uploading... ${progress}%`,
+                message: t("chatSidebar.uploadingProgress", { progress }),
               },
             },
           });
@@ -1391,7 +1401,7 @@ const ChatSidebarContent = ({ onClose }) => {
             [index]: {
               status: "analyzing",
               progress: 100,
-              message: "Document uploaded, analysis started...",
+              message: t("chatSidebar.documentUploadedAnalysisStarted"),
               documentId: result.documentModel?.id,
             },
           },
@@ -1403,7 +1413,7 @@ const ChatSidebarContent = ({ onClose }) => {
             [index]: {
               status: "uploaded",
               progress: 100,
-              message: "Document uploaded successfully",
+              message: t("chatSidebar.documentUploaded"),
               documentId: result.documentModel?.id,
             },
           },
@@ -1415,7 +1425,7 @@ const ChatSidebarContent = ({ onClose }) => {
             [index]: {
               status: "uploaded",
               progress: 100,
-              message: "Document uploaded (no document created)",
+              message: t("chatSidebar.documentUploadedNoDocument"),
             },
           },
         });
@@ -1428,26 +1438,44 @@ const ChatSidebarContent = ({ onClose }) => {
           [index]: {
             status: "error",
             progress: 0,
-            message: `Error: ${error.message}`,
+            message: t("chatSidebar.errorMessage", { error: error.message }),
           },
         },
       });
     }
   };
 
-  // Detect documents and offer to process them
+  // The prompt effect only re-runs when the file count changes (to avoid re-prompting on status updates),
+  // so it reads the latest files, statuses and processor from a ref
+  const documentPromptRef = useRef({});
   useEffect(() => {
-    uploadedFiles.forEach((file, index) => {
-      if (file.type === "application/pdf" && !documentProcessingStatus[index]) {
+    documentPromptRef.current = {
+      uploadedFiles,
+      documentProcessingStatus,
+      processDocument,
+    };
+  });
+
+  // Detect documents and offer to process them
+  const uploadedFileCount = uploadedFiles.length;
+  useEffect(() => {
+    const {
+      uploadedFiles: pendingFiles,
+      documentProcessingStatus: processingStatus,
+    } = documentPromptRef.current;
+    pendingFiles.forEach((file, index) => {
+      if (file.type === "application/pdf" && !processingStatus[index]) {
         // Ask user if they want to process the document
         dispatch({
           type: ACTIONS.SET_CONFIRM_DIALOG,
           payload: {
             open: true,
-            message: `Would you like to upload and analyze "${file.name}"? This will extract text and generate vocabulary.`,
+            message: t("chatSidebar.confirmAnalyzeDocument", {
+              name: file.name,
+            }),
             severity: "info",
             onConfirm: () => {
-              processDocument(file, index);
+              documentPromptRef.current.processDocument(file, index);
               dispatch({
                 type: ACTIONS.SET_CONFIRM_DIALOG,
                 payload: {
@@ -1466,7 +1494,7 @@ const ChatSidebarContent = ({ onClose }) => {
                   [index]: {
                     status: "declined",
                     progress: 0,
-                    message: "Analysis declined",
+                    message: t("chatSidebar.analysisDeclined"),
                   },
                 },
               });
@@ -1484,7 +1512,7 @@ const ChatSidebarContent = ({ onClose }) => {
         });
       }
     });
-  }, [uploadedFiles.length, unit?.id]); // Use length instead of the full objects to prevent infinite loops
+  }, [uploadedFileCount, unit?.id, t]);
 
   // Don't render until translations are ready to prevent hydration errors
   if (!ready) return null;
@@ -1605,7 +1633,7 @@ const ChatSidebarContent = ({ onClose }) => {
                       payload: true,
                     });
                   }}
-                  title="Chat history"
+                  title={t("chatSidebar.chatHistory")}
                   sx={{ color: "primary.main" }}
                 >
                   <HistoryIcon fontSize="small" />
@@ -1674,9 +1702,7 @@ const ChatSidebarContent = ({ onClose }) => {
                         "[ChatSidebar] Error creating new chat:",
                         error,
                       );
-                      alert(
-                        "Failed to create new chat. Please check that the backend is running and try again.",
-                      );
+                      alert(t("chatSidebar.createNewChatFailed"));
                     }
                   }}
                   title={t("chatSidebar.newChat")}
@@ -1787,7 +1813,7 @@ const ChatSidebarContent = ({ onClose }) => {
                   variant="outlined"
                   onClick={() => void regenerate()}
                 >
-                  {t("chatSidebar.refreshAI", "Refresh")}
+                  {t("chatSidebar.refreshAI")}
                 </Button>
               </Box>
             </Box>
@@ -1990,8 +2016,18 @@ const ChatSidebarContent = ({ onClose }) => {
                                         variant="caption"
                                         color="text.secondary"
                                       >
-                                        {messageCount} messages • {createdAt}
-                                        {isArchived ? " • Archived" : ""}
+                                        {isArchived
+                                          ? t(
+                                              "chatSidebar.historyMetaArchived",
+                                              {
+                                                count: messageCount,
+                                                createdAt,
+                                              },
+                                            )
+                                          : t("chatSidebar.historyMeta", {
+                                              count: messageCount,
+                                              createdAt,
+                                            })}
                                       </Typography>
                                     }
                                   />
@@ -2138,18 +2174,23 @@ const ChatSidebarContent = ({ onClose }) => {
                                         variant="caption"
                                         color="text.secondary"
                                       >
-                                        {messageCount} messages • {createdAt}
                                         {isLegacy
-                                          ? " • Legacy (read-only)"
-                                          : ""}
+                                          ? t("chatSidebar.historyMetaLegacy", {
+                                              count: messageCount,
+                                              createdAt,
+                                            })
+                                          : t("chatSidebar.historyMeta", {
+                                              count: messageCount,
+                                              createdAt,
+                                            })}
                                       </Typography>
                                     }
                                   />
                                   <Tooltip
                                     title={
                                       isLegacy
-                                        ? "Cannot unarchive legacy chat"
-                                        : "Unarchive chat"
+                                        ? t("chatSidebar.cannotUnarchiveLegacy")
+                                        : t("chatSidebar.unarchiveChat")
                                     }
                                   >
                                     <span>
@@ -2229,6 +2270,7 @@ const ChatSidebarContent = ({ onClose }) => {
                 // Extract tool invocations from message.parts
                 const toolParts =
                   message.parts?.filter((part) =>
+                    // eslint-disable-next-line i18next/no-literal-string -- message part type prefix
                     part.type?.startsWith("tool-"),
                   ) || [];
 
@@ -2262,8 +2304,10 @@ const ChatSidebarContent = ({ onClose }) => {
                           }
                           data-role={message.role}
                           {...(message.role === "assistant"
-                            ? { "data-tour": "ai-message" }
-                            : { "data-tour": "user-message" })}
+                            ? // eslint-disable-next-line i18next/no-literal-string -- tour target id
+                              { "data-tour": "ai-message" }
+                            : // eslint-disable-next-line i18next/no-literal-string -- tour target id
+                              { "data-tour": "user-message" })}
                           sx={{
                             m: 0.75,
                             p: "0.75rem 1rem",
@@ -2324,6 +2368,7 @@ const ChatSidebarContent = ({ onClose }) => {
                       const callId = part.toolCallId;
                       // Extract tool name from type (e.g., 'tool-search_content' -> 'search_content')
                       const toolName =
+                        // eslint-disable-next-line i18next/no-literal-string -- message part type prefix
                         part.type?.replace("tool-", "") ||
                         part.toolName ||
                         t("chatSidebar.unknown");
@@ -2396,7 +2441,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                   color: "text.secondary",
                                 }}
                               >
-                                Preparing search...
+                                {t("chatSidebar.preparingSearch")}
                               </Typography>
                             )}
 
@@ -2466,7 +2511,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✗ {part.errorText}
+                                {t("chatSidebar.errorWithMark", {
+                                  error: part.errorText,
+                                })}
                               </Typography>
                             )}
                           </Box>
@@ -2512,7 +2559,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                 variant="caption"
                                 sx={{ display: "block", fontStyle: "italic" }}
                               >
-                                Preparing...
+                                {t("chatSidebar.preparing")}
                               </Typography>
                             )}
 
@@ -2526,7 +2573,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                "{part.input?.name}"
+                                {t("chatSidebar.quotedName", {
+                                  name: part.input?.name,
+                                })}
                               </Typography>
                             )}
 
@@ -2541,9 +2590,11 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✓{" "}
-                                {part.output?.message ||
-                                  t("chatSidebar.created")}
+                                {t("chatSidebar.successWithMark", {
+                                  message:
+                                    part.output?.message ||
+                                    t("chatSidebar.created"),
+                                })}
                               </Typography>
                             )}
 
@@ -2558,7 +2609,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✗ {part.errorText}
+                                {t("chatSidebar.errorWithMark", {
+                                  error: part.errorText,
+                                })}
                               </Typography>
                             )}
                           </Box>
@@ -2567,6 +2620,7 @@ const ChatSidebarContent = ({ onClose }) => {
 
                       // Handle block insertion tools (quiz, answer, meaning-association, custom-answer, content)
                       if (
+                        /* eslint-disable i18next/no-literal-string -- tool name identifiers */
                         [
                           "insert_quiz",
                           "insert_answer_block",
@@ -2574,6 +2628,7 @@ const ChatSidebarContent = ({ onClose }) => {
                           "insert_custom_answer",
                           "insert_content_block",
                         ].includes(toolName)
+                        /* eslint-enable i18next/no-literal-string */
                       ) {
                         // Parse output to get block data
                         let parsedOutput = null;
@@ -2612,7 +2667,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                   color: "text.secondary",
                                 }}
                               >
-                                Preparing block...
+                                {t("chatSidebar.preparingBlock")}
                               </Typography>
                             )}
 
@@ -2624,11 +2679,11 @@ const ChatSidebarContent = ({ onClose }) => {
                                   color: "text.secondary",
                                 }}
                               >
-                                Creating{" "}
-                                {toolName
-                                  .replace("insert_", "")
-                                  .replace(/_/g, " ")}{" "}
-                                block...
+                                {t("chatSidebar.creatingBlock", {
+                                  blockType: toolName
+                                    .replace("insert_", "")
+                                    .replace(/_/g, " "),
+                                })}
                               </Typography>
                             )}
 
@@ -2664,7 +2719,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                     whiteSpace: "normal",
                                   }}
                                 >
-                                  Error creating block: {part.errorText}
+                                  {t("chatSidebar.errorCreatingBlock", {
+                                    error: part.errorText,
+                                  })}
                                 </Typography>
                               </Box>
                             )}
@@ -2709,7 +2766,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                   color: "text.secondary",
                                 }}
                               >
-                                Generating recording script...
+                                {t("chatSidebar.generatingRecordingScript")}
                               </Typography>
                             )}
 
@@ -2721,8 +2778,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   color: "text.secondary",
                                 }}
                               >
-                                Creating {part.input?.preset} recording
-                                script...
+                                {t("chatSidebar.creatingRecordingScript", {
+                                  preset: part.input?.preset,
+                                })}
                               </Typography>
                             )}
 
@@ -2746,8 +2804,12 @@ const ChatSidebarContent = ({ onClose }) => {
                                 }}
                               >
                                 <Typography variant="body2">
-                                  Error creating recording script:{" "}
-                                  {part.errorText}
+                                  {t(
+                                    "chatSidebar.errorCreatingRecordingScript",
+                                    {
+                                      error: part.errorText,
+                                    },
+                                  )}
                                 </Typography>
                               </Box>
                             )}
@@ -2794,7 +2856,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                 variant="caption"
                                 sx={{ display: "block", fontStyle: "italic" }}
                               >
-                                Preparing...
+                                {t("chatSidebar.preparing")}
                               </Typography>
                             )}
 
@@ -2826,8 +2888,11 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✓{" "}
-                                {part.output?.message || t("chatSidebar.ready")}
+                                {t("chatSidebar.successWithMark", {
+                                  message:
+                                    part.output?.message ||
+                                    t("chatSidebar.ready"),
+                                })}
                               </Typography>
                             )}
 
@@ -2842,7 +2907,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✗ {part.errorText}
+                                {t("chatSidebar.errorWithMark", {
+                                  error: part.errorText,
+                                })}
                               </Typography>
                             )}
                           </Box>
@@ -2880,7 +2947,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                 color: "text.primary",
                               }}
                             >
-                              📝 Generate Quiz Questions
+                              {t("chatSidebar.generateQuizQuestions")}
                             </Typography>
 
                             {part.state === "input-streaming" && (
@@ -2888,7 +2955,7 @@ const ChatSidebarContent = ({ onClose }) => {
                                 variant="caption"
                                 sx={{ display: "block", fontStyle: "italic" }}
                               >
-                                Preparing...
+                                {t("chatSidebar.preparing")}
                               </Typography>
                             )}
 
@@ -2902,9 +2969,12 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                Topic: {part.input?.topic} ({part.input?.count}{" "}
-                                {part.input?.questionType} questions,{" "}
-                                {part.input?.difficulty} difficulty)
+                                {t("chatSidebar.quizQuestionsSummary", {
+                                  topic: part.input?.topic,
+                                  count: part.input?.count,
+                                  questionType: part.input?.questionType,
+                                  difficulty: part.input?.difficulty,
+                                })}
                               </Typography>
                             )}
 
@@ -2919,9 +2989,15 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✓{" "}
-                                {part.output?.message ||
-                                  `Generated ${part.output?.questionsGenerated || part.input?.count} questions`}
+                                {t("chatSidebar.successWithMark", {
+                                  message:
+                                    part.output?.message ||
+                                    t("chatSidebar.generatedQuestions", {
+                                      count:
+                                        part.output?.questionsGenerated ||
+                                        part.input?.count,
+                                    }),
+                                })}
                               </Typography>
                             )}
 
@@ -2936,7 +3012,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                   whiteSpace: "normal",
                                 }}
                               >
-                                ✗ {part.errorText}
+                                {t("chatSidebar.errorWithMark", {
+                                  error: part.errorText,
+                                })}
                               </Typography>
                             )}
                           </Box>
@@ -2972,7 +3050,9 @@ const ChatSidebarContent = ({ onClose }) => {
                               color: "text.primary",
                             }}
                           >
-                            🔧 {toolName || t("chatSidebar.unknown")}
+                            {t("chatSidebar.toolNameWithIcon", {
+                              name: toolName || t("chatSidebar.unknown"),
+                            })}
                           </Typography>
 
                           {part.state === "input-streaming" && (
@@ -2980,7 +3060,7 @@ const ChatSidebarContent = ({ onClose }) => {
                               variant="caption"
                               sx={{ display: "block", mt: 0.5 }}
                             >
-                              Preparing...
+                              {t("chatSidebar.preparing")}
                             </Typography>
                           )}
 
@@ -2989,7 +3069,7 @@ const ChatSidebarContent = ({ onClose }) => {
                               variant="caption"
                               sx={{ display: "block", mt: 0.5 }}
                             >
-                              Executing...
+                              {t("chatSidebar.executing")}
                             </Typography>
                           )}
 
@@ -3018,7 +3098,9 @@ const ChatSidebarContent = ({ onClose }) => {
                                 whiteSpace: "normal",
                               }}
                             >
-                              ✗ {part.errorText}
+                              {t("chatSidebar.errorWithMark", {
+                                error: part.errorText,
+                              })}
                             </Typography>
                           )}
                         </Box>
@@ -3338,7 +3420,7 @@ const ChatSidebarContent = ({ onClose }) => {
                 color="error.dark"
                 sx={{ mb: 1, fontWeight: 600 }}
               >
-                ⚠️ Failed to create chat session
+                {t("chatSidebar.chatCreationFailed")}
               </Typography>
               <Typography variant="body2" color="error.dark" sx={{ mb: 1.5 }}>
                 {chatCreationError}
@@ -3348,8 +3430,7 @@ const ChatSidebarContent = ({ onClose }) => {
                 color="error.dark"
                 sx={{ display: "block", mb: 2 }}
               >
-                Possible causes: Backend not deployed, authentication issue, or
-                network error
+                {t("chatSidebar.chatCreationCauses")}
               </Typography>
               <Button
                 size="small"
@@ -3357,7 +3438,7 @@ const ChatSidebarContent = ({ onClose }) => {
                 color="error"
                 onClick={() => window.location.reload()}
               >
-                Reload Page
+                {t("chatSidebar.reloadPage")}
               </Button>
             </Box>
           )}
@@ -3379,10 +3460,10 @@ const ChatSidebarContent = ({ onClose }) => {
                 color="info.dark"
                 sx={{ mb: 1, fontWeight: 600 }}
               >
-                🔐 Authentication Required
+                {t("chatSidebar.authRequired")}
               </Typography>
               <Typography variant="body2" color="info.dark">
-                Please sign in to use the AI Assistant chat feature.
+                {t("chatSidebar.signInToUseAssistant")}
               </Typography>
             </Box>
           )}
@@ -3421,7 +3502,7 @@ const ChatSidebarContent = ({ onClose }) => {
               }}
               placeholder={
                 !user && !authLoading
-                  ? "Please sign in to use chat"
+                  ? t("chatSidebar.signInToUseChat")
                   : !assistantChat?.id
                     ? t("chatSidebar.settingUpChat")
                     : t("chatSidebar.askMeAnything")

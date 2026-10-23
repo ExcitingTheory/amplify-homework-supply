@@ -20,6 +20,7 @@ import Chip from '@mui/material/Chip'
 import CircularProgress from '@mui/material/CircularProgress'
 import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import { useTranslations } from 'next-intl'
 import { SquadMentionPill } from './SquadMentionPill'
 
 // ============================================================================
@@ -60,11 +61,7 @@ const PERFORMANCE_COLORS: Record<string, 'success' | 'warning' | 'default'> = {
   bottom: 'default',
 }
 
-const PERFORMANCE_LABELS: Record<string, string> = {
-  top: '🏆 Champions',
-  middle: '⚔️ Contenders',
-  bottom: '💪 Underdogs',
-}
+const PERFORMANCE_TIERS = ['top', 'middle', 'bottom'] as const
 
 // ============================================================================
 // Component
@@ -77,6 +74,12 @@ export function ChallengeRecapCard({
   onGenerate,
   generating = false,
 }: ChallengeRecapCardProps) {
+  const t = useTranslations('components')
+  const performanceLabels: Record<(typeof PERFORMANCE_TIERS)[number], string> = {
+    top: t('challengeRecapCard.tierTop'),
+    middle: t('challengeRecapCard.tierMiddle'),
+    bottom: t('challengeRecapCard.tierBottom'),
+  }
   const hasRecaps = recaps.length > 0
 
   // Group recaps by performance tier
@@ -92,14 +95,14 @@ export function ChallengeRecapCard({
         <Stack spacing={2}>
           <Stack direction="row" alignItems="center" spacing={1}>
             <EmojiEventsIcon color="primary" />
-            <Typography variant="h6">Challenge Recap</Typography>
+            <Typography variant="h6">{t('challengeRecapCard.title')}</Typography>
             <Chip label={challengeTitle} size="small" variant="outlined" />
           </Stack>
 
           {!hasRecaps && (
             <Box sx={{ textAlign: 'center', py: 2 }}>
               <Typography variant="body2" color="text.secondary" gutterBottom>
-                No recaps generated yet for this challenge.
+                {t('challengeRecapCard.empty')}
               </Typography>
               {isInstructor && onGenerate && (
                 <Button
@@ -109,7 +112,9 @@ export function ChallengeRecapCard({
                   disabled={generating}
                   sx={{ mt: 1 }}
                 >
-                  {generating ? 'Generating Recaps...' : 'Generate Squad Recaps'}
+                  {generating
+                    ? t('challengeRecapCard.generating')
+                    : t('challengeRecapCard.generate')}
                 </Button>
               )}
             </Box>
@@ -117,13 +122,13 @@ export function ChallengeRecapCard({
 
           {hasRecaps && (
             <Stack spacing={2}>
-              {(['top', 'middle', 'bottom'] as const).map((tier) => {
+              {PERFORMANCE_TIERS.map((tier) => {
                 const tierRecaps = grouped[tier]
                 if (tierRecaps.length === 0) return null
                 return (
                   <Box key={tier}>
                     <Typography variant="overline" color="text.secondary">
-                      {PERFORMANCE_LABELS[tier]}
+                      {performanceLabels[tier]}
                     </Typography>
                     <Stack spacing={1}>
                       {tierRecaps.map((entry) => (
@@ -148,7 +153,7 @@ export function ChallengeRecapCard({
                             {entry.rivalSquadName && (
                               <>
                                 <Typography variant="caption" color="text.secondary">
-                                  vs
+                                  {t('challengeRecapCard.versus')}
                                 </Typography>
                                 <SquadMentionPill
                                   squadId={entry.rivalSquadId || ''}
@@ -179,7 +184,9 @@ export function ChallengeRecapCard({
                     onClick={onGenerate}
                     disabled={generating}
                   >
-                    {generating ? 'Regenerating...' : 'Regenerate Recaps'}
+                    {generating
+                      ? t('challengeRecapCard.regenerating')
+                      : t('challengeRecapCard.regenerate')}
                   </Button>
                 </>
               )}

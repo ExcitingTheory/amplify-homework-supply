@@ -8,7 +8,8 @@
  * @module AvatarUnlockEditor
  */
 
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Button from "@mui/material/Button";
@@ -55,6 +56,8 @@ export interface AvatarUnlockEditorProps {
 // Defaults
 // ============================================================================
 
+const PREVIEW_AVATAR_SEED = "preview-student";
+
 const DEFAULT_UNLOCKS: AvatarUnlockEntry[] = [
   { minLevel: 1, tier: "simple" },
   { minLevel: 2, tier: "detailed" },
@@ -70,6 +73,7 @@ export function AvatarUnlockEditor({
   onSave,
   sectionName,
 }: AvatarUnlockEditorProps) {
+  const t = useTranslations("components");
   const [unlocks, setUnlocks] = useState<AvatarUnlockEntry[]>(() =>
     config?.unlocks?.length
       ? [...config.unlocks].sort((a, b) => a.minLevel - b.minLevel)
@@ -96,18 +100,20 @@ export function AvatarUnlockEditor({
   // Compute cascaded levels: each style starts after the previous style's accessories unlock
   const hairOffset = featureUnlockLevels.hairAndClothing ?? 2;
   const accOffset = featureUnlockLevels.accessories ?? 3;
-  const computedUnlocks: AvatarUnlockEntry[] = [];
-  for (let i = 0; i < unlocks.length; i++) {
-    if (i === 0) {
-      computedUnlocks.push({ ...unlocks[i], minLevel: startLevel });
-    } else {
-      const prevStart = computedUnlocks[i - 1].minLevel;
-      computedUnlocks.push({
-        ...unlocks[i],
-        minLevel: prevStart + accOffset + 1,
-      });
+  const computedUnlocks = useMemo(() => {
+    const entries: AvatarUnlockEntry[] = [];
+    for (let index = 0; index < unlocks.length; index++) {
+      if (index === 0) {
+        entries.push({ ...unlocks[index], minLevel: startLevel });
+      } else {
+        entries.push({
+          ...unlocks[index],
+          minLevel: entries[index - 1].minLevel + accOffset + 1,
+        });
+      }
     }
-  }
+    return entries;
+  }, [unlocks, startLevel, accOffset]);
 
   const handleStyleChange = useCallback(
     (index: number, tier: AvatarStyleTier) => {
@@ -149,7 +155,7 @@ export function AvatarUnlockEditor({
   return (
     <Box>
       <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-        Avatar Style Unlocks
+        {t("avatarUnlockEditor.title")}
         {sectionName && (
           <Chip
             label={sectionName}
@@ -160,16 +166,13 @@ export function AvatarUnlockEditor({
         )}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Each avatar style unlocks progressively. The next style begins after the
-        previous style&apos;s full customization is complete. Only the starting
-        level needs to be set — everything else cascades automatically from the
-        offsets below.
+        {t("avatarUnlockEditor.description")}
       </Typography>
 
       {/* Starting level input */}
       <Box sx={{ mb: 2 }}>
         <TextField
-          label="Starting Level"
+          label={t("avatarUnlockEditor.startingLevel")}
           type="number"
           size="small"
           value={startLevel}
@@ -178,7 +181,7 @@ export function AvatarUnlockEditor({
             setDirty(true);
           }}
           inputProps={{ min: 1, max: 20 }}
-          helperText="Level at which the first avatar style unlocks"
+          helperText={t("avatarUnlockEditor.startingLevelHelper")}
           sx={{ width: 140 }}
         />
       </Box>
@@ -198,30 +201,30 @@ export function AvatarUnlockEditor({
               sx={{ p: 1.5, display: "flex", alignItems: "center", gap: 2 }}
             >
               <DiceBearAvatar
-                seed="preview-student"
+                seed={PREVIEW_AVATAR_SEED}
                 size={40}
                 style={entry.tier}
               />
               <Chip
                 size="small"
-                label={`Level ${styleStart}`}
+                label={t("avatarUnlockEditor.levelChip", { level: styleStart })}
                 variant="status"
                 color="success"
               />
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" fontWeight={600}>
-                  {styleName} — Colors &amp; Face
+                  {t("avatarUnlockEditor.colorsAndFace", { styleName })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Background, skin tone, eyebrows, eyes, mouth
+                  {t("avatarUnlockEditor.colorsAndFaceDetail")}
                 </Typography>
               </Box>
               {/* Style selector on first phase only */}
               <FormControl size="small" sx={{ minWidth: 130 }}>
-                <InputLabel>Style</InputLabel>
+                <InputLabel>{t("avatarUnlockEditor.styleLabel")}</InputLabel>
                 <Select
                   value={entry.tier}
-                  label="Style"
+                  label={t("avatarUnlockEditor.styleLabel")}
                   onChange={(e) =>
                     handleStyleChange(index, e.target.value as AvatarStyleTier)
                   }
@@ -234,7 +237,7 @@ export function AvatarUnlockEditor({
                   ))}
                 </Select>
               </FormControl>
-              <Tooltip title="Remove this style">
+              <Tooltip title={t("avatarUnlockEditor.removeStyle")}>
                 <span>
                   <IconButton
                     size="small"
@@ -263,16 +266,16 @@ export function AvatarUnlockEditor({
             >
               <Chip
                 size="small"
-                label={`Level ${hairLevel}`}
+                label={t("avatarUnlockEditor.levelChip", { level: hairLevel })}
                 variant="status"
                 color="primary"
               />
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" fontWeight={600}>
-                  {styleName} — Hair &amp; Clothing
+                  {t("avatarUnlockEditor.hairAndClothing", { styleName })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Hair color, clothes color, hair/top, clothing
+                  {t("avatarUnlockEditor.hairAndClothingDetail")}
                 </Typography>
               </Box>
             </Paper>,
@@ -294,16 +297,16 @@ export function AvatarUnlockEditor({
             >
               <Chip
                 size="small"
-                label={`Level ${accLevel}`}
+                label={t("avatarUnlockEditor.levelChip", { level: accLevel })}
                 variant="status"
                 color="secondary"
               />
               <Box sx={{ flex: 1 }}>
                 <Typography variant="body2" fontWeight={600}>
-                  {styleName} — Accessories
+                  {t("avatarUnlockEditor.accessories", { styleName })}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  Facial hair, accessories, extras
+                  {t("avatarUnlockEditor.accessoriesDetail")}
                 </Typography>
               </Box>
             </Paper>,
@@ -319,7 +322,7 @@ export function AvatarUnlockEditor({
           size="small"
           sx={{ mt: 1.5 }}
         >
-          Add Style Unlock ({availableStyles.length} available)
+          {t("avatarUnlockEditor.addStyle", { count: availableStyles.length })}
         </Button>
       )}
 
@@ -335,29 +338,25 @@ export function AvatarUnlockEditor({
               }}
             />
           }
-          label="Enable glow ring powerup on level-up (24hr)"
+          label={t("avatarUnlockEditor.glowOnLevelUp")}
         />
       </Box>
 
       {/* Feature unlock levels */}
       <Box sx={{ mt: 2 }}>
         <Typography variant="subtitle2" fontWeight={600} gutterBottom>
-          Customization Feature Unlock Offsets
+          {t("avatarUnlockEditor.offsetsTitle")}
         </Typography>
         <Typography
           variant="caption"
           color="text.secondary"
           sx={{ display: "block", mb: 1.5 }}
         >
-          Colors (background, skin tone) and basic face features are always
-          available when a style is unlocked. These offsets control how many
-          levels after unlocking a style the additional customizations become
-          available. For example, if a style unlocks at Level 3 and the offset
-          is +2, hair/clothing unlocks at Level 5.
+          {t("avatarUnlockEditor.offsetsDescription")}
         </Typography>
         <Stack direction="row" spacing={2}>
           <TextField
-            label="Hair & Clothing offset"
+            label={t("avatarUnlockEditor.hairOffsetLabel")}
             type="number"
             size="small"
             value={featureUnlockLevels.hairAndClothing ?? 2}
@@ -369,11 +368,11 @@ export function AvatarUnlockEditor({
               setDirty(true);
             }}
             inputProps={{ min: 1, max: 20 }}
-            helperText="+N levels: hair color, clothes color, hair/top, clothing"
+            helperText={t("avatarUnlockEditor.hairOffsetHelper")}
             sx={{ width: 220 }}
           />
           <TextField
-            label="Accessories offset"
+            label={t("avatarUnlockEditor.accessoriesOffsetLabel")}
             type="number"
             size="small"
             value={featureUnlockLevels.accessories ?? 3}
@@ -385,7 +384,7 @@ export function AvatarUnlockEditor({
               setDirty(true);
             }}
             inputProps={{ min: 1, max: 20 }}
-            helperText="+N levels: facial hair, accessories, extras"
+            helperText={t("avatarUnlockEditor.accessoriesOffsetHelper")}
             sx={{ width: 220 }}
           />
         </Stack>
@@ -400,7 +399,7 @@ export function AvatarUnlockEditor({
           disabled={!dirty}
           size="small"
         >
-          Save
+          {t("avatarUnlockEditor.save")}
         </Button>
         <Button
           variant="outlined"
@@ -408,7 +407,7 @@ export function AvatarUnlockEditor({
           onClick={handleReset}
           size="small"
         >
-          Reset to Defaults
+          {t("avatarUnlockEditor.reset")}
         </Button>
       </Box>
     </Box>

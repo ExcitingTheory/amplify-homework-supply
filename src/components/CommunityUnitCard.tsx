@@ -95,14 +95,16 @@ export default function CommunityUnitCard({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mt: 1 }}>
             <Chip
               label={t("communityUnitCard.byAuthor", {
-                author: unit.owner || "Unknown",
+                author: unit.owner || t("communityUnitCard.unknownAuthor"),
               })}
               size="small"
               variant="outlined"
             />
             {unit.publishedAt && (
               <Typography variant="caption" color="text.secondary">
-                Published {new Date(unit.publishedAt).toLocaleDateString()}
+                {t("communityUnitCard.publishedOn", {
+                  date: new Date(unit.publishedAt).toLocaleDateString(),
+                })}
               </Typography>
             )}
           </Box>

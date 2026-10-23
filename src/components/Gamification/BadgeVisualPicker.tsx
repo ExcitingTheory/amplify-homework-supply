@@ -23,6 +23,7 @@ import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Tooltip from '@mui/material/Tooltip'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
+import { useTranslations } from 'next-intl'
 import type { IconType } from 'react-icons'
 import type { CustomBadgeVisual } from './BadgeEditor'
 import { BadgeIcon } from './BadgeIcon'
@@ -79,8 +80,9 @@ interface IconEntry {
   label: string
 }
 
-const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
+const ICON_CATALOG: { id: string; category: string; icons: IconEntry[] }[] = [
   {
+    id: 'awards',
     category: 'Awards & Trophies',
     icons: [
       { name: 'GiTrophy', lib: 'gi', icon: GiTrophy, label: 'Trophy' },
@@ -101,6 +103,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'combat',
     category: 'Combat & Adventure',
     icons: [
       { name: 'GiSwordsPower', lib: 'gi', icon: GiSwordsPower, label: 'Swords' },
@@ -121,6 +124,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'knowledge',
     category: 'Knowledge & Science',
     icons: [
       { name: 'GiBrain', lib: 'gi', icon: GiBrain, label: 'Brain' },
@@ -142,6 +146,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'nature',
     category: 'Nature & Elements',
     icons: [
       { name: 'GiFlame', lib: 'gi', icon: GiFlame, label: 'Flame' },
@@ -161,6 +166,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'exploration',
     category: 'Exploration & Tools',
     icons: [
       { name: 'GiSpyglass', lib: 'gi', icon: GiSpyglass, label: 'Spyglass' },
@@ -181,6 +187,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'creative',
     category: 'Creative & Magic',
     icons: [
       { name: 'GiPalette', lib: 'gi', icon: GiPalette, label: 'Palette' },
@@ -206,6 +213,7 @@ const ICON_CATALOG: { category: string; icons: IconEntry[] }[] = [
     ],
   },
   {
+    id: 'tech',
     category: 'Tech & AI',
     icons: [
       { name: 'GiArtificialIntelligence', lib: 'gi', icon: GiArtificialIntelligence, label: 'AI' },
@@ -296,6 +304,15 @@ const GRADIENT_PRESETS: { label: string; gradient: BadgeVisualConfig['gradient']
   },
 ]
 
+const ICON_COLOR_PRESETS = ['#ffffff', '#000000', '#ffd700', '#1a237e']
+
+/** CSS background for a gradient preset swatch */
+function gradientSwatchBackground(gradient: BadgeVisualConfig['gradient']): string {
+  if (!gradient) return '#ccc'
+  const stops = gradient.stops.map((s) => `${s.color} ${s.position}`).join(', ')
+  return `${gradient.type}-gradient(${gradient.angle || 'circle'}, ${stops})`
+}
+
 const SHAPE_OPTIONS: { value: BadgeShape; label: string }[] = [
   { value: 'circle', label: 'Circle' },
   { value: 'hexagon', label: 'Hexagon' },
@@ -313,6 +330,149 @@ const ANIMATION_OPTIONS: { value: BadgeAnimationPreset; label: string }[] = [
   { value: 'none', label: 'None' },
 ]
 
+/** Translated picker labels; data constants keep English labels for the exported catalog API */
+function useVisualPickerLabels() {
+  const t = useTranslations('components')
+  return useMemo(
+    () => ({
+      categories: {
+        awards: t('badgeVisualPicker.categoryAwards'),
+        combat: t('badgeVisualPicker.categoryCombat'),
+        knowledge: t('badgeVisualPicker.categoryKnowledge'),
+        nature: t('badgeVisualPicker.categoryNature'),
+        exploration: t('badgeVisualPicker.categoryExploration'),
+        creative: t('badgeVisualPicker.categoryCreative'),
+        tech: t('badgeVisualPicker.categoryTech'),
+      } as Record<string, string>,
+      icons: {
+        GiTrophy: t('badgeVisualPicker.icons.giTrophy'),
+        GiCrown: t('badgeVisualPicker.icons.giCrown'),
+        GiLaurelCrown: t('badgeVisualPicker.icons.giLaurelCrown'),
+        GiStarMedal: t('badgeVisualPicker.icons.giStarMedal'),
+        GiCutDiamond: t('badgeVisualPicker.icons.giCutDiamond'),
+        FaStar: t('badgeVisualPicker.icons.faStar'),
+        FaMedal: t('badgeVisualPicker.icons.faMedal'),
+        FaAward: t('badgeVisualPicker.icons.faAward'),
+        FaCrown: t('badgeVisualPicker.icons.faCrown'),
+        FaGem: t('badgeVisualPicker.icons.faGem'),
+        MdEmojiEvents: t('badgeVisualPicker.icons.mdEmojiEvents'),
+        MdWorkspacePremium: t('badgeVisualPicker.icons.mdWorkspacePremium'),
+        MdMilitaryTech: t('badgeVisualPicker.icons.mdMilitaryTech'),
+        MdDiamond: t('badgeVisualPicker.icons.mdDiamond'),
+        MdStars: t('badgeVisualPicker.icons.mdStars'),
+        GiSwordsPower: t('badgeVisualPicker.icons.giSwordsPower'),
+        GiShield: t('badgeVisualPicker.icons.giShield'),
+        GiCrossedSwords: t('badgeVisualPicker.icons.giCrossedSwords'),
+        GiFireShield: t('badgeVisualPicker.icons.giFireShield'),
+        GiLightningBow: t('badgeVisualPicker.icons.giLightningBow'),
+        GiTargetShot: t('badgeVisualPicker.icons.giTargetShot'),
+        GiArcheryTarget: t('badgeVisualPicker.icons.giArcheryTarget'),
+        GiChessKnight: t('badgeVisualPicker.icons.giChessKnight'),
+        GiDragonBreath: t('badgeVisualPicker.icons.giDragonBreath'),
+        GiNinjaHead: t('badgeVisualPicker.icons.giNinjaHead'),
+        GiCastleRuins: t('badgeVisualPicker.icons.giCastleRuins'),
+        FaBolt: t('badgeVisualPicker.icons.faBolt'),
+        FaDragon: t('badgeVisualPicker.icons.faDragon'),
+        FaShieldHalved: t('badgeVisualPicker.icons.faShieldHalved'),
+        FaBullseye: t('badgeVisualPicker.icons.faBullseye'),
+        GiBrain: t('badgeVisualPicker.icons.giBrain'),
+        GiSpellBook: t('badgeVisualPicker.icons.giSpellBook'),
+        GiBookCover: t('badgeVisualPicker.icons.giBookCover'),
+        GiScrollUnfurled: t('badgeVisualPicker.icons.giScrollUnfurled'),
+        GiMicroscope: t('badgeVisualPicker.icons.giMicroscope'),
+        GiAtom: t('badgeVisualPicker.icons.giAtom'),
+        GiDna1: t('badgeVisualPicker.icons.giDna1'),
+        GiAbacus: t('badgeVisualPicker.icons.giAbacus'),
+        GiTeacher: t('badgeVisualPicker.icons.giTeacher'),
+        FaBookOpen: t('badgeVisualPicker.icons.faBookOpen'),
+        FaGraduationCap: t('badgeVisualPicker.icons.faGraduationCap'),
+        FaLightbulb: t('badgeVisualPicker.icons.faLightbulb'),
+        MdPsychology: t('badgeVisualPicker.icons.mdPsychology'),
+        MdSchool: t('badgeVisualPicker.icons.mdSchool'),
+        MdScience: t('badgeVisualPicker.icons.mdScience'),
+        MdBiotech: t('badgeVisualPicker.icons.mdBiotech'),
+        GiFlame: t('badgeVisualPicker.icons.giFlame'),
+        GiFire: t('badgeVisualPicker.icons.giFire'),
+        GiSnowflake2: t('badgeVisualPicker.icons.giSnowflake2'),
+        GiWaterDrop: t('badgeVisualPicker.icons.giWaterDrop'),
+        GiChemicalDrop: t('badgeVisualPicker.icons.giChemicalDrop'),
+        GiFlowerPot: t('badgeVisualPicker.icons.giFlowerPot'),
+        GiOctopus: t('badgeVisualPicker.icons.giOctopus'),
+        GiUnicorn: t('badgeVisualPicker.icons.giUnicorn'),
+        GiPlanetCore: t('badgeVisualPicker.icons.giPlanetCore'),
+        GiRingedPlanet: t('badgeVisualPicker.icons.giRingedPlanet'),
+        FaFire: t('badgeVisualPicker.icons.faFire'),
+        FaHeart: t('badgeVisualPicker.icons.faHeart'),
+        FaMountainSun: t('badgeVisualPicker.icons.faMountainSun'),
+        MdLocalFireDepartment: t('badgeVisualPicker.icons.mdLocalFireDepartment'),
+        GiSpyglass: t('badgeVisualPicker.icons.giSpyglass'),
+        GiCompass: t('badgeVisualPicker.icons.giCompass'),
+        GiMagnifyingGlass: t('badgeVisualPicker.icons.giMagnifyingGlass'),
+        GiTreasureMap: t('badgeVisualPicker.icons.giTreasureMap'),
+        GiKey: t('badgeVisualPicker.icons.giKey'),
+        GiGears: t('badgeVisualPicker.icons.giGears'),
+        GiClockwork: t('badgeVisualPicker.icons.giClockwork'),
+        Gi3dHammer: t('badgeVisualPicker.icons.gi3dHammer'),
+        GiAnvilImpact: t('badgeVisualPicker.icons.giAnvilImpact'),
+        GiMountainRoad: t('badgeVisualPicker.icons.giMountainRoad'),
+        FaCompass: t('badgeVisualPicker.icons.faCompass'),
+        FaRocket: t('badgeVisualPicker.icons.faRocket'),
+        FaHandshake: t('badgeVisualPicker.icons.faHandshake'),
+        MdExplore: t('badgeVisualPicker.icons.mdExplore'),
+        MdRocketLaunch: t('badgeVisualPicker.icons.mdRocketLaunch'),
+        GiPalette: t('badgeVisualPicker.icons.giPalette'),
+        GiPaintBrush: t('badgeVisualPicker.icons.giPaintBrush'),
+        GiQuillInk: t('badgeVisualPicker.icons.giQuillInk'),
+        GiMusicalNotes: t('badgeVisualPicker.icons.giMusicalNotes'),
+        GiViolin: t('badgeVisualPicker.icons.giViolin'),
+        GiMagicLamp: t('badgeVisualPicker.icons.giMagicLamp'),
+        GiCrystalBall: t('badgeVisualPicker.icons.giCrystalBall'),
+        GiJesterHat: t('badgeVisualPicker.icons.giJesterHat'),
+        GiGlobe: t('badgeVisualPicker.icons.giGlobe'),
+        GiYinYang: t('badgeVisualPicker.icons.giYinYang'),
+        GiRocket: t('badgeVisualPicker.icons.giRocket'),
+        GiZeppelin: t('badgeVisualPicker.icons.giZeppelin'),
+        GiIdea: t('badgeVisualPicker.icons.giIdea'),
+        GiLightBulb: t('badgeVisualPicker.icons.giLightBulb'),
+        GiHeartPlus: t('badgeVisualPicker.icons.giHeartPlus'),
+        FaPalette: t('badgeVisualPicker.icons.faPalette'),
+        FaPuzzlePiece: t('badgeVisualPicker.icons.faPuzzlePiece'),
+        FaWandMagicSparkles: t('badgeVisualPicker.icons.faWandMagicSparkles'),
+        FaFeather: t('badgeVisualPicker.icons.faFeather'),
+        MdAutoAwesome: t('badgeVisualPicker.icons.mdAutoAwesome'),
+        GiArtificialIntelligence: t('badgeVisualPicker.icons.giArtificialIntelligence'),
+        GiCyberEye: t('badgeVisualPicker.icons.giCyberEye'),
+      } as Record<string, string>,
+      gradients: {
+        None: t('badgeVisualPicker.gradientNone'),
+        Gold: t('badgeVisualPicker.gradientGold'),
+        Ocean: t('badgeVisualPicker.gradientOcean'),
+        Fire: t('badgeVisualPicker.gradientFire'),
+        Forest: t('badgeVisualPicker.gradientForest'),
+        Cosmic: t('badgeVisualPicker.gradientCosmic'),
+        Sunset: t('badgeVisualPicker.gradientSunset'),
+        Frost: t('badgeVisualPicker.gradientFrost'),
+      } as Record<string, string>,
+      shapes: {
+        circle: t('badgeVisualPicker.shapeCircle'),
+        hexagon: t('badgeVisualPicker.shapeHexagon'),
+        shield: t('badgeVisualPicker.shapeShield'),
+        diamond: t('badgeVisualPicker.shapeDiamond'),
+      } as Record<string, string>,
+      animations: {
+        draw: t('badgeVisualPicker.animationDraw'),
+        pulse: t('badgeVisualPicker.animationPulse'),
+        'bounce-in': t('badgeVisualPicker.animationBounceIn'),
+        'spin-in': t('badgeVisualPicker.animationSpinIn'),
+        glow: t('badgeVisualPicker.animationGlow'),
+        shake: t('badgeVisualPicker.animationShake'),
+        none: t('badgeVisualPicker.animationNone'),
+      } as Record<string, string>,
+    }),
+    [t],
+  )
+}
+
 // ============================================================================
 // Component
 // ============================================================================
@@ -325,6 +485,8 @@ export interface BadgeVisualPickerProps {
 }
 
 export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
+  const t = useTranslations('components')
+  const labels = useVisualPickerLabels()
   const [iconTab, setIconTab] = useState(0)
   const [iconSearch, setIconSearch] = useState('')
   const [customGradientOpen, setCustomGradientOpen] = useState(false)
@@ -334,7 +496,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
   // Build a preview config for BadgeIcon
   const previewConfig = useMemo((): BadgeVisualConfig => ({
     icon: selectedIcon || GiTrophy,
-    name: 'Preview',
+    name: t('badgeVisualPicker.previewName'),
     description: '',
     bgColor: value.bgColor,
     gradient: value.gradient,
@@ -343,7 +505,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
     animation: value.animation,
     category: 'core',
     rarity: 'common',
-  }), [selectedIcon, value])
+  }), [selectedIcon, value, t])
 
   const filteredIcons = useMemo(() => {
     if (!iconSearch.trim()) return ICON_CATALOG
@@ -351,10 +513,11 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
     return ICON_CATALOG.map((cat) => ({
       ...cat,
       icons: cat.icons.filter((i) =>
-        i.label.toLowerCase().includes(q) || i.name.toLowerCase().includes(q)
+        (labels.icons[i.name] ?? i.label).toLowerCase().includes(q) ||
+        i.name.toLowerCase().includes(q)
       ),
     })).filter((cat) => cat.icons.length > 0)
-  }, [iconSearch])
+  }, [iconSearch, labels])
 
   const handleChange = useCallback(
     (partial: Partial<CustomBadgeVisual>) => {
@@ -369,23 +532,26 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2, p: 1.5, bgcolor: 'background.paper', borderRadius: 1, border: 1, borderColor: 'divider', position: 'sticky', top: 0, zIndex: 1 }}>
         <BadgeIcon config={previewConfig} size={72} earned animate />
         <Box>
-          <Typography variant="caption" color="text.secondary">Live Preview</Typography>
+          <Typography variant="caption" color="text.secondary">{t('badgeVisualPicker.livePreview')}</Typography>
           <Typography variant="body2" fontWeight={600}>
-            {selectedIcon ? value.iconName.replace(/^(Gi|Fa|Md|Hi)/, '') : 'Choose an icon'}
+            {selectedIcon ? value.iconName.replace(/^(Gi|Fa|Md|Hi)/, '') : t('badgeVisualPicker.chooseIcon')}
           </Typography>
           <Typography variant="caption" color="text.secondary">
-            {value.shape} · {value.animation}
+            {t('badgeVisualPicker.previewMeta', {
+              shape: labels.shapes[value.shape] ?? value.shape,
+              animation: labels.animations[value.animation] ?? value.animation,
+            })}
           </Typography>
         </Box>
       </Box>
 
       {/* ---- Icon Picker ---- */}
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-        Icon
+        {t('badgeVisualPicker.icon')}
       </Typography>
       <TextField
         size="small"
-        placeholder="Search icons..."
+        placeholder={t('badgeVisualPicker.searchIcons')}
         value={iconSearch}
         onChange={(e) => setIconSearch(e.target.value)}
         fullWidth
@@ -399,7 +565,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
         sx={{ mb: 1, minHeight: 32, '& .MuiTab-root': { minHeight: 32, py: 0, fontSize: '0.7rem' } }}
       >
         {(iconSearch ? filteredIcons : ICON_CATALOG).map((cat, i) => (
-          <Tab key={cat.category} label={cat.category} value={i} />
+          <Tab key={cat.id} label={labels.categories[cat.id] ?? cat.category} value={i} />
         ))}
       </Tabs>
       <Box sx={{ maxHeight: 160, overflow: 'auto', mb: 2 }}>
@@ -408,7 +574,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             const Icon = entry.icon
             const isSelected = value.iconName === entry.name
             return (
-              <Tooltip key={entry.name} title={entry.label} placement="top">
+              <Tooltip key={entry.name} title={labels.icons[entry.name] ?? entry.label} placement="top">
                 <ButtonBase
                   onClick={() => handleChange({ iconName: entry.name, iconLib: entry.lib })}
                   sx={{
@@ -434,7 +600,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
 
       {/* ---- Shape ---- */}
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-        Shape
+        {t('badgeVisualPicker.shape')}
       </Typography>
       <ToggleButtonGroup
         value={value.shape}
@@ -445,7 +611,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
       >
         {SHAPE_OPTIONS.map((s) => (
           <ToggleButton key={s.value} value={s.value}>
-            {s.label}
+            {labels.shapes[s.value] ?? s.label}
           </ToggleButton>
         ))}
       </ToggleButtonGroup>
@@ -454,7 +620,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
       <Stack direction="row" spacing={2} sx={{ mb: 2 }}>
         <Box sx={{ flex: 1 }}>
           <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-            Background
+            {t('badgeVisualPicker.background')}
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 0.5 }}>
             {COLOR_PRESETS.map((c) => (
@@ -482,10 +648,10 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
         </Box>
         <Box>
           <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-            Icon Color
+            {t('badgeVisualPicker.iconColor')}
           </Typography>
           <Stack direction="row" spacing={0.5} sx={{ mb: 0.5 }}>
-            {['#ffffff', '#000000', '#ffd700', '#1a237e'].map((c) => (
+            {ICON_COLOR_PRESETS.map((c) => (
               <ButtonBase
                 key={c}
                 onClick={() => handleChange({ iconColor: c })}
@@ -512,16 +678,14 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
 
       {/* ---- Gradient ---- */}
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 0.5 }}>
-        Gradient Preset
+        {t('badgeVisualPicker.gradientPreset')}
       </Typography>
       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5, mb: 2 }}>
         {GRADIENT_PRESETS.map((gp) => {
           const isSelected = JSON.stringify(value.gradient) === JSON.stringify(gp.gradient)
-          const bg = gp.gradient
-            ? `${gp.gradient.type}-gradient(${gp.gradient.angle || 'circle'}, ${gp.gradient.stops.map((s) => `${s.color} ${s.position}`).join(', ')})`
-            : '#ccc'
+          const bg = gradientSwatchBackground(gp.gradient)
           return (
-            <Tooltip key={gp.label} title={gp.label}>
+            <Tooltip key={gp.label} title={labels.gradients[gp.label] ?? gp.label}>
               <ButtonBase
                 onClick={() => handleChange({ gradient: gp.gradient })}
                 sx={{
@@ -552,7 +716,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
         onClick={() => setCustomGradientOpen((v) => !v)}
         sx={{ mb: 1, fontSize: '0.7rem', textTransform: 'none' }}
       >
-        {customGradientOpen ? 'Hide Custom Gradient' : 'Custom Gradient…'}
+        {customGradientOpen ? t('badgeVisualPicker.hideCustomGradient') : t('badgeVisualPicker.customGradient')}
       </Button>
       <Collapse in={customGradientOpen}>
         <Box sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: 1, mb: 2 }}>
@@ -567,13 +731,13 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
                 handleChange({ gradient: { ...base, type: v } })
               }}
             >
-              <ToggleButton value="linear" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>Linear</ToggleButton>
-              <ToggleButton value="radial" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>Radial</ToggleButton>
+              <ToggleButton value="linear" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>{t('badgeVisualPicker.linear')}</ToggleButton>
+              <ToggleButton value="radial" sx={{ fontSize: '0.7rem', py: 0.5, px: 1.5 }}>{t('badgeVisualPicker.radial')}</ToggleButton>
             </ToggleButtonGroup>
             {(value.gradient?.type ?? 'linear') === 'linear' && (
               <TextField
                 size="small"
-                label="Angle"
+                label={t('badgeVisualPicker.angle')}
                 placeholder="135deg"
                 value={value.gradient?.angle ?? '135deg'}
                 onChange={(e) => {
@@ -585,7 +749,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             )}
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center" sx={{ mb: 1 }}>
-            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>Start</Typography>
+            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>{t('badgeVisualPicker.start')}</Typography>
             <TextField
               type="color"
               size="small"
@@ -598,7 +762,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             />
             <TextField
               size="small"
-              label="Position"
+              label={t('badgeVisualPicker.position')}
               placeholder="0%"
               value={value.gradient?.stops[0]?.position ?? '0%'}
               onChange={(e) => {
@@ -609,7 +773,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             />
           </Stack>
           <Stack direction="row" spacing={1} alignItems="center">
-            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>End</Typography>
+            <Typography variant="caption" sx={{ width: 80, flexShrink: 0 }}>{t('badgeVisualPicker.end')}</Typography>
             <TextField
               type="color"
               size="small"
@@ -622,7 +786,7 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
             />
             <TextField
               size="small"
-              label="Position"
+              label={t('badgeVisualPicker.position')}
               placeholder="100%"
               value={value.gradient?.stops[1]?.position ?? '100%'}
               onChange={(e) => {
@@ -637,15 +801,15 @@ export function BadgeVisualPicker({ value, onChange }: BadgeVisualPickerProps) {
 
       {/* ---- Animation ---- */}
       <FormControl size="small" fullWidth sx={{ mb: 1 }}>
-        <InputLabel>Animation</InputLabel>
+        <InputLabel>{t('badgeVisualPicker.animation')}</InputLabel>
         <Select
           value={value.animation}
-          label="Animation"
+          label={t('badgeVisualPicker.animation')}
           onChange={(e) => handleChange({ animation: e.target.value as BadgeAnimationPreset })}
         >
           {ANIMATION_OPTIONS.map((a) => (
             <MenuItem key={a.value} value={a.value}>
-              {a.label}
+              {labels.animations[a.value] ?? a.label}
             </MenuItem>
           ))}
         </Select>

@@ -1,5 +1,6 @@
 "use client";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Paper from "@mui/material/Paper";
 import Typography from "@mui/material/Typography";
@@ -83,6 +84,7 @@ export function DashboardHeroView({
   badgeShelf,
   squad,
 }: DashboardHeroViewProps) {
+  const t = useTranslations("components");
   const theme = useTheme();
   const heroStart = theme.palette.secondary.main;
   const heroEnd = theme.palette.error.main;
@@ -155,7 +157,7 @@ export function DashboardHeroView({
             >
               <StatPill
                 icon={<SchoolIcon sx={{ fontSize: "1rem" }} />}
-                label="Badges"
+                label={t("dashboardHero.badges")}
                 value={badgesCount}
                 color="success"
               />
@@ -224,7 +226,7 @@ export function DashboardHeroView({
                   color="text.secondary"
                   sx={{ display: "block" }}
                 >
-                  Your Squad
+                  {t("dashboardHero.yourSquad")}
                 </Typography>
                 <Typography variant="body2" sx={{ fontWeight: 600 }}>
                   {squad.name}
@@ -232,7 +234,9 @@ export function DashboardHeroView({
               </Box>
               <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                 <Chip
-                  label={`${(squad.totalXP || 0).toLocaleString()} XP`}
+                  label={t("dashboardHero.squadXp", {
+                    xp: (squad.totalXP || 0).toLocaleString(),
+                  })}
                   size="small"
                   color="primary"
                   variant="outlined"

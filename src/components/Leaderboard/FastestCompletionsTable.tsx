@@ -9,6 +9,7 @@
  */
 
 import React from 'react'
+import { useTranslations } from 'next-intl'
 import Table from '@mui/material/Table'
 import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
@@ -24,6 +25,7 @@ import { AvatarDisplay } from '../Gamification/AvatarDisplay'
 import type { AvatarStyleTier, AvatarOverrides } from '../Gamification/DiceBearAvatar'
 
 export interface FastestCompletionEntry {
+  profileHidden?: boolean
   studentId: string
   studentName: string
   /** Average completion time in milliseconds */
@@ -50,14 +52,18 @@ export interface FastestCompletionsTableProps {
 
 const MEDALS = ['🥇', '🥈', '🥉']
 
-function formatDuration(ms: number): string {
+function formatDuration(
+  ms: number,
+  t: ReturnType<typeof useTranslations>,
+): string {
   if (ms <= 0) return '—'
   const totalSeconds = Math.floor(ms / 1000)
   const hours = Math.floor(totalSeconds / 3600)
   const minutes = Math.floor((totalSeconds % 3600) / 60)
-  if (hours > 0) return `${hours}h ${minutes}m`
-  if (minutes > 0) return `${minutes}m`
-  return `${totalSeconds}s`
+  if (hours > 0)
+    return t('fastestCompletionsTable.durationHoursMinutes', { hours, minutes })
+  if (minutes > 0) return t('fastestCompletionsTable.durationMinutes', { minutes })
+  return t('fastestCompletionsTable.durationSeconds', { seconds: totalSeconds })
 }
 
 function OnTimeChip({ onTimeCount, totalSubmissions }: { onTimeCount: number; totalSubmissions: number }) {
@@ -80,6 +86,8 @@ function StudentAvatar({ entry }: { entry: FastestCompletionEntry }) {
   }
   return (
     <AvatarDisplay
+      profileUsername={entry.profileHidden ? undefined : entry.studentId}
+      label={entry.studentName}
       seed={entry.avatarSeed || entry.studentId}
       size={24}
       style={entry.avatarStyle || 'simple'}
@@ -107,6 +115,7 @@ export function FastestCompletionsTable({
   currentStudentId,
   topN = 10,
 }: FastestCompletionsTableProps) {
+  const t = useTranslations('components')
   const sorted = [...entries]
     .map((e) => ({ ...e, score: computeScore(e) }))
     .sort((a, b) => a.score - b.score)
@@ -127,11 +136,19 @@ export function FastestCompletionsTable({
         <TableHead>
           <TableRow>
             <TableCell>#</TableCell>
-            <TableCell>Student</TableCell>
-            <TableCell align="right">Avg Time</TableCell>
-            <TableCell align="right">Fastest</TableCell>
-            <TableCell align="right">Completed</TableCell>
-            <TableCell align="right">On-Time</TableCell>
+            <TableCell>{t('fastestCompletionsTable.studentHeader')}</TableCell>
+            <TableCell align="right">
+              {t('fastestCompletionsTable.avgTimeHeader')}
+            </TableCell>
+            <TableCell align="right">
+              {t('fastestCompletionsTable.fastestHeader')}
+            </TableCell>
+            <TableCell align="right">
+              {t('fastestCompletionsTable.completedHeader')}
+            </TableCell>
+            <TableCell align="right">
+              {t('fastestCompletionsTable.onTimeHeader')}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -154,18 +171,22 @@ export function FastestCompletionsTable({
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <StudentAvatar entry={entry} />
                     <Typography variant="body2" fontWeight={isCurrentUser ? 700 : 400}>
-                      {isCurrentUser ? `${entry.studentName} (You)` : entry.studentName}
+                      {isCurrentUser
+                        ? t('fastestCompletionsTable.currentUserName', {
+                            name: entry.studentName,
+                          })
+                        : entry.studentName}
                     </Typography>
                   </Box>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">
-                    {formatDuration(entry.avgTimeMs)}
+                    {formatDuration(entry.avgTimeMs, t)}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">
-                    {formatDuration(entry.fastestTimeMs)}
+                    {formatDuration(entry.fastestTimeMs, t)}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">{entry.completedCount}</TableCell>
@@ -191,18 +212,20 @@ export function FastestCompletionsTable({
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <StudentAvatar entry={currentRow} />
                     <Typography variant="body2" fontWeight={700}>
-                      {currentRow.studentName} (You)
+                      {t('fastestCompletionsTable.currentUserName', {
+                        name: currentRow.studentName,
+                      })}
                     </Typography>
                   </Box>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">
-                    {formatDuration(currentRow.avgTimeMs)}
+                    {formatDuration(currentRow.avgTimeMs, t)}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">
                   <Typography variant="body2">
-                    {formatDuration(currentRow.fastestTimeMs)}
+                    {formatDuration(currentRow.fastestTimeMs, t)}
                   </Typography>
                 </TableCell>
                 <TableCell align="right">{currentRow.completedCount}</TableCell>

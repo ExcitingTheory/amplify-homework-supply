@@ -14,6 +14,7 @@
 import * as React from 'react'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { useTranslations } from 'next-intl'
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext'
 import {
   $getSelection,
@@ -144,12 +145,12 @@ const ALL_LAYOUTS: LayoutOption[] = [
   '1fr 1fr', '1fr 3fr', '1fr 1fr 1fr', '1fr 2fr 1fr', '1fr 1fr 1fr 1fr',
 ]
 
-const LAYOUT_LABELS: Record<LayoutOption, string> = {
-  '1fr 1fr': '2 columns (equal)',
-  '1fr 3fr': '2 columns (25% - 75%)',
-  '1fr 1fr 1fr': '3 columns (equal)',
-  '1fr 2fr 1fr': '3 columns (25% - 50% - 25%)',
-  '1fr 1fr 1fr 1fr': '4 columns (equal)',
+const LAYOUT_LABEL_KEYS: Record<LayoutOption, string> = {
+  '1fr 1fr': 'floatingToolbarPlugin.layoutTwoEqual',
+  '1fr 3fr': 'floatingToolbarPlugin.layoutTwoQuarterThreeQuarters',
+  '1fr 1fr 1fr': 'floatingToolbarPlugin.layoutThreeEqual',
+  '1fr 2fr 1fr': 'floatingToolbarPlugin.layoutThreeQuarterHalfQuarter',
+  '1fr 1fr 1fr 1fr': 'floatingToolbarPlugin.layoutFourEqual',
 }
 
 // ============================================================================
@@ -185,6 +186,7 @@ function FloatingToolbar({
   anchorElem: HTMLElement
   config: Required<FloatingToolbarConfig>
 }) {
+  const t = useTranslations('editor.authoring')
   const toolbarRef = useRef<HTMLDivElement>(null)
   const [isFocused, setIsFocused] = useState(false)
   const [isBold, setIsBold] = useState(false)
@@ -507,7 +509,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'bold')}
               color={isBold ? 'primary' : 'default'}
-              aria-label="Bold"
+              aria-label={t('toolBarPlugin.bold')}
             >
               <FormatBoldIcon fontSize="small" />
             </IconButton>
@@ -517,7 +519,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'italic')}
               color={isItalic ? 'primary' : 'default'}
-              aria-label="Italic"
+              aria-label={t('toolBarPlugin.italic')}
             >
               <FormatItalicIcon fontSize="small" />
             </IconButton>
@@ -527,7 +529,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'underline')}
               color={isUnderline ? 'primary' : 'default'}
-              aria-label="Underline"
+              aria-label={t('toolBarPlugin.underline')}
             >
               <FormatUnderlinedIcon fontSize="small" />
             </IconButton>
@@ -537,7 +539,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'strikethrough')}
               color={isStrikethrough ? 'primary' : 'default'}
-              aria-label="Strikethrough"
+              aria-label={t('toolBarPlugin.strikethrough')}
             >
               <FormatStrikethroughIcon fontSize="small" />
             </IconButton>
@@ -547,7 +549,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'code')}
               color={isCode ? 'primary' : 'default'}
-              aria-label="Code"
+              aria-label={t('floatingToolbarPlugin.code')}
             >
               <CodeIcon fontSize="small" />
             </IconButton>
@@ -557,7 +559,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'subscript')}
               color={isSubscript ? 'primary' : 'default'}
-              aria-label="Subscript"
+              aria-label={t('toolBarPlugin.subscript')}
             >
               <SubscriptIcon fontSize="small" />
             </IconButton>
@@ -567,7 +569,7 @@ function FloatingToolbar({
               size="small"
               onClick={() => editor.dispatchCommand(FORMAT_TEXT_COMMAND, 'superscript')}
               color={isSuperscript ? 'primary' : 'default'}
-              aria-label="Superscript"
+              aria-label={t('toolBarPlugin.superscript')}
             >
               <SuperscriptIcon fontSize="small" />
             </IconButton>
@@ -583,7 +585,7 @@ function FloatingToolbar({
             size="small"
             onClick={insertLink}
             color={isLink ? 'primary' : 'default'}
-            aria-label="Insert link"
+            aria-label={t('floatingToolbarPlugin.insertLink')}
           >
             <AddLinkIcon fontSize="small" />
           </IconButton>
@@ -601,7 +603,7 @@ function FloatingToolbar({
                 setColorAnchorEl(e.currentTarget)
                 setIsColorMode('font')
               }}
-              aria-label="Font color"
+              aria-label={t('floatingToolbarPlugin.fontColor')}
               sx={{
                 '& svg': { color: fontColor !== '#000000' ? fontColor : undefined },
               }}
@@ -616,7 +618,7 @@ function FloatingToolbar({
                 setBgColorAnchorEl(e.currentTarget)
                 setIsColorMode('bg')
               }}
-              aria-label="Background color"
+              aria-label={t('toolBarPlugin.backgroundColor')}
               sx={{
                 '& svg': { color: bgColor !== '#ffffff' ? bgColor : undefined },
               }}
@@ -662,7 +664,7 @@ function FloatingToolbar({
           <IconButton
             size="small"
             onClick={(e) => setInsertAnchorEl(e.currentTarget)}
-            aria-label="Insert block"
+            aria-label={t('floatingToolbarPlugin.insertBlock')}
             aria-haspopup="true"
           >
             <AddIcon fontSize="small" />
@@ -676,43 +678,43 @@ function FloatingToolbar({
             {config.insertBlocks.includes('meaningAssociation') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><WordBlockIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Meaning Association</ListItemText>
+                <ListItemText>{t('toolBarPlugin.meaningAssociation')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('wordBlock') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_WORD_BLOCK_COMMAND, 'placeholder-word-id')); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FontDownloadIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Word Block</ListItemText>
+                <ListItemText>{t('toolBarPlugin.wordBlock')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('answerVocabulary') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, [])); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FormatSizeIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Short Answer (Vocabulary)</ListItemText>
+                <ListItemText>{t('floatingToolbarPlugin.shortAnswerVocabulary')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('answerCustom') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_CUSTOM_ANSWER_BLOCK_COMMAND, [])); setInsertAnchorEl(null) }}>
                 <ListItemIcon><FormatSizeIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Short Answer (Custom)</ListItemText>
+                <ListItemText>{t('floatingToolbarPlugin.shortAnswerCustom')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('quiz') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_QUIZ_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><QuizIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Multiple Choice Quiz</ListItemText>
+                <ListItemText>{t('toolBarPlugin.multipleChoiceQuiz')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('playlist') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_PLAYLIST_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><AudiotrackIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Audio Playlist</ListItemText>
+                <ListItemText>{t('toolBarPlugin.audioPlaylist')}</ListItemText>
               </MenuItem>
             )}
             {config.insertBlocks.includes('horizontalRule') && (
               <MenuItem onClick={() => { insertWithSelection(() => editor.dispatchCommand(INSERT_HORIZONTAL_RULE_COMMAND, undefined)); setInsertAnchorEl(null) }}>
                 <ListItemIcon><HorizontalRuleIcon fontSize="small" /></ListItemIcon>
-                <ListItemText>Horizontal Rule</ListItemText>
+                <ListItemText>{t('toolBarPlugin.horizontalRule')}</ListItemText>
               </MenuItem>
             )}
           </Menu>
@@ -725,7 +727,7 @@ function FloatingToolbar({
           <IconButton
             size="small"
             onClick={(e) => setLayoutAnchorEl(e.currentTarget)}
-            aria-label="Insert columns layout"
+            aria-label={t('floatingToolbarPlugin.insertColumnsLayout')}
             aria-haspopup="true"
           >
             <ViewColumnIcon fontSize="small" />
@@ -747,7 +749,7 @@ function FloatingToolbar({
                 <ListItemIcon>
                   <ViewColumnIcon fontSize="small" />
                 </ListItemIcon>
-                <ListItemText>{LAYOUT_LABELS[value]}</ListItemText>
+                <ListItemText>{t(LAYOUT_LABEL_KEYS[value])}</ListItemText>
               </MenuItem>
             ))}
           </Menu>

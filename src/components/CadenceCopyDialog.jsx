@@ -82,7 +82,7 @@ export function CadenceCopyDialog({
   sections = [],
   units = [],
 }) {
-  const t = useTranslations("components.cadenceCopyDialog");
+  const t = useTranslations("components");
   const client = React.useMemo(() => getAmplifyClient(), []);
   const [source, setSource] = React.useState(null);
   const [targets, setTargets] = React.useState([]);
@@ -92,14 +92,14 @@ export function CadenceCopyDialog({
   const [weeklyMeetingNumber, setWeeklyMeetingNumber] = React.useState(0);
   const [loading, setLoading] = React.useState(false);
   const [saving, setSaving] = React.useState(false);
-  const [message, setMessage] = React.useState("");
+  const [message, setMessage] = React.useState(null);
   const [timingPattern, setTimingPattern] = React.useState(
     BUILT_IN_TIMING_PATTERNS[0],
   );
 
   React.useEffect(() => {
     if (!open) return;
-    setMessage("");
+    setMessage(null);
     setStartDate(new Date().toISOString().slice(0, 10));
   }, [open]);
 
@@ -115,13 +115,16 @@ export function CadenceCopyDialog({
       })
       .catch((error) => {
         if (active)
-          setMessage(error.message || "Unable to load source assignments.");
+          setMessage({
+            severity: "error",
+            text: error.message || t("cadenceCopyDialog.loadAssignmentsError"),
+          });
       })
       .finally(() => active && setLoading(false));
     return () => {
       active = false;
     };
-  }, [client, open, source]);
+  }, [client, open, source, t]);
 
   const cadence = React.useMemo(
     () => cadenceForAssignments(assignments, source?.assignmentSlots),
@@ -188,9 +191,13 @@ export function CadenceCopyDialog({
         const unitName = item.assignment.unitID
           ? units.find((unit) => unit.id === item.assignment.unitID)?.name ||
             item.assignment.unitID
-          : "Open slot";
+          : t("cadenceCopyDialog.openSlot");
         const slotName =
-          item.slotName || `Week ${week} · Meeting ${meetingIndex + 1}`;
+          item.slotName ||
+          t("cadenceCopyDialog.weekMeetingSlot", {
+            week,
+            meeting: meetingIndex + 1,
+          });
         return {
           id: `${target.id}-${item.assignment.id}-${index}`,
           title: `${slotName}: ${unitName}`,
@@ -199,13 +206,13 @@ export function CadenceCopyDialog({
           end: new Date(date.getTime() + 60 * 60 * 1000).toISOString(),
         };
       }),
-    [preview, units],
+    [preview, t, units],
   );
 
   const handleCopy = async () => {
     if (!preview.length) return;
     setSaving(true);
-    setMessage("");
+    setMessage(null);
     try {
       const existingByTarget = new Map();
       for (const target of targets) {
@@ -299,11 +306,15 @@ export function CadenceCopyDialog({
         if (data) existing.push(data);
         created += 1;
       }
-      setMessage(
-        `${created} cadence assignment${created === 1 ? "" : "s"} copied.`,
-      );
+      setMessage({
+        severity: "success",
+        text: t("cadenceCopyDialog.copiedCount", { count: created }),
+      });
     } catch (error) {
-      setMessage(error.message || "Unable to copy cadence.");
+      setMessage({
+        severity: "error",
+        text: error.message || t("cadenceCopyDialog.copyError"),
+      });
     } finally {
       setSaving(false);
     }
@@ -312,7 +323,7 @@ export function CadenceCopyDialog({
   return (
     <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
       <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <ContentCopyIcon color="primary" /> {t("title")}
+        <ContentCopyIcon color="primary" /> {t("cadenceCopyDialog.title")}
       </DialogTitle>
       <DialogContent>
         <Stack spacing={2} sx={{ pt: 1 }}>
@@ -325,7 +336,10 @@ export function CadenceCopyDialog({
             }}
             getOptionLabel={(option) => option?.name || ""}
             renderInput={(params) => (
-              <TextField {...params} label={t("copyFromClass")} />
+              <TextField
+                {...params}
+                label={t("cadenceCopyDialog.copyFromClass")}
+              />
             )}
           />
           <Autocomplete
@@ -344,31 +358,34 @@ export function CadenceCopyDialog({
               ))
             }
             renderInput={(params) => (
-              <TextField {...params} label={t("copyToClasses")} />
+              <TextField
+                {...params}
+                label={t("cadenceCopyDialog.copyToClasses")}
+              />
             )}
           />
           <Box sx={{ display: "flex", gap: 2 }}>
             <TextField
               type="date"
-              label={t("firstMeetingDate")}
+              label={t("cadenceCopyDialog.firstMeetingDate")}
               value={startDate}
               onChange={(event) => setStartDate(event.target.value)}
               slotProps={{ inputLabel: { shrink: true } }}
             />
             <TextField
               type="number"
-              label={t("weeksLabel")}
+              label={t("cadenceCopyDialog.weeksLabel")}
               value={weeks}
               onChange={(event) => setWeeks(event.target.value)}
               inputProps={{ min: 1, max: 52 }}
             />
             <TextField
               type="number"
-              label={t("weeklyMeetingLabel")}
+              label={t("cadenceCopyDialog.weeklyMeetingLabel")}
               value={weeklyMeetingNumber}
               onChange={(event) => setWeeklyMeetingNumber(event.target.value)}
               inputProps={{ min: 0, max: 20 }}
-              helperText={t("weeklyMeetingHint")}
+              helperText={t("cadenceCopyDialog.weeklyMeetingHint")}
             />
           </Box>
           <TimingPatternPicker
@@ -378,15 +395,19 @@ export function CadenceCopyDialog({
           />
           {loading && (
             <Typography color="text.secondary">
-              {t("loadingCadence")}
+              {t("cadenceCopyDialog.loadingCadence")}
             </Typography>
           )}
           {!loading && source && assignments.length === 0 && (
-            <Alert severity="info">{t("noAssignments")}</Alert>
+            <Alert severity="info">
+              {t("cadenceCopyDialog.noAssignments")}
+            </Alert>
           )}
           {!loading && source && assignmentsWithoutMetadata.length > 0 && (
             <Alert severity="warning">
-              {assignmentsWithoutMetadata.length} {t("missingMetadata")}
+              {t("cadenceCopyDialog.missingMetadataCount", {
+                count: assignmentsWithoutMetadata.length,
+              })}
             </Alert>
           )}
           {preview.length > 0 && (
@@ -398,7 +419,9 @@ export function CadenceCopyDialog({
               >
                 <EventCalendar
                   events={calendarEvents}
+                  // eslint-disable-next-line i18next/no-literal-string -- calendar view identifier
                   defaultView="week"
+                  // eslint-disable-next-line i18next/no-literal-string -- calendar view identifiers
                   views={["week", "month"]}
                   defaultPreferences={{ isSidePanelOpen: false }}
                   sx={{ height: "100%" }}
@@ -411,32 +434,31 @@ export function CadenceCopyDialog({
                       key={`${target.id}-${item.assignment.id}-${index}`}
                       variant="body2"
                     >
-                      Week {week}
-                      {item.meetingIndex !== null
-                        ? `, meeting ${item.meetingIndex + 1}`
-                        : `, meeting ${weeklyMeetingIndex + 1}`}
-                      :{" "}
-                      {item.assignment.unitID
-                        ? units.find(
-                            (unit) => unit.id === item.assignment.unitID,
-                          )?.name || item.assignment.unitID
-                        : "Open slot"}{" "}
-                      → {target.name} ({date.toLocaleDateString()})
+                      {t("cadenceCopyDialog.previewRow", {
+                        week,
+                        meeting:
+                          (item.meetingIndex !== null
+                            ? item.meetingIndex
+                            : weeklyMeetingIndex) + 1,
+                        unit: item.assignment.unitID
+                          ? units.find(
+                              (unit) => unit.id === item.assignment.unitID,
+                            )?.name || item.assignment.unitID
+                          : t("cadenceCopyDialog.openSlot"),
+                        target: target.name,
+                        date: date.toLocaleDateString(),
+                      })}
                     </Typography>
                   ),
                 )}
               </Box>
             </Box>
           )}
-          {message && (
-            <Alert severity={message.includes("Unable") ? "error" : "success"}>
-              {message}
-            </Alert>
-          )}
+          {message && <Alert severity={message.severity}>{message.text}</Alert>}
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>{t("close")}</Button>
+        <Button onClick={onClose}>{t("cadenceCopyDialog.close")}</Button>
         <Button
           variant="contained"
           onClick={handleCopy}
@@ -450,7 +472,9 @@ export function CadenceCopyDialog({
           }
           startIcon={<ContentCopyIcon />}
         >
-          {saving ? t("copying") : t("copyCadence")}
+          {saving
+            ? t("cadenceCopyDialog.copying")
+            : t("cadenceCopyDialog.copyCadence")}
         </Button>
       </DialogActions>
     </Dialog>

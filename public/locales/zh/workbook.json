@@ -18,7 +18,37 @@
     "noDictionaryAvailable": "无可用词典",
     "submit": "提交",
     "inputMethodSelector": "输入方式",
-    "placeholder": "请在此输入答案"
+    "placeholder": "请在此输入答案",
+    "loadingAudio": "正在加载音频...",
+    "progressDescription": "已回答提示的百分比。",
+    "accuracyDescription": "已提交答案中被判定为正确的百分比。",
+    "inputMethodLabels": {
+      "audio": "语音作答",
+      "text": "输入答案",
+      "writing": "手写作答"
+    },
+    "recordYourAnswer": "录制您的回答",
+    "defaultPromptByDefinition": "请填写与以下定义最匹配的词语:",
+    "defaultPromptByWord": "请对以下词语进行释义:"
+  },
+  "customAIComponent": {
+    "accuracyDescription": "已提交答案中被AI判定为正确的百分比。",
+    "completed": "已完成",
+    "correct": "正确",
+    "grading": "AI 正在为您批改答案...",
+    "gradingError": "评分时出现错误,请重试。",
+    "imageUploadHint": "图片上传输入——请提交图片以供AI评估",
+    "inputMethod": "输入方式",
+    "loading": "加载中...",
+    "modeAudio": "语音作答",
+    "modeDrawing": "绘制答案",
+    "modeImage": "上传图片",
+    "modeText": "输入答案",
+    "needsImprovement": "需要改进",
+    "progressDescription": "已回答的AI评分题目所占百分比。",
+    "questionFallback": "第 {id} 题",
+    "score": "得分:{score}/100",
+    "yourAnswer": "您的答案"
   },
   "toolBarRoPlugin": {
     "fallbackText": "格式",
@@ -38,7 +68,10 @@
     "nextAssignment": "下一个作业",
     "retrying": "正在开始新的尝试...",
     "sectionHeading": "下一步",
-    "tryAgain": "再试一次"
+    "tryAgain": "再试一次",
+    "completedIn": "完成用时:{duration}",
+    "timeLimit": "时间限制:{duration}",
+    "timeLimitWithCompletion": "时间限制:{duration} • {completion}"
   },
   "quizComponent": {
     "gradeDisplay": "成绩：{score}%"
@@ -59,7 +92,8 @@
     "submit": "提交",
     "text": "文本",
     "writing": "写作",
-    "yourAnswer": "您的答案"
+    "yourAnswer": "您的答案",
+    "answerVerifiedAndAccepted": "答案已验证并被接受"
   },
   "gradeHistory": {
     "title": "成绩记录",
@@ -91,6 +125,7 @@
     "showWaveformsDescription": "为音频内容显示可视化波形",
     "feedbackPreferences": "反馈偏好设置",
     "immediateFeedback": "即时反馈",
-    "immediateFeedbackDescription": "立即显示正确/错误反馈"
+    "immediateFeedbackDescription": "立即显示正确/错误反馈",
+    "accessibilityMoved": "无障碍设置(减少动态效果、高对比度)已移至您的<link>全局设置页面</link>。"
   }
 }

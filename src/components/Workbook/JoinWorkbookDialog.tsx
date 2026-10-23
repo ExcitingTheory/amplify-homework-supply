@@ -135,7 +135,7 @@ export default function JoinWorkbookDialog({
               value={input}
               onChange={handleInputChange}
               onKeyDown={handleKeyDown}
-              placeholder="https://...workbook/abc-123 or abc-123"
+              placeholder={t('workbook.joinDialog.inputPlaceholder')}
               disabled={loading}
               sx={{ mb: 1 }}
             />

@@ -59,6 +59,20 @@
       "disableNotifications": "Désactiver les notifications",
       "experimentalFeatures": "Fonctionnalités expérimentales",
       "studentMode": "Mode Étudiant"
+    },
+    "debugModeEnabled": "🐛 Mode débogage activé ! Actualisez la page pour activer le panneau de débogage.\n\nUtilisez Cmd/Ctrl + Maj + D pour ouvrir le panneau de débogage.",
+    "nav": {
+      "adminDashboard": "Tableau de bord administrateur",
+      "analytics": "Analyses",
+      "archives": "Archives",
+      "collapseNavigation": "Réduire la navigation",
+      "expandNavigation": "Développer la navigation",
+      "files": "Fichiers",
+      "moderation": "Modération",
+      "questions": "Questions",
+      "recycleBin": "Corbeille",
+      "showNavigation": "Afficher la navigation",
+      "words": "Mots"
     }
   },
   "navigation": {
@@ -81,13 +95,23 @@
   },
   "peerReview": {
     "helpful": "L'évaluation par les pairs a été utile",
-    "notHelpful": "L'évaluation par les pairs n'a pas été utile"
+    "notHelpful": "L'évaluation par les pairs n'a pas été utile",
+    "aiAssistant": "Assistant IA",
+    "blockReference": "Bloc : {blockId}",
+    "didItHelp": "L'évaluation par les pairs a-t-elle été utile ?",
+    "messagePlaceholder": "Saisissez un message… (utilisez @AI pour obtenir l'aide de l'IA)",
+    "noMessages": "Aucun message pour le moment. Commencez la conversation d'évaluation par les pairs !",
+    "sessionEnded": "Cette session d'évaluation est terminée.",
+    "thanksForFeedback": "Merci pour votre retour !",
+    "typing": "{count, plural, one {{names} est en train d’écrire…} other {{names} sont en train d’écrire…}}"
   },
   "quizComponent": {
     "grade": "Note : {grade}"
   },
   "sectionDetail": {
-    "studentHeader": "Étudiant"
+    "studentHeader": "Étudiant",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "Échec de l'inscription des étudiants"
   },
   "status": {
     "complete": "Terminer",
@@ -134,5 +158,42 @@
     "increase": "Augmenter le segment de temps sélectionné",
     "minutes": "Minutes",
     "seconds": "Secondes"
+  },
+  "debugPanel": {
+    "contactLabel": "Votre adresse e-mail ou un autre moyen de vous contacter (facultatif)",
+    "contactPlaceholder": "Afin que nous puissions vous recontacter",
+    "describeIssueLabel": "Décrivez le problème (facultatif)",
+    "describeIssuePlaceholder": "Que faisiez-vous lorsque le problème est survenu ?",
+    "diagnosticSent": "✅ Diagnostic envoyé à l'équipe d'assistance ! (Le lien S3 expirera dans 30 jours)",
+    "performanceComingSoon": "Les indicateurs de performance seront bientôt disponibles...",
+    "sendDialogDescription": "Cette action enverra votre instantané de diagnostic à notre équipe d'assistance via Discord. Vos données seront nettoyées afin de supprimer toute information sensible.",
+    "sendDialogTitle": "Envoyer les informations de diagnostic au support",
+    "sendFailed": "Échec de l'envoi : {error}",
+    "sendingToDiscord": "Envoi vers Discord en cours...",
+    "sendToSupport": "Envoyer au support",
+    "snapshotDownloaded": "Instantané de diagnostic téléchargé",
+    "tabs": {
+      "components": "Composants",
+      "logs": "Journaux ({count})",
+      "performance": "Performances",
+      "state": "État"
+    },
+    "title": "Panneau de débogage",
+    "unknownError": "Erreur inconnue",
+    "uploadFailed": "Échec du téléversement : {error}",
+    "uploadingArtifact": "Téléversement de l'artefact de diagnostic vers S3 en cours...",
+    "webhookNotConfigured": "Webhook Discord non configuré"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "Taux de réussite sur l'ensemble des tentatives dans les modes d'entraînement activés.",
+    "modes": {
+      "easy": "Facile",
+      "hard": "Difficile",
+      "learn": "Apprendre"
+    },
+    "progressDescription": "Taux d'achèvement moyen pour l'ensemble des modes d'entraînement activés."
+  },
+  "editor": {
+    "anonymousUser": "Anonyme"
   }
 }

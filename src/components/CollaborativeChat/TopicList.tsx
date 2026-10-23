@@ -99,7 +99,7 @@ export default function TopicList({
           }}
         >
           <Typography variant="subtitle1" fontWeight={600}>
-            Topics
+            {t("topicList.header")}
           </Typography>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
             {onlineUsers.length > 0 && (
@@ -116,7 +116,7 @@ export default function TopicList({
             <IconButton
               size="small"
               onClick={() => setCreateDialogOpen(true)}
-              aria-label="Create topic"
+              aria-label={t("topicList.createTopicAriaLabel")}
             >
               <AddIcon fontSize="small" />
             </IconButton>
@@ -125,7 +125,7 @@ export default function TopicList({
         <TextField
           size="small"
           fullWidth
-          placeholder="Search topics..."
+          placeholder={t("topicList.searchPlaceholder")}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           slotProps={{
@@ -147,7 +147,7 @@ export default function TopicList({
         {filteredTopics.length === 0 && (
           <Box sx={{ p: 2, textAlign: "center" }}>
             <Typography variant="body2" color="text.secondary">
-              No topics yet. Create one to start chatting!
+              {t("topicList.emptyStateCta")}
             </Typography>
           </Box>
         )}
@@ -182,17 +182,17 @@ export default function TopicList({
         maxWidth="xs"
         fullWidth
       >
-        <DialogTitle>Create Topic</DialogTitle>
+        <DialogTitle>{t("topicList.createDialogTitle")}</DialogTitle>
         <DialogContent>
           <TextField
             data-testid="new-topic-input"
             autoFocus
             fullWidth
-            label="Topic name"
+            label={t("topicList.topicNameLabel")}
             value={newTopicName}
             onChange={(e) => setNewTopicName(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && handleCreate()}
-            placeholder="e.g. homework-help"
+            placeholder={t("topicList.topicNamePlaceholder")}
             sx={{ mt: 1 }}
             slotProps={{
               input: {
@@ -207,17 +207,19 @@ export default function TopicList({
             color="text.secondary"
             sx={{ mt: 1, display: "block" }}
           >
-            Scope: {currentScope}
+            {t("topicList.scope", { scope: currentScope })}
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
+          <Button onClick={() => setCreateDialogOpen(false)}>
+            {t("topicList.cancel")}
+          </Button>
           <Button
             variant="contained"
             onClick={handleCreate}
             disabled={!newTopicName.trim()}
           >
-            Create
+            {t("topicList.create")}
           </Button>
         </DialogActions>
       </Dialog>

@@ -18,9 +18,12 @@ import { useEffect } from "react";
 import MeaningAssociationExercise from "../../MeaningAssociationExercise";
 
 // Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
-const MeaningAssociationEditor = React.lazy(() =>
-  import("../components/MeaningAssociationEditor"),
+const MeaningAssociationEditor = React.lazy(
+  () => import("../components/MeaningAssociationEditor"),
 );
+
+const DEFAULT_ENABLED_MODES = ["learn", "easy", "hard"];
+const DEFAULT_PROMPT_FOR = "definition";
 
 /**
  * Converts a DOM element into a MeaningAssociationNode.
@@ -243,8 +246,8 @@ export class MeaningAssociationNode extends DecoratorNode {
               format={this.__format}
               nodeKey={this.getKey()}
               wordIDs={this.__ids}
-              enabledModes={this.__enabledModes || ["learn", "easy", "hard"]}
-              promptFor={this.__promptFor || "definition"}
+              enabledModes={this.__enabledModes || DEFAULT_ENABLED_MODES}
+              promptFor={this.__promptFor || DEFAULT_PROMPT_FOR}
               showAudio={this.__showAudio !== false}
               showPronunciation={this.__showPronunciation !== false}
             />
@@ -257,8 +260,8 @@ export class MeaningAssociationNode extends DecoratorNode {
             format={this.__format}
             nodeKey={this.getKey()}
             wordIDs={this.__ids}
-            enabledModes={this.__enabledModes || ["learn", "easy", "hard"]}
-            promptFor={this.__promptFor || "definition"}
+            enabledModes={this.__enabledModes || DEFAULT_ENABLED_MODES}
+            promptFor={this.__promptFor || DEFAULT_PROMPT_FOR}
             showAudio={this.__showAudio !== false}
             showPronunciation={this.__showPronunciation !== false}
           />

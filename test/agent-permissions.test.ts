@@ -229,14 +229,15 @@ describe("AgentPermissions", () => {
       expect(result.requiresConfirmation).toBe(true);
     });
 
-    it("should block deleting production code", async () => {
+    it("requires confirmation before deleting production code", async () => {
       const result = await permissions.checkPermission({
         operation: "delete",
         path: "src/components/MyComponent.tsx",
       });
 
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("cannot be deleted");
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(true);
+      expect(result.reason).toContain("explicit confirmation");
     });
   });
 
@@ -332,14 +333,15 @@ describe("AgentPermissions", () => {
       expect(result.reason).toContain("push");
     });
 
-    it("should block dangerous rm commands", async () => {
+    it("requires confirmation for dangerous rm commands", async () => {
       const result = await permissions.checkPermission({
         operation: "terminal",
         command: "rm -rf .",
       });
 
-      expect(result.allowed).toBe(false);
-      expect(result.reason).toContain("rm");
+      expect(result.allowed).toBe(true);
+      expect(result.requiresConfirmation).toBe(true);
+      expect(result.reason).toContain("explicit confirmation");
     });
 
     it("should block amplify push commands", async () => {
@@ -359,6 +361,35 @@ describe("AgentPermissions", () => {
       });
 
       expect(result.allowed).toBe(true);
+    });
+
+    it("should block local Thoth speech generation", async () => {
+      const result = await permissions.checkPermission({
+        operation: "terminal",
+        command:
+          "npx tsx scripts/thoth/render-call-response-album.mts --local-preview",
+      });
+
+      expect(result.allowed).toBe(false);
+    });
+
+    it("should allow the side-effect-free Thoth playlist dry run", async () => {
+      const result = await permissions.checkPermission({
+        operation: "terminal",
+        command: "npx tsx scripts/thoth/render-call-response-album.mts",
+      });
+
+      expect(result.allowed).toBe(true);
+    });
+
+    it("should not allow the Thoth album upload mode", async () => {
+      const result = await permissions.checkPermission({
+        operation: "terminal",
+        command:
+          "npx tsx scripts/thoth/render-call-response-album.mts --execute",
+      });
+
+      expect(result.allowed).toBe(false);
     });
   });
 

@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 
@@ -14,6 +15,7 @@ const TRACK_HEIGHT = 32;
 export function WeeklyParticipationChart({
   days,
 }: WeeklyParticipationChartProps) {
+  const t = useTranslations("components");
   const theme = useTheme();
   const ink = theme.palette.primary.main;
   const maxCount = Math.max(1, ...days.map((d) => d.count));
@@ -32,7 +34,7 @@ export function WeeklyParticipationChart({
           mb: 1,
         }}
       >
-        Participation This Week
+        {t("weeklyParticipationChart.title")}
       </Typography>
       <Box
         sx={{
@@ -51,7 +53,14 @@ export function WeeklyParticipationChart({
           return (
             <Tooltip
               key={day.date}
-              title={`${new Date(day.date).toLocaleDateString(undefined, { weekday: "long", month: "short", day: "numeric" })}: ${day.count} submission${day.count === 1 ? "" : "s"}`}
+              title={t("weeklyParticipationChart.dayTooltip", {
+                date: new Date(day.date).toLocaleDateString(undefined, {
+                  weekday: "long",
+                  month: "short",
+                  day: "numeric",
+                }),
+                count: day.count,
+              })}
             >
               <Box
                 sx={{
@@ -94,7 +103,7 @@ export function WeeklyParticipationChart({
           color="text.disabled"
           sx={{ display: "block", mt: 0.5 }}
         >
-          No submissions yet this week
+          {t("weeklyParticipationChart.noSubmissions")}
         </Typography>
       )}
     </Box>

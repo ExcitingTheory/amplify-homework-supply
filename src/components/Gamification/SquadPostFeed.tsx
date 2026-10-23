@@ -9,6 +9,7 @@
 
 import * as React from 'react'
 import { useState, useCallback } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -68,6 +69,7 @@ export function SquadPostFeed({
   isPublishing = false,
   authorDisplayNames = {},
 }: SquadPostFeedProps) {
+  const t = useTranslations('components')
   const [composerOpen, setComposerOpen] = useState(false)
 
   const handlePublish = useCallback(
@@ -89,7 +91,7 @@ export function SquadPostFeed({
               startIcon={<AddIcon />}
               onClick={() => setComposerOpen(true)}
             >
-              New Post
+              {t('squadPostFeed.newPost')}
             </Button>
           ) : (
             <Collapse in={composerOpen}>
@@ -102,7 +104,7 @@ export function SquadPostFeed({
                 onClick={() => setComposerOpen(false)}
                 sx={{ mb: 2 }}
               >
-                Cancel
+                {t('squadPostFeed.cancel')}
               </Button>
             </Collapse>
           )}
@@ -113,7 +115,7 @@ export function SquadPostFeed({
       <Stack spacing={2}>
         {posts.length === 0 && (
           <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-            No posts yet. Be the first to share something!
+            {t('squadPostFeed.empty')}
           </Typography>
         )}
 
@@ -123,6 +125,8 @@ export function SquadPostFeed({
               <Box sx={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
                   <AvatarDisplay
+                    profileUsername={post.authorId}
+                    label={authorDisplayNames[post.authorId]}
                     seed={post.authorId}
                     size={36}
                   />
@@ -146,7 +150,7 @@ export function SquadPostFeed({
                 {onDelete && post.authorId === currentUserId && (
                   <IconButton
                     size="small"
-                    aria-label="Delete post"
+                    aria-label={t('squadPostFeed.deletePost')}
                     onClick={() => onDelete(post.id, post._version)}
                   >
                     <DeleteIcon fontSize="small" />
@@ -159,7 +163,7 @@ export function SquadPostFeed({
                   <Divider sx={{ my: 1.5 }} />
                   <NarrativeReader
                     contentJson={post.data}
-                    ariaLabel={`Post: ${post.title}`}
+                    ariaLabel={t('squadPostFeed.postAriaLabel', { title: post.title })}
                     padding="0.5rem 0"
                   />
                 </>

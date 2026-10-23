@@ -38,6 +38,7 @@ import { BADGE_REGISTRY, type BadgeVisualConfig } from "./badgeRegistry";
 import { BadgeVisualPicker, resolveIcon } from "./BadgeVisualPicker";
 import AutoAwesomeIcon from "@mui/icons-material/AutoAwesome";
 import AIBadgeDesigner from "./AIBadgeDesigner";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Constants — available XP events that can trigger badges
@@ -180,6 +181,41 @@ export interface BadgeEditorProps {
   onDeleteCustomBadge?: (badgeId: string) => void;
 }
 
+type Translate = ReturnType<typeof useTranslations<"components">>;
+
+function getEventLabels(t: Translate): Record<string, string> {
+  return {
+    HOMEWORK_SUBMITTED: t("badgeEditor.eventHomeworkSubmitted"),
+    AI_FEEDBACK_REVISED: t("badgeEditor.eventAiFeedbackRevised"),
+    ON_TIME_SUBMISSION: t("badgeEditor.eventOnTimeSubmission"),
+    PERFECT_SCORE: t("badgeEditor.eventPerfectScore"),
+    STREAK_7DAY: t("badgeEditor.eventStreak7day"),
+    STREAK_14DAY: t("badgeEditor.eventStreak14day"),
+    STREAK_30DAY: t("badgeEditor.eventStreak30day"),
+    PEER_REVIEW_GIVEN: t("badgeEditor.eventPeerReviewGiven"),
+    PRACTICE_DRILL_COMPLETED: t("badgeEditor.eventPracticeDrillCompleted"),
+    COMEBACK: t("badgeEditor.eventComeback"),
+    EASTER_EGG: t("badgeEditor.eventEasterEgg"),
+    NAILED_IT: t("badgeEditor.eventNailedIt"),
+    PEER_REVIEW_HOSTED: t("badgeEditor.eventPeerReviewHosted"),
+    PEER_REVIEW_TOP_REVIEWER: t("badgeEditor.eventPeerReviewTopReviewer"),
+    PRACTICE_DRILL_ACCURACY_BONUS: t(
+      "badgeEditor.eventPracticeDrillAccuracyBonus",
+    ),
+    STREAK_3DAY: t("badgeEditor.eventStreak3day"),
+  };
+}
+
+function getRarityLabels(t: Translate): Record<string, string> {
+  return {
+    common: t("badgeEditor.rarityCommon"),
+    uncommon: t("badgeEditor.rarityUncommon"),
+    rare: t("badgeEditor.rarityRare"),
+    epic: t("badgeEditor.rarityEpic"),
+    legendary: t("badgeEditor.rarityLegendary"),
+  };
+}
+
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -199,6 +235,9 @@ function HardcodedBadgeRow({
   onOverrideChange?: (override: BadgeOverride) => void;
   onOverrideReset?: (badgeType: string) => void;
 }) {
+  const t = useTranslations("components");
+  const eventLabels = useMemo(() => getEventLabels(t), [t]);
+  const rarityLabels = useMemo(() => getRarityLabels(t), [t]);
   const [expanded, setExpanded] = useState(false);
   const hasOverride = !!override;
   const currentThreshold = override?.threshold ?? defaults.threshold;
@@ -206,16 +245,20 @@ function HardcodedBadgeRow({
 
   const eventLabel = useMemo(() => {
     const ev = override?.event ?? defaults.event;
-    if (!ev) return "Total XP";
-    return BADGE_EVENTS.find((e) => e.value === ev)?.label ?? ev;
-  }, [override?.event, defaults.event]);
+    if (!ev) return t("badgeEditor.totalXp");
+    return eventLabels[ev] ?? ev;
+  }, [override?.event, defaults.event, t, eventLabels]);
 
   const criteriaText = useMemo(() => {
     if (defaults.comparator === "xp_gte")
-      return `Earn ≥ ${currentThreshold} total XP`;
-    if (defaults.comparator === "any") return `${eventLabel} (any occurrence)`;
-    return `${eventLabel} × ${currentThreshold}`;
-  }, [defaults.comparator, currentThreshold, eventLabel]);
+      return t("badgeEditor.criteriaXp", { threshold: currentThreshold });
+    if (defaults.comparator === "any")
+      return t("badgeEditor.criteriaAny", { event: eventLabel });
+    return t("badgeEditor.criteriaCount", {
+      event: eventLabel,
+      threshold: currentThreshold,
+    });
+  }, [defaults.comparator, currentThreshold, eventLabel, t]);
 
   return (
     <Card
@@ -236,7 +279,7 @@ function HardcodedBadgeRow({
               </Typography>
               {hasOverride && (
                 <Chip
-                  label="Modified"
+                  label={t("badgeEditor.modified")}
                   size="small"
                   color="warning"
                   sx={{ height: 18, fontSize: "0.6rem" }}
@@ -248,7 +291,7 @@ function HardcodedBadgeRow({
             </Typography>
           </Box>
           <Chip
-            label={currentRarity}
+            label={rarityLabels[currentRarity] ?? currentRarity}
             size="small"
             variant="outlined"
             sx={{
@@ -278,8 +321,8 @@ function HardcodedBadgeRow({
                   fontWeight={600}
                 >
                   {defaults.comparator === "xp_gte"
-                    ? "XP Threshold"
-                    : "Event Count Required"}
+                    ? t("badgeEditor.xpThreshold")
+                    : t("badgeEditor.eventCountRequired")}
                 </Typography>
                 <Stack direction="row" alignItems="center" spacing={2}>
                   <Slider
@@ -313,10 +356,10 @@ function HardcodedBadgeRow({
               </Box>
             )}
             <FormControl size="small" fullWidth>
-              <InputLabel>Rarity</InputLabel>
+              <InputLabel>{t("badgeEditor.rarity")}</InputLabel>
               <Select
                 value={currentRarity}
-                label="Rarity"
+                label={t("badgeEditor.rarity")}
                 onChange={(e) => {
                   onOverrideChange?.({
                     badgeType,
@@ -335,7 +378,7 @@ function HardcodedBadgeRow({
                     value={r}
                     sx={{ textTransform: "capitalize" }}
                   >
-                    {r}
+                    {rarityLabels[r] ?? r}
                   </MenuItem>
                 ))}
               </Select>
@@ -348,7 +391,7 @@ function HardcodedBadgeRow({
                 onClick={() => onOverrideReset?.(badgeType)}
                 color="warning"
               >
-                Reset to Default
+                {t("badgeEditor.resetToDefault")}
               </Button>
             )}
           </Stack>
@@ -370,6 +413,9 @@ export function BadgeEditor({
   onAddCustomBadge,
   onDeleteCustomBadge,
 }: BadgeEditorProps) {
+  const t = useTranslations("components");
+  const eventLabels = useMemo(() => getEventLabels(t), [t]);
+  const rarityLabels = useMemo(() => getRarityLabels(t), [t]);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAIDesigner, setShowAIDesigner] = useState(false);
   const [newName, setNewName] = useState("");
@@ -448,15 +494,14 @@ export function BadgeEditor({
     <Box>
       {/* ---- Hardcoded Badge Customization ---- */}
       <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-        Badge Criteria
+        {t("badgeEditor.badgeCriteria")}
       </Typography>
       <Typography
         variant="caption"
         color="text.secondary"
         sx={{ display: "block", mb: 1.5 }}
       >
-        Adjust the difficulty and rarity of built-in badges. Modified badges are
-        highlighted.
+        {t("badgeEditor.badgeCriteriaDescription")}
       </Typography>
       {editableBadges.map(({ type, config, criteria }) => (
         <HardcodedBadgeRow
@@ -480,7 +525,7 @@ export function BadgeEditor({
         sx={{ mb: 1 }}
       >
         <Typography variant="subtitle2" fontWeight={600}>
-          Custom Badges ({customBadges.length})
+          {t("badgeEditor.customBadges", { count: customBadges.length })}
         </Typography>
         <Stack direction="row" spacing={1}>
           <Button
@@ -493,7 +538,9 @@ export function BadgeEditor({
             }}
             color={showAIDesigner ? "secondary" : "inherit"}
           >
-            {showAIDesigner ? "Cancel AI" : "AI Generate"}
+            {showAIDesigner
+              ? t("badgeEditor.cancelAi")
+              : t("badgeEditor.aiGenerate")}
           </Button>
           <Button
             size="small"
@@ -504,7 +551,9 @@ export function BadgeEditor({
               setShowAIDesigner(false);
             }}
           >
-            {showCreateForm ? "Cancel" : "New Badge"}
+            {showCreateForm
+              ? t("badgeEditor.cancel")
+              : t("badgeEditor.newBadge")}
           </Button>
         </Stack>
       </Stack>
@@ -513,7 +562,7 @@ export function BadgeEditor({
         color="text.secondary"
         sx={{ display: "block", mb: 1.5 }}
       >
-        Create badges awarded when students reach a specific event count.
+        {t("badgeEditor.customBadgesDescription")}
       </Typography>
 
       <Collapse in={showAIDesigner}>
@@ -539,8 +588,7 @@ export function BadgeEditor({
               color="text.secondary"
               sx={{ mt: 1, display: "block" }}
             >
-              After generating, you can edit the trigger event and threshold in
-              the badge list.
+              {t("badgeEditor.aiAfterGenerating")}
             </Typography>
           </CardContent>
         </Card>
@@ -552,30 +600,30 @@ export function BadgeEditor({
             <Stack spacing={1.5}>
               <TextField
                 size="small"
-                label="Badge Name"
+                label={t("badgeEditor.badgeName")}
                 value={newName}
                 onChange={(e) => setNewName(e.target.value)}
-                placeholder="e.g. Grammar Guru"
+                placeholder={t("badgeEditor.badgeNamePlaceholder")}
                 fullWidth
               />
               <TextField
                 size="small"
-                label="Description"
+                label={t("badgeEditor.description")}
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="What does this badge reward?"
+                placeholder={t("badgeEditor.descriptionPlaceholder")}
                 fullWidth
               />
               <FormControl size="small" fullWidth>
-                <InputLabel>Trigger Event</InputLabel>
+                <InputLabel>{t("badgeEditor.triggerEvent")}</InputLabel>
                 <Select
                   value={newEvent}
-                  label="Trigger Event"
+                  label={t("badgeEditor.triggerEvent")}
                   onChange={(e) => setNewEvent(e.target.value)}
                 >
                   {BADGE_EVENTS.map((ev) => (
                     <MenuItem key={ev.value} value={ev.value}>
-                      {ev.label}
+                      {eventLabels[ev.value] ?? ev.label}
                     </MenuItem>
                   ))}
                 </Select>
@@ -586,7 +634,7 @@ export function BadgeEditor({
                   color="text.secondary"
                   fontWeight={600}
                 >
-                  Times Required: {newThreshold}
+                  {t("badgeEditor.timesRequired", { count: newThreshold })}
                 </Typography>
                 <Slider
                   size="small"
@@ -599,10 +647,10 @@ export function BadgeEditor({
                 />
               </Box>
               <FormControl size="small" fullWidth>
-                <InputLabel>Rarity</InputLabel>
+                <InputLabel>{t("badgeEditor.rarity")}</InputLabel>
                 <Select
                   value={newRarity}
-                  label="Rarity"
+                  label={t("badgeEditor.rarity")}
                   onChange={(e) =>
                     setNewRarity(e.target.value as BadgeVisualConfig["rarity"])
                   }
@@ -613,7 +661,7 @@ export function BadgeEditor({
                       value={r}
                       sx={{ textTransform: "capitalize" }}
                     >
-                      {r}
+                      {rarityLabels[r] ?? r}
                     </MenuItem>
                   ))}
                 </Select>
@@ -628,7 +676,9 @@ export function BadgeEditor({
                 onClick={() => setShowVisualEditor(!showVisualEditor)}
                 color={showVisualEditor ? "primary" : "inherit"}
               >
-                {showVisualEditor ? "Visual Design ✓" : "Add Visual Design"}
+                {showVisualEditor
+                  ? t("badgeEditor.visualDesignOn")
+                  : t("badgeEditor.addVisualDesign")}
               </Button>
               <Collapse in={showVisualEditor}>
                 <Box sx={{ pt: 1 }}>
@@ -647,19 +697,21 @@ export function BadgeEditor({
                 onClick={() => setShowBuffEditor(!showBuffEditor)}
                 color={showBuffEditor ? "secondary" : "inherit"}
               >
-                {showBuffEditor ? "Badge Buffs ✓" : "Add Badge Buffs"}
+                {showBuffEditor
+                  ? t("badgeEditor.badgeBuffsOn")
+                  : t("badgeEditor.addBadgeBuffs")}
               </Button>
               <Collapse in={showBuffEditor}>
                 <Box sx={{ pt: 1 }}>
                   <Stack spacing={1.5}>
                     <Typography variant="caption" color="text.secondary">
-                      Buffs are granted when a student earns this badge.
+                      {t("badgeEditor.buffsDescription")}
                     </Typography>
                     <Stack direction="row" spacing={2}>
                       <TextField
                         size="small"
                         type="number"
-                        label="XP Multiplier"
+                        label={t("badgeEditor.xpMultiplier")}
                         value={newBuffs.xpMultiplier ?? 1}
                         onChange={(e) =>
                           setNewBuffs((b) => ({
@@ -673,15 +725,17 @@ export function BadgeEditor({
                         inputProps={{ min: 0, max: 5, step: 0.25 }}
                         helperText={
                           (newBuffs.xpMultiplier ?? 1) === 1
-                            ? "No bonus"
-                            : `${newBuffs.xpMultiplier}× XP`
+                            ? t("badgeEditor.noBonus")
+                            : t("badgeEditor.xpMultiplierValue", {
+                                multiplier: newBuffs.xpMultiplier ?? 1,
+                              })
                         }
                         sx={{ flex: 1 }}
                       />
                       <TextField
                         size="small"
                         type="number"
-                        label="Duration (hours)"
+                        label={t("badgeEditor.durationHours")}
                         value={newBuffs.xpMultiplierDurationHours ?? 0}
                         onChange={(e) =>
                           setNewBuffs((b) => ({
@@ -695,8 +749,10 @@ export function BadgeEditor({
                         inputProps={{ min: 0, step: 1 }}
                         helperText={
                           (newBuffs.xpMultiplierDurationHours ?? 0) === 0
-                            ? "Permanent"
-                            : `${newBuffs.xpMultiplierDurationHours}h`
+                            ? t("badgeEditor.permanent")
+                            : t("badgeEditor.hoursValue", {
+                                hours: newBuffs.xpMultiplierDurationHours ?? 0,
+                              })
                         }
                         sx={{ flex: 1 }}
                       />
@@ -704,7 +760,7 @@ export function BadgeEditor({
                     <TextField
                       size="small"
                       type="number"
-                      label="Streak Freezes Granted"
+                      label={t("badgeEditor.streakFreezesGranted")}
                       value={newBuffs.streakFreezes ?? 0}
                       onChange={(e) =>
                         setNewBuffs((b) => ({
@@ -718,14 +774,16 @@ export function BadgeEditor({
                       inputProps={{ min: 0, max: 10, step: 1 }}
                       helperText={
                         (newBuffs.streakFreezes ?? 0) === 0
-                          ? "None"
-                          : `${newBuffs.streakFreezes} freeze(s)`
+                          ? t("badgeEditor.none")
+                          : t("badgeEditor.freezeCount", {
+                              count: newBuffs.streakFreezes ?? 0,
+                            })
                       }
                       fullWidth
                     />
                     <TextField
                       size="small"
-                      label="Content Unlock IDs"
+                      label={t("badgeEditor.contentUnlockIds")}
                       value={(newBuffs.contentUnlockIds || []).join(", ")}
                       onChange={(e) =>
                         setNewBuffs((b) => ({
@@ -737,7 +795,7 @@ export function BadgeEditor({
                         }))
                       }
                       placeholder="unit-id-1, unit-id-2"
-                      helperText="Comma-separated unit IDs to unlock"
+                      helperText={t("badgeEditor.contentUnlockIdsHelper")}
                       fullWidth
                     />
                   </Stack>
@@ -751,7 +809,7 @@ export function BadgeEditor({
                 disabled={!newName.trim() || !newEvent}
                 onClick={handleCreate}
               >
-                Create Badge
+                {t("badgeEditor.createBadge")}
               </Button>
             </Stack>
           </CardContent>
@@ -760,9 +818,7 @@ export function BadgeEditor({
 
       {/* ---- Custom badge list ---- */}
       {customBadges.map((badge) => {
-        const eventLabel =
-          BADGE_EVENTS.find((e) => e.value === badge.event)?.label ??
-          badge.event;
+        const eventLabel = eventLabels[badge.event] ?? badge.event;
         // Build BadgeIcon config if visual is present
         const visualIcon = badge.visual
           ? resolveIcon(badge.visual.iconName)
@@ -819,7 +875,10 @@ export function BadgeEditor({
                     {badge.name}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    {eventLabel} × {badge.threshold}
+                    {t("badgeEditor.criteriaCount", {
+                      event: eventLabel,
+                      threshold: badge.threshold,
+                    })}
                   </Typography>
                   {badge.description && (
                     <Typography
@@ -835,7 +894,9 @@ export function BadgeEditor({
                       {badge.buffs!.xpMultiplier &&
                         badge.buffs!.xpMultiplier !== 1 && (
                           <Chip
-                            label={`${badge.buffs!.xpMultiplier}× XP`}
+                            label={t("badgeEditor.xpMultiplierValue", {
+                              multiplier: badge.buffs!.xpMultiplier,
+                            })}
                             size="small"
                             variant="status"
                             color="success"
@@ -845,7 +906,9 @@ export function BadgeEditor({
                       {badge.buffs!.streakFreezes &&
                         badge.buffs!.streakFreezes > 0 && (
                           <Chip
-                            label={`${badge.buffs!.streakFreezes} freeze(s)`}
+                            label={t("badgeEditor.freezeCount", {
+                              count: badge.buffs!.streakFreezes,
+                            })}
                             size="small"
                             variant="status"
                             color="info"
@@ -855,7 +918,9 @@ export function BadgeEditor({
                       {badge.buffs!.contentUnlockIds &&
                         badge.buffs!.contentUnlockIds.length > 0 && (
                           <Chip
-                            label={`${badge.buffs!.contentUnlockIds.length} unlock(s)`}
+                            label={t("badgeEditor.unlockCount", {
+                              count: badge.buffs!.contentUnlockIds.length,
+                            })}
                             size="small"
                             variant="status"
                             color="warning"
@@ -866,7 +931,7 @@ export function BadgeEditor({
                   )}
                 </Box>
                 <Chip
-                  label={badge.rarity}
+                  label={rarityLabels[badge.rarity] ?? badge.rarity}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -875,7 +940,7 @@ export function BadgeEditor({
                     textTransform: "capitalize",
                   }}
                 />
-                <Tooltip title="Delete custom badge">
+                <Tooltip title={t("badgeEditor.deleteCustomBadge")}>
                   <IconButton
                     size="small"
                     onClick={() => onDeleteCustomBadge?.(badge.id)}
@@ -890,7 +955,7 @@ export function BadgeEditor({
       })}
       {customBadges.length === 0 && !showCreateForm && (
         <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-          No custom badges created yet.
+          {t("badgeEditor.noCustomBadges")}
         </Typography>
       )}
     </Box>

@@ -176,6 +176,7 @@ import { INSERT_WORD_BLOCK_COMMAND } from "./WordBlockPlugin";
 
 import { INSERT_PLAYLIST_COMMAND } from "./PlaylistPlugin";
 import { INSERT_CONVERSATION_PLAYLIST_COMMAND } from "./ConversationPlaylistPlugin";
+import { INSERT_CALL_RESPONSE_COMMAND } from "./CallResponsePlugin";
 import RecordingStudioEnhancedModal from "../../RecordingStudioEnhancedModal";
 import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import { getAmplifyClient } from "../../../utils/amplifyClient";
@@ -532,7 +533,7 @@ function LayoutModal({ editor }) {
 
             <Select
               value={layout}
-              label="Layout"
+              label={t("toolBarPlugin.layout")}
               variant="standard"
               style={{
                 width: "100%",
@@ -557,6 +558,7 @@ function LayoutModal({ editor }) {
             </Select>
             <Stack
               direction="row"
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               justifyContent="center"
               alignItems="center"
               spacing={2}
@@ -623,6 +625,7 @@ function DeleteModal() {
             </Typography>
             <Stack
               direction="row"
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               justifyContent="center"
               alignItems="center"
               spacing={2}
@@ -1007,9 +1010,11 @@ const TextAlignmentDropdown = ({ activeEditor, disabled = false, isRTL }) => {
   return (
     <>
       <Button
+        /* eslint-disable i18next/no-literal-string -- ARIA wiring values */
         aria-controls="text-alignment-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        /* eslint-enable i18next/no-literal-string */
         onClick={handleClick}
         disabled={disabled}
         className={"toolbar-item text-alignment"}
@@ -1142,9 +1147,11 @@ const DropdownColorPicker = ({
   return (
     <>
       <Button
+        /* eslint-disable i18next/no-literal-string -- ARIA wiring values */
         aria-controls="color-picker-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        /* eslint-enable i18next/no-literal-string */
         onClick={handleClick}
         disabled={disabled}
         // className={'insert-node'}
@@ -1184,9 +1191,11 @@ const InsertNodeDropDown = ({
     <>
       <Button
         data-tour="insert-button"
+        /* eslint-disable i18next/no-literal-string -- ARIA wiring values */
         aria-controls="insert-node-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        /* eslint-enable i18next/no-literal-string */
         onClick={handleClick}
         disabled={disabled}
         // className={'insert-node'}
@@ -1324,12 +1333,12 @@ const InsertNodeDropDown = ({
             editor.dispatchCommand(INSERT_CUSTOM_AI_BLOCK_COMMAND, []);
             handleClose();
           }}
-          title="AI-Graded Exercise"
-          aria-label="AI-Graded Exercise"
+          title={t("toolBarPlugin.aiGradedExercise")}
+          aria-label={t("toolBarPlugin.aiGradedExercise")}
         >
           <FormatSizeIcon />
           &nbsp;
-          <span className="text">AI-Graded Exercise</span>
+          <span className="text">{t("toolBarPlugin.aiGradedExercise")}</span>
         </MenuItem>
 
         {/**
@@ -1362,6 +1371,20 @@ const InsertNodeDropDown = ({
           <AudiotrackIcon />
           &nbsp;
           <span className="text">{t("toolBarPlugin.audioPlaylist")}</span>
+        </MenuItem>
+
+        <MenuItem
+          tabIndex={-1}
+          onClick={() => {
+            editor.dispatchCommand(INSERT_CALL_RESPONSE_COMMAND, undefined);
+            handleClose();
+          }}
+          title={t("toolBarPlugin.callAndResponse")}
+          aria-label={t("toolBarPlugin.callAndResponse")}
+        >
+          <RecordVoiceOverIcon />
+          &nbsp;
+          <span className="text">{t("toolBarPlugin.callAndResponse")}</span>
         </MenuItem>
 
         <MenuItem
@@ -1431,9 +1454,11 @@ function TextFormatDropDown({
   return (
     <>
       <Button
+        /* eslint-disable i18next/no-literal-string -- ARIA wiring values */
         aria-controls="text-format-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        /* eslint-enable i18next/no-literal-string */
         onClick={handleClick}
         disabled={disabled}
         className={"toolbar-item " + style}
@@ -1966,9 +1991,11 @@ function FontDropDown({ editor, value, style, disabled = false }) {
       `}</style>
 
       <Button
+        /* eslint-disable i18next/no-literal-string -- ARIA wiring values */
         aria-controls="font-menu"
         aria-haspopup="true"
         aria-expanded={open ? "true" : undefined}
+        /* eslint-enable i18next/no-literal-string */
         onClick={handleOpen}
         disabled={disabled}
         className={"toolbar-item " + style}

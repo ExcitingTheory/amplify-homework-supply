@@ -11,6 +11,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -51,7 +52,6 @@ interface WizardConfig {
   chapterOrder: number;
 }
 
-const STEPS = ["Get Started", "Configure", "Preview & Create"];
 const DEFAULT_TARGET_XP = 500;
 
 // ─── AI generation helper ────────────────────────────────────────────────────
@@ -119,6 +119,12 @@ export function CampaignSetupWizard({
   onClose,
   onCreated,
 }: CampaignSetupWizardProps) {
+  const t = useTranslations("components");
+  const steps = [
+    t("campaignSetupWizard.stepGetStarted"),
+    t("campaignSetupWizard.stepConfigure"),
+    t("campaignSetupWizard.stepPreview"),
+  ];
   const [activeStep, setActiveStep] = React.useState(0);
   const [config, setConfig] = React.useState<WizardConfig>({
     title: "",
@@ -163,7 +169,7 @@ export function CampaignSetupWizard({
         setting: result.setting || prev.setting,
       }));
     } catch {
-      setAiError("AI generation failed. You can fill in the details manually.");
+      setAiError(t("campaignSetupWizard.aiError"));
     } finally {
       setAiLoading(false);
     }
@@ -189,7 +195,7 @@ export function CampaignSetupWizard({
       onCreated?.(data.id);
       onClose();
     } catch (err: any) {
-      setSaveError(err?.message || "Failed to create campaign chapter.");
+      setSaveError(err?.message || t("campaignSetupWizard.saveError"));
     } finally {
       setSaving(false);
     }
@@ -211,14 +217,14 @@ export function CampaignSetupWizard({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <AutoStoriesIcon color="primary" />
           <Typography variant="h6" component="span" fontWeight={700}>
-            Campaign Narrative Setup
+            {t("campaignSetupWizard.title")}
           </Typography>
         </Box>
       </DialogTitle>
 
       <DialogContent>
         <Stepper activeStep={activeStep} sx={{ mb: 3 }}>
-          {STEPS.map((label) => (
+          {steps.map((label) => (
             <Step key={label}>
               <StepLabel>{label}</StepLabel>
             </Step>
@@ -229,15 +235,16 @@ export function CampaignSetupWizard({
         {activeStep === 0 && (
           <Box>
             <Typography variant="body1" gutterBottom>
-              Would you like to add a <strong>campaign narrative</strong> to{" "}
-              <strong>{sectionName}</strong>?
+              {t.rich("campaignSetupWizard.confirmQuestion", {
+                sectionName,
+                strong: (chunks) => <strong>{chunks}</strong>,
+              })}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              A campaign narrative wraps your assignments in an engaging story.
-              Students unlock chapters as they complete work and earn XP.
+              {t("campaignSetupWizard.confirmDescription")}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-              You can skip this now and add it later from the section settings.
+              {t("campaignSetupWizard.confirmSkipHint")}
             </Typography>
           </Box>
         )}
@@ -254,7 +261,9 @@ export function CampaignSetupWizard({
               disabled={aiLoading}
               sx={{ alignSelf: "flex-start" }}
             >
-              {aiLoading ? "Generating…" : "AI Suggest narrative"}
+              {aiLoading
+                ? t("campaignSetupWizard.generating")
+                : t("campaignSetupWizard.aiSuggest")}
             </Button>
             {aiError && (
               <Typography variant="caption" color="error">
@@ -262,7 +271,7 @@ export function CampaignSetupWizard({
               </Typography>
             )}
             <TextField
-              label="Chapter title"
+              label={t("campaignSetupWizard.chapterTitleLabel")}
               value={config.title}
               onChange={(e) =>
                 setConfig((p) => ({ ...p, title: e.target.value }))
@@ -270,10 +279,10 @@ export function CampaignSetupWizard({
               required
               fullWidth
               inputProps={{ maxLength: 100 }}
-              helperText='e.g. "Chapter 1: The Ancient Texts"'
+              helperText={t("campaignSetupWizard.chapterTitleHelper")}
             />
             <TextField
-              label="Setting / story context"
+              label={t("campaignSetupWizard.settingLabel")}
               value={config.setting}
               onChange={(e) =>
                 setConfig((p) => ({ ...p, setting: e.target.value }))
@@ -281,11 +290,11 @@ export function CampaignSetupWizard({
               multiline
               rows={3}
               fullWidth
-              helperText="2-3 sentences describing the narrative world. Students see this."
+              helperText={t("campaignSetupWizard.settingHelper")}
             />
             <Box sx={{ display: "flex", gap: 2 }}>
               <TextField
-                label="Target XP"
+                label={t("campaignSetupWizard.targetXpLabel")}
                 type="number"
                 value={config.targetXP}
                 onChange={(e) =>
@@ -297,10 +306,10 @@ export function CampaignSetupWizard({
                 required
                 sx={{ flex: 1 }}
                 inputProps={{ min: 1, step: 50 }}
-                helperText="XP students must earn to complete this chapter"
+                helperText={t("campaignSetupWizard.targetXpHelper")}
               />
               <TextField
-                label="Chapter order"
+                label={t("campaignSetupWizard.chapterOrderLabel")}
                 type="number"
                 value={config.chapterOrder}
                 onChange={(e) =>
@@ -314,7 +323,7 @@ export function CampaignSetupWizard({
                 }
                 sx={{ width: 130 }}
                 inputProps={{ min: 1, step: 1 }}
-                helperText="Display position — 1 is shown first"
+                helperText={t("campaignSetupWizard.chapterOrderHelper")}
               />
             </Box>
           </Box>
@@ -328,7 +337,7 @@ export function CampaignSetupWizard({
               color="text.secondary"
               sx={{ display: "block", mb: 1.5 }}
             >
-              This is how students will see the campaign briefing:
+              {t("campaignSetupWizard.previewIntro")}
             </Typography>
             <CampaignBriefing
               title={config.title}
@@ -346,7 +355,7 @@ export function CampaignSetupWizard({
             >
               <Box>
                 <Typography variant="caption" color="text.secondary">
-                  Target XP
+                  {t("campaignSetupWizard.targetXpLabel")}
                 </Typography>
                 <Typography variant="body2" fontWeight={700}>
                   {config.targetXP.toLocaleString()}
@@ -354,7 +363,7 @@ export function CampaignSetupWizard({
               </Box>
               <Box>
                 <Typography variant="caption" color="text.secondary">
-                  Chapter
+                  {t("campaignSetupWizard.chapterLabel")}
                 </Typography>
                 <Typography variant="body2" fontWeight={700}>
                   {config.chapterOrder}
@@ -378,28 +387,28 @@ export function CampaignSetupWizard({
         {activeStep === 0 && (
           <>
             <Button onClick={handleDecline} color="inherit">
-              Skip for now
+              {t("campaignSetupWizard.skip")}
             </Button>
             <Button
               variant="contained"
               onClick={() => setActiveStep(1)}
               startIcon={<AutoStoriesIcon />}
             >
-              Add narrative
+              {t("campaignSetupWizard.addNarrative")}
             </Button>
           </>
         )}
         {activeStep === 1 && (
           <>
             <Button onClick={() => setActiveStep(0)} color="inherit">
-              Back
+              {t("campaignSetupWizard.back")}
             </Button>
             <Button
               variant="contained"
               onClick={() => setActiveStep(2)}
               disabled={!isStep2Valid}
             >
-              Preview
+              {t("campaignSetupWizard.preview")}
             </Button>
           </>
         )}
@@ -410,7 +419,7 @@ export function CampaignSetupWizard({
               color="inherit"
               disabled={saving}
             >
-              Back
+              {t("campaignSetupWizard.back")}
             </Button>
             <Button
               variant="contained"
@@ -418,7 +427,9 @@ export function CampaignSetupWizard({
               disabled={saving}
               startIcon={saving ? <CircularProgress size={16} /> : undefined}
             >
-              {saving ? "Creating…" : "Create chapter"}
+              {saving
+                ? t("campaignSetupWizard.creating")
+                : t("campaignSetupWizard.createChapter")}
             </Button>
           </>
         )}

@@ -656,6 +656,7 @@ function useDraggableBlockMenu(
       </div>
       <div className="draggable-block-target-line" ref={targetLineRef}>
         {/* Zero-width space to prevent Storybook's div:empty:last-child rule from hiding this */}
+        {/* eslint-disable-line i18next/no-literal-string -- zero-width space, not user text */}
         &#8203;
       </div>
     </>,

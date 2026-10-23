@@ -96,8 +96,12 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Content-based key so a fresh array with the same keys doesn't refetch.
+  const submissionKeysSignature = JSON.stringify(submissionKeys);
+
   useEffect(() => {
-    if (!submissionKeys.length || !grade) {
+    const keys = JSON.parse(submissionKeysSignature);
+    if (!keys.length || !grade) {
       setLoading(false);
       return;
     }
@@ -111,7 +115,7 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
         const isInstructor = userGroups.includes('Instructors') || userGroups.includes('Admins');
         const isOwner = grade.owner === username;
 
-        const urlPromises = submissionKeys.map(async (key) => {
+        const urlPromises = keys.map(async (key) => {
           try {
             if (isOwner) {
               const directUrl = await getCachedUrl(key);
@@ -146,7 +150,7 @@ export function useStudentSubmissions({ submissionKeys = [], grade, userGroups =
     }
 
     fetchSubmissionUrls();
-  }, [JSON.stringify(submissionKeys), grade, userGroups]);
+  }, [submissionKeysSignature, grade, userGroups]);
 
   return { urls, loading, error };
 }

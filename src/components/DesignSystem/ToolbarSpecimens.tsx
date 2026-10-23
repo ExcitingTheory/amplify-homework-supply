@@ -57,7 +57,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import TimerIcon from "@mui/icons-material/Timer";
 import WifiTetheringIcon from "@mui/icons-material/WifiTethering";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import { useTranslations } from "next-intl";
 import { SEMANTIC_THEME } from "@/themes/semanticTheme";
+
+const BRAND_NAME = "Homework Supply";
+const SPECIMEN_FONT_NAME = "Inter";
 
 const vDivider = <Divider orientation="vertical" flexItem sx={{ mx: 0.5 }} />;
 
@@ -126,22 +130,23 @@ export function ToolbarStrip({
 
 /** Global navigation app bar — dashboard / list pages (single row). */
 export function DefaultAppBar() {
+  const t = useTranslations("components");
   return (
     <ToolbarStrip height={56}>
       <IconButton size="small">
         <MenuIcon />
       </IconButton>
       <Typography fontWeight={700} sx={{ mx: 1 }}>
-        Homework Supply
+        {BRAND_NAME}
       </Typography>
       <Button size="small" color="inherit">
-        Dashboard
+        {t("toolbarSpecimens.navDashboard")}
       </Button>
       <Button size="small" color="inherit">
-        Sections
+        {t("toolbarSpecimens.navSections")}
       </Button>
       <Button size="small" color="inherit">
-        Units
+        {t("toolbarSpecimens.navUnits")}
       </Button>
       <Box sx={{ flex: 1 }} />
       <Box
@@ -158,11 +163,15 @@ export function DefaultAppBar() {
       >
         <SearchIcon fontSize="small" sx={{ color: "text.secondary" }} />
         <Typography variant="body2" color="text.secondary">
-          Search…
+          {t("toolbarSpecimens.searchPlaceholder")}
         </Typography>
         <Chip size="small" label="⌘K" variant="outlined" />
       </Box>
-      <Chip size="small" icon={<EmojiEventsIcon />} label="1,240 XP" />
+      <Chip
+        size="small"
+        icon={<EmojiEventsIcon />}
+        label={t("toolbarSpecimens.sampleXp")}
+      />
       <Chip
         size="small"
         variant="outlined"
@@ -183,6 +192,7 @@ export function DefaultAppBar() {
 
 /** Full Lexical editor toolbar — every text/block/insert control (edit mode). */
 export function FullEditorToolbar() {
+  const t = useTranslations("components");
   return (
     <ToolbarStrip height={48} wrap>
       <IconButton size="small">
@@ -196,7 +206,7 @@ export function FullEditorToolbar() {
       </IconButton>
       {vDivider}
       <Button size="small" color="inherit" endIcon={<ArrowDropDownIcon />}>
-        Normal
+        {t("toolbarSpecimens.blockTypeNormal")}
       </Button>
       {vDivider}
       <Button
@@ -205,7 +215,7 @@ export function FullEditorToolbar() {
         startIcon={<FontDownloadIcon />}
         endIcon={<ArrowDropDownIcon />}
       >
-        Inter
+        {SPECIMEN_FONT_NAME}
       </Button>
       <Button
         size="small"
@@ -269,7 +279,7 @@ export function FullEditorToolbar() {
         startIcon={<FormatAlignLeftIcon />}
         endIcon={<ArrowDropDownIcon />}
       >
-        Align
+        {t("toolbarSpecimens.align")}
       </Button>
       <IconButton size="small">
         <FormatIndentDecreaseIcon />
@@ -285,7 +295,7 @@ export function FullEditorToolbar() {
         startIcon={<AddIcon />}
         endIcon={<ArrowDropDownIcon />}
       >
-        Insert
+        {t("toolbarSpecimens.insert")}
       </Button>
     </ToolbarStrip>
   );
@@ -354,6 +364,7 @@ export function FloatingSelectionToolbar() {
 
 /** Contextual app bar — workbook / editor pages (two rows). */
 export function ContextualAppBar() {
+  const t = useTranslations("components");
   return (
     <Box
       sx={{
@@ -381,7 +392,7 @@ export function ContextualAppBar() {
         </IconButton>
         <Box sx={{ minWidth: 0 }}>
           <Typography fontWeight={700} noWrap lineHeight={1.2}>
-            Chapter 3: Verb Conjugation
+            {t("toolbarSpecimens.sampleUnitTitle")}
           </Typography>
           <Typography
             variant="caption"
@@ -389,11 +400,15 @@ export function ContextualAppBar() {
             noWrap
             display="block"
           >
-            Practice conjugating regular -ar, -er, and -ir verbs.
+            {t("toolbarSpecimens.sampleUnitDescription")}
           </Typography>
         </Box>
         <Box sx={{ flex: 1 }} />
-        <Chip size="small" icon={<EmojiEventsIcon />} label="1,240 XP" />
+        <Chip
+          size="small"
+          icon={<EmojiEventsIcon />}
+          label={t("toolbarSpecimens.sampleXp")}
+        />
         <IconButton size="small">
           <Badge badgeContent={3} color="error">
             <NotificationsNoneIcon />
@@ -424,7 +439,7 @@ export function ContextualAppBar() {
         >
           <SearchIcon fontSize="small" sx={{ color: "text.secondary" }} />
           <Typography variant="body2" color="text.secondary">
-            Search this unit…
+            {t("toolbarSpecimens.searchUnitPlaceholder")}
           </Typography>
         </Box>
         <Box sx={{ flex: 1 }} />
@@ -434,7 +449,7 @@ export function ContextualAppBar() {
           variant="outlined"
           color="success"
           icon={<WifiTetheringIcon />}
-          label="Synced"
+          label={t("toolbarSpecimens.synced")}
           sx={{ mx: 0.5 }}
         />
         <Box sx={{ width: 120 }}>
@@ -447,13 +462,14 @@ export function ContextualAppBar() {
 
 /** Read-only workbook toolbar — slim primary row for the learner workbook. */
 export function ReadOnlyWorkbookToolbar() {
+  const t = useTranslations("components");
   return (
     <ToolbarStrip height={48}>
       <IconButton size="small">
         <ArrowBackIcon />
       </IconButton>
       <Typography fontWeight={600} sx={{ mx: 1 }}>
-        Chapter 3: Verb Conjugation
+        {t("toolbarSpecimens.sampleUnitTitle")}
       </Typography>
       <Box sx={{ flex: 1 }} />
       <Chip size="small" icon={<TimerIcon />} label="12:30" sx={{ mr: 1 }} />
@@ -469,39 +485,40 @@ export function ReadOnlyWorkbookToolbar() {
 
 /** All toolbar specimens laid out with titles + captions. */
 export function ToolbarSpecimens() {
+  const t = useTranslations("components");
   return (
     <Stack spacing={4}>
       <TitledStrip
-        title="Default app bar (single row)"
-        caption="Dashboard / list pages — nav, in-bar search, XP · streak · notifications · profile."
+        title={t("toolbarSpecimens.defaultAppBarTitle")}
+        caption={t("toolbarSpecimens.defaultAppBarCaption")}
       >
         <DefaultAppBar />
       </TitledStrip>
 
       <TitledStrip
-        title="Contextual app bar (two rows)"
-        caption="Workbook / editor pages — primary row (title + description + actions) with a second contextual row (search, timer, connection, progress) injected via useSecondaryToolbar."
+        title={t("toolbarSpecimens.contextualAppBarTitle")}
+        caption={t("toolbarSpecimens.contextualAppBarCaption")}
       >
         <ContextualAppBar />
       </TitledStrip>
 
       <TitledStrip
-        title="Full editor toolbar (block editing mode)"
-        caption="Lexical ToolBarPlugin — every text, block, alignment, color, and insert control."
+        title={t("toolbarSpecimens.fullEditorToolbarTitle")}
+        caption={t("toolbarSpecimens.fullEditorToolbarCaption")}
       >
         <FullEditorToolbar />
       </TitledStrip>
 
       <TitledStrip
-        title="Floating selection toolbar"
-        caption="FloatingToolbarPlugin — the compact popover that appears over selected text."
+        title={t("toolbarSpecimens.floatingToolbarTitle")}
+        caption={t("toolbarSpecimens.floatingToolbarCaption")}
       >
         <FloatingSelectionToolbar />
       </TitledStrip>
 
       <TitledStrip
-        title="Read-only workbook toolbar"
-        caption="ToolBarRoPlugin — slim primary row for the learner workbook."
+        title={t("toolbarSpecimens.readOnlyToolbarTitle")}
+        caption={t("toolbarSpecimens.readOnlyToolbarCaption")}
       >
         <ReadOnlyWorkbookToolbar />
       </TitledStrip>

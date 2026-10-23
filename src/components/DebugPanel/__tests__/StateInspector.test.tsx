@@ -8,6 +8,12 @@ import '@testing-library/jest-dom';
 import { StateInspector } from '../StateInspector';
 import { StateSnapshot } from '../../../utils/debug/StateSnapshot';
 
+// Keep interpolated counts observable: render "key(value,...)" when values are passed.
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}(${Object.values(values).join(',')})` : key,
+}));
+
 const mockSnapshot: StateSnapshot = {
   timestamp: new Date().toISOString(),
   version: '1.0.0',
@@ -53,13 +59,13 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText('Environment')).toBeInTheDocument();
-    expect(screen.getByText(/Local Storage/)).toBeInTheDocument();
-    expect(screen.getByText(/Session Storage/)).toBeInTheDocument();
-    expect(screen.getByText(/Component Tree/)).toBeInTheDocument();
-    expect(screen.getByText(/Logs/)).toBeInTheDocument();
-    expect(screen.getByText('DataStore Models')).toBeInTheDocument();
-    expect(screen.getByText('Performance Metrics')).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.environment')).toBeInTheDocument();
+    expect(screen.getByText(/stateInspector\.localStorage/)).toBeInTheDocument();
+    expect(screen.getByText(/stateInspector\.sessionStorage/)).toBeInTheDocument();
+    expect(screen.getByText(/stateInspector\.componentTree/)).toBeInTheDocument();
+    expect(screen.getByText(/stateInspector\.logs/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.dataStoreModels')).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.performanceMetrics')).toBeInTheDocument();
   });
 
   it('calls onRefresh when refresh button clicked', () => {
@@ -72,7 +78,7 @@ describe('StateInspector', () => {
       />
     );
 
-    const refreshButton = screen.getByLabelText('Refresh snapshot');
+    const refreshButton = screen.getByLabelText('stateInspector.refreshSnapshot');
     fireEvent.click(refreshButton);
 
     expect(onRefresh).toHaveBeenCalled();
@@ -88,7 +94,7 @@ describe('StateInspector', () => {
       />
     );
 
-    const exportButton = screen.getByLabelText('Export snapshot');
+    const exportButton = screen.getByLabelText('stateInspector.exportSnapshot');
     fireEvent.click(exportButton);
 
     expect(onExport).toHaveBeenCalledWith(mockSnapshot);
@@ -103,11 +109,11 @@ describe('StateInspector', () => {
       />
     );
 
-    const environmentSection = screen.getByText('Environment');
+    const environmentSection = screen.getByText('stateInspector.environment');
     fireEvent.click(environmentSection);
 
     // Content should be visible after expansion (already defaultExpanded)
-    expect(screen.getByText(/User Agent:/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.userAgentLabel')).toBeInTheDocument();
   });
 
   it('displays component count badge', () => {
@@ -119,7 +125,7 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText(/Component Tree \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.componentTree(1)')).toBeInTheDocument();
   });
 
   it('displays localStorage count badge', () => {
@@ -131,7 +137,7 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText(/Local Storage \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.localStorage(1)')).toBeInTheDocument();
   });
 
   it('handles empty localStorage gracefully', () => {
@@ -148,7 +154,7 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText(/Local Storage \(0\)/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.localStorage(0)')).toBeInTheDocument();
   });
 
   it('handles empty componentTree gracefully', () => {
@@ -165,7 +171,7 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText(/Component Tree \(0\)/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.componentTree(0)')).toBeInTheDocument();
   });
 
   it('displays error count when present', () => {
@@ -184,6 +190,6 @@ describe('StateInspector', () => {
       />
     );
 
-    expect(screen.getByText(/Errors \(1\)/)).toBeInTheDocument();
+    expect(screen.getByText('stateInspector.errors(1)')).toBeInTheDocument();
   });
 });

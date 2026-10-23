@@ -11,6 +11,7 @@
  */
 
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import LinearProgress from "@mui/material/LinearProgress";
@@ -62,6 +63,7 @@ export function SectionXPGauge({
   onApplyTuning,
   showTuner = true,
 }: SectionXPGaugeProps) {
+  const t = useTranslations("components");
   const maxLevel = desiredMaxLevel ?? xpConfig?.levelConfig?.maxLevel ?? 6;
 
   const projection = useMemo(
@@ -92,10 +94,10 @@ export function SectionXPGauge({
       <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
         <AutoStoriesIcon color="primary" fontSize="small" />
         <Typography variant="subtitle2" fontWeight={700}>
-          Section XP Projection
+          {t("sectionXPGauge.title")}
         </Typography>
         <Chip
-          label={`${unitCount} unit${unitCount !== 1 ? "s" : ""}`}
+          label={t("sectionXPGauge.unitCount", { count: unitCount })}
           size="small"
           variant="outlined"
         />
@@ -105,10 +107,13 @@ export function SectionXPGauge({
       <Box sx={{ mb: 2 }}>
         <Box sx={{ display: "flex", justifyContent: "space-between", mb: 0.5 }}>
           <Typography variant="caption" color="text.secondary">
-            Max XP from assignments
+            {t("sectionXPGauge.maxAssignmentXp")}
           </Typography>
           <Typography variant="caption" fontWeight={700}>
-            {projection.totalAssignmentXP} / {maxThresholdXP} XP
+            {t("sectionXPGauge.xpProgress", {
+              current: projection.totalAssignmentXP,
+              max: maxThresholdXP,
+            })}
           </Typography>
         </Box>
         <LinearProgress
@@ -130,7 +135,7 @@ export function SectionXPGauge({
           color="text.secondary"
           sx={{ mt: 0.5, display: "block" }}
         >
-          {projection.perUnitXP.total} XP per unit (perfect completion)
+          {t("sectionXPGauge.perUnitXp", { xp: projection.perUnitXP.total })}
         </Typography>
       </Box>
 
@@ -140,7 +145,7 @@ export function SectionXPGauge({
         fontWeight={700}
         sx={{ mb: 1, display: "block" }}
       >
-        Level Reachability
+        {t("sectionXPGauge.levelReachability")}
       </Typography>
       <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75, mb: 2 }}>
         {projection.levelGaps.map((gap) => (
@@ -175,18 +180,21 @@ export function SectionXPGauge({
               variant="caption"
               sx={{ minWidth: 40, fontWeight: 700 }}
             >
-              Lv.{gap.level}
+              {t("sectionXPGauge.levelShort", { level: gap.level })}
             </Typography>
             <Typography
               variant="caption"
               color="text.secondary"
               sx={{ flex: 1 }}
             >
-              {gap.label} — {gap.xpRequired} XP
+              {t("sectionXPGauge.levelRequirement", {
+                label: gap.label,
+                xp: gap.xpRequired,
+              })}
             </Typography>
             {gap.reachableFromAssignments ? (
               <Chip
-                label="Assignments"
+                label={t("sectionXPGauge.assignmentsChip")}
                 size="small"
                 color="success"
                 variant="outlined"
@@ -194,13 +202,18 @@ export function SectionXPGauge({
               />
             ) : (
               <Tooltip
-                title={`${gap.xpDeficit} XP deficit → ~${gap.drillSessionsNeeded} drill sessions (1/day optimal)`}
+                title={t("sectionXPGauge.deficitTooltip", {
+                  deficit: gap.xpDeficit,
+                  sessions: gap.drillSessionsNeeded,
+                })}
               >
                 <Chip
                   icon={
                     <FitnessCenterIcon sx={{ fontSize: "0.7rem !important" }} />
                   }
-                  label={`+${gap.drillSessionsNeeded} drills`}
+                  label={t("sectionXPGauge.drillsChip", {
+                    count: gap.drillSessionsNeeded,
+                  })}
                   size="small"
                   color="warning"
                   variant="outlined"
@@ -218,18 +231,19 @@ export function SectionXPGauge({
           severity="info"
           sx={{ mb: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}
         >
-          Students can reach{" "}
-          <strong>Level {projection.maxLevelFromAssignments.level}</strong> from
-          assignments alone. Levels{" "}
-          {projection.maxLevelFromAssignments.level + 1}–{maxLevel} require
-          practice drills.
+          {t.rich("sectionXPGauge.partialReach", {
+            level: projection.maxLevelFromAssignments.level,
+            nextLevel: projection.maxLevelFromAssignments.level + 1,
+            maxLevel,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </Alert>
       ) : (
         <Alert
           severity="success"
           sx={{ mb: 2, "& .MuiAlert-message": { fontSize: "0.75rem" } }}
         >
-          All {maxLevel} levels are achievable from assignments alone!
+          {t("sectionXPGauge.fullReach", { maxLevel })}
         </Alert>
       )}
 
@@ -240,7 +254,7 @@ export function SectionXPGauge({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
             <TuneIcon fontSize="small" color="secondary" />
             <Typography variant="caption" fontWeight={700}>
-              Auto-Tune Suggestion
+              {t("sectionXPGauge.autoTuneTitle")}
             </Typography>
           </Box>
           <Typography
@@ -258,8 +272,10 @@ export function SectionXPGauge({
               onClick={() => onApplyTuning(tuning.recommendedConfig)}
               sx={{ textTransform: "none", fontSize: "0.75rem" }}
             >
-              Apply Balanced Config (base={tuning.recommendedConfig.xpPerLevel},
-              scale={tuning.recommendedConfig.levelScaling}×)
+              {t("sectionXPGauge.applyConfig", {
+                base: tuning.recommendedConfig.xpPerLevel,
+                scale: tuning.recommendedConfig.levelScaling,
+              })}
             </Button>
           )}
         </>

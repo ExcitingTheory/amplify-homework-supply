@@ -32,6 +32,15 @@ import { getAmplifyClient } from "../../utils/amplifyClient";
 /**
  * Highlight search terms in text
  */
+const RESULT_SECTIONS = {
+  files: "files",
+  words: "words",
+  questions: "questions",
+  sections: "sections",
+  units: "units",
+  assignments: "assignments",
+};
+
 const highlightMatches = (text, searchTerm) => {
   if (!searchTerm || !text) return text;
 
@@ -503,7 +512,9 @@ export default function SearchResults({
               </Typography>
               {file.page && (
                 <Chip
-                  label={`Page ${file.page}`}
+                  label={t("chatSidebar.searchResults.page", {
+                    page: file.page,
+                  })}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -846,7 +857,9 @@ export default function SearchResults({
         {/* Answer */}
         {question.answer && (
           <TruncatedText
-            text={`**Answer:** ${question.answer}`}
+            text={t("chatSidebar.searchResults.answerMarkdown", {
+              answer: question.answer,
+            })}
             maxLength={150}
             variant="body2"
             searchTerm={searchQuery}
@@ -931,7 +944,9 @@ export default function SearchResults({
               </Typography>
               {section.joinCode && (
                 <Chip
-                  label={`Code: ${section.joinCode}`}
+                  label={t("chatSidebar.searchResults.joinCode", {
+                    code: section.joinCode,
+                  })}
                   size="small"
                   variant="outlined"
                   sx={{
@@ -1049,7 +1064,7 @@ export default function SearchResults({
               </Typography>
               {unit.published && (
                 <Chip
-                  label="Published"
+                  label={t("chatSidebar.searchResults.published")}
                   size="small"
                   color="success"
                   variant="outlined"
@@ -1136,21 +1151,29 @@ export default function SearchResults({
               variant="body1"
               sx={{ fontWeight: 600, wordBreak: "break-word" }}
             >
-              {assignment.name || assignment.title || "Assignment"}
+              {assignment.name ||
+                assignment.title ||
+                t("chatSidebar.searchResults.assignmentFallback")}
             </Typography>
             {assignment.unitName && (
               <Typography variant="body2" color="text.secondary">
-                Unit: {assignment.unitName}
+                {t("chatSidebar.searchResults.assignmentUnit", {
+                  name: assignment.unitName,
+                })}
               </Typography>
             )}
             {assignment.sectionName && (
               <Typography variant="body2" color="text.secondary">
-                Section: {assignment.sectionName}
+                {t("chatSidebar.searchResults.assignmentSection", {
+                  name: assignment.sectionName,
+                })}
               </Typography>
             )}
             {assignment.dueDate && (
               <Typography variant="caption" color="text.secondary">
-                Due {new Date(assignment.dueDate).toLocaleDateString()}
+                {t("chatSidebar.searchResults.assignmentDue", {
+                  date: new Date(assignment.dueDate).toLocaleDateString(),
+                })}
               </Typography>
             )}
           </Box>
@@ -1158,7 +1181,7 @@ export default function SearchResults({
         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
           <RelevanceScore similarity={assignment.similarity} />
           {(assignment.sectionId || assignment.unitId) && (
-            <Tooltip title="Open linked record">
+            <Tooltip title={t("chatSidebar.searchResults.openLinkedRecord")}>
               <IconButton
                 size="small"
                 onClick={() => handleOpenAssignment(assignment)}
@@ -1253,7 +1276,7 @@ export default function SearchResults({
             count={fileResults.length}
             color="primary"
             expanded={expandedSections.files}
-            onToggle={() => toggleSection("files")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.files)}
           />
           <Collapse in={expandedSections.files} timeout={300}>
             <Box
@@ -1272,7 +1295,7 @@ export default function SearchResults({
             count={wordResults.length}
             color="secondary"
             expanded={expandedSections.words}
-            onToggle={() => toggleSection("words")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.words)}
           />
           <Collapse in={expandedSections.words} timeout={300}>
             <Box
@@ -1291,7 +1314,7 @@ export default function SearchResults({
             count={questionResults.length}
             color="info"
             expanded={expandedSections.questions}
-            onToggle={() => toggleSection("questions")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.questions)}
           />
           <Collapse in={expandedSections.questions} timeout={300}>
             <Box
@@ -1310,7 +1333,7 @@ export default function SearchResults({
             count={sectionResults.length}
             color="secondary"
             expanded={expandedSections.sections}
-            onToggle={() => toggleSection("sections")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.sections)}
           />
           <Collapse in={expandedSections.sections} timeout={300}>
             <Box
@@ -1329,7 +1352,7 @@ export default function SearchResults({
             count={unitResults.length}
             color="primary"
             expanded={expandedSections.units}
-            onToggle={() => toggleSection("units")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.units)}
           />
           <Collapse in={expandedSections.units} timeout={300}>
             <Box
@@ -1344,11 +1367,11 @@ export default function SearchResults({
       {assignmentResults.length > 0 && (
         <Box>
           <SectionHeader
-            title="Assignments"
+            title={t("chatSidebar.searchResults.sections.assignments")}
             count={assignmentResults.length}
             color="warning"
             expanded={expandedSections.assignments !== false}
-            onToggle={() => toggleSection("assignments")}
+            onToggle={() => toggleSection(RESULT_SECTIONS.assignments)}
           />
           <Collapse in={expandedSections.assignments !== false} timeout={300}>
             <Box

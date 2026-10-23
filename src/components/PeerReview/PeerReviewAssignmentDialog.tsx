@@ -13,6 +13,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -77,6 +78,7 @@ export function PeerReviewAssignmentDialog({
   units,
   onAssign,
 }: PeerReviewAssignmentDialogProps) {
+  const t = useTranslations('components')
   const [selectedGradeId, setSelectedGradeId] = useState<string>('')
   const [selectedReviewers, setSelectedReviewers] = useState<string[]>([])
   const [submitting, setSubmitting] = useState(false)
@@ -109,7 +111,7 @@ export function PeerReviewAssignmentDialog({
 
   const handleSubmit = async () => {
     if (!selectedGradeId || selectedReviewers.length === 0) {
-      setError('Select a grade and at least one reviewer.')
+      setError(t('peerReviewAssignmentDialog.selectionRequired'))
       return
     }
     if (!selectedGrade) return
@@ -121,7 +123,7 @@ export function PeerReviewAssignmentDialog({
       await onAssign(selectedGradeId, selectedGrade.owner, selectedReviewers)
       handleClose()
     } catch (err: any) {
-      setError(err?.message || 'Failed to assign peer review')
+      setError(err?.message || t('peerReviewAssignmentDialog.assignFailed'))
     } finally {
       setSubmitting(false)
     }
@@ -139,22 +141,23 @@ export function PeerReviewAssignmentDialog({
     <Dialog open={open} onClose={handleClose} maxWidth="sm" fullWidth>
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
         <RateReviewIcon color="primary" />
-        Assign Peer Review
+        {t('peerReviewAssignmentDialog.title')}
       </DialogTitle>
 
       <DialogContent>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-          Select a student&apos;s completed homework and choose who will review it.
-          A review room will be created and the reviewer(s) will be invited.
+          {t('peerReviewAssignmentDialog.description')}
         </Typography>
 
         {/* Grade (homework) selector */}
         <FormControl fullWidth sx={{ mb: 3 }}>
-          <InputLabel id="grade-select-label">Student&apos;s Homework</InputLabel>
+          <InputLabel id="grade-select-label">
+            {t('peerReviewAssignmentDialog.homeworkLabel')}
+          </InputLabel>
           <Select
             labelId="grade-select-label"
             value={selectedGradeId}
-            label="Student's Homework"
+            label={t('peerReviewAssignmentDialog.homeworkLabel')}
             onChange={(e) => handleGradeChange(e.target.value)}
           >
             {grades.map((grade) => {
@@ -183,12 +186,14 @@ export function PeerReviewAssignmentDialog({
         {/* Reviewer(s) selector — multi-select checkboxes */}
         {selectedGradeId && (
           <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="reviewer-select-label">Reviewer(s)</InputLabel>
+            <InputLabel id="reviewer-select-label">
+              {t('peerReviewAssignmentDialog.reviewersLabel')}
+            </InputLabel>
             <Select
               labelId="reviewer-select-label"
               multiple
               value={selectedReviewers}
-              input={<OutlinedInput label="Reviewer(s)" />}
+              input={<OutlinedInput label={t('peerReviewAssignmentDialog.reviewersLabel')} />}
               renderValue={(selected) => (
                 <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
                   {selected.map((id) => {
@@ -219,7 +224,7 @@ export function PeerReviewAssignmentDialog({
 
       <DialogActions>
         <Button onClick={handleClose} disabled={submitting}>
-          Cancel
+          {t('peerReviewAssignmentDialog.cancel')}
         </Button>
         <Button
           variant="contained"
@@ -227,7 +232,9 @@ export function PeerReviewAssignmentDialog({
           disabled={submitting || !selectedGradeId || selectedReviewers.length === 0}
           startIcon={submitting ? <CircularProgress size={16} /> : <RateReviewIcon />}
         >
-          {submitting ? 'Assigning…' : 'Assign Review'}
+          {submitting
+            ? t('peerReviewAssignmentDialog.assigning')
+            : t('peerReviewAssignmentDialog.assignReview')}
         </Button>
       </DialogActions>
     </Dialog>

@@ -63,23 +63,24 @@ describe("LeaderboardTable", () => {
 
   it("renders top entries with rank badges", () => {
     render(<LeaderboardTable entries={entries} currentStudentId="s5" />);
-    expect(screen.getByLabelText("Rank 1")).toBeDefined();
-    expect(screen.getByLabelText("Rank 2")).toBeDefined();
-    expect(screen.getByLabelText("Rank 3")).toBeDefined();
+    expect(
+      screen.getAllByLabelText("leaderboardTable.rankAriaLabel"),
+    ).toHaveLength(3);
   });
 
   it("renders column headers", () => {
     render(<LeaderboardTable entries={entries} currentStudentId="s1" />);
     expect(screen.getByText("#")).toBeDefined();
-    expect(screen.getByText("Student")).toBeDefined();
+    expect(screen.getByText("leaderboardTable.studentHeader")).toBeDefined();
     expect(screen.getByText("XP")).toBeDefined();
-    expect(screen.getByText("Lvl")).toBeDefined();
-    expect(screen.getByText("Streak")).toBeDefined();
+    expect(screen.getByText("leaderboardTable.levelHeader")).toBeDefined();
+    expect(screen.getByText("leaderboardTable.streakHeader")).toBeDefined();
   });
 
   it("marks the current user with (You)", () => {
     render(<LeaderboardTable entries={entries} currentStudentId="s1" />);
-    expect(screen.getByText("Maria Garcia (You)")).toBeDefined();
+    expect(screen.getByText("leaderboardTable.currentUserName")).toBeDefined();
+    expect(screen.queryByText("Maria Garcia")).toBeNull();
   });
 
   it("shows gap indicator when current user is below topN", () => {
@@ -87,12 +88,13 @@ describe("LeaderboardTable", () => {
       <LeaderboardTable entries={entries} currentStudentId="s6" topN={3} />,
     );
     expect(screen.getByText("···")).toBeDefined();
-    expect(screen.getByText("Bob Smith (You)")).toBeDefined();
+    expect(screen.getByText("leaderboardTable.currentUserName")).toBeDefined();
+    expect(screen.queryByText("Bob Smith")).toBeNull();
   });
 
   it("shows streak fire icon for active streaks", () => {
     render(<LeaderboardTable entries={entries} currentStudentId="s1" />);
-    expect(screen.getByText("🔥 12d")).toBeDefined();
+    expect(screen.getAllByText("leaderboardTable.streakDays")).toHaveLength(5);
   });
 
   it("shows dash for zero streak", () => {
@@ -164,9 +166,13 @@ describe("CompletionGrid", () => {
         currentStudentId="s1"
       />,
     );
-    const completedChips = screen.getAllByText("Completed");
+    const completedChips = screen.getAllByText(
+      "completionGrid.statusCompleted",
+    );
     expect(completedChips.length).toBe(3); // 2 for Maria + 1 for James
-    expect(screen.getByText("In Progress")).toBeDefined();
-    expect(screen.getAllByText("Not Started").length).toBe(2); // James hw2 + hw3
+    expect(screen.getByText("completionGrid.statusInProgress")).toBeDefined();
+    expect(screen.getAllByText("completionGrid.statusNotStarted").length).toBe(
+      2,
+    ); // James hw2 + hw3
   });
 });

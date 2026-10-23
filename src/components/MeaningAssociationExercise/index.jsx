@@ -84,7 +84,7 @@ function dropTargetSx(theme, { isActive, canDrop, isMatched = false }) {
 
 export function LinearProgressWithLabel(props) {
   return (
-    <Box display="flex" alignItems="center">
+    <Box sx={{ display: "flex", alignItems: "center" }}>
       <Box flex={1}>
         <LinearProgress variant="determinate" {...props} />
       </Box>
@@ -602,9 +602,12 @@ export function getNextMeaningMode(mode, availableModes) {
     : null;
 }
 
-function modeLabel(mode) {
-  return mode.charAt(0).toUpperCase() + mode.slice(1);
+// Resolved lazily: Easy/Hard/Learn import from this module, so their bindings
+// may not be initialized yet when this module body first evaluates.
+function getModeComponent(mode) {
+  return { learn: Learn, easy: Easy, hard: Hard }[mode];
 }
+const MEANING_ASSOCIATION_BLOCK_TYPE = "meaning-association";
 
 const MeaningAssociationTabs = ({
   nodeKey,
@@ -680,9 +683,12 @@ const MeaningAssociationTabs = ({
   };
 
   // Check completion status for each mode
-  const learnComplete = inProgress?.learn?.complete || false;
-  const easyComplete = inProgress?.easy?.complete || false;
-  const hardComplete = inProgress?.hard?.complete || false;
+  const modeComplete = Object.fromEntries(
+    MEANING_MODE_ORDER.map((mode) => [
+      mode,
+      inProgress?.[mode]?.complete || false,
+    ]),
+  );
   const modeProgress = availableModes.map(
     (mode) => liveModeProgress[mode] || inProgress?.[mode] || {},
   );
@@ -714,7 +720,7 @@ const MeaningAssociationTabs = ({
 
   return (
     <ExerciseBlockCard
-      blockType="meaning-association"
+      blockType={MEANING_ASSOCIATION_BLOCK_TYPE}
       accuracy={overallAccuracy}
       graded={allEnabledModesComplete}
       sx={{
@@ -731,8 +737,12 @@ const MeaningAssociationTabs = ({
         percentComplete={overallProgress}
         accuracy={overallAccuracy}
         hasAttempts={totalAttempts > 0}
-        progressDescription="Average completion across enabled practice modes."
-        accuracyDescription="Accuracy across attempts in enabled practice modes."
+        progressDescription={t(
+          "meaningAssociationExercise.progressDescription",
+        )}
+        accuracyDescription={t(
+          "meaningAssociationExercise.accuracyDescription",
+        )}
       />
       <Box
         sx={{
@@ -760,13 +770,14 @@ const MeaningAssociationTabs = ({
             },
           }}
         >
-          {availableModes.includes("learn") && (
+          {availableModes.map((mode) => (
             <Tab
-              value="learn"
+              key={mode}
+              value={mode}
               label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  Learn
-                  {learnComplete && (
+                <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                  {t(`meaningAssociationExercise.modes.${mode}`)}
+                  {modeComplete[mode] && (
                     <CheckCircleIcon
                       style={{
                         fontSize: "1rem",
@@ -776,101 +787,35 @@ const MeaningAssociationTabs = ({
                   )}
                 </Box>
               }
-              {...a11yProps("learn")}
+              {...a11yProps(mode)}
             />
-          )}
-          {availableModes.includes("easy") && (
-            <Tab
-              value="easy"
-              label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  Easy
-                  {easyComplete && (
-                    <CheckCircleIcon
-                      style={{
-                        fontSize: "1rem",
-                        color: "var(--mui-palette-success-main, #4caf50)",
-                      }}
-                    />
-                  )}
-                </Box>
-              }
-              {...a11yProps("easy")}
-            />
-          )}
-          {availableModes.includes("hard") && (
-            <Tab
-              value="hard"
-              label={
-                <Box display="flex" alignItems="center" gap={1}>
-                  Hard
-                  {hardComplete && (
-                    <CheckCircleIcon
-                      style={{
-                        fontSize: "1rem",
-                        color: "var(--mui-palette-success-main, #4caf50)",
-                      }}
-                    />
-                  )}
-                </Box>
-              }
-              {...a11yProps("hard")}
-            />
-          )}
+          ))}
         </Tabs>
       </Box>
       <DndWrapper>
-        {availableModes.includes("learn") && (
-          <TabPanel value={activeMode} index="learn">
-            <Learn
-              nodeKey={nodeKey}
-              setTabIndex={setActiveMode}
-              tabIndex={activeMode}
-              wordIDs={wordIDs}
-              enabledModes={availableModes}
-              nextMode={nextModeAfter("learn")}
-              nextModeLabel={modeLabel(nextModeAfter("learn") || "learn")}
-              onProgressChange={handleModeProgressChange}
-              promptFor={promptFor}
-              showAudio={showAudio}
-              showPronunciation={showPronunciation}
-            />
-          </TabPanel>
-        )}
-        {availableModes.includes("easy") && (
-          <TabPanel value={activeMode} index="easy">
-            <Easy
-              nodeKey={nodeKey}
-              setTabIndex={setActiveMode}
-              tabIndex={activeMode}
-              wordIDs={wordIDs}
-              enabledModes={availableModes}
-              nextMode={nextModeAfter("easy")}
-              nextModeLabel={modeLabel(nextModeAfter("easy") || "easy")}
-              onProgressChange={handleModeProgressChange}
-              promptFor={promptFor}
-              showAudio={showAudio}
-              showPronunciation={showPronunciation}
-            />
-          </TabPanel>
-        )}
-        {availableModes.includes("hard") && (
-          <TabPanel value={activeMode} index="hard">
-            <Hard
-              nodeKey={nodeKey}
-              setTabIndex={setActiveMode}
-              tabIndex={activeMode}
-              wordIDs={wordIDs}
-              enabledModes={availableModes}
-              nextMode={nextModeAfter("hard")}
-              nextModeLabel={modeLabel(nextModeAfter("hard") || "hard")}
-              onProgressChange={handleModeProgressChange}
-              promptFor={promptFor}
-              showAudio={showAudio}
-              showPronunciation={showPronunciation}
-            />
-          </TabPanel>
-        )}
+        {availableModes.map((mode) => {
+          const ModeComponent = getModeComponent(mode);
+          const nextMode = nextModeAfter(mode);
+          return (
+            <TabPanel key={mode} value={activeMode} index={mode}>
+              <ModeComponent
+                nodeKey={nodeKey}
+                setTabIndex={setActiveMode}
+                tabIndex={activeMode}
+                wordIDs={wordIDs}
+                enabledModes={availableModes}
+                nextMode={nextMode}
+                nextModeLabel={t(
+                  `meaningAssociationExercise.modes.${nextMode || mode}`,
+                )}
+                onProgressChange={handleModeProgressChange}
+                promptFor={promptFor}
+                showAudio={showAudio}
+                showPronunciation={showPronunciation}
+              />
+            </TabPanel>
+          );
+        })}
       </DndWrapper>
     </ExerciseBlockCard>
   );

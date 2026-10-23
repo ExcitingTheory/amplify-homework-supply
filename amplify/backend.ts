@@ -14,7 +14,12 @@ import { Policy, PolicyStatement, ServicePrincipal } from "aws-cdk-lib/aws-iam";
 import { CfnDataSource } from "aws-cdk-lib/aws-appsync";
 import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
+import * as logs from "aws-cdk-lib/aws-logs";
+import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
+import { Alarm, ComparisonOperator } from "aws-cdk-lib/aws-cloudwatch";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
+import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import { Stream, StreamEncryption } from "aws-cdk-lib/aws-kinesis";
 import { KinesisEventSource } from "aws-cdk-lib/aws-lambda-event-sources";
 import { StartingPosition } from "aws-cdk-lib/aws-lambda";
@@ -27,6 +32,7 @@ import { suggestBlocksStreamHandler } from "./functions/suggestBlocksStream/reso
 import { openaiHandler } from "./functions/openai/resource";
 import { sectionHandler } from "./functions/section/resource";
 import { documentAnalysisHandler } from "./functions/documentAnalysis/resource";
+import { documentAnalysisWorkflowHandler } from "./functions/documentAnalysisWorkflow/resource";
 import { embeddingsHandler } from "./functions/embeddings/resource";
 
 import { moderationHandler } from "./functions/moderation/resource";
@@ -80,6 +86,7 @@ export const backend = defineBackend({
   openaiHandler,
   sectionHandler,
   documentAnalysisHandler,
+  documentAnalysisWorkflowHandler,
   embeddingsHandler,
   moderationHandler,
   mediaConvertHandler,
@@ -101,6 +108,21 @@ export const backend = defineBackend({
 
 const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
 const apiId = backend.data.resources.cfnResources.cfnGraphqlApi.attrApiId;
+const documentAnalysisLimiterTable = new dynamodb.Table(
+  dataStack,
+  "DocumentAnalysisProviderRateLimiter",
+  {
+    partitionKey: {
+      name: "id",
+      type: dynamodb.AttributeType.STRING,
+    },
+    billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
+    encryption: dynamodb.TableEncryption.AWS_MANAGED,
+    pointInTimeRecovery: true,
+    timeToLiveAttribute: "expiresAt",
+    removalPolicy: cdk.RemovalPolicy.RETAIN,
+  },
+);
 
 // Tag every resource in every stack of this app (Tags.of on the App root
 // cascades to all child stacks/constructs) so deployed AWS resources can be
@@ -465,6 +487,527 @@ backend.documentAnalysisHandler.resources.lambda.role?.attachInlinePolicy(
   documentAnalysisAppSyncPolicy,
 );
 
+backend.documentAnalysisHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects("protected/*"),
+    ],
+  }),
+);
+backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects(
+        "private/*/documents/*",
+      ),
+      backend.storage.resources.bucket.arnForObjects(
+        "protected/*/pending-media/*",
+      ),
+      backend.storage.resources.bucket.arnForObjects("protected/*/files/*"),
+    ],
+  }),
+);
+backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:DeleteObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects(
+        "protected/*/pending-media/*",
+      ),
+    ],
+  }),
+);
+
+const workflowLambda = backend.documentAnalysisWorkflowHandler.resources.lambda;
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "DOCUMENT_ANALYSIS_LIMITER_TABLE",
+  documentAnalysisLimiterTable.tableName,
+);
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "DOCUMENT_ANALYSIS_DEMO_MODE",
+  process.env.DOCUMENT_ANALYSIS_DEMO_MODE === "true" ? "true" : "false",
+);
+documentAnalysisLimiterTable.grantReadWriteData(workflowLambda);
+
+const workflowAppSyncPolicy = new Policy(
+  workflowLambda.stack,
+  "DocumentAnalysisWorkflowAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+workflowLambda.role?.attachInlinePolicy(workflowAppSyncPolicy);
+workflowLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects("public/*"),
+      backend.storage.resources.bucket.arnForObjects("protected/*"),
+      backend.storage.resources.bucket.arnForObjects("private/*"),
+    ],
+  }),
+);
+// Without s3:ListBucket, S3 reports a missing object as AccessDenied instead of
+// NoSuchKey, which breaks the aggregate step's "page result not found" handling.
+workflowLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:ListBucket"],
+    resources: [backend.storage.resources.bucket.bucketArn],
+  }),
+);
+workflowLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects(
+        "private/*/documents/*/analysis/*",
+      ),
+      backend.storage.resources.bucket.arnForObjects(
+        "private/*/documents/*/extracted-text.txt",
+      ),
+      backend.storage.resources.bucket.arnForObjects(
+        "protected/*/pending-media/*",
+      ),
+    ],
+  }),
+);
+workflowLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObjectTagging"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects(
+        "private/*/documents/*/analysis/*",
+      ),
+    ],
+  }),
+);
+
+const workflowInvoke = (
+  id: string,
+  workflowMode: string,
+  fields: Record<string, unknown> = {},
+) =>
+  new tasks.LambdaInvoke(dataStack, id, {
+    lambdaFunction: workflowLambda,
+    payload: sfn.TaskInput.fromObject({
+      workflowMode,
+      runId: sfn.JsonPath.stringAt("$.runId"),
+      documentId: sfn.JsonPath.stringAt("$.documentId"),
+      fileId: sfn.JsonPath.stringAt("$.fileId"),
+      identityId: sfn.JsonPath.stringAt("$.identityId"),
+      s3Key: sfn.JsonPath.stringAt("$.s3Key"),
+      profile: sfn.JsonPath.stringAt("$.profile"),
+      executionArn: sfn.JsonPath.executionId,
+      ...fields,
+    }),
+    payloadResponseOnly: true,
+    resultPath: "$",
+  });
+
+const transientModelErrors = [
+  "RateLimited",
+  "ModelTimeout",
+  "VerifierResponseError",
+  "ProviderLimitError",
+  "Lambda.ServiceException",
+  "Lambda.AWSLambdaException",
+  "Lambda.SdkClientException",
+  "States.Timeout",
+];
+const prepareTask = workflowInvoke("PrepareDocumentAnalysis", "prepare").addRetry({
+  errors: transientModelErrors,
+  interval: cdk.Duration.seconds(2),
+  backoffRate: 2,
+  maxAttempts: 3,
+});
+
+const extractTask = workflowInvoke("ExtractAnalysisPage", "extract", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+}).addRetry({
+  errors: transientModelErrors,
+  interval: cdk.Duration.seconds(2),
+  backoffRate: 2,
+  maxAttempts: 4,
+});
+const verifyOpenAITask = workflowInvoke("VerifyAnalysisPageWithOpenAI", "verifyOpenAI", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+}).addRetry({
+  errors: transientModelErrors,
+  interval: cdk.Duration.seconds(2),
+  backoffRate: 2,
+  maxAttempts: 3,
+});
+const verifyRepairedTask = workflowInvoke(
+  "VerifyRepairedAnalysisPage",
+  "verifyOpenAI",
+  {
+    page: sfn.JsonPath.numberAt("$.page"),
+    inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+    resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+  },
+).addRetry({
+  errors: transientModelErrors,
+  interval: cdk.Duration.seconds(2),
+  backoffRate: 2,
+  maxAttempts: 3,
+});
+const repairTask = workflowInvoke("RepairAnalysisPage", "repair", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+}).addRetry({
+  errors: transientModelErrors,
+  interval: cdk.Duration.seconds(2),
+  backoffRate: 2,
+  maxAttempts: 3,
+});
+const writePageResultTask = workflowInvoke("WriteAnalysisPageResult", "writeResult", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+});
+const repairChoice = new sfn.Choice(dataStack, "PageNeedsRepair")
+  .when(
+    sfn.Condition.and(
+      sfn.Condition.booleanEquals("$.needsRepair", true),
+      sfn.Condition.booleanEquals("$.repaired", false),
+    ),
+    repairTask.next(verifyRepairedTask.next(writePageResultTask)),
+  )
+  .otherwise(writePageResultTask);
+verifyOpenAITask.next(repairChoice);
+const verificationChoice = new sfn.Choice(dataStack, "AnthropicVerifierAvailable")
+  .when(sfn.Condition.booleanEquals("$.available", false), verifyOpenAITask)
+  .otherwise(repairChoice);
+const verifyAnthropicTask = workflowInvoke("VerifyAnalysisPageWithAnthropic", "verify", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+})
+  .addRetry({
+    errors: transientModelErrors,
+    interval: cdk.Duration.seconds(2),
+    backoffRate: 2,
+    maxAttempts: 3,
+  })
+  .addCatch(verifyOpenAITask, {
+    errors: ["States.ALL"],
+    resultPath: "$.verificationError",
+  })
+  .next(verificationChoice);
+
+const renderPageTask = new tasks.LambdaInvoke(dataStack, "RenderSparseAnalysisPage", {
+  lambdaFunction: backend.documentThumbnailHandler.resources.lambda,
+  payload: sfn.TaskInput.fromObject({
+    workflowMode: "renderPage",
+    s3Key: sfn.JsonPath.stringAt("$.s3Key"),
+    pageNumber: sfn.JsonPath.numberAt("$.page"),
+    outputKey: sfn.JsonPath.stringAt("$.imageKey"),
+    runId: sfn.JsonPath.stringAt("$.runId"),
+  }),
+  payloadResponseOnly: true,
+  resultPath: "$.rendered",
+});
+const visionTask = workflowInvoke("AnalyzeSparsePageVision", "vision", {
+  page: sfn.JsonPath.numberAt("$.page"),
+  inputKey: sfn.JsonPath.stringAt("$.inputKey"),
+  resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+  imageKey: sfn.JsonPath.stringAt("$.rendered.imageKey"),
+});
+const sparseTextChoice = new sfn.Choice(dataStack, "PageTextIsSparse")
+  .when(
+    sfn.Condition.booleanEquals("$.sparseText", true),
+    renderPageTask.next(visionTask).next(verifyAnthropicTask),
+  )
+  .otherwise(verifyAnthropicTask);
+
+const documentPages = new sfn.DistributedMap(dataStack, "DocumentPages", {
+  maxConcurrency: 3,
+  itemReader: new sfn.S3JsonItemReader({
+    bucket: backend.storage.resources.bucket,
+    key: sfn.JsonPath.stringAt("$.manifestKey"),
+  }),
+  itemSelector: {
+    "runId.$": "$.runId",
+    "documentId.$": "$.documentId",
+    "fileId.$": "$.fileId",
+    "identityId.$": "$.identityId",
+    "s3Key.$": "$.s3Key",
+    "profile.$": "$.profile",
+    "executionArn.$": "$$.Execution.Id",
+    "page.$": "$$.Map.Item.Value.page",
+    "inputKey.$": "$$.Map.Item.Value.inputKey",
+    "resultKey.$": "$$.Map.Item.Value.resultKey",
+    "imageKey.$": "$$.Map.Item.Value.imageKey",
+  },
+  resultWriter: new sfn.ResultWriter({
+    bucket: backend.storage.resources.bucket,
+    prefix: "document-analysis-map-output",
+  }),
+  toleratedFailurePercentage: 100,
+});
+documentPages.itemProcessor(extractTask.next(sparseTextChoice), {
+  mode: sfn.ProcessorMode.DISTRIBUTED,
+  executionType: sfn.ProcessorType.STANDARD,
+});
+
+const progressWait = new sfn.Wait(dataStack, "WaitForPageProgress", {
+  time: sfn.WaitTime.duration(cdk.Duration.seconds(15)),
+});
+const progressTask = workflowInvoke("ReportDocumentAnalysisProgress", "progress", {
+  totalPages: sfn.JsonPath.numberAt("$.totalPages"),
+});
+const progressDone = new sfn.Pass(dataStack, "ProgressPollingComplete");
+const progressChoice = new sfn.Choice(dataStack, "PageMapHasFinished")
+  .when(sfn.Condition.booleanEquals("$.mapDone", false), progressWait)
+  .otherwise(progressDone);
+const progressPoller = progressWait.next(progressTask).next(progressChoice);
+const mapAndProgress = new sfn.Parallel(dataStack, "MapPagesAndReportProgress", {
+  resultPath: "$.parallelResults",
+})
+  .branch(documentPages)
+  .branch(progressPoller);
+
+const aggregateTask = workflowInvoke("AggregateDocumentAnalysis", "aggregate", {
+  manifestKey: sfn.JsonPath.stringAt("$.manifestKey"),
+  directContentKey: sfn.JsonPath.stringAt("$.directContentKey"),
+  pendingMediaKey: sfn.JsonPath.stringAt("$.pendingMediaKey"),
+  baseKey: sfn.JsonPath.stringAt("$.baseKey"),
+  totalPages: sfn.JsonPath.numberAt("$.totalPages"),
+});
+const moderateTask = workflowInvoke("ModerateDocumentAnalysis", "moderate", {
+  aggregateKey: sfn.JsonPath.stringAt("$.aggregateKey"),
+});
+const finalizeTask = workflowInvoke("FinalizeDocumentAnalysis", "finalize", {
+  aggregateKey: sfn.JsonPath.stringAt("$.aggregateKey"),
+  pendingMediaKey: sfn.JsonPath.stringAt("$.pendingMediaKey"),
+});
+const embedTask = new tasks.LambdaInvoke(dataStack, "EmbedParsedDocument", {
+  lambdaFunction: backend.embeddingsHandler.resources.lambda,
+  payload: sfn.TaskInput.fromObject({
+    workflowMode: "generateEmbeddingsForAnalysis",
+    fileID: sfn.JsonPath.stringAt("$.fileId"),
+  }),
+  payloadResponseOnly: true,
+  resultPath: "$.embeddingResult",
+}).addRetry({
+  errors: [
+    "Lambda.ServiceException",
+    "Lambda.AWSLambdaException",
+    "Lambda.SdkClientException",
+    "States.TaskFailed",
+    "States.Timeout",
+  ],
+  interval: cdk.Duration.seconds(5),
+  backoffRate: 2,
+  maxAttempts: 2,
+});
+const completeTask = workflowInvoke("CompleteDocumentAnalysis", "complete", {
+  aggregateKey: sfn.JsonPath.stringAt("$.aggregateKey"),
+});
+const analysisPipeline = prepareTask
+  .next(mapAndProgress)
+  .next(aggregateTask)
+  .next(moderateTask)
+  .next(finalizeTask)
+  .next(embedTask)
+  .next(completeTask);
+const markWorkflowFailedTask = workflowInvoke("MarkDocumentAnalysisFailed", "markFailed", {
+  error: sfn.JsonPath.objectAt("$.workflowError"),
+});
+const workflowDefinition = new sfn.Parallel(dataStack, "DocumentAnalysisWorkflow")
+  .branch(analysisPipeline)
+  .addCatch(markWorkflowFailedTask.next(
+    new sfn.Fail(dataStack, "DocumentAnalysisFailed", {
+      error: "DocumentAnalysisFailed",
+      cause: "The document analysis workflow failed",
+    }),
+  ), {
+    errors: ["States.ALL"],
+    resultPath: "$.workflowError",
+  });
+
+const workflowLogGroup = new logs.LogGroup(dataStack, "DocumentAnalysisWorkflowLogs", {
+  retention: logs.RetentionDays.ONE_MONTH,
+  removalPolicy: cdk.RemovalPolicy.DESTROY,
+});
+// A static name lets IAM policies on the workflow Lambda build execution ARNs
+// without referencing the state machine resource, which would create a
+// Lambda -> role policy -> state machine -> Lambda dependency cycle.
+const documentAnalysisStateMachineName = `DocAnalysis-${cdk.Names.uniqueResourceName(
+  dataStack,
+  { maxLength: 60, separator: "-" },
+)}`;
+const documentAnalysisStateMachine = new sfn.StateMachine(
+  dataStack,
+  "DocumentAnalysisStateMachine",
+  {
+    stateMachineName: documentAnalysisStateMachineName,
+    definitionBody: sfn.DefinitionBody.fromChainable(workflowDefinition),
+    stateMachineType: sfn.StateMachineType.STANDARD,
+    logs: {
+      destination: workflowLogGroup,
+      level: sfn.LogLevel.ERROR,
+      includeExecutionData: false,
+    },
+    tracingEnabled: true,
+  },
+);
+backend.documentAnalysisHandler.addEnvironment(
+  "DOCUMENT_ANALYSIS_WORKFLOW_ARN",
+  documentAnalysisStateMachine.stateMachineArn,
+);
+documentAnalysisStateMachine.grantStartExecution(
+  backend.documentAnalysisHandler.resources.lambda,
+);
+// Step Functions ARNs separate the resource type with a colon
+// (arn:...:execution:NAME:RUN_ID), unlike formatArn's default slash form.
+const stepFunctionsArn = (
+  resource: "execution" | "mapRun",
+  resourceName: string,
+) =>
+  dataStack.formatArn({
+    service: "states",
+    resource,
+    resourceName,
+    arnFormat: cdk.ArnFormat.COLON_RESOURCE_NAME,
+  });
+backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["states:StopExecution"],
+    resources: [
+      stepFunctionsArn("execution", `${documentAnalysisStateMachineName}:*`),
+    ],
+  }),
+);
+workflowLambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["states:ListMapRuns", "states:DescribeMapRun"],
+    resources: [
+      stepFunctionsArn("execution", `${documentAnalysisStateMachineName}:*`),
+      stepFunctionsArn("mapRun", `${documentAnalysisStateMachineName}/*`),
+    ],
+  }),
+);
+
+const verifierParameterName = process.env.ANTHROPIC_API_KEY_PARAMETER;
+if (verifierParameterName) {
+  const parameterArn = verifierParameterName.startsWith("arn:")
+    ? verifierParameterName
+    : dataStack.formatArn({
+        service: "ssm",
+        resource: "parameter",
+        resourceName: verifierParameterName.replace(/^\/+/, ""),
+      });
+  workflowLambda.addToRolePolicy(
+    new PolicyStatement({
+      actions: ["ssm:GetParameter"],
+      resources: [parameterArn],
+    }),
+  );
+}
+const verifierKmsKeyArn = process.env.ANTHROPIC_API_KEY_KMS_KEY_ARN;
+if (verifierParameterName && verifierKmsKeyArn) {
+  workflowLambda.addToRolePolicy(
+    new PolicyStatement({
+      actions: ["kms:Decrypt"],
+      resources: [verifierKmsKeyArn],
+    }),
+  );
+}
+
+new Alarm(dataStack, "DocumentAnalysisWorkflowFailures", {
+  metric: documentAnalysisStateMachine.metricFailed({
+    period: cdk.Duration.minutes(5),
+  }),
+  threshold: 0,
+  evaluationPeriods: 1,
+  comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+});
+
+// Lambda creates its log group lazily on first invoke, so the metric filter
+// would fail with "log group does not exist" on a fresh deploy. Create it here.
+const workflowLambdaLogGroup = new logs.LogGroup(
+  dataStack,
+  "DocumentAnalysisWorkflowLambdaLogGroup",
+  {
+    logGroupName: `/aws/lambda/${workflowLambda.functionName}`,
+    retention: logs.RetentionDays.ONE_MONTH,
+    removalPolicy: cdk.RemovalPolicy.DESTROY,
+  },
+);
+const modelRateLimitMetric = new logs.MetricFilter(
+  dataStack,
+  "DocumentAnalysisModelRateLimits",
+  {
+    logGroup: workflowLambdaLogGroup,
+    filterPattern: logs.FilterPattern.literal("MODEL_RATE_LIMITED"),
+    metricNamespace: "DocumentAnalysis/Workflow",
+    metricName: "ModelRateLimited",
+    metricValue: "1",
+    defaultValue: 0,
+  },
+).metric({
+  period: cdk.Duration.minutes(5),
+  statistic: "Sum",
+});
+
+new Alarm(dataStack, "DocumentAnalysisWorkflowLambdaErrors", {
+  metric: workflowLambda.metricErrors({ period: cdk.Duration.minutes(5) }),
+  threshold: 0,
+  evaluationPeriods: 1,
+  comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+});
+
+new Alarm(dataStack, "DocumentAnalysisWorkflowLambdaThrottles", {
+  metric: workflowLambda.metricThrottles({ period: cdk.Duration.minutes(5) }),
+  threshold: 0,
+  evaluationPeriods: 1,
+  comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+});
+
+new Alarm(dataStack, "DocumentAnalysisWorkflowLambdaDuration", {
+  metric: workflowLambda.metricDuration({
+    period: cdk.Duration.minutes(5),
+    statistic: "Maximum",
+  }),
+  threshold: cdk.Duration.minutes(12).toMilliseconds(),
+  evaluationPeriods: 1,
+  comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+});
+
+new Alarm(dataStack, "DocumentAnalysisWorkflowModelRateLimits", {
+  metric: modelRateLimitMetric,
+  threshold: 0,
+  evaluationPeriods: 1,
+  comparisonOperator: ComparisonOperator.GREATER_THAN_THRESHOLD,
+});
+
 // Grant Embeddings handler permission to call AppSync GraphQL API
 const embeddingsAppSyncPolicy = new Policy(
   backend.embeddingsHandler.resources.lambda.stack,
@@ -540,6 +1083,20 @@ const openaiAppSyncPolicy = new Policy(
 
 backend.openaiHandler.resources.lambda.role?.attachInlinePolicy(
   openaiAppSyncPolicy,
+);
+
+backend.openaiHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.openaiHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects("public/audio/*"),
+      backend.storage.resources.bucket.arnForObjects("public/images/*"),
+    ],
+  }),
 );
 
 // Grant Embeddings handler permission to invoke itself for async operations if needed
@@ -778,6 +1335,20 @@ cfnBucket.addPropertyOverride(
     EventBridgeEnabled: true,
   },
 );
+cfnBucket.addPropertyOverride("LifecycleConfiguration.Rules", [
+  {
+    Id: "DocumentAnalysisMapArtifactsExpiry",
+    Status: "Enabled",
+    Prefix: "document-analysis-map-output/",
+    ExpirationInDays: 14,
+  },
+  {
+    Id: "DocumentAnalysisTemporaryArtifactsExpiry",
+    Status: "Enabled",
+    TagFilters: [{ Key: "analysis-run", Value: "true" }],
+    ExpirationInDays: 14,
+  },
+]);
 
 new events.Rule(dataStack, "S3VideoUploadRule", {
   description:

@@ -292,7 +292,7 @@ describe("NotificationContext", () => {
     );
   });
 
-  it("deleteNotificationForever permanently deletes with _version", async () => {
+  it("deleteNotificationForever permanently deletes by id", async () => {
     render(
       <NotificationProvider>
         <TestConsumer />
@@ -307,7 +307,7 @@ describe("NotificationContext", () => {
       screen.getByTestId("deleteForeverN").click();
     });
 
-    expect(mockDelete).toHaveBeenCalledWith({ id: "n1", _version: 1 });
+    expect(mockDelete).toHaveBeenCalledWith({ id: "n1" });
   });
 
   describe("useUnseenCount", () => {

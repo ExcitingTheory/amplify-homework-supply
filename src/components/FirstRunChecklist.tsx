@@ -19,28 +19,26 @@ export default function FirstRunChecklist({
 }: FirstRunChecklistProps) {
   const router = useRouter();
   const t = useTranslations("components");
-  const td = (key: string, fallback: string) =>
-    t.has(key) ? t(key) : fallback;
   const [visible, setVisible] = React.useState(false);
   const items: ChecklistItem[] =
     role === "instructor"
       ? [
           {
-            label: td("firstRunChecklist.setupClass", "Set up a class"),
+            label: t("firstRunChecklist.setupClass"),
             href: "/sections",
           },
           {
-            label: td("firstRunChecklist.createUnit", "Create your first unit"),
+            label: t("firstRunChecklist.createUnit"),
             href: "/units",
           },
         ]
       : [
           {
-            label: td("firstRunChecklist.joinClass", "Join a class"),
+            label: t("firstRunChecklist.joinClass"),
             href: "/sections",
           },
           {
-            label: td("firstRunChecklist.openWork", "Open assigned work"),
+            label: t("firstRunChecklist.openWork"),
             href: "/dashboard",
           },
         ];
@@ -69,10 +67,10 @@ export default function FirstRunChecklist({
         }}
       >
         <Typography variant="subtitle1" fontWeight={700}>
-          {td("firstRunChecklist.title", "Start here")}
+          {t("firstRunChecklist.title")}
         </Typography>
         <Typography variant="body2" sx={{ mb: 1 }}>
-          {td("firstRunChecklist.description", "Choose your next step.")}
+          {t("firstRunChecklist.description")}
         </Typography>
         <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
           {items.map((item) => (

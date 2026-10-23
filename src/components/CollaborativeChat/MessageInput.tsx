@@ -32,10 +32,12 @@ import {
   Typography,
   Popper,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 import SendIcon from "@mui/icons-material/Send";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import CircleIcon from "@mui/icons-material/Circle";
 import type { MemberInfo } from "./types";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 export interface MessageInputProps {
   onSend: (content: string) => void;
@@ -51,11 +53,12 @@ export default function MessageInput({
   onSend,
   onTypingChange,
   members = [],
-  placeholder = "Type a message...",
+  placeholder,
   disabled = false,
   replyingTo,
   onCancelReply,
 }: MessageInputProps) {
+  const t = useTranslations("components");
   const [text, setText] = useState("");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionAnchor, setMentionAnchor] = useState<HTMLElement | null>(null);
@@ -69,7 +72,7 @@ export default function MessageInput({
     const query = mentionQuery.toLowerCase();
     const kaiBotEntry: MemberInfo = {
       username: "kai",
-      displayName: "Kai (AI Assistant)",
+      displayName: t("messageInput.kaiDisplayName"),
       online: true,
     };
     const allMembers = [kaiBotEntry, ...members];
@@ -81,7 +84,7 @@ export default function MessageInput({
           m.username.toLowerCase().includes(query),
       )
       .slice(0, 8);
-  }, [mentionQuery, members]);
+  }, [mentionQuery, members, t]);
 
   // Handle typing indicator
   const signalTyping = useCallback(() => {
@@ -202,7 +205,7 @@ export default function MessageInput({
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            Replying to message
+            {t("messageInput.replyingTo")}
           </Typography>
           <Typography
             variant="caption"
@@ -210,7 +213,7 @@ export default function MessageInput({
             sx={{ cursor: "pointer" }}
             onClick={onCancelReply}
           >
-            Cancel
+            {t("messageInput.cancelReply")}
           </Typography>
         </Box>
       )}
@@ -227,7 +230,7 @@ export default function MessageInput({
           value={text}
           onChange={handleChange}
           onKeyDown={handleKeyDown}
-          placeholder={placeholder}
+          placeholder={placeholder ?? t("messageInput.placeholder")}
           disabled={disabled}
           sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
         />
@@ -235,7 +238,7 @@ export default function MessageInput({
           color="primary"
           onClick={handleSend}
           disabled={disabled || !text.trim()}
-          aria-label="Send message"
+          aria-label={t("messageInput.sendMessage")}
         >
           <SendIcon />
         </IconButton>
@@ -268,7 +271,7 @@ export default function MessageInput({
                       <SmartToyIcon sx={{ fontSize: 14 }} />
                     </Avatar>
                   ) : (
-                    <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+                    <Avatar component={ProfileAvatarLink} username={member.username} displayName={member.displayName} sx={{ width: 24, height: 24, fontSize: 12 }}>
                       {member.displayName[0]}
                     </Avatar>
                   )}
@@ -276,7 +279,9 @@ export default function MessageInput({
                 <ListItemText
                   primary={member.displayName}
                   secondary={
-                    member.username === "kai" ? "AI Bot" : `@${member.username}`
+                    member.username === "kai"
+                      ? t("messageInput.aiBot")
+                      : `@${member.username}`
                   }
                   primaryTypographyProps={{ variant: "body2" }}
                   secondaryTypographyProps={{ variant: "caption" }}

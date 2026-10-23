@@ -147,15 +147,16 @@ export function useYjsWord(config: UseYjsWordConfig): UseYjsWordReturn {
         }
 
         // Initialize metadata if empty (first time or no snapshot)
-        if (metadata && metadata.size === 0) {
-          metadata.set("id", data.id);
-          metadata.set("phrase", data.phrase || "");
-          metadata.set("pronunciation", data.pronunciation || "");
-          metadata.set("definition", data.definition || "");
-          metadata.set("audio", data.audio || []);
-          metadata.set("rubyTags", data.rubyTags || "");
-          metadata.set("definitionAudio", data.definitionAudio || []);
-          metadata.set("updatedAt", new Date().toISOString());
+        const docMetadata = provider?.getDoc().getMap("metadata");
+        if (docMetadata && docMetadata.size === 0) {
+          docMetadata.set("id", data.id);
+          docMetadata.set("phrase", data.phrase || "");
+          docMetadata.set("pronunciation", data.pronunciation || "");
+          docMetadata.set("definition", data.definition || "");
+          docMetadata.set("audio", data.audio || []);
+          docMetadata.set("rubyTags", data.rubyTags || "");
+          docMetadata.set("definitionAudio", data.definitionAudio || []);
+          docMetadata.set("updatedAt", new Date().toISOString());
           console.log(`[useYjsWord] Initialized metadata for word ${wordId}`);
         }
 

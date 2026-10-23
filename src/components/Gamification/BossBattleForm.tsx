@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
@@ -61,6 +62,7 @@ export interface BossBattleFormProps {
 // ============================================================================
 
 export function BossBattleForm({ onSubmit, initialValues, submitting = false }: BossBattleFormProps) {
+  const t = useTranslations('components')
   const isEditMode = !!initialValues
 
   const [title, setTitle] = useState(initialValues?.title || '')
@@ -119,7 +121,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
       serializedStakes = serializeBattleStakes(stakes)
       setStakesError('')
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Invalid stakes payload'
+      const message = err instanceof Error ? err.message : t('bossBattleForm.invalidStakes')
       setStakesError(message)
       return
     }
@@ -155,19 +157,19 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
       <Stack spacing={2}>
         <TextField
           size="small"
-          label="Title"
+          label={t('bossBattleForm.titleLabel')}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           required
           fullWidth
-          placeholder="e.g. The Algorithm Dragon"
+          placeholder={t('bossBattleForm.titlePlaceholder')}
           disabled={submitting}
         />
 
         <Stack direction="row" spacing={1}>
           <TextField
             size="small"
-            label="Target XP (HP)"
+            label={t('bossBattleForm.targetXpLabel')}
             type="number"
             value={targetXP}
             onChange={(e) => {
@@ -177,7 +179,11 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
             required
             placeholder="1000"
             InputProps={{
-              startAdornment: <InputAdornment position="start">XP</InputAdornment>,
+              startAdornment: (
+                <InputAdornment position="start">
+                  {t('bossBattleForm.xpAdornment')}
+                </InputAdornment>
+              ),
               inputProps: { min: 1 },
             }}
             sx={{ flex: 1 }}
@@ -186,7 +192,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
 
           <TextField
             size="small"
-            label="Bonus Multiplier"
+            label={t('bossBattleForm.bonusMultiplierLabel')}
             type="number"
             value={bonusMultiplier}
             onChange={(e) => setBonusMultiplier(Number(e.target.value))}
@@ -202,7 +208,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
         <Stack direction="row" spacing={1}>
           <TextField
             size="small"
-            label="Start Date"
+            label={t('bossBattleForm.startDateLabel')}
             type="datetime-local"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
@@ -213,7 +219,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
 
           <TextField
             size="small"
-            label="End Date (Deadline)"
+            label={t('bossBattleForm.endDateLabel')}
             type="datetime-local"
             value={deadline}
             onChange={(e) => setDeadline(e.target.value)}
@@ -225,20 +231,20 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
 
         <TextField
           size="small"
-          label="Narrative Setting"
+          label={t('bossBattleForm.settingLabel')}
           value={setting}
           onChange={(e) => setSetting(e.target.value)}
           multiline
           rows={2}
           fullWidth
-          placeholder="A world where bugs rule the codebase..."
+          placeholder={t('bossBattleForm.settingPlaceholder')}
           disabled={submitting}
         />
 
         {/* Stakes — Preset consequence switches */}
         <Box>
           <Typography variant="subtitle2" gutterBottom>
-            Stakes (Consequences on Failure)
+            {t('bossBattleForm.stakesTitle')}
           </Typography>
           <Stack spacing={0}>
             <FormControlLabel
@@ -250,7 +256,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Lose a streak freeze"
+              label={t('bossBattleForm.loseStreakFreeze')}
             />
             <FormControlLabel
               control={
@@ -261,12 +267,12 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Lose XP points"
+              label={t('bossBattleForm.loseXp')}
             />
             <Collapse in={stakes.loseXP}>
               <TextField
                 size="small"
-                label="XP Loss Amount"
+                label={t('bossBattleForm.xpLossAmount')}
                 type="number"
                 value={stakes.xpLossAmount}
                 onChange={(e) =>
@@ -289,7 +295,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Lose a level"
+              label={t('bossBattleForm.loseLevel')}
             />
             <FormControlLabel
               control={
@@ -300,7 +306,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Reset streak to zero"
+              label={t('bossBattleForm.resetStreak')}
             />
             <FormControlLabel
               control={
@@ -311,7 +317,7 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Lose most recent badge"
+              label={t('bossBattleForm.loseBadge')}
             />
             <FormControlLabel
               control={
@@ -322,13 +328,13 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Lose a badge by rarity"
+              label={t('bossBattleForm.loseBadgeByRarity')}
             />
             <Collapse in={stakes.loseBadgeByRarity}>
               <TextField
                 size="small"
                 select
-                label="Badge Rarity"
+                label={t('bossBattleForm.badgeRarity')}
                 value={stakes.badgeRarityTarget}
                 onChange={(e) =>
                   setStakes((prev) => ({ ...prev, badgeRarityTarget: e.target.value as BadgeRarity }))
@@ -336,11 +342,11 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                 sx={{ ml: 5, mt: 0.5, mb: 1, width: 160 }}
                 disabled={submitting}
               >
-                <MenuItem value="common">Common</MenuItem>
-                <MenuItem value="uncommon">Uncommon</MenuItem>
-                <MenuItem value="rare">Rare</MenuItem>
-                <MenuItem value="epic">Epic</MenuItem>
-                <MenuItem value="legendary">Legendary</MenuItem>
+                <MenuItem value="common">{t('bossBattleForm.rarityCommon')}</MenuItem>
+                <MenuItem value="uncommon">{t('bossBattleForm.rarityUncommon')}</MenuItem>
+                <MenuItem value="rare">{t('bossBattleForm.rarityRare')}</MenuItem>
+                <MenuItem value="epic">{t('bossBattleForm.rarityEpic')}</MenuItem>
+                <MenuItem value="legendary">{t('bossBattleForm.rarityLegendary')}</MenuItem>
               </TextField>
             </Collapse>
             <FormControlLabel
@@ -352,12 +358,12 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Missed streaks cost XP"
+              label={t('bossBattleForm.streakMissPenalty')}
             />
             <Collapse in={stakes.streakMissXPPenalty}>
               <TextField
                 size="small"
-                label="XP per missed day"
+                label={t('bossBattleForm.xpPerMissedDay')}
                 type="number"
                 value={stakes.streakMissXPPerDay}
                 onChange={(e) =>
@@ -380,12 +386,12 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
                   disabled={submitting}
                 />
               }
-              label="Scramble cosmetics (name, border, flair)"
+              label={t('bossBattleForm.loseCosmetics')}
             />
             <Collapse in={stakes.loseCosmetics}>
               <TextField
                 size="small"
-                label="Penalty duration (days)"
+                label={t('bossBattleForm.penaltyDuration')}
                 type="number"
                 value={stakes.cosmeticPenaltyDays}
                 onChange={(e) =>
@@ -409,19 +415,22 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
         {/* Featured Image Generation */}
         <Box>
           <Typography variant="subtitle2" gutterBottom>
-            Featured Image
+            {t('bossBattleForm.featuredImageTitle')}
           </Typography>
           <Stack spacing={1}>
             <TextField
               size="small"
-              label="Image Prompt"
+              label={t('bossBattleForm.imagePromptLabel')}
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
               multiline
               rows={2}
               fullWidth
-              placeholder={`e.g., Epic boss battle: ${title || 'The Algorithm Dragon'}. ${setting || 'A world where bugs rule...'}`}
-              helperText="Describe the image (leave blank for auto-prompt from title + setting)"
+              placeholder={t('bossBattleForm.imagePromptPlaceholder', {
+                title: title || t('bossBattleForm.imagePromptDefaultTitle'),
+                setting: setting || t('bossBattleForm.imagePromptDefaultSetting'),
+              })}
+              helperText={t('bossBattleForm.imagePromptHelper')}
               disabled={submitting}
             />
             <Button
@@ -431,13 +440,17 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
               onClick={handleGenerateImage}
               disabled={imageGenerating || submitting || (!imagePrompt.trim() && !title.trim())}
             >
-              {imageGenerating ? 'Generating...' : featuredImage ? 'Regenerate' : 'Generate Image'}
+              {imageGenerating
+                ? t('bossBattleForm.generatingImage')
+                : featuredImage
+                  ? t('bossBattleForm.regenerateImage')
+                  : t('bossBattleForm.generateImage')}
             </Button>
             {featuredImageUrl && (
               <Box sx={{ borderRadius: 1, overflow: 'hidden' }}>
                 <img
                   src={featuredImageUrl}
-                  alt="Featured"
+                  alt={t('bossBattleForm.featuredImageAlt')}
                   style={{ width: '100%', maxHeight: 200, objectFit: 'cover' }}
                 />
               </Box>
@@ -453,8 +466,12 @@ export function BossBattleForm({ onSubmit, initialValues, submitting = false }: 
           disabled={!isValid || submitting}
         >
           {submitting
-            ? (isEditMode ? 'Updating...' : 'Creating...')
-            : (isEditMode ? 'Update Battle' : 'Create Boss Battle')}
+            ? isEditMode
+              ? t('bossBattleForm.updating')
+              : t('bossBattleForm.creating')
+            : isEditMode
+              ? t('bossBattleForm.updateBattle')
+              : t('bossBattleForm.createBattle')}
         </Button>
       </Stack>
     </Box>

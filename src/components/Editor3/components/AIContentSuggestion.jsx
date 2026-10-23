@@ -71,7 +71,7 @@ export default function AIContentSuggestion({
               fontStyle: 'italic',
             }}
           >
-            Generating...
+            {t('aiContentSuggestion.generating')}
           </Typography>
         </Box>
       ) : (

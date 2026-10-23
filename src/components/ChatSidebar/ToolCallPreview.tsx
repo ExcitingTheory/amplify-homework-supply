@@ -322,7 +322,7 @@ export const ToolCallPreview: React.FC<ToolCallPreviewProps> = ({
                     </Typography>
                     {isRequired && (
                       <Chip
-                        label="required"
+                        label={t("chatSidebar.toolCallPreview.required")}
                         size="small"
                         color="error"
                         sx={{ height: 16, fontSize: "0.6rem" }}

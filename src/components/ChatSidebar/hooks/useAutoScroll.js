@@ -30,6 +30,7 @@ export const useAutoScroll = (
   const [isAtBottom, setIsAtBottom] = useState(true);
   const [hasNewMessages, setHasNewMessages] = useState(false);
   const previousMessageCountRef = useRef(messages.length);
+  const hasInitialScrolledRef = useRef(false);
   
   /**
    * Check if scrolled to bottom
@@ -100,11 +101,13 @@ export const useAutoScroll = (
    * Scroll to bottom on initial mount
    */
   useEffect(() => {
+    if (hasInitialScrolledRef.current) return;
+    hasInitialScrolledRef.current = true;
     if (messages.length > 0) {
       // Force instant scroll on mount
       scrollToBottom(true);
     }
-  }, []); // Only on mount
+  }, [messages.length, scrollToBottom]);
   
   return {
     isAtBottom,

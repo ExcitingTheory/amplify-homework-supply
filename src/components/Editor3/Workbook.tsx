@@ -256,7 +256,7 @@ export function Workbook({
                       </Box>
                       <TutorCursorOverlay />
                       <ContentEditable
-                        data-lexical-editor="true"
+                        data-lexical-editor={true}
                         aria-label={t("navigation.workbook")}
                         style={{
                           width: "100%",

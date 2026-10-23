@@ -68,7 +68,7 @@ export function PasswordChangeView({
           />
 
           <TextField
-            label="Old Password"
+            label={t("profile.changePassword.oldPasswordLabel")}
             type="password"
             value={oldPassword}
             onChange={(event) => onOldPasswordChange(event.target.value)}
@@ -78,7 +78,7 @@ export function PasswordChangeView({
           />
 
           <TextField
-            label="New Password"
+            label={t("profile.changePassword.newPasswordLabel")}
             type="password"
             value={newPassword}
             onChange={(event) => onNewPasswordChange(event.target.value)}
@@ -88,7 +88,7 @@ export function PasswordChangeView({
           />
 
           <TextField
-            label="Confirm New Password"
+            label={t("profile.changePassword.confirmPasswordLabel")}
             type="password"
             value={confirmNewPassword}
             onChange={(event) => onConfirmNewPasswordChange(event.target.value)}

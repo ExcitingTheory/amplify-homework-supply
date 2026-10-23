@@ -6,6 +6,7 @@ import Divider from "@mui/material/Divider";
 import Typography from "@mui/material/Typography";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
+import { useTranslations } from "next-intl";
 
 export interface AccountPreferences {
   leaderboardOptIn?: boolean;
@@ -18,7 +19,7 @@ export interface AccountPreferences {
 export interface AccountPreferencesViewProps {
   preferences?: AccountPreferences | null;
   onToggle: (key: keyof AccountPreferences, value: boolean) => void;
-  /** next-intl translator scoped to "pages"; falls back to English when omitted. */
+  /** next-intl translator scoped to "pages"; defaults to the "pages" namespace when omitted. */
   t?: (key: string) => string;
   /** "card" (default) renders each group as its own bordered Card. "bare"
    * renders all groups in a single container separated by dividers, for
@@ -42,11 +43,16 @@ const CARD_SX = {
 export function AccountPreferencesView({
   preferences,
   onToggle,
-  t,
+  t: tPagesProp,
   variant = "card",
 }: AccountPreferencesViewProps) {
   const s = preferences ?? {};
-  const tr = (key: string, fallback: string) => (t ? t(key) : fallback);
+  const t = useTranslations("components");
+  const tPagesDefault = useTranslations("pages");
+  const tPages: (key: string) => string = tPagesProp ?? tPagesDefault;
+  const privacyHeading = tPages("settings.privacy.heading");
+  const leaderboardOptInLabel = tPages("settings.privacy.leaderboardOptIn");
+  const leaderboardOptInHint = tPages("settings.privacy.leaderboardOptInHint");
   const isBare = variant === "bare";
   const Group: React.ElementType = isBare ? Box : Card;
   const groupSx = isBare ? undefined : CARD_SX;
@@ -56,7 +62,7 @@ export function AccountPreferencesView({
       {/* Privacy */}
       <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
-          {tr("settings.privacy.heading", "Privacy")}
+          {privacyHeading}
         </Typography>
         <FormControlLabel
           data-testid="setting-leaderboard-opt-in"
@@ -66,16 +72,10 @@ export function AccountPreferencesView({
               onChange={(e) => onToggle("leaderboardOptIn", e.target.checked)}
             />
           }
-          label={tr(
-            "settings.privacy.leaderboardOptIn",
-            "Show me on leaderboards",
-          )}
+          label={leaderboardOptInLabel}
         />
         <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
-          {tr(
-            "settings.privacy.leaderboardOptInHint",
-            "When off, you won't appear on any public leaderboards.",
-          )}
+          {leaderboardOptInHint}
         </Typography>
       </Group>
 
@@ -84,12 +84,10 @@ export function AccountPreferencesView({
       {/* Accessibility */}
       <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
-          Accessibility
+          {t("accountPreferencesView.accessibilityHeading")}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          These settings apply across the entire app. The system-level
-          &ldquo;reduce motion&rdquo; preference from your device is always
-          respected automatically.
+          {t("accountPreferencesView.accessibilityDescription")}
         </Typography>
         <FormControlLabel
           data-testid="setting-reduced-motion"
@@ -99,16 +97,14 @@ export function AccountPreferencesView({
               onChange={(e) => onToggle("reducedMotion", e.target.checked)}
             />
           }
-          label="Reduced Motion"
+          label={t("accountPreferencesView.reducedMotionLabel")}
         />
         <Typography
           variant="body2"
           color="text.secondary"
           sx={{ ml: 4, mb: 1 }}
         >
-          Disable animations, transitions, and auto-playing effects throughout
-          the app. Useful for reducing distractions or if motion causes
-          discomfort.
+          {t("accountPreferencesView.reducedMotionHint")}
         </Typography>
         <FormControlLabel
           data-testid="setting-high-contrast"
@@ -118,10 +114,10 @@ export function AccountPreferencesView({
               onChange={(e) => onToggle("highContrastMode", e.target.checked)}
             />
           }
-          label="High Contrast Mode"
+          label={t("accountPreferencesView.highContrastLabel")}
         />
         <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
-          Increase contrast for text and UI elements to improve readability.
+          {t("accountPreferencesView.highContrastHint")}
         </Typography>
       </Group>
 
@@ -130,10 +126,10 @@ export function AccountPreferencesView({
       {/* Profile Visibility */}
       <Group sx={groupSx}>
         <Typography variant="h5" gutterBottom>
-          Profile Visibility
+          {t("accountPreferencesView.profileVisibilityHeading")}
         </Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Choose what others can see on your profile page.
+          {t("accountPreferencesView.profileVisibilityDescription")}
         </Typography>
         <FormControlLabel
           data-testid="setting-show-badges"
@@ -145,14 +141,14 @@ export function AccountPreferencesView({
               }
             />
           }
-          label="Show badges on profile"
+          label={t("accountPreferencesView.showBadgesLabel")}
         />
         <Typography
           variant="body2"
           color="text.secondary"
           sx={{ ml: 4, mb: 1 }}
         >
-          Display your earned achievement badges on your public profile.
+          {t("accountPreferencesView.showBadgesHint")}
         </Typography>
         <FormControlLabel
           data-testid="setting-show-anti-badges"
@@ -164,11 +160,10 @@ export function AccountPreferencesView({
               }
             />
           }
-          label="Show anti-badges on profile"
+          label={t("accountPreferencesView.showAntiBadgesLabel")}
         />
         <Typography variant="body2" color="text.secondary" sx={{ ml: 4 }}>
-          Display anti-badges on your profile. These are humorous, not punitive
-          — show them off if you want!
+          {t("accountPreferencesView.showAntiBadgesHint")}
         </Typography>
       </Group>
     </>

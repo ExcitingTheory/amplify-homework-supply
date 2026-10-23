@@ -51,7 +51,6 @@ export const OnlineNoPending: Story = {
  * In a real browser, trigger by going to DevTools → Network → Offline.
  */
 export const OfflineWarning: Story = {
-  name: "Offline Warning",
   decorators: [
     (Story) => {
       // Simulate offline — note: this only affects the visual,

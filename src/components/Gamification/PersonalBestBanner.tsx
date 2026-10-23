@@ -8,6 +8,7 @@ import React from 'react'
 import Alert from '@mui/material/Alert'
 import Collapse from '@mui/material/Collapse'
 import Typography from '@mui/material/Typography'
+import { useTranslations } from 'next-intl'
 import BadgeIcon from './BadgeIcon'
 
 export interface PersonalBestBannerProps {
@@ -23,6 +24,7 @@ export function PersonalBestBanner({
   previousBest,
   onClose,
 }: PersonalBestBannerProps) {
+  const t = useTranslations('components')
   const improvement = previousBest != null ? Math.round(newScore - previousBest) : null
 
   return (
@@ -39,14 +41,14 @@ export function PersonalBestBanner({
         }}
       >
         <Typography variant="subtitle2" fontWeight={700}>
-          New Personal Best! 🏆
+          {t('personalBestBanner.title')}
         </Typography>
         <Typography variant="body2">
-          Score: {Math.round(newScore)}%
-          {improvement != null && improvement > 0 && (
-            <> — up {improvement} points from your previous best!</>
-          )}
-          {previousBest == null && <> — first recorded score for this unit!</>}
+          {improvement != null && improvement > 0
+            ? t('personalBestBanner.scoreImproved', { score: Math.round(newScore), improvement })
+            : previousBest == null
+              ? t('personalBestBanner.scoreFirst', { score: Math.round(newScore) })
+              : t('personalBestBanner.score', { score: Math.round(newScore) })}
         </Typography>
       </Alert>
     </Collapse>

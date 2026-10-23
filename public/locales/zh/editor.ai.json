@@ -9,7 +9,14 @@
     "lostWarning": "如果您现在取消，您生成的{type}将会丢失。",
     "preview": "预览",
     "saveClose": "保存并关闭",
-    "takeMoments": "这可能需要一些时间"
+    "takeMoments": "这可能需要一些时间",
+    "defaultInputPlaceholder": "请输入描述...",
+    "defaultTitle": "生成内容",
+    "editPrompt": "编辑提示词",
+    "enterDescriptionError": "请输入描述",
+    "generateFailed": "内容生成失败",
+    "regenerate": "重新生成",
+    "regenerateFailed": "重新生成内容失败"
   },
   "promptMethodSelector": {
     "inputButton": "输入",
@@ -20,7 +27,53 @@
       "text": "文本",
       "video": "视频"
     },
-    "outputButton": "输出"
+    "outputButton": "输出",
+    "configure": "配置",
+    "displaySettings": "显示设置",
+    "displaySettingsDescription": "控制辅助词汇的文本和音频。",
+    "enableAudioPlayback": "启用音频播放",
+    "enableAudioPlaybackDescription": "允许对单词和释义使用音频控制功能。",
+    "inputDescription": "学员提交答案的方式。",
+    "invalidConfig": "请至少选择一种输入方式和一种输出方式",
+    "meaningModes": {
+      "easy": {
+        "description": "将单词与其含义进行匹配。",
+        "label": "简单"
+      },
+      "hard": {
+        "description": "在没有含义引导提示的情况下进行匹配。",
+        "label": "困难"
+      },
+      "learn": {
+        "description": "通过引导式匹配和反馈进行学习。",
+        "label": "学习"
+      }
+    },
+    "methodDescriptions": {
+      "audio": "使用录制或生成的音频。",
+      "image": "将图片显示为提示或回答。",
+      "text": "以文本形式显示提示或回复。",
+      "video": "使用视频作为提示或回答。",
+      "writing": "允许学习者在书写区域手写作答。"
+    },
+    "outputDescription": "问题向学习者呈现的方式。",
+    "practiceModes": "练习模式",
+    "practiceModesDescription": "选择学员需要完成的匹配活动。",
+    "promptDescription": "请选择向学习者显示词语还是释义。",
+    "promptFor": {
+      "definition": {
+        "description": "将释义显示为目标内容。",
+        "label": "定义提示词"
+      },
+      "word": {
+        "description": "将词汇单词作为目标项显示。",
+        "label": "针对单词的提示"
+      }
+    },
+    "promptForAriaLabel": "提示输入单词或释义",
+    "promptHeading": "提示词",
+    "showPronunciations": "显示发音",
+    "showPronunciationsDescription": "在词汇旁显示发音文本。"
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "输入要转换为语音的文本...",
@@ -29,7 +82,9 @@
     "generateAudio": "生成音频",
     "generateImage": "生成图像",
     "imagePromptPlaceholder": "请描述您想要生成的图片...",
-    "openRecordingStudio": "在录音工作室中打开"
+    "openRecordingStudio": "在录音工作室中打开",
+    "generatedAlt": "已生成",
+    "regeneratedAlt": "已重新生成"
   },
   "blockSuggestionMenu": {
     "aiTitle": "🤖 AI智能建议",
@@ -45,6 +100,20 @@
     "ownerPlaceholder": "所有者ID"
   },
   "aiContentSuggestion": {
-    "tabToAccept": "按Tab键接受"
+    "tabToAccept": "按Tab键接受",
+    "generating": "正在生成...",
+    "tabToAcceptHint": "（按 Tab 键接受）"
+  },
+  "blockSuggestionPlugin": {
+    "addCustomPractice": "添加自定义练习",
+    "addExplanation": "添加解释",
+    "addHeading": "添加标题",
+    "addQuiz": "添加测验",
+    "addSummary": "添加摘要",
+    "addVocabularyPractice": "添加词汇练习",
+    "moreSuggestions": "↑↓ 还有 {count} 条",
+    "newSection": "新建章节",
+    "questionCount": "{count, plural, one {# 个问题} other {# 个问题}}",
+    "tabKey": "Tab"
   }
 }

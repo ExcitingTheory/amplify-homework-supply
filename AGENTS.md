@@ -6,9 +6,8 @@ Use this file for repository-wide rules. Read the nearest nested `AGENTS.md` bef
 
 - Anchor work in the named file, failing test, route, or symbol. Search locally before exploring broadly.
 - Treat source code, `package.json`, and `package-lock.json` as authoritative. Documentation can lag behind implementation.
-- Check permissions before every file operation using the exact supported name: `read`, `write`, `delete`, or `rename`. File edits use `npm run agent:check -- --operation write --path <path>`; `edit` is not a valid operation. Check shell commands with `npm run agent:check -- --operation terminal --command "<command>"`.
 - Production-code changes under `app/`, `src/`, `pages/`, or `amplify/` require user confirmation; tests, stories, and documentation follow the explicit policy exceptions.
-- Never modify `package.json`, `amplify.yml`, or a GraphQL/data schema without explicit permission. Do not run `npm install`; dependency installation is user-managed.
+- Never modify `package*.json`, `amplify.yml`, or a GraphQL/data schema without explicit permission. Do not run `npm install`; dependency installation is user-managed.
 - Preserve unrelated working-tree changes. Do not commit, delete, rename, deploy, or run destructive Git/AWS commands unless explicitly requested and permitted.
 
 ## Current Baseline

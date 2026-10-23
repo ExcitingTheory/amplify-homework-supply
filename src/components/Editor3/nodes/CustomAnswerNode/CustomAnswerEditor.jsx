@@ -154,6 +154,7 @@ const useColumns = (t) => [
         <Typography
           variant="body2"
           color="text.secondary"
+          // eslint-disable-next-line i18next/no-literal-string -- CSS value
           fontStyle="italic"
           sx={{ width: "100%", textAlign: "center" }}
         >
@@ -379,7 +380,7 @@ export default React.memo(function CustomAnswerEditor({
       // setValue('');
       setPreviewMessage(t("customAnswerEditor.successGeneratedAudio"));
     });
-  }, [audioSrc]);
+  }, [audioSrc, _b, _g, t]);
 
   const title = t("customAnswerEditor.title");
 
@@ -478,7 +479,7 @@ export default React.memo(function CustomAnswerEditor({
     ...baseColumns,
     {
       field: "actions",
-      headerName: "Actions",
+      headerName: t("customAnswerEditor.columnHeaders.actions"),
       width: 80,
       sortable: false,
       filterable: false,
@@ -700,6 +701,7 @@ export default React.memo(function CustomAnswerEditor({
   return (
     <div ref={customAnswerRef} style={{ cursor: "pointer" }}>
       <ExerciseBlockCard
+        // eslint-disable-next-line i18next/no-literal-string -- block type identifier
         blockType="custom-answer"
         selected={isSelected}
         sx={{ maxWidth: "72rem" }}
@@ -1041,6 +1043,7 @@ export default React.memo(function CustomAnswerEditor({
             rows={gridRows}
             columns={columns}
             getRowHeight={(params) =>
+              // eslint-disable-next-line i18next/no-literal-string -- DataGrid row height value
               params.id === "__empty__" ? "auto" : null
             }
             columnVisibilityModel={{
@@ -1056,6 +1059,7 @@ export default React.memo(function CustomAnswerEditor({
             disableRowSelectionExcludeModel
             slotProps={{ baseCheckbox: roundedCheckboxIcons }}
             rowSelectionModel={{
+              // eslint-disable-next-line i18next/no-literal-string -- DataGrid selection model type
               type: "include",
               ids: new Set(gridSelection),
             }}
@@ -1097,7 +1101,9 @@ export default React.memo(function CustomAnswerEditor({
                 setGridSelection([]);
               }}
             >
-              {`Remove ${gridSelection.length} ${gridSelection.length === 1 ? "answer" : "answers"}`}
+              {t("customAnswerEditor.removeAnswers", {
+                count: gridSelection.length,
+              })}
             </Button>
           </Box>
         </Box>

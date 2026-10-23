@@ -10,6 +10,7 @@
 
 import * as React from "react";
 import { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Paper,
@@ -185,6 +186,7 @@ export function GradedWorkbookViewer({
   onModerationAction,
   maxHeight,
 }: GradedWorkbookViewerProps) {
+  const t = useTranslations("components");
   const [selectedAttempt, setSelectedAttempt] = React.useState(0);
   const [gutterWidth, setGutterWidth] = React.useState(320);
   const isDraggingRef = React.useRef(false);
@@ -328,14 +330,19 @@ export function GradedWorkbookViewer({
         >
           <Box>
             <Typography variant="h6" component="h2">
-              {studentName}&apos;s Workbook
+              {t("gradedWorkbookViewer.title", { name: studentName })}
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {grades.length} attempt{grades.length !== 1 ? "s" : ""} &middot;
-              Latest: {currentGrade?.complete ? "Complete" : "In Progress"}
               {currentCompletionLabel
-                ? ` &middot; ${currentCompletionLabel}`
-                : ""}
+                ? t("gradedWorkbookViewer.summaryWithCompletion", {
+                    count: grades.length,
+                    status: currentGrade?.complete ? "complete" : "inProgress",
+                    completion: currentCompletionLabel,
+                  })
+                : t("gradedWorkbookViewer.summary", {
+                    count: grades.length,
+                    status: currentGrade?.complete ? "complete" : "inProgress",
+                  })}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
@@ -347,13 +354,17 @@ export function GradedWorkbookViewer({
                   <ErrorOutlineIcon />
                 )
               }
-              label={`${Math.round(overallAccuracy)}% Accuracy`}
+              label={t("gradedWorkbookViewer.accuracyChip", {
+                percent: Math.round(overallAccuracy),
+              })}
               color={accuracyColor}
               variant="outlined"
             />
             {currentGrade?.percentComplete != null && (
               <Chip
-                label={`${Math.round(currentGrade.percentComplete)}% Complete`}
+                label={t("gradedWorkbookViewer.percentCompleteChip", {
+                  percent: Math.round(currentGrade.percentComplete),
+                })}
                 variant="outlined"
                 size="small"
               />
@@ -361,7 +372,7 @@ export function GradedWorkbookViewer({
             {moderation && moderation.status === "flagged" && (
               <Chip
                 icon={<WarningAmberIcon />}
-                label="Content Flagged"
+                label={t("gradedWorkbookViewer.contentFlagged")}
                 color="error"
                 size="small"
               />
@@ -375,18 +386,34 @@ export function GradedWorkbookViewer({
             <Stack direction="row" spacing={1} alignItems="center">
               <HistoryIcon fontSize="small" color="action" />
               <Typography variant="caption" color="text.secondary">
-                Attempts:
+                {t("gradedWorkbookViewer.attemptsLabel")}
               </Typography>
-              {grades.map((grade, index) => (
-                <Chip
-                  key={grade.id}
-                  label={`#${grade.attempt || grades.length - index} — ${Math.round(grade.accuracy)}%${getGradeCompletionLabel(grade) ? ` — ${getGradeCompletionLabel(grade)}` : ""}`}
-                  size="small"
-                  color={index === selectedAttempt ? "primary" : "default"}
-                  variant={index === selectedAttempt ? "filled" : "outlined"}
-                  onClick={() => setSelectedAttempt(index)}
-                />
-              ))}
+              {grades.map((grade, index) => {
+                const attempt = grade.attempt || grades.length - index;
+                const percent = Math.round(grade.accuracy);
+                const completion = getGradeCompletionLabel(grade);
+                return (
+                  <Chip
+                    key={grade.id}
+                    label={
+                      completion
+                        ? t("gradedWorkbookViewer.attemptChipWithCompletion", {
+                            attempt,
+                            percent,
+                            completion,
+                          })
+                        : t("gradedWorkbookViewer.attemptChip", {
+                            attempt,
+                            percent,
+                          })
+                    }
+                    size="small"
+                    color={index === selectedAttempt ? "primary" : "default"}
+                    variant={index === selectedAttempt ? "filled" : "outlined"}
+                    onClick={() => setSelectedAttempt(index)}
+                  />
+                );
+              })}
             </Stack>
           </Box>
         )}
@@ -440,7 +467,9 @@ export function GradedWorkbookViewer({
                   <RichTextPlugin
                     contentEditable={
                       <ContentEditable
-                        aria-label={`${studentName}'s graded workbook`}
+                        aria-label={t("gradedWorkbookViewer.contentAriaLabel", {
+                          name: studentName,
+                        })}
                         style={{
                           width: "100%",
                           padding: "1.5rem",
@@ -505,8 +534,9 @@ export function GradedWorkbookViewer({
       {currentGrade?.feedback && (
         <Paper elevation={0} variant="outlined" sx={{ mt: 2, p: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
-            Feedback — Attempt #
-            {currentGrade.attempt || grades.length - selectedAttempt}
+            {t("gradedWorkbookViewer.feedbackTitle", {
+              attempt: currentGrade.attempt || grades.length - selectedAttempt,
+            })}
           </Typography>
           {currentGrade.feedback.overall && (
             <Typography variant="body2" sx={{ mb: 1 }}>
@@ -515,7 +545,9 @@ export function GradedWorkbookViewer({
           )}
           {currentGrade.feedback.instructorNotes && (
             <Alert severity="info" sx={{ mt: 1 }}>
-              <AlertTitle>Instructor Notes</AlertTitle>
+              <AlertTitle>
+                {t("gradedWorkbookViewer.instructorNotes")}
+              </AlertTitle>
               {currentGrade.feedback.instructorNotes}
             </Alert>
           )}

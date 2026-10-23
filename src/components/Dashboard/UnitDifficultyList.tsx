@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Chip, Stack, Typography } from "@mui/material";
 import { CompletionBar } from "./GradeRangeBar";
 
@@ -17,6 +18,7 @@ const LOW_AVG_THRESHOLD = 70;
 
 /** Ranked list of the hardest units across every section — the same unit taught in multiple sections is already merged by the caller. */
 export function UnitDifficultyList({ units }: UnitDifficultyListProps) {
+  const t = useTranslations("components");
   if (units.length === 0) return null;
 
   return (
@@ -42,7 +44,7 @@ export function UnitDifficultyList({ units }: UnitDifficultyListProps) {
             </Typography>
             {unit.avg < LOW_AVG_THRESHOLD && (
               <Chip
-                label="Low avg"
+                label={t("unitDifficultyList.lowAvg")}
                 size="small"
                 color="warning"
                 variant="outlined"
@@ -54,7 +56,9 @@ export function UnitDifficultyList({ units }: UnitDifficultyListProps) {
               color="text.secondary"
               sx={{ ml: "auto", flexShrink: 0 }}
             >
-              {unit.studentCount} student{unit.studentCount === 1 ? "" : "s"}
+              {t("unitDifficultyList.studentCount", {
+                count: unit.studentCount,
+              })}
             </Typography>
           </Box>
           <CompletionBar pct={unit.avg} />

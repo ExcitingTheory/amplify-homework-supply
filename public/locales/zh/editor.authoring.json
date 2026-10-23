@@ -19,7 +19,8 @@
     "sectionLabel": "部分",
     "selectSectionHelper": "选择要分配截止日期的章节",
     "timerDescription": "计时器将在用户点击\"开始\"按钮后启动。用户在计时器结束后仍可继续操作，系统将记录作业的开始和完成时间。在计时器运行期间，倒计时将显示在屏幕顶部。",
-    "timerLabel": "计时器"
+    "timerLabel": "计时器",
+    "wholeSection": "整个章节"
   },
   "configurationManager": {
     "autoAnalyzeDescription": "启用后，PDF文件将在上传后立即发送至OpenAI进行词汇提取。",
@@ -36,7 +37,8 @@
     "setFeaturedImage": "设置特色图片",
     "uploadImagePrompt": "上传图片",
     "uploadingImage": "上传图片",
-    "uploadingVideo": "正在转码视频"
+    "uploadingVideo": "正在转码视频",
+    "setVideoUrl": "设置"
   },
   "mainToolbar": {
     "menuAttribute": "菜单",
@@ -156,7 +158,9 @@
     "underline": "下划线",
     "undo": "撤销",
     "untitledUnit": "未命名单元",
-    "wordBlock": "词块"
+    "wordBlock": "词块",
+    "layout": "布局",
+    "aiGradedExercise": "AI 评分练习"
   },
   "toolbar": {
     "align_center": "居中对齐",
@@ -174,5 +178,60 @@
     "paragraph": "段落",
     "strikethrough": "删除线",
     "underline": "下划线"
+  },
+  "save": {
+    "permissionError": "错误：您没有编辑此单元的权限。",
+    "savedSuccessfully": "保存成功",
+    "saveFailed": "保存失败",
+    "saveNowTitle": "立即保存(停止输入2秒后将自动保存)"
+  },
+  "campaignPanel": {
+    "addToExistingChapter": "添加到现有章节",
+    "badgeLock": "徽章:{badgeId}",
+    "cancel": "取消",
+    "chapterNumber": "第{order}章",
+    "chapterOptionLabel": "第{order}章：{title}",
+    "chapterProgress": "已完成 {percent}% · {currentXP}/{targetXP} 经验值",
+    "close": "关闭",
+    "contentLock": "内容锁定",
+    "createNewChapter": "创建新章节",
+    "edit": "编辑",
+    "heading": "活动章节",
+    "linkedToChapters": "{count, plural, one {已关联到 # 个章节} other {已关联到 # 个章节}}：",
+    "linkUnitToChapter": "将单元关联到章节",
+    "loadingChapters": "正在加载章节…",
+    "locksManagedHint": "徽章和模块完成锁定由该章节的“高级游戏化”设置统一管理。",
+    "moduleCompletionLock": "模块完成度达 {percent}%",
+    "newChapter": "新章节",
+    "noLinkedChaptersWarning": "该单元尚未关联任何战役章节,学生将无法看到此内容的叙事框架。",
+    "noSections": "暂无可用章节。请先创建章节。",
+    "preview": "预览",
+    "quotedSetting": "“{setting}”",
+    "requiredXP": "所需经验值",
+    "saveUnitFirst": "请先保存课程单元,再管理活动链接。",
+    "saving": "正在保存…",
+    "sectionLabel": "章节",
+    "selectChapterPlaceholder": "选择章节…",
+    "selectSectionHint": "请选择一个章节所属的分区，以便在其中创建章节。",
+    "selectSectionPlaceholder": "请为本章节选择所属部分…",
+    "statusActive": "进行中",
+    "statusDone": "已完成",
+    "studentPreview": "学生预览",
+    "thisUnit": "本单元",
+    "unlink": "取消关联"
+  },
+  "floatingToolbarPlugin": {
+    "code": "代码",
+    "fontColor": "字体颜色",
+    "insertBlock": "插入区块",
+    "insertColumnsLayout": "插入分栏布局",
+    "insertLink": "插入链接",
+    "layoutFourEqual": "4 列(等宽)",
+    "layoutThreeEqual": "3 列（等宽）",
+    "layoutThreeQuarterHalfQuarter": "3 列(25% - 50% - 25%)",
+    "layoutTwoEqual": "双栏（等宽）",
+    "layoutTwoQuarterThreeQuarters": "2 列(25% - 75%)",
+    "shortAnswerCustom": "简答题（自定义）",
+    "shortAnswerVocabulary": "简答题（词汇）"
   }
 }

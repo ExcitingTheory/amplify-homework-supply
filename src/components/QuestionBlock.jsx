@@ -48,6 +48,7 @@ function DraggableAnswer({
       {(provided) => (
         <Stack
           border="thin solid"
+          // eslint-disable-next-line i18next/no-literal-string -- theme palette token
           borderColor="divider"
           padding="0.5rem"
           margin="0.5rem"
@@ -144,7 +145,10 @@ function SortableAnswers({
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <Droppable droppableId="list">
+      <Droppable
+        // eslint-disable-next-line i18next/no-literal-string -- drag-and-drop identifier
+        droppableId="list"
+      >
         {(provided) => (
           <div ref={provided.innerRef} {...provided.droppableProps}>
             {list()}
@@ -565,6 +569,7 @@ class QuestionBlock extends React.Component {
               spacing={2}
               alignItems="center"
               border="thin solid"
+              // eslint-disable-next-line i18next/no-literal-string -- theme palette token
               borderColor="divider"
               padding="0.5rem"
               margin="0.5rem"

@@ -6,14 +6,39 @@
     "dialogTitle": "编辑答案",
     "emptyState": "未提供答案",
     "instructions": "在下方创建您的答案",
-    "save": "保存"
+    "save": "保存",
+    "actionsColumn": "操作",
+    "addNewOption": "添加“{value}”",
+    "removeNamedWord": "删除{phrase}",
+    "removeWord": "删除单词",
+    "removeWords": "Chinese has no plural distinction, but we must keep the ICU structure with one and other keywords, translating the text inside.\n\n删除 {count, plural, one {# 个单词} other {# 个单词}}",
+    "title": "简答题练习",
+    "titleByDefinition": "根据定义的简答题练习",
+    "titleByWord": "按单词简答练习"
   },
   "blocks": {
     "meaning_association": "意义关联"
   },
   "customAIEditor": {
     "title": "AI 评分练习",
-    "description": "创建一个由 AI 评分的练习，学习者回答问题后，AI 会根据您自定义的评分标准对答案进行评估。"
+    "description": "创建一个由 AI 评分的练习，学习者回答问题后，AI 会根据您自定义的评分标准对答案进行评估。",
+    "inputModeText": "文本",
+    "inputModeAudio": "音频",
+    "inputModeImage": "图片",
+    "inputModeDrawing": "绘图",
+    "questionPromptHeader": "题目提示词",
+    "expectedAnswerHeader": "预期答案",
+    "removeQuestion": "删除问题",
+    "questionFallback": "第 {id} 题",
+    "secureGrading": "安全评分",
+    "studentInputModes": "学生输入模式",
+    "allowedInputModes": "允许的输入方式",
+    "gradingCriteria": "评分标准（AI 指令）",
+    "criteriaPlaceholder": "请描述 AI 应如何批改学生的回答。例如:“根据学生对光合作用的理解进行评分。若回答中提到光反应、卡尔文循环以及叶绿素的作用,则给予满分。”",
+    "criteriaHelperText": "AI 将根据这些标准评估学生提交的作业，学生无法看到这些标准。",
+    "questionsCount": "问题 ({count})",
+    "searchQuestions": "从题库中搜索并添加题目",
+    "securityNotice": "安全性:AI 评分提示词已进行安全加固,可防范提示词注入、角色脱离以及数据泄露。学生输入内容会经过净化处理,评分标准对学生保持隐藏,输出结果会经过验证并过滤个人身份信息(PII)。"
   },
   "customAnswerEditor": {
     "add": "添加",
@@ -28,7 +53,8 @@
       "hint": "提示",
       "id": "ID",
       "prompt": "提示",
-      "promptAudio": "提示音频"
+      "promptAudio": "提示音频",
+      "actions": "操作"
     },
     "description": "创建一个简答练习，可以向用户提出问题并期望得到简短回答。",
     "dialogDescription": "添加新的问答对。",
@@ -43,7 +69,8 @@
     "remove": "移除",
     "successGeneratedAudio": "成功生成音频文件",
     "title": "自定义答案练习",
-    "ttsPreview": "文字转语音预览"
+    "ttsPreview": "文字转语音预览",
+    "removeAnswers": "{count, plural, one {删除 # 个答案} other {删除 # 个答案}}"
   },
   "meaningAssociationEditor": {
     "add": "添加",
@@ -60,7 +87,13 @@
     "emptyState": "尚未添加任何单词。请使用上方的输入框从词典中添加单词。如果您要添加的单词不在词典中，可以通过点击下拉菜单中的\"添加单词\"选项或侧边栏的词典编辑器来添加。",
     "phraseLabel": "短语",
     "pronunciationLabel": "发音",
-    "removeFromAssignment": "从作业中移除"
+    "removeFromAssignment": "从作业中移除",
+    "actionsColumn": "操作",
+    "addNewOption": "添加“{value}”",
+    "definitionAriaLabel": "定义",
+    "removeNamedWord": "删除{phrase}",
+    "removeWord": "删除词语",
+    "removeWords": "移除 {count, plural, one {# 个词语} other {# 个词语}}"
   },
   "questionEditor": {
     "cancel": "取消"

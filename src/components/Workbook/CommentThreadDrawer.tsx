@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Drawer from '@mui/material/Drawer'
 import Typography from '@mui/material/Typography'
@@ -24,6 +25,7 @@ import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
 import ReplyIcon from '@mui/icons-material/Reply'
 import SendIcon from '@mui/icons-material/Send'
 import type { CommentThread, CommentReply } from '../../yjs/WorkbookCollaborationProvider'
+import { ProfileAvatarLink } from '../ProfileAvatarLink'
 
 // ============================================================================
 // Types
@@ -52,7 +54,7 @@ function ReplyItem({ reply }: { reply: CommentReply }) {
 
   return (
     <Box sx={{ display: 'flex', gap: 1, pl: 4, py: 0.5 }}>
-      <Avatar sx={{ width: 24, height: 24, fontSize: 12 }}>
+      <Avatar component={ProfileAvatarLink} username={reply.author} displayName={reply.displayName} sx={{ width: 24, height: 24, fontSize: 12 }}>
         {(reply.displayName || reply.author)?.[0]?.toUpperCase() || '?'}
       </Avatar>
       <Box sx={{ flex: 1 }}>
@@ -79,6 +81,7 @@ function ThreadItem({
   onReply: (threadKey: string, text: string) => void
   onResolve: (threadKey: string, resolved: boolean) => void
 }) {
+  const t = useTranslations('components')
   const [replyOpen, setReplyOpen] = useState(false)
   const [replyText, setReplyText] = useState('')
 
@@ -108,7 +111,7 @@ function ThreadItem({
     >
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-        <Avatar sx={{ width: 28, height: 28, fontSize: 13 }}>
+        <Avatar component={ProfileAvatarLink} username={thread.author} displayName={thread.displayName} sx={{ width: 28, height: 28, fontSize: 13 }}>
           {(thread.displayName || thread.author)?.[0]?.toUpperCase() || '?'}
         </Avatar>
         <Box sx={{ flex: 1 }}>
@@ -122,7 +125,11 @@ function ThreadItem({
         <IconButton
           size="small"
           onClick={() => onResolve(threadKey, !thread.resolved)}
-          title={thread.resolved ? 'Unresolve' : 'Resolve'}
+          title={
+            thread.resolved
+              ? t('commentThreadDrawer.unresolve')
+              : t('commentThreadDrawer.resolve')
+          }
         >
           {thread.resolved ? (
             <CheckCircleIcon color="success" fontSize="small" />
@@ -138,7 +145,13 @@ function ThreadItem({
       </Typography>
 
       {thread.resolved && (
-        <Chip label="Resolved" size="small" color="success" variant="outlined" sx={{ ml: 4.5, mb: 0.5 }} />
+        <Chip
+          label={t('commentThreadDrawer.resolved')}
+          size="small"
+          color="success"
+          variant="outlined"
+          sx={{ ml: 4.5, mb: 0.5 }}
+        />
       )}
 
       {/* Replies */}
@@ -159,14 +172,14 @@ function ThreadItem({
             startIcon={<ReplyIcon />}
             onClick={() => setReplyOpen(true)}
           >
-            Reply
+            {t('commentThreadDrawer.reply')}
           </Button>
         ) : (
           <Collapse in={replyOpen}>
             <Stack direction="row" spacing={1} alignItems="flex-end">
               <TextField
                 size="small"
-                placeholder="Write a reply..."
+                placeholder={t('commentThreadDrawer.replyPlaceholder')}
                 value={replyText}
                 onChange={(e) => setReplyText(e.target.value)}
                 onKeyDown={(e) => {
@@ -209,6 +222,7 @@ export function CommentThreadDrawer({
   onReply,
   onResolve,
 }: CommentThreadDrawerProps) {
+  const t = useTranslations('components')
   const [newCommentText, setNewCommentText] = useState('')
 
   const handleAddComment = () => {
@@ -229,10 +243,15 @@ export function CommentThreadDrawer({
       {/* Header */}
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <Typography variant="h6" sx={{ flex: 1 }}>
-          Comments
+          {t('commentThreadDrawer.title')}
         </Typography>
         {unresolvedCount > 0 && (
-          <Chip label={`${unresolvedCount} open`} size="small" color="primary" sx={{ mr: 1 }} />
+          <Chip
+            label={t('commentThreadDrawer.openCount', { count: unresolvedCount })}
+            size="small"
+            color="primary"
+            sx={{ mr: 1 }}
+          />
         )}
         <IconButton onClick={onClose} size="small">
           <CloseIcon />
@@ -243,7 +262,7 @@ export function CommentThreadDrawer({
       <Box sx={{ flex: 1, overflowY: 'auto', mb: 2 }}>
         {threads.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 4 }}>
-            No comments on this block yet
+            {t('commentThreadDrawer.empty')}
           </Typography>
         ) : (
           threads.map((thread) => (
@@ -263,7 +282,7 @@ export function CommentThreadDrawer({
       <Stack direction="row" spacing={1} alignItems="flex-end">
         <TextField
           size="small"
-          placeholder="Add a comment..."
+          placeholder={t('commentThreadDrawer.addCommentPlaceholder')}
           value={newCommentText}
           onChange={(e) => setNewCommentText(e.target.value)}
           onKeyDown={(e) => {

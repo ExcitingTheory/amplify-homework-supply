@@ -61,12 +61,16 @@
     "changePassword": {
       "button": "Changer le mot de passe",
       "description": "Mettez à jour le mot de passe de votre compte pour la sécurité",
-      "heading": "Changer le mot de passe"
+      "heading": "Changer le mot de passe",
+      "confirmPasswordLabel": "Confirmer le nouveau mot de passe",
+      "newPasswordLabel": "Nouveau mot de passe",
+      "oldPasswordLabel": "Ancien mot de passe"
     },
     "confirmEmail": {
       "button": "Confirmer l'e-mail",
       "message": "Veuillez vérifier votre email et saisir le code de confirmation pour vérifier votre adresse email.",
-      "title": "Confirmez votre e-mail"
+      "title": "Confirmez votre e-mail",
+      "codeLabel": "Code de confirmation"
     },
     "description": "Afficher et modifier les informations de votre profil",
     "heading": "Mon profil",
@@ -80,7 +84,8 @@
     "name": "Nom",
     "title": "Mon profil",
     "updateProfile": "Mettre à jour le profil",
-    "userId": "Identifiant utilisateur"
+    "userId": "Identifiant utilisateur",
+    "email": "E-mail"
   },
   "sectionDetail": {
     "actionsHeader": "Actions",
@@ -183,5 +188,29 @@
     "loading": "Chargement…",
     "start": "Démarrer",
     "timerInstructions": "Il s'agit d'un exercice chronométré, appuyez sur démarrer pour lancer le minuteur et répondre aux questions."
+  },
+  "gradeReviewDrawer": {
+    "cancel": "Annuler",
+    "currentLabel": "Actuel :",
+    "drop": "Abandonner",
+    "gradeLabel": "Note (%)",
+    "gradeUpdated": "Note mise à jour : {score} %",
+    "keep": "Conserver",
+    "lateDropped": "Soumission tardive écartée",
+    "lateKept": "Remise tardive conservée",
+    "lateRequiresReview": "Un devoir rendu en retard nécessite une révision.",
+    "lateStatus": "En retard : {status}",
+    "lateUpdateError": "Échec de la mise à jour du travail rendu en retard",
+    "nextTooltip": "Suivant (→)",
+    "noGradeData": "Aucune donnée de notes trouvée.",
+    "override": "Remplacer",
+    "overrideError": "Échec de l'enregistrement de la modification de la note",
+    "overrideTitle": "Modifier la note manuellement",
+    "position": "({current}/{total})",
+    "previousTooltip": "Précédent (←)",
+    "save": "Enregistrer",
+    "saving": "Enregistrement en cours...",
+    "scoreRangeError": "La note doit être comprise entre 0 et 100",
+    "studentLabel": "Étudiant :"
   }
 }

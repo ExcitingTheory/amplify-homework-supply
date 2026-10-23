@@ -14,6 +14,7 @@ export { ImageNode } from "./ImageNode.js";
 export { AutocompleteNode } from "./AutocompleteNode.js";
 export { ArmorEditorNode } from "./ArmorEditorNode";
 export { FileMetadataNode } from "./FileMetadataNode.server.js";
+export { CallResponseNodeServer as CallResponseNode } from "./CallResponseNode.server";
 export {
   AIContentSuggestionNode,
   AILoadingNode,

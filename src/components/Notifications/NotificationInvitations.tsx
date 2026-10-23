@@ -4,6 +4,7 @@
  */
 
 import React, { useMemo } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
@@ -29,9 +30,10 @@ interface NotificationInvitationsProps {
 export default function NotificationInvitations({
   types,
   onJoin,
-  joinLabel = "Join",
-  emptyMessage = "No pending invitations",
+  joinLabel,
+  emptyMessage,
 }: NotificationInvitationsProps) {
+  const t = useTranslations("components");
   const { notifications, loading, markInteracted } = useNotifications();
 
   const invitations = useMemo(() => {
@@ -64,7 +66,7 @@ export default function NotificationInvitations({
           sx={{ fontSize: 40, color: "text.disabled", mb: 1 }}
         />
         <Typography variant="body2" color="text.secondary">
-          {emptyMessage}
+          {emptyMessage ?? t("notificationInvitations.empty")}
         </Typography>
       </Box>
     );
@@ -82,7 +84,11 @@ export default function NotificationInvitations({
                 sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
               >
                 {notification.senderName && (
-                  <span>From: {notification.senderName}</span>
+                  <span>
+                    {t("notificationInvitations.from", {
+                      name: notification.senderName,
+                    })}
+                  </span>
                 )}
                 {notification.body && (
                   <Typography
@@ -101,7 +107,11 @@ export default function NotificationInvitations({
           />
           <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
             {!notification.seen && (
-              <Chip label="New" size="small" color="primary" />
+              <Chip
+                label={t("notificationInvitations.new")}
+                size="small"
+                color="primary"
+              />
             )}
             <Button
               variant="contained"
@@ -111,7 +121,7 @@ export default function NotificationInvitations({
                 onJoin(notification);
               }}
             >
-              {joinLabel}
+              {joinLabel ?? t("notificationInvitations.join")}
             </Button>
           </Box>
         </ListItem>

@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogContent from '@mui/material/DialogContent'
@@ -104,38 +105,17 @@ const BASE_XP: Record<XPReason, number> = {
   [XPReason.PEER_REVIEW_TOP_REVIEWER]: 50,
 }
 
-/** Human-readable labels for each XP reason */
-const REASON_LABELS: Record<XPReason, string> = {
-  [XPReason.HOMEWORK_SUBMITTED]: 'Homework Submitted',
-  [XPReason.AI_FEEDBACK_REVISED]: 'AI Feedback Revised',
-  [XPReason.ALL_BLOCKS_COMPLETED]: 'All Blocks Completed',
-  [XPReason.PEER_REVIEW_GIVEN]: 'Peer Review Given',
-  [XPReason.PEER_REVIEW_HOSTED]: 'Peer Review Hosted',
-  [XPReason.NAILED_IT]: 'Nailed It',
-  [XPReason.ON_TIME_SUBMISSION]: 'On-Time Submission',
-  [XPReason.STREAK_3DAY]: '3-Day Streak',
-  [XPReason.STREAK_7DAY]: '7-Day Streak',
-  [XPReason.STREAK_14DAY]: '14-Day Streak',
-  [XPReason.STREAK_30DAY]: '30-Day Streak',
-  [XPReason.PERFECT_SCORE]: 'Perfect Score',
-  [XPReason.COMEBACK]: 'Comeback',
-  [XPReason.PERSONAL_BEST]: 'Personal Best',
-  [XPReason.EASTER_EGG]: 'Easter Egg',
-  [XPReason.SQUAD_CHALLENGE_BONUS]: 'Squad Challenge Bonus',
-  [XPReason.PRACTICE_DRILL_COMPLETED]: 'Practice Drill Completed',
-  [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: 'Practice Drill Accuracy Bonus',
-  [XPReason.PEER_REVIEW_TOP_REVIEWER]: 'Top Reviewer',
-}
+type CategoryId = 'submissions' | 'streaks' | 'achievements' | 'social' | 'practice'
 
 /** Grouped categories for better organization */
 interface CategoryGroup {
-  label: string
+  id: CategoryId
   reasons: XPReason[]
 }
 
 const CATEGORIES: CategoryGroup[] = [
   {
-    label: 'Submissions',
+    id: 'submissions',
     reasons: [
       XPReason.HOMEWORK_SUBMITTED,
       XPReason.ALL_BLOCKS_COMPLETED,
@@ -144,7 +124,7 @@ const CATEGORIES: CategoryGroup[] = [
     ],
   },
   {
-    label: 'Streaks',
+    id: 'streaks',
     reasons: [
       XPReason.STREAK_3DAY,
       XPReason.STREAK_7DAY,
@@ -153,7 +133,7 @@ const CATEGORIES: CategoryGroup[] = [
     ],
   },
   {
-    label: 'Achievements',
+    id: 'achievements',
     reasons: [
       XPReason.PERFECT_SCORE,
       XPReason.NAILED_IT,
@@ -162,7 +142,7 @@ const CATEGORIES: CategoryGroup[] = [
     ],
   },
   {
-    label: 'Social & Events',
+    id: 'social',
     reasons: [
       XPReason.PEER_REVIEW_GIVEN,
       XPReason.PEER_REVIEW_HOSTED,
@@ -171,13 +151,47 @@ const CATEGORIES: CategoryGroup[] = [
     ],
   },
   {
-    label: 'Practice Drills',
+    id: 'practice',
     reasons: [
       XPReason.PRACTICE_DRILL_COMPLETED,
       XPReason.PRACTICE_DRILL_ACCURACY_BONUS,
     ],
   },
 ]
+
+/** Translated labels for XP reasons and categories */
+function useXPTunerLabels() {
+  const t = useTranslations('components')
+  const reasonLabels: Record<XPReason, string> = {
+    [XPReason.HOMEWORK_SUBMITTED]: t('xpTunerDialog.reasonHomeworkSubmitted'),
+    [XPReason.AI_FEEDBACK_REVISED]: t('xpTunerDialog.reasonAiFeedbackRevised'),
+    [XPReason.ALL_BLOCKS_COMPLETED]: t('xpTunerDialog.reasonAllBlocksCompleted'),
+    [XPReason.PEER_REVIEW_GIVEN]: t('xpTunerDialog.reasonPeerReviewGiven'),
+    [XPReason.PEER_REVIEW_HOSTED]: t('xpTunerDialog.reasonPeerReviewHosted'),
+    [XPReason.NAILED_IT]: t('xpTunerDialog.reasonNailedIt'),
+    [XPReason.ON_TIME_SUBMISSION]: t('xpTunerDialog.reasonOnTimeSubmission'),
+    [XPReason.STREAK_3DAY]: t('xpTunerDialog.reasonStreak3Day'),
+    [XPReason.STREAK_7DAY]: t('xpTunerDialog.reasonStreak7Day'),
+    [XPReason.STREAK_14DAY]: t('xpTunerDialog.reasonStreak14Day'),
+    [XPReason.STREAK_30DAY]: t('xpTunerDialog.reasonStreak30Day'),
+    [XPReason.PERFECT_SCORE]: t('xpTunerDialog.reasonPerfectScore'),
+    [XPReason.COMEBACK]: t('xpTunerDialog.reasonComeback'),
+    [XPReason.PERSONAL_BEST]: t('xpTunerDialog.reasonPersonalBest'),
+    [XPReason.EASTER_EGG]: t('xpTunerDialog.reasonEasterEgg'),
+    [XPReason.SQUAD_CHALLENGE_BONUS]: t('xpTunerDialog.reasonSquadChallengeBonus'),
+    [XPReason.PRACTICE_DRILL_COMPLETED]: t('xpTunerDialog.reasonPracticeDrillCompleted'),
+    [XPReason.PRACTICE_DRILL_ACCURACY_BONUS]: t('xpTunerDialog.reasonPracticeDrillAccuracyBonus'),
+    [XPReason.PEER_REVIEW_TOP_REVIEWER]: t('xpTunerDialog.reasonTopReviewer'),
+  }
+  const categoryLabels: Record<CategoryId, string> = {
+    submissions: t('xpTunerDialog.categorySubmissions'),
+    streaks: t('xpTunerDialog.categoryStreaks'),
+    achievements: t('xpTunerDialog.categoryAchievements'),
+    social: t('xpTunerDialog.categorySocial'),
+    practice: t('xpTunerDialog.categoryPractice'),
+  }
+  return { t, reasonLabels, categoryLabels }
+}
 
 /** Slider marks */
 const SLIDER_MARKS = [
@@ -201,6 +215,7 @@ export function XPTunerDialog({
   sectionName,
   unitCount = 0,
 }: XPTunerDialogProps) {
+  const { t, reasonLabels, categoryLabels } = useXPTunerLabels()
   // Local draft state for editing
   const [draftMultipliers, setDraftMultipliers] = useState<XPMultipliers>({})
   const [draftDailyCap, setDraftDailyCap] = useState<number>(0)
@@ -352,7 +367,7 @@ export function XPTunerDialog({
         <TuneIcon color="primary" />
         <Box sx={{ flex: 1 }}>
           <Typography variant="h6" component="span">
-            XP Tuner
+            {t('xpTunerDialog.title')}
           </Typography>
           {sectionName && (
             <Typography variant="body2" color="text.secondary">
@@ -362,13 +377,13 @@ export function XPTunerDialog({
         </Box>
         {customCount > 0 && (
           <Chip
-            label={`${customCount} custom`}
+            label={t('xpTunerDialog.customCount', { count: customCount })}
             size="small"
             color="primary"
             variant="outlined"
           />
         )}
-        <Tooltip title="Reset all to defaults">
+        <Tooltip title={t('xpTunerDialog.resetAll')}>
           <IconButton onClick={handleResetAll} size="small">
             <RestoreIcon />
           </IconButton>
@@ -377,7 +392,7 @@ export function XPTunerDialog({
 
       <DialogContent dividers sx={{ pb: 3 }}>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Adjust XP multipliers for each interaction type. A multiplier of 0× disables XP for that action, while higher values reward students more.
+          {t('xpTunerDialog.intro')}
         </Typography>
 
         {/* ---- XP Enable Toggle ---- */}
@@ -388,43 +403,51 @@ export function XPTunerDialog({
               onChange={(_, checked) => setDraftEnabled(checked)}
             />
           }
-          label="XP Enabled"
+          label={t('xpTunerDialog.xpEnabled')}
           sx={{ mb: 1 }}
         />
 
         {!draftEnabled && (
           <Alert severity="warning" sx={{ mb: 2 }}>
-            XP is disabled for this section. Students will not earn any XP.
+            {t('xpTunerDialog.xpDisabledWarning')}
           </Alert>
         )}
 
         {/* ---- XP Caps ---- */}
         <Box sx={{ mb: 3, opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
           <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>
-            XP Caps
+            {t('xpTunerDialog.xpCapsTitle')}
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-            Limit how much XP a student can earn per day or week to control leveling pace. Set to 0 for unlimited.
+            {t('xpTunerDialog.xpCapsDescription')}
           </Typography>
           <Stack direction="row" spacing={2}>
             <TextField
               type="number"
               size="small"
-              label="Daily cap"
+              label={t('xpTunerDialog.dailyCap')}
               value={draftDailyCap}
               onChange={(e) => setDraftDailyCap(Math.max(0, parseInt(e.target.value) || 0))}
               inputProps={{ min: 0, step: 25 }}
-              helperText={draftDailyCap > 0 ? `Max ${draftDailyCap} XP/day` : 'Unlimited'}
+              helperText={
+              draftDailyCap > 0
+                ? t('xpTunerDialog.dailyCapHelper', { cap: draftDailyCap })
+                : t('xpTunerDialog.unlimited')
+            }
               sx={{ flex: 1 }}
             />
             <TextField
               type="number"
               size="small"
-              label="Weekly cap"
+              label={t('xpTunerDialog.weeklyCap')}
               value={draftWeeklyCap}
               onChange={(e) => setDraftWeeklyCap(Math.max(0, parseInt(e.target.value) || 0))}
               inputProps={{ min: 0, step: 50 }}
-              helperText={draftWeeklyCap > 0 ? `Max ${draftWeeklyCap} XP/week` : 'Unlimited'}
+              helperText={
+              draftWeeklyCap > 0
+                ? t('xpTunerDialog.weeklyCapHelper', { cap: draftWeeklyCap })
+                : t('xpTunerDialog.unlimited')
+            }
               sx={{ flex: 1 }}
             />
           </Stack>
@@ -435,9 +458,9 @@ export function XPTunerDialog({
         <Box sx={{ mb: 3, opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
-              Leveling
+              {t('xpTunerDialog.levelingTitle')}
             </Typography>
-            <Tooltip title="Reset leveling to defaults">
+            <Tooltip title={t('xpTunerDialog.resetLeveling')}>
               <IconButton
                 size="small"
                 onClick={() => {
@@ -451,15 +474,14 @@ export function XPTunerDialog({
             </Tooltip>
           </Box>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Configure how many levels students can reach and how fast they progress.
-            Avatar style tiers unlock at 33% and 66% of max level.
+            {t('xpTunerDialog.levelingDescription')}
           </Typography>
 
           <Stack spacing={2.5}>
             {/* Max Level */}
             <Box>
               <Typography variant="body2" gutterBottom>
-                Max Level: <strong>{draftMaxLevel}</strong>
+                {t('xpTunerDialog.maxLevel')} <strong>{draftMaxLevel}</strong>
               </Typography>
               <Slider
                 value={draftMaxLevel}
@@ -485,24 +507,28 @@ export function XPTunerDialog({
               <TextField
                 type="number"
                 size="small"
-                label="Base XP per level"
+                label={t('xpTunerDialog.baseXpPerLevel')}
                 value={draftXpPerLevel}
                 onChange={(e) => setDraftXpPerLevel(Math.max(1, parseInt(e.target.value) || 1))}
                 inputProps={{ min: 1, step: 25 }}
-                helperText={`XP needed for level 2`}
+                helperText={t('xpTunerDialog.baseXpPerLevelHelper', { level: 2 })}
                 sx={{ flex: 1 }}
               />
               <TextField
                 type="number"
                 size="small"
-                label="Level scaling"
+                label={t('xpTunerDialog.levelScaling')}
                 value={draftLevelScaling}
                 onChange={(e) => {
                   const v = parseFloat(e.target.value)
                   if (!isNaN(v)) setDraftLevelScaling(Math.max(1, Math.min(3, v)))
                 }}
                 inputProps={{ min: 1, max: 3, step: 0.1 }}
-                helperText={draftLevelScaling === 1 ? 'Linear' : `${draftLevelScaling}× per level`}
+                helperText={
+                draftLevelScaling === 1
+                  ? t('xpTunerDialog.linear')
+                  : t('xpTunerDialog.scalingPerLevel', { scaling: draftLevelScaling })
+              }
                 sx={{ flex: 1 }}
               />
             </Stack>
@@ -510,7 +536,7 @@ export function XPTunerDialog({
             {/* Level Preview Table */}
             <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, p: 1.5 }}>
               <Typography variant="caption" fontWeight={600} gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-                Level Preview
+                {t('xpTunerDialog.levelPreview')}
               </Typography>
               <Box
                 component="table"
@@ -523,23 +549,25 @@ export function XPTunerDialog({
               >
                 <thead>
                   <tr>
-                    <th>Level</th>
-                    <th>XP Required</th>
-                    <th>Title</th>
+                    <th>{t('xpTunerDialog.columnLevel')}</th>
+                    <th>{t('xpTunerDialog.columnXpRequired')}</th>
+                    <th>{t('xpTunerDialog.columnTitle')}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {previewMilestones.map((t) => (
-                    <tr key={t.level}>
-                      <td>{t.level}</td>
-                      <td>{t.xpRequired.toLocaleString()}</td>
-                      <td>{t.label}</td>
+                  {previewMilestones.map((threshold) => (
+                    <tr key={threshold.level}>
+                      <td>{threshold.level}</td>
+                      <td>{threshold.xpRequired.toLocaleString()}</td>
+                      <td>{threshold.label}</td>
                     </tr>
                   ))}
                 </tbody>
               </Box>
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                Total XP for max level: {previewThresholds[previewThresholds.length - 1]?.xpRequired.toLocaleString() ?? 0}
+                {t('xpTunerDialog.totalXpForMax', {
+                xp: previewThresholds[previewThresholds.length - 1]?.xpRequired.toLocaleString() ?? 0,
+              })}
               </Typography>
             </Box>
 
@@ -577,12 +605,12 @@ export function XPTunerDialog({
         {/* ---- Per-Action Multipliers ---- */}
         <Stack spacing={3} sx={{ opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
           {CATEGORIES.map((category) => (
-            <Box key={category.label}>
+            <Box key={category.id}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>
-                  {category.label}
+                  {categoryLabels[category.id]}
                 </Typography>
-                <Tooltip title={`Reset ${category.label} to defaults`}>
+                <Tooltip title={t('xpTunerDialog.resetCategory', { category: categoryLabels[category.id] })}>
                   <IconButton
                     size="small"
                     onClick={() => handleResetCategory(category.reasons)}
@@ -603,17 +631,17 @@ export function XPTunerDialog({
                     <Box key={reason}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
                         <Typography variant="body2" fontWeight={isCustom ? 600 : 400}>
-                          {REASON_LABELS[reason]}
+                          {reasonLabels[reason]}
                         </Typography>
                         <Typography
                           variant="body2"
                           color={multiplier === 0 ? 'error' : isCustom ? 'primary' : 'text.secondary'}
                           fontWeight={isCustom ? 600 : 400}
                         >
-                          {effectiveXP} XP
+                          {t('xpTunerDialog.effectiveXp', { xp: effectiveXP })}
                           {isCustom && (
                             <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>
-                              ({multiplier}×)
+                              {t('xpTunerDialog.multiplierSuffix', { multiplier })}
                             </Typography>
                           )}
                         </Typography>
@@ -645,13 +673,13 @@ export function XPTunerDialog({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t('xpTunerDialog.cancel')}</Button>
         <Button
           onClick={handleSave}
           variant="contained"
           disabled={!hasChanges}
         >
-          Save XP Settings
+          {t('xpTunerDialog.save')}
         </Button>
       </DialogActions>
     </Dialog>
@@ -681,6 +709,7 @@ export function XPTunerInline({
   sectionName,
   unitCount = 0,
 }: XPTunerInlineProps) {
+  const { t, reasonLabels, categoryLabels } = useXPTunerLabels()
   const [draftMultipliers, setDraftMultipliers] = useState<XPMultipliers>({})
   const [draftDailyCap, setDraftDailyCap] = useState<number>(0)
   const [draftWeeklyCap, setDraftWeeklyCap] = useState<number>(0)
@@ -803,9 +832,9 @@ export function XPTunerInline({
           )}
         </Box>
         {customCount > 0 && (
-          <Chip label={`${customCount} custom`} size="small" color="primary" variant="outlined" sx={{ mr: 1 }} />
+          <Chip label={t('xpTunerDialog.customCount', { count: customCount })} size="small" color="primary" variant="outlined" sx={{ mr: 1 }} />
         )}
-        <Tooltip title="Reset all to defaults">
+        <Tooltip title={t('xpTunerDialog.resetAll')}>
           <IconButton onClick={handleResetAll} size="small">
             <RestoreIcon />
           </IconButton>
@@ -813,41 +842,49 @@ export function XPTunerInline({
       </Box>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Adjust XP multipliers for each interaction type. A multiplier of 0× disables XP for that action, while higher values reward students more.
+        {t('xpTunerDialog.intro')}
       </Typography>
 
       {/* XP Enable Toggle */}
       <FormControlLabel
         control={<Switch checked={draftEnabled} onChange={(_, checked) => setDraftEnabled(checked)} />}
-        label="XP Enabled"
+        label={t('xpTunerDialog.xpEnabled')}
         sx={{ mb: 1 }}
       />
 
       {!draftEnabled && (
         <Alert severity="warning" sx={{ mb: 2 }}>
-          XP is disabled for this section. Students will not earn any XP.
+          {t('xpTunerDialog.xpDisabledWarning')}
         </Alert>
       )}
 
       {/* XP Caps */}
       <Box sx={{ mb: 3, opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
-        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>XP Caps</Typography>
+        <Typography variant="subtitle2" fontWeight={700} sx={{ mb: 1 }}>{t('xpTunerDialog.xpCapsTitle')}</Typography>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          Limit how much XP a student can earn per day or week to control leveling pace. Set to 0 for unlimited.
+          {t('xpTunerDialog.xpCapsDescription')}
         </Typography>
         <Stack direction="row" spacing={2}>
           <TextField
-            type="number" size="small" label="Daily cap" value={draftDailyCap}
+            type="number" size="small" label={t('xpTunerDialog.dailyCap')} value={draftDailyCap}
             onChange={(e) => setDraftDailyCap(Math.max(0, parseInt(e.target.value) || 0))}
             inputProps={{ min: 0, step: 25 }}
-            helperText={draftDailyCap > 0 ? `Max ${draftDailyCap} XP/day` : 'Unlimited'}
+            helperText={
+              draftDailyCap > 0
+                ? t('xpTunerDialog.dailyCapHelper', { cap: draftDailyCap })
+                : t('xpTunerDialog.unlimited')
+            }
             sx={{ flex: 1 }}
           />
           <TextField
-            type="number" size="small" label="Weekly cap" value={draftWeeklyCap}
+            type="number" size="small" label={t('xpTunerDialog.weeklyCap')} value={draftWeeklyCap}
             onChange={(e) => setDraftWeeklyCap(Math.max(0, parseInt(e.target.value) || 0))}
             inputProps={{ min: 0, step: 50 }}
-            helperText={draftWeeklyCap > 0 ? `Max ${draftWeeklyCap} XP/week` : 'Unlimited'}
+            helperText={
+              draftWeeklyCap > 0
+                ? t('xpTunerDialog.weeklyCapHelper', { cap: draftWeeklyCap })
+                : t('xpTunerDialog.unlimited')
+            }
             sx={{ flex: 1 }}
           />
         </Stack>
@@ -857,8 +894,8 @@ export function XPTunerInline({
       {/* Leveling */}
       <Box sx={{ mb: 3, opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>Leveling</Typography>
-          <Tooltip title="Reset leveling to defaults">
+          <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>{t('xpTunerDialog.levelingTitle')}</Typography>
+          <Tooltip title={t('xpTunerDialog.resetLeveling')}>
             <IconButton
               size="small"
               onClick={() => {
@@ -872,14 +909,13 @@ export function XPTunerInline({
           </Tooltip>
         </Box>
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          Configure how many levels students can reach and how fast they progress.
-          Avatar style tiers unlock at 33% and 66% of max level.
+          {t('xpTunerDialog.levelingDescription')}
         </Typography>
 
         <Stack spacing={2.5}>
           {/* Max Level */}
           <Box>
-            <Typography variant="body2" gutterBottom>Max Level: <strong>{draftMaxLevel}</strong></Typography>
+            <Typography variant="body2" gutterBottom>{t('xpTunerDialog.maxLevel')} <strong>{draftMaxLevel}</strong></Typography>
             <Slider
               value={draftMaxLevel}
               onChange={(_, value) => setDraftMaxLevel(value as number)}
@@ -893,20 +929,24 @@ export function XPTunerInline({
           {/* XP per Level & Scaling */}
           <Stack direction="row" spacing={2}>
             <TextField
-              type="number" size="small" label="Base XP per level" value={draftXpPerLevel}
+              type="number" size="small" label={t('xpTunerDialog.baseXpPerLevel')} value={draftXpPerLevel}
               onChange={(e) => setDraftXpPerLevel(Math.max(1, parseInt(e.target.value) || 1))}
               inputProps={{ min: 1, step: 25 }}
-              helperText={`XP needed for level 2`}
+              helperText={t('xpTunerDialog.baseXpPerLevelHelper', { level: 2 })}
               sx={{ flex: 1 }}
             />
             <TextField
-              type="number" size="small" label="Level scaling" value={draftLevelScaling}
+              type="number" size="small" label={t('xpTunerDialog.levelScaling')} value={draftLevelScaling}
               onChange={(e) => {
                 const v = parseFloat(e.target.value)
                 if (!isNaN(v)) setDraftLevelScaling(Math.max(1, Math.min(3, v)))
               }}
               inputProps={{ min: 1, max: 3, step: 0.1 }}
-              helperText={draftLevelScaling === 1 ? 'Linear' : `${draftLevelScaling}× per level`}
+              helperText={
+                draftLevelScaling === 1
+                  ? t('xpTunerDialog.linear')
+                  : t('xpTunerDialog.scalingPerLevel', { scaling: draftLevelScaling })
+              }
               sx={{ flex: 1 }}
             />
           </Stack>
@@ -914,7 +954,7 @@ export function XPTunerInline({
           {/* Level Preview Table */}
           <Box sx={{ bgcolor: 'action.hover', borderRadius: 1, p: 1.5 }}>
             <Typography variant="caption" fontWeight={600} gutterBottom sx={{ display: 'block', mb: 0.5 }}>
-              Level Preview
+              {t('xpTunerDialog.levelPreview')}
             </Typography>
             <Box
               component="table"
@@ -925,16 +965,22 @@ export function XPTunerInline({
               }}
             >
               <thead>
-                <tr><th>Level</th><th>XP Required</th><th>Title</th></tr>
+                <tr>
+                  <th>{t('xpTunerDialog.columnLevel')}</th>
+                  <th>{t('xpTunerDialog.columnXpRequired')}</th>
+                  <th>{t('xpTunerDialog.columnTitle')}</th>
+                </tr>
               </thead>
               <tbody>
-                {previewMilestones.map((t) => (
-                  <tr key={t.level}><td>{t.level}</td><td>{t.xpRequired.toLocaleString()}</td><td>{t.label}</td></tr>
+                {previewMilestones.map((threshold) => (
+                  <tr key={threshold.level}><td>{threshold.level}</td><td>{threshold.xpRequired.toLocaleString()}</td><td>{threshold.label}</td></tr>
                 ))}
               </tbody>
             </Box>
             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-              Total XP for max level: {previewThresholds[previewThresholds.length - 1]?.xpRequired.toLocaleString() ?? 0}
+              {t('xpTunerDialog.totalXpForMax', {
+                xp: previewThresholds[previewThresholds.length - 1]?.xpRequired.toLocaleString() ?? 0,
+              })}
             </Typography>
           </Box>
 
@@ -968,10 +1014,10 @@ export function XPTunerInline({
       {/* Per-Action Multipliers */}
       <Stack spacing={3} sx={{ opacity: draftEnabled ? 1 : 0.5, pointerEvents: draftEnabled ? 'auto' : 'none' }}>
         {CATEGORIES.map((category) => (
-          <Box key={category.label}>
+          <Box key={category.id}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>{category.label}</Typography>
-              <Tooltip title={`Reset ${category.label} to defaults`}>
+              <Typography variant="subtitle2" fontWeight={700} sx={{ flex: 1 }}>{categoryLabels[category.id]}</Typography>
+              <Tooltip title={t('xpTunerDialog.resetCategory', { category: categoryLabels[category.id] })}>
                 <IconButton size="small" onClick={() => handleResetCategory(category.reasons)}>
                   <RestoreIcon fontSize="small" />
                 </IconButton>
@@ -986,15 +1032,15 @@ export function XPTunerInline({
                 return (
                   <Box key={reason}>
                     <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', mb: 0.5 }}>
-                      <Typography variant="body2" fontWeight={isCustom ? 600 : 400}>{REASON_LABELS[reason]}</Typography>
+                      <Typography variant="body2" fontWeight={isCustom ? 600 : 400}>{reasonLabels[reason]}</Typography>
                       <Typography
                         variant="body2"
                         color={multiplier === 0 ? 'error' : isCustom ? 'primary' : 'text.secondary'}
                         fontWeight={isCustom ? 600 : 400}
                       >
-                        {effectiveXP} XP
+                        {t('xpTunerDialog.effectiveXp', { xp: effectiveXP })}
                         {isCustom && (
-                          <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>({multiplier}×)</Typography>
+                          <Typography component="span" variant="caption" sx={{ ml: 0.5 }}>{t('xpTunerDialog.multiplierSuffix', { multiplier })}</Typography>
                         )}
                       </Typography>
                     </Box>
@@ -1020,7 +1066,7 @@ export function XPTunerInline({
       {/* Save button */}
       <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 3, pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
         <Button onClick={handleSave} variant="contained" disabled={!hasChanges}>
-          Save XP Settings
+          {t('xpTunerDialog.save')}
         </Button>
       </Box>
     </Box>

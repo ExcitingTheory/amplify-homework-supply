@@ -15,6 +15,7 @@
 
 import * as React from "react";
 import { useCallback, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
@@ -159,6 +160,7 @@ export function SquadPostEditor({
   initialData,
   disabled = false,
 }: SquadPostEditorProps) {
+  const t = useTranslations("components");
   const [title, setTitle] = useState(initialTitle);
   const editorRef = useRef<any>(null);
   const [anchorElem, setAnchorElem] = useState<HTMLDivElement | null>(null);
@@ -194,7 +196,7 @@ export function SquadPostEditor({
         <TextField
           fullWidth
           variant="standard"
-          placeholder="Post title…"
+          placeholder={t("squadPostEditor.titlePlaceholder")}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           disabled={disabled}
@@ -240,7 +242,7 @@ export function SquadPostEditor({
                     <RichTextPlugin
                       contentEditable={
                         <ContentEditable
-                          aria-label="Squad post content"
+                          aria-label={t("squadPostEditor.contentLabel")}
                           style={{
                             width: "100%",
                             minHeight: 120,
@@ -262,7 +264,7 @@ export function SquadPostEditor({
                             userSelect: "none",
                           }}
                         >
-                          Write your post…
+                          {t("squadPostEditor.contentPlaceholder")}
                         </Box>
                       }
                       ErrorBoundary={LexicalErrorBoundary}
@@ -312,7 +314,7 @@ export function SquadPostEditor({
             onClick={handlePublish}
             disabled={disabled || !title.trim()}
           >
-            Publish
+            {t("squadPostEditor.publish")}
           </Button>
         </Box>
       </CardContent>

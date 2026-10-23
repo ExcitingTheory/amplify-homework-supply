@@ -12,6 +12,7 @@ import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import { useTheme } from "@mui/material/styles";
 import MainToolbar from "./MainToolbar";
+import { AppFooter } from "./AppFooter";
 import { AppShellContext, DRAWER_WIDTH, RAIL_WIDTH } from "./AppShellContext";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
@@ -201,12 +202,14 @@ export default function AppShell({ children, toolbarChildren }) {
         }}
       >
         <Box
-          component="main"
           sx={{
             flexGrow: 1,
             // Lets oversized children (wide tables) scroll inside themselves
             // instead of stretching main past the drawer offset.
             minWidth: 0,
+            minHeight: `calc(100dvh - ${appBarHeight}px)`,
+            display: "flex",
+            flexDirection: "column",
             transition: theme.transitions.create(["margin", "width"], {
               easing: theme.transitions.easing.sharp,
               duration: theme.transitions.duration.leavingScreen,
@@ -222,7 +225,10 @@ export default function AppShell({ children, toolbarChildren }) {
               }),
           }}
         >
-          {children}
+          <Box component="main" sx={{ flexGrow: 1, minWidth: 0 }}>
+            {children}
+          </Box>
+          <AppFooter />
         </Box>
       </Box>
     </AppShellContext.Provider>

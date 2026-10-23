@@ -72,6 +72,14 @@ export async function removeStudentFromSection(sectionId, username) {
   return { success: true };
 }
 
+export async function recomputeGradeAggregation(sectionId) {
+  if (!sectionId || sectionId.trim().length === 0) {
+    return { success: false, error: "Section is required" };
+  }
+
+  return { success: true, assignmentsUpdated: 0, studentsUpdated: 0 };
+}
+
 // --- app/actions/collaborator ---
 export async function grantCollaboratorAccess() {
   return { success: true };

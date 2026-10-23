@@ -231,6 +231,11 @@ export default function AssignmentConfiguration() {
     return new Set(assignments?.map((a) => a.sectionID) || []);
   }, [assignments]);
 
+  const wholeSectionOption = React.useMemo(
+    () => ({ id: "all", name: t("assignmentConfiguration.wholeSection") }),
+    [t],
+  );
+
   const studentOptions = React.useMemo(() => {
     const students = selectedSections.flatMap((section) =>
       Array.isArray(section?.students) ? section.students : [],
@@ -783,7 +788,7 @@ export default function AssignmentConfiguration() {
 
         <FormControl sx={{ margin: "1rem", minWidth: 250 }}>
           <Autocomplete
-            options={[{ id: "all", name: "Whole section" }, ...studentOptions]}
+            options={[wholeSectionOption, ...studentOptions]}
             value={
               selectedStudentId
                 ? studentOptions.find(
@@ -791,7 +796,7 @@ export default function AssignmentConfiguration() {
                       (student.id || student.studentId || student.username) ===
                       selectedStudentId,
                   ) || null
-                : { id: "all", name: "Whole section" }
+                : wholeSectionOption
             }
             onChange={(_, nextValue) =>
               setSelectedStudentId(

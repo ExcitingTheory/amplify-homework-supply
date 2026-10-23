@@ -19,6 +19,7 @@ import Stack from '@mui/material/Stack'
 import SendIcon from '@mui/icons-material/Send'
 import SmartToyIcon from '@mui/icons-material/SmartToy'
 import type { RoomMessage, PeerReviewUser, MessageType } from '../../yjs/PeerReviewRoomProvider'
+import { ProfileAvatarLink } from '../ProfileAvatarLink'
 
 export interface PeerReviewChatProps {
   messages: RoomMessage[]
@@ -38,6 +39,7 @@ function MessageBubble({
   message: RoomMessage
   isOwnMessage: boolean
 }) {
+  const t = useTranslations('common')
   const isAI = message.messageType === 'AI_SUGGESTION'
   const isSystem = message.messageType === 'SYSTEM'
 
@@ -62,6 +64,9 @@ function MessageBubble({
       }}
     >
       <Avatar
+        component={ProfileAvatarLink}
+        username={isAI ? undefined : message.author}
+        displayName={message.displayName || message.author}
         sx={{
           width: 28,
           height: 28,
@@ -85,11 +90,11 @@ function MessageBubble({
         }}
       >
         <Typography variant="caption" fontWeight={600} color="text.secondary">
-          {isAI ? 'AI Assistant' : message.displayName || message.author}
+          {isAI ? t('peerReview.aiAssistant') : message.displayName || message.author}
         </Typography>
         {message.referencedBlockId && (
           <Chip
-            label={`Block: ${message.referencedBlockId}`}
+            label={t('peerReview.blockReference', { blockId: message.referencedBlockId })}
             size="small"
             variant="outlined"
             sx={{ ml: 1, height: 18, fontSize: 10 }}
@@ -173,7 +178,7 @@ export function PeerReviewChat({
             textAlign="center"
             mt={4}
           >
-            No messages yet. Start the peer review conversation!
+            {t('peerReview.noMessages')}
           </Typography>
         )}
         {messages.map((msg) => (
@@ -190,8 +195,10 @@ export function PeerReviewChat({
       {typingPeers.length > 0 && (
         <Box sx={{ px: 2, pb: 0.5 }}>
           <Typography variant="caption" color="text.secondary">
-            {typingPeers.map((p) => p.displayName || p.username).join(', ')}{' '}
-            {typingPeers.length === 1 ? 'is' : 'are'} typing…
+            {t('peerReview.typing', {
+              names: typingPeers.map((p) => p.displayName || p.username).join(', '),
+              count: typingPeers.length,
+            })}
           </Typography>
         </Box>
       )}
@@ -202,7 +209,7 @@ export function PeerReviewChat({
           <TextField
             fullWidth
             size="small"
-            placeholder="Type a message… (use @AI for AI help)"
+            placeholder={t('peerReview.messagePlaceholder')}
             value={input}
             onChange={handleInputChange}
             onKeyDown={handleKeyDown}
@@ -221,7 +228,7 @@ export function PeerReviewChat({
       ) : (
         <Box sx={{ p: 2, textAlign: 'center', borderTop: 1, borderColor: 'divider' }}>
           <Typography variant="body2" color="text.secondary">
-            This review session has ended.
+            {t('peerReview.sessionEnded')}
           </Typography>
         </Box>
       )}

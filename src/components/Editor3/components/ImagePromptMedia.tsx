@@ -1,6 +1,7 @@
 import * as React from "react";
 import PlaylistPlayIcon from "@mui/icons-material/PlaylistPlay";
 import { Box, IconButton, Tooltip, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../utils/waveformDefaults";
 import MediaPromptBand from "./MediaPromptBand";
@@ -42,6 +43,7 @@ export default function ImagePromptMedia({
   promptThumbnail,
   promptTitle,
 }: ImagePromptMediaProps) {
+  const t = useTranslations("editor.shared");
   const imagePath = imageUrl || imageFile?.path || imageFile?.key || null;
   const [resolvedImageUrl, setResolvedImageUrl] = React.useState<string | null>(
     null,
@@ -117,7 +119,9 @@ export default function ImagePromptMedia({
               color: "text.secondary",
             }}
           >
-            <Typography variant="caption">No image</Typography>
+            <Typography variant="caption">
+              {t("imagePromptMedia.noImage")}
+            </Typography>
           </Box>
         )}
 
@@ -132,9 +136,9 @@ export default function ImagePromptMedia({
               textShadow: "0 1px 4px rgba(0, 0, 0, 0.7)",
             }}
           >
-            <Tooltip title="Help">
+            <Tooltip title={t("imagePromptMedia.help")}>
               <IconButton
-                aria-label="Help"
+                aria-label={t("imagePromptMedia.help")}
                 onClick={onHelp}
                 size="small"
                 sx={{ color: "inherit", opacity: 0.72 }}
@@ -169,10 +173,10 @@ export default function ImagePromptMedia({
           borderColor: "divider",
         }}
       >
-        <Tooltip title="Playlist">
+        <Tooltip title={t("imagePromptMedia.playlist")}>
           <span>
             <IconButton
-              aria-label="Playlist"
+              aria-label={t("imagePromptMedia.playlist")}
               aria-expanded={playlistOpen}
               onClick={() => onPlaylistOpenChange?.(!playlistOpen)}
               size="small"

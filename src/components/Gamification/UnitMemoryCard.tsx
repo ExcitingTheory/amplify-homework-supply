@@ -15,6 +15,7 @@ import Stack from '@mui/material/Stack'
 import LinearProgress from '@mui/material/LinearProgress'
 import Skeleton from '@mui/material/Skeleton'
 import { generateClient } from 'aws-amplify/data'
+import { useTranslations } from 'next-intl'
 
 const client = generateClient()
 
@@ -46,13 +47,14 @@ interface UnitMemoryData {
   lastPracticedAt: string
 }
 
-function getPriorityIndicator(priority: number): { label: string; color: 'error' | 'warning' | 'success' } {
-  if (priority >= 0.7) return { label: '🔥 High Priority', color: 'error' }
-  if (priority >= 0.4) return { label: '🟡 Medium', color: 'warning' }
-  return { label: '🟢 Low', color: 'success' }
+function getPriorityIndicator(priority: number): { level: 'high' | 'medium' | 'low'; color: 'error' | 'warning' | 'success' } {
+  if (priority >= 0.7) return { level: 'high', color: 'error' }
+  if (priority >= 0.4) return { level: 'medium', color: 'warning' }
+  return { level: 'low', color: 'success' }
 }
 
 export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
+  const t = useTranslations('components')
   const [data, setData] = useState<UnitMemoryData | null>(null)
   const [loading, setLoading] = useState(true)
 
@@ -84,22 +86,28 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
   if (!data) return null
 
   const priority = getPriorityIndicator(data.reviewPriority)
+  const priorityLabel =
+    priority.level === 'high'
+      ? t('unitMemoryCard.priorityHigh')
+      : priority.level === 'medium'
+        ? t('unitMemoryCard.priorityMedium')
+        : t('unitMemoryCard.priorityLow')
 
   return (
     <Card variant="outlined" sx={{ borderRadius: 2 }}>
       <CardContent>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="subtitle2" fontWeight={700}>
-            Your Progress
+            {t('unitMemoryCard.title')}
           </Typography>
-          <Chip label={priority.label} size="small" color={priority.color} sx={{ height: 22, fontSize: '0.75rem' }} />
+          <Chip label={priorityLabel} size="small" color={priority.color} sx={{ height: 22, fontSize: '0.75rem' }} />
         </Box>
 
         {/* Accuracy */}
         <Box sx={{ mb: 1.5 }}>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
             <Typography variant="body2" color="text.secondary">
-              Average Accuracy
+              {t('unitMemoryCard.averageAccuracy')}
             </Typography>
             <Typography variant="body2" fontWeight={600}>
               {Math.round(data.averageAccuracy)}%
@@ -112,8 +120,12 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
             sx={{ height: 6, borderRadius: 3 }}
           />
           <Typography variant="caption" color="text.secondary">
-            {data.totalAttempts} attempt{data.totalAttempts !== 1 ? 's' : ''}
-            {data.lastPracticedAt && ` · Last: ${new Date(data.lastPracticedAt).toLocaleDateString()}`}
+            {data.lastPracticedAt
+              ? t('unitMemoryCard.attemptsWithLast', {
+                  count: data.totalAttempts,
+                  date: new Date(data.lastPracticedAt).toLocaleDateString(),
+                })
+              : t('unitMemoryCard.attempts', { count: data.totalAttempts })}
           </Typography>
         </Box>
 
@@ -121,7 +133,7 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
         {data.strongConcepts.length > 0 && (
           <Box sx={{ mb: 1 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-              Strengths
+              {t('unitMemoryCard.strengths')}
             </Typography>
             <Stack direction="row" flexWrap="wrap" gap={0.5}>
               {data.strongConcepts.slice(0, 6).map((c) => (
@@ -135,7 +147,7 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
         {data.weakConcepts.length > 0 && (
           <Box sx={{ mb: 1 }}>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-              Needs Review
+              {t('unitMemoryCard.needsReview')}
             </Typography>
             <Stack direction="row" flexWrap="wrap" gap={0.5}>
               {data.weakConcepts.slice(0, 6).map((c) => (
@@ -149,11 +161,11 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
         {data.confusionPairs.length > 0 && (
           <Box>
             <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
-              Common Mix-ups
+              {t('unitMemoryCard.mixUps')}
             </Typography>
             {data.confusionPairs.slice(0, 3).map((p, i) => (
               <Typography key={i} variant="body2" sx={{ fontSize: '0.8rem' }}>
-                {p.item1} ↔ {p.item2} <Typography component="span" variant="caption" color="text.secondary">(×{p.frequency})</Typography>
+                {p.item1} ↔ {p.item2} <Typography component="span" variant="caption" color="text.secondary">{t('unitMemoryCard.frequency', { frequency: p.frequency })}</Typography>
               </Typography>
             ))}
           </Box>

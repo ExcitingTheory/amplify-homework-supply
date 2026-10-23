@@ -9,7 +9,14 @@
  * @module MiniEditor/BlockInserterPlugin
  */
 
-import React, { useState, useCallback, useEffect, useRef } from "react";
+import React, {
+  useState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+} from "react";
+import { useTranslations } from "next-intl";
 import { createPortal } from "react-dom";
 import {
   Box,
@@ -283,14 +290,6 @@ const ICON_MAP: Record<string, React.ReactNode> = {
   columns: <ViewColumnIcon fontSize="small" />,
 };
 
-const CATEGORY_LABELS: Record<BlockCategory, string> = {
-  text: "Text",
-  media: "Media",
-  educational: "Educational",
-  layout: "Layout & AI",
-  embed: "Embeds",
-};
-
 // ─── Gutter Helpers ───────────────────────────────────────────────────────────
 
 /** Width of the gutter area in pixels */
@@ -329,6 +328,7 @@ export interface BlockInserterPluginProps {
 export default function BlockInserterPlugin({
   anchorElem,
 }: BlockInserterPluginProps) {
+  const t = useTranslations("components");
   const [editor] = useLexicalComposerContext();
   const [hoveredBlockElem, setHoveredBlockElem] = useState<HTMLElement | null>(
     null,
@@ -449,8 +449,18 @@ export default function BlockInserterPlugin({
     );
   }, [editor, menuOpen, anchorElem]);
 
+  const localizedBlocks = useMemo<BlockDefinition[]>(
+    () =>
+      BLOCK_DEFINITIONS.map((block) => ({
+        ...block,
+        label: t(`blockInserterPlugin.blocks.${block.type}.label`),
+        description: t(`blockInserterPlugin.blocks.${block.type}.description`),
+      })),
+    [t],
+  );
+
   // Filter blocks based on search
-  const filteredBlocks = BLOCK_DEFINITIONS.filter(
+  const filteredBlocks = localizedBlocks.filter(
     (b) =>
       b.label.toLowerCase().includes(filter.toLowerCase()) ||
       b.description.toLowerCase().includes(filter.toLowerCase()) ||
@@ -598,7 +608,11 @@ export default function BlockInserterPlugin({
             setSelectedIndex(0);
           }
         }}
-        aria-label={menuOpen ? "Close block menu" : "Insert block"}
+        aria-label={
+          menuOpen
+            ? t("blockInserterPlugin.closeMenu")
+            : t("blockInserterPlugin.insertBlock")
+        }
         sx={{
           position: "absolute",
           top: position.top,
@@ -669,7 +683,7 @@ export default function BlockInserterPlugin({
                   size="small"
                   fullWidth
                   autoFocus
-                  placeholder="Filter blocks..."
+                  placeholder={t("blockInserterPlugin.filterPlaceholder")}
                   value={filter}
                   onChange={(e) => {
                     setFilter(e.target.value);
@@ -700,7 +714,7 @@ export default function BlockInserterPlugin({
                       color: "text.secondary",
                     }}
                   >
-                    {CATEGORY_LABELS[category as BlockCategory]}
+                    {t(`blockInserterPlugin.categories.${category}`)}
                   </Typography>
                   <List dense disablePadding>
                     {blocks.map((block) => {
@@ -743,7 +757,7 @@ export default function BlockInserterPlugin({
                   variant="body2"
                   sx={{ p: 2, color: "text.secondary", textAlign: "center" }}
                 >
-                  No blocks match &ldquo;{filter}&rdquo;
+                  {t("blockInserterPlugin.noMatches", { filter })}
                 </Typography>
               )}
             </Paper>

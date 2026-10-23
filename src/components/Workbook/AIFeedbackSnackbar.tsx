@@ -10,6 +10,7 @@
 
 import React, { useEffect, useState, useCallback } from 'react'
 import Snackbar from '@mui/material/Snackbar'
+import { useTranslations } from 'next-intl'
 import Alert from '@mui/material/Alert'
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import type { WorkbookCollaborationProvider } from '../../yjs/WorkbookCollaborationProvider'
@@ -28,6 +29,7 @@ export function AIFeedbackSnackbar({
   provider,
   currentUsername,
 }: AIFeedbackSnackbarProps) {
+  const t = useTranslations('components')
   const [notification, setNotification] = useState<FeedbackNotification | null>(null)
   const [open, setOpen] = useState(false)
 
@@ -43,7 +45,9 @@ export function AIFeedbackSnackbar({
       for (const [blockId] of event.changes.keys) {
         setNotification({
           blockId,
-          message: `AI feedback received for block ${blockId.slice(0, 8)}...`,
+          message: t('aiFeedbackSnackbar.receivedForBlock', {
+            block: blockId.slice(0, 8),
+          }),
         })
         setOpen(true)
       }
@@ -54,7 +58,7 @@ export function AIFeedbackSnackbar({
     return () => {
       feedbackMap.unobserve(handleFeedbackChange)
     }
-  }, [provider, currentUsername])
+  }, [provider, currentUsername, t])
 
   const handleClose = useCallback(
     (_event?: React.SyntheticEvent | Event, reason?: string) => {
@@ -78,7 +82,7 @@ export function AIFeedbackSnackbar({
         icon={<AutoAwesomeIcon />}
         sx={{ width: '100%' }}
       >
-        {notification?.message || 'AI feedback received'}
+        {notification?.message || t('aiFeedbackSnackbar.received')}
       </Alert>
     </Snackbar>
   )

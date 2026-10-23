@@ -15,6 +15,7 @@
  */
 
 import React, { useState, useMemo } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
@@ -118,9 +119,9 @@ function categorizeRoom(
   return 'tutoring'
 }
 
-const STATUS_LABELS: Record<string, string> = {
-  OPEN: 'Open',
-  IN_REVIEW: 'In Progress',
+const STATUS_LABEL_KEYS: Record<string, string> = {
+  OPEN: 'open',
+  IN_REVIEW: 'inProgress',
 }
 
 const STATUS_COLORS: Record<string, 'success' | 'warning' | 'default'> = {
@@ -144,6 +145,7 @@ export function OpenCollaborationRooms({
   onRandomAssign,
   onAwardTopReviewer,
 }: OpenCollaborationRoomsProps) {
+  const t = useTranslations('components')
   const [assignDialogOpen, setAssignDialogOpen] = useState(false)
   const [selectedUnitId, setSelectedUnitId] = useState<string>('')
   const [randomAssigning, setRandomAssigning] = useState(false)
@@ -204,15 +206,15 @@ export function OpenCollaborationRooms({
 
   const handleRandomAssign = async () => {
     if (!selectedUnitId) {
-      setSnackbar({ open: true, message: 'Select a unit first', severity: 'error' })
+      setSnackbar({ open: true, message: t('openCollaborationRooms.selectUnitFirst'), severity: 'error' })
       return
     }
     setRandomAssigning(true)
     try {
       await onRandomAssign(selectedUnitId)
-      setSnackbar({ open: true, message: 'Peer reviews randomly assigned!', severity: 'success' })
+      setSnackbar({ open: true, message: t('openCollaborationRooms.randomAssignSuccess'), severity: 'success' })
     } catch (err: any) {
-      setSnackbar({ open: true, message: err?.message || 'Failed to assign', severity: 'error' })
+      setSnackbar({ open: true, message: err?.message || t('openCollaborationRooms.assignFailed'), severity: 'error' })
     } finally {
       setRandomAssigning(false)
     }
@@ -220,7 +222,7 @@ export function OpenCollaborationRooms({
 
   const handleAwardTopReviewer = async () => {
     if (!selectedUnitId) {
-      setSnackbar({ open: true, message: 'Select a unit first', severity: 'error' })
+      setSnackbar({ open: true, message: t('openCollaborationRooms.selectUnitFirst'), severity: 'error' })
       return
     }
     setAwardingXP(true)
@@ -228,13 +230,13 @@ export function OpenCollaborationRooms({
       await onAwardTopReviewer(selectedUnitId)
       setSnackbar({
         open: true,
-        message: 'Top reviewer XP awarded!',
+        message: t('openCollaborationRooms.awardSuccess'),
         severity: 'success',
       })
     } catch (err: any) {
       setSnackbar({
         open: true,
-        message: err?.message || 'Failed to award XP',
+        message: err?.message || t('openCollaborationRooms.awardFailed'),
         severity: 'error',
       })
     } finally {
@@ -244,7 +246,7 @@ export function OpenCollaborationRooms({
 
   const handleAssign = async (gradeId: string, ownerId: string, reviewerIds: string[]) => {
     await onAssignPeerReview(gradeId, ownerId, reviewerIds)
-    setSnackbar({ open: true, message: 'Peer review room created!', severity: 'success' })
+    setSnackbar({ open: true, message: t('openCollaborationRooms.roomCreated'), severity: 'success' })
   }
 
   if (rooms.length === 0 && !isInstructor) return null
@@ -256,7 +258,7 @@ export function OpenCollaborationRooms({
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2, flexWrap: 'wrap', gap: 1 }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <MeetingRoomIcon color="primary" />
-            <Typography variant="h6">Open Collaboration Rooms</Typography>
+            <Typography variant="h6">{t('openCollaborationRooms.title')}</Typography>
             {rooms.length > 0 && (
               <Chip label={rooms.length} size="small" color="primary" />
             )}
@@ -271,7 +273,7 @@ export function OpenCollaborationRooms({
               onClick={() => setAssignDialogOpen(true)}
               disabled={assignableGrades.length === 0}
             >
-              Assign Peer Review
+              {t('openCollaborationRooms.assignPeerReview')}
             </Button>
           )}
         </Box>
@@ -291,15 +293,15 @@ export function OpenCollaborationRooms({
             }}
           >
             <FormControl size="small" sx={{ minWidth: 200 }}>
-              <InputLabel id="unit-select-label">Unit</InputLabel>
+              <InputLabel id="unit-select-label">{t('openCollaborationRooms.unit')}</InputLabel>
               <Select
                 labelId="unit-select-label"
                 value={selectedUnitId}
-                label="Unit"
+                label={t('openCollaborationRooms.unit')}
                 onChange={(e) => setSelectedUnitId(e.target.value)}
               >
                 <MenuItem value="">
-                  <em>Select a unit…</em>
+                  <em>{t('openCollaborationRooms.selectUnitPlaceholder')}</em>
                 </MenuItem>
                 {unitOptions.map((unit) => (
                   <MenuItem key={unit.id} value={unit.id}>
@@ -309,7 +311,7 @@ export function OpenCollaborationRooms({
               </Select>
             </FormControl>
 
-            <Tooltip title="Randomly pair students who haven't been assigned a peer reviewer yet for the selected unit">
+            <Tooltip title={t('openCollaborationRooms.randomAssignTooltip')}>
               <span>
                 <Button
                   size="small"
@@ -321,12 +323,12 @@ export function OpenCollaborationRooms({
                   onClick={handleRandomAssign}
                   disabled={randomAssigning || !selectedUnitId}
                 >
-                  Random Assign
+                  {t('openCollaborationRooms.randomAssign')}
                 </Button>
               </span>
             </Tooltip>
 
-            <Tooltip title="Award bonus XP to the student who gave the most peer reviews for this unit. 3× in a row earns the Peer Review Champion badge!">
+            <Tooltip title={t('openCollaborationRooms.awardTopReviewerTooltip')}>
               <span>
                 <Button
                   size="small"
@@ -338,7 +340,7 @@ export function OpenCollaborationRooms({
                   onClick={handleAwardTopReviewer}
                   disabled={awardingXP || !selectedUnitId}
                 >
-                  Award Top Reviewer
+                  {t('openCollaborationRooms.awardTopReviewer')}
                 </Button>
               </span>
             </Tooltip>
@@ -347,7 +349,7 @@ export function OpenCollaborationRooms({
 
         {rooms.length === 0 ? (
           <Typography variant="body2" color="text.secondary" sx={{ py: 2, textAlign: 'center' }}>
-            No open collaboration rooms yet.
+            {t('openCollaborationRooms.noRooms')}
           </Typography>
         ) : (
           <>
@@ -357,7 +359,7 @@ export function OpenCollaborationRooms({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <RateReviewIcon fontSize="small" color="primary" />
                   <Typography variant="subtitle2" color="primary">
-                    Peer Review
+                    {t('openCollaborationRooms.peerReview')}
                   </Typography>
                   <Chip label={peerReviewRooms.length} size="small" color="primary" variant="outlined" />
                 </Box>
@@ -378,7 +380,7 @@ export function OpenCollaborationRooms({
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
                   <SchoolIcon fontSize="small" color="secondary" />
                   <Typography variant="subtitle2" color="secondary">
-                    Instructor Tutoring
+                    {t('openCollaborationRooms.instructorTutoring')}
                   </Typography>
                   <Chip label={tutoringRooms.length} size="small" color="secondary" variant="outlined" />
                 </Box>
@@ -443,17 +445,18 @@ function RoomsTable({
   units: Record<string, AssignmentUnit>
   onJoinRoom: (roomId: string) => void
 }) {
+  const t = useTranslations('components')
   return (
     <TableContainer component={Paper} variant="outlined">
       <Table size="small">
         <TableHead>
           <TableRow>
-            <TableCell>Student</TableCell>
-            <TableCell>Unit</TableCell>
-            <TableCell>Reviewer(s)</TableCell>
-            <TableCell>Code</TableCell>
-            <TableCell>Status</TableCell>
-            <TableCell align="right">Actions</TableCell>
+            <TableCell>{t('openCollaborationRooms.columns.student')}</TableCell>
+            <TableCell>{t('openCollaborationRooms.columns.unit')}</TableCell>
+            <TableCell>{t('openCollaborationRooms.columns.reviewers')}</TableCell>
+            <TableCell>{t('openCollaborationRooms.columns.code')}</TableCell>
+            <TableCell>{t('openCollaborationRooms.columns.status')}</TableCell>
+            <TableCell align="right">{t('openCollaborationRooms.columns.actions')}</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -495,7 +498,11 @@ function RoomsTable({
                 </TableCell>
                 <TableCell>
                   <Chip
-                    label={STATUS_LABELS[room.status] ?? room.status}
+                    label={
+                      STATUS_LABEL_KEYS[room.status]
+                        ? t(`openCollaborationRooms.status.${STATUS_LABEL_KEYS[room.status]}`)
+                        : room.status
+                    }
                     size="small"
                     color={STATUS_COLORS[room.status] ?? 'default'}
                   />
@@ -507,7 +514,7 @@ function RoomsTable({
                     endIcon={<OpenInNewIcon fontSize="small" />}
                     onClick={() => onJoinRoom(room.id)}
                   >
-                    Join
+                    {t('openCollaborationRooms.join')}
                   </Button>
                 </TableCell>
               </TableRow>

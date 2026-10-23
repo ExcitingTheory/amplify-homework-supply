@@ -19,7 +19,8 @@
     "sectionLabel": "Sección",
     "selectSectionHelper": "Seleccione una sección para asignar la fecha de vencimiento",
     "timerDescription": "El temporizador comenzará después de que el usuario haya hecho clic en el botón \"Iniciar\". Se permitirá a los usuarios continuar después de que el temporizador haya terminado, y se registrará cuándo se inició y completó la tarea. La cuenta regresiva se mostrará en la parte superior de la pantalla durante la duración del temporizador.",
-    "timerLabel": "Temporizador"
+    "timerLabel": "Temporizador",
+    "wholeSection": "Sección completa"
   },
   "configurationManager": {
     "autoAnalyzeDescription": "Cuando esté habilitado, los PDFs se enviarán a OpenAI para la extracción de vocabulario inmediatamente después de la carga.",
@@ -36,7 +37,8 @@
     "setFeaturedImage": "Establecer imagen destacada",
     "uploadImagePrompt": "Subir imagen",
     "uploadingImage": "Subiendo imagen",
-    "uploadingVideo": "Transcodificando video"
+    "uploadingVideo": "Transcodificando video",
+    "setVideoUrl": "Establecer"
   },
   "mainToolbar": {
     "menuAttribute": "Menú",
@@ -156,7 +158,9 @@
     "underline": "Subrayar",
     "undo": "Deshacer",
     "untitledUnit": "Unidad sin título",
-    "wordBlock": "Bloque de Palabras"
+    "wordBlock": "Bloque de Palabras",
+    "layout": "Diseño",
+    "aiGradedExercise": "Ejercicio calificado por IA"
   },
   "toolbar": {
     "align_center": "Centrar",
@@ -174,5 +178,60 @@
     "paragraph": "Párrafo",
     "strikethrough": "Tachado",
     "underline": "Subrayar"
+  },
+  "save": {
+    "permissionError": "Error: no tiene permiso para editar esta unidad.",
+    "savedSuccessfully": "Guardado correctamente",
+    "saveFailed": "Error al guardar",
+    "saveNowTitle": "Guardar ahora (el guardado automático se realiza 2 segundos después de que deje de escribir)"
+  },
+  "campaignPanel": {
+    "addToExistingChapter": "Agregar a un capítulo existente",
+    "badgeLock": "Insignia: {badgeId}",
+    "cancel": "Cancelar",
+    "chapterNumber": "Cap. {order}",
+    "chapterOptionLabel": "Cap. {order}: {title}",
+    "chapterProgress": "{percent} % completado · {currentXP}/{targetXP} XP",
+    "close": "Cerrar",
+    "contentLock": "Bloqueo de contenido",
+    "createNewChapter": "Crear nuevo capítulo",
+    "edit": "Editar",
+    "heading": "Capítulos de la campaña",
+    "linkedToChapters": "Vinculado a {count, plural, one {# capítulo} other {# capítulos}}:",
+    "linkUnitToChapter": "Vincular unidad al capítulo",
+    "loadingChapters": "Cargando capítulos…",
+    "locksManagedHint": "Los bloqueos de insignias y de finalización de módulos se gestionan en la configuración avanzada de gamificación de la sección.",
+    "moduleCompletionLock": "{percent}% de finalización del módulo",
+    "newChapter": "Nuevo capítulo",
+    "noLinkedChaptersWarning": "Esta unidad no está vinculada a ningún capítulo de la campaña. Los estudiantes no verán el marco narrativo de este contenido.",
+    "noSections": "No hay secciones disponibles. Cree primero una sección.",
+    "preview": "Vista previa",
+    "quotedSetting": "“{setting}”",
+    "requiredXP": "XP necesarios",
+    "saveUnitFirst": "Guarde primero la unidad para gestionar los enlaces de campaña.",
+    "saving": "Guardando…",
+    "sectionLabel": "Sección",
+    "selectChapterPlaceholder": "Selecciona un capítulo…",
+    "selectSectionHint": "Seleccione una sección para crear un capítulo en ella.",
+    "selectSectionPlaceholder": "Seleccione la sección para este capítulo…",
+    "statusActive": "Activa",
+    "statusDone": "Completado",
+    "studentPreview": "Vista previa del estudiante",
+    "thisUnit": "Esta unidad",
+    "unlink": "Desvincular"
+  },
+  "floatingToolbarPlugin": {
+    "code": "Código",
+    "fontColor": "Color de fuente",
+    "insertBlock": "Insertar bloque",
+    "insertColumnsLayout": "Insertar diseño de columnas",
+    "insertLink": "Insertar enlace",
+    "layoutFourEqual": "4 columnas (iguales)",
+    "layoutThreeEqual": "3 columnas (iguales)",
+    "layoutThreeQuarterHalfQuarter": "3 columnas (25 % - 50 % - 25 %)",
+    "layoutTwoEqual": "2 columnas (iguales)",
+    "layoutTwoQuarterThreeQuarters": "2 columnas (25 % - 75 %)",
+    "shortAnswerCustom": "Respuesta corta (personalizada)",
+    "shortAnswerVocabulary": "Respuesta corta (vocabulario)"
   }
 }

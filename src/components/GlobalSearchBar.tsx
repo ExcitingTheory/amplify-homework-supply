@@ -1,5 +1,6 @@
 import React from "react";
 import InputBase from "@mui/material/InputBase";
+import { useTranslations } from "next-intl";
 import IconButton from "@mui/material/IconButton";
 import Paper from "@mui/material/Paper";
 import Popper from "@mui/material/Popper";
@@ -56,15 +57,6 @@ const typeIcons: Record<string, React.ReactNode> = {
   chat: <ChatIcon fontSize="small" />,
 };
 
-const typeLabels: Record<string, string> = {
-  unit: "UNITS",
-  file: "FILES",
-  word: "VOCABULARY",
-  question: "QUESTIONS",
-  section: "SECTIONS",
-  chat: "CHAT",
-};
-
 function groupResults(results: SearchResult[]): Record<string, SearchResult[]> {
   const grouped: Record<string, SearchResult[]> = {};
   for (const result of results) {
@@ -114,6 +106,15 @@ export default function GlobalSearchBar() {
     setOpen,
     executeSearch,
   } = useSearch();
+  const t = useTranslations("components");
+  const typeLabels: Record<string, string> = {
+    unit: t("globalSearchBar.typeLabelUnits"),
+    file: t("globalSearchBar.typeLabelFiles"),
+    word: t("globalSearchBar.typeLabelVocabulary"),
+    question: t("globalSearchBar.typeLabelQuestions"),
+    section: t("globalSearchBar.typeLabelSections"),
+    chat: t("globalSearchBar.typeLabelChat"),
+  };
   const router = useRouter();
   const pathname = usePathname();
   const sectionCtx = React.useContext(SectionContext as React.Context<any>);
@@ -329,13 +330,13 @@ export default function GlobalSearchBar() {
           fontSize="small"
         />
         <InputBase
-          placeholder="Search..."
+          placeholder={t("globalSearchBar.searchPlaceholder")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           onFocus={() => setOpen(true)}
           onKeyDown={handleKeyDown}
           sx={{ flex: 1, fontSize: "0.875rem" }}
-          inputProps={{ "aria-label": "global search" }}
+          inputProps={{ "aria-label": t("globalSearchBar.searchAriaLabel") }}
         />
         {searching && <CircularProgress size={16} sx={{ mr: 0.5 }} />}
         {query && (
@@ -381,7 +382,7 @@ export default function GlobalSearchBar() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Type"
+                    label={t("globalSearchBar.typeFilterLabel")}
                     placeholder="type:..."
                     size="small"
                   />
@@ -405,7 +406,7 @@ export default function GlobalSearchBar() {
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="From"
+                    label={t("globalSearchBar.fromFilterLabel")}
                     placeholder="from:..."
                     size="small"
                   />
@@ -425,7 +426,9 @@ export default function GlobalSearchBar() {
                   <Chip
                     size="small"
                     variant="outlined"
-                    label={`Type: ${selectedTypeOption.label}`}
+                    label={t("globalSearchBar.typeChip", {
+                      type: selectedTypeOption.label,
+                    })}
                     onDelete={() => {
                       setQuery(stripOperator(query, "type"));
                       setOpen(true);
@@ -436,7 +439,9 @@ export default function GlobalSearchBar() {
                   <Chip
                     size="small"
                     variant="outlined"
-                    label={`From: ${selectedFromOption.label}`}
+                    label={t("globalSearchBar.fromChip", {
+                      from: selectedFromOption.label,
+                    })}
                     onDelete={() => {
                       setQuery(stripOperator(query, "from"));
                       setOpen(true);
@@ -453,7 +458,7 @@ export default function GlobalSearchBar() {
                   }}
                   sx={{ minWidth: "auto", px: 0.75 }}
                 >
-                  Clear filters
+                  {t("globalSearchBar.clearFilters")}
                 </Button>
               </Stack>
             )}
@@ -503,14 +508,16 @@ export default function GlobalSearchBar() {
             {shouldShowFallbackSearch && (
               <>
                 <ListSubheader sx={{ lineHeight: "28px", fontSize: "0.7rem" }}>
-                  NO RESULTS
+                  {t("globalSearchBar.noResultsHeader")}
                 </ListSubheader>
                 <ListItemButton disabled sx={{ pl: 3, opacity: 0.8 }}>
                   <Box sx={{ mr: 1, color: "text.secondary" }}>
                     <SearchIcon fontSize="small" />
                   </Box>
                   <ListItemText
-                    primary={`No matches for "${query.trim()}"`}
+                    primary={t("globalSearchBar.noMatchesFor", {
+                      query: query.trim(),
+                    })}
                     primaryTypographyProps={{
                       noWrap: true,
                       fontSize: "0.85rem",

@@ -159,10 +159,11 @@ describe('FileManager2 Integration Tests', () => {
     expect(checkboxes.length).toBeGreaterThan(0);
   });
 
-  it('renders search input', async () => {
+  it('does not render a local search input because search is global', async () => {
     renderFileManager();
-    const searchInput = screen.getByPlaceholderText('fileManager2.toolbar.searchPlaceholder');
-    expect(searchInput).toBeInTheDocument();
+    expect(
+      screen.queryByPlaceholderText('fileManager2.toolbar.searchPlaceholder'),
+    ).not.toBeInTheDocument();
   });
 
   it('disables actions button when nothing selected', async () => {

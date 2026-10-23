@@ -27,6 +27,10 @@ import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import TimerIcon from "@mui/icons-material/Timer";
 import ShieldIcon from "@mui/icons-material/Shield";
 import SportsKabaddiIcon from "@mui/icons-material/SportsKabaddi";
+import { useTranslations } from "next-intl";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
+
+type Translate = ReturnType<typeof useTranslations<"components">>;
 
 // ============================================================================
 // Types
@@ -82,13 +86,14 @@ export interface BossBattleCardProps {
 // Helpers
 // ============================================================================
 
-function formatTimeRemaining(deadline: string): string {
+function formatTimeRemaining(deadline: string, t: Translate): string {
   const diff = new Date(deadline).getTime() - Date.now();
-  if (diff <= 0) return "Expired";
+  if (diff <= 0) return t("bossBattleCard.expired");
   const hours = Math.floor(diff / (1000 * 60 * 60));
   const days = Math.floor(hours / 24);
-  if (days > 0) return `${days}d ${hours % 24}h left`;
-  return `${hours}h left`;
+  if (days > 0)
+    return t("bossBattleCard.daysHoursLeft", { days, hours: hours % 24 });
+  return t("bossBattleCard.hoursLeft", { hours });
 }
 
 function getActivePhaseIndex(phases: BossPhase[]): number {
@@ -113,6 +118,7 @@ export function BossBattleCard({
   maxContributorsShown = 5,
   currentUserRole,
 }: BossBattleCardProps) {
+  const t = useTranslations("components");
   const overallProgress =
     totalHP > 0 ? Math.min(100, Math.round((totalDamage / totalHP) * 100)) : 0;
   const defeated = totalDamage >= totalHP;
@@ -149,7 +155,7 @@ export function BossBattleCard({
           <Stack direction="row" spacing={0.5}>
             {bonusMultiplier > 1 && (
               <Chip
-                label={`${bonusMultiplier}× bonus`}
+                label={t("bossBattleCard.bonusMultiplier", { bonusMultiplier })}
                 size="small"
                 variant="status"
                 color="warning"
@@ -190,8 +196,11 @@ export function BossBattleCard({
           >
             <Typography variant="body2" color="text.secondary">
               {defeated
-                ? "💀 Defeated!"
-                : `Boss HP: ${totalDamage.toLocaleString()} / ${totalHP.toLocaleString()}`}
+                ? t("bossBattleCard.defeated")
+                : t("bossBattleCard.bossHp", {
+                    damage: totalDamage.toLocaleString(),
+                    total: totalHP.toLocaleString(),
+                  })}
             </Typography>
             <Typography variant="body2" fontWeight={600}>
               {overallProgress}%
@@ -214,7 +223,10 @@ export function BossBattleCard({
                   <StepLabel
                     optional={
                       <Typography variant="caption" color="text.secondary">
-                        {phase.currentXP}/{phase.targetXP} XP
+                        {t("bossBattleCard.phaseXp", {
+                          currentXP: phase.currentXP,
+                          targetXP: phase.targetXP,
+                        })}
                       </Typography>
                     }
                   >
@@ -232,7 +244,9 @@ export function BossBattleCard({
             sx={{ bgcolor: "action.hover", borderRadius: 1, p: 1.5, mb: 1.5 }}
           >
             <Typography variant="subtitle2" gutterBottom>
-              Current Phase: {phases[activePhaseIdx].title}
+              {t("bossBattleCard.currentPhase", {
+                title: phases[activePhaseIdx].title,
+              })}
             </Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 1 }}>
               {phases[activePhaseIdx].description}
@@ -268,9 +282,15 @@ export function BossBattleCard({
               {contributors.slice(0, maxContributorsShown).map((c) => (
                 <Tooltip
                   key={c.userId}
-                  title={`${c.displayName}: ${c.xpContributed} XP`}
+                  title={t("bossBattleCard.contributorTooltip", {
+                    name: c.displayName,
+                    xp: c.xpContributed,
+                  })}
                 >
                   <Avatar
+                    component={ProfileAvatarLink}
+                    username={c.userId}
+                    displayName={c.displayName}
                     src={c.avatarUrl}
                     sx={{
                       width: 28,
@@ -301,7 +321,7 @@ export function BossBattleCard({
             <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
               <TimerIcon sx={{ fontSize: 16, color: "text.secondary" }} />
               <Typography variant="caption" color="text.secondary">
-                {formatTimeRemaining(deadline)}
+                {formatTimeRemaining(deadline, t)}
               </Typography>
             </Box>
           )}

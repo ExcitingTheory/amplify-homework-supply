@@ -9,6 +9,9 @@ import React from 'react';
 import VocabularyReview2 from '../../VocabularyReview2';
 import QuestionsReview2 from '../../QuestionsReview2';
 
+const PLACEHOLDER_OWNER = 'current-user';
+const PLACEHOLDER_IDENTITY_ID = 'current-identity';
+
 /**
  * SuggestedVocabulary - Wrapper for VocabularyReview2
  * 
@@ -36,8 +39,8 @@ export const SuggestedVocabulary = ({
         <VocabularyReview2
             documentId={documentId}
             unitId={unitId}
-            owner="current-user" // This will be overridden by the component's internal auth check
-            identityId="current-identity" // This will be overridden by the component's internal auth check
+            owner={PLACEHOLDER_OWNER} // This will be overridden by the component's internal auth check
+            identityId={PLACEHOLDER_IDENTITY_ID} // This will be overridden by the component's internal auth check
             onImportComplete={handleImportComplete}
             searchTerm=""
         />
@@ -71,8 +74,8 @@ export const SuggestedQuestions = ({
         <QuestionsReview2
             documentId={documentId}
             unitId={unitId}
-            owner="current-user" // This will be overridden by the component's internal auth check
-            identityId="current-identity" // This will be overridden by the component's internal auth check
+            owner={PLACEHOLDER_OWNER} // This will be overridden by the component's internal auth check
+            identityId={PLACEHOLDER_IDENTITY_ID} // This will be overridden by the component's internal auth check
             onImportComplete={handleImportComplete}
             searchTerm=""
         />

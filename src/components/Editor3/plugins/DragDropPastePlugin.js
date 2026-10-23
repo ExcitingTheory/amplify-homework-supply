@@ -185,7 +185,7 @@ export default function DragDropPaste() {
             })();
             return true;
         }, COMMAND_PRIORITY_HIGH);
-    }, [editor]);
+    }, [editor, identityId]);
 
 
     return null

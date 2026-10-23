@@ -169,7 +169,6 @@ export default meta;
 type Story = StoryObj<typeof NotificationList>;
 
 export const WithNotifications: Story = {
-  name: "With Notifications",
   decorators: [
     (Story) => (
       <MockNotificationProvider>
@@ -221,7 +220,6 @@ export const Empty: Story = {
 };
 
 export const Loading: Story = {
-  name: "Loading",
   decorators: [
     (Story) => (
       <MockNotificationProvider loading={true} notifications={[]}>

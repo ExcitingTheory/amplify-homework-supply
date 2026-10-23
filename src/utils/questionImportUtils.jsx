@@ -4,6 +4,7 @@
  */
 
 import { getAmplifyClient } from "./amplifyClient";
+import { assertParsedContentImportAllowed } from "./parsedContentModeration";
 
 /**
  * Check if a question already exists in the bank (by prompt similarity)
@@ -171,6 +172,7 @@ export async function importQuestionsToUnit(
     if (!parsedContent) {
       throw new Error(`ParsedContent not found: ${parsedContentId}`);
     }
+    await assertParsedContentImportAllowed(client, parsedContent);
 
     // Parse the questionsJSON
     const questionItems = parsedContent.questionsJSON

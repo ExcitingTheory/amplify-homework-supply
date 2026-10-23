@@ -30,6 +30,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import Tooltip from "@mui/material/Tooltip";
+import { useTranslations } from "next-intl";
 import { useThemeDrafts } from "../../themes/themeDrafts";
 import type { UseThemeDraftsResult } from "../../themes/themeDrafts";
 
@@ -251,14 +252,14 @@ function hslToHex(h: number, s: number, l: number): string {
 type HarmonyType =
   "mono" | "analogous" | "split" | "complementary" | "triadic" | "square";
 
-const HARMONY_LABELS: Record<HarmonyType, string> = {
-  mono: "Mono",
-  analogous: "Analogous",
-  split: "Split",
-  complementary: "Compl.",
-  triadic: "Triadic",
-  square: "Square",
-};
+const HARMONY_TYPES: HarmonyType[] = [
+  "mono",
+  "analogous",
+  "split",
+  "complementary",
+  "triadic",
+  "square",
+];
 
 /**
  * Given a base hue, generate 5 hues for the palette colors using the specified harmony.
@@ -390,6 +391,7 @@ export function buildFullPaletteFromCustom(input: CustomThemePaletteInput) {
 // ============================================================================
 
 function DraftsBar({ drafts }: { drafts: UseThemeDraftsResult }) {
+  const t = useTranslations("components");
   const { drafts: list, activeId, activeDraft } = drafts;
   if (!activeDraft) return null;
   return (
@@ -404,7 +406,7 @@ function DraftsBar({ drafts }: { drafts: UseThemeDraftsResult }) {
       <TextField
         select
         size="small"
-        label="Draft"
+        label={t("themeMixer.draftLabel")}
         value={activeId ?? ""}
         onChange={(e) => drafts.selectDraft(e.target.value)}
         sx={{ minWidth: 140 }}
@@ -417,12 +419,12 @@ function DraftsBar({ drafts }: { drafts: UseThemeDraftsResult }) {
       </TextField>
       <TextField
         size="small"
-        label="Name"
+        label={t("themeMixer.nameLabel")}
         value={activeDraft.name}
         onChange={(e) => drafts.renameDraft(activeDraft.id, e.target.value)}
         sx={{ width: 150 }}
       />
-      <Tooltip title="New draft">
+      <Tooltip title={t("themeMixer.newDraft")}>
         <IconButton
           size="small"
           onClick={() => drafts.createDraft(DEFAULT_CUSTOM_PALETTE)}
@@ -430,7 +432,7 @@ function DraftsBar({ drafts }: { drafts: UseThemeDraftsResult }) {
           <AddIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Duplicate draft">
+      <Tooltip title={t("themeMixer.duplicateDraft")}>
         <IconButton
           size="small"
           onClick={() => drafts.duplicateDraft(activeDraft.id)}
@@ -438,7 +440,7 @@ function DraftsBar({ drafts }: { drafts: UseThemeDraftsResult }) {
           <ContentCopyIcon fontSize="small" />
         </IconButton>
       </Tooltip>
-      <Tooltip title="Delete draft">
+      <Tooltip title={t("themeMixer.deleteDraft")}>
         <span>
           <IconButton
             size="small"
@@ -481,7 +483,28 @@ export function ThemeMixer({
   enableDrafts = false,
   sourceThemes = DEFAULT_SOURCE_THEMES,
 }: ThemeMixerProps) {
+  const t = useTranslations("components");
   const drafts = useThemeDrafts();
+  const harmonyLabels: Record<HarmonyType, string> = {
+    mono: t("themeMixer.harmonyMono"),
+    analogous: t("themeMixer.harmonyAnalogous"),
+    split: t("themeMixer.harmonySplit"),
+    complementary: t("themeMixer.harmonyComplementary"),
+    triadic: t("themeMixer.harmonyTriadic"),
+    square: t("themeMixer.harmonySquare"),
+  };
+  const builtInSourceThemeNames: Record<string, string> = {
+    default: t("themeMixer.sourceDefault"),
+    midnight: t("themeMixer.sourceMidnight"),
+    forest: t("themeMixer.sourceForest"),
+    sunset: t("themeMixer.sourceSunset"),
+    aurora: t("themeMixer.sourceAurora"),
+    highContrast: t("themeMixer.sourceHighContrast"),
+  };
+  const getSourceThemeName = (theme: SourceTheme) =>
+    DEFAULT_SOURCE_THEMES.includes(theme)
+      ? (builtInSourceThemeNames[theme.id] ?? theme.name)
+      : theme.name;
   const [localPalette, setLocalPalette] = useState<CustomThemePaletteInput>(
     () => value || DEFAULT_CUSTOM_PALETTE,
   );
@@ -491,8 +514,11 @@ export function ThemeMixer({
   useEffect(() => {
     if (!enableDrafts || !drafts.hydrated || didInitDrafts.current) return;
     didInitDrafts.current = true;
-    drafts.ensureAtLeastOneDraft(value || DEFAULT_CUSTOM_PALETTE, "My Theme");
-  }, [enableDrafts, drafts, value]);
+    drafts.ensureAtLeastOneDraft(
+      value || DEFAULT_CUSTOM_PALETTE,
+      t("themeMixer.defaultDraftName"),
+    );
+  }, [enableDrafts, drafts, value, t]);
 
   // In drafts mode the active draft is the single source of truth.
   const palette: CustomThemePaletteInput = enableDrafts
@@ -520,7 +546,7 @@ export function ThemeMixer({
 
   const handleSourceTheme = useCallback(
     (id: string) => {
-      const source = sourceThemes.find((t) => t.id === id);
+      const source = sourceThemes.find((theme) => theme.id === id);
       if (source) applyPalette(source.palette);
     },
     [applyPalette, sourceThemes],
@@ -554,12 +580,12 @@ export function ThemeMixer({
   // Which source preset (if any) exactly matches the current palette.
   const activeSourceId = useMemo(() => {
     const match = sourceThemes.find(
-      (t) =>
-        t.palette.primaryMain === palette.primaryMain &&
-        t.palette.secondaryMain === palette.secondaryMain &&
-        t.palette.backgroundDefault === palette.backgroundDefault &&
-        t.palette.backgroundPaper === palette.backgroundPaper &&
-        t.palette.accentColor === palette.accentColor,
+      (theme) =>
+        theme.palette.primaryMain === palette.primaryMain &&
+        theme.palette.secondaryMain === palette.secondaryMain &&
+        theme.palette.backgroundDefault === palette.backgroundDefault &&
+        theme.palette.backgroundPaper === palette.backgroundPaper &&
+        theme.palette.accentColor === palette.accentColor,
     );
     return match?.id ?? "";
   }, [sourceThemes, palette]);
@@ -567,10 +593,10 @@ export function ThemeMixer({
   return (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
-        Mix Your Own Theme
+        {t("themeMixer.title")}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Pick your colors below. A dark mode variant is automatically generated.
+        {t("themeMixer.description")}
       </Typography>
 
       {enableDrafts && <DraftsBar drafts={drafts} />}
@@ -580,20 +606,20 @@ export function ThemeMixer({
         <TextField
           select
           size="small"
-          label="Source theme"
+          label={t("themeMixer.sourceThemeLabel")}
           value={activeSourceId}
           onChange={(e) => handleSourceTheme(e.target.value)}
-          helperText="Start from a preset, then customize below"
+          helperText={t("themeMixer.sourceThemeHelper")}
           sx={{ maxWidth: 240 }}
         >
           {activeSourceId === "" && (
             <MenuItem value="" disabled>
-              Custom
+              {t("themeMixer.customOption")}
             </MenuItem>
           )}
-          {sourceThemes.map((t) => (
-            <MenuItem key={t.id} value={t.id}>
-              {t.name}
+          {sourceThemes.map((theme) => (
+            <MenuItem key={theme.id} value={theme.id}>
+              {getSourceThemeName(theme)}
             </MenuItem>
           ))}
         </TextField>
@@ -608,12 +634,12 @@ export function ThemeMixer({
             color="text.secondary"
             sx={{ mb: 0.5, display: "block" }}
           >
-            Color Harmonies
+            {t("themeMixer.colorHarmonies")}
           </Typography>
           <ButtonGroup size="small" variant="outlined">
-            {(Object.keys(HARMONY_LABELS) as HarmonyType[]).map((h) => (
+            {HARMONY_TYPES.map((h) => (
               <Button key={h} onClick={() => handleHarmony(h)}>
-                {HARMONY_LABELS[h]}
+                {harmonyLabels[h]}
               </Button>
             ))}
           </ButtonGroup>
@@ -624,27 +650,27 @@ export function ThemeMixer({
         {/* Color inputs */}
         <Stack direction="row" flexWrap="wrap" gap={2}>
           <ColorInput
-            label="Primary"
+            label={t("themeMixer.colorPrimary")}
             value={palette.primaryMain}
             onChange={(v) => handleChange("primaryMain", v)}
           />
           <ColorInput
-            label="Secondary"
+            label={t("themeMixer.colorSecondary")}
             value={palette.secondaryMain}
             onChange={(v) => handleChange("secondaryMain", v)}
           />
           <ColorInput
-            label="Background"
+            label={t("themeMixer.colorBackground")}
             value={palette.backgroundDefault}
             onChange={(v) => handleChange("backgroundDefault", v)}
           />
           <ColorInput
-            label="Paper"
+            label={t("themeMixer.colorPaper")}
             value={palette.backgroundPaper}
             onChange={(v) => handleChange("backgroundPaper", v)}
           />
           <ColorInput
-            label="Accent"
+            label={t("themeMixer.colorAccent")}
             value={palette.accentColor}
             onChange={(v) => handleChange("accentColor", v)}
           />
@@ -654,26 +680,26 @@ export function ThemeMixer({
 
         {/* Status colors */}
         <Typography variant="caption" color="text.secondary">
-          Status colors
+          {t("themeMixer.statusColors")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={2}>
           <ColorInput
-            label="Error"
+            label={t("themeMixer.colorError")}
             value={resolved.errorMain}
             onChange={(v) => handleChange("errorMain", v)}
           />
           <ColorInput
-            label="Warning"
+            label={t("themeMixer.colorWarning")}
             value={resolved.warningMain}
             onChange={(v) => handleChange("warningMain", v)}
           />
           <ColorInput
-            label="Info"
+            label={t("themeMixer.colorInfo")}
             value={resolved.infoMain}
             onChange={(v) => handleChange("infoMain", v)}
           />
           <ColorInput
-            label="Success"
+            label={t("themeMixer.colorSuccess")}
             value={resolved.successMain}
             onChange={(v) => handleChange("successMain", v)}
           />
@@ -683,16 +709,16 @@ export function ThemeMixer({
 
         {/* Text colors */}
         <Typography variant="caption" color="text.secondary">
-          Text colors
+          {t("themeMixer.textColors")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={2}>
           <ColorInput
-            label="Text primary"
+            label={t("themeMixer.colorTextPrimary")}
             value={resolved.textPrimary}
             onChange={(v) => handleChange("textPrimary", v)}
           />
           <ColorInput
-            label="Text secondary"
+            label={t("themeMixer.colorTextSecondary")}
             value={resolved.textSecondary}
             onChange={(v) => handleChange("textSecondary", v)}
           />
@@ -702,36 +728,36 @@ export function ThemeMixer({
 
         {/* Surface & accent tokens */}
         <Typography variant="caption" color="text.secondary">
-          Surface &amp; accent tokens
+          {t("themeMixer.surfaceTokens")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={2}>
           <ColorInput
-            label="Chat bubble (you)"
+            label={t("themeMixer.colorChatBubbleUser")}
             value={resolved.chatBubbleUser}
             onChange={(v) => handleChange("chatBubbleUser", v)}
           />
           <ColorInput
-            label="Chat bubble (AI)"
+            label={t("themeMixer.colorChatBubbleAssistant")}
             value={resolved.chatBubbleAssistant}
             onChange={(v) => handleChange("chatBubbleAssistant", v)}
           />
           <ColorInput
-            label="Editor background"
+            label={t("themeMixer.colorEditorBackground")}
             value={resolved.editorBackground}
             onChange={(v) => handleChange("editorBackground", v)}
           />
           <ColorInput
-            label="Code block"
+            label={t("themeMixer.colorCodeBlock")}
             value={resolved.codeBlock}
             onChange={(v) => handleChange("codeBlock", v)}
           />
           <ColorInput
-            label="Search highlight"
+            label={t("themeMixer.colorSearchHighlight")}
             value={resolved.searchHighlight}
             onChange={(v) => handleChange("searchHighlight", v)}
           />
           <ColorInput
-            label="Subtle border"
+            label={t("themeMixer.colorSubtleBorder")}
             value={resolved.subtleBorder}
             onChange={(v) => handleChange("subtleBorder", v)}
           />
@@ -741,21 +767,21 @@ export function ThemeMixer({
 
         {/* Backgrounds & gradients */}
         <Typography variant="caption" color="text.secondary">
-          Backgrounds &amp; gradients
+          {t("themeMixer.backgroundsGradients")}
         </Typography>
         <Stack direction="row" flexWrap="wrap" gap={2} alignItems="center">
           <ColorInput
-            label="Navbar (glass)"
+            label={t("themeMixer.colorGlassNavbar")}
             value={resolved.glassNavbarColor}
             onChange={(v) => handleChange("glassNavbarColor", v)}
           />
           <ColorInput
-            label="Gradient start"
+            label={t("themeMixer.colorGradientStart")}
             value={resolved.heroGradientStart}
             onChange={(v) => handleChange("heroGradientStart", v)}
           />
           <ColorInput
-            label="Gradient end"
+            label={t("themeMixer.colorGradientEnd")}
             value={resolved.heroGradientEnd}
             onChange={(v) => handleChange("heroGradientEnd", v)}
           />
@@ -776,7 +802,7 @@ export function ThemeMixer({
 
         {/* Live Preview */}
         <Typography variant="caption" color="text.secondary">
-          Preview
+          {t("themeMixer.preview")}
         </Typography>
         <Stack direction="row" gap={1.5}>
           {/* Light preview */}
@@ -794,7 +820,7 @@ export function ThemeMixer({
                 variant="caption"
                 sx={{ color: "#fff", fontSize: "0.65rem" }}
               >
-                Light
+                {t("themeMixer.light")}
               </Typography>
             </Box>
             <Box sx={{ p: 1, bgcolor: preview.light.background.default }}>
@@ -839,7 +865,7 @@ export function ThemeMixer({
                 variant="caption"
                 sx={{ color: "#fff", fontSize: "0.65rem" }}
               >
-                Dark
+                {t("themeMixer.dark")}
               </Typography>
             </Box>
             <Box sx={{ p: 1, bgcolor: preview.dark.background.default }}>
@@ -879,7 +905,7 @@ export function ThemeMixer({
             startIcon={<SaveIcon />}
             onClick={handleSave}
           >
-            Save Custom Theme
+            {t("themeMixer.save")}
           </Button>
           <Button
             variant="outlined"
@@ -887,7 +913,7 @@ export function ThemeMixer({
             startIcon={<RestoreIcon />}
             onClick={handleReset}
           >
-            Reset
+            {t("themeMixer.reset")}
           </Button>
         </Stack>
       </Stack>
@@ -903,14 +929,13 @@ const WHEEL_SIZE = 220;
 const WHEEL_RADIUS = WHEEL_SIZE / 2;
 const POINT_RADIUS = 10;
 
-const POINT_FIELDS: { field: keyof CustomThemePaletteInput; label: string }[] =
-  [
-    { field: "primaryMain", label: "P" },
-    { field: "secondaryMain", label: "S" },
-    { field: "backgroundDefault", label: "B" },
-    { field: "backgroundPaper", label: "W" },
-    { field: "accentColor", label: "A" },
-  ];
+const POINT_FIELDS: (keyof CustomThemePaletteInput)[] = [
+  "primaryMain",
+  "secondaryMain",
+  "backgroundDefault",
+  "backgroundPaper",
+  "accentColor",
+];
 
 interface ColorWheelProps {
   palette: CustomThemePaletteInput;
@@ -918,6 +943,14 @@ interface ColorWheelProps {
 }
 
 function ColorWheel({ palette, onChange }: ColorWheelProps) {
+  const t = useTranslations("components");
+  const pointLabels: Partial<Record<keyof CustomThemePaletteInput, string>> = {
+    primaryMain: t("themeMixer.pointPrimary"),
+    secondaryMain: t("themeMixer.pointSecondary"),
+    backgroundDefault: t("themeMixer.pointBackground"),
+    backgroundPaper: t("themeMixer.pointPaper"),
+    accentColor: t("themeMixer.pointAccent"),
+  };
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const draggingRef = useRef<keyof CustomThemePaletteInput | null>(null);
@@ -1011,7 +1044,7 @@ function ColorWheel({ palette, onChange }: ColorWheelProps) {
       const y = e.clientY - rect.top;
 
       // Find which point was clicked
-      for (const { field } of POINT_FIELDS) {
+      for (const field of POINT_FIELDS) {
         const pos = hexToPosition(palette[field] ?? "#000000");
         const dx = x - pos.x;
         const dy = y - pos.y;
@@ -1067,7 +1100,7 @@ function ColorWheel({ palette, onChange }: ColorWheelProps) {
         style={{ borderRadius: "50%", display: "block" }}
       />
       {/* Draggable color points */}
-      {POINT_FIELDS.map(({ field, label }) => {
+      {POINT_FIELDS.map((field) => {
         const pos = hexToPosition(palette[field] ?? "#000000");
         return (
           <Box
@@ -1097,7 +1130,7 @@ function ColorWheel({ palette, onChange }: ColorWheelProps) {
                 lineHeight: 1,
               }}
             >
-              {label}
+              {pointLabels[field]}
             </Typography>
           </Box>
         );

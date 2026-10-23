@@ -9,7 +9,14 @@
     "lostWarning": "Ihr erstellter {type} geht verloren, wenn Sie jetzt abbrechen.",
     "preview": "Vorschau",
     "saveClose": "Speichern & Schließen",
-    "takeMoments": "Dies kann einen Moment dauern"
+    "takeMoments": "Dies kann einen Moment dauern",
+    "defaultInputPlaceholder": "Beschreibung eingeben...",
+    "defaultTitle": "Inhalte generieren",
+    "editPrompt": "Prompt bearbeiten",
+    "enterDescriptionError": "Bitte geben Sie eine Beschreibung ein",
+    "generateFailed": "Inhalt konnte nicht generiert werden",
+    "regenerate": "Neu generieren",
+    "regenerateFailed": "Der Inhalt konnte nicht neu generiert werden"
   },
   "promptMethodSelector": {
     "inputButton": "Eingabe",
@@ -20,7 +27,53 @@
       "text": "Text",
       "video": "Video"
     },
-    "outputButton": "Ausgabe"
+    "outputButton": "Ausgabe",
+    "configure": "Konfigurieren",
+    "displaySettings": "Anzeigeeinstellungen",
+    "displaySettingsDescription": "Steuern Sie Text und Audio der unterstützenden Vokabeln.",
+    "enableAudioPlayback": "Audiowiedergabe aktivieren",
+    "enableAudioPlaybackDescription": "Audiosteuerung für Wörter und Definitionen zulassen.",
+    "inputDescription": "Wie die Lernenden eine Antwort einreichen.",
+    "invalidConfig": "Wählen Sie mindestens eine Eingabe- und eine Ausgabemethode aus",
+    "meaningModes": {
+      "easy": {
+        "description": "Ordnen Sie Wörter ihren Bedeutungen zu.",
+        "label": "Einfach"
+      },
+      "hard": {
+        "description": "Zuordnen ohne die unterstützenden Hinweise zur Bedeutung.",
+        "label": "Schwer"
+      },
+      "learn": {
+        "description": "Lernen Sie mit geführtem Zuordnen und Feedback.",
+        "label": "Lernen"
+      }
+    },
+    "methodDescriptions": {
+      "audio": "Verwenden Sie aufgezeichnetes oder generiertes Audio.",
+      "image": "Ein Bild als Aufgabenstellung oder Antwort anzeigen.",
+      "text": "Den Prompt oder die Antwort als Text anzeigen.",
+      "video": "Verwenden Sie ein Video als Prompt oder Antwort.",
+      "writing": "Handschriftliche Antwort auf einer Zeichenfläche zulassen."
+    },
+    "outputDescription": "Wie die Frage dem Lernenden präsentiert wird.",
+    "practiceModes": "Übungsmodi",
+    "practiceModesDescription": "Wählen Sie aus, welche Zuordnungsaktivitäten die Lernenden absolvieren.",
+    "promptDescription": "Legen Sie fest, ob Lernende Wörter oder Definitionen sehen.",
+    "promptFor": {
+      "definition": {
+        "description": "Zeigen Sie die Definition als Ziel an.",
+        "label": "Prompt für Definition"
+      },
+      "word": {
+        "description": "Das Vokabelwort als Ziel anzeigen.",
+        "label": "Prompt für Wort"
+      }
+    },
+    "promptForAriaLabel": "Wort oder Definition abfragen",
+    "promptHeading": "Prompt",
+    "showPronunciations": "Aussprachen anzeigen",
+    "showPronunciationsDescription": "Aussprache neben dem Vokabular anzeigen."
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "Text zur Sprachausgabe eingeben...",
@@ -29,7 +82,9 @@
     "generateAudio": "Audio generieren",
     "generateImage": "Bild generieren",
     "imagePromptPlaceholder": "Beschreiben Sie das Bild, das Sie generieren möchten...",
-    "openRecordingStudio": "Im Aufnahmestudio öffnen"
+    "openRecordingStudio": "Im Aufnahmestudio öffnen",
+    "generatedAlt": "Generiert",
+    "regeneratedAlt": "Neu generiert"
   },
   "blockSuggestionMenu": {
     "aiTitle": "🤖 KI-gestützte Vorschläge",
@@ -45,6 +100,20 @@
     "ownerPlaceholder": "Besitzer-ID"
   },
   "aiContentSuggestion": {
-    "tabToAccept": "Tab zum Akzeptieren"
+    "tabToAccept": "Tab zum Akzeptieren",
+    "generating": "Wird generiert...",
+    "tabToAcceptHint": "(Tab zum Akzeptieren)"
+  },
+  "blockSuggestionPlugin": {
+    "addCustomPractice": "Eigene Übung hinzufügen",
+    "addExplanation": "Erklärung hinzufügen",
+    "addHeading": "Überschrift hinzufügen",
+    "addQuiz": "Quiz hinzufügen",
+    "addSummary": "Zusammenfassung hinzufügen",
+    "addVocabularyPractice": "Vokabelübung hinzufügen",
+    "moreSuggestions": "↑↓ {count} weitere",
+    "newSection": "Neuer Abschnitt",
+    "questionCount": "{count, plural, one {# Frage} other {# Fragen}}",
+    "tabKey": "Tab"
   }
 }

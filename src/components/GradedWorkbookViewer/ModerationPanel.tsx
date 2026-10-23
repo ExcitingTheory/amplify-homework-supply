@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Box,
   Paper,
@@ -48,20 +49,24 @@ interface ModerationPanelProps {
 // Category display names
 // ============================================================================
 
-const MODERATION_CATEGORIES: Record<string, string> = {
-  sexual: 'Sexual Content',
-  'sexual/minors': 'Sexual Content (Minors)',
-  harassment: 'Harassment',
-  'harassment/threatening': 'Harassment (Threatening)',
-  hate: 'Hate Speech',
-  'hate/threatening': 'Hate (Threatening)',
-  illicit: 'Illicit Activity',
-  'illicit/violent': 'Illicit Violence',
-  'self-harm': 'Self-Harm',
-  'self-harm/intent': 'Self-Harm (Intent)',
-  'self-harm/instructions': 'Self-Harm (Instructions)',
-  violence: 'Violence',
-  'violence/graphic': 'Violence (Graphic)',
+type Translate = ReturnType<typeof useTranslations>
+
+const MODERATION_CATEGORIES: Record<string, (t: Translate) => string> = {
+  sexual: (t) => t('moderationPanel.categoryLabels.sexual'),
+  'sexual/minors': (t) => t('moderationPanel.categoryLabels.sexualMinors'),
+  harassment: (t) => t('moderationPanel.categoryLabels.harassment'),
+  'harassment/threatening': (t) =>
+    t('moderationPanel.categoryLabels.harassmentThreatening'),
+  hate: (t) => t('moderationPanel.categoryLabels.hate'),
+  'hate/threatening': (t) => t('moderationPanel.categoryLabels.hateThreatening'),
+  illicit: (t) => t('moderationPanel.categoryLabels.illicit'),
+  'illicit/violent': (t) => t('moderationPanel.categoryLabels.illicitViolent'),
+  'self-harm': (t) => t('moderationPanel.categoryLabels.selfHarm'),
+  'self-harm/intent': (t) => t('moderationPanel.categoryLabels.selfHarmIntent'),
+  'self-harm/instructions': (t) =>
+    t('moderationPanel.categoryLabels.selfHarmInstructions'),
+  violence: (t) => t('moderationPanel.categoryLabels.violence'),
+  'violence/graphic': (t) => t('moderationPanel.categoryLabels.violenceGraphic'),
 }
 
 // ============================================================================
@@ -69,9 +74,10 @@ const MODERATION_CATEGORIES: Record<string, string> = {
 // ============================================================================
 
 export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPanelProps) {
+  const t = useTranslations('components')
   const [expanded, setExpanded] = React.useState(moderation.status === 'flagged')
 
-  const statusConfig = getStatusConfig(moderation.status)
+  const statusConfig = getStatusConfig(moderation.status, t)
   const flaggedCategories = getFlaggedCategories(moderation.flags)
 
   return (
@@ -100,7 +106,7 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
         <ShieldIcon sx={{ color: statusConfig.iconColor }} />
         <Box sx={{ flex: 1 }}>
           <Stack direction="row" alignItems="center" spacing={1}>
-            <Typography variant="subtitle2">Content Moderation</Typography>
+            <Typography variant="subtitle2">{t('moderationPanel.title')}</Typography>
             <Chip
               icon={statusConfig.chipIcon}
               label={statusConfig.label}
@@ -111,7 +117,9 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
           </Stack>
           {moderation.checkedAt && (
             <Typography variant="caption" color="text.secondary">
-              Last checked: {new Date(moderation.checkedAt).toLocaleString()}
+              {t('moderationPanel.lastChecked', {
+                date: new Date(moderation.checkedAt).toLocaleString(),
+              })}
             </Typography>
           )}
         </Box>
@@ -126,7 +134,7 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
           {/* Flagged categories */}
           {moderation.status === 'flagged' && flaggedCategories.length > 0 && (
             <Alert severity="error" sx={{ mb: 2 }}>
-              <AlertTitle>Flagged Categories</AlertTitle>
+              <AlertTitle>{t('moderationPanel.flaggedCategoriesTitle')}</AlertTitle>
               <List dense disablePadding>
                 {flaggedCategories.map((cat) => (
                   <ListItem key={cat.category} disablePadding sx={{ py: 0.25 }}>
@@ -134,8 +142,14 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
                       <BlockIcon fontSize="small" color="error" />
                     </ListItemIcon>
                     <ListItemText
-                      primary={MODERATION_CATEGORIES[cat.category] || cat.category}
-                      secondary={cat.score != null ? `Score: ${(cat.score * 100).toFixed(1)}%` : undefined}
+                      primary={MODERATION_CATEGORIES[cat.category]?.(t) || cat.category}
+                      secondary={
+                        cat.score != null
+                          ? t('moderationPanel.score', {
+                              score: (cat.score * 100).toFixed(1),
+                            })
+                          : undefined
+                      }
                       primaryTypographyProps={{ variant: 'body2' }}
                       secondaryTypographyProps={{ variant: 'caption' }}
                     />
@@ -147,37 +161,37 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
 
           {moderation.status === 'approved' && (
             <Alert severity="success" sx={{ mb: 2 }}>
-              Content has passed moderation checks. No policy violations detected.
+              {t('moderationPanel.approvedMessage')}
             </Alert>
           )}
 
           {moderation.status === 'pending' && (
             <Alert severity="info" sx={{ mb: 2 }}>
-              Content has not been moderated yet. Run a check to verify compliance.
+              {t('moderationPanel.pendingMessage')}
             </Alert>
           )}
 
           {!moderation.status && (
             <Alert severity="info" sx={{ mb: 2 }}>
-              No moderation data available for this submission.
+              {t('moderationPanel.noDataMessage')}
             </Alert>
           )}
 
           {/* Actions */}
           {onAction && (
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-              <Tooltip title="Run moderation check on this submission">
+              <Tooltip title={t('moderationPanel.recheckTooltip')}>
                 <Button
                   size="small"
                   variant="outlined"
                   startIcon={<RefreshIcon />}
                   onClick={() => onAction('recheck', gradeId)}
                 >
-                  Re-check
+                  {t('moderationPanel.recheck')}
                 </Button>
               </Tooltip>
               {moderation.status !== 'approved' && (
-                <Tooltip title="Manually approve this content">
+                <Tooltip title={t('moderationPanel.approveTooltip')}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -185,12 +199,12 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
                     startIcon={<VerifiedUserIcon />}
                     onClick={() => onAction('approve', gradeId)}
                   >
-                    Approve
+                    {t('moderationPanel.approve')}
                   </Button>
                 </Tooltip>
               )}
               {moderation.status !== 'flagged' && (
-                <Tooltip title="Manually flag this content for review">
+                <Tooltip title={t('moderationPanel.flagTooltip')}>
                   <Button
                     size="small"
                     variant="outlined"
@@ -198,7 +212,7 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
                     startIcon={<BlockIcon />}
                     onClick={() => onAction('flag', gradeId)}
                   >
-                    Flag
+                    {t('moderationPanel.flag')}
                   </Button>
                 </Tooltip>
               )}
@@ -214,11 +228,11 @@ export function ModerationPanel({ moderation, gradeId, onAction }: ModerationPan
 // Helpers
 // ============================================================================
 
-function getStatusConfig(status: string | null | undefined) {
+function getStatusConfig(status: string | null | undefined, t: Translate) {
   switch (status) {
     case 'approved':
       return {
-        label: 'Approved',
+        label: t('moderationPanel.statusApproved'),
         borderColor: 'success.main',
         bgColor: 'success.50',
         iconColor: 'success.main',
@@ -227,7 +241,7 @@ function getStatusConfig(status: string | null | undefined) {
       }
     case 'flagged':
       return {
-        label: 'Flagged',
+        label: t('moderationPanel.statusFlagged'),
         borderColor: 'error.main',
         bgColor: 'error.50',
         iconColor: 'error.main',
@@ -236,7 +250,7 @@ function getStatusConfig(status: string | null | undefined) {
       }
     case 'pending':
       return {
-        label: 'Pending',
+        label: t('moderationPanel.statusPending'),
         borderColor: 'warning.main',
         bgColor: 'warning.50',
         iconColor: 'warning.main',
@@ -245,7 +259,7 @@ function getStatusConfig(status: string | null | undefined) {
       }
     default:
       return {
-        label: 'Not Checked',
+        label: t('moderationPanel.statusNotChecked'),
         borderColor: 'grey.300',
         bgColor: 'grey.50',
         iconColor: 'grey.500',

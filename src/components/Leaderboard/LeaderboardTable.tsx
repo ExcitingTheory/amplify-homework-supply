@@ -8,6 +8,7 @@
  */
 
 import React from "react";
+import { useTranslations } from "next-intl";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -28,6 +29,7 @@ import type {
 } from "../Gamification/DiceBearAvatar";
 
 export interface LeaderboardEntry {
+  profileHidden?: boolean;
   studentId: string;
   studentName: string;
   avatarColor: string;
@@ -57,6 +59,7 @@ export interface LeaderboardTableProps {
 const RANK_METALS: MetalKey[] = ["gold", "silver", "bronze"];
 
 function RankBadge({ rank }: { rank: number }) {
+  const t = useTranslations("components");
   const theme = useTheme();
   if (rank > 3) {
     return (
@@ -72,7 +75,7 @@ function RankBadge({ rank }: { rank: number }) {
       size={26}
       rimMetal={metal}
       fieldColor={metal.mid}
-      ariaLabel={`Rank ${rank}`}
+      ariaLabel={t("leaderboardTable.rankAriaLabel", { rank })}
       charge={
         <Typography
           variant="caption"
@@ -95,6 +98,8 @@ function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
   }
   return (
     <AvatarDisplay
+      profileUsername={entry.profileHidden ? undefined : entry.studentId}
+      label={entry.studentName}
       seed={entry.avatarSeed || entry.studentId}
       size={24}
       style={entry.avatarStyle || "simple"}
@@ -104,6 +109,8 @@ function StudentAvatar({ entry }: { entry: LeaderboardEntry }) {
 }
 
 /** Single sidebar-card row: rank medallion, avatar, name, XP — no Lvl/Streak columns. */
+const GAP_INDICATOR = "⋯";
+
 function CompactRow({
   entry,
   rank,
@@ -113,6 +120,7 @@ function CompactRow({
   rank: number;
   isCurrentUser: boolean;
 }) {
+  const t = useTranslations("components");
   return (
     <Box
       sx={{
@@ -138,7 +146,9 @@ function CompactRow({
           whiteSpace: "nowrap",
         }}
       >
-        {isCurrentUser ? `${entry.studentName} (You)` : entry.studentName}
+        {isCurrentUser
+          ? t("leaderboardTable.currentUserName", { name: entry.studentName })
+          : entry.studentName}
       </Typography>
       <Typography variant="body2" fontWeight={700} color="primary.main">
         {entry.totalXP}
@@ -153,6 +163,7 @@ export function LeaderboardTable({
   topN = 5,
   variant = "table",
 }: LeaderboardTableProps) {
+  const t = useTranslations("components");
   const sorted = [...entries].sort((a, b) => b.totalXP - a.totalXP);
   const currentIndex = sorted.findIndex(
     (e) => e.studentId === currentStudentId,
@@ -175,7 +186,7 @@ export function LeaderboardTable({
           color="text.secondary"
           sx={{ fontWeight: 700, px: 1, display: "block" }}
         >
-          Top Students
+          {t("leaderboardTable.topStudents")}
         </Typography>
         {topRows.map((entry, index) => (
           <CompactRow
@@ -192,7 +203,7 @@ export function LeaderboardTable({
               color="text.disabled"
               sx={{ display: "block", textAlign: "center", py: 0.5 }}
             >
-              ⋯
+              {GAP_INDICATOR}
             </Typography>
             <CompactRow
               entry={currentRow}
@@ -215,10 +226,14 @@ export function LeaderboardTable({
         <TableHead>
           <TableRow>
             <TableCell>#</TableCell>
-            <TableCell>Student</TableCell>
+            <TableCell>{t("leaderboardTable.studentHeader")}</TableCell>
             <TableCell align="right">XP</TableCell>
-            <TableCell align="right">Lvl</TableCell>
-            <TableCell align="right">Streak</TableCell>
+            <TableCell align="right">
+              {t("leaderboardTable.levelHeader")}
+            </TableCell>
+            <TableCell align="right">
+              {t("leaderboardTable.streakHeader")}
+            </TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -246,7 +261,9 @@ export function LeaderboardTable({
                       fontWeight={isCurrentUser ? 700 : 400}
                     >
                       {isCurrentUser
-                        ? `${entry.studentName} (You)`
+                        ? t("leaderboardTable.currentUserName", {
+                            name: entry.studentName,
+                          })
                         : entry.studentName}
                     </Typography>
                   </Box>
@@ -254,7 +271,11 @@ export function LeaderboardTable({
                 <TableCell align="right">{entry.totalXP}</TableCell>
                 <TableCell align="right">{entry.level}</TableCell>
                 <TableCell align="right">
-                  {entry.currentStreak > 0 ? `🔥 ${entry.currentStreak}d` : "—"}
+                  {entry.currentStreak > 0
+                    ? t("leaderboardTable.streakDays", {
+                        days: entry.currentStreak,
+                      })
+                    : "—"}
                 </TableCell>
               </TableRow>
             );
@@ -275,7 +296,9 @@ export function LeaderboardTable({
                   <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                     <StudentAvatar entry={currentRow} />
                     <Typography variant="body2" fontWeight={700}>
-                      {currentRow.studentName} (You)
+                      {t("leaderboardTable.currentUserName", {
+                        name: currentRow.studentName,
+                      })}
                     </Typography>
                   </Box>
                 </TableCell>
@@ -283,7 +306,9 @@ export function LeaderboardTable({
                 <TableCell align="right">{currentRow.level}</TableCell>
                 <TableCell align="right">
                   {currentRow.currentStreak > 0
-                    ? `🔥 ${currentRow.currentStreak}d`
+                    ? t("leaderboardTable.streakDays", {
+                        days: currentRow.currentStreak,
+                      })
                     : "—"}
                 </TableCell>
               </TableRow>

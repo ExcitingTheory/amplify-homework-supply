@@ -7,6 +7,12 @@ import React from 'react'
 import { PeerReviewInvitations, PeerReviewInvitation } from '../PeerReviewInvitations'
 import { OpenPeerReviewButton } from '../OpenPeerReviewButton'
 
+// Keep interpolated values observable: render "key(value,...)" when values are passed.
+vi.mock('next-intl', () => ({
+  useTranslations: () => (key: string, values?: Record<string, unknown>) =>
+    values ? `${key}(${Object.values(values).join(',')})` : key,
+}))
+
 // ============================================================================
 // PeerReviewInvitations
 // ============================================================================
@@ -47,7 +53,7 @@ describe('PeerReviewInvitations', () => {
     expect(screen.getByText('Biology Chapter 3')).toBeDefined()
     expect(screen.getByText('Chemistry Lab')).toBeDefined()
     // REVIEW_COMPLETE should be filtered out
-    expect(screen.queryByText('From: carol')).toBeNull()
+    expect(screen.queryByText('peerReviewInvitations.from(carol)')).toBeNull()
   })
 
   it('shows the invitation count badge', () => {
@@ -66,7 +72,7 @@ describe('PeerReviewInvitations', () => {
       <PeerReviewInvitations invitations={mockInvitations} onJoinReview={onJoin} />,
     )
 
-    const joinButtons = screen.getAllByText('Join Review')
+    const joinButtons = screen.getAllByText('peerReviewInvitations.joinReview')
     fireEvent.click(joinButtons[0])
     expect(onJoin).toHaveBeenCalledWith('room-1')
   })
@@ -98,8 +104,8 @@ describe('PeerReviewInvitations', () => {
       <PeerReviewInvitations invitations={mockInvitations} onJoinReview={onJoin} />,
     )
 
-    expect(screen.getByText('Open')).toBeDefined()
-    expect(screen.getByText('In Progress')).toBeDefined()
+    expect(screen.getByText('peerReviewInvitations.status.open')).toBeDefined()
+    expect(screen.getByText('peerReviewInvitations.status.inProgress')).toBeDefined()
   })
 
   it('shows owner display name or fallback to ownerId', () => {
@@ -118,7 +124,7 @@ describe('PeerReviewInvitations', () => {
     )
 
     // Falls back to ownerId when no displayName
-    expect(screen.getByText('From: user123')).toBeDefined()
+    expect(screen.getByText('peerReviewInvitations.from(user123)')).toBeDefined()
   })
 })
 
@@ -133,7 +139,7 @@ describe('OpenPeerReviewButton', () => {
       <OpenPeerReviewButton gradeId="grade-1" onCreateRoom={onCreate} />,
     )
 
-    expect(screen.getByText('Open for Peer Review')).toBeDefined()
+    expect(screen.getByText('openPeerReviewButton.openForPeerReview')).toBeDefined()
   })
 
   it('opens dialog on click', () => {
@@ -142,9 +148,9 @@ describe('OpenPeerReviewButton', () => {
       <OpenPeerReviewButton gradeId="grade-1" onCreateRoom={onCreate} />,
     )
 
-    fireEvent.click(screen.getByText('Open for Peer Review'))
-    expect(screen.getByText('Open Peer Review')).toBeDefined()
-    expect(screen.getByText('Create Room')).toBeDefined()
+    fireEvent.click(screen.getByText('openPeerReviewButton.openForPeerReview'))
+    expect(screen.getByText('openPeerReviewButton.dialogTitle')).toBeDefined()
+    expect(screen.getByText('openPeerReviewButton.createRoom')).toBeDefined()
   })
 
   it('calls onCreateRoom with gradeId and invited users', async () => {
@@ -159,9 +165,9 @@ describe('OpenPeerReviewButton', () => {
     )
 
     // Open dialog
-    fireEvent.click(screen.getByText('Open for Peer Review'))
+    fireEvent.click(screen.getByText('openPeerReviewButton.openForPeerReview'))
     // Click Create Room (no invites yet)
-    fireEvent.click(screen.getByText('Create Room'))
+    fireEvent.click(screen.getByText('openPeerReviewButton.createRoom'))
 
     await waitFor(() => {
       expect(onCreate).toHaveBeenCalledWith('grade-1', [])
@@ -175,8 +181,8 @@ describe('OpenPeerReviewButton', () => {
       <OpenPeerReviewButton gradeId="grade-1" onCreateRoom={onCreate} />,
     )
 
-    fireEvent.click(screen.getByText('Open for Peer Review'))
-    fireEvent.click(screen.getByText('Create Room'))
+    fireEvent.click(screen.getByText('openPeerReviewButton.openForPeerReview'))
+    fireEvent.click(screen.getByText('openPeerReviewButton.createRoom'))
 
     await waitFor(() => {
       expect(screen.getByText('Network error')).toBeDefined()
@@ -189,7 +195,7 @@ describe('OpenPeerReviewButton', () => {
       <OpenPeerReviewButton gradeId="grade-1" onCreateRoom={onCreate} disabled />,
     )
 
-    const button = screen.getByText('Open for Peer Review').closest('button')
+    const button = screen.getByText('openPeerReviewButton.openForPeerReview').closest('button')
     expect(button?.disabled).toBe(true)
   })
 })

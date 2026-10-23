@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import {
   Box,
   Paper,
@@ -41,6 +42,7 @@ export function CompactStudentTable({
   students,
   totalCount,
 }: CompactStudentTableProps) {
+  const t = useTranslations("components");
   if (students.length === 0) return null;
   const overflow = totalCount != null ? totalCount - students.length : 0;
 
@@ -53,18 +55,20 @@ export function CompactStudentTable({
         overflow: "hidden",
       }}
     >
-      <Table size="small" aria-label="student performance matrix table">
+      <Table size="small" aria-label={t("compactStudentTable.tableAriaLabel")}>
         <TableHead sx={{ bgcolor: "action.hover" }}>
           <TableRow>
-            <TableCell sx={{ fontWeight: 700 }}>Student</TableCell>
-            <TableCell sx={{ fontWeight: 700 }} align="right">
-              Units Completed
+            <TableCell sx={{ fontWeight: 700 }}>
+              {t("compactStudentTable.student")}
             </TableCell>
             <TableCell sx={{ fontWeight: 700 }} align="right">
-              Average
+              {t("compactStudentTable.unitsCompleted")}
             </TableCell>
             <TableCell sx={{ fontWeight: 700 }} align="right">
-              Rank
+              {t("compactStudentTable.average")}
+            </TableCell>
+            <TableCell sx={{ fontWeight: 700 }} align="right">
+              {t("compactStudentTable.rank")}
             </TableCell>
           </TableRow>
         </TableHead>
@@ -74,6 +78,8 @@ export function CompactStudentTable({
               <TableCell>
                 <Stack direction="row" alignItems="center" spacing={1.5}>
                   <AvatarDisplay
+                    profileUsername={row.studentId}
+                    label={row.name}
                     seed={row.studentId}
                     size={28}
                     style="simple"
@@ -129,7 +135,7 @@ export function CompactStudentTable({
           }}
         >
           <Typography variant="caption" color="text.secondary">
-            +{overflow} more students
+            {t("compactStudentTable.moreStudents", { count: overflow })}
           </Typography>
         </Box>
       )}

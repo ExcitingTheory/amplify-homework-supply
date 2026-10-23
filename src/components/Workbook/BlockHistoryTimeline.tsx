@@ -7,6 +7,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -29,38 +30,45 @@ const fieldIcons: Record<string, React.ReactNode> = {
   accuracy: <GradeIcon fontSize="small" />,
 }
 
-function formatTime(iso: string): string {
+type Translate = ReturnType<typeof useTranslations>
+
+function formatTime(iso: string, t: Translate): string {
   const date = new Date(iso)
   const now = new Date()
   const diffMs = now.getTime() - date.getTime()
   const diffMin = Math.floor(diffMs / 60000)
 
-  if (diffMin < 1) return 'just now'
-  if (diffMin < 60) return `${diffMin}m ago`
+  if (diffMin < 1) return t('blockHistoryTimeline.justNow')
+  if (diffMin < 60) return t('blockHistoryTimeline.minutesAgo', { minutes: diffMin })
   const diffHrs = Math.floor(diffMin / 60)
-  if (diffHrs < 24) return `${diffHrs}h ago`
+  if (diffHrs < 24) return t('blockHistoryTimeline.hoursAgo', { hours: diffHrs })
   return date.toLocaleDateString()
 }
 
-function formatFieldChange(entry: HistoryEntry): string {
+function formatFieldChange(entry: HistoryEntry, t: Translate): string {
   const { fieldChanged, newValue } = entry
   if (fieldChanged === 'complete') {
-    return newValue ? 'Marked complete' : 'Marked incomplete'
+    return newValue
+      ? t('blockHistoryTimeline.markedComplete')
+      : t('blockHistoryTimeline.markedIncomplete')
   }
   if (fieldChanged === 'accuracy') {
-    return `Accuracy: ${newValue}%`
+    return t('blockHistoryTimeline.accuracy', { accuracy: String(newValue) })
   }
   if (fieldChanged === 'userAnswer') {
     const preview = typeof newValue === 'string' ? newValue.slice(0, 60) : String(newValue)
-    return `Answer updated: "${preview}${String(newValue).length > 60 ? '...' : ''}"`
+    return t('blockHistoryTimeline.answerUpdated', {
+      preview: `${preview}${String(newValue).length > 60 ? '...' : ''}`,
+    })
   }
-  return `${fieldChanged} changed`
+  return t('blockHistoryTimeline.fieldChanged', { field: fieldChanged })
 }
 
 export function BlockHistoryTimeline({
   entries,
   maxVisible = 10,
 }: BlockHistoryTimelineProps) {
+  const t = useTranslations('components')
   const [expanded, setExpanded] = useState(false)
 
   if (entries.length === 0) {
@@ -76,12 +84,16 @@ export function BlockHistoryTimeline({
         <IconButton
           size="small"
           onClick={() => setExpanded(!expanded)}
-          title={expanded ? 'Collapse history' : 'Show history'}
+          title={
+            expanded
+              ? t('blockHistoryTimeline.collapseHistory')
+              : t('blockHistoryTimeline.showHistory')
+          }
         >
           <HistoryIcon fontSize="small" />
         </IconButton>
         <Typography variant="caption" color="text.secondary">
-          {entries.length} change{entries.length !== 1 ? 's' : ''}
+          {t('blockHistoryTimeline.changeCount', { count: entries.length })}
         </Typography>
       </Box>
 
@@ -107,10 +119,11 @@ export function BlockHistoryTimeline({
               </Box>
               <Box sx={{ pt: 0.3, pb: 1, minWidth: 0 }}>
                 <Typography variant="body2" fontSize={13}>
-                  {formatFieldChange(entry)}
+                  {formatFieldChange(entry, t)}
                 </Typography>
                 <Typography variant="caption" color="text.secondary">
-                  {entry.displayName || entry.userId} &middot; {formatTime(entry.timestamp)}
+                  {entry.displayName || entry.userId} &middot;{' '}
+                  {formatTime(entry.timestamp, t)}
                 </Typography>
               </Box>
             </Box>
@@ -123,7 +136,7 @@ export function BlockHistoryTimeline({
             sx={{ cursor: 'pointer', pl: 1 }}
             onClick={() => setExpanded(true)}
           >
-            Show {entries.length - maxVisible} more...
+            {t('blockHistoryTimeline.showMore', { count: entries.length - maxVisible })}
           </Typography>
         )}
       </Collapse>

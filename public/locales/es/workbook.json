@@ -6,7 +6,10 @@
     "nextAssignment": "Siguiente tarea",
     "retrying": "Comenzando nuevo intento...",
     "sectionHeading": "Próximos pasos",
-    "tryAgain": "Intentar de nuevo"
+    "tryAgain": "Intentar de nuevo",
+    "completedIn": "Completado en {duration}",
+    "timeLimit": "Límite de tiempo: {duration}",
+    "timeLimitWithCompletion": "Límite de tiempo: {duration} • {completion}"
   },
   "answerComponent": {
     "audioNotAvailableParens": "(audio no disponible)",
@@ -27,7 +30,37 @@
     "audioNotAvailable": "{text} (audio no disponible)",
     "inputMethodSelector": "Método de entrada",
     "placeholder": "Ingrese su respuesta aquí",
-    "noDictionaryAvailable": "No hay diccionario disponible"
+    "noDictionaryAvailable": "No hay diccionario disponible",
+    "loadingAudio": "Cargando audio...",
+    "progressDescription": "Porcentaje de preguntas respondidas.",
+    "accuracyDescription": "Porcentaje de respuestas enviadas que se han marcado como correctas.",
+    "inputMethodLabels": {
+      "audio": "Responder en voz alta",
+      "text": "Escribir respuesta",
+      "writing": "Dibujar respuesta"
+    },
+    "recordYourAnswer": "Grabe su respuesta",
+    "defaultPromptByDefinition": "Escriba las palabras que mejor correspondan a la(s) siguiente(s) definición(es):",
+    "defaultPromptByWord": "Defina las siguientes palabras:"
+  },
+  "customAIComponent": {
+    "accuracyDescription": "Porcentaje de respuestas enviadas que la IA ha marcado como correctas.",
+    "completed": "Completado",
+    "correct": "Correcto",
+    "grading": "La IA está calificando su respuesta...",
+    "gradingError": "Se produjo un error al calificar. Inténtelo de nuevo.",
+    "imageUploadHint": "Campo de carga de imagen: envíe una imagen para su evaluación mediante IA",
+    "inputMethod": "Método de entrada",
+    "loading": "Cargando...",
+    "modeAudio": "Responder hablando",
+    "modeDrawing": "Dibujar respuesta",
+    "modeImage": "Subir imagen",
+    "modeText": "Escriba su respuesta",
+    "needsImprovement": "Necesita mejorar",
+    "progressDescription": "Porcentaje de preguntas calificadas por IA que han sido respondidas.",
+    "questionFallback": "Pregunta {id}",
+    "score": "Puntuación: {score}/100",
+    "yourAnswer": "Su respuesta"
   },
   "toolBarRoPlugin": {
     "fallbackText": "Formato",
@@ -56,7 +89,8 @@
     "answerPlaceholder": "Marcador de Respuesta",
     "yourAnswer": "Su Respuesta",
     "audioQuestion": "Pregunta de Audio",
-    "completedQuestion": "Pregunta Completada"
+    "completedQuestion": "Pregunta Completada",
+    "answerVerifiedAndAccepted": "Respuesta verificada y aceptada"
   },
   "workbookSettings": {
     "title": "Configuración",
@@ -72,7 +106,8 @@
     "immediateFeedback": "Retroalimentación Inmediata",
     "autoPlayAudioDescription": "Reproducir audio automáticamente cuando esté disponible",
     "immediateFeedbackDescription": "Mostrar retroalimentación correcta/incorrecta de inmediato",
-    "showWaveforms": "Mostrar formas de onda de audio"
+    "showWaveforms": "Mostrar formas de onda de audio",
+    "accessibilityMoved": "Los ajustes de accesibilidad (movimiento reducido, alto contraste) se han trasladado a su <link>página de ajustes globales</link>."
   },
   "quizComponent": {
     "gradeDisplay": "Calificación: {score}%"

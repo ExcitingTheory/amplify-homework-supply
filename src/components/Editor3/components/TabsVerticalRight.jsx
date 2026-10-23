@@ -31,6 +31,8 @@ import ConfigurationManager from "./ConfigurationManager";
 import AssignmentConfiguration from "./AssignmentConfiguration";
 import { QuestionMarkOutlined } from "@mui/icons-material";
 
+const OVERFLOW_HIDDEN = "hidden";
+
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;
 
@@ -211,7 +213,7 @@ export default function TabsVerticalRight({
         }
       />
       <Box sx={{ flexGrow: 1, minWidth: 0, order: 1 }}>
-        <TabPanel value={value} index={5} overflowY="hidden">
+        <TabPanel value={value} index={5} overflowY={OVERFLOW_HIDDEN}>
           <ChatSidebar />
         </TabPanel>
         <TabPanel value={value} index={7}>
@@ -345,7 +347,7 @@ export default function TabsVerticalRight({
             )}
           </Box>
         </TabPanel>
-        <TabPanel value={value} index={9} overflowY="hidden">
+        <TabPanel value={value} index={9} overflowY={OVERFLOW_HIDDEN}>
           {sectionId ? (
             <ChatPanel
               sectionId={sectionId}

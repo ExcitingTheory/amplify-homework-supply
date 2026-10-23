@@ -96,14 +96,8 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
   const {
     gradeId,
     user,
-    initialData,
-    onTutorJoin,
-    onTutorLeave,
-    onSyncToGrade,
-    autoSyncToGrade = true,
-    syncInterval = 3000,
-    wsUrl,
   } = options || {} as UseWorkbookCollaborationOptions
+  const username = user?.username
 
   const providerRef = useRef<WorkbookCollaborationProvider | null>(null)
   const [workbookData, setWorkbookData] = useState<WorkbookBlockData>({})
@@ -112,33 +106,41 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
   const [isSynced, setIsSynced] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
 
+  // Latest options are read when the provider is created and when callbacks
+  // fire; only gradeId/user identity should reinitialize the provider.
+  const optionsRef = useRef(options)
+  useEffect(() => {
+    optionsRef.current = options
+  })
+
   // Initialize provider
   useEffect(() => {
-    if (!options || !gradeId || !user) return
+    const latest = optionsRef.current
+    if (!latest || !gradeId || !latest.user) return
 
     console.log(`[useWorkbookCollaboration] Initializing for grade ${gradeId}`)
 
     const provider = new WorkbookCollaborationProvider({
       gradeId,
-      user,
-      wsUrl,
-      autoSyncToGrade,
-      syncInterval,
+      user: latest.user,
+      wsUrl: latest.wsUrl,
+      autoSyncToGrade: latest.autoSyncToGrade ?? true,
+      syncInterval: latest.syncInterval ?? 3000,
       onTutorJoin: (tutor) => {
         setActiveTutors(provider.getActiveTutors())
-        onTutorJoin?.(tutor)
+        optionsRef.current?.onTutorJoin?.(tutor)
       },
       onTutorLeave: (tutor) => {
         setActiveTutors(provider.getActiveTutors())
-        onTutorLeave?.(tutor)
+        optionsRef.current?.onTutorLeave?.(tutor)
       },
     })
 
     providerRef.current = provider
 
     // Load initial data from Grade.data if provided
-    if (initialData) {
-      provider.loadFromGradeData(initialData)
+    if (latest.initialData) {
+      provider.loadFromGradeData(latest.initialData)
     }
 
     // Set initial workbook data
@@ -159,7 +161,7 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
     // Listen for sync events
     const handleWorkbookSync = (event: CustomEvent) => {
       if (event.detail.gradeId === gradeId) {
-        onSyncToGrade?.(event.detail.data, event.detail.feedback)
+        optionsRef.current?.onSyncToGrade?.(event.detail.data, event.detail.feedback)
       }
     }
 
@@ -187,7 +189,7 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
       }
       // Don't destroy provider on unmount - keeps connection alive
     }
-  }, [gradeId, user?.username]) // Only reinitialize if gradeId or user changes
+  }, [gradeId, username]) // Only reinitialize if gradeId or user changes
 
   const updateBlock = useCallback(
     <T extends Partial<WorkbookBlockData[string]>>(blockId: string, data: T) => {

@@ -33,6 +33,7 @@ import { usePracticeCollaboration } from "../../yjs/practiceCollaborationHooks";
 import { previewXP } from "../../utils/practiceXPCalculator";
 import type { DrillConfig } from "./PracticeDrillConfigPopup";
 import type { DrillStats } from "./DrillGradeAdapter";
+import type { PracticeDrillBlock } from "./buildDrillEditorState";
 
 // ============================================================================
 // Transition
@@ -276,9 +277,7 @@ export default function PracticeDrillDialog({
             <DictionaryProvider>
               <DrillGradeAdapter
                 sessionId={session.id || ""}
-                blocks={
-                  session.blocks as import("./buildDrillEditorState").PracticeDrillBlock[]
-                }
+                blocks={session.blocks as PracticeDrillBlock[]}
                 onGradeChange={(_data, stats) => handleStatsChange(stats)}
               >
                 <Workbook />
@@ -292,7 +291,11 @@ export default function PracticeDrillDialog({
         <Button
           onClick={handleClose}
           color="inherit"
-          aria-label={session.complete ? "Return to workbook" : "Cancel drill"}
+          aria-label={
+            session.complete
+              ? t("practiceDrill.dialog.returnToWorkbookAriaLabel")
+              : t("practiceDrill.dialog.cancelDrillAriaLabel")
+          }
         >
           {session.complete
             ? t("practiceDrill.dialog.done")
@@ -310,7 +313,7 @@ export default function PracticeDrillDialog({
                 <CheckCircleIcon />
               )
             }
-            aria-label="Finish practice drill and show results"
+            aria-label={t("practiceDrill.dialog.finishAriaLabel")}
           >
             {t("practiceDrill.dialog.finish")}
           </Button>

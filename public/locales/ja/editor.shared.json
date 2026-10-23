@@ -59,7 +59,19 @@
     "sectionHeading": "録音スタジオ"
   },
   "audioWaveformPlayer": {
-    "noAudioSource": "オーディオソースが提供されていません"
+    "noAudioSource": "オーディオソースが提供されていません",
+    "elapsedTime": "経過時間",
+    "inputVolume": "入力音量",
+    "muteInput": "入力をミュート",
+    "muteOutput": "出力をミュート",
+    "outputVolume": "出力音量",
+    "pause": "一時停止",
+    "play": "再生",
+    "remainingTime": "残り時間",
+    "startRecording": "録音を開始",
+    "stopRecording": "録音を停止",
+    "unmuteInput": "入力のミュートを解除",
+    "unmuteOutput": "出力のミュートを解除"
   },
   "staticWaveform": {
     "errorLoading": "波形の読み込みエラーです"
@@ -67,7 +79,8 @@
   "sketchPad": {
     "cancelSubmission": "提出をキャンセルします",
     "hoverToStartDrawing": "ホバーして描画を開始してください",
-    "submittingInSeconds": "{countdown}秒後に描画を採点のために提出します..."
+    "submittingInSeconds": "{countdown}秒後に描画を採点のために提出します...",
+    "sketchAlt": "スケッチ"
   },
   "unitEmbedding": {
     "allSectionsComplete": "すべてのセクションが完了しました！",
@@ -95,6 +108,62 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "埋め込みが生成されます",
     "successConfirmation": "埋め込みが正常に生成されました"
+  },
+  "workbookSSRSkeleton": {
+    "loadingContent": "コンテンツを読み込んでいます..."
+  },
+  "imagePromptMedia": {
+    "help": "ヘルプ",
+    "noImage": "画像なし",
+    "playlist": "プレイリスト"
+  },
+  "mediaPromptBand": {
+    "timecodes": "メディアのタイムコード"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "正解",
+    "defaultAccuracyDescription": "必須の回答のうち、正しく選択できた割合です。",
+    "defaultProgressDescription": "必須の問題のうち、回答を試みた割合です。",
+    "meterDescription": "{label}。{description}",
+    "percentValue": "{percent}%",
+    "progressLabel": "進捗状況",
+    "valueDescription": "{label}：{percent}%。{description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "動画"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "テイク{number} · {duration} · {time}",
+    "deleteTake": "テイクを削除",
+    "recordedTakes": "録音したテイク",
+    "takeLabel": "テイク{number}"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "キャンセル",
+    "cancelSubmission": "提出を取り消す",
+    "submit": "送信する"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "列見出しを追加",
+    "addRowHeader": "行見出しを追加",
+    "deleteColumn": "列を削除",
+    "deleteRow": "行を削除",
+    "deleteTable": "表を削除",
+    "insertColumnsLeft": "{count, plural, one {左に列を挿入} other {左に#列を挿入}}",
+    "insertColumnsRight": "{count, plural, one {右に列を挿入} other {右に#列を挿入}}",
+    "insertRowsAbove": "{count, plural, one {行} other {# 行}}を上に挿入",
+    "insertRowsBelow": "{count, plural, one {下に行を挿入} other {下に # 行を挿入}}",
+    "removeColumnHeader": "列ヘッダーを削除",
+    "removeRowHeader": "行ヘッダーを削除"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "紋章を編集"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "16進カラー"
+  },
+  "youTubePlugin": {
+    "videoTitle": "YouTube動画"
   },
   "wordEmbedding": {
     "embeddingGenerated": "埋め込み生成完了: {count}語を処理しました"
@@ -127,7 +196,8 @@
   "wordBlockPlugin": {
     "audioUnavailable": "音声は利用できません",
     "loadingAudio": "オーディオを読み込んでいます...",
-    "wordNotFound": "単語が見つかりません: {wordID}"
+    "wordNotFound": "単語が見つかりません: {wordID}",
+    "selectVocabularyWord": "語彙を選択してください…"
   },
   "vocabularyReview": {
     "alertMessage": "続行する前に語彙を復習してください",
@@ -185,7 +255,16 @@
     "typeLabel": "タイプ：",
     "unknown": "不明です",
     "updatedLabel": "更新日:",
-    "variantLabel": "バリアント"
+    "variantLabel": "バリアント",
+    "autoSaveChip": "自動保存",
+    "autoSaved": "自動保存されました",
+    "descriptionLabel": "説明",
+    "descriptionPlaceholder": "このファイルの説明を追加してください...",
+    "errorSaving": "保存中にエラーが発生しました: {message}",
+    "fileNameLabel": "ファイル名",
+    "fileNamePlaceholder": "ファイル名を入力してください...",
+    "savedSuccessfully": "正常に保存されました",
+    "unsavedChip": "未保存"
   },
   "metadataField": {
     "unsavedChanges": "未保存の変更"
@@ -206,7 +285,12 @@
     "cancel": "キャンセル",
     "instructions": "<strong>手順:</strong> 再生成したい領域をペイントしてください。マスクの一部を削除するには消しゴムを使用してください。Shiftキーを押しながらドラッグすると画面を移動できます。ズームボタンを使用して詳細を確認してください。",
     "save": "保存",
-    "zoomInfo": "ズーム: {level}% | Shiftキーを押しながらパンします"
+    "zoomInfo": "ズーム: {level}% | Shiftキーを押しながらパンします",
+    "clearMask": "マスクをクリア",
+    "redo": "やり直し",
+    "undo": "元に戻す",
+    "zoomIn": "拡大",
+    "zoomOut": "縮小"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "キャンセル",
@@ -248,7 +332,16 @@
   "playlistEditor": {
     "emptyState": "プレイリストにアイテムがありません",
     "menuAttribute": "メニュー",
-    "noFilesMessage": "まだファイルが追加されていません。上の入力欄を使用してプレイリストにファイルを追加してください。"
+    "noFilesMessage": "まだファイルが追加されていません。上の入力欄を使用してプレイリストにファイルを追加してください。",
+    "addFiles": "ファイルを追加",
+    "addFilesToPlaylist": "プレイリストにファイルを追加",
+    "columnHeaders": {
+      "size": "サイズ",
+      "title": "タイトル"
+    },
+    "dragMediaHere": "ここに音声または動画をドラッグしてください",
+    "dropToAddFiles": "ここにドロップしてファイルを追加",
+    "removeFromPlaylist": "プレイリストから削除"
   },
   "autoSubmit": {
     "cancelSubmission": "キャンセル",

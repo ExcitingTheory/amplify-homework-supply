@@ -130,12 +130,16 @@
     "changePassword": {
       "button": "パスワードを変更",
       "description": "セキュリティのためにアカウントのパスワードを更新してください",
-      "heading": "パスワードを変更"
+      "heading": "パスワードを変更",
+      "confirmPasswordLabel": "新しいパスワード(確認用)",
+      "newPasswordLabel": "新しいパスワード",
+      "oldPasswordLabel": "現在のパスワード"
     },
     "confirmEmail": {
       "button": "メールアドレスを確認する",
       "message": "メールをご確認いただき、確認コードを入力してメールアドレスを認証してください。",
-      "title": "メールアドレスを確認してください"
+      "title": "メールアドレスを確認してください",
+      "codeLabel": "確認コード"
     },
     "description": "プロフィール情報を表示・更新します",
     "heading": "マイプロフィール",
@@ -151,7 +155,8 @@
     "progress": "進捗状況",
     "title": "マイプロフィール",
     "updateProfile": "プロフィールを更新",
-    "userId": "ユーザーID"
+    "userId": "ユーザーID",
+    "email": "メールアドレス"
   },
   "sectionDetail": {
     "actionsHeader": "操作",
@@ -303,5 +308,29 @@
     "start": "開始",
     "timerInstructions": "これは時間制限のある練習問題です。スタートを押してタイマーを開始し、問題に答えてください。",
     "unitUpdated": "このユニットは講師によって更新されました。最新バージョンで再読み込みしますか？"
+  },
+  "gradeReviewDrawer": {
+    "cancel": "キャンセル",
+    "currentLabel": "現在:",
+    "drop": "履修取消",
+    "gradeLabel": "成績(%)",
+    "gradeUpdated": "成績が{score}%に更新されました",
+    "keep": "保持する",
+    "lateDropped": "遅延提出は除外されました",
+    "lateKept": "遅延提出は維持されました",
+    "lateRequiresReview": "遅れて提出されたため、確認が必要です。",
+    "lateStatus": "遅延: {status}",
+    "lateUpdateError": "遅延提出の更新に失敗しました",
+    "nextTooltip": "次へ (→)",
+    "noGradeData": "成績データが見つかりません。",
+    "override": "上書き",
+    "overrideError": "成績の上書きを保存できませんでした",
+    "overrideTitle": "成績を上書き",
+    "position": "({current}/{total})",
+    "previousTooltip": "前へ (←)",
+    "save": "保存",
+    "saving": "保存中...",
+    "scoreRangeError": "スコアは0から100の間で入力してください",
+    "studentLabel": "受講者:"
   }
 }

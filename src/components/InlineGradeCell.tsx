@@ -21,6 +21,7 @@ import React, {
   useContext,
   createContext,
 } from "react";
+import { useTranslations } from "next-intl";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { PlainTextPlugin } from "@lexical/react/LexicalPlainTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
@@ -316,6 +317,7 @@ export function InlineGradeCell({
   row,
   col,
 }: InlineGradeCellProps) {
+  const t = useTranslations("components");
   const hasOverride = overrideScore != null;
   const overrideOverwritesGrade = hasOverride && rawHighest != null;
   const externalValue = hasOverride ? String(Math.round(overrideScore)) : "";
@@ -573,7 +575,7 @@ export function InlineGradeCell({
         <>
           {/* View work leads — it's the action instructors use most, so it
               carries more visual weight than the (rarer) override affordance. */}
-          <Tooltip title="View student work" arrow>
+          <Tooltip title={t("inlineGradeCell.viewStudentWork")} arrow>
             <IconButton
               size="small"
               tabIndex={-1}
@@ -588,7 +590,7 @@ export function InlineGradeCell({
             </IconButton>
           </Tooltip>
 
-          <Tooltip title="Click to override grade" arrow>
+          <Tooltip title={t("inlineGradeCell.clickToOverride")} arrow>
             <span
               onClick={startEditing}
               style={{
@@ -626,7 +628,9 @@ export function InlineGradeCell({
 
           {overrideOverwritesGrade && (
             <Tooltip
-              title={`Overriding computed grade of ${Math.round(rawHighest)}%`}
+              title={t("inlineGradeCell.overridingComputedGrade", {
+                grade: Math.round(rawHighest),
+              })}
               arrow
             >
               <WarningAmberIcon
@@ -657,7 +661,7 @@ export function InlineGradeCell({
           <PlainTextPlugin
             contentEditable={
               <ContentEditable
-                aria-label="Grade override"
+                aria-label={t("inlineGradeCell.gradeOverrideAriaLabel")}
                 style={{
                   outline: "none",
                   fontSize: "0.8125rem",
@@ -702,7 +706,7 @@ export function InlineGradeCell({
 
       {/* Remove override button (only when override exists and editing) */}
       {editing && hasOverride && (
-        <Tooltip title="Remove override" arrow>
+        <Tooltip title={t("inlineGradeCell.removeOverride")} arrow>
           <IconButton
             size="small"
             tabIndex={-1}

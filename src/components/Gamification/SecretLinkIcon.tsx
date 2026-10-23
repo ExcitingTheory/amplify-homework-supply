@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { generateClient } from 'aws-amplify/data';
 import { fetchAuthSession } from 'aws-amplify/auth';
+import { useTranslations } from 'next-intl';
 import IconButton from '@mui/material/IconButton';
 import SearchIcon from '@mui/icons-material/Search';
 import { EasterEggToast } from './EasterEggToast';
@@ -16,6 +17,7 @@ export interface SecretLinkIconProps {
  * target this unit. Clicking the icon triggers discoverEasterEgg.
  */
 export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
+  const t = useTranslations('components');
   const [eggs, setEggs] = useState<Array<{ id: string; message: string; xpReward: number }>>([]);
   const [studentId, setStudentId] = useState('');
   const [toast, setToast] = useState({ open: false, message: '', xpReward: 0 });
@@ -45,7 +47,7 @@ export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
         setEggs(
           undiscovered.map((e: any) => ({
             id: e.id,
-            message: e.revealMessage || 'You found a secret!',
+            message: e.revealMessage || '',
             xpReward: e.xpReward || 0,
           })),
         );
@@ -57,7 +59,11 @@ export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
     async (egg: { id: string; message: string; xpReward: number }) => {
       if (!studentId || discoveredRef.current.has(egg.id)) return;
       discoveredRef.current.add(egg.id);
-      setToast({ open: true, message: egg.message, xpReward: egg.xpReward });
+      setToast({
+        open: true,
+        message: egg.message || t('secretLinkIcon.defaultMessage'),
+        xpReward: egg.xpReward,
+      });
       setEggs((prev) => prev.filter((e) => e.id !== egg.id));
 
       try {
@@ -66,7 +72,7 @@ export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
         console.error('[SecretLinkIcon] discoverEasterEgg error:', err);
       }
     },
-    [studentId],
+    [studentId, t],
   );
 
   if (eggs.length === 0) return null;
@@ -87,7 +93,7 @@ export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
             '&:hover': { opacity: 0.8 },
             zIndex: 10,
           }}
-          aria-label="hidden secret"
+          aria-label={t('secretLinkIcon.hiddenSecretLabel')}
         >
           <SearchIcon fontSize="small" />
         </IconButton>
@@ -96,7 +102,7 @@ export function SecretLinkIcon({ unitId }: SecretLinkIconProps) {
         open={toast.open}
         message={toast.message}
         xpReward={toast.xpReward}
-        onClose={() => setToast((t) => ({ ...t, open: false }))}
+        onClose={() => setToast((prev) => ({ ...prev, open: false }))}
       />
     </>
   );

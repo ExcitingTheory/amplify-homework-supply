@@ -47,6 +47,12 @@ const defaultPlatformValues: AIAgentConfigValues = {
   kaiTotalTurnBudget: null,
   sageTotalTurnBudget: null,
   enforceTokenBudget: true,
+  documentAnalysisOpenAiRequestsPerMinute: 5,
+  documentAnalysisOpenAiTokensPerMinute: 20000,
+  documentAnalysisOpenAiMaxConcurrentRequests: 1,
+  documentAnalysisAnthropicRequestsPerMinute: 5,
+  documentAnalysisAnthropicTokensPerMinute: 20000,
+  documentAnalysisAnthropicMaxConcurrentRequests: 1,
 };
 
 export const PlatformMode: Story = {

@@ -59,7 +59,19 @@
     "sectionHeading": "Studio d'enregistrement"
   },
   "audioWaveformPlayer": {
-    "noAudioSource": "Aucune source audio fournie"
+    "noAudioSource": "Aucune source audio fournie",
+    "elapsedTime": "Temps écoulé",
+    "inputVolume": "Volume d'entrée",
+    "muteInput": "Couper l'entrée audio",
+    "muteOutput": "Couper le son de la sortie",
+    "outputVolume": "Volume de sortie",
+    "pause": "Pause",
+    "play": "Lire",
+    "remainingTime": "Temps restant",
+    "startRecording": "Démarrer l'enregistrement",
+    "stopRecording": "Arrêter l'enregistrement",
+    "unmuteInput": "Réactiver l'entrée audio",
+    "unmuteOutput": "Réactiver la sortie audio"
   },
   "staticWaveform": {
     "errorLoading": "Erreur de chargement de la forme d'onde"
@@ -67,7 +79,8 @@
   "sketchPad": {
     "cancelSubmission": "Annuler la soumission",
     "hoverToStartDrawing": "Survolez pour commencer à dessiner",
-    "submittingInSeconds": "Envoi du dessin pour correction dans {countdown} secondes..."
+    "submittingInSeconds": "Envoi du dessin pour correction dans {countdown} secondes...",
+    "sketchAlt": "croquis"
   },
   "unitEmbedding": {
     "allSectionsComplete": "Toutes les sections terminées !",
@@ -95,6 +108,62 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "Les embeddings seront générés",
     "successConfirmation": "Embeddings générés avec succès"
+  },
+  "workbookSSRSkeleton": {
+    "loadingContent": "Chargement du contenu…"
+  },
+  "imagePromptMedia": {
+    "help": "Aide",
+    "noImage": "Aucune image",
+    "playlist": "Playlist"
+  },
+  "mediaPromptBand": {
+    "timecodes": "Codes temporels du média"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "Correct",
+    "defaultAccuracyDescription": "Pourcentage des réponses requises sélectionnées correctement.",
+    "defaultProgressDescription": "Pourcentage des réponses requises ayant fait l'objet d'une tentative.",
+    "meterDescription": "{label}. {description}",
+    "percentValue": "{percent} %",
+    "progressLabel": "Progression",
+    "valueDescription": "{label} : {percent} %. {description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "Film"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "Prise {number} · {duration} · {time}",
+    "deleteTake": "Supprimer la prise",
+    "recordedTakes": "Prises enregistrées",
+    "takeLabel": "Prise {number}"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "Annuler",
+    "cancelSubmission": "Annuler la soumission",
+    "submit": "Valider"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "Ajouter un en-tête de colonne",
+    "addRowHeader": "Ajouter un en-tête de ligne",
+    "deleteColumn": "Supprimer la colonne",
+    "deleteRow": "Supprimer la ligne",
+    "deleteTable": "Supprimer le tableau",
+    "insertColumnsLeft": "Insérer {count, plural, one {colonne} other {# colonnes}} à gauche",
+    "insertColumnsRight": "Insérer {count, plural, one {# colonne} other {# colonnes}} à droite",
+    "insertRowsAbove": "Insérer {count, plural, one {une ligne} other {# lignes}} au-dessus",
+    "insertRowsBelow": "Insérer {count, plural, one {une ligne} other {# lignes}} en dessous",
+    "removeColumnHeader": "Supprimer l’en-tête de colonne",
+    "removeRowHeader": "Supprimer l’en-tête de ligne"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "Modifier les armoiries"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "Couleur hexadécimale"
+  },
+  "youTubePlugin": {
+    "videoTitle": "Vidéo YouTube"
   },
   "wordEmbedding": {
     "embeddingGenerated": "Intégration générée : {count} mots traités"
@@ -127,7 +196,8 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio non disponible",
     "loadingAudio": "Chargement de l'audio...",
-    "wordNotFound": "Mot introuvable : {wordID}"
+    "wordNotFound": "Mot introuvable : {wordID}",
+    "selectVocabularyWord": "Sélectionnez un mot de vocabulaire…"
   },
   "vocabularyReview": {
     "alertMessage": "Révisez le vocabulaire avant de continuer",
@@ -185,7 +255,16 @@
     "typeLabel": "Type :",
     "unknown": "Inconnu",
     "updatedLabel": "Mis à jour :",
-    "variantLabel": "Variante"
+    "variantLabel": "Variante",
+    "autoSaveChip": "Enregistrement automatique",
+    "autoSaved": "Enregistré automatiquement",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Ajoutez une description pour ce fichier...",
+    "errorSaving": "Erreur lors de l'enregistrement : {message}",
+    "fileNameLabel": "Nom du fichier",
+    "fileNamePlaceholder": "Saisissez le nom du fichier...",
+    "savedSuccessfully": "Enregistré avec succès",
+    "unsavedChip": "Non enregistré"
   },
   "metadataField": {
     "unsavedChanges": "modifications non enregistrées"
@@ -206,7 +285,12 @@
     "cancel": "Annuler",
     "instructions": "<strong>Instructions :</strong> Peignez sur les zones que vous souhaitez régénérer. Utilisez la gomme pour supprimer des parties du masque. Maintenez Shift et faites glisser pour faire un panoramique. Utilisez les boutons de zoom pour obtenir plus de détails.",
     "save": "Enregistrer",
-    "zoomInfo": "Zoom : {level}% | Maintenez Maj enfoncée pour faire un panoramique"
+    "zoomInfo": "Zoom : {level}% | Maintenez Maj enfoncée pour faire un panoramique",
+    "clearMask": "Effacer le masque",
+    "redo": "Rétablir",
+    "undo": "Annuler",
+    "zoomIn": "Zoom avant",
+    "zoomOut": "Zoom arrière"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "Annuler",
@@ -248,7 +332,16 @@
   "playlistEditor": {
     "emptyState": "Aucun élément dans la playlist",
     "menuAttribute": "Menu",
-    "noFilesMessage": "Aucun fichier n'a encore été ajouté. Utilisez la zone de saisie ci-dessus pour ajouter des fichiers à la liste de lecture."
+    "noFilesMessage": "Aucun fichier n'a encore été ajouté. Utilisez la zone de saisie ci-dessus pour ajouter des fichiers à la liste de lecture.",
+    "addFiles": "Ajouter des fichiers",
+    "addFilesToPlaylist": "Ajouter des fichiers à la liste de lecture",
+    "columnHeaders": {
+      "size": "Taille",
+      "title": "Titre"
+    },
+    "dragMediaHere": "Faites glisser un fichier audio ou vidéo ici",
+    "dropToAddFiles": "Déposez pour ajouter des fichiers",
+    "removeFromPlaylist": "Retirer de la playlist"
   },
   "autoSubmit": {
     "cancelSubmission": "Annuler",

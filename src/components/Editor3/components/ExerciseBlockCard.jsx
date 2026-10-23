@@ -26,6 +26,7 @@ function getPaletteColor(theme, path) {
   return theme.palette?.[group]?.[shade] ?? theme.palette.primary.main;
 }
 
+/** @param {{ blockType: string, accuracy?: number, graded?: boolean, selected?: boolean, className?: string, dataTour?: string, children?: React.ReactNode, sx?: import("@mui/material").SxProps }} props */
 export function ExerciseBlockCard({
   blockType,
   accuracy = undefined,

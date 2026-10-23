@@ -39,6 +39,7 @@ import {
   CustomAnswerNode,
   ArmorEditorNode,
   FileMetadataNode,
+  CallResponseNode,
   AutocompleteNode,
   AIContentSuggestionNode,
   AILoadingNode,
@@ -82,6 +83,7 @@ const headlessNodes: any[] = [
   CustomAnswerNode,
   ArmorEditorNode,
   FileMetadataNode,
+  CallResponseNode,
 ];
 
 /**

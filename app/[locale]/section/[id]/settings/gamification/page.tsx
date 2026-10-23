@@ -7,6 +7,7 @@
  * @module section/[id]/settings/gamification
  */
 "use client";
+import { SectionSettingsNavigation } from "@/components/SectionSettingsNavigation";
 
 import React, {
   useState,
@@ -422,6 +423,7 @@ export default function GamificationSettingsPage() {
       sx={{ maxWidth: 800, mx: "auto", p: 3 }}
     >
       <Stack spacing={3}>
+        <SectionSettingsNavigation sectionId={sectionId} backToSection />
         <Typography variant="h4">Gamification Settings</Typography>
         <Typography variant="body2" color="text.secondary">
           Section: {currentSection?.name || sectionId}

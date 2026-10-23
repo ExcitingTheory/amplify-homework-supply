@@ -50,6 +50,7 @@ import {
   importVocabularyToUnit,
   updateVocabularyItem,
 } from "../utils/vocabularyImportUtils";
+import { getParsedContentModeration } from "../utils/parsedContentModeration";
 import DictionaryContext from "../context/dictionaryContext";
 import AuthContext from "../context/authContext";
 
@@ -138,6 +139,7 @@ function NestedVocabField({
   placeholder = "",
   multiline = false,
 }: NestedVocabFieldProps) {
+  const t = useTranslations("components");
   const [isEditing, setIsEditing] = useState(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const latestTextRef = useRef(value);
@@ -202,7 +204,7 @@ function NestedVocabField({
         )}
         <Box
           onClick={() => setIsEditing(true)}
-          title="Click to edit"
+          title={t("vocabularyReview.clickToEdit")}
           sx={{
             minHeight: multiline ? "60px" : "24px",
             padding: multiline ? "8px" : "4px 8px",
@@ -327,6 +329,7 @@ export function VocabularyCard({
   onOpenRubyEditor,
   onOpenAudioStudio,
 }: VocabularyCardProps) {
+  const t = useTranslations("components");
   const isEvenRow = index % 2 === 0;
 
   return (
@@ -463,7 +466,11 @@ export function VocabularyCard({
           }}
         >
           {item.filename && (
-            <Tooltip title={`Source: ${item.filename}`}>
+            <Tooltip
+              title={t("vocabularyReview.sourceTooltip", {
+                filename: item.filename,
+              })}
+            >
               <Chip
                 label={
                   item.filename.length > 20
@@ -479,7 +486,7 @@ export function VocabularyCard({
           )}
           {item.page && (
             <Chip
-              label={`p.${item.page}`}
+              label={t("vocabularyReview.pageChip", { page: item.page })}
               size="small"
               variant="outlined"
               sx={{ fontSize: "0.7rem", height: "20px" }}
@@ -489,8 +496,8 @@ export function VocabularyCard({
             <Tooltip
               title={
                 onOpenRubyEditor
-                  ? "Open ruby tag editor"
-                  : "Has phonetic notation"
+                  ? t("vocabularyReview.openRubyEditor")
+                  : t("vocabularyReview.hasPhonetic")
               }
             >
               <Box component="span" display="inline-block">
@@ -526,8 +533,10 @@ export function VocabularyCard({
             <Tooltip
               title={
                 onOpenAudioStudio
-                  ? "Open audio studio"
-                  : `${item.audio.length} audio file(s)`
+                  ? t("vocabularyReview.openAudioStudio")
+                  : t("vocabularyReview.audioFileCount", {
+                      count: item.audio.length,
+                    })
               }
             >
               <Box component="span" display="inline-block">
@@ -572,8 +581,8 @@ export function VocabularyCard({
             itemIndex={index}
             onSave={onUpdate}
             searchTerm={searchTerm}
-            label="Word"
-            placeholder="Enter word..."
+            label={t("vocabularyReview.wordLabel")}
+            placeholder={t("vocabularyReview.wordPlaceholder")}
           />
 
           {item.phonetic !== undefined && (
@@ -583,8 +592,8 @@ export function VocabularyCard({
               itemIndex={index}
               onSave={onUpdate}
               searchTerm={searchTerm}
-              label="Phonetic"
-              placeholder="Enter phonetic pronunciation..."
+              label={t("vocabularyReview.phoneticLabel")}
+              placeholder={t("vocabularyReview.phoneticPlaceholder")}
             />
           )}
 
@@ -594,8 +603,8 @@ export function VocabularyCard({
             itemIndex={index}
             onSave={onUpdate}
             searchTerm={searchTerm}
-            label="Definition"
-            placeholder="Enter definition..."
+            label={t("vocabularyReview.definitionLabel")}
+            placeholder={t("vocabularyReview.definitionPlaceholder")}
             multiline
           />
 
@@ -606,8 +615,8 @@ export function VocabularyCard({
               itemIndex={index}
               onSave={onUpdate}
               searchTerm={searchTerm}
-              label="Context"
-              placeholder="Enter context or example sentence..."
+              label={t("vocabularyReview.contextLabel")}
+              placeholder={t("vocabularyReview.contextPlaceholder")}
               multiline
             />
           )}
@@ -639,6 +648,8 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     user: { username?: string; [key: string]: any } | undefined;
     isLoading: boolean;
   };
+  const hasUser = !!user;
+  const username = user?.username;
 
   const [state, dispatch] = useReducer(
     importReviewReducer<VocabularyItem>,
@@ -660,6 +671,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     objectives,
   } = state;
   const importing = importStatus === "importing";
+  const moderation = getParsedContentModeration(document);
 
   // Use DictionaryContext to access existing dictionary words
   const { dictionary } = useContext(DictionaryContext) || { dictionary: {} };
@@ -691,42 +703,6 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     estimateSize: () => 60,
     overscan: 5,
   });
-
-  // Fetch ParsedContent and Document
-  useEffect(() => {
-    // Wait for authentication
-    if (authLoading || !user) {
-      console.log("[VocabularyReview2] Waiting for authentication", {
-        authLoading,
-        hasUser: !!user,
-      });
-      return;
-    }
-
-    loadParsedContent();
-
-    console.log(
-      "[VocabularyReview2] Setting up ParsedContent subscription for user:",
-      user.username,
-    );
-    const client = getAmplifyClient();
-    const subscription = client.models.ParsedContent.observeQuery().subscribe({
-      next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(
-          (item: any) => item != null && item.id != null,
-        );
-        loadParsedContent();
-      },
-      error: (error: any) =>
-        console.error(
-          "[VocabularyReview2] ParsedContent subscription error:",
-          error,
-        ),
-    });
-
-    return () => subscription.unsubscribe();
-  }, [documentId, authLoading, user?.username]);
 
   const loadParsedContent = useCallback(async () => {
     try {
@@ -793,6 +769,42 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     }
   }, [documentId]);
 
+  // Fetch ParsedContent and Document
+  useEffect(() => {
+    // Wait for authentication
+    if (authLoading || !hasUser) {
+      console.log("[VocabularyReview2] Waiting for authentication", {
+        authLoading,
+        hasUser,
+      });
+      return;
+    }
+
+    loadParsedContent();
+
+    console.log(
+      "[VocabularyReview2] Setting up ParsedContent subscription for user:",
+      username,
+    );
+    const client = getAmplifyClient();
+    const subscription = client.models.ParsedContent.observeQuery().subscribe({
+      next: ({ items }) => {
+        // Filter out null items that can appear during subscription updates
+        const validItems = items.filter(
+          (item: any) => item != null && item.id != null,
+        );
+        loadParsedContent();
+      },
+      error: (error: any) =>
+        console.error(
+          "[VocabularyReview2] ParsedContent subscription error:",
+          error,
+        ),
+    });
+
+    return () => subscription.unsubscribe();
+  }, [authLoading, hasUser, username, loadParsedContent]);
+
   const toggleItem = useCallback((index: number) => {
     dispatch({ type: "TOGGLE_SELECT", index });
   }, []);
@@ -836,6 +848,12 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       console.error("Missing parsedContent or unitId");
       return;
     }
+    if (moderation.blocked) {
+      console.error(
+        moderation.error || "Moderation flagged this document; import is blocked",
+      );
+      return;
+    }
 
     dispatch({ type: "IMPORT_START" });
 
@@ -866,6 +884,8 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     loadParsedContent();
   }, [
     parsedContent,
+    moderation.blocked,
+    moderation.error,
     unitId,
     selectedItems,
     owner,
@@ -915,6 +935,18 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             {document.pageCount &&
               ` (${document.pageCount} ${t("vocabularyReview.pages")})`}
           </Typography>
+        )}
+
+        {moderation.blocked && (
+          <Alert severity="warning" sx={{ mt: 1 }}>
+            {moderation.error
+              ? t("moderationPanel.alertMessage")
+              : moderation.categories.length > 0
+                ? t("moderationBadge.flaggedWithCategories", {
+                    categories: moderation.categories.join(", "),
+                  })
+                : t("moderationPanel.alertMessage")}
+          </Alert>
         )}
 
         {alreadyImported && (
@@ -1018,7 +1050,9 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             variant="contained"
             startIcon={<ImportIcon />}
             onClick={handleImport}
-            disabled={importing || selectedItems.size === 0}
+            disabled={
+              moderation.blocked || importing || selectedItems.size === 0
+            }
           >
             {t("vocabularyReview.importToDictionary")}
           </Button>
@@ -1046,7 +1080,11 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
             onClose={() => dispatch({ type: "CLEAR_IMPORT_RESULT" })}
           >
             {importResult.message ||
-              `Imported ${importResult.imported} new words, ${importResult.skipped} already existed, ${importResult.errors} errors`}
+              t("vocabularyReview.importSummary", {
+                imported: importResult.imported ?? 0,
+                skipped: importResult.skipped ?? 0,
+                errors: importResult.errors ?? 0,
+              })}
           </Alert>
         </Box>
       )}

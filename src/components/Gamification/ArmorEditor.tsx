@@ -58,55 +58,46 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 
 interface ShapeEntry {
   id: string;
-  label: string;
   path: string;
 }
 
 const SHIELD_SHAPES: ShapeEntry[] = [
   {
     id: "classic",
-    label: "Classic",
     path: "M10,2 L90,2 L90,60 Q90,95 50,98 Q10,95 10,60 Z",
   },
   {
     id: "rounded",
-    label: "Rounded",
     path: "M10,2 Q10,2 10,2 L90,2 Q95,2 95,8 L95,55 Q95,95 50,98 Q5,95 5,55 L5,8 Q5,2 10,2 Z",
   },
   {
     id: "pointed",
-    label: "Pointed",
     path: "M10,2 L90,2 L90,50 L50,98 L10,50 Z",
   },
-  { id: "diamond", label: "Diamond", path: "M50,2 L90,40 L50,98 L10,40 Z" },
+  { id: "diamond", path: "M50,2 L90,40 L50,98 L10,40 Z" },
   {
     id: "heater",
-    label: "Heater",
     path: "M10,2 L90,2 L90,55 Q90,80 50,98 Q10,80 10,55 Z",
   },
   {
     id: "oval",
-    label: "Oval",
     path: "M50,2 Q90,2 90,50 Q90,98 50,98 Q10,98 10,50 Q10,2 50,2 Z",
   },
-  { id: "square", label: "Square", path: "M8,2 L92,2 L92,92 L8,92 Z" },
-  { id: "kite", label: "Kite", path: "M50,2 L85,30 L50,98 L15,30 Z" },
+  { id: "square", path: "M8,2 L92,2 L92,92 L8,92 Z" },
+  { id: "kite", path: "M50,2 L85,30 L50,98 L15,30 Z" },
   {
     id: "swiss",
-    label: "Swiss",
     path: "M10,2 L90,2 L90,65 Q90,85 70,92 L50,98 L30,92 Q10,85 10,65 Z",
   },
   {
     id: "french",
-    label: "French",
     path: "M10,2 L90,2 L90,70 Q90,90 75,95 L50,98 L25,95 Q10,90 10,70 Z",
   },
   {
     id: "horsehead",
-    label: "Horse Head",
     path: "M15,2 L85,2 Q92,2 92,10 L92,60 Q92,75 80,85 L50,98 L20,85 Q8,75 8,60 L8,10 Q8,2 15,2 Z",
   },
-  { id: "banner", label: "Banner", path: "M5,5 L95,5 L95,80 L50,95 L5,80 Z" },
+  { id: "banner", path: "M5,5 L95,5 L95,80 L50,95 L5,80 Z" },
 ];
 
 // ============================================================================
@@ -121,16 +112,19 @@ interface ColorEntry {
   hex: string;
 }
 
-function getColorSwatches(theme: Theme): ColorEntry[] {
+function getColorSwatches(
+  theme: Theme,
+  labels: Record<string, string>,
+): ColorEntry[] {
   const tinctures = getTinctures(theme);
   return [
-    { id: "blue", label: "Blue", hex: tinctures.azure.main },
-    { id: "red", label: "Red", hex: tinctures.gules.main },
-    { id: "green", label: "Green", hex: tinctures.vert.main },
-    { id: "purple", label: "Purple", hex: tinctures.purpure.main },
-    { id: "gold", label: "Gold", hex: tinctures.or.main },
-    { id: "silver", label: "Silver", hex: tinctures.argent.main },
-    { id: "black", label: "Black", hex: tinctures.sable.main },
+    { id: "blue", label: labels.blue, hex: tinctures.azure.main },
+    { id: "red", label: labels.red, hex: tinctures.gules.main },
+    { id: "green", label: labels.green, hex: tinctures.vert.main },
+    { id: "purple", label: labels.purple, hex: tinctures.purpure.main },
+    { id: "gold", label: labels.gold, hex: tinctures.or.main },
+    { id: "silver", label: labels.silver, hex: tinctures.argent.main },
+    { id: "black", label: labels.black, hex: tinctures.sable.main },
   ];
 }
 
@@ -151,29 +145,28 @@ const DEFAULT_RIM_METAL: MetalRamp = {
 
 interface DivisionEntry {
   id: string;
-  label: string;
   group: "split" | "ordinary";
 }
 
 const DIVISIONS: DivisionEntry[] = [
   // Field splits — how the background is divided
-  { id: "none", label: "Solid", group: "split" },
-  { id: "halved", label: "Halved", group: "split" },
-  { id: "horizontal", label: "Horizontal Split", group: "split" },
-  { id: "quartered", label: "Quartered", group: "split" },
-  { id: "diagonal-right", label: "Diagonal Right", group: "split" },
-  { id: "diagonal-left", label: "Diagonal Left", group: "split" },
-  { id: "x-split", label: "X Split", group: "split" },
-  { id: "chevron-split", label: "Chevron Split", group: "split" },
+  { id: "none", group: "split" },
+  { id: "halved", group: "split" },
+  { id: "horizontal", group: "split" },
+  { id: "quartered", group: "split" },
+  { id: "diagonal-right", group: "split" },
+  { id: "diagonal-left", group: "split" },
+  { id: "x-split", group: "split" },
+  { id: "chevron-split", group: "split" },
   // Ordinaries — bands and stripes overlaid on the field
-  { id: "fess", label: "Horizontal Band", group: "ordinary" },
-  { id: "pale", label: "Vertical Band", group: "ordinary" },
-  { id: "bend", label: "Diagonal Band", group: "ordinary" },
-  { id: "chevron", label: "Chevron", group: "ordinary" },
-  { id: "chief", label: "Top Band", group: "ordinary" },
-  { id: "saltire", label: "X Band", group: "ordinary" },
-  { id: "cross-band", label: "Cross Band", group: "ordinary" },
-  { id: "border", label: "Border", group: "ordinary" },
+  { id: "fess", group: "ordinary" },
+  { id: "pale", group: "ordinary" },
+  { id: "bend", group: "ordinary" },
+  { id: "chevron", group: "ordinary" },
+  { id: "chief", group: "ordinary" },
+  { id: "saltire", group: "ordinary" },
+  { id: "cross-band", group: "ordinary" },
+  { id: "border", group: "ordinary" },
 ];
 
 // ============================================================================
@@ -189,21 +182,20 @@ const DIVISIONS: DivisionEntry[] = [
 
 interface PositionEntry {
   id: string;
-  label: string;
   x: number;
   y: number;
 }
 
 const POSITIONS: PositionEntry[] = [
-  { id: "top-left", label: "Top Left", x: 32, y: 28 },
-  { id: "top", label: "Top Center", x: 50, y: 28 },
-  { id: "top-right", label: "Top Right", x: 68, y: 28 },
-  { id: "left", label: "Center Left", x: 30, y: 50 },
-  { id: "center", label: "Center", x: 50, y: 50 },
-  { id: "right", label: "Center Right", x: 70, y: 50 },
-  { id: "bottom-left", label: "Bottom Left", x: 36, y: 70 },
-  { id: "bottom", label: "Bottom Center", x: 50, y: 70 },
-  { id: "bottom-right", label: "Bottom Right", x: 64, y: 70 },
+  { id: "top-left", x: 32, y: 28 },
+  { id: "top", x: 50, y: 28 },
+  { id: "top-right", x: 68, y: 28 },
+  { id: "left", x: 30, y: 50 },
+  { id: "center", x: 50, y: 50 },
+  { id: "right", x: 70, y: 50 },
+  { id: "bottom-left", x: 36, y: 70 },
+  { id: "bottom", x: 50, y: 70 },
+  { id: "bottom-right", x: 64, y: 70 },
 ];
 
 // ============================================================================
@@ -392,6 +384,68 @@ export function renderShieldSvg(
 </svg>`;
 }
 
+/** Translated labels for the shield option pickers, keyed by option id */
+function useArmorOptionLabels() {
+  const t = useTranslations("components");
+  return useMemo(
+    () => ({
+      shapes: {
+        classic: t("armorEditor.shapeClassic"),
+        rounded: t("armorEditor.shapeRounded"),
+        pointed: t("armorEditor.shapePointed"),
+        diamond: t("armorEditor.shapeDiamond"),
+        heater: t("armorEditor.shapeHeater"),
+        oval: t("armorEditor.shapeOval"),
+        square: t("armorEditor.shapeSquare"),
+        kite: t("armorEditor.shapeKite"),
+        swiss: t("armorEditor.shapeSwiss"),
+        french: t("armorEditor.shapeFrench"),
+        horsehead: t("armorEditor.shapeHorsehead"),
+        banner: t("armorEditor.shapeBanner"),
+      } as Record<string, string>,
+      divisions: {
+        none: t("armorEditor.divisionNone"),
+        halved: t("armorEditor.divisionHalved"),
+        horizontal: t("armorEditor.divisionHorizontal"),
+        quartered: t("armorEditor.divisionQuartered"),
+        "diagonal-right": t("armorEditor.divisionDiagonalRight"),
+        "diagonal-left": t("armorEditor.divisionDiagonalLeft"),
+        "x-split": t("armorEditor.divisionXSplit"),
+        "chevron-split": t("armorEditor.divisionChevronSplit"),
+        fess: t("armorEditor.divisionFess"),
+        pale: t("armorEditor.divisionPale"),
+        bend: t("armorEditor.divisionBend"),
+        chevron: t("armorEditor.divisionChevron"),
+        chief: t("armorEditor.divisionChief"),
+        saltire: t("armorEditor.divisionSaltire"),
+        "cross-band": t("armorEditor.divisionCrossBand"),
+        border: t("armorEditor.divisionBorder"),
+      } as Record<string, string>,
+      positions: {
+        "top-left": t("armorEditor.positionTopLeft"),
+        top: t("armorEditor.positionTop"),
+        "top-right": t("armorEditor.positionTopRight"),
+        left: t("armorEditor.positionLeft"),
+        center: t("armorEditor.positionCenter"),
+        right: t("armorEditor.positionRight"),
+        "bottom-left": t("armorEditor.positionBottomLeft"),
+        bottom: t("armorEditor.positionBottom"),
+        "bottom-right": t("armorEditor.positionBottomRight"),
+      } as Record<string, string>,
+      colors: {
+        blue: t("armorEditor.colorBlue"),
+        red: t("armorEditor.colorRed"),
+        green: t("armorEditor.colorGreen"),
+        purple: t("armorEditor.colorPurple"),
+        gold: t("armorEditor.colorGold"),
+        silver: t("armorEditor.colorSilver"),
+        black: t("armorEditor.colorBlack"),
+      } as Record<string, string>,
+    }),
+    [t],
+  );
+}
+
 // ============================================================================
 // Sub-components
 // ============================================================================
@@ -442,10 +496,11 @@ function ShapeSelector({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const labels = useArmorOptionLabels();
   return (
     <Stack direction="row" flexWrap="wrap" gap={1}>
       {shapes.map((shape) => (
-        <Tooltip key={shape.id} title={shape.label}>
+        <Tooltip key={shape.id} title={labels.shapes[shape.id] ?? shape.id}>
           <Box
             onClick={() => onSelect(shape.id)}
             sx={{
@@ -574,11 +629,13 @@ function DivisionSelector({
   color1: string;
   color2: string;
 }) {
+  const t = useTranslations("components");
+  const labels = useArmorOptionLabels();
   const splits = DIVISIONS.filter((d) => d.group === "split");
   const ordinaries = DIVISIONS.filter((d) => d.group === "ordinary");
 
   const renderItem = (div: DivisionEntry) => (
-    <Tooltip key={div.id} title={div.label}>
+    <Tooltip key={div.id} title={labels.divisions[div.id] ?? div.id}>
       <Box
         onClick={() => onSelect(div.id)}
         sx={{
@@ -608,7 +665,7 @@ function DivisionSelector({
         color="text.secondary"
         sx={{ fontSize: "0.65rem", mt: 0.25 }}
       >
-        Bands &amp; Stripes
+        {t("armorEditor.bandsAndStripes")}
       </Typography>
       <Stack direction="row" flexWrap="wrap" gap={0.5}>
         {ordinaries.map(renderItem)}
@@ -625,6 +682,7 @@ function PositionSelector({
   selected: string;
   onSelect: (id: string) => void;
 }) {
+  const labels = useArmorOptionLabels();
   // 3×3 layout order
   const rows = [
     ["top-left", "top", "top-right"],
@@ -644,7 +702,7 @@ function PositionSelector({
         const pos = POSITIONS.find((p) => p.id === posId)!;
         const isSel = selected === posId;
         return (
-          <Tooltip key={posId} title={pos.label}>
+          <Tooltip key={posId} title={labels.positions[pos.id] ?? pos.id}>
             <Box
               onClick={() => onSelect(posId)}
               sx={{
@@ -729,28 +787,29 @@ export function ArmorEditor({
 }: ArmorEditorProps) {
   const t = useTranslations("components");
   const theme = useTheme();
+  const optionLabels = useArmorOptionLabels();
   const rimMetal = useMemo(() => getMetals(theme).gold, [theme]);
 
   // Curated heraldic palette + two theme-derived "custom" swatches.
   const baseColors = useMemo<ColorEntry[]>(
-    () => getColorSwatches(theme),
-    [theme],
+    () => getColorSwatches(theme, optionLabels.colors),
+    [theme, optionLabels.colors],
   );
   const palette = useMemo<ColorEntry[]>(
     () => [
       ...baseColors,
       {
         id: "theme-primary",
-        label: "Theme Primary",
+        label: t("armorEditor.colorThemePrimary"),
         hex: theme.palette.primary.main,
       },
       {
         id: "theme-secondary",
-        label: "Theme Secondary",
+        label: t("armorEditor.colorThemeSecondary"),
         hex: theme.palette.secondary.main,
       },
     ],
-    [baseColors, theme.palette.primary.main, theme.palette.secondary.main],
+    [baseColors, theme.palette.primary.main, theme.palette.secondary.main, t],
   );
 
   const defaultConfig = useMemo(
@@ -944,23 +1003,23 @@ export function ArmorEditor({
           justifyContent: "space-between",
         }}
       >
-        <span>Design Coat of Arms — {name || squadName}</span>
+        <span>{t("armorEditor.dialogTitle", { name: name || squadName })}</span>
         <Stack direction="row" spacing={0.5}>
-          <Tooltip title="Undo (Ctrl+Z)">
+          <Tooltip title={t("armorEditor.undo")}>
             <span>
               <IconButton onClick={handleUndo} disabled={!canUndo} size="small">
                 <UndoIcon />
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="Redo (Ctrl+Shift+Z)">
+          <Tooltip title={t("armorEditor.redo")}>
             <span>
               <IconButton onClick={handleRedo} disabled={!canRedo} size="small">
                 <RedoIcon />
               </IconButton>
             </span>
           </Tooltip>
-          <Tooltip title="Randomize">
+          <Tooltip title={t("armorEditor.randomize")}>
             <IconButton onClick={handleRandomize} size="small">
               <CasinoIcon />
             </IconButton>
@@ -996,7 +1055,7 @@ export function ArmorEditor({
             {/* Shape */}
             <Box>
               <Typography variant="caption" color="text.secondary">
-                Shield Shape
+                {t("armorEditor.shieldShape")}
               </Typography>
               <ShapeSelector
                 shapes={SHIELD_SHAPES}
@@ -1008,7 +1067,7 @@ export function ArmorEditor({
             {/* Division */}
             <Box>
               <Typography variant="caption" color="text.secondary">
-                Division
+                {t("armorEditor.division")}
               </Typography>
               <DivisionSelector
                 selected={config.division}
@@ -1021,7 +1080,7 @@ export function ArmorEditor({
             {/* Field Color */}
             <Box>
               <Typography variant="caption" color="text.secondary">
-                Primary Color
+                {t("armorEditor.primaryColor")}
               </Typography>
               <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 0.5 }}>
                 {palette.map((c) => (
@@ -1039,7 +1098,7 @@ export function ArmorEditor({
             {config.division !== "none" && (
               <Box>
                 <Typography variant="caption" color="text.secondary">
-                  Secondary Color
+                  {t("armorEditor.secondaryColor")}
                 </Typography>
                 <Stack
                   direction="row"
@@ -1063,7 +1122,7 @@ export function ArmorEditor({
             {charges.length > 0 && activeChargeIndex < charges.length && (
               <Box>
                 <Typography variant="caption" color="text.secondary">
-                  Charge Color
+                  {t("armorEditor.chargeColor")}
                 </Typography>
                 <Stack
                   direction="row"
@@ -1088,7 +1147,9 @@ export function ArmorEditor({
             {/* Charge type selector */}
             <Box>
               <Typography variant="caption" color="text.secondary">
-                {charges.length > 0 ? "Change Charge Type" : "Add a Charge"}
+                {charges.length > 0
+                  ? t("armorEditor.changeChargeType")
+                  : t("armorEditor.addACharge")}
               </Typography>
               <ChargeSelector
                 charges={CHARGES.filter((c) => c.id !== "none")}
@@ -1109,10 +1170,10 @@ export function ArmorEditor({
                 justifyContent="space-between"
               >
                 <Typography variant="caption" color="text.secondary">
-                  Charges
+                  {t("armorEditor.charges")}
                 </Typography>
                 {charges.length > 0 && charges.length < 5 && (
-                  <Tooltip title="Add another charge">
+                  <Tooltip title={t("armorEditor.addAnotherCharge")}>
                     <IconButton
                       size="small"
                       onClick={addCharge}
@@ -1180,7 +1241,9 @@ export function ArmorEditor({
                             "&:hover": { bgcolor: "error.dark" },
                           }}
                           role="button"
-                          aria-label={`Remove charge ${i + 1}`}
+                          aria-label={t("armorEditor.removeCharge", {
+                            number: i + 1,
+                          })}
                         >
                           ×
                         </Box>
@@ -1202,7 +1265,7 @@ export function ArmorEditor({
                 >
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Position
+                      {t("armorEditor.position")}
                     </Typography>
                     <Box sx={{ mt: 0.5 }}>
                       <PositionSelector
@@ -1217,7 +1280,7 @@ export function ArmorEditor({
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Size
+                      {t("armorEditor.size")}
                     </Typography>
                     <Slider
                       value={charges[activeChargeIndex].chargeScale ?? 1}
@@ -1228,9 +1291,9 @@ export function ArmorEditor({
                       max={2}
                       step={0.25}
                       marks={[
-                        { value: 0.5, label: "S" },
-                        { value: 1, label: "M" },
-                        { value: 2, label: "L" },
+                        { value: 0.5, label: t("armorEditor.sizeSmall") },
+                        { value: 1, label: t("armorEditor.sizeMedium") },
+                        { value: 2, label: t("armorEditor.sizeLarge") },
                       ]}
                       size="small"
                       sx={{ mt: 1.5 }}
@@ -1239,7 +1302,7 @@ export function ArmorEditor({
                   </Box>
                   <Box>
                     <Typography variant="caption" color="text.secondary">
-                      Rotation
+                      {t("armorEditor.rotation")}
                     </Typography>
                     <Slider
                       value={charges[activeChargeIndex].rotation ?? 0}
@@ -1264,7 +1327,7 @@ export function ArmorEditor({
                 <Stack direction="row" gap={2}>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary">
-                      X Offset
+                      {t("armorEditor.xOffsetLabel")}
                     </Typography>
                     <Slider
                       value={charges[activeChargeIndex].offsetX ?? 0}
@@ -1281,7 +1344,7 @@ export function ArmorEditor({
                   </Box>
                   <Box sx={{ flex: 1 }}>
                     <Typography variant="caption" color="text.secondary">
-                      Y Offset
+                      {t("armorEditor.yOffsetLabel")}
                     </Typography>
                     <Slider
                       value={charges[activeChargeIndex].offsetY ?? 0}
@@ -1308,11 +1371,11 @@ export function ArmorEditor({
           color="text.secondary"
           sx={{ mr: "auto", ml: 1 }}
         >
-          {autoSaveDelay > 0 ? "Auto-saving…" : ""}
+          {autoSaveDelay > 0 ? t("armorEditor.autoSaving") : ""}
         </Typography>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t("armorEditor.cancel")}</Button>
         <Button onClick={handleSave} variant="contained">
-          Save Coat of Arms
+          {t("armorEditor.saveCoatOfArms")}
         </Button>
       </DialogActions>
     </Dialog>

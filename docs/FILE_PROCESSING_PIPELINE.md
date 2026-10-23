@@ -192,42 +192,50 @@ Content (text string or file content)
 
 ---
 
-### 4. Document Analysis (`documentAnalysis` Lambda)
+### 4. Document Analysis (`DocumentAnalysisWorkflow`)
 
 | Property | Value |
 |----------|-------|
-| **Trigger** | `analyzeDocument(fileID)` mutation |
-| **Cancellation** | `cancelDocumentAnalysis(fileID)` mutation |
+| **Trigger** | `analyzeDocument(fileID)` mutation or S3 upload EventBridge rule |
+| **Orchestration** | AWS Step Functions Standard workflow with a Distributed Map (3 pages at a time per document) |
+| **Cancellation** | `cancelDocumentAnalysis(fileID)` stops the recorded execution |
 | **Input** | PDF, DOCX, and other text-bearing documents |
-| **Output** | `Document` + `ParsedContent` records with extracted text, vocabulary, summaries |
+| **Output** | One `ParsedContent` record per document; extracted text, page inputs, page results, and aggregation artifacts are stored in S3 |
 
 **Status progression:**
 
 ```
-uploaded → extracting → analyzing → completed
-                                  ↘ cancelled (if user cancels)
-                                  ↘ failed (on error)
+uploaded → analyzing (preparing → page analysis → aggregation → embeddings)
+         → completed (standard, including reported failed pages)
+         → failed (workflow error, or any failed page in exhaustive profile)
+         → cancelled (if the user stops the execution)
 ```
 
 **Processing stages:**
 
 ```
 File in S3
-  → Download document
-  → Text extraction (format-specific: PDF parser, DOCX parser, etc.)
-  → AI analysis (vocabulary extraction, summary, objectives, questions)
-  → Create ParsedContent records (one per page/section)
-  → Generate embeddings for each ParsedContent record
-  → Update Document.status = 'completed'
+  → Entry Lambda starts/supersedes a Step Functions execution
+  → Prepare: format-aware text extraction, page segmentation, S3 manifest
+  → Distributed Map: extract and deterministically check each page
+  → Verify with Anthropic when configured, otherwise OpenAI; repair suspect pages
+  → Render sparse-text pages and run vision extraction
+  → Aggregate verified page results; keep direct questions/vocabulary only when they exactly match verified entries
+  → Hierarchically synthesize and independently verify summaries/objectives/concepts
+  → Moderate combined source and results
+  → Persist ParsedContent, generate embeddings, then set terminal Document status
 ```
 
 **Records created:**
 - `Document` — top-level analysis record with status tracking
-- `ParsedContent` — individual extracted sections with:
-  - `text` — raw extracted text
-  - `vocabulary` — identified vocabulary words
-  - `summary` — AI-generated summary
-  - `embedding` — vector for semantic search
+- `ParsedContent` — consolidated vocabulary, summaries, objectives, concepts, and questions for the document. Embedding metadata is stored with the record; vectors are stored in S3.
+- `Document.metadata.analysis` — run ID, state, execution ARN, page progress, failed page numbers, and verification quality counts.
+- `Document.metadata.analysis.moderation` — moderation result for the source and aggregate. Flagged results remain available for review but are blocked by the normal review UI and import utilities. This is not yet a server-side guard on direct Word/Question GraphQL mutations.
+- `AgentJob` — one record per document/run (`responseId` equals the analysis run ID), with per-model token counts. No estimated cost is written because no versioned model-price source is configured.
+- `ParsedContent` authorization — Owners/Admins have full access; Instructors can read; Learners have no model-level read access.
+- Temporary analysis artifacts and Map results expire from S3 after 14 days.
+- The Thoth seed reports this progress while polling; its 15-minute default deadline is configurable with `THOTH_ANALYSIS_TIMEOUT_MINUTES`.
+- Shared DynamoDB-backed per-provider RPM/TPM/concurrency limits are implemented in source and editable through Admin Platform Settings; demo mode caps them at 5 RPM, 20,000 TPM, and 1 concurrent request. Final `ParsedContent` persistence rejects serialized payloads over 300 KiB instead of truncating or partially saving. CDK synthesis/deployment, limiter fairness and latency, failed-page redrive, and runtime behavior remain unverified; larger-content chunking is not implemented.
 
 ---
 
@@ -298,12 +306,13 @@ sequenceDiagram
         DocThumbnail->>DynamoDB: Update File.thumbnail
     and Document Analysis (analyzable docs only)
         Browser->>DocAnalysis: analyzeDocument(fileID)
-        DocAnalysis->>DynamoDB: Status: extracting
-        DocAnalysis->>S3: Download document
-        DocAnalysis->>DocAnalysis: Extract text + AI analysis
-        DocAnalysis->>DynamoDB: Create ParsedContent records
-        DocAnalysis->>Embeddings: Generate content embeddings
-        DocAnalysis->>DynamoDB: Status: completed
+        DocAnalysis->>StepFunctions: Start execution
+        StepFunctions->>S3: Extract text + write page manifest
+        StepFunctions->>StepFunctions: Distributed page extraction, verification, repair
+        StepFunctions->>DynamoDB: Update page progress in Document.metadata
+        StepFunctions->>DynamoDB: Persist ParsedContent
+        StepFunctions->>Embeddings: Generate document embeddings
+        StepFunctions->>DynamoDB: Set terminal Document status
     end
 
     Note over S3,EventBridge: EventBridge also fires (redundant safety net)

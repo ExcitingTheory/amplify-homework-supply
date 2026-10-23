@@ -1,4 +1,5 @@
 "use client";
+import { SectionSettingsNavigation } from "@/components/SectionSettingsNavigation";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { useTranslations } from "next-intl";
@@ -108,7 +109,8 @@ import {
   randomAssignPeerReview,
   awardTopReviewerXP,
 } from "../../../actions/peerReview";
-import { useRouter, useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
+import { useRouter as useLocalizedRouter } from "@/i18n/navigation";
 import { GradeReviewDrawer } from "@/components/GradeReviewDrawer";
 import { SkillTreePopupButton } from "@/components/SkillTreePopupButton";
 import { useContentLock, useCampaign } from "@/context/gamificationContext";
@@ -118,6 +120,7 @@ import { ChapterDetailPopover } from "@/components/Gamification/ChapterDetailPop
 import LockIcon from "@mui/icons-material/Lock";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import HourglassBottomIcon from "@mui/icons-material/HourglassBottom";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 import { AssignmentComposer } from "@/components/AssignmentComposer";
 import AddIcon from "@mui/icons-material/Add";
 import PersonAddAlt1Icon from "@mui/icons-material/PersonAddAlt1";
@@ -281,6 +284,7 @@ function SectionDetail({
   const client = getAmplifyClient();
   const t = useTranslations("pages");
   const tCommon = useTranslations("common");
+  const tComponents = useTranslations("components");
   const { toolbarPortalRef, appBarHeight } = useAppShell();
   const isAppBarScrolled = useScrolledAppBar();
   const reducedMotion = useReducedMotion();
@@ -297,6 +301,7 @@ function SectionDetail({
   }, [isAppBarScrolled, reducedMotion]);
 
   const router = useRouter();
+  const localizedRouter = useLocalizedRouter();
 
   const [currentUser, setCurrentUser] = useState(null);
   const [userAttributes, setUserAttributes] = useState(null);
@@ -1661,22 +1666,40 @@ function SectionDetail({
     });
   }, []);
 
+  const getGradeIdsForAssignment = (unitId) =>
+    sortedStudents
+      .map(
+        (student) =>
+          getEffectiveGrade(gradeMap[student.id]?.[unitId], unitId).grade,
+      )
+      .filter((grade) => grade?.id && grade?.complete)
+      .map((grade) => grade.id);
+
+  const handleOpenFullGradeReview = (student, assignment, currentGrade) => {
+    if (!currentGrade?.id || !currentGrade.complete) return;
+
+    const gradeIds = getGradeIdsForAssignment(assignment.unitID);
+    const currentIndex = gradeIds.indexOf(currentGrade.id);
+    const params = new URLSearchParams({
+      sectionId: id,
+      unitId: assignment.unitID,
+      studentName: formatLastFirst(student),
+      gradeIds: gradeIds.join(","),
+      currentIndex: String(Math.max(currentIndex, 0)),
+    });
+
+    localizedRouter.push(
+      `/instructor/grade/${encodeURIComponent(currentGrade.id)}?${params.toString()}`,
+    );
+  };
+
   const handleGradeCellClick = (student, assignment, currentGrade) => {
     if (!isOwner) return; // Only instructors can override grades
 
     // If there's a completed grade, open the grade review drawer
     if (currentGrade?.id && currentGrade?.complete) {
       // Build ordered grade IDs for same assignment across all sorted students
-      const gradeIds = sortedStudents
-        .map(
-          (s) =>
-            getEffectiveGrade(
-              gradeMap[s.id]?.[assignment.unitID],
-              assignment.unitID,
-            ).grade,
-        )
-        .filter((g) => g?.id && g?.complete)
-        .map((g) => g.id);
+      const gradeIds = getGradeIdsForAssignment(assignment.unitID);
       const currentIndex = gradeIds.indexOf(currentGrade.id);
 
       setGradeDrawerData({
@@ -1827,6 +1850,11 @@ function SectionDetail({
 
   return (
     <>
+      {section && (isOwner || isTeacher) && !viewAsStudent && (
+        <Box sx={{ display: "flex", justifyContent: "flex-end", px: 2, py: 1 }}>
+          <SectionSettingsNavigation sectionId={section.id} />
+        </Box>
+      )}
       {/* Title/description live in the main AppBar (same pattern as the Workbook/Unit editor) */}
       {section &&
         toolbarPortalRef?.current &&
@@ -3904,6 +3932,30 @@ function SectionDetail({
                                       )
                                     }
                                   />
+                                  {gradeRecord?.id && gradeRecord?.complete && (
+                                    <Tooltip
+                                      title={tComponents("openGradeReview")}
+                                      arrow
+                                    >
+                                      <IconButton
+                                        size="small"
+                                        aria-label={tComponents(
+                                          "openGradeReview",
+                                        )}
+                                        onClick={(event) => {
+                                          event.stopPropagation();
+                                          handleOpenFullGradeReview(
+                                            student,
+                                            assignment,
+                                            gradeRecord,
+                                          );
+                                        }}
+                                        sx={{ p: 0.25 }}
+                                      >
+                                        <OpenInNewIcon fontSize="small" />
+                                      </IconButton>
+                                    </Tooltip>
+                                  )}
                                   {/* Status trails the grade — it's a glanceable badge, not an action */}
                                   {canHaveGrades &&
                                     (() => {

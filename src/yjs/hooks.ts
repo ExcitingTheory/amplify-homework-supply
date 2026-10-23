@@ -15,10 +15,17 @@ export function useYjsProvider(config: YjsProviderConfig) {
   const [isConnected, setIsConnected] = useState(false)
   const [, forceUpdate] = useState(0)
 
+  // The provider is created once from the latest config; only docName re-runs the effect.
+  const configRef = useRef(config)
+  useEffect(() => {
+    configRef.current = config
+  })
+  const docName = config.docName
+
   useEffect(() => {
     // Create provider if not already created
     if (!providerRef.current) {
-      providerRef.current = new YjsDocProvider(config)
+      providerRef.current = new YjsDocProvider(configRef.current)
     }
 
     const provider = providerRef.current
@@ -52,7 +59,7 @@ export function useYjsProvider(config: YjsProviderConfig) {
         wsProvider.off('status', handleStatus)
       }
     }
-  }, [config.docName])
+  }, [docName])
 
   useEffect(() => {
     // Cleanup on unmount

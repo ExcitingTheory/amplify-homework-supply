@@ -12,11 +12,15 @@
 import type { Handler } from "aws-lambda";
 import {
   S3Client,
-  GetObjectCommand,
-  PutObjectCommand,
   CopyObjectCommand,
   DeleteObjectCommand,
+  PutObjectCommand,
 } from "@aws-sdk/client-s3";
+import {
+  SFNClient,
+  StartExecutionCommand,
+  StopExecutionCommand,
+} from "@aws-sdk/client-sfn";
 import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
@@ -25,9 +29,15 @@ import {
   addTraceAttributes,
 } from "../shared/phoenix-tracer";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
+import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
 import { extractByFormat } from "./formatRegistry.js";
-import { analyzePages } from "./analysis.js";
+import {
+  analyzePages,
+  normaliseQuestionEntries,
+  resolveAnalysisProfile,
+  resolveSkipAutoAnalysis,
+} from "./analysis.js";
 
 // Initialize Phoenix tracing
 initializePhoenixTracing();
@@ -57,13 +67,14 @@ Amplify.configure(
 );
 
 const s3Client = new S3Client();
+const sfnClient = new SFNClient();
 let openaiInstance: any = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
 // Raw GraphQL operations - .models API doesn't work in Lambda resolvers
 const LIST_FILES_BY_PATH = /* GraphQL */ `
-  query ListFiles($filter: ModelFileFilterInput) {
-    listFiles(filter: $filter, limit: 1) {
+  query ListFiles($filter: ModelFileFilterInput, $limit: Int, $nextToken: String) {
+    listFiles(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
         _version
@@ -75,7 +86,9 @@ const LIST_FILES_BY_PATH = /* GraphQL */ `
         path
         identityId
         owner
+        settings
       }
+      nextToken
     }
   }
 `;
@@ -91,6 +104,8 @@ const GET_FILE = /* GraphQL */ `
       name
       mimeType
       path
+      identityId
+      settings
     }
   }
 `;
@@ -105,6 +120,7 @@ const GET_DOCUMENT = /* GraphQL */ `
       filename
       status
       s3Key
+      metadata
     }
   }
 `;
@@ -134,6 +150,7 @@ const UPDATE_DOCUMENT = /* GraphQL */ `
       status
       textExtractedAt
       sourceFormat
+      metadata
     }
   }
 `;
@@ -186,24 +203,13 @@ const CREATE_FILE = /* GraphQL */ `
   }
 `;
 
-async function getS3Object(s3Key: string): Promise<Buffer> {
-  const bucketName = process.env.STORAGE_BUCKET || "";
-
-  const command = new GetObjectCommand({
-    Bucket: bucketName,
-    Key: s3Key,
-  });
-
-  const response = await s3Client.send(command);
-  const stream = response.Body as any;
-
-  // Convert stream to buffer
-  const chunks: any[] = [];
-  for await (const chunk of stream) {
-    chunks.push(chunk);
+function getDataClient() {
+  if (!dataClient) {
+    dataClient = generateClient<Schema>({
+      authMode: "iam",
+    });
   }
-
-  return Buffer.concat(chunks);
+  return dataClient;
 }
 
 async function getOpenAI(): Promise<any> {
@@ -213,15 +219,6 @@ async function getOpenAI(): Promise<any> {
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
-}
-
-function getDataClient() {
-  if (!dataClient) {
-    dataClient = generateClient<Schema>({
-      authMode: "iam",
-    });
-  }
-  return dataClient;
 }
 
 /**
@@ -293,21 +290,43 @@ async function handleS3Event(event: any): Promise<void> {
 
   const client = getDataClient();
 
-  // Look up File record by S3 path
-  const { data, errors } = (await client.graphql({
-    query: LIST_FILES_BY_PATH,
-    variables: { filter: { path: { eq: key } } },
-  })) as any;
+  // Look up File record by S3 path. File has no index on `path`, so this is a
+  // filtered scan: DynamoDB applies the filter after each page's limit, which
+  // means pages can be empty while later pages still match.
+  let file: any;
+  let nextToken: string | null | undefined;
+  do {
+    const { data, errors } = (await client.graphql({
+      query: LIST_FILES_BY_PATH,
+      variables: { filter: { path: { eq: key } }, limit: 1000, nextToken },
+    })) as any;
 
-  if (errors) {
-    console.error("[DocumentAnalysis] GraphQL error looking up file:", errors);
-    return;
-  }
+    if (errors) {
+      console.error("[DocumentAnalysis] GraphQL error looking up file:", errors);
+      return;
+    }
 
-  const file = data?.listFiles?.items?.[0];
+    file = data?.listFiles?.items?.[0];
+    nextToken = file ? null : data?.listFiles?.nextToken;
+  } while (!file && nextToken);
+
   if (!file) {
     console.warn(
       `[DocumentAnalysis] No File record found for path: ${key}, skipping`,
+    );
+    return;
+  }
+
+  const autoAnalysis = resolveSkipAutoAnalysis(file.settings);
+  if (autoAnalysis.invalidValue !== undefined) {
+    console.warn(
+      `[DocumentAnalysis] Invalid skipAutoAnalysis setting on File ${file.id}:`,
+      autoAnalysis.invalidValue,
+    );
+  }
+  if (autoAnalysis.skip) {
+    console.log(
+      `[DocumentAnalysis] Auto-analysis disabled for File ${file.id}`,
     );
     return;
   }
@@ -431,7 +450,226 @@ export const handler: Handler = async (event: any, context: any) => {
   }
 };
 
+function parseDocumentMetadata(value: unknown): Record<string, any> {
+  if (typeof value === "string") return JSON.parse(value || "{}");
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return value as Record<string, any>;
+  }
+  return {};
+}
+
+async function updateDocumentRecord(
+  document: Record<string, any>,
+  update: Record<string, unknown>,
+): Promise<Record<string, any>> {
+  const { data, errors } = (await getDataClient().graphql({
+    query: UPDATE_DOCUMENT,
+    variables: {
+      input: { id: document.id, _version: document._version, ...update },
+    },
+  })) as any;
+  if (errors?.length || !data?.updateDocument) {
+    throw new Error(`Unable to update Document ${document.id}`);
+  }
+  return data.updateDocument;
+}
+
+async function stopExecution(executionArn: string, cause: string): Promise<void> {
+  try {
+    await sfnClient.send(
+      new StopExecutionCommand({ executionArn, cause }),
+    );
+  } catch (error) {
+    if (
+      error !== null &&
+      typeof error === "object" &&
+      "name" in error &&
+      ["ExecutionDoesNotExist", "ExecutionNotRunning"].includes(
+        (error as { name: string }).name,
+      )
+    ) {
+      return;
+    }
+    throw error;
+  }
+}
+
 async function handleAnalyzeDocument(args: any): Promise<any> {
+  const { fileID } = args;
+  const client = getDataClient();
+  const stateMachineArn = process.env.DOCUMENT_ANALYSIS_WORKFLOW_ARN;
+  if (!stateMachineArn) {
+    throw new Error("DOCUMENT_ANALYSIS_WORKFLOW_ARN is not configured");
+  }
+
+  const { data: fileData, errors: fileErrors } = (await client.graphql({
+    query: GET_FILE,
+    variables: { id: fileID },
+  })) as any;
+  if (fileErrors?.length || !fileData?.getFile) {
+    throw new Error(`File not found for ID: ${fileID}`);
+  }
+  const file = fileData.getFile;
+  if (!file.path || !file.identityId) {
+    throw new Error(`File ${fileID} is missing its S3 path or identity ID`);
+  }
+  const { profile, invalidValue } = resolveAnalysisProfile(file.settings);
+  if (invalidValue !== undefined) {
+    console.warn(
+      `[Analyze Document] Invalid analysisProfile setting for File ${fileID}; using standard profile:`,
+      invalidValue,
+    );
+  }
+
+  let documentId = file.documentID;
+  if (!documentId) {
+    const { data, errors } = (await client.graphql({
+      query: CREATE_DOCUMENT,
+      variables: {
+        input: {
+          filename: file.name || "Untitled Document",
+          s3Key: file.path,
+          status: "uploaded",
+          mimeType: file.mimeType,
+          uploadedAt: new Date().toISOString(),
+        },
+      },
+    })) as any;
+    if (errors?.length || !data?.createDocument) {
+      throw new Error(`Failed to create Document for File ${fileID}`);
+    }
+    documentId = data.createDocument.id;
+    const { errors: linkErrors } = (await client.graphql({
+      query: UPDATE_FILE,
+      variables: {
+        input: {
+          id: fileID,
+          documentID: documentId,
+          _version: file._version ?? 1,
+        },
+      },
+    })) as any;
+    if (linkErrors?.length) {
+      throw new Error(`Unable to link File ${fileID} to its Document`);
+    }
+  }
+
+  const { data: documentData, errors: documentErrors } = (await client.graphql({
+    query: GET_DOCUMENT,
+    variables: { id: documentId },
+  })) as any;
+  if (documentErrors?.length || !documentData?.getDocument) {
+    throw new Error(`Document not found for ID: ${documentId}`);
+  }
+  let document = documentData.getDocument;
+  const existingMetadata = parseDocumentMetadata(document.metadata);
+  const previousAnalysis = existingMetadata.analysis ?? {};
+  if (
+    typeof previousAnalysis.executionArn === "string" &&
+    !["completed", "failed", "cancelled"].includes(previousAnalysis.state)
+  ) {
+    await stopExecution(
+      previousAnalysis.executionArn,
+      "Superseded by a new analysis run",
+    );
+  }
+
+  const runId = randomUUID();
+  const analysis = {
+    runId,
+    state: "preparing",
+    startedAt: new Date().toISOString(),
+    totalPages: 0,
+    done: 0,
+    failed: 0,
+  };
+  document = await updateDocumentRecord(document, {
+    status: "analyzing",
+    metadata: JSON.stringify({ ...existingMetadata, analysis }),
+  });
+
+  let startedExecutionArn: string | undefined;
+  try {
+    const execution = await sfnClient.send(
+      new StartExecutionCommand({
+        stateMachineArn,
+        name: runId,
+        input: JSON.stringify({
+          runId,
+          documentId,
+          fileId: fileID,
+          identityId: file.identityId,
+          s3Key: file.path,
+          profile,
+        }),
+      }),
+    );
+    if (!execution.executionArn) {
+      throw new Error("Step Functions did not return an execution ARN");
+    }
+    startedExecutionArn = execution.executionArn;
+    const latestResult = (await client.graphql({
+      query: GET_DOCUMENT,
+      variables: { id: documentId },
+    })) as any;
+    if (latestResult.errors?.length || !latestResult.data?.getDocument) {
+      throw new Error(`Unable to reload Document ${documentId}`);
+    }
+    const latest = latestResult.data.getDocument;
+    const latestMetadata = parseDocumentMetadata(latest.metadata);
+    if (latestMetadata.analysis?.runId === runId) {
+      await updateDocumentRecord(latest, {
+        metadata: JSON.stringify({
+          ...latestMetadata,
+          analysis: {
+            ...latestMetadata.analysis,
+            executionArn: execution.executionArn,
+          },
+        }),
+      });
+    } else {
+      await stopExecution(
+        execution.executionArn,
+        "Superseded by a newer analysis run",
+      );
+    }
+    return {
+      success: true,
+      documentID: documentId,
+      fileID,
+      executionArn: execution.executionArn,
+      message: "Document analysis started",
+    };
+  } catch (error) {
+    if (startedExecutionArn) {
+      await stopExecution(startedExecutionArn, "Unable to register analysis execution");
+    }
+    const latestResult = (await client.graphql({
+      query: GET_DOCUMENT,
+      variables: { id: documentId },
+    })) as any;
+    if (!latestResult.errors?.length && latestResult.data?.getDocument) {
+      const latest = latestResult.data.getDocument;
+      const latestMetadata = parseDocumentMetadata(latest.metadata);
+      if (latestMetadata.analysis?.runId === runId) {
+        await updateDocumentRecord(latest, {
+          status: "failed",
+          metadata: JSON.stringify({
+            ...latestMetadata,
+            analysis: {
+              ...latestMetadata.analysis,
+              state: "failed",
+              error: error instanceof Error ? error.message : String(error),
+            },
+          }),
+        });
+      }
+    }
+    throw error;
+  }
+}
+
+async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
   const { fileID } = args;
 
   try {
@@ -451,6 +689,13 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
     }
 
     const file = fileData.getFile;
+    const { profile, invalidValue } = resolveAnalysisProfile(file.settings);
+    if (invalidValue !== undefined) {
+      console.warn(
+        `[Analyze Document] Invalid analysisProfile setting on File ${fileID}; using standard profile:`,
+        invalidValue,
+      );
+    }
 
     let documentID = file.documentID;
 
@@ -604,9 +849,19 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
     const openai = await getOpenAI();
 
     let parsedContent;
-    if (s3Key.toLowerCase().endsWith(".pdf") && pages.length > 0) {
-      // Page-by-page analysis for PDFs
-      parsedContent = await analyzePages(openai, pages, fileID, documentID);
+    if (profile === "exhaustive" && pages.length === 0) {
+      throw new Error(
+        `Exhaustive analysis requires page-based text extraction for file ${fileID}`,
+      );
+    }
+
+    if (
+      (profile === "exhaustive" || s3Key.toLowerCase().endsWith(".pdf")) &&
+      pages.length > 0
+    ) {
+      parsedContent = await analyzePages(openai, pages, fileID, documentID, {
+        profile,
+      });
     } else {
       // Build format-aware system prompt
       const systemPrompt = buildAnalysisPrompt(sourceFormat, directContent);
@@ -618,7 +873,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           { role: "system", content: systemPrompt },
           {
             role: "user",
-            content: `Extract from:\n\n${text.substring(0, 100000)}`,
+            content: `Extract from:\n\n${text}`,
           },
         ],
         response_format: { type: "json_object" },
@@ -713,7 +968,9 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
           summariesJSON: JSON.stringify(parsedContent.summariesJSON || []),
           objectivesJSON: JSON.stringify(parsedContent.objectivesJSON || []),
           conceptsJSON: JSON.stringify(parsedContent.conceptsJSON || []),
-          questionsJSON: JSON.stringify(parsedContent.questionsJSON || []),
+          questionsJSON: JSON.stringify(
+            normaliseQuestionEntries(parsedContent.questionsJSON ?? []),
+          ),
           pendingMediaJSON:
             pendingMedia.length > 0 ? JSON.stringify(pendingMedia) : undefined,
           modelUsed: "gpt-4o",
@@ -806,7 +1063,7 @@ function buildAnalysisPrompt(
   summariesJSON: [{title, content, page_range}],
   objectivesJSON: [{objective, bloom_level}],
   conceptsJSON: [{concept, description, related_vocabulary}],
-  questionsJSON: [{prompt, answer, hint, difficulty, questionType}]
+  questionsJSON: [{prompt, answer, hint, difficulty, questionType, page, subject, field, sourceText}]
 }`;
 
   const formatHints: Record<string, string> = {
@@ -899,22 +1156,22 @@ async function handleCancelDocumentAnalysis(args: any): Promise<any> {
 
     const document = docData.getDocument;
 
-    // Update document status to "cancelled"
-    await client.graphql({
-      query: UPDATE_DOCUMENT,
-      variables: {
-        input: {
-          id: document.id,
-          status: "cancelled",
-          _version: document._version ?? 1,
+    const metadata = parseDocumentMetadata(document.metadata);
+    const analysis = metadata.analysis ?? {};
+    if (typeof analysis.executionArn === "string") {
+      await stopExecution(analysis.executionArn, "Cancelled by user");
+    }
+    await updateDocumentRecord(document, {
+      status: "cancelled",
+      metadata: JSON.stringify({
+        ...metadata,
+        analysis: {
+          ...analysis,
+          state: "cancelled",
+          cancelledAt: new Date().toISOString(),
         },
-      },
+      }),
     });
-
-    // In production, would:
-    // 1. Cancel any in-progress async tasks
-    // 2. Delete partial ParsedContent records
-    // 3. Clean up S3 temporary files
 
     return {
       success: true,

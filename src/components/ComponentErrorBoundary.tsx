@@ -1,5 +1,6 @@
 import React from "react";
 import { Alert, Box, Button, Typography } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 interface ComponentErrorBoundaryProps {
   children: React.ReactNode;
@@ -8,6 +9,35 @@ interface ComponentErrorBoundaryProps {
 
 interface ComponentErrorBoundaryState {
   error: Error | null;
+}
+
+interface ComponentErrorFallbackProps {
+  name: string;
+  onRetry: () => void;
+}
+
+function ComponentErrorFallback({
+  name,
+  onRetry,
+}: ComponentErrorFallbackProps) {
+  const t = useTranslations("components");
+
+  return (
+    <Box role="alert" sx={{ p: 2 }}>
+      <Alert
+        severity="error"
+        action={
+          <Button color="inherit" size="small" onClick={onRetry}>
+            {t("componentErrorBoundary.tryAgain")}
+          </Button>
+        }
+      >
+        <Typography component="span" variant="body2">
+          {t("componentErrorBoundary.couldNotLoad", { name })}
+        </Typography>
+      </Alert>
+    </Box>
+  );
 }
 
 export default class ComponentErrorBoundary extends React.Component<
@@ -32,20 +62,10 @@ export default class ComponentErrorBoundary extends React.Component<
     if (!this.state.error) return this.props.children;
 
     return (
-      <Box role="alert" sx={{ p: 2 }}>
-        <Alert
-          severity="error"
-          action={
-            <Button color="inherit" size="small" onClick={this.handleRetry}>
-              Try again
-            </Button>
-          }
-        >
-          <Typography component="span" variant="body2">
-            {this.props.name} could not load. Your other work is still safe.
-          </Typography>
-        </Alert>
-      </Box>
+      <ComponentErrorFallback
+        name={this.props.name}
+        onRetry={this.handleRetry}
+      />
     );
   }
 }

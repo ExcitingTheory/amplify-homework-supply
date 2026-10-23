@@ -4,6 +4,7 @@
  */
 
 import { getAmplifyClient } from './amplifyClient';
+import { assertParsedContentImportAllowed } from './parsedContentModeration';
 // Type import removed - not needed in runtime JS
 
 /**
@@ -110,6 +111,7 @@ export async function importVocabularyToUnit(
         if (!parsedContent) {
             throw new Error(`ParsedContent not found: ${parsedContentId}`);
         }
+        await assertParsedContentImportAllowed(client, parsedContent);
         
         // Parse the vocabularyJSON
         const vocabularyItems = parsedContent.vocabularyJSON 

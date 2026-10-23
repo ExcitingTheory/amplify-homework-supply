@@ -6,6 +6,47 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import React from "react";
 
+// File-local next-intl mock (overrides test/setup.ts): appends interpolation
+// values as JSON so assertions can verify both the message key and its data.
+vi.mock("next-intl", () => {
+  const format = (key: string, values?: Record<string, unknown>) =>
+    values ? `${key} ${JSON.stringify(values)}` : key;
+  const createT = () => {
+    const t = (key: string, values?: Record<string, unknown>) =>
+      format(key, values);
+    t.rich = (key: string, values?: Record<string, unknown>) =>
+      format(key, values);
+    t.markup = (key: string, values?: Record<string, unknown>) =>
+      format(key, values);
+    t.raw = (key: string) => key;
+    t.has = () => true;
+    return t;
+  };
+  return {
+    useTranslations: () => createT(),
+    useLocale: () => "en",
+    useMessages: () => ({}),
+    useFormatter: () => ({
+      number: (n: number) => String(n),
+      dateTime: (d: Date) => d.toISOString(),
+    }),
+    NextIntlClientProvider: ({ children }: { children: React.ReactNode }) =>
+      children,
+  };
+});
+
+/** Text matcher for `key {"name":value,...}` output that checks a subset of the values. */
+const withValues =
+  (key: string, expected: Record<string, unknown>) => (content: string) => {
+    if (!content.startsWith(`${key} `)) return false;
+    try {
+      const values = JSON.parse(content.slice(key.length + 1));
+      return Object.entries(expected).every(([k, v]) => values[k] === v);
+    } catch {
+      return false;
+    }
+  };
+
 import { GroupChallengeCard } from "../GroupChallengeCard";
 import { SquadCrest } from "../SquadCrest";
 import { SquadLeaderboard } from "../SquadLeaderboard";
@@ -25,8 +66,18 @@ describe("GroupChallengeCard", () => {
       />,
     );
     expect(screen.getByText("Weekly Sprint")).toBeDefined();
-    expect(screen.getByText("600 / 1,000 XP")).toBeDefined();
+    expect(
+      screen.getByText(
+        withValues("groupChallengeCard.xpProgress", {
+          currentXP: "600",
+          targetXP: "1,000",
+        }),
+      ),
+    ).toBeDefined();
     expect(screen.getByText("60%")).toBeDefined();
+    expect(screen.getByRole("progressbar").getAttribute("aria-valuenow")).toBe(
+      "60",
+    );
   });
 
   it('shows "Goal Reached!" chip when target met', () => {
@@ -38,7 +89,7 @@ describe("GroupChallengeCard", () => {
         active={false}
       />,
     );
-    expect(screen.getByText("Goal Reached!")).toBeDefined();
+    expect(screen.getByText("groupChallengeCard.goalReached")).toBeDefined();
   });
 
   it("shows bonus multiplier chip", () => {
@@ -51,11 +102,18 @@ describe("GroupChallengeCard", () => {
         bonusMultiplier={2}
       />,
     );
-    expect(screen.getByText("2× bonus")).toBeDefined();
+    expect(
+      screen.getByText(
+        withValues("groupChallengeCard.bonusMultiplier", {
+          bonusMultiplier: 2,
+        }),
+      ),
+    ).toBeDefined();
   });
 
   it("shows deadline info", () => {
-    const future = new Date(Date.now() + 2 * 86400000).toISOString();
+    // 30-minute buffer keeps the remaining time safely above 2 full days
+    const future = new Date(Date.now() + 2 * 86400000 + 1800000).toISOString();
     render(
       <GroupChallengeCard
         title="Timed Challenge"
@@ -65,8 +123,10 @@ describe("GroupChallengeCard", () => {
         deadline={future}
       />,
     );
-    // Should show days remaining
-    const text = screen.getByText(/\dd.*left/);
+    // Should show days remaining (days + hours variant, not hours-only or expired)
+    const text = screen.getByText(
+      withValues("groupChallengeCard.daysHoursLeft", { days: 2 }),
+    );
     expect(text).toBeDefined();
   });
 
@@ -134,18 +194,26 @@ describe("SquadLeaderboard", () => {
 
   it("shows empty state", () => {
     render(<SquadLeaderboard squads={[]} />);
-    expect(screen.getByText("No squads yet")).toBeDefined();
+    expect(screen.getByText("squadLeaderboard.emptyTitle")).toBeDefined();
   });
 
   it('highlights student squad with "My Squad" chip', () => {
     render(<SquadLeaderboard squads={squads} mySquadId="g2" />);
-    expect(screen.getByText("My Squad")).toBeDefined();
+    expect(screen.getByText("squadLeaderboard.mySquad")).toBeDefined();
   });
 
   it("shows member count text", () => {
     render(<SquadLeaderboard squads={squads} />);
-    expect(screen.getByText(/3 members/)).toBeDefined();
-    expect(screen.getByText(/4 members/)).toBeDefined();
+    expect(
+      screen.getByText(
+        withValues("squadLeaderboard.memberCount", { count: 3 }),
+      ),
+    ).toBeDefined();
+    expect(
+      screen.getByText(
+        withValues("squadLeaderboard.memberCount", { count: 4 }),
+      ),
+    ).toBeDefined();
   });
 
   it("shows rank emojis for top 3", () => {

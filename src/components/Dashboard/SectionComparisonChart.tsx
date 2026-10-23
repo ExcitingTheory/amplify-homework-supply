@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Stack, Tooltip, Typography } from "@mui/material";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import AssignmentTurnedInIcon from "@mui/icons-material/AssignmentTurnedIn";
@@ -18,6 +19,7 @@ export interface SectionComparisonChartProps {
 export function SectionComparisonChart({
   sections,
 }: SectionComparisonChartProps) {
+  const t = useTranslations("components");
   if (sections.length === 0) return null;
 
   return (
@@ -29,7 +31,7 @@ export function SectionComparisonChart({
           </Typography>
           <Stack spacing={0.5}>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Average grade">
+              <Tooltip title={t("sectionComparisonChart.averageGrade")}>
                 <EmojiEventsIcon
                   sx={{ fontSize: 16, color: "text.disabled" }}
                 />
@@ -37,7 +39,7 @@ export function SectionComparisonChart({
               <CompletionBar pct={section.avgGrade} />
             </Box>
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Tooltip title="Completion rate">
+              <Tooltip title={t("sectionComparisonChart.completionRate")}>
                 <AssignmentTurnedInIcon
                   sx={{ fontSize: 16, color: "text.disabled" }}
                 />

@@ -14,6 +14,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Stack from '@mui/material/Stack'
 import StarIcon from '@mui/icons-material/Star'
 import Link from 'next/link'
+import { useTranslations } from 'next-intl'
 
 export interface ModuleProgress {
   moduleId: string
@@ -108,10 +109,11 @@ function ProgressRing({ module }: { module: ModuleProgress }) {
 }
 
 export function ProgressRings({ modules }: ProgressRingsProps) {
+  const t = useTranslations('components')
   if (modules.length === 0) {
     return (
       <Typography variant="body2" color="text.secondary">
-        No modules started yet.
+        {t('progressRings.empty')}
       </Typography>
     )
   }

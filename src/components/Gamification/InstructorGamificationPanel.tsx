@@ -13,6 +13,7 @@
  */
 
 import React, { useState } from "react";
+import { useTranslations } from "next-intl";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Accordion from "@mui/material/Accordion";
@@ -88,6 +89,10 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import InputLabel from "@mui/material/InputLabel";
 import Slider from "@mui/material/Slider";
+
+// Defer mounting each panel's contents until first expansion, then keep them
+// mounted so in-progress form drafts survive collapsing.
+const LAZY_ACCORDION_SLOT_PROPS = { transition: { mountOnEnter: true } };
 
 // ============================================================================
 // Types
@@ -298,6 +303,7 @@ export function InstructorGamificationPanel({
   antiBadgesEnabled,
   onToggleAntiBadges,
 }: InstructorGamificationPanelProps) {
+  const t = useTranslations("components");
   // Local form state for inline creation
   const [newSquadName, setNewSquadName] = useState("");
   const [selectedSquadSection, setSelectedSquadSection] = useState<{
@@ -332,23 +338,35 @@ export function InstructorGamificationPanel({
     const opts: Array<{ id: string; label: string; group: string }> = [];
     getAllBadgeTypes().forEach((key) => {
       const cfg = getBadgeConfig(key);
-      opts.push({ id: key, label: cfg.name || key, group: "Badges" });
+      opts.push({
+        id: key,
+        label: cfg.name || key,
+        group: t("instructorGamificationPanel.badgeGroupBadges"),
+      });
     });
     getAllAntiBadgeTypes().forEach((key) => {
       const cfg = getAntiBadgeConfig(key);
       if (cfg)
-        opts.push({ id: key, label: cfg.name || key, group: "Anti-Badges" });
+        opts.push({
+          id: key,
+          label: cfg.name || key,
+          group: t("instructorGamificationPanel.badgeGroupAntiBadges"),
+        });
     });
     customBadges.forEach((cb) => {
-      opts.push({ id: cb.id, label: cb.name || cb.id, group: "Custom" });
+      opts.push({
+        id: cb.id,
+        label: cb.name || cb.id,
+        group: t("instructorGamificationPanel.badgeGroupCustom"),
+      });
     });
     return opts;
-  }, [customBadges]);
+  }, [customBadges, t]);
 
   return (
     <Box sx={{ maxWidth: 800, margin: "0 auto" }}>
       <Typography variant="h5" fontWeight={700} gutterBottom>
-        Gamification Admin
+        {t("instructorGamificationPanel.title")}
       </Typography>
 
       {/* ---- Section Selector ---- */}
@@ -370,17 +388,24 @@ export function InstructorGamificationPanel({
 
       {/* ---- XP Tuner ---- */}
       {(onSaveXPConfig || onSaveXPMultipliers) && (
-        <Accordion defaultExpanded={false}>
+        <Accordion
+          defaultExpanded={false}
+          slotProps={LAZY_ACCORDION_SLOT_PROPS}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <TuneIcon sx={{ mr: 1 }} />
-            <Typography fontWeight={600}>XP Tuner</Typography>
+            <Typography fontWeight={600}>
+              {t("instructorGamificationPanel.xpTuner")}
+            </Typography>
             {(xpConfig || xpMultipliers) &&
               (() => {
                 const cfg = xpConfig || xpMultipliers || {};
                 const count = Object.keys(cfg).length;
                 return count > 0 ? (
                   <Chip
-                    label={`${count} custom`}
+                    label={t("instructorGamificationPanel.customCount", {
+                      count,
+                    })}
                     size="small"
                     color="primary"
                     variant="outlined"
@@ -405,13 +430,20 @@ export function InstructorGamificationPanel({
       {/* ---- Skill Tree Editor ---- */}
       {/* ---- Avatar Unlock Editor ---- */}
       {onSaveXPConfig && (
-        <Accordion defaultExpanded={false}>
+        <Accordion
+          defaultExpanded={false}
+          slotProps={LAZY_ACCORDION_SLOT_PROPS}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <FaceIcon sx={{ mr: 1 }} />
-            <Typography fontWeight={600}>Avatar Style Unlocks</Typography>
+            <Typography fontWeight={600}>
+              {t("instructorGamificationPanel.avatarStyleUnlocks")}
+            </Typography>
             {xpConfig?.avatarUnlocks?.unlocks?.length ? (
               <Chip
-                label={`${xpConfig.avatarUnlocks.unlocks.length} styles`}
+                label={t("instructorGamificationPanel.styleCount", {
+                  count: xpConfig.avatarUnlocks.unlocks.length,
+                })}
                 size="small"
                 color="secondary"
                 variant="outlined"
@@ -435,13 +467,20 @@ export function InstructorGamificationPanel({
 
       {/* ---- Theme Unlock Editor ---- */}
       {onSaveXPConfig && (
-        <Accordion defaultExpanded={false}>
+        <Accordion
+          defaultExpanded={false}
+          slotProps={LAZY_ACCORDION_SLOT_PROPS}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <TuneIcon sx={{ mr: 1 }} />
-            <Typography fontWeight={600}>Theme Unlock Levels</Typography>
+            <Typography fontWeight={600}>
+              {t("instructorGamificationPanel.themeUnlockLevels")}
+            </Typography>
             {xpConfig?.themeUnlocks?.unlocks?.length ? (
               <Chip
-                label={`${xpConfig.themeUnlocks.unlocks.length} themes`}
+                label={t("instructorGamificationPanel.themeCount", {
+                  count: xpConfig.themeUnlocks.unlocks.length,
+                })}
                 size="small"
                 color="secondary"
                 variant="outlined"
@@ -463,11 +502,13 @@ export function InstructorGamificationPanel({
         </Accordion>
       )}
 
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <AccountTreeIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>
-            Skill Tree ({skills.length} skills)
+            {t("instructorGamificationPanel.skillTreeHeading", {
+              count: skills.length,
+            })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -483,7 +524,7 @@ export function InstructorGamificationPanel({
           {skills.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                Visual Layout
+                {t("instructorGamificationPanel.visualLayout")}
               </Typography>
               <SkillTree
                 skills={skills.map((s) => ({
@@ -506,7 +547,7 @@ export function InstructorGamificationPanel({
 
           {/* Flat list for editing/deleting */}
           <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-            All Skills
+            {t("instructorGamificationPanel.allSkills")}
           </Typography>
           <List dense>
             {skills.map((skill) => (
@@ -523,14 +564,18 @@ export function InstructorGamificationPanel({
                     >
                       {skill.xpReward ? (
                         <Chip
-                          label={`${skill.xpReward} XP`}
+                          label={t("instructorGamificationPanel.xpAmount", {
+                            xp: skill.xpReward,
+                          })}
                           size="small"
                           sx={{ height: 18, fontSize: "0.65rem" }}
                         />
                       ) : null}
                       {skill.unitIds && skill.unitIds.length > 0 && (
                         <Chip
-                          label={`${skill.unitIds.length} units`}
+                          label={t("instructorGamificationPanel.unitCount", {
+                            count: skill.unitIds.length,
+                          })}
                           size="small"
                           variant="outlined"
                           sx={{ height: 18, fontSize: "0.65rem" }}
@@ -538,7 +583,12 @@ export function InstructorGamificationPanel({
                       )}
                       {skill.minimumAccuracy != null && (
                         <Chip
-                          label={`≥${skill.minimumAccuracy}%`}
+                          label={t(
+                            "instructorGamificationPanel.minimumAccuracy",
+                            {
+                              percent: skill.minimumAccuracy,
+                            },
+                          )}
                           size="small"
                           variant="outlined"
                           sx={{ height: 18, fontSize: "0.65rem" }}
@@ -560,7 +610,7 @@ export function InstructorGamificationPanel({
             ))}
             {skills.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                No skills defined. Add your first skill above.
+                {t("instructorGamificationPanel.noSkills")}
               </Typography>
             )}
           </List>
@@ -568,33 +618,41 @@ export function InstructorGamificationPanel({
       </Accordion>
 
       {/* ---- Campaign Editor ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <AutoStoriesIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>
-            Campaign ({campaigns.length})
+            {t("instructorGamificationPanel.campaignHeading", {
+              count: campaigns.length,
+            })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={2} sx={{ mb: 2 }}>
             <TextField
               size="small"
-              label="Campaign title"
+              label={t("instructorGamificationPanel.campaignTitleLabel")}
               value={campaignTitle}
               onChange={(e) => setCampaignTitle(e.target.value)}
-              placeholder="e.g. The Quest for Lost Vocabulary"
+              placeholder={t(
+                "instructorGamificationPanel.campaignTitlePlaceholder",
+              )}
               fullWidth
             />
             <TextField
               size="small"
-              label="Setting (narrative world)"
+              label={t("instructorGamificationPanel.campaignSettingLabel")}
               value={campaignSetting}
               onChange={(e) => setCampaignSetting(e.target.value)}
-              placeholder="Describe the world students inhabit..."
+              placeholder={t(
+                "instructorGamificationPanel.campaignSettingPlaceholder",
+              )}
               multiline
               rows={2}
               fullWidth
-              helperText="The fictional world or scenario that frames the learning journey"
+              helperText={t(
+                "instructorGamificationPanel.campaignSettingHelper",
+              )}
             />
             <Stack direction="row" spacing={1}>
               <Button
@@ -611,7 +669,7 @@ export function InstructorGamificationPanel({
                   setCampaignSetting("");
                 }}
               >
-                Save Campaign
+                {t("instructorGamificationPanel.saveCampaign")}
               </Button>
               {onGenerateCampaign && (
                 <Button
@@ -639,7 +697,9 @@ export function InstructorGamificationPanel({
                     }
                   }}
                 >
-                  {campaignGenerating ? "Generating…" : "Generate with AI"}
+                  {campaignGenerating
+                    ? t("instructorGamificationPanel.generating")
+                    : t("instructorGamificationPanel.generateWithAI")}
                 </Button>
               )}
             </Stack>
@@ -667,8 +727,8 @@ export function InstructorGamificationPanel({
                       }
                       aria-label={
                         expandedCampaignId === c.id
-                          ? "Collapse narrative"
-                          : "Expand narrative"
+                          ? t("instructorGamificationPanel.collapseNarrative")
+                          : t("instructorGamificationPanel.expandNarrative")
                       }
                     >
                       <ExpandMoreIcon
@@ -700,7 +760,7 @@ export function InstructorGamificationPanel({
                           color="text.secondary"
                           fontWeight={600}
                         >
-                          Setting
+                          {t("instructorGamificationPanel.setting")}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -717,7 +777,7 @@ export function InstructorGamificationPanel({
                           color="text.secondary"
                           fontWeight={600}
                         >
-                          Stakes
+                          {t("instructorGamificationPanel.stakes")}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -729,7 +789,7 @@ export function InstructorGamificationPanel({
                     )}
                     {!c.setting && !c.stakes && (
                       <Typography variant="body2" color="text.secondary">
-                        No narrative generated yet. Edit or generate one above.
+                        {t("instructorGamificationPanel.noNarrative")}
                       </Typography>
                     )}
                   </Box>
@@ -741,10 +801,14 @@ export function InstructorGamificationPanel({
       </Accordion>
 
       {/* ---- Squad Management ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <GroupsIcon sx={{ mr: 1 }} />
-          <Typography fontWeight={600}>Squads ({squads.length})</Typography>
+          <Typography fontWeight={600}>
+            {t("instructorGamificationPanel.squadsHeading", {
+              count: squads.length,
+            })}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack direction="row" spacing={1} sx={{ mb: 2, flexWrap: "wrap" }}>
@@ -767,15 +831,19 @@ export function InstructorGamificationPanel({
                 </li>
               )}
               renderInput={(params) => (
-                <TextField {...params} size="small" label="Section" />
+                <TextField
+                  {...params}
+                  size="small"
+                  label={t("instructorGamificationPanel.sectionLabel")}
+                />
               )}
               sx={{ minWidth: 200 }}
               size="small"
-              noOptionsText="No sections found"
+              noOptionsText={t("instructorGamificationPanel.noSectionsFound")}
             />
             <TextField
               size="small"
-              label="Squad name"
+              label={t("instructorGamificationPanel.squadNameLabel")}
               value={newSquadName}
               onChange={(e) => setNewSquadName(e.target.value)}
               sx={{ flex: 1 }}
@@ -791,7 +859,7 @@ export function InstructorGamificationPanel({
                 setSelectedSquadSection(null);
               }}
             >
-              Create
+              {t("instructorGamificationPanel.create")}
             </Button>
           </Stack>
           <List dense>
@@ -799,7 +867,9 @@ export function InstructorGamificationPanel({
               <ListItem key={g.id} divider sx={{ gap: 1 }}>
                 <ListItemText
                   primary={g.name}
-                  secondary={`${g.memberCount} members`}
+                  secondary={t("instructorGamificationPanel.memberCount", {
+                    count: g.memberCount,
+                  })}
                   sx={{ flex: 1, minWidth: 0 }}
                   primaryTypographyProps={{ noWrap: true }}
                 />
@@ -812,17 +882,24 @@ export function InstructorGamificationPanel({
                 </IconButton>
               </ListItem>
             ))}
-            {squads.length === 0 && <EmptyState dense title="No squads yet" />}
+            {squads.length === 0 && (
+              <EmptyState
+                dense
+                title={t("instructorGamificationPanel.noSquads")}
+              />
+            )}
           </List>
         </AccordionDetails>
       </Accordion>
 
       {/* ---- Easter Egg CRUD ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <SearchIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>
-            Easter Eggs ({easterEggs.length})
+            {t("instructorGamificationPanel.easterEggsHeading", {
+              count: easterEggs.length,
+            })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -852,13 +929,17 @@ export function InstructorGamificationPanel({
                         sx={{ height: 18, fontSize: "0.65rem" }}
                       />
                       <Chip
-                        label={`${egg.xpReward} XP`}
+                        label={t("instructorGamificationPanel.xpAmount", {
+                          xp: egg.xpReward,
+                        })}
                         size="small"
                         sx={{ height: 18, fontSize: "0.65rem" }}
                       />
                       {egg.keyword && (
                         <Chip
-                          label={`"${egg.keyword}"`}
+                          label={t("instructorGamificationPanel.quoted", {
+                            value: egg.keyword,
+                          })}
                           size="small"
                           variant="outlined"
                           sx={{ height: 18, fontSize: "0.65rem" }}
@@ -891,15 +972,17 @@ export function InstructorGamificationPanel({
       </Accordion>
 
       {/* ---- Badge Customization ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <EmojiEventsIcon sx={{ mr: 1 }} />
           <Typography component="div" fontWeight={600}>
-            Badges ({customBadges.length} custom, {badgeOverrides.length}{" "}
-            modified)
+            {t("instructorGamificationPanel.badgesHeading", {
+              customCount: customBadges.length,
+              modifiedCount: badgeOverrides.length,
+            })}
             {badgesEnabled === false && (
               <Chip
-                label="Disabled"
+                label={t("instructorGamificationPanel.disabled")}
                 size="small"
                 color="warning"
                 variant="outlined"
@@ -922,11 +1005,12 @@ export function InstructorGamificationPanel({
                 label={
                   <Box>
                     <Typography variant="body2" fontWeight={600}>
-                      Badge Awarding
+                      {t("instructorGamificationPanel.badgeAwarding")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      When disabled, no badges (regular or anti) will be awarded
-                      to students in this section.
+                      {t(
+                        "instructorGamificationPanel.badgeAwardingDescription",
+                      )}
                     </Typography>
                   </Box>
                 }
@@ -946,14 +1030,16 @@ export function InstructorGamificationPanel({
       </Accordion>
 
       {/* ---- Anti-Badges ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <ReportProblemIcon sx={{ mr: 1, color: "error.main" }} />
           <Typography component="div" fontWeight={600}>
-            Anti-Badges ({getAllAntiBadgeTypes().length} badges)
+            {t("instructorGamificationPanel.antiBadgesHeading", {
+              count: getAllAntiBadgeTypes().length,
+            })}
             {antiBadgesEnabled === false && (
               <Chip
-                label="Disabled"
+                label={t("instructorGamificationPanel.disabled")}
                 size="small"
                 color="warning"
                 variant="outlined"
@@ -976,12 +1062,12 @@ export function InstructorGamificationPanel({
                 label={
                   <Box>
                     <Typography variant="body2" fontWeight={600}>
-                      Anti-Badge Awarding
+                      {t("instructorGamificationPanel.antiBadgeAwarding")}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
-                      When disabled, anti-badges (and their debuffs) will not be
-                      awarded in this section. Regular badges are unaffected by
-                      this toggle.
+                      {t(
+                        "instructorGamificationPanel.antiBadgeAwardingDescription",
+                      )}
                     </Typography>
                   </Box>
                 }
@@ -990,10 +1076,7 @@ export function InstructorGamificationPanel({
             </Box>
           )}
           <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-            Sardonic anti-badges are awarded automatically for dubious
-            achievements. Each comes with a temporary debuff — a whimsical
-            penalty that makes earning them memorable. Anti-badges appear on
-            student profiles alongside regular badges.
+            {t("instructorGamificationPanel.antiBadgesIntro")}
           </Typography>
           <Box
             sx={{
@@ -1049,7 +1132,9 @@ export function InstructorGamificationPanel({
                               opacity: 0.8,
                             }}
                           >
-                            &ldquo;{config.debuff.shameText}&rdquo;
+                            {t("instructorGamificationPanel.quoted", {
+                              value: config.debuff.shameText,
+                            })}
                           </Typography>
                         )}
                         <Stack
@@ -1060,7 +1145,12 @@ export function InstructorGamificationPanel({
                         >
                           {config.debuff.xpMultiplier != null && (
                             <Chip
-                              label={`XP ×${config.debuff.xpMultiplier}`}
+                              label={t(
+                                "instructorGamificationPanel.xpMultiplier",
+                                {
+                                  multiplier: config.debuff.xpMultiplier,
+                                },
+                              )}
                               size="small"
                               color="error"
                               variant="outlined"
@@ -1069,7 +1159,9 @@ export function InstructorGamificationPanel({
                           )}
                           {config.debuff.temporaryTitle && (
                             <Chip
-                              label={`"${config.debuff.temporaryTitle}"`}
+                              label={t("instructorGamificationPanel.quoted", {
+                                value: config.debuff.temporaryTitle,
+                              })}
                               size="small"
                               variant="outlined"
                               sx={{ height: 18, fontSize: "0.6rem" }}
@@ -1077,7 +1169,12 @@ export function InstructorGamificationPanel({
                           )}
                           {config.debuff.streakFreezesRemoved != null && (
                             <Chip
-                              label={`-${config.debuff.streakFreezesRemoved} freeze`}
+                              label={t(
+                                "instructorGamificationPanel.freezesRemoved",
+                                {
+                                  count: config.debuff.streakFreezesRemoved,
+                                },
+                              )}
                               size="small"
                               color="warning"
                               variant="outlined"
@@ -1086,7 +1183,9 @@ export function InstructorGamificationPanel({
                           )}
                           {config.debuff.hideFromLeaderboard && (
                             <Chip
-                              label="Hidden from LB"
+                              label={t(
+                                "instructorGamificationPanel.hiddenFromLeaderboard",
+                              )}
                               size="small"
                               color="warning"
                               variant="outlined"
@@ -1095,7 +1194,12 @@ export function InstructorGamificationPanel({
                           )}
                           {config.debuff.extraDrills != null && (
                             <Chip
-                              label={`+${config.debuff.extraDrills} drills`}
+                              label={t(
+                                "instructorGamificationPanel.extraDrills",
+                                {
+                                  count: config.debuff.extraDrills,
+                                },
+                              )}
                               size="small"
                               color="info"
                               variant="outlined"
@@ -1106,8 +1210,13 @@ export function InstructorGamificationPanel({
                             <Chip
                               label={
                                 config.redemptionCondition
-                                  ? `Auto: ${config.redemptionCondition.type.replace(/_/g, " ").toLowerCase()}${config.redemptionCondition.count ? ` (${config.redemptionCondition.count})` : ""}${config.redemptionCondition.percent ? ` (${config.redemptionCondition.percent}%)` : ""}`
-                                  : "Redeemable"
+                                  ? t(
+                                      "instructorGamificationPanel.autoRedeem",
+                                      {
+                                        condition: `${config.redemptionCondition.type.replace(/_/g, " ").toLowerCase()}${config.redemptionCondition.count ? ` (${config.redemptionCondition.count})` : ""}${config.redemptionCondition.percent ? ` (${config.redemptionCondition.percent}%)` : ""}`,
+                                      },
+                                    )
+                                  : t("instructorGamificationPanel.redeemable")
                               }
                               size="small"
                               color="success"
@@ -1127,19 +1236,24 @@ export function InstructorGamificationPanel({
       </Accordion>
 
       {/* ---- Boss Battle Parameters ---- */}
-      <Accordion defaultExpanded={false}>
+      <Accordion defaultExpanded={false} slotProps={LAZY_ACCORDION_SLOT_PROPS}>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <SportsKabaddiIcon sx={{ mr: 1 }} />
           <Typography fontWeight={600}>
-            Boss Battles ({bossBattles.length})
+            {t("instructorGamificationPanel.bossBattlesHeading", {
+              count: bossBattles.length,
+            })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           {editingBossId ? (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Editing:{" "}
-                {bossBattles.find((b) => b.id === editingBossId)?.title}
+                {t("instructorGamificationPanel.editingBoss", {
+                  title:
+                    bossBattles.find((b) => b.id === editingBossId)?.title ??
+                    "",
+                })}
               </Typography>
               <GroupChallengeEditor
                 initialData={(() => {
@@ -1168,7 +1282,7 @@ export function InstructorGamificationPanel({
                 onClick={() => setEditingBossId(null)}
                 sx={{ mt: 1 }}
               >
-                Cancel Edit
+                {t("instructorGamificationPanel.cancelEdit")}
               </Button>
             </Box>
           ) : (
@@ -1199,7 +1313,7 @@ export function InstructorGamificationPanel({
           ))}
           {bossBattles.length === 0 && (
             <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-              No boss battles configured. Create one above.
+              {t("instructorGamificationPanel.noBossBattles")}
             </Typography>
           )}
         </AccordionDetails>
@@ -1207,14 +1321,17 @@ export function InstructorGamificationPanel({
 
       {/* ---- Unit Progression & Lock Configuration ---- */}
       {(onToggleLinearLock || onUpdateUnitLock) && (
-        <Accordion defaultExpanded={false}>
+        <Accordion
+          defaultExpanded={false}
+          slotProps={LAZY_ACCORDION_SLOT_PROPS}
+        >
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <LockIcon sx={{ mr: 1 }} />
             <Typography fontWeight={600}>
-              Unit Progression
+              {t("instructorGamificationPanel.unitProgression")}
               {linearLockEnabled && (
                 <Chip
-                  label="Linear"
+                  label={t("instructorGamificationPanel.linear")}
                   size="small"
                   color="info"
                   variant="outlined"
@@ -1223,7 +1340,9 @@ export function InstructorGamificationPanel({
               )}
               {Object.keys(unitLockRequirements).length > 0 && (
                 <Chip
-                  label={`${Object.keys(unitLockRequirements).length} gated`}
+                  label={t("instructorGamificationPanel.gatedCount", {
+                    count: Object.keys(unitLockRequirements).length,
+                  })}
                   size="small"
                   color="warning"
                   variant="outlined"
@@ -1234,16 +1353,14 @@ export function InstructorGamificationPanel({
           </AccordionSummary>
           <AccordionDetails>
             <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-              Control how students progress through units. Choose sequential
-              (linear) ordering, skill-tree-based ordering, or set per-unit
-              requirements like XP gates and badge requirements.
+              {t("instructorGamificationPanel.unitProgressionDescription")}
             </Typography>
 
             {/* ---- Progression Mode ---- */}
             {onToggleLinearLock && (
               <Box sx={{ mb: 3 }}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Progression Mode
+                  {t("instructorGamificationPanel.progressionMode")}
                 </Typography>
                 <Stack spacing={1}>
                   <FormControlLabel
@@ -1262,12 +1379,13 @@ export function InstructorGamificationPanel({
                         >
                           <LinearScaleIcon fontSize="small" />
                           <Typography variant="body2" fontWeight={600}>
-                            Linear Lock Order
+                            {t("instructorGamificationPanel.linearLockOrder")}
                           </Typography>
                         </Stack>
                         <Typography variant="caption" color="text.secondary">
-                          Students must complete each unit in due-date order
-                          before the next becomes available.
+                          {t(
+                            "instructorGamificationPanel.linearLockOrderDescription",
+                          )}
                         </Typography>
                       </Box>
                     }
@@ -1283,13 +1401,20 @@ export function InstructorGamificationPanel({
                         >
                           <AccountTreeIcon fontSize="small" />
                           <Typography variant="body2" fontWeight={600}>
-                            Skill Tree Order
+                            {t("instructorGamificationPanel.skillTreeOrder")}
                           </Typography>
                         </Stack>
                         <Typography variant="caption" color="text.secondary">
                           {skills.length > 0
-                            ? `${skills.length} skills configured — manage in the Skill Tree section above.`
-                            : "Create skills in the Skill Tree section above to enable branching progression."}
+                            ? t(
+                                "instructorGamificationPanel.skillTreeOrderConfigured",
+                                {
+                                  count: skills.length,
+                                },
+                              )
+                            : t(
+                                "instructorGamificationPanel.skillTreeOrderEmpty",
+                              )}
                         </Typography>
                       </Box>
                     }
@@ -1303,16 +1428,14 @@ export function InstructorGamificationPanel({
             {onUpdateUnitLock && availableUnits.length > 0 && (
               <Box>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ mb: 1 }}>
-                  Per-Unit Gate Requirements
+                  {t("instructorGamificationPanel.perUnitGates")}
                 </Typography>
                 <Typography
                   variant="caption"
                   color="text.secondary"
                   sx={{ display: "block", mb: 1.5 }}
                 >
-                  Set XP, badge, or completion requirements that must be met
-                  before a student can access each unit. These work alongside
-                  linear/skill-tree ordering.
+                  {t("instructorGamificationPanel.perUnitGatesDescription")}
                 </Typography>
                 <Stack spacing={1.5}>
                   {availableUnits.map((unit) => {
@@ -1344,8 +1467,7 @@ export function InstructorGamificationPanel({
             )}
             {onUpdateUnitLock && availableUnits.length === 0 && (
               <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-                No units assigned to this section. Assign units first to
-                configure lock requirements.
+                {t("instructorGamificationPanel.noUnits")}
               </Typography>
             )}
           </AccordionDetails>
@@ -1376,6 +1498,7 @@ function UnitLockRow({
   hasReq: boolean;
   badgeOptions?: Array<{ id: string; label: string; group: string }>;
 }) {
+  const t = useTranslations("components");
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -1397,7 +1520,9 @@ function UnitLockRow({
               <Stack direction="row" spacing={0.5}>
                 {requirement.requiredXP ? (
                   <Chip
-                    label={`${requirement.requiredXP} XP`}
+                    label={t("instructorGamificationPanel.xpAmount", {
+                      xp: requirement.requiredXP,
+                    })}
                     size="small"
                     color="primary"
                     sx={{ height: 18, fontSize: "0.6rem" }}
@@ -1417,7 +1542,12 @@ function UnitLockRow({
                 ) : null}
                 {requirement.requiredModuleCompletion ? (
                   <Chip
-                    label={`${requirement.requiredModuleCompletion}% complete`}
+                    label={t(
+                      "instructorGamificationPanel.moduleCompletionChip",
+                      {
+                        percent: requirement.requiredModuleCompletion,
+                      },
+                    )}
                     size="small"
                     color="info"
                     sx={{ height: 18, fontSize: "0.6rem" }}
@@ -1445,7 +1575,9 @@ function UnitLockRow({
                   fontWeight={600}
                   color="text.secondary"
                 >
-                  Required XP: {requirement.requiredXP || 0}
+                  {t("instructorGamificationPanel.requiredXp", {
+                    xp: requirement.requiredXP || 0,
+                  })}
                 </Typography>
                 <Slider
                   size="small"
@@ -1489,9 +1621,13 @@ function UnitLockRow({
                 renderInput={(params) => (
                   <TextField
                     {...params}
-                    label="Required Badge"
-                    placeholder="Search badges..."
-                    helperText="Badge that must be earned to unlock this unit"
+                    label={t("instructorGamificationPanel.requiredBadgeLabel")}
+                    placeholder={t(
+                      "instructorGamificationPanel.searchBadgesPlaceholder",
+                    )}
+                    helperText={t(
+                      "instructorGamificationPanel.requiredBadgeHelper",
+                    )}
                   />
                 )}
                 fullWidth
@@ -1502,8 +1638,9 @@ function UnitLockRow({
                   fontWeight={600}
                   color="text.secondary"
                 >
-                  Required Module Completion:{" "}
-                  {requirement.requiredModuleCompletion || 0}%
+                  {t("instructorGamificationPanel.requiredModuleCompletion", {
+                    percent: requirement.requiredModuleCompletion || 0,
+                  })}
                 </Typography>
                 <Slider
                   size="small"
@@ -1518,11 +1655,28 @@ function UnitLockRow({
                   max={100}
                   step={5}
                   valueLabelDisplay="auto"
-                  valueLabelFormat={(v) => `${v}%`}
+                  valueLabelFormat={(v) =>
+                    t("instructorGamificationPanel.percent", { value: v })
+                  }
                   marks={[
-                    { value: 0, label: "0%" },
-                    { value: 50, label: "50%" },
-                    { value: 100, label: "100%" },
+                    {
+                      value: 0,
+                      label: t("instructorGamificationPanel.percent", {
+                        value: 0,
+                      }),
+                    },
+                    {
+                      value: 50,
+                      label: t("instructorGamificationPanel.percent", {
+                        value: 50,
+                      }),
+                    },
+                    {
+                      value: 100,
+                      label: t("instructorGamificationPanel.percent", {
+                        value: 100,
+                      }),
+                    },
                   ]}
                   sx={{ "& .MuiSlider-markLabel": { fontSize: "0.6rem" } }}
                 />
@@ -1543,6 +1697,7 @@ function CopyFromSectionButton({
   sections: SectionOption[];
   onCopy: (sectionId: string) => void;
 }) {
+  const t = useTranslations("components");
   const [open, setOpen] = useState(false);
   const [selectedSource, setSelectedSource] = useState<string | null>(null);
 
@@ -1554,7 +1709,7 @@ function CopyFromSectionButton({
         startIcon={<ContentCopyIcon />}
         onClick={() => setOpen(!open)}
       >
-        Copy From Section
+        {t("instructorGamificationPanel.copyFromSection")}
       </Button>
       {open && (
         <>
@@ -1566,7 +1721,7 @@ function CopyFromSectionButton({
             renderInput={(params) => (
               <TextField
                 {...params}
-                label="Source section"
+                label={t("instructorGamificationPanel.sourceSection")}
                 size="small"
                 sx={{ minWidth: 200 }}
               />
@@ -1584,7 +1739,7 @@ function CopyFromSectionButton({
               }
             }}
           >
-            Copy
+            {t("instructorGamificationPanel.copy")}
           </Button>
         </>
       )}

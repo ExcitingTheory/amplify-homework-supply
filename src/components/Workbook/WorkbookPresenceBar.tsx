@@ -7,9 +7,11 @@
 import React from 'react'
 import { Avatar, AvatarGroup, Box, Chip, Tooltip, Typography } from '@mui/material'
 import { Circle as CircleIcon } from '@mui/icons-material'
+import { useTranslations } from 'next-intl'
 import UnitContext from '../../context/unitContext'
 import { usePresenceUsers, type PresenceUser } from '../../yjs/workbookHooks'
 import { WorkbookInviteShare } from './WorkbookInviteShare'
+import { ProfileAvatarLink } from '../ProfileAvatarLink'
 
 export interface WorkbookPresenceBarProps {
   /** Maximum number of avatars before "+N" overflow */
@@ -17,6 +19,7 @@ export interface WorkbookPresenceBarProps {
 }
 
 export function WorkbookPresenceBar({ max = 5 }: WorkbookPresenceBarProps) {
+  const t = useTranslations('components')
   const { workbook, workbookEnabled, unit } = React.useContext(UnitContext)
 
   const users = usePresenceUsers(workbook?.provider ?? null)
@@ -48,9 +51,18 @@ export function WorkbookPresenceBar({ max = 5 }: WorkbookPresenceBarProps) {
           {users.map((user) => (
             <Tooltip
               key={user.clientId}
-              title={`${user.displayName || user.username}${user.isIdle ? ' (idle)' : ''}`}
+              title={
+                user.isIdle
+                  ? t('workbookPresenceBar.idleUser', {
+                      name: user.displayName || user.username,
+                    })
+                  : user.displayName || user.username
+              }
             >
               <Avatar
+                component={ProfileAvatarLink}
+                username={user.username}
+                displayName={user.displayName}
                 sx={{
                   bgcolor: user.color || '#6366f1',
                   opacity: user.isIdle ? 0.4 : 1,
@@ -66,7 +78,7 @@ export function WorkbookPresenceBar({ max = 5 }: WorkbookPresenceBarProps) {
 
       {users.length > 0 && (
         <Typography variant="caption" color="text.secondary">
-          {users.length} {users.length === 1 ? 'user' : 'users'} connected
+          {t('workbookPresenceBar.connectedCount', { count: users.length })}
         </Typography>
       )}
 

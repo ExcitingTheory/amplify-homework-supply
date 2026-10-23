@@ -35,6 +35,7 @@ export const gradedBlockTypes = [
   "answer",
   "custom-answer",
   "custom-ai",
+  "call-response",
 ];
 const UnitProvider = ({ children, id }) => {
   // Get auth state from centralized context
@@ -725,12 +726,17 @@ const UnitProvider = ({ children, id }) => {
       }
     },
     [
+      id,
+      sectionId,
+      user?.attributes?.sub,
+      state.unit?.id,
       rubricLength,
-      state.grade,
       createGrade,
       timeLimitSeconds,
       assignmentRecord,
       sectionRecord,
+      verifyAccuracy,
+      summarizeGradeFeedback,
     ],
   );
 
@@ -1015,6 +1021,12 @@ const UnitProvider = ({ children, id }) => {
     [],
   );
 
+  // Read inside the unit subscription effect without re-subscribing when groups refresh.
+  const loadsDraftContentRef = React.useRef(false);
+  loadsDraftContentRef.current =
+    !!authSession?.groups?.includes("Instructors") ||
+    !!authSession?.groups?.includes("Admins");
+
   React.useEffect(() => {
     console.log("[UnitContext] useEffect triggered", {
       id,
@@ -1137,10 +1149,7 @@ const UnitProvider = ({ children, id }) => {
         unitRecord.identityId &&
         (unitRecord.contentVersion || 0) > prevContentVersion
       ) {
-        const isInstructor =
-          authSession?.groups?.includes("Instructors") ||
-          authSession?.groups?.includes("Admins");
-        const variant = isInstructor ? "draft" : "published";
+        const variant = loadsDraftContentRef.current ? "draft" : "published";
         const s3Content = await loadContent(
           unitRecord.identityId,
           unitRecord.id,
@@ -1424,7 +1433,7 @@ const UnitProvider = ({ children, id }) => {
         endSaving();
       }
     },
-    [id, beginSaving, endSaving],
+    [sectionId, user?.attributes?.sub, beginSaving, endSaving],
   );
 
   const handleDelete = React.useCallback(async () => {
@@ -1627,15 +1636,16 @@ const UnitProvider = ({ children, id }) => {
     } finally {
       endSaving();
     }
-  }, []);
+  }, [beginSaving, endSaving]);
 
   // Create session object for backward compatibility with components expecting session.username
   const session = React.useMemo(
     () => ({
       username: user?.attributes?.sub,
+      identityId: authSession?.identityId,
       error: authSession?.error,
     }),
-    [user?.attributes?.sub, authSession?.error],
+    [user?.attributes?.sub, authSession?.identityId, authSession?.error],
   );
 
   // Initialize collaborative workbook when feature is enabled and grade exists
@@ -1736,8 +1746,8 @@ const UnitProvider = ({ children, id }) => {
     };
   }, [
     workbookEnabled,
-    state.grade?.id,
-    state.grade?.data,
+    state.grade,
+    sectionId,
     user?.attributes,
     authSession?.groups,
   ]);
@@ -1860,7 +1870,10 @@ const UnitProvider = ({ children, id }) => {
       assignmentRecord,
       state.playlistUrls,
       description,
+      unitVersion,
       state.finishedQuestions,
+      setShowUnitComplete,
+      setFinishedQuestions,
       checkUnitEditPermission,
       checkUnitViewPermission,
       state.showUnitComplete,

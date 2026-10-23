@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
@@ -18,6 +19,7 @@ export interface JoinByCodeProps {
 }
 
 export function JoinByCode({ onJoin }: JoinByCodeProps) {
+  const t = useTranslations('components')
   const [code, setCode] = useState('')
   const [joining, setJoining] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -33,10 +35,10 @@ export function JoinByCode({ onJoin }: JoinByCodeProps) {
 
     try {
       const result = await onJoin(trimmed)
-      setSuccess(result.message || 'Joined review room')
+      setSuccess(result.message || t('joinByCode.joined'))
       setCode('')
     } catch (err: any) {
-      setError(err?.message || 'Failed to join review room')
+      setError(err?.message || t('joinByCode.joinFailed'))
     } finally {
       setJoining(false)
     }
@@ -52,12 +54,12 @@ export function JoinByCode({ onJoin }: JoinByCodeProps) {
   return (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
-        Join a Peer Review
+        {t('joinByCode.title')}
       </Typography>
       <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-start' }}>
         <TextField
           size="small"
-          placeholder="Enter review code"
+          placeholder={t('joinByCode.codePlaceholder')}
           value={code}
           onChange={(e) => {
             setCode(e.target.value)
@@ -75,7 +77,7 @@ export function JoinByCode({ onJoin }: JoinByCodeProps) {
           onClick={handleJoin}
           disabled={!code.trim() || joining}
         >
-          {joining ? 'Joining...' : 'Join'}
+          {joining ? t('joinByCode.joining') : t('joinByCode.join')}
         </Button>
       </Box>
       {error && (

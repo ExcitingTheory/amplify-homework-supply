@@ -51,6 +51,9 @@ import {
   waveformCssColor,
 } from "../../../utils/waveformDefaults";
 
+const ZERO_WIDTH_SPACE = "\u200B";
+const PAPER_BACKGROUND = "background.paper";
+
 // Module-level cache: avoids redundant fetch+decode when the same URL
 // is rendered by multiple players or across remounts.
 const waveformCache = new Map();
@@ -227,19 +230,19 @@ export default function AudioWaveformPlayer({
 
   // Resolve CSS variables for canvas drawing (canvas API can't use var())
   // Re-computed when color mode changes (light <-> dark)
-  const canvasBg = React.useMemo(() => {
-    return resolveWaveformCssColor(
+  const { canvasBg, _r, _g, _b } = React.useMemo(() => {
+    const bg = resolveWaveformCssColor(
       WAVEFORM_CSS_VARIABLES.background,
       WAVEFORM_COLOR_FALLBACKS.background,
     );
-  }, [mode]);
-  const { _r, _g, _b } = React.useMemo(() => {
     const mc = resolveWaveformCssColor(
       WAVEFORM_CSS_VARIABLES.color,
       WAVEFORM_COLOR_FALLBACKS.color,
     );
     const rgb = hexToRgb(mc);
-    return { _r: rgb.r, _g: rgb.g, _b: rgb.b };
+    return { canvasBg: bg, _r: rgb.r, _g: rgb.g, _b: rgb.b };
+    // `mode` re-triggers resolution because the CSS variables change with the color scheme
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode]);
 
   const audioPlayer = useAudioPlayer();
@@ -279,11 +282,12 @@ export default function AudioWaveformPlayer({
 
   // Cleanup filtered blob URLs on unmount
   useEffect(() => {
+    const cache = filteredBlobCacheRef.current;
     return () => {
-      for (const url of filteredBlobCacheRef.current.values()) {
+      for (const url of cache.values()) {
         URL.revokeObjectURL(url);
       }
-      filteredBlobCacheRef.current.clear();
+      cache.clear();
     };
   }, []);
 
@@ -699,7 +703,7 @@ export default function AudioWaveformPlayer({
         cancelAnimationFrame(rafId);
       }
     };
-  }, [isActive, isPlaying, isSeeking, useLocalAudio]);
+  }, [isActive, isPlaying, isSeeking, useLocalAudio, audioPlayer.audioElement]);
 
   // Load source into shared audio context (only for non-recording sources)
   useEffect(() => {
@@ -994,7 +998,7 @@ export default function AudioWaveformPlayer({
         previewRafRef.current = null;
       }
     };
-  }, [previewing, recording, _g, _b]);
+  }, [previewing, recording, canvasBg, _g, _b]);
 
   // Recording functions
   const startRecording = useCallback(async () => {
@@ -1066,6 +1070,7 @@ export default function AudioWaveformPlayer({
     file,
     enableRecording,
     previewing,
+    canvasBg,
     _r,
     _g,
     _b,
@@ -1263,8 +1268,12 @@ export default function AudioWaveformPlayer({
     pendingRecordingStart,
     recording,
     width,
+    canvasBg,
     _g,
     _b,
+    cleanupStrength,
+    enableRecording,
+    file?.settings?.audioCleanupStrength,
     gradeId,
     nodeKey,
     metadata,
@@ -1432,30 +1441,50 @@ export default function AudioWaveformPlayer({
         >
           {enableRecording && (
             <IconButton
-              aria-label={recording ? "Stop recording" : "Start recording"}
+              aria-label={
+                recording
+                  ? t("audioWaveformPlayer.stopRecording")
+                  : t("audioWaveformPlayer.startRecording")
+              }
               aria-pressed={recording}
               color={recording ? "error" : "primary"}
               onClick={recording ? stopRecording : startRecording}
               size="small"
-              title={recording ? "Stop recording" : "Start recording"}
+              title={
+                recording
+                  ? t("audioWaveformPlayer.stopRecording")
+                  : t("audioWaveformPlayer.startRecording")
+              }
             >
               <FiberManualRecordIcon />
             </IconButton>
           )}
           <IconButton
-            aria-label={isPlaying ? "Pause" : "Play"}
+            aria-label={
+              isPlaying
+                ? t("audioWaveformPlayer.pause")
+                : t("audioWaveformPlayer.play")
+            }
             aria-pressed={isPlaying}
             color="primary"
             disabled={recording || (!sourceUrl && !audioBlob)}
             onClick={togglePlayPause}
             size="small"
-            title={isPlaying ? "Pause" : "Play"}
+            title={
+              isPlaying
+                ? t("audioWaveformPlayer.pause")
+                : t("audioWaveformPlayer.play")
+            }
           >
             {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
           </IconButton>
           {enableRecording && (
             <IconButton
-              aria-label={inputMuted ? "Unmute input" : "Mute input"}
+              aria-label={
+                inputMuted
+                  ? t("audioWaveformPlayer.unmuteInput")
+                  : t("audioWaveformPlayer.muteInput")
+              }
               aria-pressed={inputMuted}
               onClick={() => {
                 if (inputMuted) {
@@ -1468,14 +1497,18 @@ export default function AudioWaveformPlayer({
                 }
               }}
               size="small"
-              title={inputMuted ? "Unmute input" : "Mute input"}
+              title={
+                inputMuted
+                  ? t("audioWaveformPlayer.unmuteInput")
+                  : t("audioWaveformPlayer.muteInput")
+              }
             >
               {inputMuted ? <MicOffIcon /> : <MicIcon />}
             </IconButton>
           )}
           {enableRecording && (
             <CompactLevelSlider
-              label="Input volume"
+              label={t("audioWaveformPlayer.inputVolume")}
               value={inputMuted ? 0 : inputVolume}
               visualLevel={inputMuted ? 0 : inputLevel}
               onChange={(nextVolume) => {
@@ -1488,7 +1521,11 @@ export default function AudioWaveformPlayer({
             />
           )}
           <IconButton
-            aria-label={outputMuted ? "Unmute output" : "Mute output"}
+            aria-label={
+              outputMuted
+                ? t("audioWaveformPlayer.unmuteOutput")
+                : t("audioWaveformPlayer.muteOutput")
+            }
             aria-pressed={outputMuted}
             onClick={() => {
               if (outputMuted) {
@@ -1501,12 +1538,16 @@ export default function AudioWaveformPlayer({
               }
             }}
             size="small"
-            title={outputMuted ? "Unmute output" : "Mute output"}
+            title={
+              outputMuted
+                ? t("audioWaveformPlayer.unmuteOutput")
+                : t("audioWaveformPlayer.muteOutput")
+            }
           >
             {outputMuted ? <VolumeOffIcon /> : <VolumeUpIcon />}
           </IconButton>
           <CompactLevelSlider
-            label="Output volume"
+            label={t("audioWaveformPlayer.outputVolume")}
             value={outputMuted ? 0 : outputVolume}
             visualLevel={outputMuted || !isPlaying ? 0 : outputVolume}
             onChange={(nextVolume) => {
@@ -1534,7 +1575,7 @@ export default function AudioWaveformPlayer({
                 color="primary"
                 disabled={recording}
                 size="small"
-                title="Start recording"
+                title={t("audioWaveformPlayer.startRecording")}
               >
                 <RecordIcon />
               </IconButton>
@@ -1546,7 +1587,7 @@ export default function AudioWaveformPlayer({
                 color="error"
                 disabled={!recording}
                 size="small"
-                title="Stop recording"
+                title={t("audioWaveformPlayer.stopRecording")}
               >
                 <StopIcon />
               </IconButton>
@@ -1558,7 +1599,11 @@ export default function AudioWaveformPlayer({
                 color="primary"
                 disabled={recording || (!sourceUrl && !audioBlob)}
                 size="small"
-                title={isPlaying ? "Pause" : "Play"}
+                title={
+                  isPlaying
+                    ? t("audioWaveformPlayer.pause")
+                    : t("audioWaveformPlayer.play")
+                }
               >
                 {isPlaying ? <PauseIcon /> : <PlayArrowIcon />}
               </IconButton>
@@ -1652,7 +1697,7 @@ export default function AudioWaveformPlayer({
 
   return (
     <ExerciseResponsePanel
-      actionRowBackground={compact ? "background.paper" : undefined}
+      actionRowBackground={compact ? PAPER_BACKGROUND : undefined}
       centerControls={usesLocalTakes ? undefined : footerControls}
       countdown={submissionCountdown}
       countdownDuration={submissionCountdownDuration}
@@ -1775,7 +1820,7 @@ export default function AudioWaveformPlayer({
                   willChange: "transform",
                 }}
               >
-                {"\u200B"}
+                {ZERO_WIDTH_SPACE}
               </div>
             )}
           </div>
@@ -1842,7 +1887,7 @@ export default function AudioWaveformPlayer({
                   willChange: "transform",
                 }}
               >
-                {"\u200B"}
+                {ZERO_WIDTH_SPACE}
               </div>
             )}
           </div>
@@ -1938,7 +1983,7 @@ export default function AudioWaveformPlayer({
             }}
           >
             <Typography
-              aria-label="Elapsed time"
+              aria-label={t("audioWaveformPlayer.elapsedTime")}
               component="span"
               sx={{
                 justifySelf: "start",
@@ -1967,7 +2012,7 @@ export default function AudioWaveformPlayer({
               {footerControls}
             </Box>
             <Typography
-              aria-label="Remaining time"
+              aria-label={t("audioWaveformPlayer.remainingTime")}
               component="span"
               sx={{
                 gridColumn: 3,

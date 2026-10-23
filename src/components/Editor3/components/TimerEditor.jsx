@@ -1,5 +1,5 @@
 'use strict';
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { createRef, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { Box, IconButton } from '@mui/material';
 import TimerIcon from '@mui/icons-material/Timer';
@@ -30,7 +30,10 @@ export default function TimerEditor() {
   const { unit, beginSaving, endSaving } = React.useContext(UnitContext);
   const debounceRef = useRef(null);
   const editingRef = useRef(false);
-  const inputRefs = [useRef(null), useRef(null), useRef(null)];
+  const inputRefs = useMemo(
+    () => [createRef(), createRef(), createRef()],
+    [],
+  );
 
   const initial = decompose(unit?.timeLimitSeconds);
   const [segments, setSegments] = useState(initial);
@@ -119,7 +122,7 @@ export default function TimerEditor() {
       return next;
     });
     debouncedSave();
-  }, [debouncedSave]);
+  }, [debouncedSave, inputRefs]);
 
   // Decrement with borrow-right: MM 0→59 borrows from HH
   // When a segment reaches 0, focus moves right to the next segment
@@ -144,7 +147,7 @@ export default function TimerEditor() {
       return next;
     });
     debouncedSave();
-  }, [debouncedSave]);
+  }, [debouncedSave, inputRefs]);
 
   const handleArrowUp = useCallback(() => {
     const idx = activeIdx ?? 2;
@@ -213,7 +216,7 @@ export default function TimerEditor() {
         inputRefs[idx - 1].current?.select();
       }
     }
-  }, [increment, decrement]);
+  }, [increment, decrement, inputRefs]);
 
   const segmentStyle = {
     width: '2.5ch',

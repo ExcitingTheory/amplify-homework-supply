@@ -66,6 +66,7 @@ import CustomAnswerPlugin from "./plugins/CustomAnswerPlugin";
 import CustomAIPlugin from "./plugins/CustomAIPlugin";
 import ArmorEditorPlugin from "./plugins/ArmorEditorPlugin";
 import ConversationPlaylistPlugin from "./plugins/ConversationPlaylistPlugin";
+import CallResponsePlugin from "./plugins/CallResponsePlugin";
 import BlockSuggestionPlugin from "./plugins/BlockSuggestionPlugin";
 import AIContentCompletionPlugin from "./plugins/AIContentCompletionPlugin";
 import DraggableBlockPlugin from "./plugins/DraggableBlockPlugin";
@@ -402,8 +403,10 @@ function EditorContent(): React.ReactElement {
       // can bootstrap the Y.Doc with content via shouldBootstrap=true
       editorState: sanitizeEditorStateJSON(unit?.data) || null,
     }),
+    // Re-create only when unit changes; later unit.data edits must not reset the editor (LexicalComposer reads this once on mount)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [unit?.id],
-  ); // Re-create only when unit changes (LexicalComposer reads this once on mount)
+  );
 
   // Create debounced save function with stable reference
   const debouncedSaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -580,6 +583,7 @@ function EditorContent(): React.ReactElement {
                 <MeaningAssociationPlugin />
                 <PlaylistPlugin />
                 <ConversationPlaylistPlugin />
+                <CallResponsePlugin />
                 <PdfViewerPlugin />
                 <AutocompletePlugin />
                 <DragDropPastePlugin />
@@ -598,7 +602,7 @@ function EditorContent(): React.ReactElement {
                 {unit?.id && provider && (
                   <YjsCollaborationPlugin
                     provider={provider}
-                    username={session?.username || "Anonymous"}
+                    username={session?.username || t("editor.anonymousUser")}
                     color={getUserColor(session?.username)}
                     cursorsContainerRef={cursorsContainerRef}
                   />
@@ -699,7 +703,7 @@ function EditorContent(): React.ReactElement {
                               <ContentEditable
                                 className="editor"
                                 data-tour="editor"
-                                data-lexical-editor="true"
+                                data-lexical-editor={true}
                                 aria-label={t("actions.edit")}
                                 style={{
                                   maxWidth: "100%",

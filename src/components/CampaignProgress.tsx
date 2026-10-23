@@ -24,6 +24,7 @@ import TimerIcon from "@mui/icons-material/Timer";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import WarningIcon from "@mui/icons-material/Warning";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Types
@@ -62,16 +63,30 @@ export interface CampaignProgressProps {
 // Helpers
 // ============================================================================
 
-function formatCountdown(deadline: string): { text: string; urgent: boolean } {
+function formatCountdown(
+  deadline: string,
+  t: ReturnType<typeof useTranslations>,
+): { text: string; urgent: boolean } {
   const diff = new Date(deadline).getTime() - Date.now();
-  if (diff <= 0) return { text: "Campaign ended", urgent: true };
+  if (diff <= 0) return { text: t("campaignProgress.ended"), urgent: true };
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
   const urgent = days === 0 && hours < 12;
-  if (days > 0) return { text: `${days}d ${hours}h remaining`, urgent: false };
-  if (hours > 0) return { text: `${hours}h ${minutes}m remaining`, urgent };
-  return { text: `${minutes}m remaining`, urgent: true };
+  if (days > 0)
+    return {
+      text: t("campaignProgress.daysHoursRemaining", { days, hours }),
+      urgent: false,
+    };
+  if (hours > 0)
+    return {
+      text: t("campaignProgress.hoursMinutesRemaining", { hours, minutes }),
+      urgent,
+    };
+  return {
+    text: t("campaignProgress.minutesRemaining", { minutes }),
+    urgent: true,
+  };
 }
 
 // ============================================================================
@@ -89,6 +104,7 @@ export function CampaignProgress({
   chapters = [],
   active = true,
 }: CampaignProgressProps) {
+  const t = useTranslations("components");
   const [countdown, setCountdown] = useState<{ text: string; urgent: boolean }>(
     {
       text: "",
@@ -105,12 +121,12 @@ export function CampaignProgress({
   // Live countdown
   useEffect(() => {
     if (!deadline) return;
-    setCountdown(formatCountdown(deadline));
+    setCountdown(formatCountdown(deadline, t));
     const interval = setInterval(() => {
-      setCountdown(formatCountdown(deadline));
+      setCountdown(formatCountdown(deadline, t));
     }, 60_000);
     return () => clearInterval(interval);
-  }, [deadline]);
+  }, [deadline, t]);
 
   return (
     <Card
@@ -136,10 +152,18 @@ export function CampaignProgress({
               <EmojiEventsIcon color={isComplete ? "success" : "primary"} />
               <Typography variant="h6">{title}</Typography>
             </Stack>
-            {!active && <Chip label="Ended" color="default" size="small" />}
+            {!active && (
+              <Chip
+                label={t("campaignProgress.endedChip")}
+                color="default"
+                size="small"
+              />
+            )}
             {bonusMultiplier && bonusMultiplier > 1 && active && (
               <Chip
-                label={`×${bonusMultiplier} XP Bonus`}
+                label={t("campaignProgress.xpBonus", {
+                  multiplier: bonusMultiplier,
+                })}
                 color="secondary"
                 size="small"
               />
@@ -162,7 +186,10 @@ export function CampaignProgress({
           <Box>
             <Stack direction="row" justifyContent="space-between" mb={0.5}>
               <Typography variant="body2" fontWeight="bold">
-                {currentXP.toLocaleString()} / {targetXP.toLocaleString()} XP
+                {t("campaignProgress.xpProgress", {
+                  current: currentXP.toLocaleString(),
+                  target: targetXP.toLocaleString(),
+                })}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 {Math.round(progress)}%
@@ -198,7 +225,7 @@ export function CampaignProgress({
             <Stack direction="row" spacing={1} alignItems="flex-start">
               <WarningIcon fontSize="small" color="warning" sx={{ mt: 0.3 }} />
               <Typography variant="body2" color="text.secondary">
-                <strong>Stakes:</strong> {stakes}
+                <strong>{t("campaignProgress.stakesLabel")}</strong> {stakes}
               </Typography>
             </Stack>
           )}
@@ -207,7 +234,7 @@ export function CampaignProgress({
           {sortedChapters.length > 0 && (
             <Box>
               <Typography variant="subtitle2" gutterBottom>
-                Chapter Progression
+                {t("campaignProgress.chapterProgression")}
               </Typography>
               <Stepper
                 activeStep={
@@ -235,7 +262,9 @@ export function CampaignProgress({
                             color="text.secondary"
                             ml={1}
                           >
-                            ({chapter.xpRequired} XP needed)
+                            {t("campaignProgress.xpNeeded", {
+                              xp: chapter.xpRequired,
+                            })}
                           </Typography>
                         )}
                       </Typography>
@@ -250,7 +279,7 @@ export function CampaignProgress({
           {isComplete && (
             <Paper sx={{ p: 2, bgcolor: "success.light", textAlign: "center" }}>
               <Typography variant="h6" color="success.dark">
-                🎉 Campaign Complete!
+                {t("campaignProgress.complete")}
               </Typography>
             </Paper>
           )}

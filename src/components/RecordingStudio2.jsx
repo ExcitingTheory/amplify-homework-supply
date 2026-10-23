@@ -95,9 +95,36 @@ export function RecordingStudio2({
 
   console.log("audioFile", audioFile);
 
+  // The upload effect must only fire for a new audioBlob, so it reads everything else from the latest render
+  const uploadContextRef = React.useRef({});
+  React.useEffect(() => {
+    uploadContextRef.current = {
+      createGrade,
+      definition,
+      grade,
+      identityId,
+      onRecordingComplete,
+      phrase,
+      qk,
+      requestDefinition,
+      setFeedback,
+    };
+  });
+
   React.useEffect(() => {
     let cancelled = false;
     async function uploadSignAndVerifyAudio() {
+      const {
+        createGrade,
+        definition,
+        grade,
+        identityId,
+        onRecordingComplete,
+        phrase,
+        qk,
+        requestDefinition,
+        setFeedback,
+      } = uploadContextRef.current;
       if (!audioBlob) return;
       setError(null);
 
@@ -371,12 +398,18 @@ export function RecordingStudio2({
     e.stopPropagation();
   };
 
+  const mediaRecorderRef = React.useRef(null);
+  React.useEffect(() => {
+    mediaRecorderRef.current = mediaRecorder;
+  }, [mediaRecorder]);
+
   React.useEffect(() => {
     // Cleanup on unmount
     return () => {
-      if (mediaRecorder) {
+      const activeRecorder = mediaRecorderRef.current;
+      if (activeRecorder) {
         try {
-          mediaRecorder.stop();
+          activeRecorder.stop();
         } catch {}
       }
       if (streamRef.current) {

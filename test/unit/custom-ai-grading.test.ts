@@ -145,7 +145,8 @@ describe("gradedBlockTypes includes custom-ai", () => {
     expect(gradedBlockTypes).toContain("answer");
     expect(gradedBlockTypes).toContain("custom-answer");
     expect(gradedBlockTypes).toContain("custom-ai");
-    expect(gradedBlockTypes.length).toBe(5);
+    expect(gradedBlockTypes).toContain("call-response");
+    expect(gradedBlockTypes.length).toBe(6);
   });
 });
 

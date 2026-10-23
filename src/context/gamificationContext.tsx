@@ -340,6 +340,19 @@ interface XPToastItem {
 // Provider
 // ============================================================================
 
+/**
+ * Returns the first value seen for a given content key, so props whose
+ * defaults create new instances every render keep a stable identity until
+ * their content changes.
+ */
+function useStableByKey<T>(value: T, key: string): T {
+  const cacheRef = useRef<{ key: string; value: T }>({ key, value });
+  if (cacheRef.current.key !== key) {
+    cacheRef.current = { key, value };
+  }
+  return cacheRef.current.value;
+}
+
 export interface GamificationProviderProps {
   client: any;
   studentId: string;
@@ -393,22 +406,18 @@ export function GamificationProvider({
   // Stabilize reference-identity of array/object/Set props whose default values
   // (= [], = {}, = new Set()) create new instances on every render, which would
   // cause useEffect/useMemo deps to always appear changed.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const stableSectionIDs = useMemo(() => sectionIDs, [sectionIDs.join(",")]);
-
-  const stableModuleNames = useMemo(
-    () => moduleNames,
-    [JSON.stringify(moduleNames)],
+  const stableSectionIDs = useStableByKey(sectionIDs, sectionIDs.join(","));
+  const stableModuleNames = useStableByKey(
+    moduleNames,
+    JSON.stringify(moduleNames),
   );
-
-  const stableEarnedBadgeTypes = useMemo(
-    () => earnedBadgeTypes,
-    [[...earnedBadgeTypes].sort().join(",")],
+  const stableEarnedBadgeTypes = useStableByKey(
+    earnedBadgeTypes,
+    [...earnedBadgeTypes].sort().join(","),
   );
-
-  const stableModuleCompletionMap = useMemo(
-    () => moduleCompletionMap,
-    [JSON.stringify(moduleCompletionMap)],
+  const stableModuleCompletionMap = useStableByKey(
+    moduleCompletionMap,
+    JSON.stringify(moduleCompletionMap),
   );
 
   // Stable setter for selectedSkillId

@@ -10,6 +10,7 @@
 import React, { useRef, useState, useCallback } from "react";
 import { Box, Chip, Typography, Tooltip } from "@mui/material";
 import { GraphicEq as WaveformIcon } from "@mui/icons-material";
+import { useTranslations } from "next-intl";
 
 /** Pixel movement below this threshold is treated as a click, not a drag. */
 const DRAG_THRESHOLD_PX = 4;
@@ -45,6 +46,7 @@ export default function TimelineCard({
   onClick,
   onDragEnd,
 }: TimelineCardProps) {
+  const t = useTranslations("components");
   const activeTake =
     line.activeTakeIndex !== null && line.takes?.[line.activeTakeIndex];
 
@@ -111,7 +113,11 @@ export default function TimelineCard({
   const displayLeft = dragStart !== null ? dragStart * pxPerSec : left;
 
   return (
-    <Tooltip title={line.text || "(empty)"} enterDelay={400} placement="top">
+    <Tooltip
+      title={line.text || t("timelineCard.emptyText")}
+      enterDelay={400}
+      placement="top"
+    >
       <Box
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -122,7 +128,10 @@ export default function TimelineCard({
         onKeyDown={(e) => {
           if (e.key === "Enter" || e.key === " ") onClick(line.id);
         }}
-        aria-label={`${speaker?.name || "Unknown"}: ${line.text || "empty"}`}
+        aria-label={t("timelineCard.ariaLabel", {
+          speaker: speaker?.name || t("timelineCard.unknownSpeaker"),
+          text: line.text || t("timelineCard.emptyAriaText"),
+        })}
         sx={{
           position: "absolute",
           left: displayLeft,
@@ -159,7 +168,7 @@ export default function TimelineCard({
           noWrap
           sx={{ fontWeight: 500, lineHeight: 1.3 }}
         >
-          {line.text || "(empty)"}
+          {line.text || t("timelineCard.emptyText")}
         </Typography>
 
         {/* Direction note (italic sub-line) */}

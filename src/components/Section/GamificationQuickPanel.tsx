@@ -27,6 +27,7 @@ import AddIcon from "@mui/icons-material/Add";
 import TuneIcon from "@mui/icons-material/Tune";
 import EmojiEventsIcon from "@mui/icons-material/EmojiEvents";
 import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 import { generateClient } from "aws-amplify/data";
 import {
   GroupChallengeEditor,
@@ -62,6 +63,7 @@ export function GamificationQuickPanel({
   sectionId,
   locale = "en",
 }: GamificationQuickPanelProps) {
+  const t = useTranslations("components");
   const router = useRouter();
   const [challenges, setChallenges] = useState<ChallengeSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
@@ -166,7 +168,7 @@ export function GamificationQuickPanel({
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <EmojiEventsIcon color="primary" sx={{ fontSize: "1.3rem" }} />
             <Typography variant="subtitle1" fontWeight={700}>
-              Campaign Progress
+              {t("gamificationQuickPanel.title")}
             </Typography>
           </Box>
           <Stack direction="row" spacing={1} alignItems="center">
@@ -176,9 +178,11 @@ export function GamificationQuickPanel({
               startIcon={<TuneIcon />}
               onClick={openCreateDrawer}
             >
-              Customize Learning Path
+              {t("gamificationQuickPanel.customizeLearningPath")}
             </Button>
-            <Tooltip title="Skills, badges, squads, and other advanced gamification settings">
+            <Tooltip
+              title={t("gamificationQuickPanel.advancedSettingsTooltip")}
+            >
               <Button
                 size="small"
                 color="inherit"
@@ -189,7 +193,7 @@ export function GamificationQuickPanel({
                 }
                 sx={{ textTransform: "none", color: "text.secondary" }}
               >
-                Advanced settings
+                {t("gamificationQuickPanel.advancedSettings")}
               </Button>
             </Tooltip>
           </Stack>
@@ -197,7 +201,7 @@ export function GamificationQuickPanel({
 
         {challenges.length === 0 && (
           <Typography variant="body2" color="text.secondary">
-            No campaign chapters configured yet.
+            {t("gamificationQuickPanel.noChapters")}
           </Typography>
         )}
 
@@ -226,16 +230,26 @@ export function GamificationQuickPanel({
                       noWrap
                       sx={{ maxWidth: "55%" }}
                     >
-                      {ch.chapterOrder != null && `Ch.${ch.chapterOrder}: `}
-                      {ch.title}
+                      {ch.chapterOrder != null
+                        ? t("gamificationQuickPanel.chapterTitleWithOrder", {
+                            order: ch.chapterOrder,
+                            title: ch.title,
+                          })
+                        : ch.title}
                     </Typography>
                     <Box
                       sx={{ display: "flex", alignItems: "center", gap: 0.5 }}
                     >
                       <Typography variant="caption" color="text.secondary">
-                        {ch.currentXP}/{ch.targetXP} XP ({pct}%)
+                        {t("gamificationQuickPanel.chapterProgress", {
+                          current: ch.currentXP,
+                          target: ch.targetXP,
+                          percent: pct,
+                        })}
                       </Typography>
-                      <Tooltip title="Edit this chapter">
+                      <Tooltip
+                        title={t("gamificationQuickPanel.editChapterTooltip")}
+                      >
                         <IconButton
                           size="small"
                           onClick={() => openEditDrawer(ch)}
@@ -255,7 +269,9 @@ export function GamificationQuickPanel({
             })}
             {activeChallenges.length > 3 && (
               <Typography variant="caption" color="text.secondary">
-                +{activeChallenges.length - 3} more active
+                {t("gamificationQuickPanel.moreActive", {
+                  count: activeChallenges.length - 3,
+                })}
               </Typography>
             )}
           </Stack>
@@ -264,7 +280,9 @@ export function GamificationQuickPanel({
         {completedCount > 0 && (
           <Chip
             size="small"
-            label={`${completedCount} chapter${completedCount > 1 ? "s" : ""} completed`}
+            label={t("gamificationQuickPanel.chaptersCompleted", {
+              count: completedCount,
+            })}
             color="success"
             variant="outlined"
             sx={{ mt: 1 }}
@@ -279,7 +297,9 @@ export function GamificationQuickPanel({
       >
         <Box sx={{ width: { xs: "100vw", sm: 420 }, p: 2 }}>
           <Typography variant="h6" fontWeight={700} sx={{ mb: 1.5 }}>
-            {editingChallenge ? "Edit Chapter" : "New Chapter"}
+            {editingChallenge
+              ? t("gamificationQuickPanel.editChapter")
+              : t("gamificationQuickPanel.newChapter")}
           </Typography>
           <GroupChallengeEditor
             initialData={

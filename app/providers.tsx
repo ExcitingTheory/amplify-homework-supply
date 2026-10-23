@@ -1,7 +1,7 @@
 "use client";
 
 import * as React from "react";
-// Next's vendored experimental React build only exports this as `unstable_ViewTransition`.
+// Next 15's bundled React experimental build exposes this as unstable_ViewTransition.
 import { Suspense, unstable_ViewTransition as ViewTransition } from "react";
 import ThemeRegistry from "./ThemeRegistry";
 
@@ -14,6 +14,7 @@ import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
 import { DebugPanelProvider } from "../src/components/DebugPanel";
 import AuthContext, { AuthProvider } from "../src/context/authContext";
 import AppShell from "../src/components/AppShell";
+import { AppFooter } from "../src/components/AppFooter";
 import { SettingsProvider } from "../src/context/settingsContext";
 import DynamicThemeProvider from "../src/components/DynamicThemeProvider";
 import { NotificationProvider } from "../src/context/notificationContext";
@@ -183,7 +184,7 @@ export default function Providers({
                     <SearchProvider>
                       <TourProvider>
                         <AuthenticatedShell hideChatButton={hideChatButton}>
-                          {/* ViewTransition must render inside a Client Component - react-server condition doesn't export it */}
+                          {/* Keep ViewTransition inside the client provider subtree. */}
                           <Suspense>
                             <ViewTransition>{children}</ViewTransition>
                           </Suspense>
@@ -221,7 +222,12 @@ function AuthenticatedShell({
     : "learner";
 
   if (!user) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <AppFooter />
+      </>
+    );
   }
 
   return (

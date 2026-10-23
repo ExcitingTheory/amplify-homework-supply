@@ -29,6 +29,7 @@ import {
   Storage,
 } from "@mui/icons-material";
 import { resolveGradeConflict } from "../offline/conflictResolution";
+import { useTranslations } from "next-intl";
 
 export interface ConflictBlockData {
   userAnswer?: string;
@@ -76,6 +77,7 @@ export default function ConflictResolutionDialog({
   onClose,
   onResolve,
 }: ConflictResolutionDialogProps) {
+  const t = useTranslations("components");
   const [strategy, setStrategy] = useState<
     "local-wins" | "server-wins" | "merge"
   >("local-wins");
@@ -144,10 +146,12 @@ export default function ConflictResolutionDialog({
         <Box display="flex" alignItems="center" gap={1}>
           <CompareArrows color="warning" />
           <Typography variant="h6" component="span" fontWeight="bold">
-            Sync Conflict Resolution
+            {t("conflictResolutionDialog.title")}
           </Typography>
           <Chip
-            label={`Grade: ${conflict.gradeId.slice(0, 8)}...`}
+            label={t("conflictResolutionDialog.gradeChip", {
+              id: conflict.gradeId.slice(0, 8),
+            })}
             size="small"
             variant="outlined"
             sx={{ ml: "auto" }}
@@ -158,23 +162,24 @@ export default function ConflictResolutionDialog({
       <DialogContent dividers>
         {mergedResult.requiresInstructorReview && (
           <Alert severity="warning" icon={<Warning />} sx={{ mb: 2 }}>
-            Score discrepancy detected between local offline grade and server
-            state (&gt;15 point difference). Resolution will flag this
-            submission for instructor review.
+            {t("conflictResolutionDialog.discrepancyWarning")}
           </Alert>
         )}
 
         <Box sx={{ mb: 2 }}>
           <Typography variant="body2" color="text.secondary">
-            Local version (v{localVersion ?? "?"}) was modified offline while
-            the server version (v{serverVersion ?? "?"}) had updates. Review the
-            block differences below and choose a resolution strategy.
+            {t("conflictResolutionDialog.versionSummary", {
+              localVersion: localVersion ?? "?",
+              serverVersion: serverVersion ?? "?",
+            })}
           </Typography>
         </Box>
 
         {/* Block Comparisons */}
         <Typography variant="subtitle2" fontWeight="bold" sx={{ mb: 1 }}>
-          Block Comparisons ({blockIds.length})
+          {t("conflictResolutionDialog.blockComparisons", {
+            count: blockIds.length,
+          })}
         </Typography>
 
         <Box display="flex" flexDirection="column" gap={2} sx={{ mb: 3 }}>
@@ -200,12 +205,14 @@ export default function ConflictResolutionDialog({
                     mb={1}
                   >
                     <Typography variant="subtitle2" color="primary">
-                      Block ID: {blockId}
+                      {t("conflictResolutionDialog.blockId", { blockId })}
                     </Typography>
                     {diffScore > 15 && (
                       <Chip
                         icon={<Warning />}
-                        label={`Score diff: ${diffScore} pts`}
+                        label={t("conflictResolutionDialog.scoreDiff", {
+                          diff: diffScore,
+                        })}
                         color="warning"
                         size="small"
                       />
@@ -218,7 +225,10 @@ export default function ConflictResolutionDialog({
                       color="text.secondary"
                       sx={{ mb: 1.5 }}
                     >
-                      <strong>Prompt:</strong> {localBlock.prompt}
+                      <strong>
+                        {t("conflictResolutionDialog.promptLabel")}
+                      </strong>{" "}
+                      {localBlock.prompt}
                     </Typography>
                   )}
 
@@ -246,11 +256,13 @@ export default function ConflictResolutionDialog({
                             fontWeight="bold"
                             color="primary"
                           >
-                            Local Offline Version
+                            {t("conflictResolutionDialog.localVersion")}
                           </Typography>
                           {localBlock?.gradedOffline && (
                             <Chip
-                              label="Offline Graded"
+                              label={t(
+                                "conflictResolutionDialog.offlineGraded",
+                              )}
                               size="small"
                               variant="outlined"
                               sx={{
@@ -262,18 +274,26 @@ export default function ConflictResolutionDialog({
                           )}
                         </Box>
                         <Typography variant="body2">
-                          <strong>Answer:</strong>{" "}
+                          <strong>
+                            {t("conflictResolutionDialog.answerLabel")}
+                          </strong>{" "}
                           {localBlock?.userAnswer || "—"}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Score:</strong>{" "}
+                          <strong>
+                            {t("conflictResolutionDialog.scoreLabel")}
+                          </strong>{" "}
                           {localBlock?.accuracy != null
                             ? `${localBlock.accuracy}%`
                             : "—"}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Completed:</strong>{" "}
-                          {localBlock?.complete ? "Yes" : "No"}
+                          <strong>
+                            {t("conflictResolutionDialog.completedLabel")}
+                          </strong>{" "}
+                          {localBlock?.complete
+                            ? t("conflictResolutionDialog.yes")
+                            : t("conflictResolutionDialog.no")}
                         </Typography>
                       </Box>
                     </Grid>
@@ -301,22 +321,30 @@ export default function ConflictResolutionDialog({
                             fontWeight="bold"
                             color="secondary"
                           >
-                            Server Version
+                            {t("conflictResolutionDialog.serverVersion")}
                           </Typography>
                         </Box>
                         <Typography variant="body2">
-                          <strong>Answer:</strong>{" "}
+                          <strong>
+                            {t("conflictResolutionDialog.answerLabel")}
+                          </strong>{" "}
                           {serverBlock?.userAnswer || "—"}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Score:</strong>{" "}
+                          <strong>
+                            {t("conflictResolutionDialog.scoreLabel")}
+                          </strong>{" "}
                           {serverBlock?.accuracy != null
                             ? `${serverBlock.accuracy}%`
                             : "—"}
                         </Typography>
                         <Typography variant="body2">
-                          <strong>Completed:</strong>{" "}
-                          {serverBlock?.complete ? "Yes" : "No"}
+                          <strong>
+                            {t("conflictResolutionDialog.completedLabel")}
+                          </strong>{" "}
+                          {serverBlock?.complete
+                            ? t("conflictResolutionDialog.yes")
+                            : t("conflictResolutionDialog.no")}
                         </Typography>
                       </Box>
                     </Grid>
@@ -332,7 +360,7 @@ export default function ConflictResolutionDialog({
         {/* Strategy Selection */}
         <FormControl component="fieldset" fullWidth>
           <FormLabel component="legend" sx={{ fontWeight: "bold", mb: 1 }}>
-            Select Conflict Resolution Strategy
+            {t("conflictResolutionDialog.selectStrategy")}
           </FormLabel>
           <RadioGroup
             value={strategy}
@@ -345,11 +373,10 @@ export default function ConflictResolutionDialog({
               label={
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    Keep Local Answers (Student Wins)
+                    {t("conflictResolutionDialog.localWinsTitle")}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Preserves student&apos;s offline answers and scores as
-                    canonical. Server feedback is retained.
+                    {t("conflictResolutionDialog.localWinsDescription")}
                   </Typography>
                 </Box>
               }
@@ -360,11 +387,10 @@ export default function ConflictResolutionDialog({
               label={
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    Smart Merge &amp; Flag for Review
+                    {t("conflictResolutionDialog.mergeTitle")}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Merges local answers with server data and flags for
-                    instructor review if scores conflict.
+                    {t("conflictResolutionDialog.mergeDescription")}
                   </Typography>
                 </Box>
               }
@@ -375,11 +401,10 @@ export default function ConflictResolutionDialog({
               label={
                 <Box>
                   <Typography variant="body2" fontWeight="bold">
-                    Overwrite with Server Version
+                    {t("conflictResolutionDialog.serverWinsTitle")}
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
-                    Discards local offline edits and reverts completely to
-                    server state.
+                    {t("conflictResolutionDialog.serverWinsDescription")}
                   </Typography>
                 </Box>
               }
@@ -390,7 +415,7 @@ export default function ConflictResolutionDialog({
 
       <DialogActions sx={{ p: 2 }}>
         <Button onClick={onClose} disabled={submitting}>
-          Cancel
+          {t("conflictResolutionDialog.cancel")}
         </Button>
         <Button
           variant="contained"
@@ -399,7 +424,9 @@ export default function ConflictResolutionDialog({
           startIcon={<CheckCircle />}
           data-testid="apply-resolution-button"
         >
-          {submitting ? "Applying..." : "Apply & Sync"}
+          {submitting
+            ? t("conflictResolutionDialog.applying")
+            : t("conflictResolutionDialog.apply")}
         </Button>
       </DialogActions>
     </Dialog>

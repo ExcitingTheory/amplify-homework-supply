@@ -59,6 +59,20 @@
       "disableNotifications": "Benachrichtigungen deaktivieren",
       "experimentalFeatures": "Experimentelle Funktionen",
       "studentMode": "Schülermodus"
+    },
+    "debugModeEnabled": "🐛 Debug-Modus aktiviert! Laden Sie die Seite neu, um das Debug-Panel zu aktivieren.\n\nVerwenden Sie Cmd/Strg + Umschalt + D, um das Debug-Panel zu öffnen.",
+    "nav": {
+      "adminDashboard": "Admin-Dashboard",
+      "analytics": "Analysen",
+      "archives": "Archiv",
+      "collapseNavigation": "Navigation einklappen",
+      "expandNavigation": "Navigation erweitern",
+      "files": "Dateien",
+      "moderation": "Moderation",
+      "questions": "Fragen",
+      "recycleBin": "Papierkorb",
+      "showNavigation": "Navigation anzeigen",
+      "words": "Wörter"
     }
   },
   "navigation": {
@@ -81,13 +95,23 @@
   },
   "peerReview": {
     "helpful": "Die Peer-Review war hilfreich",
-    "notHelpful": "Die Peer-Review war nicht hilfreich"
+    "notHelpful": "Die Peer-Review war nicht hilfreich",
+    "aiAssistant": "KI-Assistent",
+    "blockReference": "Block: {blockId}",
+    "didItHelp": "Hat das Peer-Review geholfen?",
+    "messagePlaceholder": "Nachricht eingeben… (mit @AI erhalten Sie KI-Hilfe)",
+    "noMessages": "Noch keine Nachrichten vorhanden. Beginnen Sie die Peer-Review-Unterhaltung!",
+    "sessionEnded": "Diese Review-Sitzung wurde beendet.",
+    "thanksForFeedback": "Vielen Dank für Ihr Feedback!",
+    "typing": "{count, plural, one {{names} schreibt gerade…} other {{names} schreiben gerade…}}"
   },
   "quizComponent": {
     "grade": "Note: {grade}"
   },
   "sectionDetail": {
-    "studentHeader": "Schüler"
+    "studentHeader": "Schüler",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "Die Teilnehmer konnten nicht angemeldet werden"
   },
   "status": {
     "complete": "Abschließen",
@@ -134,5 +158,42 @@
     "increase": "Ausgewähltes Zeitsegment erhöhen",
     "minutes": "Minuten",
     "seconds": "Sekunden"
+  },
+  "debugPanel": {
+    "contactLabel": "Ihre E-Mail-Adresse oder Kontaktdaten (optional)",
+    "contactPlaceholder": "Damit wir uns bei Ihnen melden können",
+    "describeIssueLabel": "Beschreiben Sie das Problem (optional)",
+    "describeIssuePlaceholder": "Was haben Sie getan, als das Problem aufgetreten ist?",
+    "diagnosticSent": "✅ Diagnose an das Support-Team gesendet! (S3-Link läuft in 30 Tagen ab)",
+    "performanceComingSoon": "Leistungskennzahlen folgen in Kürze...",
+    "sendDialogDescription": "Dadurch wird Ihr Diagnose-Snapshot über Discord an unser Support-Team gesendet. Ihre Daten werden bereinigt, um sensible Informationen zu entfernen.",
+    "sendDialogTitle": "Diagnose an den Support senden",
+    "sendFailed": "Senden fehlgeschlagen: {error}",
+    "sendingToDiscord": "Wird an Discord gesendet...",
+    "sendToSupport": "An den Support senden",
+    "snapshotDownloaded": "Diagnose-Snapshot heruntergeladen",
+    "tabs": {
+      "components": "Komponenten",
+      "logs": "Protokolle ({count})",
+      "performance": "Leistung",
+      "state": "Status"
+    },
+    "title": "Debug-Panel",
+    "unknownError": "Unbekannter Fehler",
+    "uploadFailed": "Upload fehlgeschlagen: {error}",
+    "uploadingArtifact": "Diagnoseartefakt wird zu S3 hochgeladen...",
+    "webhookNotConfigured": "Discord-Webhook nicht konfiguriert"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "Genauigkeit über alle Versuche in den aktivierten Übungsmodi.",
+    "modes": {
+      "easy": "Einfach",
+      "hard": "Schwer",
+      "learn": "Lernen"
+    },
+    "progressDescription": "Durchschnittlicher Abschluss über alle aktivierten Übungsmodi."
+  },
+  "editor": {
+    "anonymousUser": "Anonym"
   }
 }

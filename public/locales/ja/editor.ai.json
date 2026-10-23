@@ -9,7 +9,14 @@
     "lostWarning": "今キャンセルすると、生成された{type}は失われます。",
     "preview": "プレビュー",
     "saveClose": "保存して閉じる",
-    "takeMoments": "しばらくお待ちください"
+    "takeMoments": "しばらくお待ちください",
+    "defaultInputPlaceholder": "説明を入力してください...",
+    "defaultTitle": "コンテンツを生成",
+    "editPrompt": "プロンプトを編集",
+    "enterDescriptionError": "説明を入力してください",
+    "generateFailed": "コンテンツの生成に失敗しました",
+    "regenerate": "再生成",
+    "regenerateFailed": "コンテンツの再生成に失敗しました"
   },
   "promptMethodSelector": {
     "inputButton": "入力",
@@ -20,7 +27,53 @@
       "text": "テキスト",
       "video": "ビデオ"
     },
-    "outputButton": "出力"
+    "outputButton": "出力",
+    "configure": "設定する",
+    "displaySettings": "表示設定",
+    "displaySettingsDescription": "補助語彙のテキストと音声を設定します。",
+    "enableAudioPlayback": "音声再生を有効にする",
+    "enableAudioPlaybackDescription": "単語と定義の音声コントロールを許可します。",
+    "inputDescription": "学習者が回答を送信する方法です。",
+    "invalidConfig": "入力方法と出力方法をそれぞれ1つ以上選択してください",
+    "meaningModes": {
+      "easy": {
+        "description": "単語と意味を組み合わせます。",
+        "label": "簡単"
+      },
+      "hard": {
+        "description": "意味のヒントによるガイドなしでマッチングします。",
+        "label": "難しい"
+      },
+      "learn": {
+        "description": "ガイド付きのマッチングとフィードバックで学習します。",
+        "label": "学ぶ"
+      }
+    },
+    "methodDescriptions": {
+      "audio": "録音した音声または生成した音声を使用します。",
+      "image": "プロンプトまたは回答として画像を表示します。",
+      "text": "プロンプトまたは応答をテキストとして表示します。",
+      "video": "動画をプロンプトまたは回答として使用します。",
+      "writing": "描画面への手書きによる回答を許可します。"
+    },
+    "outputDescription": "問題が学習者にどのように表示されるかを示します。",
+    "practiceModes": "練習モード",
+    "practiceModesDescription": "学習者が取り組むマッチングアクティビティを選択してください。",
+    "promptDescription": "学習者に表示するのを単語にするか定義にするかを選択してください。",
+    "promptFor": {
+      "definition": {
+        "description": "定義をターゲットとして表示します。",
+        "label": "定義用のプロンプト"
+      },
+      "word": {
+        "description": "語彙の単語をターゲットとして表示します。",
+        "label": "単語用のプロンプト"
+      }
+    },
+    "promptForAriaLabel": "単語または定義のプロンプト",
+    "promptHeading": "プロンプト",
+    "showPronunciations": "発音を表示",
+    "showPronunciationsDescription": "語彙と一緒に発音表記を表示します。"
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "音声に変換するテキストを入力してください...",
@@ -29,7 +82,9 @@
     "generateAudio": "音声を生成",
     "generateImage": "画像を生成します",
     "imagePromptPlaceholder": "生成したい画像について説明してください...",
-    "openRecordingStudio": "録音スタジオで開く"
+    "openRecordingStudio": "録音スタジオで開く",
+    "generatedAlt": "生成済み",
+    "regeneratedAlt": "再生成されました"
   },
   "blockSuggestionMenu": {
     "aiTitle": "🤖 AIによる提案",
@@ -45,6 +100,20 @@
     "ownerPlaceholder": "オーナーID"
   },
   "aiContentSuggestion": {
-    "tabToAccept": "Tabキーで確定します"
+    "tabToAccept": "Tabキーで確定します",
+    "generating": "生成中...",
+    "tabToAcceptHint": "(Tabキーで承諾)"
+  },
+  "blockSuggestionPlugin": {
+    "addCustomPractice": "カスタム練習を追加",
+    "addExplanation": "解説を追加",
+    "addHeading": "見出しを追加",
+    "addQuiz": "クイズを追加",
+    "addSummary": "要約を追加",
+    "addVocabularyPractice": "語彙練習を追加",
+    "moreSuggestions": "↑↓ 他{count}件",
+    "newSection": "新しいセクション",
+    "questionCount": "{count, plural, one {#件の質問} other {#件の質問}}",
+    "tabKey": "Tab"
   }
 }

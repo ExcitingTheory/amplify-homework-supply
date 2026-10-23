@@ -18,14 +18,45 @@
     },
     "noDictionaryAvailable": "No Dictionary Available",
     "placeholder": "Enter answer here",
-    "submit": "Submit"
+    "submit": "Submit",
+    "loadingAudio": "Loading audio...",
+    "progressDescription": "Percentage of prompts answered.",
+    "accuracyDescription": "Percentage of submitted answers marked correct.",
+    "inputMethodLabels": {
+      "audio": "Speak answer",
+      "text": "Type answer",
+      "writing": "Draw answer"
+    },
+    "recordYourAnswer": "Record your answer",
+    "defaultPromptByDefinition": "Provide words that best match the following definition(s):",
+    "defaultPromptByWord": "Please define the following word(s):"
   },
   "common": {
     "copied": "Copied"
   },
+  "customAIComponent": {
+    "accuracyDescription": "Percentage of submitted answers marked correct by the AI.",
+    "completed": "Completed",
+    "correct": "Correct",
+    "grading": "AI is grading your response...",
+    "gradingError": "An error occurred while grading. Please try again.",
+    "imageUploadHint": "Image upload input - submit an image for AI evaluation",
+    "inputMethod": "Input method",
+    "loading": "Loading...",
+    "modeAudio": "Speak answer",
+    "modeDrawing": "Draw answer",
+    "modeImage": "Upload image",
+    "modeText": "Type answer",
+    "needsImprovement": "Needs Improvement",
+    "progressDescription": "Percentage of AI-graded questions answered.",
+    "questionFallback": "Question {id}",
+    "score": "Score: {score}/100",
+    "yourAnswer": "Your answer"
+  },
   "customAnswerComponent": {
     "answerPlaceholder": "Answer Placeholder",
     "answerQuestions": "Answer Questions",
+    "answerVerifiedAndAccepted": "Answer verified and accepted",
     "audio": "Audio",
     "audioQuestion": "Audio Question",
     "completedQuestion": "Completed Question",
@@ -69,6 +100,7 @@
   },
   "unitCompletedPlugin": {
     "allCaughtUp": "All caught up! No more assignments.",
+    "completedIn": "Completed in {duration}",
     "completionMessage": "Unit completed!",
     "continueButton": "Continue",
     "copyInvite": "Copy Invite",
@@ -81,6 +113,8 @@
     "reviewAnswers": "Review Answers",
     "roomCreated": "Room Created",
     "sectionHeading": "Next Steps",
+    "timeLimit": "Time limit: {duration}",
+    "timeLimitWithCompletion": "Time limit: {duration} • {completion}",
     "tryAgain": "Try Again"
   },
   "verticalTabsRo": {
@@ -90,6 +124,7 @@
     "tableOfContents": "Table of Contents"
   },
   "workbookSettings": {
+    "accessibilityMoved": "Accessibility settings (reduced motion, high contrast) have moved to your <link>global Settings page</link>.",
     "audioPreferences": "Audio Preferences",
     "autoPlayAudio": "Auto-play Audio",
     "autoPlayAudioDescription": "Automatically play audio when available",

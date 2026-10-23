@@ -5,6 +5,7 @@ import { sectionHandler } from "../functions/section/resource";
 import { embeddingsHandler } from "../functions/embeddings/resource";
 import { moderationHandler } from "../functions/moderation/resource";
 import { documentAnalysisHandler } from "../functions/documentAnalysis/resource";
+import { documentAnalysisWorkflowHandler } from "../functions/documentAnalysisWorkflow/resource";
 
 import { mediaConvertHandler } from "../functions/mediaConvert/resource";
 import { imageProcessHandler } from "../functions/imageProcess/resource";
@@ -381,6 +382,15 @@ const QuestionEntry = a.customType({
   expectedAnswer: a.string(),
   hint: a.string(),
   type: a.string(),
+  prompt: a.string(),
+  answer: a.string(),
+  questionType: a.string(),
+  difficulty: a.string(),
+  page: a.integer(),
+  subject: a.string(),
+  field: a.string(),
+  sourceText: a.string(),
+  accept: a.string().array(),
 });
 
 const PendingMediaEntry = a.customType({
@@ -1784,9 +1794,9 @@ const rawSchemaDefinition = {
       owner: a
         .string()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          allow.owner(),
+          allow.group("Admins").to(["create", "read", "update", "delete"]),
+          allow.group("Instructors").to(["read"]),
         ]),
       identityId: a.string(),
       // Foreign keys
@@ -1794,9 +1804,9 @@ const rawSchemaDefinition = {
         .id()
         .required()
         .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
+          allow.owner(),
+          allow.group("Admins").to(["create", "read", "update", "delete"]),
+          allow.group("Instructors").to(["read"]),
         ]),
       document: a.belongsTo("Document", ["documentID"]),
       fileID: a.id(),
@@ -1819,8 +1829,8 @@ const rawSchemaDefinition = {
     })
     .authorization((allow) => [
       allow.owner(),
-      allow.group("Learners").to(["read"]),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
+      allow.group("Instructors").to(["read"]),
       // Note: Lambda function access (documentAnalysis, embeddings)
       // is granted via schema-level .authorization() - see bottom of schema definition
     ]),
@@ -2396,6 +2406,12 @@ const rawSchemaDefinition = {
       // === AI & Document Analysis ===
       autoAnalyzeDocuments: a.boolean().default(true),
       documentAnalysisModel: a.string(), // e.g. "gpt-4", "gpt-4o"
+      documentAnalysisOpenAiRequestsPerMinute: a.integer().default(5),
+      documentAnalysisOpenAiTokensPerMinute: a.integer().default(20000),
+      documentAnalysisOpenAiMaxConcurrentRequests: a.integer().default(1),
+      documentAnalysisAnthropicRequestsPerMinute: a.integer().default(5),
+      documentAnalysisAnthropicTokensPerMinute: a.integer().default(20000),
+      documentAnalysisAnthropicMaxConcurrentRequests: a.integer().default(1),
       defaultAIModel: a.string().default("gpt-4o-mini"), // default model for chat/assistant
       // === Bot Personas ===
       kaiEnabled: a.boolean().default(true), // Student tutor bot
@@ -3069,6 +3085,7 @@ const rawSchemaDefinition = {
       audioUrl: a.string().required(),
       model: a.string().required(),
       chatModel: a.string().required(),
+      prompt: a.string(),
       studentMemory: a.string(),
       contentContext: a.string(),
     })
@@ -3765,6 +3782,7 @@ const schema = a
   .authorization((allow) => [
     allow.resource(openaiHandler),
     allow.resource(documentAnalysisHandler),
+    allow.resource(documentAnalysisWorkflowHandler),
     allow.resource(embeddingsHandler),
     allow.resource(mediaConvertHandler),
     allow.resource(imageProcessHandler),

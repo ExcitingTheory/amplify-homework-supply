@@ -130,12 +130,16 @@
     "changePassword": {
       "button": "Passwort ändern",
       "description": "Aktualisieren Sie Ihr Kontokennwort für die Sicherheit",
-      "heading": "Passwort ändern"
+      "heading": "Passwort ändern",
+      "confirmPasswordLabel": "Neues Passwort bestätigen",
+      "newPasswordLabel": "Neues Passwort",
+      "oldPasswordLabel": "Altes Passwort"
     },
     "confirmEmail": {
       "button": "E-Mail bestätigen",
       "message": "Bitte überprüfen Sie Ihre E-Mail und geben Sie den Bestätigungscode ein, um Ihre E-Mail-Adresse zu verifizieren.",
-      "title": "E-Mail bestätigen"
+      "title": "E-Mail bestätigen",
+      "codeLabel": "Bestätigungscode"
     },
     "description": "Ihre Profilinformationen anzeigen und aktualisieren",
     "heading": "Mein Profil",
@@ -151,7 +155,8 @@
     "progress": "Fortschritt",
     "title": "Mein Profil",
     "updateProfile": "Profil aktualisieren",
-    "userId": "Benutzer-ID"
+    "userId": "Benutzer-ID",
+    "email": "E-Mail"
   },
   "sectionDetail": {
     "actionsHeader": "Aktionen",
@@ -303,5 +308,29 @@
     "start": "Starten",
     "timerInstructions": "Dies ist eine zeitlich begrenzte Übung. Drücken Sie Start, um den Timer zu beginnen und die Fragen zu beantworten.",
     "unitUpdated": "Diese Einheit wurde vom Kursleiter aktualisiert. Möchten Sie die neueste Version neu laden?"
+  },
+  "gradeReviewDrawer": {
+    "cancel": "Abbrechen",
+    "currentLabel": "Aktuell:",
+    "drop": "Streichen",
+    "gradeLabel": "Note (%)",
+    "gradeUpdated": "Note aktualisiert auf {score} %",
+    "keep": "Beibehalten",
+    "lateDropped": "Verspätete Abgabe verworfen",
+    "lateKept": "Verspätete Abgabe beibehalten",
+    "lateRequiresReview": "Verspätete Abgabe erfordert eine Überprüfung.",
+    "lateStatus": "Verspätet: {status}",
+    "lateUpdateError": "Die verspätete Abgabe konnte nicht aktualisiert werden",
+    "nextTooltip": "Weiter (→)",
+    "noGradeData": "Es wurden keine Notendaten gefunden.",
+    "override": "Überschreiben",
+    "overrideError": "Die Notenänderung konnte nicht gespeichert werden",
+    "overrideTitle": "Note überschreiben",
+    "position": "({current}/{total})",
+    "previousTooltip": "Zurück (←)",
+    "save": "Speichern",
+    "saving": "Wird gespeichert...",
+    "scoreRangeError": "Die Punktzahl muss zwischen 0 und 100 liegen",
+    "studentLabel": "Student/in:"
   }
 }

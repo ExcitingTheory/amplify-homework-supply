@@ -59,6 +59,7 @@ export function InsertImageUriDialogBody({ onClick }) {
                 placeholder={t('imagesPlugin.imageUrlPlaceholder')}
                 onChange={setSrc}
                 value={src}
+                // eslint-disable-next-line i18next/no-literal-string -- test id
                 data-test-id="image-modal-url-input"
             />
             <TextInput
@@ -66,10 +67,12 @@ export function InsertImageUriDialogBody({ onClick }) {
                 placeholder={t('imagesPlugin.altTextPlaceholder')}
                 onChange={setAltText}
                 value={altText}
+                // eslint-disable-next-line i18next/no-literal-string -- test id
                 data-test-id="image-modal-alt-text-input"
             />
             <DialogActions>
                 <Button
+                    // eslint-disable-next-line i18next/no-literal-string -- test id
                     data-test-id="image-modal-confirm-btn"
                     disabled={isDisabled}
                     onClick={() => onClick({ altText, src })}
@@ -107,6 +110,7 @@ export function InsertImageUploadedDialogBody({ onClick }) {
                 label={t('imagesPlugin.imageUpload')}
                 onChange={loadImage}
                 accept="image/*"
+                // eslint-disable-next-line i18next/no-literal-string -- test id
                 data-test-id="image-modal-file-upload"
             />
             <TextInput
@@ -114,10 +118,12 @@ export function InsertImageUploadedDialogBody({ onClick }) {
                 placeholder={t('imagesPlugin.altTextDescriptive')}
                 onChange={setAltText}
                 value={altText}
+                // eslint-disable-next-line i18next/no-literal-string -- test id
                 data-test-id="image-modal-alt-text-input"
             />
             <DialogActions>
                 <Button
+                    // eslint-disable-next-line i18next/no-literal-string -- test id
                     data-test-id="image-modal-file-upload-btn"
                     disabled={isDisabled}
                     onClick={() => onClick({ altText, src })}
@@ -155,6 +161,7 @@ export function InsertImageDialog({ activeEditor, onClose }) {
             {!mode && (
                 <DialogButtonsList>
                     <Button
+                        // eslint-disable-next-line i18next/no-literal-string -- test id
                         data-test-id="image-modal-option-sample"
                         onClick={() =>
                             onClick(
@@ -174,12 +181,14 @@ export function InsertImageDialog({ activeEditor, onClose }) {
                         {t('imagesPlugin.sample')}
                     </Button>
                     <Button
+                        // eslint-disable-next-line i18next/no-literal-string -- test id
                         data-test-id="image-modal-option-url"
                         onClick={() => setMode('url')}
                     >
                         {t('imagesPlugin.url')}
                     </Button>
                     <Button
+                        // eslint-disable-next-line i18next/no-literal-string -- test id
                         data-test-id="image-modal-option-file"
                         onClick={() => setMode('file')}
                     >

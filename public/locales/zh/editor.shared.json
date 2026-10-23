@@ -59,7 +59,19 @@
     "sectionHeading": "录音室"
   },
   "audioWaveformPlayer": {
-    "noAudioSource": "未提供音频源"
+    "noAudioSource": "未提供音频源",
+    "elapsedTime": "已用时间",
+    "inputVolume": "输入音量",
+    "muteInput": "静音输入",
+    "muteOutput": "静音输出",
+    "outputVolume": "输出音量",
+    "pause": "暂停",
+    "play": "播放",
+    "remainingTime": "剩余时间",
+    "startRecording": "开始录音",
+    "stopRecording": "停止录制",
+    "unmuteInput": "取消输入静音",
+    "unmuteOutput": "取消静音输出"
   },
   "staticWaveform": {
     "errorLoading": "波形加载错误"
@@ -67,7 +79,8 @@
   "sketchPad": {
     "cancelSubmission": "取消提交",
     "hoverToStartDrawing": "悬停开始绘制",
-    "submittingInSeconds": "正在提交绘图作业进行评分，{countdown} 秒后完成..."
+    "submittingInSeconds": "正在提交绘图作业进行评分，{countdown} 秒后完成...",
+    "sketchAlt": "草图"
   },
   "unitEmbedding": {
     "allSectionsComplete": "所有部分已完成！",
@@ -95,6 +108,62 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "将生成嵌入向量",
     "successConfirmation": "嵌入向量生成成功"
+  },
+  "workbookSSRSkeleton": {
+    "loadingContent": "正在加载内容..."
+  },
+  "imagePromptMedia": {
+    "help": "帮助",
+    "noImage": "无图片",
+    "playlist": "播放列表"
+  },
+  "mediaPromptBand": {
+    "timecodes": "媒体时间码"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "正确",
+    "defaultAccuracyDescription": "正确选择所需答案的百分比。",
+    "defaultProgressDescription": "已尝试作答的必答题百分比。",
+    "meterDescription": "{label}。{description}",
+    "percentValue": "{percent}%",
+    "progressLabel": "进度",
+    "valueDescription": "{label}:{percent}%。{description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "电影"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "第 {number} 条录音 · {duration} · {time}",
+    "deleteTake": "删除录音",
+    "recordedTakes": "已录制的录音",
+    "takeLabel": "第 {number} 次录制"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "取消",
+    "cancelSubmission": "取消提交",
+    "submit": "提交"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "添加列标题",
+    "addRowHeader": "添加行标题",
+    "deleteColumn": "删除列",
+    "deleteRow": "删除行",
+    "deleteTable": "删除表格",
+    "insertColumnsLeft": "向左插入{count, plural, one {列} other {# 列}}",
+    "insertColumnsRight": "在右侧插入{count, plural, one {列} other {# 列}}",
+    "insertRowsAbove": "在上方插入{count, plural, one {# 行} other {# 行}}",
+    "insertRowsBelow": "在下方插入{count, plural, one {# 行} other {# 行}}",
+    "removeColumnHeader": "移除列标题",
+    "removeRowHeader": "移除行标题"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "编辑纹章"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "十六进制颜色"
+  },
+  "youTubePlugin": {
+    "videoTitle": "YouTube 视频"
   },
   "wordEmbedding": {
     "embeddingGenerated": "已生成嵌入：已处理 {count} 个单词"
@@ -127,7 +196,8 @@
   "wordBlockPlugin": {
     "audioUnavailable": "音频不可用",
     "loadingAudio": "正在加载音频...",
-    "wordNotFound": "未找到词汇：{wordID}"
+    "wordNotFound": "未找到词汇：{wordID}",
+    "selectVocabularyWord": "请选择词汇…"
   },
   "vocabularyReview": {
     "alertMessage": "继续前请复习词汇",
@@ -185,7 +255,16 @@
     "typeLabel": "类型：",
     "unknown": "未知",
     "updatedLabel": "更新时间：",
-    "variantLabel": "变体"
+    "variantLabel": "变体",
+    "autoSaveChip": "自动保存",
+    "autoSaved": "已自动保存",
+    "descriptionLabel": "描述",
+    "descriptionPlaceholder": "为此文件添加描述...",
+    "errorSaving": "保存时出错:{message}",
+    "fileNameLabel": "文件名称",
+    "fileNamePlaceholder": "请输入文件名称...",
+    "savedSuccessfully": "保存成功",
+    "unsavedChip": "未保存"
   },
   "metadataField": {
     "unsavedChanges": "未保存的更改"
@@ -206,7 +285,12 @@
     "cancel": "取消",
     "instructions": "<strong>操作说明：</strong>在您想要重新生成的区域上涂抹。使用橡皮擦移除蒙版的部分区域。按住Shift键并拖动以平移视图。使用缩放按钮查看更多细节。",
     "save": "保存",
-    "zoomInfo": "缩放: {level}% | 按住Shift键平移"
+    "zoomInfo": "缩放: {level}% | 按住Shift键平移",
+    "clearMask": "清除蒙版",
+    "redo": "重做",
+    "undo": "撤销",
+    "zoomIn": "放大",
+    "zoomOut": "缩小"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "取消",
@@ -248,7 +332,16 @@
   "playlistEditor": {
     "emptyState": "播放列表中没有项目",
     "menuAttribute": "菜单",
-    "noFilesMessage": "尚未添加任何文件。请使用上方的输入框将文件添加到播放列表中。"
+    "noFilesMessage": "尚未添加任何文件。请使用上方的输入框将文件添加到播放列表中。",
+    "addFiles": "添加文件",
+    "addFilesToPlaylist": "添加文件到播放列表",
+    "columnHeaders": {
+      "size": "大小",
+      "title": "标题"
+    },
+    "dragMediaHere": "将音频或视频拖放到此处",
+    "dropToAddFiles": "拖放到此处以添加文件",
+    "removeFromPlaylist": "从播放列表中移除"
   },
   "autoSubmit": {
     "cancelSubmission": "取消",

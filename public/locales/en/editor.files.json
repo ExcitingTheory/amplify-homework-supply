@@ -42,18 +42,30 @@
   },
   "fileManager2": {
     "contextMenu": {
+      "confirmMoveSelected": "Move {count} file(s) to Recycle Bin?",
       "deleteConfirmMessage": "Delete {count} selected file(s)?",
       "deleteSelected": "Delete Selected ({count})",
       "deselectAll": "Deselect All",
+      "moveSelectedFailed": "Failed to move {count} file(s) to Recycle Bin: {files}",
       "reAnalyzeSelected": "Re-analyze Selected ({count})"
+    },
+    "documentStatus": {
+      "analyzed": "Analyzed",
+      "analyzing": "Analyzing...",
+      "extracted": "Extracted",
+      "extracting": "Extracting...",
+      "failed": "Failed",
+      "ready": "Ready"
     },
     "dragDrop": {
       "dropFilesHere": "Drop files here to upload",
       "supportedFormats": "Audio, Images, PDFs, Documents and more"
     },
     "expandedContent": {
+      "bloomLevelChip": "Bloom Level: {level}",
       "descriptionLabel": "Description:",
       "durationLabel": "Duration Label",
+      "durationSeconds": "{duration}s",
       "extractedContentHeading": "Extracted Content",
       "fileInfoHeading": "File Info Heading",
       "noConceptsExtracted": "No concepts extracted",
@@ -62,31 +74,42 @@
       "noQuestionsExtracted": "No questions extracted",
       "noSummariesExtracted": "No summaries extracted",
       "noVocabularyExtracted": "No vocabulary extracted",
+      "pagesChip": "Pages: {range}",
+      "relatedChip": "Related: {related}",
       "reviewQuestionsMessage": "Review and import questions from the document",
       "reviewVocabularyMessage": "Review and import vocabulary from the document",
       "sizeLabel": "Size Label",
       "transcriptionLabel": "Transcription:"
     },
     "fileDetails": {
+      "confirmMoveToRecycleBin": "Move to Recycle Bin: {name}?",
       "deleteTooltip": "Delete",
       "downloadTooltip": "Download",
       "insertTooltip": "Insert into editor",
+      "moveToRecycleBinFailed": "Failed to move {name} to Recycle Bin: {error}",
       "noWaveformAvailable": "No waveform available",
+      "reAnalyzeError": "Error re-analyzing {name}: {error}",
       "reAnalyzeTooltip": "Re-analyze",
       "videoNotSupported": "Your browser does not support the video tag."
     },
     "generators": {
+      "audioPreviewTitle": "Audio Preview",
       "audioPromptPlaceholder": "Text to transform into audio file.",
       "errorGeneratingAudio": "Error generating audio file",
       "errorGeneratingImage": "Error generating image file",
       "generatingAudio": "Generating audio file...",
       "generatingImage": "Generating image file...",
       "imagePromptPlaceholder": "Text to transform into image file.",
+      "noDescriptionPlaceholder": "No Description",
       "successfullyGeneratedAudio": "Successfully generated audio file",
       "successfullyGeneratedImage": "Successfully generated image file"
     },
+    "inlineEditor": {
+      "fieldAriaLabel": "File metadata field"
+    },
     "mainView": {
-      "noFilesMessage": "No files available. Upload files to get started."
+      "noFilesMessage": "No files available. Upload files to get started.",
+      "updateFileNameFailed": "Failed to update file name: {error}"
     },
     "metadataEditor": {
       "cancelButton": "Cancel",
@@ -99,6 +122,7 @@
       "promptLabel": "Prompt (for AI-generated files)",
       "protectionLevelLabel": "Protection Level",
       "saveButton": "Save",
+      "sizeKB": "{size} KB",
       "sizeLabel": "Size",
       "typeLabel": "Type",
       "unknown": "Unknown",
@@ -111,7 +135,10 @@
     },
     "toolbar": {
       "actionsTooltip": "Actions",
+      "generateConversation": "Generate Conversation",
+      "generateConversationForUnit": "Generate Conversation: {unitName}",
       "recordConversation": "Record Conversation",
+      "recordConversationForUnit": "Record Conversation: {unitName}",
       "searchPlaceholder": "Search files...",
       "selectAllTooltip": "Select All",
       "uploadTooltip": "Upload Files"

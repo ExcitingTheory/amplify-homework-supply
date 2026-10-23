@@ -16,18 +16,9 @@ import CheckIcon from "@mui/icons-material/Check";
 import CloseIcon from "@mui/icons-material/Close";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import SkipNextIcon from "@mui/icons-material/SkipNext";
+import { useTranslations } from "next-intl";
 import { useTourSafe } from "../context/tourContext";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
-
-const TOUR_COPY = {
-  fallbackTitle: "Guided tour",
-  label: "Guided walkthrough",
-  unavailable:
-    "The target is not available yet. Complete the current page action to continue.",
-  next: "Next",
-  skip: "Skip",
-  done: "Done",
-};
 
 function getTooltipPosition(targetRect, preferred = "bottom", containerRect) {
   if (!targetRect || !containerRect) return null;
@@ -84,6 +75,7 @@ export default function TourOverlay({
   containerSelector,
   isNavigating = false,
 }) {
+  const t = useTranslations("components");
   const tour = useTourSafe();
   const activeTour = tour
     ?.getAvailableTours()
@@ -284,7 +276,7 @@ export default function TourOverlay({
       <Paper
         component="aside"
         role="dialog"
-        aria-label={activeTour?.title || TOUR_COPY.fallbackTitle}
+        aria-label={activeTour?.title || t("tourOverlay.fallbackTitle")}
         sx={{
           position: "absolute",
           zIndex: 2,
@@ -330,16 +322,16 @@ export default function TourOverlay({
               variant="subtitle1"
               sx={{ fontWeight: SEMANTIC_THEME.typography.controlWeight }}
             >
-              {activeTour?.title || TOUR_COPY.fallbackTitle}
+              {activeTour?.title || t("tourOverlay.fallbackTitle")}
             </Typography>
             <Typography variant="caption" color="text.secondary">
-              {TOUR_COPY.label}
+              {t("tourOverlay.label")}
             </Typography>
           </Box>
-          <Tooltip title="Exit tour">
+          <Tooltip title={t("tourOverlay.exitTour")}>
             <IconButton
               size="small"
-              aria-label="Exit tour"
+              aria-label={t("tourOverlay.exitTour")}
               onMouseDown={(event) => event.stopPropagation()}
               onClick={tour.stopTour}
             >
@@ -371,11 +363,14 @@ export default function TourOverlay({
         )}
         {!targetRect && step?.target && (
           <Typography variant="caption" color="warning.main">
-            {TOUR_COPY.unavailable}
+            {t("tourOverlay.unavailable")}
           </Typography>
         )}
         <Typography variant="caption" color="text.secondary">
-          {`Step ${Math.min(stepIndex + 1, steps.length)} of ${steps.length}`}
+          {t("tourOverlay.stepProgress", {
+            current: Math.min(stepIndex + 1, steps.length),
+            total: steps.length,
+          })}
         </Typography>
         <Stack
           direction="row"
@@ -390,7 +385,7 @@ export default function TourOverlay({
               endIcon={<ArrowForwardIcon />}
               onClick={() => setStepIndex((index) => index + 1)}
             >
-              {TOUR_COPY.next}
+              {t("tourOverlay.next")}
             </Button>
           )}
           {!isLast && (
@@ -401,7 +396,7 @@ export default function TourOverlay({
               startIcon={<SkipNextIcon />}
               onClick={tour.stopTour}
             >
-              {TOUR_COPY.skip}
+              {t("tourOverlay.skip")}
             </Button>
           )}
           {isLast && (
@@ -413,7 +408,7 @@ export default function TourOverlay({
               onClick={tour.stopTour}
               disabled={isNavigating}
             >
-              {TOUR_COPY.done}
+              {t("tourOverlay.done")}
             </Button>
           )}
         </Stack>

@@ -432,7 +432,7 @@ export default function AIContentCompletionPlugin() {
       unregisterLoading();
       removeEscape();
     };
-  }, [editor, acceptSuggestion, dismissSuggestion]);
+  }, [editor, acceptSuggestion, dismissSuggestion, clearSuggestion]);
   
   // Auto-dismiss on typing
   useEffect(() => {

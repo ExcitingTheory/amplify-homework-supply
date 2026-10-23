@@ -27,6 +27,8 @@ import { QuestionMarkOutlined } from "@mui/icons-material";
 import ConfigurationManager from "./ConfigurationManager";
 import AssignmentConfiguration from "./AssignmentConfiguration";
 
+const OVERFLOW_HIDDEN = "hidden";
+
 function TabPanel(props) {
   const { children, value, index, overflowY, ...other } = props;
 
@@ -235,7 +237,7 @@ export default function TabsVerticalLeft({
             data-tour="questions-tab"
             label={<QuestionMarkOutlined />}
             {...a11yProps(t("tabsVerticalLeft.tabs.questions"))}
-            overflow="hidden"
+            overflow={OVERFLOW_HIDDEN}
           />
         </Tooltip>
         <Tooltip title={t("tabsVerticalLeft.tabs.files")} placement="right">
@@ -254,7 +256,7 @@ export default function TabsVerticalLeft({
             onClick={() => handleTabClick(5)}
             data-tour="campaign-tab"
             label={<CampaignIcon />}
-            {...a11yProps(t("tabsVerticalLeft.tabs.campaign") || "Campaign")}
+            {...a11yProps(t("tabsVerticalLeft.tabs.campaign"))}
           />
         </Tooltip>
         <Tooltip

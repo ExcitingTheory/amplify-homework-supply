@@ -66,7 +66,7 @@ export default function TakeVersionHistory({
         }
       }
     },
-    [identityId, dialogueId, slotId, versions],
+    [identityId, dialogueId, slotId, versions, t],
   );
 
   const handleClose = useCallback(() => {
@@ -166,7 +166,7 @@ export default function TakeVersionHistory({
                           </Typography>
                           {active && (
                             <Chip
-                              label="active"
+                              label={t("takeVersionHistory.activeChip")}
                               size="small"
                               color="primary"
                               variant="outlined"

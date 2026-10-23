@@ -31,6 +31,7 @@ import ImageIcon from "@mui/icons-material/Image";
 import { generateImage } from "../../app/actions/generate";
 import getCachedUrl from "../utils/getCachedUrl";
 import { calculateFeasibility } from "../utils/chapterFeasibility";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Types
@@ -65,15 +66,30 @@ export interface GroupChallengeEditorProps {
 // Helpers
 // ============================================================================
 
-function formatCountdown(deadline: string): string {
+function formatCountdown(
+  deadline: string,
+  t: ReturnType<typeof useTranslations>,
+): { text: string; expired: boolean } {
   const diff = new Date(deadline).getTime() - Date.now();
-  if (diff <= 0) return "Expired";
+  if (diff <= 0)
+    return { text: t("groupChallengeEditor.expired"), expired: true };
   const days = Math.floor(diff / (1000 * 60 * 60 * 24));
   const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
   const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-  if (days > 0) return `${days}d ${hours}h remaining`;
-  if (hours > 0) return `${hours}h ${minutes}m remaining`;
-  return `${minutes}m remaining`;
+  if (days > 0)
+    return {
+      text: t("groupChallengeEditor.daysHoursRemaining", { days, hours }),
+      expired: false,
+    };
+  if (hours > 0)
+    return {
+      text: t("groupChallengeEditor.hoursMinutesRemaining", { hours, minutes }),
+      expired: false,
+    };
+  return {
+    text: t("groupChallengeEditor.minutesRemaining", { minutes }),
+    expired: false,
+  };
 }
 
 // ============================================================================
@@ -86,6 +102,7 @@ export function GroupChallengeEditor({
   submitting = false,
   availableUnits = [],
 }: GroupChallengeEditorProps) {
+  const t = useTranslations("components");
   const [title, setTitle] = useState(initialData?.title || "");
   const [targetXP, setTargetXP] = useState(initialData?.targetXP ?? 1000);
   const [deadline, setDeadline] = useState(initialData?.deadline || "");
@@ -99,7 +116,10 @@ export function GroupChallengeEditor({
     initialData?.systemPromptSeed || "",
   );
   const [active, setActive] = useState(initialData?.active ?? true);
-  const [countdown, setCountdown] = useState("");
+  const [countdown, setCountdown] = useState<{
+    text: string;
+    expired: boolean;
+  } | null>(null);
   const [featuredImage, setFeaturedImage] = useState(
     initialData?.featuredImage || "",
   );
@@ -127,15 +147,15 @@ export function GroupChallengeEditor({
   // Live countdown timer
   useEffect(() => {
     if (!deadline) {
-      setCountdown("");
+      setCountdown(null);
       return;
     }
-    setCountdown(formatCountdown(deadline));
+    setCountdown(formatCountdown(deadline, t));
     const interval = setInterval(() => {
-      setCountdown(formatCountdown(deadline));
+      setCountdown(formatCountdown(deadline, t));
     }, 60_000);
     return () => clearInterval(interval);
-  }, [deadline]);
+  }, [deadline, t]);
 
   const handleGenerateImage = async () => {
     const prompt =
@@ -182,8 +202,8 @@ export function GroupChallengeEditor({
           <Stack spacing={3}>
             <Typography variant="h6">
               {initialData?.title
-                ? "Edit Group Challenge"
-                : "Create Group Challenge"}
+                ? t("groupChallengeEditor.editTitle")
+                : t("groupChallengeEditor.createTitle")}
             </Typography>
 
             {/* Progress display (only in edit mode with current XP) */}
@@ -196,14 +216,17 @@ export function GroupChallengeEditor({
                   mb={1}
                 >
                   <Typography variant="body2" color="text.secondary">
-                    Progress: {currentXP} / {targetXP} XP
+                    {t("groupChallengeEditor.progress", {
+                      current: currentXP,
+                      target: targetXP,
+                    })}
                   </Typography>
                   {countdown && (
                     <Chip
                       icon={<TimerIcon />}
-                      label={countdown}
+                      label={countdown.text}
                       size="small"
-                      color={countdown === "Expired" ? "error" : "default"}
+                      color={countdown.expired ? "error" : "default"}
                     />
                   )}
                 </Stack>
@@ -223,20 +246,20 @@ export function GroupChallengeEditor({
                   onChange={(e) => setActive(e.target.checked)}
                 />
               }
-              label="Active"
+              label={t("groupChallengeEditor.activeLabel")}
             />
 
             {/* Core fields */}
             <TextField
-              label="Title"
+              label={t("groupChallengeEditor.titleLabel")}
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               required
-              placeholder="e.g., The Algorithm Dragon"
+              placeholder={t("groupChallengeEditor.titlePlaceholder")}
             />
 
             <TextField
-              label="Target XP (HP)"
+              label={t("groupChallengeEditor.targetXpLabel")}
               type="number"
               value={targetXP}
               onChange={(e) =>
@@ -252,7 +275,7 @@ export function GroupChallengeEditor({
 
             <Stack direction="row" spacing={2}>
               <TextField
-                label="Start Date"
+                label={t("groupChallengeEditor.startDateLabel")}
                 type="datetime-local"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
@@ -260,7 +283,7 @@ export function GroupChallengeEditor({
                 fullWidth
               />
               <TextField
-                label="Deadline"
+                label={t("groupChallengeEditor.deadlineLabel")}
                 type="datetime-local"
                 value={deadline}
                 onChange={(e) => setDeadline(e.target.value)}
@@ -270,7 +293,7 @@ export function GroupChallengeEditor({
             </Stack>
 
             <TextField
-              label="Bonus Multiplier"
+              label={t("groupChallengeEditor.bonusMultiplierLabel")}
               type="number"
               value={bonusMultiplier}
               onChange={(e) =>
@@ -282,48 +305,53 @@ export function GroupChallengeEditor({
                   <InputAdornment position="start">×</InputAdornment>
                 ),
               }}
-              helperText="XP multiplier applied to all contributions during the challenge"
+              helperText={t("groupChallengeEditor.bonusMultiplierHelper")}
             />
 
             <Divider>
-              <Chip label="Campaign Narrative" icon={<EmojiEventsIcon />} />
+              <Chip
+                label={t("groupChallengeEditor.campaignNarrative")}
+                icon={<EmojiEventsIcon />}
+              />
             </Divider>
 
             {/* Campaign narrative fields */}
             <TextField
-              label="Setting"
+              label={t("groupChallengeEditor.settingLabel")}
               value={setting}
               onChange={(e) => setSetting(e.target.value)}
               multiline
               rows={2}
-              placeholder="e.g., A world where bugs rule the codebase..."
-              helperText="The narrative setting for this challenge"
+              placeholder={t("groupChallengeEditor.settingPlaceholder")}
+              helperText={t("groupChallengeEditor.settingHelper")}
             />
 
             <TextField
-              label="Stakes"
+              label={t("groupChallengeEditor.stakesLabel")}
               value={stakes}
               onChange={(e) => setStakes(e.target.value)}
               multiline
               rows={2}
-              placeholder="e.g., If the dragon wins, everyone loses a streak freeze..."
-              helperText="What happens if the challenge is not completed"
+              placeholder={t("groupChallengeEditor.stakesPlaceholder")}
+              helperText={t("groupChallengeEditor.stakesHelper")}
             />
 
             <TextField
-              label="System Prompt Seed"
+              label={t("groupChallengeEditor.systemPromptSeedLabel")}
               value={systemPromptSeed}
               onChange={(e) => setSystemPromptSeed(e.target.value)}
               multiline
               rows={2}
-              placeholder="Context for AI-generated narrative responses..."
-              helperText="Used to seed AI chat context during the challenge"
+              placeholder={t(
+                "groupChallengeEditor.systemPromptSeedPlaceholder",
+              )}
+              helperText={t("groupChallengeEditor.systemPromptSeedHelper")}
             />
 
             {/* Featured Image Generation */}
             <Divider>
               <Chip
-                label="Linked Units (Scoped XP)"
+                label={t("groupChallengeEditor.linkedUnitsScoped")}
                 icon={<EmojiEventsIcon />}
               />
             </Divider>
@@ -331,8 +359,7 @@ export function GroupChallengeEditor({
             {availableUnits.length > 0 && (
               <>
                 <Typography variant="body2" color="text.secondary">
-                  Only XP earned from the selected units will count toward this
-                  chapter. Leave empty to count all XP in the section.
+                  {t("groupChallengeEditor.linkedUnitsHint")}
                 </Typography>
                 <Autocomplete
                   multiple
@@ -354,8 +381,10 @@ export function GroupChallengeEditor({
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Linked Units"
-                      placeholder="Select units..."
+                      label={t("groupChallengeEditor.linkedUnitsLabel")}
+                      placeholder={t(
+                        "groupChallengeEditor.linkedUnitsPlaceholder",
+                      )}
                     />
                   )}
                 />
@@ -386,18 +415,25 @@ export function GroupChallengeEditor({
                         }}
                       >
                         <Typography variant="caption" fontWeight={600}>
-                          Feasibility: {feasibility.verdict.toUpperCase()}
+                          {t("groupChallengeEditor.feasibility", {
+                            verdict: feasibility.verdict.toUpperCase(),
+                          })}
                         </Typography>
                         <Typography
                           variant="caption"
                           display="block"
                           color="text.secondary"
                         >
-                          One-time XP from linked units: ~
-                          {feasibility.oneTimeXPConservative}–
-                          {feasibility.oneTimeXPOptimistic} XP
-                          {feasibility.drillSessionsNeeded > 0 &&
-                            ` · ~${feasibility.drillSessionsNeeded} extra drill sessions needed per student`}
+                          {feasibility.drillSessionsNeeded > 0
+                            ? t("groupChallengeEditor.oneTimeXpWithDrills", {
+                                min: feasibility.oneTimeXPConservative,
+                                max: feasibility.oneTimeXPOptimistic,
+                                drills: feasibility.drillSessionsNeeded,
+                              })
+                            : t("groupChallengeEditor.oneTimeXp", {
+                                min: feasibility.oneTimeXPConservative,
+                                max: feasibility.oneTimeXPOptimistic,
+                              })}
                         </Typography>
                         {feasibility.warning && (
                           <Typography
@@ -415,17 +451,23 @@ export function GroupChallengeEditor({
             )}
 
             <Divider>
-              <Chip label="Featured Image" icon={<ImageIcon />} />
+              <Chip
+                label={t("groupChallengeEditor.featuredImage")}
+                icon={<ImageIcon />}
+              />
             </Divider>
 
             <TextField
-              label="Image Prompt"
+              label={t("groupChallengeEditor.imagePromptLabel")}
               value={imagePrompt}
               onChange={(e) => setImagePrompt(e.target.value)}
               multiline
               rows={2}
-              placeholder={`e.g., Fantasy battle scene: ${title || "The Algorithm Dragon"}. ${setting || "A world where bugs rule the codebase..."}`}
-              helperText="Describe the featured image you want to generate (leave blank for auto-prompt from title + setting)"
+              placeholder={t("groupChallengeEditor.imagePromptPlaceholder", {
+                title: title || t("groupChallengeEditor.exampleTitle"),
+                setting: setting || t("groupChallengeEditor.exampleSetting"),
+              })}
+              helperText={t("groupChallengeEditor.imagePromptHelper")}
             />
 
             <Button
@@ -439,17 +481,17 @@ export function GroupChallengeEditor({
               }
             >
               {imageGenerating
-                ? "Generating..."
+                ? t("groupChallengeEditor.generating")
                 : featuredImage
-                  ? "Regenerate Image"
-                  : "Generate Featured Image"}
+                  ? t("groupChallengeEditor.regenerateImage")
+                  : t("groupChallengeEditor.generateFeaturedImage")}
             </Button>
 
             {featuredImageUrl && (
               <Box sx={{ borderRadius: 2, overflow: "hidden" }}>
                 <img
                   src={featuredImageUrl}
-                  alt="Featured"
+                  alt={t("groupChallengeEditor.featuredImageAlt")}
                   style={{ width: "100%", maxHeight: 300, objectFit: "cover" }}
                 />
               </Box>
@@ -462,7 +504,9 @@ export function GroupChallengeEditor({
               startIcon={<SaveIcon />}
               disabled={!isValid || submitting}
             >
-              {initialData?.title ? "Save Challenge" : "Create Challenge"}
+              {initialData?.title
+                ? t("groupChallengeEditor.saveChallenge")
+                : t("groupChallengeEditor.createChallenge")}
             </Button>
           </Stack>
         </Box>

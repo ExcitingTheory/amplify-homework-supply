@@ -1,4 +1,5 @@
 import * as React from "react";
+import { useTranslations } from "next-intl";
 import { useState, useEffect } from "react";
 import UnitContext from "../../context/unitContext";
 import DictionaryContext from "../../context/dictionaryContext";
@@ -18,12 +19,16 @@ export const Hard = ({
   wordIDs,
   enabledModes = ["learn", "easy", "hard"],
   nextMode = null,
-  nextModeLabel = "",
+  nextModeLabel,
   onProgressChange,
   promptFor = "definition",
   showAudio = true,
   showPronunciation = true,
 }) => {
+  const t = useTranslations("components");
+  const resolvedNextModeLabel =
+    nextModeLabel ||
+    (nextMode ? t(`meaningAssociationExercise.modes.${nextMode}`) : "");
   let [assignment, setAssignment] = React.useState([]);
   const [answers, setAnswers] = React.useState([]);
   const [length, setLength] = React.useState();
@@ -76,7 +81,10 @@ export const Hard = ({
     return grade.data;
   }, [grade?.data]);
 
-  const inProgress = gradeData[nodeKey] || {};
+  const inProgress = React.useMemo(
+    () => gradeData[nodeKey] || {},
+    [gradeData, nodeKey],
+  );
 
   // Show completion screen once when exercise completes — don't re-show after dismiss
   React.useEffect(() => {
@@ -383,7 +391,9 @@ export const Hard = ({
             }}
           >
             <Typography variant="body2" color="textSecondary">
-              Hard Mode Complete — {accuracyPercent}% accuracy
+              {t("meaningAssociationExercise.hardModeComplete", {
+                accuracy: accuracyPercent,
+              })}
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
               <Button
@@ -391,7 +401,7 @@ export const Hard = ({
                 size="small"
                 onClick={handleDismissCompletion}
               >
-                Back
+                {t("meaningAssociationExercise.back")}
               </Button>
               {!nextMode ? (
                 <Button
@@ -400,7 +410,7 @@ export const Hard = ({
                   size="small"
                   onClick={handleContinueFromCompletion}
                 >
-                  Finish Exercise
+                  {t("meaningAssociationExercise.finishExercise")}
                 </Button>
               ) : (
                 <Button
@@ -408,7 +418,9 @@ export const Hard = ({
                   size="small"
                   onClick={handleContinueFromCompletion}
                 >
-                  Continue to {nextModeLabel} Mode
+                  {t("meaningAssociationExercise.continueToMode", {
+                    mode: resolvedNextModeLabel,
+                  })}
                 </Button>
               )}
             </Box>
@@ -453,7 +465,9 @@ export const Hard = ({
                 }}
               >
                 <CheckCircleIcon
-                  aria-label="Completed"
+                  aria-label={t(
+                    "meaningAssociationExercise.completedAriaLabel",
+                  )}
                   sx={{
                     position: "absolute",
                     top: 12,
@@ -464,7 +478,7 @@ export const Hard = ({
                   }}
                 />
                 <Typography variant="body2" color="inherit" fontWeight={600}>
-                  Complete
+                  {t("meaningAssociationExercise.complete")}
                 </Typography>
               </Box>
             </Box>

@@ -132,12 +132,12 @@ export default function CustomAIComponent({
         completeFeedback[qid] = {
           correct: true,
           score: inProgress.score || 100,
-          feedback: inProgress.feedback || "Completed",
+          feedback: inProgress.feedback || t("customAIComponent.completed"),
         };
       });
       setFeedback(completeFeedback);
     }
-  }, [inProgress, questionIDs]);
+  }, [inProgress, questionIDs, t]);
 
   // Reset completion guard when exercise changes
   useEffect(() => {
@@ -208,7 +208,7 @@ export default function CustomAIComponent({
         [questionID]: {
           correct: false,
           score: 0,
-          feedback: "An error occurred while grading. Please try again.",
+          feedback: t("customAIComponent.gradingError"),
         },
       }));
     } finally {
@@ -247,7 +247,7 @@ export default function CustomAIComponent({
         [questionID]: {
           correct: false,
           score: 0,
-          feedback: "An error occurred while grading. Please try again.",
+          feedback: t("customAIComponent.gradingError"),
         },
       }));
     } finally {
@@ -269,16 +269,17 @@ export default function CustomAIComponent({
   const nailedIt = blockGradeData?.nailedIt === true;
 
   const MODE_LABELS: Record<CustomAIInputMode, string> = {
-    text: "Type answer",
-    audio: "Speak answer",
-    drawing: "Draw answer",
-    image: "Upload image",
+    text: t("customAIComponent.modeText"),
+    audio: t("customAIComponent.modeAudio"),
+    drawing: t("customAIComponent.modeDrawing"),
+    image: t("customAIComponent.modeImage"),
   };
 
   return (
     <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
       <div className={className?.base}>
         <ExerciseBlockCard
+          // eslint-disable-next-line i18next/no-literal-string -- block type identifier
           blockType="custom-ai"
           accuracy={accuracy}
           graded={graded}
@@ -288,8 +289,8 @@ export default function CustomAIComponent({
             percentComplete={percentComplete}
             accuracy={accuracy}
             hasAttempts={answeredCount > 0}
-            progressDescription="Percentage of AI-graded questions answered."
-            accuracyDescription="Percentage of submitted answers marked correct by the AI."
+            progressDescription={t("customAIComponent.progressDescription")}
+            accuracyDescription={t("customAIComponent.accuracyDescription")}
           />
 
           <ol style={{ margin: 0, paddingLeft: "1.25rem" }}>
@@ -300,12 +301,15 @@ export default function CustomAIComponent({
               const displayPrompt =
                 question.prompt ||
                 question.question ||
-                `Question ${questionID}`;
+                t("customAIComponent.questionFallback", { id: questionID });
 
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               let borderStyle = "1px solid #ccc";
               if (feedback[questionID]?.correct === true) {
+                // eslint-disable-next-line i18next/no-literal-string -- CSS value
                 borderStyle = "1px solid green";
               } else if (feedback[questionID]?.correct === false) {
+                // eslint-disable-next-line i18next/no-literal-string -- CSS value
                 borderStyle = "1px solid red";
               }
 
@@ -342,7 +346,9 @@ export default function CustomAIComponent({
                         }}
                       >
                         <Typography variant="body2" color="text.secondary">
-                          Score: {feedback[questionID].score}/100
+                          {t("customAIComponent.score", {
+                            score: feedback[questionID].score,
+                          })}
                         </Typography>
                         <Typography
                           variant="body2"
@@ -353,8 +359,8 @@ export default function CustomAIComponent({
                           }
                         >
                           {feedback[questionID].correct
-                            ? "Correct"
-                            : "Needs Improvement"}
+                            ? t("customAIComponent.correct")
+                            : t("customAIComponent.needsImprovement")}
                         </Typography>
                       </Box>
                       <Typography variant="body2" color="text.primary">
@@ -375,7 +381,7 @@ export default function CustomAIComponent({
                     >
                       <CircularProgress size={20} />
                       <Typography variant="body2" color="text.secondary">
-                        AI is grading your response...
+                        {t("customAIComponent.grading")}
                       </Typography>
                     </Box>
                   )}
@@ -398,7 +404,7 @@ export default function CustomAIComponent({
                         placeholder={t(
                           "customAnswerComponent.answerPlaceholder",
                         )}
-                        ariaLabel="Your answer"
+                        ariaLabel={t("customAIComponent.yourAnswer")}
                         borderStyle={borderStyle}
                         textColor={
                           feedback[questionID]?.correct === true
@@ -407,6 +413,7 @@ export default function CustomAIComponent({
                               ? "red"
                               : "inherit"
                         }
+                        // eslint-disable-next-line i18next/no-literal-string -- test id
                         testId="custom-ai-input"
                         wordId={questionID}
                         questionId={questionID}
@@ -447,6 +454,7 @@ export default function CustomAIComponent({
                                     ...currentGradeData[audioNodeKey],
                                     audioFilePath: audioFile?.path || null,
                                     audioFileId: audioFile?.id || null,
+                                    // eslint-disable-next-line i18next/no-literal-string -- stored enum value
                                     inputMethod: "audio",
                                   },
                                 };
@@ -487,7 +495,9 @@ export default function CustomAIComponent({
                   {/* Drawing input */}
                   {currentInputMethod === "drawing" && (
                     <Box sx={{ mb: 1 }}>
-                      <Suspense fallback={<div>Loading...</div>}>
+                      <Suspense
+                        fallback={<div>{t("customAIComponent.loading")}</div>}
+                      >
                         <SketchPad
                           excalidrawData={inProgress?.excalidrawData ?? {}}
                           expect={question.answer || ""}
@@ -520,7 +530,7 @@ export default function CustomAIComponent({
                   {currentInputMethod === "image" && (
                     <Box sx={{ mb: 1 }}>
                       <Typography variant="body2" color="text.secondary">
-                        Image upload input - submit an image for AI evaluation
+                        {t("customAIComponent.imageUploadHint")}
                       </Typography>
                       <input
                         type="file"
@@ -568,7 +578,7 @@ export default function CustomAIComponent({
                 exclusive
                 value={currentInputMethod}
                 onChange={handleInputChange}
-                aria-label="Input method"
+                aria-label={t("customAIComponent.inputMethod")}
                 size="small"
                 sx={{
                   maxWidth: 360,

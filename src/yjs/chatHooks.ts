@@ -80,25 +80,31 @@ export function useChatRoom(
     roomType,
     roomId,
     user,
-    wsUrl,
-    connect = true,
-    persistence = true,
   } = options || ({} as UseChatRoomOptions);
+  const username = user?.username;
 
   const providerRef = useRef<ChatCollaborationProvider | null>(null);
   const [isConnected, setIsConnected] = useState(false);
   const [isSynced, setIsSynced] = useState(false);
 
+  // Latest options are read when the provider is created; only the room/user
+  // identity should recreate the provider.
+  const optionsRef = useRef(options);
   useEffect(() => {
-    if (!options || !roomId || !user?.username) return;
+    optionsRef.current = options;
+  });
+
+  useEffect(() => {
+    const latest = optionsRef.current;
+    if (!latest || !roomId || !username) return;
 
     const provider = new ChatCollaborationProvider({
       roomType,
       roomId,
-      user,
-      wsUrl,
-      connect,
-      persistence,
+      user: latest.user,
+      wsUrl: latest.wsUrl,
+      connect: latest.connect ?? true,
+      persistence: latest.persistence ?? true,
     });
 
     providerRef.current = provider;
@@ -120,7 +126,7 @@ export function useChatRoom(
       setIsConnected(false);
       setIsSynced(false);
     };
-  }, [roomType, roomId, user?.username]);
+  }, [roomType, roomId, username]);
 
   return {
     provider: providerRef.current,

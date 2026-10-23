@@ -19,7 +19,8 @@
     "sectionLabel": "Abschnitt",
     "selectSectionHelper": "Wählen Sie einen Abschnitt aus, dem Sie das Fälligkeitsdatum zuweisen möchten",
     "timerDescription": "Der Timer startet, nachdem der Benutzer auf die Schaltfläche „Start\" geklickt hat. Benutzer können fortfahren, nachdem der Timer abgelaufen ist, und es wird aufgezeichnet, wann die Aufgabe gestartet und abgeschlossen wurde. Der Countdown wird für die Dauer des Timers oben auf dem Bildschirm angezeigt.",
-    "timerLabel": "Timer"
+    "timerLabel": "Timer",
+    "wholeSection": "Gesamter Abschnitt"
   },
   "configurationManager": {
     "autoAnalyzeDescription": "Wenn aktiviert, werden PDFs unmittelbar nach dem Upload zur Vokabelextraktion an OpenAI gesendet.",
@@ -36,7 +37,8 @@
     "setFeaturedImage": "Hauptbild festlegen",
     "uploadImagePrompt": "Bild hochladen",
     "uploadingImage": "Bild wird hochgeladen",
-    "uploadingVideo": "Video wird transcodiert"
+    "uploadingVideo": "Video wird transcodiert",
+    "setVideoUrl": "Festlegen"
   },
   "mainToolbar": {
     "menuAttribute": "Menü",
@@ -156,7 +158,9 @@
     "underline": "Unterstreichen",
     "undo": "Rückgängig",
     "untitledUnit": "Unbenannte Einheit",
-    "wordBlock": "Wortblock"
+    "wordBlock": "Wortblock",
+    "layout": "Layout",
+    "aiGradedExercise": "KI-bewertete Übung"
   },
   "toolbar": {
     "align_center": "Zentrieren",
@@ -174,5 +178,60 @@
     "paragraph": "Absatz",
     "strikethrough": "Durchgestrichen",
     "underline": "Unterstreichen"
+  },
+  "save": {
+    "permissionError": "Fehler: Sie haben keine Berechtigung, diese Einheit zu bearbeiten.",
+    "savedSuccessfully": "Erfolgreich gespeichert",
+    "saveFailed": "Speichern fehlgeschlagen",
+    "saveNowTitle": "Jetzt speichern (die automatische Speicherung erfolgt 2 Sekunden, nachdem Sie mit der Eingabe aufgehört haben)"
+  },
+  "campaignPanel": {
+    "addToExistingChapter": "Zu bestehendem Kapitel hinzufügen",
+    "badgeLock": "Abzeichen: {badgeId}",
+    "cancel": "Abbrechen",
+    "chapterNumber": "Kap. {order}",
+    "chapterOptionLabel": "Kap. {order}: {title}",
+    "chapterProgress": "{percent} % abgeschlossen · {currentXP}/{targetXP} XP",
+    "close": "Schließen",
+    "contentLock": "Inhaltssperre",
+    "createNewChapter": "Neues Kapitel erstellen",
+    "edit": "Bearbeiten",
+    "heading": "Kampagnenkapitel",
+    "linkedToChapters": "Verknüpft mit {count, plural, one {# Kapitel} other {# Kapiteln}}:",
+    "linkUnitToChapter": "Einheit mit Kapitel verknüpfen",
+    "loadingChapters": "Kapitel werden geladen …",
+    "locksManagedHint": "Sperren für Badges und Modulabschlüsse werden in den erweiterten Gamification-Einstellungen des Abschnitts verwaltet.",
+    "moduleCompletionLock": "{percent} % Modulabschluss",
+    "newChapter": "Neues Kapitel",
+    "noLinkedChaptersWarning": "Diese Einheit ist keinen Kampagnenkapiteln zugeordnet. Lernende sehen für diesen Inhalt keine narrative Einbettung.",
+    "noSections": "Keine Abschnitte verfügbar. Erstellen Sie zuerst einen Abschnitt.",
+    "preview": "Vorschau",
+    "quotedSetting": "„{setting}“",
+    "requiredXP": "Erforderliche XP",
+    "saveUnitFirst": "Speichern Sie zuerst die Einheit, um Kampagnenlinks zu verwalten.",
+    "saving": "Wird gespeichert…",
+    "sectionLabel": "Abschnitt",
+    "selectChapterPlaceholder": "Kapitel auswählen…",
+    "selectSectionHint": "Wählen Sie einen Abschnitt aus, in dem ein Kapitel erstellt werden soll.",
+    "selectSectionPlaceholder": "Wählen Sie einen Abschnitt für dieses Kapitel aus…",
+    "statusActive": "Aktiv",
+    "statusDone": "Erledigt",
+    "studentPreview": "Vorschau für Lernende",
+    "thisUnit": "Diese Einheit",
+    "unlink": "Verknüpfung aufheben"
+  },
+  "floatingToolbarPlugin": {
+    "code": "Code",
+    "fontColor": "Schriftfarbe",
+    "insertBlock": "Block einfügen",
+    "insertColumnsLayout": "Spaltenlayout einfügen",
+    "insertLink": "Link einfügen",
+    "layoutFourEqual": "4 Spalten (gleich breit)",
+    "layoutThreeEqual": "3 Spalten (gleich breit)",
+    "layoutThreeQuarterHalfQuarter": "3 Spalten (25 % – 50 % – 25 %)",
+    "layoutTwoEqual": "2 Spalten (gleich breit)",
+    "layoutTwoQuarterThreeQuarters": "2 Spalten (25 % - 75 %)",
+    "shortAnswerCustom": "Kurzantwort (benutzerdefiniert)",
+    "shortAnswerVocabulary": "Kurzantwort (Vokabeln)"
   }
 }

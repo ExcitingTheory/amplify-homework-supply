@@ -4,7 +4,9 @@
       "deleteConfirmMessage": "¿Eliminar {count} archivo(s) seleccionado(s)?",
       "deleteSelected": "Eliminar Seleccionados ({count})",
       "deselectAll": "Deseleccionar todo",
-      "reAnalyzeSelected": "Reanalizar Seleccionados ({count})"
+      "reAnalyzeSelected": "Reanalizar Seleccionados ({count})",
+      "confirmMoveSelected": "¿Mover {count} archivo(s) a la Papelera de reciclaje?",
+      "moveSelectedFailed": "No se pudo mover {count} archivo(s) a la Papelera de reciclaje: {files}"
     },
     "expandedContent": {
       "descriptionLabel": "Descripción:",
@@ -17,7 +19,11 @@
       "noVocabularyExtracted": "No se extrajo vocabulario",
       "reviewQuestionsMessage": "Revisar e importar preguntas del documento",
       "reviewVocabularyMessage": "Revisar e importar vocabulario del documento",
-      "transcriptionLabel": "Transcripción:"
+      "transcriptionLabel": "Transcripción:",
+      "bloomLevelChip": "Nivel de Bloom: {level}",
+      "durationSeconds": "{duration} s",
+      "pagesChip": "Páginas: {range}",
+      "relatedChip": "Relacionado: {related}"
     },
     "fileDetails": {
       "deleteTooltip": "Eliminar",
@@ -25,7 +31,10 @@
       "insertTooltip": "Insertar en el editor",
       "noWaveformAvailable": "No hay forma de onda disponible",
       "reAnalyzeTooltip": "Reanalizar",
-      "videoNotSupported": "Su navegador no soporta la etiqueta de video."
+      "videoNotSupported": "Su navegador no soporta la etiqueta de video.",
+      "confirmMoveToRecycleBin": "¿Mover a la papelera de reciclaje: {name}?",
+      "moveToRecycleBinFailed": "No se pudo mover {name} a la Papelera de reciclaje: {error}",
+      "reAnalyzeError": "Error al volver a analizar {name}: {error}"
     },
     "generators": {
       "audioPromptPlaceholder": "Texto para transformar en archivo de audio.",
@@ -35,10 +44,13 @@
       "generatingImage": "Generando archivo de imagen...",
       "imagePromptPlaceholder": "Texto para transformar en archivo de imagen.",
       "successfullyGeneratedAudio": "Archivo de audio generado exitosamente",
-      "successfullyGeneratedImage": "Archivo de imagen generado exitosamente"
+      "successfullyGeneratedImage": "Archivo de imagen generado exitosamente",
+      "audioPreviewTitle": "Vista previa de audio",
+      "noDescriptionPlaceholder": "Sin descripción"
     },
     "mainView": {
-      "noFilesMessage": "No hay archivos disponibles. Sube archivos para comenzar."
+      "noFilesMessage": "No hay archivos disponibles. Sube archivos para comenzar.",
+      "updateFileNameFailed": "No se pudo actualizar el nombre del archivo: {error}"
     },
     "metadataEditor": {
       "cancelButton": "Cancelar",
@@ -54,7 +66,8 @@
       "sizeLabel": "Tamaño",
       "typeLabel": "Tipo",
       "unknown": "Desconocido",
-      "variantLabel": "Variante"
+      "variantLabel": "Variante",
+      "sizeKB": "{size} KB"
     },
     "selectedFileDetails": {
       "emptyState": "Seleccione un archivo para ver detalles y metadatos"
@@ -64,11 +77,25 @@
       "searchPlaceholder": "Buscar archivos...",
       "selectAllTooltip": "Seleccionar todo",
       "uploadTooltip": "Subir archivos",
-      "recordConversation": "Grabar Conversación"
+      "recordConversation": "Grabar Conversación",
+      "generateConversation": "Generar conversación",
+      "generateConversationForUnit": "Generar conversación: {unitName}",
+      "recordConversationForUnit": "Grabar conversación: {unitName}"
     },
     "dragDrop": {
       "dropFilesHere": "Suelta los archivos aquí para subirlos",
       "supportedFormats": "Audio, Imágenes, PDFs, Documentos y más"
+    },
+    "documentStatus": {
+      "analyzed": "Analizado",
+      "analyzing": "Analizando...",
+      "extracted": "Extraído",
+      "extracting": "Extrayendo...",
+      "failed": "Fallido",
+      "ready": "Listo"
+    },
+    "inlineEditor": {
+      "fieldAriaLabel": "Campo de metadatos del archivo"
     }
   },
   "fileMetadataComponent": {

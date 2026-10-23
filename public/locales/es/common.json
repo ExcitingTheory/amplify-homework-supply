@@ -59,6 +59,20 @@
       "disableNotifications": "Desactivar notificaciones",
       "experimentalFeatures": "Características Experimentales",
       "studentMode": "Modo Estudiante"
+    },
+    "debugModeEnabled": "🐛 ¡Modo de depuración activado! Actualice la página para activar el panel de depuración.\n\nUtilice Cmd/Ctrl + Mayús + D para abrir el panel de depuración.",
+    "nav": {
+      "adminDashboard": "Panel de administración",
+      "analytics": "Analítica",
+      "archives": "Archivos",
+      "collapseNavigation": "Contraer navegación",
+      "expandNavigation": "Expandir navegación",
+      "files": "Archivos",
+      "moderation": "Moderación",
+      "questions": "Preguntas",
+      "recycleBin": "Papelera de reciclaje",
+      "showNavigation": "Mostrar navegación",
+      "words": "Palabras"
     }
   },
   "navigation": {
@@ -81,13 +95,23 @@
   },
   "peerReview": {
     "helpful": "La revisión por pares fue útil",
-    "notHelpful": "La revisión por pares no fue útil"
+    "notHelpful": "La revisión por pares no fue útil",
+    "aiAssistant": "Asistente de IA",
+    "blockReference": "Bloque: {blockId}",
+    "didItHelp": "¿Le ayudó la revisión por pares?",
+    "messagePlaceholder": "Escriba un mensaje… (use @AI para obtener ayuda de la IA)",
+    "noMessages": "Aún no hay mensajes. ¡Inicie la conversación de la revisión por pares!",
+    "sessionEnded": "Esta sesión de revisión ha finalizado.",
+    "thanksForFeedback": "¡Gracias por sus comentarios!",
+    "typing": "{count, plural, one {{names} está escribiendo…} other {{names} están escribiendo…}}"
   },
   "quizComponent": {
     "grade": "Calificación: {grade}"
   },
   "sectionDetail": {
-    "studentHeader": "Estudiante"
+    "studentHeader": "Estudiante",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "Error al matricular a los estudiantes"
   },
   "status": {
     "complete": "Completar",
@@ -134,5 +158,42 @@
     "increase": "Aumentar el segmento de tiempo seleccionado",
     "minutes": "Minutos",
     "seconds": "Segundos"
+  },
+  "debugPanel": {
+    "contactLabel": "Su correo electrónico o contacto (opcional)",
+    "contactPlaceholder": "Para que podamos ponernos en contacto con usted",
+    "describeIssueLabel": "Describa el problema (opcional)",
+    "describeIssuePlaceholder": "¿Qué estaba haciendo cuando ocurrió el problema?",
+    "diagnosticSent": "✅ ¡Diagnóstico enviado al equipo de soporte! (El enlace de S3 caduca en 30 días)",
+    "performanceComingSoon": "Próximamente: métricas de rendimiento...",
+    "sendDialogDescription": "Esto enviará una instantánea de diagnóstico a nuestro equipo de soporte a través de Discord. Sus datos se depurarán para eliminar la información confidencial.",
+    "sendDialogTitle": "Enviar diagnóstico a Soporte",
+    "sendFailed": "Error al enviar: {error}",
+    "sendingToDiscord": "Enviando a Discord...",
+    "sendToSupport": "Enviar a Soporte",
+    "snapshotDownloaded": "Se ha descargado la instantánea de diagnóstico",
+    "tabs": {
+      "components": "Componentes",
+      "logs": "Registros ({count})",
+      "performance": "Rendimiento",
+      "state": "Estado"
+    },
+    "title": "Panel de depuración",
+    "unknownError": "Error desconocido",
+    "uploadFailed": "Error al cargar: {error}",
+    "uploadingArtifact": "Cargando el artefacto de diagnóstico a S3...",
+    "webhookNotConfigured": "Webhook de Discord no configurado"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "Precisión en todos los intentos en los modos de práctica habilitados.",
+    "modes": {
+      "easy": "Fácil",
+      "hard": "Difícil",
+      "learn": "Aprender"
+    },
+    "progressDescription": "Promedio de finalización en los modos de práctica habilitados."
+  },
+  "editor": {
+    "anonymousUser": "Anónimo"
   }
 }

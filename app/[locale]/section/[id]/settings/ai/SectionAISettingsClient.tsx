@@ -3,6 +3,7 @@ import * as React from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import { useParams } from "next/navigation";
+import { SectionSettingsNavigation } from "@/components/SectionSettingsNavigation";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import {
   AIAgentConfig,
@@ -114,6 +115,7 @@ export default function SectionAISettingsPage({
       data-testid="section-ai-settings"
       sx={{ maxWidth: "60rem", margin: "2rem auto", padding: "0 1rem" }}
     >
+      <SectionSettingsNavigation sectionId={sectionId} backToSection />
       <Typography variant="h5" gutterBottom>
         Section AI Settings
       </Typography>

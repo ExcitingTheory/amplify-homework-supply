@@ -7,7 +7,7 @@
  */
 
 import React from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Avatar from "@mui/material/Avatar";
 import AvatarGroup from "@mui/material/AvatarGroup";
 import Box from "@mui/material/Box";
@@ -15,8 +15,8 @@ import Typography from "@mui/material/Typography";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemAvatar from "@mui/material/ListItemAvatar";
-import ListItemButton from "@mui/material/ListItemButton";
 import Chip from "@mui/material/Chip";
+import { useTranslations } from "next-intl";
 import { SquadCrest } from "./SquadCrest";
 import { AvatarDisplay } from "./AvatarDisplay";
 import { EmptyState } from "../EmptyState";
@@ -73,6 +73,7 @@ export function SquadLeaderboard({
   sortBy = "xp",
   groupBy = "none",
 }: SquadLeaderboardProps) {
+  const t = useTranslations("components");
   // Apply name filter
   const filtered = React.useMemo(() => {
     if (nameFilter.length === 0) return squads;
@@ -100,7 +101,7 @@ export function SquadLeaderboard({
     if (groupBy !== "section") return [{ label: null, squads: sorted }];
     const map = new Map<string, SquadLeaderboardEntry[]>();
     for (const squad of sorted) {
-      const key = squad.sectionName || "Unknown Section";
+      const key = squad.sectionName || t("squadLeaderboard.unknownSection");
       if (!map.has(key)) map.set(key, []);
       map.get(key)!.push(squad);
     }
@@ -112,10 +113,10 @@ export function SquadLeaderboard({
         return maxB - maxA;
       })
       .map(([label, squads]) => ({ label, squads }));
-  }, [sorted, groupBy]);
+  }, [sorted, groupBy, t]);
 
   if (filtered.length === 0) {
-    return <EmptyState dense title="No squads yet" />;
+    return <EmptyState dense title={t("squadLeaderboard.emptyTitle")} />;
   }
 
   let globalRank = 0;
@@ -150,14 +151,16 @@ export function SquadLeaderboard({
                   mb: 0.5,
                 }}
               >
-                <ListItemButton
-                  component={Link}
-                  href={`/squad/${squad.id}`}
+                <Box
                   sx={{
                     display: "flex",
+                    position: "relative",
+                    width: "100%",
                     alignItems: "center",
                     gap: 1,
+                    px: 2,
                     py: 1.5,
+                    "&:hover": { bgcolor: "action.hover" },
                   }}
                 >
                   {/* Rank */}
@@ -170,7 +173,7 @@ export function SquadLeaderboard({
                     }}
                   >
                     <Typography variant="body2" fontWeight={700}>
-                      {RANK_EMOJI[rank] || `#${rank}`}
+                      {RANK_EMOJI[rank] || t("squadLeaderboard.rank", { rank })}
                     </Typography>
                   </Box>
 
@@ -187,12 +190,23 @@ export function SquadLeaderboard({
                   {/* Name + members (center, flexible) */}
                   <Box sx={{ flex: 1, minWidth: 0 }}>
                     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-                      <Typography variant="subtitle2" fontWeight={600} noWrap>
+                      <Typography
+                        component={Link}
+                        href={`/squad/${squad.id}`}
+                        variant="subtitle2"
+                        fontWeight={600}
+                        noWrap
+                        sx={{
+                          color: "inherit",
+                          textDecoration: "none",
+                          "&::after": { content: '""', position: "absolute", inset: 0 },
+                        }}
+                      >
                         {squad.name}
                       </Typography>
                       {isMine && (
                         <Chip
-                          label="My Squad"
+                          label={t("squadLeaderboard.mySquad")}
                           size="small"
                           color="primary"
                           sx={{ height: 20, fontSize: "0.7rem" }}
@@ -208,8 +222,9 @@ export function SquadLeaderboard({
                       }}
                     >
                       <Typography variant="caption" color="text.secondary">
-                        {squad.memberCount} member
-                        {squad.memberCount !== 1 ? "s" : ""}
+                        {t("squadLeaderboard.memberCount", {
+                          count: squad.memberCount,
+                        })}
                       </Typography>
                       {squad.sectionName && (
                         <Chip
@@ -224,6 +239,8 @@ export function SquadLeaderboard({
                           max={maxAvatars}
                           sx={{
                             ml: 0.5,
+                            position: "relative",
+                            zIndex: 1,
                             "& .MuiAvatar-root": {
                               width: 20,
                               height: 20,
@@ -242,6 +259,7 @@ export function SquadLeaderboard({
                               }}
                             >
                               <AvatarDisplay
+                                profileUsername={member.studentId}
                                 seed={member.avatarSeed || member.studentId}
                                 size={20}
                                 style={member.avatarStyle || "simple"}
@@ -261,9 +279,11 @@ export function SquadLeaderboard({
                     color="primary"
                     sx={{ flexShrink: 0, textAlign: "right", minWidth: 60 }}
                   >
-                    {squad.totalXP.toLocaleString()} XP
+                    {t("squadLeaderboard.totalXp", {
+                      xp: squad.totalXP.toLocaleString(),
+                    })}
                   </Typography>
-                </ListItemButton>
+                </Box>
               </ListItem>
             );
           })}

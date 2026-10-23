@@ -40,6 +40,7 @@
     "timerLabel": "Timer",
     "undo": "Undo",
     "viewSection": "View Section",
+    "wholeSection": "Whole section",
     "workbookChatEnabled": "Workbook Chat Enabled",
     "workbookChatEnabledDescription": "Workbook Chat Enabled Description"
   },
@@ -56,6 +57,7 @@
     "removeCoverVideo": "Remove Cover Video",
     "setCoverVideo": "Set Cover Video",
     "setFeaturedImage": "Set Featured Image",
+    "setVideoUrl": "Set",
     "uploadImagePrompt": "Upload Image",
     "uploadingImage": "Uploading Image",
     "uploadingVideo": "Transcoding video"
@@ -115,6 +117,7 @@
     "blockFormat": "Block format",
     "bold": "Bold",
     "bulletedList": "Bulleted List",
+    "callAndResponse": "Call and Response",
     "cancel": "Cancel",
     "chooseLayout": "Choose a layout",
     "clearAllTextFormatting": "Clear all text formatting",
@@ -181,7 +184,9 @@
     "underline": "Underline",
     "undo": "Undo",
     "untitledUnit": "Untitled Unit",
-    "wordBlock": "Word Block"
+    "wordBlock": "Word Block",
+    "layout": "Layout",
+    "aiGradedExercise": "AI-Graded Exercise"
   },
   "toolbar": {
     "align_center": "Align Center",
@@ -199,5 +204,60 @@
     "paragraph": "Paragraph",
     "strikethrough": "Strikethrough",
     "underline": "Underline"
+  },
+  "save": {
+    "permissionError": "Error: You do not have permission to edit this unit.",
+    "savedSuccessfully": "Saved successfully",
+    "saveFailed": "Save failed",
+    "saveNowTitle": "Save now (automatic save happens 2 seconds after you stop typing)"
+  },
+  "campaignPanel": {
+    "addToExistingChapter": "Add to existing chapter",
+    "badgeLock": "Badge: {badgeId}",
+    "cancel": "Cancel",
+    "chapterNumber": "Ch. {order}",
+    "chapterOptionLabel": "Ch. {order}: {title}",
+    "chapterProgress": "{percent}% complete · {currentXP}/{targetXP} XP",
+    "close": "Close",
+    "contentLock": "Content Lock",
+    "createNewChapter": "Create new chapter",
+    "edit": "Edit",
+    "heading": "Campaign Chapters",
+    "linkedToChapters": "Linked to {count, plural, one {# chapter} other {# chapters}}:",
+    "linkUnitToChapter": "Link unit to chapter",
+    "loadingChapters": "Loading chapters…",
+    "locksManagedHint": "Badge and module-completion locks are managed in the section's Advanced gamification settings.",
+    "moduleCompletionLock": "{percent}% module completion",
+    "newChapter": "New Chapter",
+    "noLinkedChaptersWarning": "This unit isn't linked to any campaign chapters. Students won't see narrative framing for this content.",
+    "noSections": "No sections available. Create a section first.",
+    "preview": "Preview",
+    "quotedSetting": "“{setting}”",
+    "requiredXP": "Required XP",
+    "saveUnitFirst": "Save the unit first to manage campaign links.",
+    "saving": "Saving…",
+    "sectionLabel": "Section",
+    "selectChapterPlaceholder": "Select a chapter…",
+    "selectSectionHint": "Select a section to create a chapter in.",
+    "selectSectionPlaceholder": "Select section for this chapter…",
+    "statusActive": "Active",
+    "statusDone": "Done",
+    "studentPreview": "Student preview",
+    "thisUnit": "This unit",
+    "unlink": "Unlink"
+  },
+  "floatingToolbarPlugin": {
+    "code": "Code",
+    "fontColor": "Font color",
+    "insertBlock": "Insert block",
+    "insertColumnsLayout": "Insert columns layout",
+    "insertLink": "Insert link",
+    "layoutFourEqual": "4 columns (equal)",
+    "layoutThreeEqual": "3 columns (equal)",
+    "layoutThreeQuarterHalfQuarter": "3 columns (25% - 50% - 25%)",
+    "layoutTwoEqual": "2 columns (equal)",
+    "layoutTwoQuarterThreeQuarters": "2 columns (25% - 75%)",
+    "shortAnswerCustom": "Short Answer (Custom)",
+    "shortAnswerVocabulary": "Short Answer (Vocabulary)"
   }
 }

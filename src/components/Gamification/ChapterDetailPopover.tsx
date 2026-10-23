@@ -12,6 +12,7 @@ import LinearProgress from '@mui/material/LinearProgress'
 import Popover from '@mui/material/Popover'
 import Typography from '@mui/material/Typography'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
+import { useTranslations } from 'next-intl'
 
 export interface ChapterDetailPopoverProps {
   anchorEl: HTMLElement | null
@@ -28,6 +29,7 @@ export interface ChapterDetailPopoverProps {
 }
 
 export function ChapterDetailPopover({ anchorEl, onClose, chapter }: ChapterDetailPopoverProps) {
+  const t = useTranslations('components')
   if (!chapter) return null
 
   const progressPercent = chapter.targetXP && chapter.targetXP > 0
@@ -46,8 +48,12 @@ export function ChapterDetailPopover({ anchorEl, onClose, chapter }: ChapterDeta
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
         <AutoStoriesIcon sx={{ fontSize: '1.1rem', color: 'primary.main' }} />
         <Typography variant="subtitle2" fontWeight={700}>
-          {chapter.chapterOrder != null ? `Chapter ${chapter.chapterOrder}: ` : ''}
-          {chapter.title}
+          {chapter.chapterOrder != null
+            ? t('chapterDetailPopover.chapterTitle', {
+                chapterOrder: chapter.chapterOrder,
+                title: chapter.title ?? '',
+              })
+            : chapter.title}
         </Typography>
       </Box>
 
@@ -59,16 +65,20 @@ export function ChapterDetailPopover({ anchorEl, onClose, chapter }: ChapterDeta
 
       {chapter.stakes && (
         <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          <strong>Stakes:</strong> {chapter.stakes}
+          <strong>{t('chapterDetailPopover.stakesLabel')}</strong> {chapter.stakes}
         </Typography>
       )}
 
       {chapter.targetXP != null && chapter.targetXP > 0 && (
         <Box>
           <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 0.5 }}>
-            <Typography variant="caption" color="text.secondary">Progress</Typography>
+            <Typography variant="caption" color="text.secondary">{t('chapterDetailPopover.progress')}</Typography>
             <Typography variant="caption" color="text.secondary">
-              {chapter.currentXP || 0}/{chapter.targetXP} XP ({progressPercent}%)
+              {t('chapterDetailPopover.xpProgress', {
+                currentXP: chapter.currentXP || 0,
+                targetXP: chapter.targetXP,
+                progressPercent,
+              })}
             </Typography>
           </Box>
           <LinearProgress
@@ -81,7 +91,7 @@ export function ChapterDetailPopover({ anchorEl, onClose, chapter }: ChapterDeta
 
       {chapter.linkedUnitIds && chapter.linkedUnitIds.length > 0 && (
         <Typography variant="caption" color="text.disabled" sx={{ display: 'block', mt: 1 }}>
-          {chapter.linkedUnitIds.length} linked unit{chapter.linkedUnitIds.length !== 1 ? 's' : ''}
+          {t('chapterDetailPopover.linkedUnits', { count: chapter.linkedUnitIds.length })}
         </Typography>
       )}
     </Popover>

@@ -8,6 +8,43 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 
+// File-local next-intl mock (overrides test/setup.ts): appends interpolation
+// values as JSON so assertions can verify both the message key and its data.
+vi.mock('next-intl', () => {
+  const format = (key: string, values?: Record<string, unknown>) =>
+    values ? `${key} ${JSON.stringify(values)}` : key
+  const createT = () => {
+    const t = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.rich = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.markup = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.raw = (key: string) => key
+    t.has = () => true
+    return t
+  }
+  return {
+    useTranslations: () => createT(),
+    useLocale: () => 'en',
+    useMessages: () => ({}),
+    useFormatter: () => ({
+      number: (n: number) => String(n),
+      dateTime: (d: Date) => d.toISOString(),
+    }),
+    NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => children,
+  }
+})
+
+/** Text matcher for `key {"name":value,...}` output that checks a subset of the values. */
+const withValues =
+  (key: string, expected: Record<string, unknown>) => (content: string) => {
+    if (!content.startsWith(`${key} `)) return false
+    try {
+      const values = JSON.parse(content.slice(key.length + 1))
+      return Object.entries(expected).every(([k, v]) => values[k] === v)
+    } catch {
+      return false
+    }
+  }
+
 import { ProgressRings } from '../ProgressRings'
 import { PersonalBestBanner } from '../PersonalBestBanner'
 import { StreakShield } from '../StreakShield'
@@ -44,7 +81,7 @@ describe('ProgressRings', () => {
 
   it('shows empty state when no modules', () => {
     render(<ProgressRings modules={[]} />)
-    expect(screen.getByText('No modules started yet.')).toBeDefined()
+    expect(screen.getByText('progressRings.empty')).toBeDefined()
   })
 })
 
@@ -62,8 +99,10 @@ describe('PersonalBestBanner', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText('New Personal Best! 🏆')).toBeDefined()
-    expect(screen.getByText(/up 7 points/)).toBeDefined()
+    expect(screen.getByText('personalBestBanner.title')).toBeDefined()
+    expect(screen.getByText(
+        withValues('personalBestBanner.scoreImproved', { score: 92, improvement: 7 }),
+      )).toBeDefined()
   })
 
   it('renders first attempt message when no previous best', () => {
@@ -75,7 +114,7 @@ describe('PersonalBestBanner', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText(/first recorded score/)).toBeDefined()
+    expect(screen.getByText(withValues('personalBestBanner.scoreFirst', { score: 80 }))).toBeDefined()
   })
 
   it('calls onClose when dismissed', () => {
@@ -139,7 +178,11 @@ describe('ContentLockCard', () => {
       />,
     )
     expect(screen.getByText('Advanced Module')).toBeDefined()
-    expect(screen.getByText('200 / 500 XP')).toBeDefined()
+    expect(screen.getByText(
+        withValues('contentLockCard.xpProgress', { currentXP: 200, requiredXP: 500 }),
+      )).toBeDefined()
+    // 200 / 500 XP => 40% progress
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('40')
   })
 
   it('renders badge requirement', () => {
@@ -150,7 +193,7 @@ describe('ContentLockCard', () => {
         requiredBadge="Sharpshooter"
       />,
     )
-    expect(screen.getByText(/Requires badge: Sharpshooter/)).toBeDefined()
+    expect(screen.getByText(withValues('contentLockCard.requiresBadge', { badge: 'Sharpshooter' }))).toBeDefined()
   })
 
   it('renders module completion requirement', () => {
@@ -162,7 +205,14 @@ describe('ContentLockCard', () => {
         currentCompletion={50}
       />,
     )
-    expect(screen.getByText('Module: 50% / 75%')).toBeDefined()
+    expect(screen.getByText(
+        withValues('contentLockCard.moduleProgress', {
+          currentCompletion: 50,
+          requiredCompletion: 75,
+        }),
+      )).toBeDefined()
+    // 50% of a 75% requirement => 67% progress
+    expect(screen.getByRole('progressbar').getAttribute('aria-valuenow')).toBe('67')
   })
 })
 
@@ -180,9 +230,12 @@ describe('EasterEggToast', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText(/Secret Unlocked!/)).toBeDefined()
-    expect(screen.getByText(/You found the hidden treasure!/)).toBeDefined()
-    expect(screen.getByText(/\+30 XP/)).toBeDefined()
+    expect(screen.getByText(
+        withValues('easterEggToast.message', {
+          message: 'You found the hidden treasure!',
+          xpReward: 30,
+        }),
+      )).toBeDefined()
   })
 })
 
@@ -247,7 +300,7 @@ describe('BadgeCoinFlip', () => {
         onClose={vi.fn()}
       />,
     )
-    expect(screen.getByText('Badge Earned!')).toBeDefined()
+    expect(screen.getByText('badgeCoinFlip.title')).toBeDefined()
     expect(screen.getByText('Sharpshooter')).toBeDefined()
     expect(screen.getByText('Scored 90%+ three times')).toBeDefined()
   })
@@ -263,7 +316,7 @@ describe('BadgeCoinFlip', () => {
         onClose={onClose}
       />,
     )
-    fireEvent.click(screen.getByText('Awesome!'))
+    fireEvent.click(screen.getByText('badgeCoinFlip.closeButton'))
     expect(onClose).toHaveBeenCalled()
   })
 })

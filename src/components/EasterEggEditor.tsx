@@ -24,6 +24,7 @@ import Alert from '@mui/material/Alert'
 import Card from '@mui/material/Card'
 import CardContent from '@mui/material/CardContent'
 import SaveIcon from '@mui/icons-material/Save'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -70,19 +71,12 @@ export interface EasterEggEditorProps {
 // Constants
 // ============================================================================
 
-const TRIGGER_LABELS: Record<EasterEggTriggerType, string> = {
-  KEYWORD: 'Keyword Sequence',
-  SCHEDULE: 'Scheduled Window',
-  SECRET_LINK: 'Hidden Link on Unit',
-  ACHIEVEMENT: 'Achievement Condition',
-}
-
-const TRIGGER_HELP: Record<EasterEggTriggerType, string> = {
-  KEYWORD: 'Students type a secret key sequence (case-insensitive) to discover this egg.',
-  SCHEDULE: 'Automatically reveals to all students between start and end dates (ISO format: YYYY-MM-DDTHH:mm).',
-  SECRET_LINK: 'A hidden icon appears on the selected unit\'s workbook page.',
-  ACHIEVEMENT: 'Triggers when a student meets a metric condition (e.g., accuracy>=95).'
-}
+const TRIGGER_TYPES: EasterEggTriggerType[] = [
+  'KEYWORD',
+  'SCHEDULE',
+  'SECRET_LINK',
+  'ACHIEVEMENT',
+]
 
 // ============================================================================
 // Component
@@ -95,6 +89,19 @@ export function EasterEggEditor({
   onSubmit,
   submitting = false,
 }: EasterEggEditorProps) {
+  const t = useTranslations('components')
+  const triggerLabels: Record<EasterEggTriggerType, string> = {
+    KEYWORD: t('easterEggEditor.triggerLabelKeyword'),
+    SCHEDULE: t('easterEggEditor.triggerLabelSchedule'),
+    SECRET_LINK: t('easterEggEditor.triggerLabelSecretLink'),
+    ACHIEVEMENT: t('easterEggEditor.triggerLabelAchievement'),
+  }
+  const triggerHelp: Record<EasterEggTriggerType, string> = {
+    KEYWORD: t('easterEggEditor.triggerHelpKeyword'),
+    SCHEDULE: t('easterEggEditor.triggerHelpSchedule'),
+    SECRET_LINK: t('easterEggEditor.triggerHelpSecretLink'),
+    ACHIEVEMENT: t('easterEggEditor.triggerHelpAchievement'),
+  }
   const [triggerType, setTriggerType] = useState<EasterEggTriggerType>(
     initialData?.triggerType || 'KEYWORD'
   )
@@ -158,7 +165,7 @@ export function EasterEggEditor({
         <Box component="form" onSubmit={handleSubmit}>
           <Stack spacing={3}>
             <Typography variant="h6">
-              {initialData ? 'Edit Easter Egg' : 'Create Easter Egg'}
+              {initialData ? t('easterEggEditor.editTitle') : t('easterEggEditor.createTitle')}
             </Typography>
 
             {/* Active toggle */}
@@ -169,21 +176,21 @@ export function EasterEggEditor({
                   onChange={(e) => setActive(e.target.checked)}
                 />
               }
-              label="Active"
+              label={t('easterEggEditor.activeLabel')}
             />
 
             {/* Trigger type selector */}
             <FormControl fullWidth>
-              <InputLabel id="trigger-type-label">Trigger Type</InputLabel>
+              <InputLabel id="trigger-type-label">{t('easterEggEditor.triggerTypeLabel')}</InputLabel>
               <Select
                 labelId="trigger-type-label"
-                label="Trigger Type"
+                label={t('easterEggEditor.triggerTypeLabel')}
                 value={triggerType}
                 onChange={(e) => setTriggerType(e.target.value as EasterEggTriggerType)}
               >
-                {Object.entries(TRIGGER_LABELS).map(([key, label]) => (
-                  <MenuItem key={key} value={key}>
-                    {label}
+                {TRIGGER_TYPES.map((type) => (
+                  <MenuItem key={type} value={type}>
+                    {triggerLabels[type]}
                   </MenuItem>
                 ))}
               </Select>
@@ -191,32 +198,32 @@ export function EasterEggEditor({
 
             {/* Help text */}
             <Alert severity="info" icon={false}>
-              {TRIGGER_HELP[triggerType]}
+              {triggerHelp[triggerType]}
             </Alert>
 
             {/* Dynamic form fields based on trigger type */}
             {triggerType === 'KEYWORD' && (
               <TextField
-                label="Keyword Sequence"
+                label={t('easterEggEditor.keywordSequenceLabel')}
                 value={triggerValue}
                 onChange={(e) => setTriggerValue(e.target.value)}
-                placeholder="e.g., konami, secret123"
+                placeholder={t('easterEggEditor.keywordSequencePlaceholder')}
                 required
-                helperText="Case-insensitive key sequence students must type"
+                helperText={t('easterEggEditor.keywordSequenceHelper')}
               />
             )}
 
             {triggerType === 'SCHEDULE' && (
               <Stack spacing={2}>
                 <TextField
-                  label="Start Date"
+                  label={t('easterEggEditor.startDateLabel')}
                   type="datetime-local"
                   value={scheduleStart}
                   onChange={(e) => setScheduleStart(e.target.value)}
                   InputLabelProps={{ shrink: true }}
                 />
                 <TextField
-                  label="End Date"
+                  label={t('easterEggEditor.endDateLabel')}
                   type="datetime-local"
                   value={scheduleEnd}
                   onChange={(e) => setScheduleEnd(e.target.value)}
@@ -232,7 +239,7 @@ export function EasterEggEditor({
                 value={availableUnits.find((u) => u.id === triggerValue) || null}
                 onChange={(_, val) => setTriggerValue(val?.id || '')}
                 renderInput={(params) => (
-                  <TextField {...params} label="Target Unit" required />
+                  <TextField {...params} label={t('easterEggEditor.targetUnitLabel')} required />
                 )}
               />
             )}
@@ -240,21 +247,21 @@ export function EasterEggEditor({
             {triggerType === 'ACHIEVEMENT' && (
               <Stack direction="row" spacing={1} alignItems="center">
                 <FormControl sx={{ minWidth: 120 }}>
-                  <InputLabel>Metric</InputLabel>
+                  <InputLabel>{t('easterEggEditor.metricLabel')}</InputLabel>
                   <Select
-                    label="Metric"
+                    label={t('easterEggEditor.metricLabel')}
                     value={achievementMetric}
                     onChange={(e) => setAchievementMetric(e.target.value)}
                   >
-                    <MenuItem value="accuracy">Accuracy</MenuItem>
-                    <MenuItem value="streak">Streak</MenuItem>
-                    <MenuItem value="xp">XP</MenuItem>
+                    <MenuItem value="accuracy">{t('easterEggEditor.metricAccuracy')}</MenuItem>
+                    <MenuItem value="streak">{t('easterEggEditor.metricStreak')}</MenuItem>
+                    <MenuItem value="xp">{t('easterEggEditor.metricXp')}</MenuItem>
                   </Select>
                 </FormControl>
                 <FormControl sx={{ minWidth: 80 }}>
-                  <InputLabel>Op</InputLabel>
+                  <InputLabel>{t('easterEggEditor.operatorLabel')}</InputLabel>
                   <Select
-                    label="Op"
+                    label={t('easterEggEditor.operatorLabel')}
                     value={achievementComparator}
                     onChange={(e) => setAchievementComparator(e.target.value)}
                   >
@@ -264,7 +271,7 @@ export function EasterEggEditor({
                   </Select>
                 </FormControl>
                 <TextField
-                  label="Value"
+                  label={t('easterEggEditor.valueLabel')}
                   type="number"
                   value={achievementValue}
                   onChange={(e) => setAchievementValue(e.target.value)}
@@ -273,7 +280,7 @@ export function EasterEggEditor({
                     endAdornment: (
                       <InputAdornment position="end">
                         {achievementMetric === 'accuracy' ? '%' :
-                         achievementMetric === 'streak' ? 'days' : 'XP'}
+                         achievementMetric === 'streak' ? t('easterEggEditor.unitDays') : t('easterEggEditor.unitXp')}
                       </InputAdornment>
                     ),
                   }}
@@ -283,7 +290,7 @@ export function EasterEggEditor({
 
             {/* XP Reward */}
             <TextField
-              label="XP Reward"
+              label={t('easterEggEditor.xpRewardLabel')}
               type="number"
               value={xpReward}
               onChange={(e) => setXpReward(Math.max(0, parseInt(e.target.value) || 0))}
@@ -302,21 +309,21 @@ export function EasterEggEditor({
               renderInput={(params) => (
                 <TextField
                   {...params}
-                  label="Associated Badge (optional)"
-                  helperText="Award this badge when the egg is discovered"
+                  label={t('easterEggEditor.associatedBadgeLabel')}
+                  helperText={t('easterEggEditor.associatedBadgeHelper')}
                 />
               )}
             />
 
             {/* Reveal message */}
             <TextField
-              label="Reveal Message"
+              label={t('easterEggEditor.revealMessageLabel')}
               value={revealMessage}
               onChange={(e) => setRevealMessage(e.target.value)}
               multiline
               rows={3}
               required
-              placeholder="Message shown to the student when they discover the egg"
+              placeholder={t('easterEggEditor.revealMessagePlaceholder')}
             />
 
             {/* Submit */}
@@ -326,7 +333,7 @@ export function EasterEggEditor({
               startIcon={<SaveIcon />}
               disabled={!isValid || submitting}
             >
-              {initialData ? 'Save Easter Egg' : 'Create Easter Egg'}
+              {initialData ? t('easterEggEditor.saveButton') : t('easterEggEditor.createButton')}
             </Button>
           </Stack>
         </Box>

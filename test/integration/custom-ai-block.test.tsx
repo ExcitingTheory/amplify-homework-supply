@@ -12,11 +12,14 @@ import { render, screen } from "@testing-library/react";
 // Mock next-intl
 vi.mock("next-intl", () => ({
   useTranslations: () => {
+    const translations: Record<string, string> = {
+      "customAIEditor.title": "AI-Graded Exercise",
+    };
     const t = (key: string, params?: Record<string, string>) => {
       if (params) {
         return `${key}: ${JSON.stringify(params)}`;
       }
-      return key;
+      return translations[key] ?? key;
     };
     return t;
   },
@@ -292,7 +295,14 @@ describe("CustomAIEditor component", () => {
       />,
     );
 
-    expect(screen.getByText(/prompt injection/i)).toBeTruthy();
+    expect(screen.getByText("customAIEditor.securityNotice")).toBeTruthy();
+    // The rendered key must resolve to English copy that still warns about prompt injection
+    const { default: editorBlocksMessages } = await import(
+      "../../public/locales/en/editor.blocks.json"
+    );
+    expect(editorBlocksMessages.customAIEditor.securityNotice).toMatch(
+      /prompt injection/i,
+    );
   });
 });
 

@@ -1,6 +1,18 @@
 {
   "audioWaveformPlayer": {
-    "noAudioSource": "No audio source provided"
+    "elapsedTime": "Elapsed time",
+    "inputVolume": "Input volume",
+    "muteInput": "Mute input",
+    "muteOutput": "Mute output",
+    "noAudioSource": "No audio source provided",
+    "outputVolume": "Output volume",
+    "pause": "Pause",
+    "play": "Play",
+    "remainingTime": "Remaining time",
+    "startRecording": "Start recording",
+    "stopRecording": "Stop recording",
+    "unmuteInput": "Unmute input",
+    "unmuteOutput": "Unmute output"
   },
   "autoEmbedPlugin": {
     "dismiss": "Dismiss",
@@ -45,9 +57,14 @@
     "applyMask": "Apply Mask & Regenerate",
     "brushSize": "Brush Size: {size}",
     "cancel": "Cancel",
+    "clearMask": "Clear mask",
     "instructions": "<strong>Instructions:</strong> Paint over the areas you want to regenerate. Use the eraser to remove parts of the mask. Hold Shift and drag to pan. Use zoom buttons to get closer detail.",
+    "redo": "Redo",
     "save": "Save",
-    "zoomInfo": "Zoom: {level}% | Hold Shift to pan"
+    "undo": "Undo",
+    "zoomIn": "Zoom in",
+    "zoomInfo": "Zoom: {level}% | Hold Shift to pan",
+    "zoomOut": "Zoom out"
   },
   "imageResizer": {
     "addCaption": "Add Caption"
@@ -76,17 +93,26 @@
   },
   "metadataEditor": {
     "aiGenerationInfo": "AI Generation Information",
+    "autoSaveChip": "Auto-save",
+    "autoSaved": "Auto-saved",
     "createdLabel": "Created:",
+    "descriptionLabel": "Description",
+    "descriptionPlaceholder": "Add a description for this file...",
+    "errorSaving": "Error saving: {message}",
     "fileInfo": "File Information",
     "fileMetadataHeading": "File Metadata",
+    "fileNameLabel": "File Name",
+    "fileNamePlaceholder": "Enter file name...",
     "modelLabel": "Model",
     "notSet": "Not set",
     "pathLabel": "Path:",
     "promptLabel": "Prompt",
     "protectionLabel": "Protection:",
+    "savedSuccessfully": "Saved successfully",
     "sizeLabel": "Size:",
     "typeLabel": "Type:",
     "unknown": "Unknown",
+    "unsavedChip": "Unsaved",
     "updatedLabel": "Updated:",
     "variantLabel": "Variant"
   },
@@ -109,9 +135,18 @@
     "type_here": "Type here..."
   },
   "playlistEditor": {
+    "addFiles": "Add files",
+    "addFilesToPlaylist": "Add files to playlist",
+    "columnHeaders": {
+      "size": "Size",
+      "title": "Title"
+    },
+    "dragMediaHere": "Drag audio or video here",
+    "dropToAddFiles": "Drop to add files",
     "emptyState": "No items in playlist",
     "menuAttribute": "Menu",
-    "noFilesMessage": "No files have been added yet. Use the input above to add files to the playlist."
+    "noFilesMessage": "No files have been added yet. Use the input above to add files to the playlist.",
+    "removeFromPlaylist": "Remove from Playlist"
   },
   "questionBlock": {
     "status": "Status",
@@ -185,6 +220,7 @@
   "sketchPad": {
     "cancelSubmission": "Cancel Submission",
     "hoverToStartDrawing": "Hover to start drawing",
+    "sketchAlt": "sketch",
     "submittingInSeconds": "Submitting drawing for grading in {countdown} seconds..."
   },
   "staticWaveform": {
@@ -256,6 +292,7 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio not available",
     "loadingAudio": "Loading audio...",
+    "selectVocabularyWord": "Select a vocabulary word…",
     "wordNotFound": "Word not found: {wordID}"
   },
   "wordEmbedding": {
@@ -264,5 +301,61 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "Embeddings will be generated",
     "successConfirmation": "Embeddings generated successfully"
+  },
+  "workbookSSRSkeleton": {
+    "loadingContent": "Loading content..."
+  },
+  "imagePromptMedia": {
+    "help": "Help",
+    "noImage": "No image",
+    "playlist": "Playlist"
+  },
+  "mediaPromptBand": {
+    "timecodes": "Media timecodes"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "Correct",
+    "defaultAccuracyDescription": "Percentage of required answers selected correctly.",
+    "defaultProgressDescription": "Percentage of required answers attempted.",
+    "meterDescription": "{label}. {description}",
+    "percentValue": "{percent}%",
+    "progressLabel": "Progress",
+    "valueDescription": "{label}: {percent}%. {description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "Movie"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "Take {number} · {duration} · {time}",
+    "deleteTake": "Delete take",
+    "recordedTakes": "Recorded takes",
+    "takeLabel": "Take {number}"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "Cancel",
+    "cancelSubmission": "Cancel submission",
+    "submit": "Submit"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "Add column header",
+    "addRowHeader": "Add row header",
+    "deleteColumn": "Delete column",
+    "deleteRow": "Delete row",
+    "deleteTable": "Delete table",
+    "insertColumnsLeft": "Insert {count, plural, one {column} other {# columns}} left",
+    "insertColumnsRight": "Insert {count, plural, one {column} other {# columns}} right",
+    "insertRowsAbove": "Insert {count, plural, one {row} other {# rows}} above",
+    "insertRowsBelow": "Insert {count, plural, one {row} other {# rows}} below",
+    "removeColumnHeader": "Remove column header",
+    "removeRowHeader": "Remove row header"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "Edit coat of arms"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "Hexadecimal Color"
+  },
+  "youTubePlugin": {
+    "videoTitle": "YouTube video"
   }
 }

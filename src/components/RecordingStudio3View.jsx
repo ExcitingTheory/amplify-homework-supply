@@ -154,7 +154,9 @@ export default function RecordingStudio3View({
         </Stack>
         <Box
           role="status"
+          // eslint-disable-next-line i18next/no-literal-string -- ARIA live-region politeness value
           aria-live="polite"
+          // eslint-disable-next-line i18next/no-literal-string -- ARIA boolean value
           aria-atomic="true"
           sx={{ minHeight: statusMessage ? 24 : 0, mt: statusMessage ? 1 : 0 }}
         >

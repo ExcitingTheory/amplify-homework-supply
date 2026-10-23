@@ -64,7 +64,7 @@ export function RosterEnrollDialog({ open, onClose, sectionId, onEnrolled }) {
     try {
       const res = await addStudentsToSection(sectionId, parsedEmails);
       if (!res.success) {
-        setError(res.error || "Failed to enroll students");
+        setError(res.error || t("sectionDetail.enrollFailed"));
         return;
       }
       setResult(res);
@@ -72,7 +72,7 @@ export function RosterEnrollDialog({ open, onClose, sectionId, onEnrolled }) {
         onEnrolled?.();
       }
     } catch (err) {
-      setError(err?.message || "Failed to enroll students");
+      setError(err?.message || t("sectionDetail.enrollFailed"));
     } finally {
       setSubmitting(false);
     }
@@ -97,7 +97,7 @@ export function RosterEnrollDialog({ open, onClose, sectionId, onEnrolled }) {
           minRows={4}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          placeholder="alice@example.com, bob@example.com"
+          placeholder={t("sectionDetail.enrollEmailsPlaceholder")}
           disabled={submitting}
           data-testid="enroll-emails-input"
         />

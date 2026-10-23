@@ -170,6 +170,7 @@ import i18n from "./i18next";
 
 // Import setLocale from the next-intl mock to sync language switching
 import { setLocale } from "./__mocks__/next-intl";
+import { IntlProvider } from "use-intl";
 
 /**
  * Synchronizes MUI's internal color scheme mode with the Storybook toolbar selection.
@@ -1049,7 +1050,11 @@ const preview = {
         }
       }, [language]);
 
-      return <Story />;
+      return (
+        <IntlProvider locale={language}>
+          <Story />
+        </IntlProvider>
+      );
     },
     (Story, context) => {
       // Try to get unitId from story args or parameters

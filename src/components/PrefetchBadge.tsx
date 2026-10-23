@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Chip, IconButton, Skeleton, Tooltip } from "@mui/material";
+import { useTranslations } from "next-intl";
 import {
   CloudDone,
   CloudDownload,
@@ -51,6 +52,7 @@ export default function PrefetchBadge({
   assignment,
   iconOnly = false,
 }: PrefetchBadgeProps) {
+  const t = useTranslations("components");
   const [status, setStatus] = useState<
     "unknown" | "none" | "downloading" | "complete" | "error"
   >("unknown");
@@ -112,8 +114,8 @@ export default function PrefetchBadge({
   if (iconOnly) {
     if (status === "complete") {
       return (
-        <Tooltip title="Available offline" arrow>
-          <span aria-label="Available offline" role="img">
+        <Tooltip title={t("prefetchBadge.availableOffline")} arrow>
+          <span aria-label={t("prefetchBadge.availableOffline")} role="img">
             <CloudDone color="success" fontSize="small" />
           </span>
         </Tooltip>
@@ -122,9 +124,12 @@ export default function PrefetchBadge({
 
     if (status === "downloading") {
       return (
-        <Tooltip title={`Downloading for offline use... ${progress}%`} arrow>
+        <Tooltip
+          title={t("prefetchBadge.downloadingTooltip", { progress })}
+          arrow
+        >
           <span
-            aria-label={`Downloading for offline use: ${progress}%`}
+            aria-label={t("prefetchBadge.downloadingAriaLabel", { progress })}
             role="status"
           >
             <Skeleton variant="circular" width={18} height={18} />
@@ -135,10 +140,10 @@ export default function PrefetchBadge({
 
     if (status === "error") {
       return (
-        <Tooltip title="Offline download failed — tap to retry" arrow>
+        <Tooltip title={t("prefetchBadge.downloadFailedRetry")} arrow>
           <IconButton
             size="small"
-            aria-label="Retry offline download"
+            aria-label={t("prefetchBadge.retryDownload")}
             onClick={handlePrefetch}
             sx={{ color: "error.main" }}
           >
@@ -149,10 +154,10 @@ export default function PrefetchBadge({
     }
 
     return (
-      <Tooltip title="Download for offline use" arrow>
+      <Tooltip title={t("prefetchBadge.downloadForOffline")} arrow>
         <IconButton
           size="small"
-          aria-label="Download for offline use"
+          aria-label={t("prefetchBadge.downloadForOffline")}
           onClick={handlePrefetch}
         >
           <CloudDownload fontSize="small" />
@@ -163,10 +168,10 @@ export default function PrefetchBadge({
 
   if (status === "complete") {
     return (
-      <Tooltip title="Available offline">
+      <Tooltip title={t("prefetchBadge.availableOffline")}>
         <Chip
           icon={<CloudDone />}
-          label="Offline ready"
+          label={t("prefetchBadge.offlineReady")}
           size="small"
           color="success"
           variant="outlined"
@@ -177,10 +182,10 @@ export default function PrefetchBadge({
 
   if (status === "downloading") {
     return (
-      <Tooltip title={`Downloading for offline use... ${progress}%`}>
+      <Tooltip title={t("prefetchBadge.downloadingTooltip", { progress })}>
         <Chip
           icon={<Skeleton variant="circular" width={14} height={14} />}
-          label={`${progress}%`}
+          label={t("prefetchBadge.progressPercent", { progress })}
           size="small"
           variant="outlined"
         />
@@ -190,10 +195,10 @@ export default function PrefetchBadge({
 
   if (status === "error") {
     return (
-      <Tooltip title="Offline download failed — tap to retry">
+      <Tooltip title={t("prefetchBadge.downloadFailedRetry")}>
         <Chip
           icon={<ErrorOutline />}
-          label="Retry"
+          label={t("prefetchBadge.retry")}
           size="small"
           color="error"
           variant="outlined"
@@ -206,10 +211,10 @@ export default function PrefetchBadge({
 
   // status === 'none'
   return (
-    <Tooltip title="Download for offline use">
+    <Tooltip title={t("prefetchBadge.downloadForOffline")}>
       <Chip
         icon={<CloudDownload />}
-        label="Save offline"
+        label={t("prefetchBadge.saveOffline")}
         size="small"
         variant="outlined"
         onClick={handlePrefetch}

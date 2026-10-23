@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { alpha, useTheme, type Theme } from "@mui/material/styles";
 
@@ -53,6 +54,7 @@ function computeStats(values: number[]) {
  * grade cutoffs. Exact min/avg/median/max still called out as text alongside.
  */
 export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
+  const t = useTranslations("components");
   const theme = useTheme();
   const ink = theme.palette.primary.main;
   const stats = computeStats(values);
@@ -66,7 +68,14 @@ export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Tooltip
-        title={`${label}: min ${Math.round(min)}% · avg ${Math.round(avg)}% · median ${Math.round(median)}% · max ${Math.round(max)}% · ${values.length} student${values.length === 1 ? "" : "s"}`}
+        title={t("gradeRangeBar.summaryTooltip", {
+          label,
+          min: Math.round(min),
+          avg: Math.round(avg),
+          median: Math.round(median),
+          max: Math.round(max),
+          count: values.length,
+        })}
       >
         <Box
           component="span"
@@ -101,7 +110,12 @@ export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
               }}
             />
           ))}
-          <Tooltip title={`Range: ${Math.round(min)}%–${Math.round(max)}%`}>
+          <Tooltip
+            title={t("gradeRangeBar.rangeTooltip", {
+              min: Math.round(min),
+              max: Math.round(max),
+            })}
+          >
             <Box
               sx={{
                 position: "absolute",
@@ -129,7 +143,9 @@ export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
             </Tooltip>
           ))}
         </Box>
-        <Tooltip title={`Avg: ${Math.round(avg)}%`}>
+        <Tooltip
+          title={t("gradeRangeBar.avgTooltip", { avg: Math.round(avg) })}
+        >
           <Box
             sx={{
               position: "absolute",
@@ -143,7 +159,11 @@ export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
             }}
           />
         </Tooltip>
-        <Tooltip title={`Median: ${Math.round(median)}%`}>
+        <Tooltip
+          title={t("gradeRangeBar.medianTooltip", {
+            median: Math.round(median),
+          })}
+        >
           <Box
             sx={{
               position: "absolute",
@@ -167,18 +187,21 @@ export function GradeRangeBar({ icon, values, label }: GradeRangeBarProps) {
           color: "text.secondary",
         }}
       >
-        {Math.round(min)}–{Math.round(max)}%{" "}
+        {t("gradeRangeBar.rangeLabel", {
+          min: Math.round(min),
+          max: Math.round(max),
+        })}{" "}
         <Box
           component="span"
           sx={{ color: theme.palette.warning.main, fontWeight: 700 }}
         >
-          avg {Math.round(avg)}
+          {t("gradeRangeBar.avgLabel", { avg: Math.round(avg) })}
         </Box>{" "}
         <Box
           component="span"
           sx={{ color: theme.palette.info.main, fontWeight: 700 }}
         >
-          med {Math.round(median)}
+          {t("gradeRangeBar.medianLabel", { median: Math.round(median) })}
         </Box>
       </Typography>
     </Box>

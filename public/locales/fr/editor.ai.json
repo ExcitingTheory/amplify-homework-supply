@@ -9,7 +9,14 @@
     "lostWarning": "Votre {type} généré sera perdu si vous annulez maintenant.",
     "preview": "Aperçu",
     "saveClose": "Enregistrer et fermer",
-    "takeMoments": "Cela peut prendre quelques instants"
+    "takeMoments": "Cela peut prendre quelques instants",
+    "defaultInputPlaceholder": "Saisissez une description...",
+    "defaultTitle": "Générer du contenu",
+    "editPrompt": "Modifier la consigne",
+    "enterDescriptionError": "Veuillez saisir une description",
+    "generateFailed": "Échec de la génération du contenu",
+    "regenerate": "Régénérer",
+    "regenerateFailed": "Échec de la régénération du contenu"
   },
   "promptMethodSelector": {
     "inputButton": "Entrée",
@@ -20,7 +27,53 @@
       "text": "Texte",
       "video": "Vidéo"
     },
-    "outputButton": "Sortie"
+    "outputButton": "Sortie",
+    "configure": "Configurer",
+    "displaySettings": "Paramètres d'affichage",
+    "displaySettingsDescription": "Gérez le texte et l'audio du vocabulaire de support.",
+    "enableAudioPlayback": "Activer la lecture audio",
+    "enableAudioPlaybackDescription": "Autoriser les commandes audio pour les mots et les définitions.",
+    "inputDescription": "Mode de soumission d'une réponse par l'apprenant.",
+    "invalidConfig": "Sélectionnez au moins une méthode de saisie et une méthode de sortie",
+    "meaningModes": {
+      "easy": {
+        "description": "Associez les mots à leur signification.",
+        "label": "Facile"
+      },
+      "hard": {
+        "description": "Associez sans les indices de sens guidés.",
+        "label": "Difficile"
+      },
+      "learn": {
+        "description": "Étudiez grâce à des associations guidées et à des retours personnalisés.",
+        "label": "Apprendre"
+      }
+    },
+    "methodDescriptions": {
+      "audio": "Utilisez un audio enregistré ou généré.",
+      "image": "Afficher une image comme invite ou comme réponse.",
+      "text": "Afficher l'invite ou la réponse sous forme de texte.",
+      "video": "Utilisez une vidéo comme consigne ou comme réponse.",
+      "writing": "Autoriser une réponse manuscrite sur une surface de dessin."
+    },
+    "outputDescription": "La façon dont la question est présentée à l'apprenant.",
+    "practiceModes": "Modes d'entraînement",
+    "practiceModesDescription": "Choisissez les activités d'association que les apprenants doivent réaliser.",
+    "promptDescription": "Choisissez si les apprenants voient des mots ou des définitions.",
+    "promptFor": {
+      "definition": {
+        "description": "Afficher la définition comme cible.",
+        "label": "Demander une définition"
+      },
+      "word": {
+        "description": "Afficher le mot de vocabulaire comme cible.",
+        "label": "Prompt pour un mot"
+      }
+    },
+    "promptForAriaLabel": "Demander un mot ou une définition",
+    "promptHeading": "Instruction",
+    "showPronunciations": "Afficher les prononciations",
+    "showPronunciationsDescription": "Afficher la prononciation à côté du vocabulaire."
   },
   "enhancedGenerators": {
     "audioPromptPlaceholder": "Entrez le texte à convertir en parole...",
@@ -29,7 +82,9 @@
     "generateAudio": "Générer l'audio",
     "generateImage": "Générer une image",
     "imagePromptPlaceholder": "Décrivez l'image que vous souhaitez générer...",
-    "openRecordingStudio": "Ouvrir dans le studio d'enregistrement"
+    "openRecordingStudio": "Ouvrir dans le studio d'enregistrement",
+    "generatedAlt": "Généré",
+    "regeneratedAlt": "Régénéré"
   },
   "blockSuggestionMenu": {
     "aiTitle": "Suggestions alimentées par l'IA",
@@ -45,6 +100,20 @@
     "ownerPlaceholder": "ID du propriétaire"
   },
   "aiContentSuggestion": {
-    "tabToAccept": "Appuyer sur Tab pour accepter"
+    "tabToAccept": "Appuyer sur Tab pour accepter",
+    "generating": "Génération en cours...",
+    "tabToAcceptHint": "(Appuyez sur Tab pour accepter)"
+  },
+  "blockSuggestionPlugin": {
+    "addCustomPractice": "Ajouter un exercice personnalisé",
+    "addExplanation": "Ajouter une explication",
+    "addHeading": "Ajouter un titre",
+    "addQuiz": "Ajouter un quiz",
+    "addSummary": "Ajouter un résumé",
+    "addVocabularyPractice": "Ajouter un exercice de vocabulaire",
+    "moreSuggestions": "↑↓ {count} de plus",
+    "newSection": "Nouvelle section",
+    "questionCount": "{count, plural, one {# question} other {# questions}}",
+    "tabKey": "Tab"
   }
 }

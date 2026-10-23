@@ -3,7 +3,7 @@
  *
  * Routes to appropriate function based on GraphQL operation.
  * This handler is registered for multiple mutations/queries:
- * - chat, generateAudio, generateImage (mutations)
+ * - chat, generateAudio, generateAudioFile, generateImage, generateImageFile (mutations)
  * - verifyDefinition, verifyWord, verifyShortAnswer (queries)
  * - transcribe, verifyAudio, verifyAudioUrl, transcribeUrl (queries)
  * - processImage, processImageUrl, verifyImage, verifyImageUrl (queries)
@@ -13,6 +13,7 @@
 
 import type { Handler } from "aws-lambda";
 import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { type Schema } from "../../data/resource";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
@@ -51,6 +52,9 @@ Amplify.configure(
 );
 
 const lambdaClient = new LambdaClient();
+const s3Client = new S3Client({
+  region: process.env.AWS_REGION || "us-east-1",
+});
 let openaiInstance: any = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
 
@@ -62,7 +66,8 @@ const GET_FILE = /* GraphQL */ `
       _version
       _lastChangedAt
       _deleted
-    }
+      path
+  }
   }
 `;
 
@@ -100,6 +105,30 @@ async function getOpenAI(): Promise<any> {
     openaiInstance = new OpenAI({ apiKey });
   }
   return openaiInstance;
+}
+
+async function uploadGeneratedMedia(
+  path: string,
+  body: Buffer,
+  contentType: "audio/mpeg" | "image/png",
+): Promise<void> {
+  const bucket = process.env.STORAGE_BUCKET;
+  if (!bucket) throw new Error("STORAGE_BUCKET environment variable not set");
+  if (body.byteLength === 0) throw new Error("Generated media is empty");
+  const allowedPrefix =
+    contentType === "audio/mpeg" ? "public/audio/" : "public/images/";
+  if (!path.startsWith(allowedPrefix)) {
+    throw new Error(`Generated media path must start with ${allowedPrefix}`);
+  }
+
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: bucket,
+      Key: path,
+      Body: body,
+      ContentType: contentType,
+    }),
+  );
 }
 
 function getDataClient() {
@@ -300,6 +329,7 @@ async function handleGenerateAudioFile(
           name: fileName,
           mimeType: "audio/mpeg",
           path: s3Path,
+          description: "Generated audio - pending",
           owner: userId,
           identityId: identityId,
         },
@@ -334,6 +364,7 @@ async function handleGenerateAudioFile(
       id: fileId,
       filename: fileName,
       fileType: "audio/mpeg",
+      mimeType: "audio/mpeg",
       path: s3Path,
       status: "pending",
       contentType: "audio/mpeg",
@@ -346,10 +377,10 @@ async function handleGenerateAudioFile(
 
 async function handleGenerateAudioFileAsync(args: any): Promise<void> {
   const { fileId, phrase, voice = "alloy", model = "tts-1" } = args;
-  const openai = await getOpenAI();
   const client = getDataClient();
 
   try {
+    const openai = await getOpenAI();
     // Generate audio
     const response = await openai.audio.speech.create({
       model,
@@ -358,25 +389,38 @@ async function handleGenerateAudioFileAsync(args: any): Promise<void> {
     });
 
     const buffer = await response.arrayBuffer();
-    const base64Audio = Buffer.from(buffer).toString("base64");
+    const audio = Buffer.from(buffer);
 
-    // Fetch current file version for optimistic locking
-    const { data: fileData } = (await client.graphql({
+    const { data: fileData, errors: getErrors } = (await client.graphql({
       query: GET_FILE,
       variables: { id: fileId },
     })) as any;
+    const file = fileData?.getFile;
+    if (
+      getErrors?.length ||
+      !file?.path ||
+      typeof file._version !== "number"
+    ) {
+      throw new Error(`Unable to find a versioned audio File ${fileId}`);
+    }
 
-    // Update File with completed data
-    await client.graphql({
+    await uploadGeneratedMedia(file.path, audio, "audio/mpeg");
+
+    const { data: updateData, errors: updateErrors } = (await client.graphql({
       query: UPDATE_FILE,
       variables: {
         input: {
           id: fileId,
           description: "Generated audio - completed",
-          _version: fileData?.getFile?._version ?? 1,
+          _version: file._version,
         },
       },
-    });
+    })) as any;
+    if (updateErrors?.length || !updateData?.updateFile) {
+      throw new Error(
+        `Unable to mark generated audio complete: ${JSON.stringify(updateErrors)}`,
+      );
+    }
 
     console.log(`[Audio Generation Complete] ${fileId}`);
   } catch (error) {
@@ -446,6 +490,7 @@ async function handleGenerateImageFile(
           name: fileName,
           mimeType: "image/png",
           path: s3Path,
+          description: "Generated image - pending",
           owner: userId,
           identityId: identityId,
         },
@@ -479,6 +524,7 @@ async function handleGenerateImageFile(
       id: fileId,
       filename: fileName,
       fileType: "image/png",
+      mimeType: "image/png",
       path: s3Path,
       status: "pending",
     };
@@ -490,10 +536,10 @@ async function handleGenerateImageFile(
 
 async function handleGenerateImageFileAsync(args: any): Promise<void> {
   const { fileId, phrase, model = "dall-e-3" } = args;
-  const openai = await getOpenAI();
   const client = getDataClient();
 
   try {
+    const openai = await getOpenAI();
     // Generate image
     const response = await openai.images.generate({
       model,
@@ -503,25 +549,40 @@ async function handleGenerateImageFileAsync(args: any): Promise<void> {
       response_format: "b64_json",
     });
 
-    const base64 = response.data[0]?.b64_json || "";
+    const base64 = response.data[0]?.b64_json;
+    if (!base64) throw new Error("Image generation returned no image data");
+    const image = Buffer.from(base64, "base64");
 
-    // Fetch current file version for optimistic locking
-    const { data: fileData } = (await client.graphql({
+    const { data: fileData, errors: getErrors } = (await client.graphql({
       query: GET_FILE,
       variables: { id: fileId },
     })) as any;
+    const file = fileData?.getFile;
+    if (
+      getErrors?.length ||
+      !file?.path ||
+      typeof file._version !== "number"
+    ) {
+      throw new Error(`Unable to find a versioned image File ${fileId}`);
+    }
 
-    // Update File with completed data
-    await client.graphql({
+    await uploadGeneratedMedia(file.path, image, "image/png");
+
+    const { data: updateData, errors: updateErrors } = (await client.graphql({
       query: UPDATE_FILE,
       variables: {
         input: {
           id: fileId,
           description: "Generated image - completed",
-          _version: fileData?.getFile?._version ?? 1,
+          _version: file._version,
         },
       },
-    });
+    })) as any;
+    if (updateErrors?.length || !updateData?.updateFile) {
+      throw new Error(
+        `Unable to mark generated image complete: ${JSON.stringify(updateErrors)}`,
+      );
+    }
 
     console.log(`[Image Generation Complete] ${fileId}`);
   } catch (error) {
@@ -725,6 +786,7 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
     audioUrl,
     model = "whisper-1",
     chatModel = "gpt-4o",
+    prompt,
   } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
@@ -739,6 +801,7 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
     const transcriptionResponse = await openai.audio.transcriptions.create({
       file,
       model,
+      ...(prompt ? { prompt } : {}),
     });
 
     const transcript = transcriptionResponse.text;

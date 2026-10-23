@@ -52,12 +52,12 @@ export function PeerReviewFeedbackPrompt({
       >
         {submitted ? (
           <Typography variant="body2" fontWeight={600}>
-            Thanks for your feedback!
+            {t('peerReview.thanksForFeedback')}
           </Typography>
         ) : (
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Typography variant="body2" fontWeight={600}>
-              Did peer review help?
+              {t('peerReview.didItHelp')}
             </Typography>
             <IconButton
               size="small"

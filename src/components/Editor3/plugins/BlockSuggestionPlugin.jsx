@@ -35,6 +35,7 @@ import { $isListNode } from "@lexical/list";
 import { $createTextNode, $createParagraphNode } from "lexical";
 import { useCallback, useEffect, useState, useRef, useContext } from "react";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 import BlockSuggestionMenu from "../components/BlockSuggestionMenu";
 import { $isQuizNode, INSERT_QUIZ_COMMAND } from "./QuizPlugin";
@@ -67,7 +68,7 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.HEADING]: [
     {
       type: "paragraph",
-      label: "Add Explanation",
+      labelKey: "blockSuggestionPlugin.addExplanation",
       icon: "📝",
       category: BLOCK_CATEGORIES.EXPLANATION,
     },
@@ -75,19 +76,19 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.EXPLANATION]: [
     {
       type: "answer",
-      label: "Add Vocabulary Practice",
+      labelKey: "blockSuggestionPlugin.addVocabularyPractice",
       icon: "✍️",
       category: BLOCK_CATEGORIES.PRACTICE,
     },
     {
       type: "custom-answer",
-      label: "Add Custom Practice",
+      labelKey: "blockSuggestionPlugin.addCustomPractice",
       icon: "📋",
       category: BLOCK_CATEGORIES.PRACTICE,
     },
     {
       type: "quiz",
-      label: "Add Quiz",
+      labelKey: "blockSuggestionPlugin.addQuiz",
       icon: "📊",
       category: BLOCK_CATEGORIES.QUIZ,
     },
@@ -95,19 +96,19 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.EXAMPLE]: [
     {
       type: "answer",
-      label: "Add Vocabulary Practice",
+      labelKey: "blockSuggestionPlugin.addVocabularyPractice",
       icon: "✍️",
       category: BLOCK_CATEGORIES.PRACTICE,
     },
     {
       type: "custom-answer",
-      label: "Add Custom Practice",
+      labelKey: "blockSuggestionPlugin.addCustomPractice",
       icon: "📋",
       category: BLOCK_CATEGORIES.PRACTICE,
     },
     {
       type: "quiz",
-      label: "Add Quiz",
+      labelKey: "blockSuggestionPlugin.addQuiz",
       icon: "📊",
       category: BLOCK_CATEGORIES.QUIZ,
     },
@@ -115,19 +116,19 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.PRACTICE]: [
     {
       type: "quiz",
-      label: "Add Quiz",
+      labelKey: "blockSuggestionPlugin.addQuiz",
       icon: "📊",
       category: BLOCK_CATEGORIES.QUIZ,
     },
     {
       type: "paragraph",
-      label: "Add Summary",
+      labelKey: "blockSuggestionPlugin.addSummary",
       icon: "📄",
       category: BLOCK_CATEGORIES.SUMMARY,
     },
     {
       type: "heading",
-      label: "New Section",
+      labelKey: "blockSuggestionPlugin.newSection",
       icon: "📑",
       category: BLOCK_CATEGORIES.HEADING,
     },
@@ -135,13 +136,13 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.QUIZ]: [
     {
       type: "paragraph",
-      label: "Add Summary",
+      labelKey: "blockSuggestionPlugin.addSummary",
       icon: "📄",
       category: BLOCK_CATEGORIES.SUMMARY,
     },
     {
       type: "heading",
-      label: "New Section",
+      labelKey: "blockSuggestionPlugin.newSection",
       icon: "📑",
       category: BLOCK_CATEGORIES.HEADING,
     },
@@ -149,7 +150,7 @@ const PEDAGOGICAL_PATTERNS = {
   [BLOCK_CATEGORIES.SUMMARY]: [
     {
       type: "heading",
-      label: "New Section",
+      labelKey: "blockSuggestionPlugin.newSection",
       icon: "📑",
       category: BLOCK_CATEGORIES.HEADING,
     },
@@ -157,13 +158,13 @@ const PEDAGOGICAL_PATTERNS = {
   default: [
     {
       type: "heading",
-      label: "Add Heading",
+      labelKey: "blockSuggestionPlugin.addHeading",
       icon: "📑",
       category: BLOCK_CATEGORIES.HEADING,
     },
     {
       type: "paragraph",
-      label: "Add Explanation",
+      labelKey: "blockSuggestionPlugin.addExplanation",
       icon: "📝",
       category: BLOCK_CATEGORIES.EXPLANATION,
     },
@@ -221,18 +222,22 @@ function categorizeNode(node) {
 /**
  * Gets block suggestions based on the previous block's category
  */
-function getSuggestions(previousCategory) {
-  if (!previousCategory || !PEDAGOGICAL_PATTERNS[previousCategory]) {
-    return PEDAGOGICAL_PATTERNS.default;
-  }
+function getSuggestions(previousCategory, t) {
+  const patterns =
+    previousCategory && PEDAGOGICAL_PATTERNS[previousCategory]
+      ? PEDAGOGICAL_PATTERNS[previousCategory]
+      : PEDAGOGICAL_PATTERNS.default;
 
-  return PEDAGOGICAL_PATTERNS[previousCategory];
+  return patterns.map((pattern) => ({
+    ...pattern,
+    label: t(pattern.labelKey),
+  }));
 }
 
 /**
  * Analyzes editor content to determine what block should come next
  */
-function $analyzePreviousBlocks() {
+function $analyzePreviousBlocks(t) {
   const selection = $getSelection();
 
   if (!$isRangeSelection(selection)) {
@@ -257,11 +262,11 @@ function $analyzePreviousBlocks() {
 
   if (!previousBlock) {
     // At the start of the document
-    return { category: null, suggestions: PEDAGOGICAL_PATTERNS.default };
+    return { category: null, suggestions: getSuggestions(null, t) };
   }
 
   const category = categorizeNode(previousBlock);
-  const suggestions = getSuggestions(category);
+  const suggestions = getSuggestions(category, t);
 
   return { category, suggestions };
 }
@@ -272,6 +277,7 @@ function $analyzePreviousBlocks() {
  * @param {boolean} props.useAI - Enable AI-powered suggestions with reasoning
  */
 export default function BlockSuggestionPlugin({ useAI = false }) {
+  const t = useTranslations("editor.ai");
   const [editor] = useLexicalComposerContext();
   // Use suggestion context instead of local state
   const {
@@ -483,7 +489,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
         return null;
       }
     },
-    [editor, useAI, setIsLoadingAI, dictionary, questionBank],
+    [editor, useAI, setIsLoadingAI, dictionary, questionBank, courseOutline],
   );
 
   // Update suggestions when selection changes
@@ -515,7 +521,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
           // ONLY show suggestions if we're on a completely empty paragraph
           if (text === "" && isAtEnd) {
             // Get rule-based analysis synchronously (inside read block)
-            const analysis = $analyzePreviousBlocks();
+            const analysis = $analyzePreviousBlocks(t);
 
             // Try AI suggestions first if enabled
             if (useAI) {
@@ -555,7 +561,7 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
         setSuggestions(null);
       });
     });
-  }, [editor, useAI, fetchAISuggestions]);
+  }, [editor, useAI, fetchAISuggestions, t, userHasTyped, setSuggestions]);
 
   // // Get anchor element for menu positioning
   // useEffect(() => {
@@ -573,112 +579,6 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
   //     });
   //   });
   // }, [editor]);
-
-  // Handle keyboard navigation
-  const handleKeyCommand = useCallback(
-    (event, command) => {
-      if (!suggestions || suggestions.length === 0) return false;
-
-      switch (command) {
-        case KEY_ARROW_DOWN_COMMAND:
-          event.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % suggestions.length);
-          return true;
-
-        case KEY_ARROW_UP_COMMAND:
-          event.preventDefault();
-          setSelectedIndex(
-            (prev) => (prev - 1 + suggestions.length) % suggestions.length,
-          );
-          return true;
-
-        case KEY_TAB_COMMAND:
-        case KEY_ENTER_COMMAND:
-          event.preventDefault();
-          insertSelectedBlock();
-          return true;
-
-        case KEY_ESCAPE_COMMAND:
-          event.preventDefault();
-          setSuggestions(null);
-          return true;
-
-        default:
-          return false;
-      }
-    },
-    [suggestions, selectedIndex],
-  );
-
-  // Track drag operations and user typing
-  useEffect(() => {
-    return mergeRegister(
-      // Track drag operations
-      editor.registerCommand(
-        DRAGOVER_COMMAND,
-        () => {
-          isDragging.current = true;
-          setSuggestions(null);
-          return false; // Don't prevent default
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        DROP_COMMAND,
-        () => {
-          isDragging.current = false;
-          return false; // Don't prevent default
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-      // Track when user types to enable suggestions
-      editor.registerTextContentListener(() => {
-        if (!isDragging.current) {
-          setUserHasTyped(true);
-        }
-      }),
-    );
-  }, [editor, setSuggestions]);
-
-  useEffect(() => {
-    if (!suggestions) return;
-
-    return mergeRegister(
-      editor.registerCommand(
-        KEY_ARROW_DOWN_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ARROW_DOWN_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ARROW_UP_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ARROW_UP_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_TAB_COMMAND,
-        (event) => handleKeyCommand(event, KEY_TAB_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ENTER_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ENTER_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ESCAPE_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ESCAPE_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-    );
-  }, [editor, suggestions, handleKeyCommand]);
-
-  const insertSelectedBlock = useCallback(() => {
-    if (!suggestions || selectedIndex >= suggestions.length) return;
-
-    const selected = suggestions[selectedIndex];
-    dispatchBlockInsert(selected);
-    setSuggestions(null);
-  }, [editor, suggestions, selectedIndex, setSuggestions]);
 
   /**
    * Dispatch the appropriate Lexical command for a suggestion, using blockData when available.
@@ -772,6 +672,112 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
     [editor],
   );
 
+  const insertSelectedBlock = useCallback(() => {
+    if (!suggestions || selectedIndex >= suggestions.length) return;
+
+    const selected = suggestions[selectedIndex];
+    dispatchBlockInsert(selected);
+    setSuggestions(null);
+  }, [suggestions, selectedIndex, setSuggestions, dispatchBlockInsert]);
+
+  // Handle keyboard navigation
+  const handleKeyCommand = useCallback(
+    (event, command) => {
+      if (!suggestions || suggestions.length === 0) return false;
+
+      switch (command) {
+        case KEY_ARROW_DOWN_COMMAND:
+          event.preventDefault();
+          setSelectedIndex((prev) => (prev + 1) % suggestions.length);
+          return true;
+
+        case KEY_ARROW_UP_COMMAND:
+          event.preventDefault();
+          setSelectedIndex(
+            (prev) => (prev - 1 + suggestions.length) % suggestions.length,
+          );
+          return true;
+
+        case KEY_TAB_COMMAND:
+        case KEY_ENTER_COMMAND:
+          event.preventDefault();
+          insertSelectedBlock();
+          return true;
+
+        case KEY_ESCAPE_COMMAND:
+          event.preventDefault();
+          setSuggestions(null);
+          return true;
+
+        default:
+          return false;
+      }
+    },
+    [suggestions, insertSelectedBlock, setSuggestions],
+  );
+
+  // Track drag operations and user typing
+  useEffect(() => {
+    return mergeRegister(
+      // Track drag operations
+      editor.registerCommand(
+        DRAGOVER_COMMAND,
+        () => {
+          isDragging.current = true;
+          setSuggestions(null);
+          return false; // Don't prevent default
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        DROP_COMMAND,
+        () => {
+          isDragging.current = false;
+          return false; // Don't prevent default
+        },
+        COMMAND_PRIORITY_LOW,
+      ),
+      // Track when user types to enable suggestions
+      editor.registerTextContentListener(() => {
+        if (!isDragging.current) {
+          setUserHasTyped(true);
+        }
+      }),
+    );
+  }, [editor, setSuggestions]);
+
+  useEffect(() => {
+    if (!suggestions) return;
+
+    return mergeRegister(
+      editor.registerCommand(
+        KEY_ARROW_DOWN_COMMAND,
+        (event) => handleKeyCommand(event, KEY_ARROW_DOWN_COMMAND),
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_ARROW_UP_COMMAND,
+        (event) => handleKeyCommand(event, KEY_ARROW_UP_COMMAND),
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_TAB_COMMAND,
+        (event) => handleKeyCommand(event, KEY_TAB_COMMAND),
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_ENTER_COMMAND,
+        (event) => handleKeyCommand(event, KEY_ENTER_COMMAND),
+        COMMAND_PRIORITY_LOW,
+      ),
+      editor.registerCommand(
+        KEY_ESCAPE_COMMAND,
+        (event) => handleKeyCommand(event, KEY_ESCAPE_COMMAND),
+        COMMAND_PRIORITY_LOW,
+      ),
+    );
+  }, [editor, suggestions, handleKeyCommand]);
+
   // Register the insert callback with the context so the sidebar can use it
   useEffect(() => {
     if (registerInsertCallback) {
@@ -858,7 +864,9 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
         if (questions.length === 0) return null;
         return (
           <span style={{ opacity: 0.85, fontSize: 11 }}>
-            {questions.length} question{questions.length !== 1 ? "s" : ""}
+            {t("blockSuggestionPlugin.questionCount", {
+              count: questions.length,
+            })}
             {questions[0]?.question && (
               <>
                 {" "}
@@ -946,11 +954,13 @@ export default function BlockSuggestionPlugin({ useAI = false }) {
               letterSpacing: 0.5,
             }}
           >
-            Tab
+            {t("blockSuggestionPlugin.tabKey")}
           </span>
           {suggestions.length > 1 && (
             <span style={{ opacity: 0.7, fontSize: 11 }}>
-              ↑↓ {suggestions.length - 1} more
+              {t("blockSuggestionPlugin.moreSuggestions", {
+                count: suggestions.length - 1,
+              })}
             </span>
           )}
         </div>

@@ -11,6 +11,9 @@ import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import Skeleton from "@mui/material/Skeleton";
 
+const USER_ID_FIELD_ID = "settings-user-id";
+const IDENTITY_ID_FIELD_ID = "settings-identity-id";
+
 const CARD_SX = {
   padding: "2rem 1rem",
   margin: "1rem auto",
@@ -95,7 +98,7 @@ export function ProfileInfoView({
 
           <TextField
             id="settings-email"
-            label="Email"
+            label={t("profile.email")}
             type="email"
             value={email}
             onChange={(event) => onEmailChange(event.target.value)}
@@ -115,14 +118,14 @@ export function ProfileInfoView({
 
           <Typography
             component="label"
-            htmlFor="settings-user-id"
+            htmlFor={USER_ID_FIELD_ID}
             sx={{ mb: 1, display: "block" }}
           >
             {t("profile.userId")}
           </Typography>
 
           <TextField
-            id="settings-user-id"
+            id={USER_ID_FIELD_ID}
             type="text"
             value={userSub || ""}
             disabled
@@ -131,14 +134,14 @@ export function ProfileInfoView({
 
           <Typography
             component="label"
-            htmlFor="settings-identity-id"
+            htmlFor={IDENTITY_ID_FIELD_ID}
             sx={{ mb: 1, display: "block" }}
           >
             {t("profile.identityId")}
           </Typography>
 
           <TextField
-            id="settings-identity-id"
+            id={IDENTITY_ID_FIELD_ID}
             type="text"
             value={identityId || ""}
             disabled
@@ -207,7 +210,7 @@ export function ProfileInfoView({
             <FormControl fullWidth>
               <TextField
                 id="settings-confirmation-code"
-                label="Confirmation Code"
+                label={t("profile.confirmEmail.codeLabel")}
                 type="text"
                 value={confirmationCode}
                 onChange={(event) =>

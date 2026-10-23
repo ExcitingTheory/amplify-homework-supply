@@ -26,12 +26,12 @@ describe('ContentUnlockAnimation', () => {
   it('renders overlay when show is true', () => {
     render(<ContentUnlockAnimation show={true} title="Unit 1" />)
     // In shake phase, overlay should be visible
-    expect(screen.queryByText(/Unit 1 Unlocked/)).toBeNull()
+    expect(screen.queryByText('contentUnlockAnimation.unlocked')).toBeNull()
     // After 600ms → open phase, title appears
     act(() => {
       vi.advanceTimersByTime(600)
     })
-    expect(screen.getByText(/Unit 1 Unlocked/)).toBeInTheDocument()
+    expect(screen.getByText('contentUnlockAnimation.unlocked')).toBeInTheDocument()
   })
 
   it('progresses through shake → open → shimmer → done phases', () => {
@@ -47,13 +47,13 @@ describe('ContentUnlockAnimation', () => {
     act(() => {
       vi.advanceTimersByTime(600)
     })
-    expect(screen.getByText(/Vocab Lesson Unlocked/)).toBeInTheDocument()
+    expect(screen.getByText('contentUnlockAnimation.unlocked')).toBeInTheDocument()
 
     // Phase: shimmer (1200ms)
     act(() => {
       vi.advanceTimersByTime(600)
     })
-    expect(screen.getByText(/Vocab Lesson Unlocked/)).toBeInTheDocument()
+    expect(screen.getByText('contentUnlockAnimation.unlocked')).toBeInTheDocument()
 
     // Phase: done (2400ms) — onComplete fires, component disappears
     act(() => {

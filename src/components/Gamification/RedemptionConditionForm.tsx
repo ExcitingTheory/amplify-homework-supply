@@ -18,6 +18,7 @@ import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import Typography from '@mui/material/Typography'
 import InputAdornment from '@mui/material/InputAdornment'
+import { useTranslations } from 'next-intl'
 import type { RedemptionCondition, RedemptionConditionType } from './antiBadgeRegistry'
 
 // ============================================================================
@@ -39,74 +40,50 @@ export interface RedemptionConditionFormProps {
 
 const CONDITION_TYPE_OPTIONS: Array<{
   value: RedemptionConditionType
-  label: string
-  description: string
   fields: Array<'count' | 'percent' | 'hours' | 'period'>
 }> = [
   {
     value: 'CONSECUTIVE_ON_TIME',
-    label: 'Consecutive On-Time Submissions',
-    description: 'Student must submit N assignments on time in a row',
     fields: ['count'],
   },
   {
     value: 'LOGIN_STREAK',
-    label: 'Login Streak',
-    description: 'Student must log in for N consecutive days',
     fields: ['count'],
   },
   {
     value: 'COMPLETE_ASSIGNMENT',
-    label: 'Complete Any Assignment',
-    description: 'Student must complete any pending assignment',
     fields: [],
   },
   {
     value: 'ACCURACY_ABOVE',
-    label: 'Score Above Threshold',
-    description: 'Student must score above N% on any assignment',
     fields: ['percent'],
   },
   {
     value: 'SCORE_ON_TOPIC',
-    label: 'Score on Same Topic',
-    description: 'Student must score above N% on the same topic/unit',
     fields: ['percent'],
   },
   {
     value: 'ACTIVITY_COUNT',
-    label: 'Activity Count in Period',
-    description: 'Student must complete N activities within a time period',
     fields: ['count', 'period'],
   },
   {
     value: 'BUILD_STREAK',
-    label: 'Build New Streak',
-    description: 'Student must build a new streak of N days',
     fields: ['count'],
   },
   {
     value: 'SUBMIT_ANY',
-    label: 'Submit Anything',
-    description: 'Student just needs to submit any work',
     fields: [],
   },
   {
     value: 'EARN_XP',
-    label: 'Earn XP',
-    description: 'Student must earn at least N XP',
     fields: ['count'],
   },
   {
     value: 'COMPLETE_DRILLS',
-    label: 'Complete Practice Drills',
-    description: 'Student must complete N practice drills',
     fields: ['count'],
   },
   {
     value: 'WAIT_PERIOD',
-    label: 'Wait Period (Auto-Clear)',
-    description: 'Badge auto-clears after N hours',
     fields: ['hours'],
   },
 ]
@@ -120,6 +97,56 @@ export function RedemptionConditionForm({
   onChange,
   disabled = false,
 }: RedemptionConditionFormProps) {
+  const t = useTranslations('components')
+  const conditionText: Record<
+    RedemptionConditionType,
+    { label: string; description: string }
+  > = {
+    CONSECUTIVE_ON_TIME: {
+      label: t('redemptionConditionForm.consecutiveOnTimeLabel'),
+      description: t('redemptionConditionForm.consecutiveOnTimeDescription'),
+    },
+    LOGIN_STREAK: {
+      label: t('redemptionConditionForm.loginStreakLabel'),
+      description: t('redemptionConditionForm.loginStreakDescription'),
+    },
+    COMPLETE_ASSIGNMENT: {
+      label: t('redemptionConditionForm.completeAssignmentLabel'),
+      description: t('redemptionConditionForm.completeAssignmentDescription'),
+    },
+    ACCURACY_ABOVE: {
+      label: t('redemptionConditionForm.accuracyAboveLabel'),
+      description: t('redemptionConditionForm.accuracyAboveDescription'),
+    },
+    SCORE_ON_TOPIC: {
+      label: t('redemptionConditionForm.scoreOnTopicLabel'),
+      description: t('redemptionConditionForm.scoreOnTopicDescription'),
+    },
+    ACTIVITY_COUNT: {
+      label: t('redemptionConditionForm.activityCountLabel'),
+      description: t('redemptionConditionForm.activityCountDescription'),
+    },
+    BUILD_STREAK: {
+      label: t('redemptionConditionForm.buildStreakLabel'),
+      description: t('redemptionConditionForm.buildStreakDescription'),
+    },
+    SUBMIT_ANY: {
+      label: t('redemptionConditionForm.submitAnyLabel'),
+      description: t('redemptionConditionForm.submitAnyDescription'),
+    },
+    EARN_XP: {
+      label: t('redemptionConditionForm.earnXpLabel'),
+      description: t('redemptionConditionForm.earnXpDescription'),
+    },
+    COMPLETE_DRILLS: {
+      label: t('redemptionConditionForm.completeDrillsLabel'),
+      description: t('redemptionConditionForm.completeDrillsDescription'),
+    },
+    WAIT_PERIOD: {
+      label: t('redemptionConditionForm.waitPeriodLabel'),
+      description: t('redemptionConditionForm.waitPeriodDescription'),
+    },
+  }
   const selectedType = value?.type || ''
   const typeConfig = CONDITION_TYPE_OPTIONS.find((o) => o.value === selectedType)
 
@@ -143,18 +170,18 @@ export function RedemptionConditionForm({
   return (
     <Box>
       <FormControl fullWidth size="small" disabled={disabled}>
-        <InputLabel>Redemption Condition</InputLabel>
+        <InputLabel>{t('redemptionConditionForm.conditionLabel')}</InputLabel>
         <Select
           value={selectedType}
           onChange={(e) => handleTypeChange(e.target.value)}
-          label="Redemption Condition"
+          label={t('redemptionConditionForm.conditionLabel')}
         >
           <MenuItem value="">
-            <em>None (manual/time-based only)</em>
+            <em>{t('redemptionConditionForm.none')}</em>
           </MenuItem>
           {CONDITION_TYPE_OPTIONS.map((opt) => (
             <MenuItem key={opt.value} value={opt.value}>
-              {opt.label}
+              {conditionText[opt.value].label}
             </MenuItem>
           ))}
         </Select>
@@ -163,25 +190,25 @@ export function RedemptionConditionForm({
       {typeConfig && (
         <Box sx={{ mt: 1.5 }}>
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 1 }}>
-            {typeConfig.description}
+            {conditionText[typeConfig.value].description}
           </Typography>
           <Stack direction="row" spacing={1.5}>
             {typeConfig.fields.includes('count') && (
               <TextField
                 size="small"
                 type="number"
-                label="Count"
+                label={t('redemptionConditionForm.count')}
                 value={value?.count ?? 3}
                 onChange={(e) => onChange({ ...value!, count: Math.max(1, Number(e.target.value)) })}
                 InputProps={{ inputProps: { min: 1 } }}
                 sx={{ width: 100 }}
                 disabled={disabled}
                 helperText={
-                  typeConfig.value === 'EARN_XP' ? 'XP points' :
-                  typeConfig.value === 'LOGIN_STREAK' || typeConfig.value === 'BUILD_STREAK' ? 'days' :
-                  typeConfig.value === 'COMPLETE_DRILLS' ? 'drills' :
-                  typeConfig.value === 'ACTIVITY_COUNT' ? 'activities' :
-                  'submissions'
+                  typeConfig.value === 'EARN_XP' ? t('redemptionConditionForm.unitXpPoints') :
+                  typeConfig.value === 'LOGIN_STREAK' || typeConfig.value === 'BUILD_STREAK' ? t('redemptionConditionForm.unitDays') :
+                  typeConfig.value === 'COMPLETE_DRILLS' ? t('redemptionConditionForm.unitDrills') :
+                  typeConfig.value === 'ACTIVITY_COUNT' ? t('redemptionConditionForm.unitActivities') :
+                  t('redemptionConditionForm.unitSubmissions')
                 }
               />
             )}
@@ -189,7 +216,7 @@ export function RedemptionConditionForm({
               <TextField
                 size="small"
                 type="number"
-                label="Threshold"
+                label={t('redemptionConditionForm.threshold')}
                 value={value?.percent ?? 70}
                 onChange={(e) => onChange({ ...value!, percent: Math.min(100, Math.max(1, Number(e.target.value))) })}
                 InputProps={{
@@ -204,11 +231,11 @@ export function RedemptionConditionForm({
               <TextField
                 size="small"
                 type="number"
-                label="Hours"
+                label={t('redemptionConditionForm.hours')}
                 value={value?.hours ?? 24}
                 onChange={(e) => onChange({ ...value!, hours: Math.max(1, Number(e.target.value)) })}
                 InputProps={{
-                  endAdornment: <InputAdornment position="end">hrs</InputAdornment>,
+                  endAdornment: <InputAdornment position="end">{t('redemptionConditionForm.hoursUnit')}</InputAdornment>,
                   inputProps: { min: 1 },
                 }}
                 sx={{ width: 120 }}
@@ -217,14 +244,14 @@ export function RedemptionConditionForm({
             )}
             {typeConfig.fields.includes('period') && (
               <FormControl size="small" sx={{ minWidth: 100 }} disabled={disabled}>
-                <InputLabel>Period</InputLabel>
+                <InputLabel>{t('redemptionConditionForm.period')}</InputLabel>
                 <Select
                   value={value?.period || 'day'}
                   onChange={(e) => onChange({ ...value!, period: e.target.value as 'day' | 'week' })}
-                  label="Period"
+                  label={t('redemptionConditionForm.period')}
                 >
-                  <MenuItem value="day">Day</MenuItem>
-                  <MenuItem value="week">Week</MenuItem>
+                  <MenuItem value="day">{t('redemptionConditionForm.periodDay')}</MenuItem>
+                  <MenuItem value="week">{t('redemptionConditionForm.periodWeek')}</MenuItem>
                 </Select>
               </FormControl>
             )}

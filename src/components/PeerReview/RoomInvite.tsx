@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react'
+import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import TextField from '@mui/material/TextField'
@@ -25,6 +26,7 @@ export interface RoomInviteProps {
 }
 
 export function RoomInvite({ roomState, invitedUsers, onInvite, onRemove }: RoomInviteProps) {
+  const t = useTranslations('components')
   const [username, setUsername] = useState('')
   const invited = roomState?.invitedUserIds ?? invitedUsers ?? []
 
@@ -45,13 +47,13 @@ export function RoomInvite({ roomState, invitedUsers, onInvite, onRemove }: Room
   return (
     <Box>
       <Typography variant="subtitle2" gutterBottom>
-        Invite Peers
+        {t('roomInvite.title')}
       </Typography>
 
       <Stack direction="row" spacing={1} mb={2}>
         <TextField
           size="small"
-          placeholder="Enter username or email"
+          placeholder={t('roomInvite.usernamePlaceholder')}
           value={username}
           onChange={(e) => setUsername(e.target.value)}
           onKeyDown={handleKeyDown}
@@ -63,14 +65,14 @@ export function RoomInvite({ roomState, invitedUsers, onInvite, onRemove }: Room
           onClick={handleInvite}
           disabled={!username.trim()}
         >
-          Invite
+          {t('roomInvite.invite')}
         </Button>
       </Stack>
 
       {invited.length > 0 && (
         <Box>
           <Typography variant="caption" color="text.secondary" gutterBottom>
-            Invited:
+            {t('roomInvite.invited')}
           </Typography>
           <Stack direction="row" spacing={0.5} flexWrap="wrap" useFlexGap>
             {invited.map((userId) => (

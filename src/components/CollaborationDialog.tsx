@@ -426,7 +426,7 @@ export default function CollaborationDialog({
 
       <DialogActions sx={{ px: 3, pb: 2 }}>
         <Button onClick={onClose} disabled={loading}>
-          {tCommon("actions.cancel", { defaultValue: "Cancel" })}
+          {tCommon("actions.cancel")}
         </Button>
         {tab === 1 && (
           <Button

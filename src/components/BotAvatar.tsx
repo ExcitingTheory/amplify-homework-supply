@@ -22,6 +22,8 @@ export interface BotAvatarProps {
 }
 
 /** Default bot appearance — purple-ish tones, friendly look */
+const BOT_AVATAR_SEED = "homework-supply-bot";
+
 const BOT_DEFAULTS: AvatarOverrides = {
   backgroundColor: ["b6e3f4"],
 };
@@ -33,7 +35,7 @@ export function BotAvatar({
 }: BotAvatarProps) {
   return (
     <AvatarDisplay
-      seed="homework-supply-bot"
+      seed={BOT_AVATAR_SEED}
       style={style}
       size={size}
       overrides={overrides || BOT_DEFAULTS}

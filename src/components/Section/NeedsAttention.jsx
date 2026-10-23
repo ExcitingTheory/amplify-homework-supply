@@ -197,9 +197,8 @@ export function NeedsAttention({
         <Stack
           direction="row"
           spacing={1}
-          flexWrap="wrap"
           useFlexGap
-          sx={{ mt: 2 }}
+          sx={{ mt: 2, flexWrap: "wrap" }}
         >
           {unreviewedCount > 0 && (
             <Button

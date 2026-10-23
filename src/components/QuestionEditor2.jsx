@@ -622,12 +622,23 @@ function QuestionRowComponent({
   const audioUrls = audio || [];
   const hasAudio = audioUrls.length > 0;
 
+  // Upload effect must only fire on new files, so read everything else from the latest render
+  const uploadContextRef = React.useRef({});
+  React.useEffect(() => {
+    uploadContextRef.current = {
+      audioUrls,
+      fileOperations,
+      onUpdate,
+      questionId,
+    };
+  });
+
   // Handle audio file uploads
   React.useEffect(() => {
     const asyncFunc = async () => {
       if (audioFilesToUpload.length === 0) return;
 
-      const _fileOps = [...fileOperations];
+      const _fileOps = [...uploadContextRef.current.fileOperations];
 
       for (let i = 0; i < audioFilesToUpload.length; i++) {
         const item = audioFilesToUpload[i];
@@ -648,6 +659,7 @@ function QuestionRowComponent({
             },
           }).result;
 
+          const { audioUrls, onUpdate, questionId } = uploadContextRef.current;
           const newAudio = deduplicateUrls([...audioUrls, item.name]);
 
           // Update the question with new audio
@@ -803,6 +815,7 @@ function QuestionsPlugin({
   setConfirmDialog,
   fullQuestionBank,
 }) {
+  const t = useTranslations("components");
   const { bumpQuestionVersion } = React.useContext(DictionaryContext);
   const { softDelete } = useRecycleBin();
   const [editor] = useLexicalComposerContext();
@@ -818,52 +831,6 @@ function QuestionsPlugin({
     estimateSize: () => 100,
     overscan: 5,
   });
-
-  // Update questions when questionBank changes
-  React.useEffect(() => {
-    if (!questionBank) return;
-
-    editor.update(() => {
-      const root = $getRoot();
-      root.clear();
-
-      const entries = Object.entries(questionBank);
-
-      // Render all questions - virtualization happens at render level
-      entries.forEach(([id, question], index) => {
-        const node = $createQuestionDecoratorNode(
-          id,
-          question.prompt,
-          question.hint,
-          question.answer,
-          question.audio,
-          expandedItems.has(id),
-          selectedItems.has(id),
-          searchTerm,
-          sharedHistory,
-          handleUpdateQuestion,
-          handleDeleteQuestion,
-          () => onToggleExpand(id),
-          () => onToggleSelect(id),
-          audioFiles,
-          identityId,
-          index,
-          question.documentID,
-          question.fileID,
-          question.filename,
-          question.page,
-        );
-        root.append(node);
-      });
-    });
-  }, [
-    questionBank,
-    searchTerm,
-    expandedItems,
-    selectedItems,
-    audioFiles,
-    editor,
-  ]);
 
   const handleUpdateQuestion = async (questionId, updates) => {
     try {
@@ -901,7 +868,7 @@ function QuestionsPlugin({
     // Show confirmation dialog before soft-deleting
     setConfirmDialog({
       open: true,
-      message: `Move to Recycle Bin: "${prompt}"?`,
+      message: t("questionEditor.confirmMoveToRecycleBin", { prompt }),
       severity: "warning",
       onConfirm: async () => {
         try {
@@ -925,6 +892,79 @@ function QuestionsPlugin({
       },
     });
   };
+
+  // Nodes hold these callbacks, so keep their identity stable and always call the latest closures
+  const latestHandlersRef = React.useRef({});
+  React.useEffect(() => {
+    latestHandlersRef.current = {
+      handleUpdateQuestion,
+      handleDeleteQuestion,
+      onToggleExpand,
+      onToggleSelect,
+    };
+  });
+  const stableHandlers = React.useMemo(
+    () => ({
+      handleUpdateQuestion: (...args) =>
+        latestHandlersRef.current.handleUpdateQuestion(...args),
+      handleDeleteQuestion: (...args) =>
+        latestHandlersRef.current.handleDeleteQuestion(...args),
+      onToggleExpand: (...args) =>
+        latestHandlersRef.current.onToggleExpand(...args),
+      onToggleSelect: (...args) =>
+        latestHandlersRef.current.onToggleSelect(...args),
+    }),
+    [],
+  );
+
+  // Update questions when questionBank changes
+  React.useEffect(() => {
+    if (!questionBank) return;
+
+    editor.update(() => {
+      const root = $getRoot();
+      root.clear();
+
+      const entries = Object.entries(questionBank);
+
+      // Render all questions - virtualization happens at render level
+      entries.forEach(([id, question], index) => {
+        const node = $createQuestionDecoratorNode(
+          id,
+          question.prompt,
+          question.hint,
+          question.answer,
+          question.audio,
+          expandedItems.has(id),
+          selectedItems.has(id),
+          searchTerm,
+          sharedHistory,
+          stableHandlers.handleUpdateQuestion,
+          stableHandlers.handleDeleteQuestion,
+          () => stableHandlers.onToggleExpand(id),
+          () => stableHandlers.onToggleSelect(id),
+          audioFiles,
+          identityId,
+          index,
+          question.documentID,
+          question.fileID,
+          question.filename,
+          question.page,
+        );
+        root.append(node);
+      });
+    });
+  }, [
+    questionBank,
+    searchTerm,
+    expandedItems,
+    selectedItems,
+    audioFiles,
+    editor,
+    sharedHistory,
+    identityId,
+    stableHandlers,
+  ]);
 
   return null;
 }
@@ -1015,7 +1055,9 @@ export function QuestionEditor2() {
   const handleBulkDelete = async () => {
     setConfirmDialog({
       open: true,
-      message: `Move ${selectedItems.size} question(s) to Recycle Bin?`,
+      message: t("questionEditor.confirmBulkMoveToRecycleBin", {
+        count: selectedItems.size,
+      }),
       severity: "warning",
       onConfirm: async () => {
         for (const id of selectedItems) {
@@ -1133,7 +1175,7 @@ export function QuestionEditor2() {
         }}
       >
         <Box sx={{ display: "flex", gap: 0, alignItems: "center" }}>
-          <Tooltip title="Select All">
+          <Tooltip title={t("questionEditor.selectAll")}>
             <Checkbox
               size="small"
               checked={
@@ -1162,7 +1204,11 @@ export function QuestionEditor2() {
           </Tooltip>
 
           <Tooltip
-            title={expandedItems.size === 0 ? "Expand All" : "Collapse All"}
+            title={
+              expandedItems.size === 0
+                ? t("questionEditor.expandAll")
+                : t("questionEditor.collapseAll")
+            }
           >
             <IconButton
               size="small"
@@ -1183,7 +1229,7 @@ export function QuestionEditor2() {
           </Tooltip>
         </Box>
 
-        <Tooltip title="New Question">
+        <Tooltip title={t("questionEditor.newQuestion")}>
           <IconButton
             onClick={toggleNewQuestionFormOpen}
             color="primary"
@@ -1193,7 +1239,7 @@ export function QuestionEditor2() {
           </IconButton>
         </Tooltip>
 
-        <Tooltip title="Actions">
+        <Tooltip title={t("questionEditor.actions")}>
           <IconButton
             onClick={(e) =>
               setContextMenu(
@@ -1269,7 +1315,7 @@ export function QuestionEditor2() {
               onChange={(e) => setNewPrompt(e.target.value)}
               fullWidth
               margin="normal"
-              label="Prompt"
+              label={t("questionEditor.promptField")}
               variant="outlined"
             />
             <TextField
@@ -1278,7 +1324,7 @@ export function QuestionEditor2() {
               onChange={(e) => setNewHint(e.target.value)}
               fullWidth
               margin="normal"
-              label="Hint"
+              label={t("questionEditor.hintField")}
               variant="outlined"
             />
             <TextField
@@ -1287,7 +1333,7 @@ export function QuestionEditor2() {
               onChange={(e) => setNewAnswer(e.target.value)}
               fullWidth
               margin="normal"
-              label="Answer"
+              label={t("questionEditor.answerField")}
               variant="outlined"
             />
             <Button variant="contained" type="submit" sx={{ mt: 2 }}>

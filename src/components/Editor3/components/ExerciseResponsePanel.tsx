@@ -7,6 +7,7 @@ import {
   Typography,
   type BoxProps,
 } from "@mui/material";
+import { useTranslations } from "next-intl";
 
 interface ExerciseResponsePanelProps extends Omit<
   BoxProps,
@@ -40,7 +41,7 @@ const ExerciseResponsePanel = forwardRef<
     countdown = null,
     countdownDuration = 10,
     cancelDisabled = countdown === null,
-    cancelLabel = "Cancel",
+    cancelLabel,
     onCancel,
     onSubmit,
     showActionRow = true,
@@ -48,12 +49,13 @@ const ExerciseResponsePanel = forwardRef<
     showSubmit = true,
     submitDisabled = false,
     submitIcon = <ArrowForwardRoundedIcon />,
-    submitLabel = "Submit",
+    submitLabel,
     sx,
     ...boxProps
   },
   ref,
 ) {
+  const t = useTranslations("editor.shared");
   const progress =
     countdown === null
       ? 0
@@ -101,7 +103,7 @@ const ExerciseResponsePanel = forwardRef<
           <Box sx={{ justifySelf: "start" }}>
             {showCancel && (
               <Button
-                aria-label="Cancel submission"
+                aria-label={t("exerciseResponsePanel.cancelSubmission")}
                 disabled={cancelDisabled}
                 onClick={onCancel}
                 size="small"
@@ -141,7 +143,7 @@ const ExerciseResponsePanel = forwardRef<
                   </Box>
                 }
               >
-                {cancelLabel}
+                {cancelLabel ?? t("exerciseResponsePanel.cancel")}
               </Button>
             )}
           </Box>
@@ -164,7 +166,7 @@ const ExerciseResponsePanel = forwardRef<
                 size="small"
                 variant="contained"
               >
-                {submitLabel}
+                {submitLabel ?? t("exerciseResponsePanel.submit")}
               </Button>
             )}
           </Box>

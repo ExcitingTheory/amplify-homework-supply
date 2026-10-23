@@ -41,6 +41,9 @@ import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import { LEARNER_EXERCISE_WAVEFORM_PRESET } from "../../../utils/waveformDefaults";
 import getCachedUrl from "../../../utils/getCachedUrl";
 
+const ANSWER_BLOCK_TYPE = "answer";
+const ANSWER_INPUT_TEST_ID = "answer-input";
+
 // Component to handle signed URL for word audio
 function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
   const t = useTranslations("workbook");
@@ -65,7 +68,7 @@ function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
   if (loading) {
     return (
       <Typography variant="body2" sx={{ opacity: 0.6 }}>
-        Loading audio...
+        {t("answerComponent.loadingAudio")}
       </Typography>
     );
   }
@@ -144,18 +147,22 @@ export function AnswerView({
     }
   };
 
+  const allowedInputKey = JSON.stringify(allowedInput);
   React.useEffect(() => {
-    if (allowedInput?.length > 0) {
-      setAllowedInputMethods(allowedInput);
-      setCurrentInputMethod(allowedInput[0]);
+    const methods = allowedInputKey ? JSON.parse(allowedInputKey) : undefined;
+    if (methods?.length > 0) {
+      setAllowedInputMethods(methods);
+      setCurrentInputMethod(methods[0]);
     }
-  }, [JSON.stringify(allowedInput)]);
+  }, [allowedInputKey]);
 
+  const promptMethodKey = JSON.stringify(promptMethod);
   React.useEffect(() => {
-    if (promptMethod?.length > 0) {
-      setCurrentPromptMethod(promptMethod[0]);
+    const methods = promptMethodKey ? JSON.parse(promptMethodKey) : undefined;
+    if (methods?.length > 0) {
+      setCurrentPromptMethod(methods[0]);
     }
-  }, [JSON.stringify(promptMethod)]);
+  }, [promptMethodKey]);
 
   // Reset local state when grade changes (e.g., new grade after unit completion)
   const gradeIdRef = useRef(grade?.id);
@@ -172,10 +179,10 @@ export function AnswerView({
 
   let thisPrompt = customPrompt
     ? customPrompt
-    : "Provide words that best match the following definition(s):";
+    : t("answerComponent.defaultPromptByDefinition");
 
   thisPrompt = requestDefinition
-    ? "Please define the following word(s):"
+    ? t("answerComponent.defaultPromptByWord")
     : thisPrompt;
 
   // Track completion and save grade
@@ -229,7 +236,7 @@ export function AnswerView({
   return (
     <div className={className}>
       <ExerciseBlockCard
-        blockType="answer"
+        blockType={ANSWER_BLOCK_TYPE}
         accuracy={accuracy}
         graded={graded}
         sx={{ my: 2 }}
@@ -238,8 +245,8 @@ export function AnswerView({
           percentComplete={percentComplete}
           accuracy={accuracy}
           hasAttempts={answeredCount > 0}
-          progressDescription="Percentage of prompts answered."
-          accuracyDescription="Percentage of submitted answers marked correct."
+          progressDescription={t("answerComponent.progressDescription")}
+          accuracyDescription={t("answerComponent.accuracyDescription")}
         />
 
         <Typography
@@ -317,21 +324,21 @@ export function AnswerView({
               value="text"
               aria-label={t("answerComponent.inputMethods.text")}
             >
-              Type answer
+              {t("answerComponent.inputMethodLabels.text")}
             </ToggleButton>
             <ToggleButton
               disabled={!allowedInputMethods.includes("audio")}
               value="audio"
               aria-label={t("answerComponent.inputMethods.audio")}
             >
-              Speak answer
+              {t("answerComponent.inputMethodLabels.audio")}
             </ToggleButton>
             <ToggleButton
               disabled={!allowedInputMethods.includes("writing")}
               value="writing"
               aria-label={t("answerComponent.inputMethods.writing")}
             >
-              Draw answer
+              {t("answerComponent.inputMethodLabels.writing")}
             </ToggleButton>
           </ToggleButtonGroup>
         </Box>
@@ -510,7 +517,7 @@ function ByWordList(
                 ariaLabel={t("customAnswerComponent.yourAnswer", {
                   ns: "editor",
                 })}
-                testId="answer-input"
+                testId={ANSWER_INPUT_TEST_ID}
                 wordId={wordId}
                 disabled={isCorrect !== undefined}
               />
@@ -590,7 +597,7 @@ function ByWordList(
                   color="text.secondary"
                   sx={{ mb: 1 }}
                 >
-                  Record your answer
+                  {t("answerComponent.recordYourAnswer")}
                 </Typography>
                 <AudioAutoSubmitWrapper>
                   {({ wrapOnRecordingComplete }) => (
@@ -869,7 +876,7 @@ function ByDefinitionWordList(
                 ariaLabel={t("customAnswerComponent.yourAnswer", {
                   ns: "editor",
                 })}
-                testId="answer-input"
+                testId={ANSWER_INPUT_TEST_ID}
                 wordId={wordId}
                 disabled={isCorrect !== undefined}
               />
@@ -950,7 +957,7 @@ function ByDefinitionWordList(
                   color="text.secondary"
                   sx={{ mb: 1 }}
                 >
-                  Record your answer
+                  {t("answerComponent.recordYourAnswer")}
                 </Typography>
                 <AudioAutoSubmitWrapper>
                   {({ wrapOnRecordingComplete }) => (

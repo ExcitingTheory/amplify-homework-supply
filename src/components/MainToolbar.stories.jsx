@@ -191,11 +191,13 @@ export const UserMenuOnly = {
 
     await userEvent.click(userButton);
 
-    // Verify menu opens
+    // Verify the avatar menu exposes XP history.
     await waitFor(
       () => {
         const menu = document.querySelector('[role="menu"]');
         expect(menu).toBeInTheDocument();
+        expect(within(menu).getByRole("menuitem", { name: /xp history/i }))
+          .toHaveAttribute("href", "/xp-history");
       },
       { timeout: 3000 },
     );

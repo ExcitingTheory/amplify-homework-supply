@@ -33,6 +33,7 @@ import { useVerifyContext } from "../../../../hooks/useVerifyContext";
 function LinearProgressWithLabel({ value }) {
   return (
     <>
+      {/* eslint-disable-next-line i18next/no-literal-string -- CSS value */}
       <Box display="flex" alignItems="center" margin={1}>
         <Box width="95%">
           <LinearProgress variant="determinate" value={value} />
@@ -81,6 +82,8 @@ export function CustomAnswerView({
   const gradeId = grade?.id;
   const inProgress = grade?.data?.[nodeKey];
   const completionSavedRef = useRef(false);
+  const answersRef = useRef(answers);
+  answersRef.current = answers;
 
   // Reset local state when grade changes (e.g., new grade after unit completion)
   const gradeIdRef = useRef(gradeId);
@@ -116,44 +119,37 @@ export function CustomAnswerView({
       questionIDs?.forEach((qid) => {
         completeFeedback[qid] = {
           answer: true,
-          reason: inProgress.feedback || "Answer verified and accepted",
-          userResponse: inProgress.userResponse || answers[qid],
+          reason:
+            inProgress.feedback ||
+            t("customAnswerComponent.answerVerifiedAndAccepted"),
+          userResponse: inProgress.userResponse || answersRef.current[qid],
         };
       });
       setFeedback(completeFeedback);
     }
-  }, [inProgress, questionIDs]);
+  }, [inProgress, questionIDs, t]);
 
   const handleInputChange = (event, newInputMethod) => {
     // console.log('newInputMethods', newInputMethods)
     setCurrentInputMethod(newInputMethod);
   };
 
+  const allowedInputKey = JSON.stringify(allowedInput);
   React.useEffect(() => {
-    if (allowedInput?.length > 0) {
-      console.log("allowedInput", allowedInput);
-      console.log("promptMethod", promptMethod);
-      console.log("AnswerComponent.currentPromptMethod", currentPromptMethod);
-      setAllowedInputMethods(allowedInput);
-      setCurrentInputMethod(allowedInput[0]);
+    const methods = allowedInputKey ? JSON.parse(allowedInputKey) : undefined;
+    if (methods?.length > 0) {
+      setAllowedInputMethods(methods);
+      setCurrentInputMethod(methods[0]);
     }
-  }, [JSON.stringify(allowedInput)]);
+  }, [allowedInputKey]);
 
+  const promptMethodKey = JSON.stringify(promptMethod);
   React.useEffect(() => {
-    console.log("AnswerComponent.promptMethod", promptMethod);
-    if (promptMethod?.length > 0) {
-      setCurrentPromptMethod(promptMethod[0]);
+    const methods = promptMethodKey ? JSON.parse(promptMethodKey) : undefined;
+    if (methods?.length > 0) {
+      setCurrentPromptMethod(methods[0]);
     }
-  }, [JSON.stringify(promptMethod)]);
-
-  React.useEffect(() => {
-    console.log("allowedInput", allowedInput);
-    console.log("promptMethod", promptMethod);
-    setAllowedInputMethods(allowedInput);
-    setCurrentInputMethod(allowedInput[0]);
-    setCurrentPromptMethod(promptMethod[0]);
-    console.log("AnswerComponent.currentPromptMethod", promptMethod[0]);
-  }, []);
+  }, [promptMethodKey]);
 
   // Reset completion guard when exercise changes
   React.useEffect(() => {
@@ -195,7 +191,7 @@ export function CustomAnswerView({
         saveGrade(updatedData);
       }
     }
-  }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress]);
+  }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress, answers]);
 
   return (
     <div
@@ -254,12 +250,15 @@ export function CustomAnswerView({
             console.log("CustomAnswerComponent.questionBank", questionBank);
             console.log("CustomAnswerComponent.question", question);
 
+            // eslint-disable-next-line i18next/no-literal-string -- CSS value
             let borderStyle = "1px solid #ccc";
             if (feedback[questionID]?.answer === true) {
               console.log("feedback[questionID]", feedback[questionID]);
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               borderStyle = "1px solid green";
             } else if (feedback[questionID]?.answer === false) {
               console.log("feedback[questionID]", feedback[questionID]);
+              // eslint-disable-next-line i18next/no-literal-string -- CSS value
               borderStyle = "1px solid red";
             }
 
@@ -310,6 +309,7 @@ export function CustomAnswerView({
                   displayPrompt && (
                     <Typography
                       variant="body1"
+                      // eslint-disable-next-line i18next/no-literal-string -- CSS value
                       display="flex"
                       style={{
                         textWrap: "wrap",
@@ -329,6 +329,7 @@ export function CustomAnswerView({
                 {isCompleted && !displayPrompt && (
                   <Typography
                     variant="body1"
+                    // eslint-disable-next-line i18next/no-literal-string -- CSS value
                     display="flex"
                     style={{
                       textWrap: "wrap",
@@ -397,6 +398,7 @@ export function CustomAnswerView({
 
                 {currentInputMethod === "text" && (
                   <Box
+                    // eslint-disable-next-line i18next/no-literal-string -- CSS value
                     display="flex"
                     style={{
                       marginBottom: "1rem",
@@ -419,6 +421,7 @@ export function CustomAnswerView({
                               answer: text,
                               prompt: prompt,
                               expected: answer,
+                              // eslint-disable-next-line i18next/no-literal-string -- model identifier
                               model: "gpt-3.5-turbo",
                               studentMemory,
                               contentContext,
@@ -458,6 +461,7 @@ export function CustomAnswerView({
                             ? "red"
                             : "inherit"
                       }
+                      // eslint-disable-next-line i18next/no-literal-string -- test id
                       testId="custom-answer-input"
                       questionId={questionID}
                       disabled={isCompleted}
@@ -466,6 +470,7 @@ export function CustomAnswerView({
                 )}
                 {currentInputMethod === "audio" && (
                   <Box
+                    // eslint-disable-next-line i18next/no-literal-string -- CSS value
                     display="flex"
                     style={{
                       marginBottom: "1rem",
@@ -488,6 +493,7 @@ export function CustomAnswerView({
                                   ...currentGradeData[audioNodeKey],
                                   audioFilePath: audioFile?.path || null,
                                   audioFileId: audioFile?.id || null,
+                                  // eslint-disable-next-line i18next/no-literal-string -- stored enum value
                                   inputMethod: "audio",
                                 },
                               };
@@ -504,6 +510,7 @@ export function CustomAnswerView({
                                       answer: audioUrl,
                                       prompt: prompt,
                                       expected: answer,
+                                      // eslint-disable-next-line i18next/no-literal-string -- model identifier
                                       model: "gpt-3.5-turbo",
                                       studentMemory,
                                       contentContext,
@@ -536,6 +543,7 @@ export function CustomAnswerView({
                 )}
                 {currentInputMethod === "writing" && (
                   <Box
+                    // eslint-disable-next-line i18next/no-literal-string -- CSS value
                     display="flex"
                     style={{
                       marginBottom: "1rem",

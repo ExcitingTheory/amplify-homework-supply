@@ -11,6 +11,7 @@
 
 import React, { useState, useCallback, useMemo, useEffect } from 'react'
 import { Box, Paper, Divider, useMediaQuery, useTheme, Typography } from '@mui/material'
+import { useTranslations } from 'next-intl'
 import { useChatRoom, useChatTopics, useChatThread, useChatPresence } from '../../yjs/chatHooks'
 import type { ChatScopeContext, TopicScope, ChatUser, MemberInfo } from './types'
 import { getCurrentScope } from './types'
@@ -49,6 +50,7 @@ export default function ChatPanel({
   height = 500,
   richInput = false,
 }: ChatPanelProps) {
+  const t = useTranslations('components')
   const theme = useTheme()
   const isMobile = useMediaQuery(theme.breakpoints.down('md'))
   const [selectedTopicId, setSelectedTopicId] = useState<string | null>(null)
@@ -198,11 +200,11 @@ export default function ChatPanel({
               <MiniEditorEditable
                 chatMode
                 compact
-                placeholder="Message your class... (type @kai to ask the AI)"
+                placeholder={t('chatPanel.richInputPlaceholder')}
                 onSubmit={handleRichSend}
                 showBlockInserter
                 namespace={`chat-input-${selectedTopicId}`}
-                ariaLabel="Chat message input"
+                ariaLabel={t('chatPanel.messageInputAriaLabel')}
                 autoFocus={!!selectedTopicId}
               />
             </Box>

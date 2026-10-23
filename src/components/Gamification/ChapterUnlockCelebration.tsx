@@ -18,6 +18,7 @@ import Fade from '@mui/material/Fade'
 import Typography from '@mui/material/Typography'
 import AutoStoriesIcon from '@mui/icons-material/AutoStories'
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents'
+import { useTranslations } from 'next-intl'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface ChapterUnlockCelebrationProps {
@@ -35,6 +36,7 @@ export function ChapterUnlockCelebration({
   nextChapterTitle,
   onClose,
 }: ChapterUnlockCelebrationProps) {
+  const t = useTranslations('components')
   const reducedMotion = useReducedMotion()
 
   useEffect(() => {
@@ -53,8 +55,8 @@ export function ChapterUnlockCelebration({
   // Auto-dismiss after 6 seconds
   useEffect(() => {
     if (!open) return
-    const t = setTimeout(onClose, 6000)
-    return () => clearTimeout(t)
+    const timer = setTimeout(onClose, 6000)
+    return () => clearTimeout(timer)
   }, [open, onClose])
 
   return (
@@ -95,26 +97,27 @@ export function ChapterUnlockCelebration({
           variant="overline"
           sx={{ letterSpacing: 2, opacity: 0.8, display: 'block', mt: 1 }}
         >
-          Chapter Complete!
+          {t('chapterUnlockCelebration.chapterComplete')}
         </Typography>
 
         <Typography variant="h5" fontWeight={800} sx={{ mt: 0.5 }}>
-          {chapterOrder != null ? `Ch. ${chapterOrder}: ` : ''}
-          {chapterTitle}
+          {chapterOrder != null
+            ? t('chapterUnlockCelebration.chapterTitleWithOrder', { order: chapterOrder, title: chapterTitle })
+            : chapterTitle}
         </Typography>
 
         {nextChapterTitle && (
           <Box sx={{ mt: 2, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
             <AutoStoriesIcon sx={{ fontSize: '1rem', opacity: 0.8 }} />
             <Typography variant="body2" sx={{ opacity: 0.85 }}>
-              Next: {nextChapterTitle}
+              {t('chapterUnlockCelebration.next', { title: nextChapterTitle })}
             </Typography>
           </Box>
         )}
 
         {!nextChapterTitle && (
           <Chip
-            label="Campaign Complete!"
+            label={t('chapterUnlockCelebration.campaignComplete')}
             sx={{ mt: 2, bgcolor: 'rgba(255,255,255,0.2)', color: '#fff', fontWeight: 700 }}
           />
         )}
@@ -132,7 +135,7 @@ export function ChapterUnlockCelebration({
             px: 4,
           }}
         >
-          {nextChapterTitle ? 'Onward!' : 'Celebrate!'}
+          {nextChapterTitle ? t('chapterUnlockCelebration.onward') : t('chapterUnlockCelebration.celebrate')}
         </Button>
       </Box>
     </Dialog>

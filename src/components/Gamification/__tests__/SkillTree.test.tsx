@@ -66,7 +66,7 @@ describe('SkillTree', () => {
 
   it('renders empty state when no skills', () => {
     render(<SkillTree skills={[]} />)
-    expect(screen.getByText('No skills defined yet.')).toBeDefined()
+    expect(screen.getByText('skillTree.noSkills')).toBeDefined()
   })
 
   it('renders nodes for each skill', () => {
@@ -97,17 +97,17 @@ describe('SkillTree', () => {
 
   it('does not show generate button when canGenerate is false', () => {
     render(<SkillTree skills={[]} unitId="unit-1" />)
-    expect(screen.queryByText('Generate from Unit Content')).toBeNull()
+    expect(screen.queryByText('skillTree.generateFromUnit')).toBeNull()
   })
 
   it('does not show generate button when unitId is missing', () => {
     render(<SkillTree skills={[]} canGenerate />)
-    expect(screen.queryByText('Generate from Unit Content')).toBeNull()
+    expect(screen.queryByText('skillTree.generateFromUnit')).toBeNull()
   })
 
   it('shows generate button in empty state when canGenerate and unitId are set', () => {
     render(<SkillTree skills={[]} canGenerate unitId="unit-1" />)
-    expect(screen.getByText('Generate from Unit Content')).toBeDefined()
+    expect(screen.getByText('skillTree.generateFromUnit')).toBeDefined()
   })
 
   it('calls generateSkillTree and fires onGenerated on success', async () => {
@@ -116,7 +116,7 @@ describe('SkillTree', () => {
 
     render(<SkillTree skills={[]} canGenerate unitId="unit-1" sectionID="cohort-1" onGenerated={onGenerated} />)
 
-    fireEvent.click(screen.getByText('Generate from Unit Content'))
+    fireEvent.click(screen.getByText('skillTree.generateFromUnit'))
 
     await waitFor(() => {
       expect(mockGenerateSkillTree).toHaveBeenCalledWith('unit-1', 'cohort-1')
@@ -129,7 +129,7 @@ describe('SkillTree', () => {
 
     render(<SkillTree skills={[]} canGenerate unitId="unit-1" />)
 
-    fireEvent.click(screen.getByText('Generate from Unit Content'))
+    fireEvent.click(screen.getByText('skillTree.generateFromUnit'))
 
     await waitFor(() => {
       expect(screen.getByText('Unit has no content')).toBeDefined()
@@ -139,6 +139,6 @@ describe('SkillTree', () => {
   it('shows regenerate button when skills exist and canGenerate is true', () => {
     render(<SkillTree skills={sampleSkills} canGenerate unitId="unit-1" />)
     // The regenerate button is an IconButton with a tooltip
-    expect(screen.getByRole('button', { name: /regenerate/i })).toBeDefined()
+    expect(screen.getByRole('button', { name: 'skillTree.regenerateFromUnit' })).toBeDefined()
   })
 })

@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   List,
@@ -33,6 +34,7 @@ interface ComponentItemProps {
 }
 
 function ComponentItem({ component, isSelected, onSelect }: ComponentItemProps) {
+  const t = useTranslations('components');
   const [expanded, setExpanded] = useState(false);
 
   const hasChildren = component.children && component.children.length > 0;
@@ -72,8 +74,8 @@ function ComponentItem({ component, isSelected, onSelect }: ComponentItemProps) 
       {isSelected && (
         <Collapse in={isSelected}>
           <Box sx={{ pl: 4, pr: 2, py: 1, bgcolor: 'action.hover' }}>
-            <Typography variant="caption" fontWeight="bold" display="block" gutterBottom>
-              Props
+            <Typography variant="caption" fontWeight="bold" sx={{ display: 'block' }} gutterBottom>
+              {t('componentTreeView.props')}
             </Typography>
             <pre style={{ fontSize: 10, margin: 0, overflow: 'auto', maxHeight: 150 }}>
               {JSON.stringify(component.props, null, 2)}
@@ -81,8 +83,8 @@ function ComponentItem({ component, isSelected, onSelect }: ComponentItemProps) 
 
             {component.state && (
               <>
-                <Typography variant="caption" fontWeight="bold" display="block" sx={{ mt: 1 }} gutterBottom>
-                  State
+                <Typography variant="caption" fontWeight="bold" sx={{ display: 'block', mt: 1 }} gutterBottom>
+                  {t('componentTreeView.state')}
                 </Typography>
                 <pre style={{ fontSize: 10, margin: 0, overflow: 'auto', maxHeight: 150 }}>
                   {JSON.stringify(component.state, null, 2)}
@@ -90,8 +92,10 @@ function ComponentItem({ component, isSelected, onSelect }: ComponentItemProps) 
               </>
             )}
 
-            <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-              Last render: {new Date(component.lastRenderTime).toLocaleTimeString()}
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+              {t('componentTreeView.lastRender', {
+                time: new Date(component.lastRenderTime).toLocaleTimeString(),
+              })}
             </Typography>
           </Box>
         </Collapse>
@@ -104,6 +108,7 @@ function ComponentItem({ component, isSelected, onSelect }: ComponentItemProps) 
  * ComponentTreeView component
  */
 export function ComponentTreeView({ tree, onSelectComponent, selectedId }: ComponentTreeViewProps) {
+  const t = useTranslations('components');
   const [selected, setSelected] = useState<string | null>(selectedId || null);
 
   const handleSelect = (component: ComponentMetadata) => {
@@ -115,10 +120,10 @@ export function ComponentTreeView({ tree, onSelectComponent, selectedId }: Compo
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography variant="body2" color="text.secondary">
-          No components registered
+          {t('componentTreeView.noComponents')}
         </Typography>
-        <Typography variant="caption" color="text.secondary" display="block" sx={{ mt: 1 }}>
-          Use useComponentInspector() hook to register components
+        <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
+          {t('componentTreeView.registerHint')}
         </Typography>
       </Box>
     );
@@ -136,8 +141,18 @@ export function ComponentTreeView({ tree, onSelectComponent, selectedId }: Compo
   return (
     <Box>
       <Stack direction="row" spacing={1} sx={{ mb: 2 }}>
-        <Chip label={`${tree.length} components`} size="small" color="primary" />
-        <Chip label={`${Object.keys(groupedComponents).length} types`} size="small" variant="outlined" />
+        <Chip
+          label={t('componentTreeView.componentCount', { count: tree.length })}
+          size="small"
+          color="primary"
+        />
+        <Chip
+          label={t('componentTreeView.typeCount', {
+            count: Object.keys(groupedComponents).length,
+          })}
+          size="small"
+          variant="outlined"
+        />
       </Stack>
 
       <List dense>
@@ -149,7 +164,8 @@ export function ComponentTreeView({ tree, onSelectComponent, selectedId }: Compo
                 primary={
                   <Typography variant="subtitle2">
                     {componentName}
-                    {components.length > 1 && ` (${components.length} instances)`}
+                    {components.length > 1 &&
+                      t('componentTreeView.instanceCount', { count: components.length })}
                   </Typography>
                 }
               />

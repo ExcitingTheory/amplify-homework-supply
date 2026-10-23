@@ -40,12 +40,27 @@ import PlaylistFilePickerDialog, {
   parsePlaylistFileDragData,
 } from "./PlaylistFilePickerDialog";
 
-const columns = [
-  { field: "title", headerName: "Title", flex: 1, minWidth: 100 },
-  { field: "size", headerName: "Size", flex: 1, minWidth: 100 },
+const PLAYLIST_EDIT_MENU_ID = "playlist-edit-menu";
+const ARIA_TRUE = "true";
+const INCLUDE_SELECTION_TYPE = "include";
+
+const getColumns = (t) => [
+  {
+    field: "title",
+    headerName: t("playlistEditor.columnHeaders.title"),
+    flex: 1,
+    minWidth: 100,
+  },
+  {
+    field: "size",
+    headerName: t("playlistEditor.columnHeaders.size"),
+    flex: 1,
+    minWidth: 100,
+  },
 ];
 
 export function ActionsMenu({ ids, removeFileIDs }) {
+  const t = useTranslations("editor.shared");
   const [anchorEl, setAnchorEl] = React.useState(null);
   const open = Boolean(anchorEl);
   const handleClick = (event) => {
@@ -66,9 +81,9 @@ export function ActionsMenu({ ids, removeFileIDs }) {
       <Button
         id="playlist-edit-button"
         color="inherit"
-        aria-controls={open ? "playlist-edit-menu" : undefined}
-        aria-haspopup="true"
-        aria-expanded={open ? "true" : undefined}
+        aria-controls={open ? PLAYLIST_EDIT_MENU_ID : undefined}
+        aria-haspopup={ARIA_TRUE}
+        aria-expanded={open ? ARIA_TRUE : undefined}
         onClick={handleClick}
         sx={{
           minWidth: "3rem",
@@ -86,7 +101,9 @@ export function ActionsMenu({ ids, removeFileIDs }) {
           "aria-labelledby": "playlist-edit-button",
         }}
       >
-        <MenuItem onClick={removeFromPlaylist}>Remove from Playlist</MenuItem>
+        <MenuItem onClick={removeFromPlaylist}>
+          {t("playlistEditor.removeFromPlaylist")}
+        </MenuItem>
       </Menu>
     </>
   );
@@ -100,12 +117,13 @@ export default function PlaylistEditor({
   fileIDs,
 }) {
   const t = useTranslations("editor.shared");
+  const columns = React.useMemo(() => getColumns(t), [t]);
   const [pickerOpen, setPickerOpen] = React.useState(false);
   const [dragActive, setDragActive] = React.useState(false);
   const [gridSelection, setGridSelection] = React.useState([]);
   const dropPrompt = dragActive
-    ? "Drop to add files"
-    : "Drag audio or video here";
+    ? t("playlistEditor.dropToAddFiles")
+    : t("playlistEditor.dragMediaHere");
   const playlistRef = React.useRef(null);
 
   const [editor] = useLexicalComposerContext();
@@ -163,7 +181,7 @@ export default function PlaylistEditor({
       }
       return false;
     },
-    [nodeKey],
+    [fileIDs, isSelected, nodeKey],
   );
 
   const addFileIDs = React.useCallback(
@@ -300,7 +318,7 @@ export default function PlaylistEditor({
       isMounted = false;
       unregister();
     };
-  }, [editor, nodeKey, onDelete]);
+  }, [editor, nodeKey, onDelete, setSelected, clearSelection]);
 
   return (
     <div
@@ -323,9 +341,9 @@ export default function PlaylistEditor({
       }}
     >
       <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-        <Tooltip title="Add files">
+        <Tooltip title={t("playlistEditor.addFiles")}>
           <IconButton
-            aria-label="Add files to playlist"
+            aria-label={t("playlistEditor.addFilesToPlaylist")}
             color="primary"
             onClick={() => setPickerOpen(true)}
           >
@@ -370,7 +388,10 @@ export default function PlaylistEditor({
             checkboxSelection
             disableRowSelectionExcludeModel
             slotProps={{ baseCheckbox: roundedCheckboxIcons }}
-            rowSelectionModel={{ type: "include", ids: new Set(gridSelection) }}
+            rowSelectionModel={{
+              type: INCLUDE_SELECTION_TYPE,
+              ids: new Set(gridSelection),
+            }}
             onRowSelectionModelChange={(model) => {
               const ids =
                 model.type === "exclude"

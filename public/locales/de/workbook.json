@@ -18,7 +18,37 @@
     "noDictionaryAvailable": "Kein Wörterbuch verfügbar",
     "submit": "Absenden",
     "inputMethodSelector": "Eingabemethode",
-    "placeholder": "Antwort hier eingeben"
+    "placeholder": "Antwort hier eingeben",
+    "loadingAudio": "Audio wird geladen...",
+    "progressDescription": "Prozentsatz der beantworteten Aufgaben.",
+    "accuracyDescription": "Prozentsatz der eingereichten Antworten, die als richtig bewertet wurden.",
+    "inputMethodLabels": {
+      "audio": "Antwort sprechen",
+      "text": "Antwort eingeben",
+      "writing": "Antwort zeichnen"
+    },
+    "recordYourAnswer": "Antwort aufnehmen",
+    "defaultPromptByDefinition": "Geben Sie Wörter an, die am besten zu der/den folgenden Definition(en) passen:",
+    "defaultPromptByWord": "Bitte definieren Sie das/die folgende(n) Wort/Wörter:"
+  },
+  "customAIComponent": {
+    "accuracyDescription": "Prozentsatz der eingereichten Antworten, die von der KI als richtig bewertet wurden.",
+    "completed": "Abgeschlossen",
+    "correct": "Richtig",
+    "grading": "Die KI bewertet Ihre Antwort...",
+    "gradingError": "Beim Bewerten ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
+    "imageUploadHint": "Eingabefeld zum Hochladen von Bildern – Reichen Sie ein Bild zur KI-Auswertung ein",
+    "inputMethod": "Eingabemethode",
+    "loading": "Wird geladen...",
+    "modeAudio": "Antwort sprechen",
+    "modeDrawing": "Antwort zeichnen",
+    "modeImage": "Bild hochladen",
+    "modeText": "Antwort eingeben",
+    "needsImprovement": "Verbesserungsbedarf",
+    "progressDescription": "Prozentsatz der beantworteten KI-bewerteten Fragen.",
+    "questionFallback": "Frage {id}",
+    "score": "Punktzahl: {score}/100",
+    "yourAnswer": "Ihre Antwort"
   },
   "toolBarRoPlugin": {
     "fallbackText": "Format",
@@ -38,7 +68,10 @@
     "nextAssignment": "Nächste Aufgabe",
     "retrying": "Neuer Versuch wird gestartet...",
     "sectionHeading": "Nächste Schritte",
-    "tryAgain": "Erneut versuchen"
+    "tryAgain": "Erneut versuchen",
+    "completedIn": "Abgeschlossen in {duration}",
+    "timeLimit": "Zeitlimit: {duration}",
+    "timeLimitWithCompletion": "Zeitlimit: {duration} • {completion}"
   },
   "quizComponent": {
     "gradeDisplay": "Note: {score}%"
@@ -59,7 +92,8 @@
     "submit": "Absenden",
     "text": "Text",
     "writing": "Schreiben",
-    "yourAnswer": "Ihre Antwort"
+    "yourAnswer": "Ihre Antwort",
+    "answerVerifiedAndAccepted": "Antwort überprüft und akzeptiert"
   },
   "gradeHistory": {
     "title": "Notenverlauf",
@@ -91,6 +125,7 @@
     "showWaveformsDescription": "Visuelle Wellenformen für Audioinhalte anzeigen",
     "feedbackPreferences": "Feedback-Einstellungen",
     "immediateFeedback": "Sofortiges Feedback",
-    "immediateFeedbackDescription": "Korrektes/inkorrektes Feedback sofort anzeigen"
+    "immediateFeedbackDescription": "Korrektes/inkorrektes Feedback sofort anzeigen",
+    "accessibilityMoved": "Die Einstellungen für Barrierefreiheit (reduzierte Bewegung, hoher Kontrast) wurden auf Ihre <link>globale Einstellungsseite</link> verschoben."
   }
 }

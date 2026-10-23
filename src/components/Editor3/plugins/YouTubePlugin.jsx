@@ -15,6 +15,7 @@ import { useEffect } from "react";
 import { BlockWithAlignableContents } from "@lexical/react/LexicalBlockWithAlignableContents";
 import { DecoratorBlockNode } from "@lexical/react/LexicalDecoratorBlockNode";
 import * as React from "react";
+import { useTranslations } from "next-intl";
 
 /**
  * YouTubeComponent - Renders an embedded YouTube video iframe.
@@ -32,6 +33,7 @@ const YouTubeComponent = React.memo(function YouTubeComponent({
   nodeKey,
   videoID,
 }) {
+  const t = useTranslations("editor.shared");
   return (
     <BlockWithAlignableContents
       className={className}
@@ -45,7 +47,7 @@ const YouTubeComponent = React.memo(function YouTubeComponent({
         frameBorder="0"
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowFullScreen={true}
-        title="YouTube video"
+        title={t("youTubePlugin.videoTitle")}
         style={{
           maxWidth: "100%",
           width: "100%",

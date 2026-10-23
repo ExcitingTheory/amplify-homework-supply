@@ -10,6 +10,7 @@ import React, { useEffect, useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import LockOpenIcon from '@mui/icons-material/LockOpen'
+import { useTranslations } from 'next-intl'
 import { useReducedMotion } from '@/hooks/useReducedMotion'
 
 export interface ContentUnlockAnimationProps {
@@ -27,6 +28,7 @@ export function ContentUnlockAnimation({
   onComplete,
 }: ContentUnlockAnimationProps) {
   const [phase, setPhase] = useState<'idle' | 'shake' | 'open' | 'shimmer' | 'done'>('idle')
+  const t = useTranslations('components')
   const reducedMotion = useReducedMotion()
 
   useEffect(() => {
@@ -38,11 +40,11 @@ export function ContentUnlockAnimation({
     // Skip animation — go straight to done after a brief flash
     if (reducedMotion) {
       setPhase('open')
-      const t = setTimeout(() => {
+      const timer = setTimeout(() => {
         setPhase('done')
         onComplete?.()
       }, 800)
-      return () => clearTimeout(t)
+      return () => clearTimeout(timer)
     }
 
     setPhase('shake')
@@ -137,7 +139,7 @@ export function ContentUnlockAnimation({
                 }),
           }}
         >
-          🔓 {title} Unlocked!
+          {t('contentUnlockAnimation.unlocked', { title })}
         </Typography>
       )}
     </Box>

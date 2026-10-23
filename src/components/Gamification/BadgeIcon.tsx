@@ -84,6 +84,10 @@ const RARITY_METAL: Record<BadgeVisualConfig["rarity"], MetalKey> = {
 // Animation variants
 // ============================================================================
 
+/** Motion variant names (animation state keys, not user-visible text) */
+const VARIANT_HIDDEN = "hidden";
+const VARIANT_VISIBLE = "visible";
+
 const containerVariants: Record<BadgeAnimationPreset, Variants> = {
   draw: {
     hidden: { opacity: 0, scale: 0.8 },
@@ -333,8 +337,8 @@ export function BadgeIcon({
             ? containerVariants[mountAnim]
             : containerVariants.none
         }
-        initial={effectiveAnimate && earned ? "hidden" : "visible"}
-        animate="visible"
+        initial={effectiveAnimate && earned ? VARIANT_HIDDEN : VARIANT_VISIBLE}
+        animate={VARIANT_VISIBLE}
         whileHover={
           earned && !reducedMotion
             ? (hoverVariants[hoverAnim] as any)

@@ -43,6 +43,7 @@ import type {
 } from "./DiceBearAvatar";
 import { GLOW_COLOR_PRESETS, DEFAULT_GLOW_COLORS } from "./AvatarGlowRing";
 import type { GlowRingConfig } from "./AvatarGlowRing";
+import { useTranslations } from "next-intl";
 
 // ============================================================================
 // Types
@@ -91,52 +92,6 @@ const BACKGROUND_COLORS = [
 ];
 
 // -- Avataaars Neutral (simple) --
-const NEUTRAL_EYEBROWS = [
-  { id: "angry", label: "Angry" },
-  { id: "angryNatural", label: "Angry Natural" },
-  { id: "default", label: "Default" },
-  { id: "defaultNatural", label: "Default Natural" },
-  { id: "flatNatural", label: "Flat Natural" },
-  { id: "frownNatural", label: "Frown Natural" },
-  { id: "raisedExcited", label: "Raised Excited" },
-  { id: "raisedExcitedNatural", label: "Raised Excited Natural" },
-  { id: "sadConcerned", label: "Sad Concerned" },
-  { id: "sadConcernedNatural", label: "Sad Concerned Natural" },
-  { id: "unibrowNatural", label: "Unibrow Natural" },
-  { id: "upDown", label: "Up Down" },
-  { id: "upDownNatural", label: "Up Down Natural" },
-];
-
-const NEUTRAL_EYES = [
-  { id: "closed", label: "Closed" },
-  { id: "cry", label: "Cry" },
-  { id: "default", label: "Default" },
-  { id: "eyeRoll", label: "Eye Roll" },
-  { id: "happy", label: "Happy" },
-  { id: "hearts", label: "Hearts" },
-  { id: "side", label: "Side" },
-  { id: "squint", label: "Squint" },
-  { id: "surprised", label: "Surprised" },
-  { id: "wink", label: "Wink" },
-  { id: "winkWacky", label: "Wink Wacky" },
-  { id: "xDizzy", label: "X Dizzy" },
-];
-
-const NEUTRAL_MOUTH = [
-  { id: "concerned", label: "Concerned" },
-  { id: "default", label: "Default" },
-  { id: "disbelief", label: "Disbelief" },
-  { id: "eating", label: "Eating" },
-  { id: "grimace", label: "Grimace" },
-  { id: "sad", label: "Sad" },
-  { id: "screamOpen", label: "Scream" },
-  { id: "serious", label: "Serious" },
-  { id: "smile", label: "Smile" },
-  { id: "tongue", label: "Tongue" },
-  { id: "twinkle", label: "Twinkle" },
-  { id: "vomit", label: "Vomit" },
-];
-
 // -- Avataaars (detailed) — same face options + clothing/hair/accessories --
 const DETAILED_SKIN_COLORS = [
   "614335",
@@ -179,73 +134,6 @@ const DETAILED_CLOTHES_COLORS = [
   "ffffff",
 ];
 
-const DETAILED_TOP = [
-  { id: "bigHair", label: "Big Hair" },
-  { id: "bob", label: "Bob" },
-  { id: "bun", label: "Bun" },
-  { id: "curly", label: "Curly" },
-  { id: "curvy", label: "Curvy" },
-  { id: "dreads", label: "Dreads" },
-  { id: "dreads01", label: "Dreads 01" },
-  { id: "dreads02", label: "Dreads 02" },
-  { id: "frida", label: "Frida" },
-  { id: "frizzle", label: "Frizzle" },
-  { id: "fro", label: "Fro" },
-  { id: "froBand", label: "Fro Band" },
-  { id: "hat", label: "Hat" },
-  { id: "hijab", label: "Hijab" },
-  { id: "longButNotTooLong", label: "Long" },
-  { id: "miaWallace", label: "Mia Wallace" },
-  { id: "shaggy", label: "Shaggy" },
-  { id: "shaggyMullet", label: "Shaggy Mullet" },
-  { id: "shavedSides", label: "Shaved Sides" },
-  { id: "shortCurly", label: "Short Curly" },
-  { id: "shortFlat", label: "Short Flat" },
-  { id: "shortRound", label: "Short Round" },
-  { id: "shortWaved", label: "Short Waved" },
-  { id: "sides", label: "Sides" },
-  { id: "straight01", label: "Straight 01" },
-  { id: "straight02", label: "Straight 02" },
-  { id: "straightAndStrand", label: "Straight & Strand" },
-  { id: "theCaesar", label: "The Caesar" },
-  { id: "theCaesarAndSidePart", label: "Caesar & Side Part" },
-  { id: "turban", label: "Turban" },
-  { id: "winterHat1", label: "Winter Hat 1" },
-  { id: "winterHat02", label: "Winter Hat 2" },
-  { id: "winterHat03", label: "Winter Hat 3" },
-  { id: "winterHat04", label: "Winter Hat 4" },
-];
-
-const DETAILED_CLOTHING = [
-  { id: "blazerAndShirt", label: "Blazer & Shirt" },
-  { id: "blazerAndSweater", label: "Blazer & Sweater" },
-  { id: "collarAndSweater", label: "Collar & Sweater" },
-  { id: "graphicShirt", label: "Graphic Shirt" },
-  { id: "hoodie", label: "Hoodie" },
-  { id: "overall", label: "Overall" },
-  { id: "shirtCrewNeck", label: "Crew Neck" },
-  { id: "shirtScoopNeck", label: "Scoop Neck" },
-  { id: "shirtVNeck", label: "V-Neck" },
-];
-
-const DETAILED_FACIAL_HAIR = [
-  { id: "beardLight", label: "Light Beard" },
-  { id: "beardMajestic", label: "Majestic Beard" },
-  { id: "beardMedium", label: "Medium Beard" },
-  { id: "moustacheFancy", label: "Fancy Moustache" },
-  { id: "moustacheMagnum", label: "Magnum Moustache" },
-];
-
-const DETAILED_ACCESSORIES = [
-  { id: "eyepatch", label: "Eyepatch" },
-  { id: "kurt", label: "Kurt" },
-  { id: "prescription01", label: "Glasses 01" },
-  { id: "prescription02", label: "Glasses 02" },
-  { id: "round", label: "Round Glasses" },
-  { id: "sunglasses", label: "Sunglasses" },
-  { id: "wayfarers", label: "Wayfarers" },
-];
-
 // -- Toon Head --
 const TOONHEAD_SKIN_COLORS = ["5c3829", "a36b4f", "b98e6a", "c68e7a", "f1c3a5"];
 
@@ -264,103 +152,594 @@ const TOONHEAD_CLOTHES_COLORS = [
   "f97316",
 ];
 
-const TOONHEAD_EYEBROWS = [
-  { id: "angry", label: "Angry" },
-  { id: "happy", label: "Happy" },
-  { id: "neutral", label: "Neutral" },
-  { id: "raised", label: "Raised" },
-  { id: "sad", label: "Sad" },
-];
-
-const TOONHEAD_EYES = [
-  { id: "bow", label: "Bow" },
-  { id: "happy", label: "Happy" },
-  { id: "humble", label: "Humble" },
-  { id: "wide", label: "Wide" },
-  { id: "wink", label: "Wink" },
-];
-
-const TOONHEAD_HAIR = [
-  { id: "bun", label: "Bun" },
-  { id: "sideComed", label: "Side Combed" },
-  { id: "spiky", label: "Spiky" },
-  { id: "undercut", label: "Undercut" },
-];
-
-const TOONHEAD_MOUTH = [
-  { id: "agape", label: "Agape" },
-  { id: "angry", label: "Angry" },
-  { id: "laugh", label: "Laugh" },
-  { id: "sad", label: "Sad" },
-  { id: "smile", label: "Smile" },
-];
-
-const TOONHEAD_BEARD = [
-  { id: "chin", label: "Chin" },
-  { id: "chinMoustache", label: "Chin + Moustache" },
-  { id: "fullBeard", label: "Full Beard" },
-  { id: "longBeard", label: "Long Beard" },
-  { id: "moustacheTwirl", label: "Moustache Twirl" },
-];
-
-const TOONHEAD_CLOTHES = [
-  { id: "dress", label: "Dress" },
-  { id: "openJacket", label: "Open Jacket" },
-  { id: "shirt", label: "Shirt" },
-  { id: "tShirt", label: "T-Shirt" },
-  { id: "turtleNeck", label: "Turtleneck" },
-];
-
-const TOONHEAD_REAR_HAIR = [
-  { id: "longStraight", label: "Long Straight" },
-  { id: "longWavy", label: "Long Wavy" },
-  { id: "neckHigh", label: "Neck High" },
-  { id: "shoulderHigh", label: "Shoulder High" },
-];
-
 // -- Bottts (robot) — unlocked only after all Bot Whisperer badges --
 const ROBOT_STYLES: AvatarStyleTier[] = ["bottts", "bottts-neutral"];
 
-const ROBOT_EYES = [
-  { id: "bulging", label: "Bulging" },
-  { id: "dizzy", label: "Dizzy" },
-  { id: "eva", label: "Eva" },
-  { id: "frame1", label: "Frame 1" },
-  { id: "frame2", label: "Frame 2" },
-  { id: "glow", label: "Glow" },
-  { id: "happy", label: "Happy" },
-  { id: "hearts", label: "Hearts" },
-  { id: "robocop", label: "Robocop" },
-  { id: "round", label: "Round" },
-  { id: "roundFrame01", label: "Round Frame 01" },
-  { id: "roundFrame02", label: "Round Frame 02" },
-  { id: "sensor", label: "Sensor" },
-  { id: "shade01", label: "Shade" },
-];
-
-const ROBOT_MOUTH = [
-  { id: "bite", label: "Bite" },
-  { id: "diagram", label: "Diagram" },
-  { id: "grill01", label: "Grill 01" },
-  { id: "grill02", label: "Grill 02" },
-  { id: "grill03", label: "Grill 03" },
-  { id: "smile01", label: "Smile 01" },
-  { id: "smile02", label: "Smile 02" },
-  { id: "square01", label: "Square 01" },
-  { id: "square02", label: "Square 02" },
-];
-
-const ROBOT_TOP = [
-  { id: "antenna", label: "Antenna" },
-  { id: "antennaCrooked", label: "Crooked Antenna" },
-  { id: "bulb01", label: "Bulb" },
-  { id: "glowingBulb01", label: "Glowing Bulb 01" },
-  { id: "glowingBulb02", label: "Glowing Bulb 02" },
-  { id: "horns", label: "Horns" },
-  { id: "lights", label: "Lights" },
-  { id: "pyramid", label: "Pyramid" },
-  { id: "radar", label: "Radar" },
-];
+/** DiceBear option chips with translated labels, keyed by option group */
+function useAvatarOptions() {
+  const t = useTranslations("components");
+  return useMemo(
+    () => ({
+      neutralEyebrows: [
+        {
+          id: "angry",
+          label: t("avatarCustomizer.options.neutralEyebrows.angry"),
+        },
+        {
+          id: "angryNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.angryNatural"),
+        },
+        {
+          id: "default",
+          label: t("avatarCustomizer.options.neutralEyebrows.default"),
+        },
+        {
+          id: "defaultNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.defaultNatural"),
+        },
+        {
+          id: "flatNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.flatNatural"),
+        },
+        {
+          id: "frownNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.frownNatural"),
+        },
+        {
+          id: "raisedExcited",
+          label: t("avatarCustomizer.options.neutralEyebrows.raisedExcited"),
+        },
+        {
+          id: "raisedExcitedNatural",
+          label: t(
+            "avatarCustomizer.options.neutralEyebrows.raisedExcitedNatural",
+          ),
+        },
+        {
+          id: "sadConcerned",
+          label: t("avatarCustomizer.options.neutralEyebrows.sadConcerned"),
+        },
+        {
+          id: "sadConcernedNatural",
+          label: t(
+            "avatarCustomizer.options.neutralEyebrows.sadConcernedNatural",
+          ),
+        },
+        {
+          id: "unibrowNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.unibrowNatural"),
+        },
+        {
+          id: "upDown",
+          label: t("avatarCustomizer.options.neutralEyebrows.upDown"),
+        },
+        {
+          id: "upDownNatural",
+          label: t("avatarCustomizer.options.neutralEyebrows.upDownNatural"),
+        },
+      ],
+      neutralEyes: [
+        {
+          id: "closed",
+          label: t("avatarCustomizer.options.neutralEyes.closed"),
+        },
+        { id: "cry", label: t("avatarCustomizer.options.neutralEyes.cry") },
+        {
+          id: "default",
+          label: t("avatarCustomizer.options.neutralEyes.default"),
+        },
+        {
+          id: "eyeRoll",
+          label: t("avatarCustomizer.options.neutralEyes.eyeRoll"),
+        },
+        { id: "happy", label: t("avatarCustomizer.options.neutralEyes.happy") },
+        {
+          id: "hearts",
+          label: t("avatarCustomizer.options.neutralEyes.hearts"),
+        },
+        { id: "side", label: t("avatarCustomizer.options.neutralEyes.side") },
+        {
+          id: "squint",
+          label: t("avatarCustomizer.options.neutralEyes.squint"),
+        },
+        {
+          id: "surprised",
+          label: t("avatarCustomizer.options.neutralEyes.surprised"),
+        },
+        { id: "wink", label: t("avatarCustomizer.options.neutralEyes.wink") },
+        {
+          id: "winkWacky",
+          label: t("avatarCustomizer.options.neutralEyes.winkWacky"),
+        },
+        {
+          id: "xDizzy",
+          label: t("avatarCustomizer.options.neutralEyes.xDizzy"),
+        },
+      ],
+      neutralMouth: [
+        {
+          id: "concerned",
+          label: t("avatarCustomizer.options.neutralMouth.concerned"),
+        },
+        {
+          id: "default",
+          label: t("avatarCustomizer.options.neutralMouth.default"),
+        },
+        {
+          id: "disbelief",
+          label: t("avatarCustomizer.options.neutralMouth.disbelief"),
+        },
+        {
+          id: "eating",
+          label: t("avatarCustomizer.options.neutralMouth.eating"),
+        },
+        {
+          id: "grimace",
+          label: t("avatarCustomizer.options.neutralMouth.grimace"),
+        },
+        { id: "sad", label: t("avatarCustomizer.options.neutralMouth.sad") },
+        {
+          id: "screamOpen",
+          label: t("avatarCustomizer.options.neutralMouth.screamOpen"),
+        },
+        {
+          id: "serious",
+          label: t("avatarCustomizer.options.neutralMouth.serious"),
+        },
+        {
+          id: "smile",
+          label: t("avatarCustomizer.options.neutralMouth.smile"),
+        },
+        {
+          id: "tongue",
+          label: t("avatarCustomizer.options.neutralMouth.tongue"),
+        },
+        {
+          id: "twinkle",
+          label: t("avatarCustomizer.options.neutralMouth.twinkle"),
+        },
+        {
+          id: "vomit",
+          label: t("avatarCustomizer.options.neutralMouth.vomit"),
+        },
+      ],
+      detailedTop: [
+        {
+          id: "bigHair",
+          label: t("avatarCustomizer.options.detailedTop.bigHair"),
+        },
+        { id: "bob", label: t("avatarCustomizer.options.detailedTop.bob") },
+        { id: "bun", label: t("avatarCustomizer.options.detailedTop.bun") },
+        { id: "curly", label: t("avatarCustomizer.options.detailedTop.curly") },
+        { id: "curvy", label: t("avatarCustomizer.options.detailedTop.curvy") },
+        {
+          id: "dreads",
+          label: t("avatarCustomizer.options.detailedTop.dreads"),
+        },
+        {
+          id: "dreads01",
+          label: t("avatarCustomizer.options.detailedTop.dreads01"),
+        },
+        {
+          id: "dreads02",
+          label: t("avatarCustomizer.options.detailedTop.dreads02"),
+        },
+        { id: "frida", label: t("avatarCustomizer.options.detailedTop.frida") },
+        {
+          id: "frizzle",
+          label: t("avatarCustomizer.options.detailedTop.frizzle"),
+        },
+        { id: "fro", label: t("avatarCustomizer.options.detailedTop.fro") },
+        {
+          id: "froBand",
+          label: t("avatarCustomizer.options.detailedTop.froBand"),
+        },
+        { id: "hat", label: t("avatarCustomizer.options.detailedTop.hat") },
+        { id: "hijab", label: t("avatarCustomizer.options.detailedTop.hijab") },
+        {
+          id: "longButNotTooLong",
+          label: t("avatarCustomizer.options.detailedTop.longButNotTooLong"),
+        },
+        {
+          id: "miaWallace",
+          label: t("avatarCustomizer.options.detailedTop.miaWallace"),
+        },
+        {
+          id: "shaggy",
+          label: t("avatarCustomizer.options.detailedTop.shaggy"),
+        },
+        {
+          id: "shaggyMullet",
+          label: t("avatarCustomizer.options.detailedTop.shaggyMullet"),
+        },
+        {
+          id: "shavedSides",
+          label: t("avatarCustomizer.options.detailedTop.shavedSides"),
+        },
+        {
+          id: "shortCurly",
+          label: t("avatarCustomizer.options.detailedTop.shortCurly"),
+        },
+        {
+          id: "shortFlat",
+          label: t("avatarCustomizer.options.detailedTop.shortFlat"),
+        },
+        {
+          id: "shortRound",
+          label: t("avatarCustomizer.options.detailedTop.shortRound"),
+        },
+        {
+          id: "shortWaved",
+          label: t("avatarCustomizer.options.detailedTop.shortWaved"),
+        },
+        { id: "sides", label: t("avatarCustomizer.options.detailedTop.sides") },
+        {
+          id: "straight01",
+          label: t("avatarCustomizer.options.detailedTop.straight01"),
+        },
+        {
+          id: "straight02",
+          label: t("avatarCustomizer.options.detailedTop.straight02"),
+        },
+        {
+          id: "straightAndStrand",
+          label: t("avatarCustomizer.options.detailedTop.straightAndStrand"),
+        },
+        {
+          id: "theCaesar",
+          label: t("avatarCustomizer.options.detailedTop.theCaesar"),
+        },
+        {
+          id: "theCaesarAndSidePart",
+          label: t("avatarCustomizer.options.detailedTop.theCaesarAndSidePart"),
+        },
+        {
+          id: "turban",
+          label: t("avatarCustomizer.options.detailedTop.turban"),
+        },
+        {
+          id: "winterHat1",
+          label: t("avatarCustomizer.options.detailedTop.winterHat1"),
+        },
+        {
+          id: "winterHat02",
+          label: t("avatarCustomizer.options.detailedTop.winterHat02"),
+        },
+        {
+          id: "winterHat03",
+          label: t("avatarCustomizer.options.detailedTop.winterHat03"),
+        },
+        {
+          id: "winterHat04",
+          label: t("avatarCustomizer.options.detailedTop.winterHat04"),
+        },
+      ],
+      detailedClothing: [
+        {
+          id: "blazerAndShirt",
+          label: t("avatarCustomizer.options.detailedClothing.blazerAndShirt"),
+        },
+        {
+          id: "blazerAndSweater",
+          label: t(
+            "avatarCustomizer.options.detailedClothing.blazerAndSweater",
+          ),
+        },
+        {
+          id: "collarAndSweater",
+          label: t(
+            "avatarCustomizer.options.detailedClothing.collarAndSweater",
+          ),
+        },
+        {
+          id: "graphicShirt",
+          label: t("avatarCustomizer.options.detailedClothing.graphicShirt"),
+        },
+        {
+          id: "hoodie",
+          label: t("avatarCustomizer.options.detailedClothing.hoodie"),
+        },
+        {
+          id: "overall",
+          label: t("avatarCustomizer.options.detailedClothing.overall"),
+        },
+        {
+          id: "shirtCrewNeck",
+          label: t("avatarCustomizer.options.detailedClothing.shirtCrewNeck"),
+        },
+        {
+          id: "shirtScoopNeck",
+          label: t("avatarCustomizer.options.detailedClothing.shirtScoopNeck"),
+        },
+        {
+          id: "shirtVNeck",
+          label: t("avatarCustomizer.options.detailedClothing.shirtVNeck"),
+        },
+      ],
+      detailedFacialHair: [
+        {
+          id: "beardLight",
+          label: t("avatarCustomizer.options.detailedFacialHair.beardLight"),
+        },
+        {
+          id: "beardMajestic",
+          label: t("avatarCustomizer.options.detailedFacialHair.beardMajestic"),
+        },
+        {
+          id: "beardMedium",
+          label: t("avatarCustomizer.options.detailedFacialHair.beardMedium"),
+        },
+        {
+          id: "moustacheFancy",
+          label: t(
+            "avatarCustomizer.options.detailedFacialHair.moustacheFancy",
+          ),
+        },
+        {
+          id: "moustacheMagnum",
+          label: t(
+            "avatarCustomizer.options.detailedFacialHair.moustacheMagnum",
+          ),
+        },
+      ],
+      detailedAccessories: [
+        {
+          id: "eyepatch",
+          label: t("avatarCustomizer.options.detailedAccessories.eyepatch"),
+        },
+        {
+          id: "kurt",
+          label: t("avatarCustomizer.options.detailedAccessories.kurt"),
+        },
+        {
+          id: "prescription01",
+          label: t(
+            "avatarCustomizer.options.detailedAccessories.prescription01",
+          ),
+        },
+        {
+          id: "prescription02",
+          label: t(
+            "avatarCustomizer.options.detailedAccessories.prescription02",
+          ),
+        },
+        {
+          id: "round",
+          label: t("avatarCustomizer.options.detailedAccessories.round"),
+        },
+        {
+          id: "sunglasses",
+          label: t("avatarCustomizer.options.detailedAccessories.sunglasses"),
+        },
+        {
+          id: "wayfarers",
+          label: t("avatarCustomizer.options.detailedAccessories.wayfarers"),
+        },
+      ],
+      toonheadEyebrows: [
+        {
+          id: "angry",
+          label: t("avatarCustomizer.options.toonheadEyebrows.angry"),
+        },
+        {
+          id: "happy",
+          label: t("avatarCustomizer.options.toonheadEyebrows.happy"),
+        },
+        {
+          id: "neutral",
+          label: t("avatarCustomizer.options.toonheadEyebrows.neutral"),
+        },
+        {
+          id: "raised",
+          label: t("avatarCustomizer.options.toonheadEyebrows.raised"),
+        },
+        {
+          id: "sad",
+          label: t("avatarCustomizer.options.toonheadEyebrows.sad"),
+        },
+      ],
+      toonheadEyes: [
+        { id: "bow", label: t("avatarCustomizer.options.toonheadEyes.bow") },
+        {
+          id: "happy",
+          label: t("avatarCustomizer.options.toonheadEyes.happy"),
+        },
+        {
+          id: "humble",
+          label: t("avatarCustomizer.options.toonheadEyes.humble"),
+        },
+        { id: "wide", label: t("avatarCustomizer.options.toonheadEyes.wide") },
+        { id: "wink", label: t("avatarCustomizer.options.toonheadEyes.wink") },
+      ],
+      toonheadHair: [
+        { id: "bun", label: t("avatarCustomizer.options.toonheadHair.bun") },
+        {
+          id: "sideComed",
+          label: t("avatarCustomizer.options.toonheadHair.sideComed"),
+        },
+        {
+          id: "spiky",
+          label: t("avatarCustomizer.options.toonheadHair.spiky"),
+        },
+        {
+          id: "undercut",
+          label: t("avatarCustomizer.options.toonheadHair.undercut"),
+        },
+      ],
+      toonheadMouth: [
+        {
+          id: "agape",
+          label: t("avatarCustomizer.options.toonheadMouth.agape"),
+        },
+        {
+          id: "angry",
+          label: t("avatarCustomizer.options.toonheadMouth.angry"),
+        },
+        {
+          id: "laugh",
+          label: t("avatarCustomizer.options.toonheadMouth.laugh"),
+        },
+        { id: "sad", label: t("avatarCustomizer.options.toonheadMouth.sad") },
+        {
+          id: "smile",
+          label: t("avatarCustomizer.options.toonheadMouth.smile"),
+        },
+      ],
+      toonheadBeard: [
+        { id: "chin", label: t("avatarCustomizer.options.toonheadBeard.chin") },
+        {
+          id: "chinMoustache",
+          label: t("avatarCustomizer.options.toonheadBeard.chinMoustache"),
+        },
+        {
+          id: "fullBeard",
+          label: t("avatarCustomizer.options.toonheadBeard.fullBeard"),
+        },
+        {
+          id: "longBeard",
+          label: t("avatarCustomizer.options.toonheadBeard.longBeard"),
+        },
+        {
+          id: "moustacheTwirl",
+          label: t("avatarCustomizer.options.toonheadBeard.moustacheTwirl"),
+        },
+      ],
+      toonheadClothes: [
+        {
+          id: "dress",
+          label: t("avatarCustomizer.options.toonheadClothes.dress"),
+        },
+        {
+          id: "openJacket",
+          label: t("avatarCustomizer.options.toonheadClothes.openJacket"),
+        },
+        {
+          id: "shirt",
+          label: t("avatarCustomizer.options.toonheadClothes.shirt"),
+        },
+        {
+          id: "tShirt",
+          label: t("avatarCustomizer.options.toonheadClothes.tShirt"),
+        },
+        {
+          id: "turtleNeck",
+          label: t("avatarCustomizer.options.toonheadClothes.turtleNeck"),
+        },
+      ],
+      toonheadRearHair: [
+        {
+          id: "longStraight",
+          label: t("avatarCustomizer.options.toonheadRearHair.longStraight"),
+        },
+        {
+          id: "longWavy",
+          label: t("avatarCustomizer.options.toonheadRearHair.longWavy"),
+        },
+        {
+          id: "neckHigh",
+          label: t("avatarCustomizer.options.toonheadRearHair.neckHigh"),
+        },
+        {
+          id: "shoulderHigh",
+          label: t("avatarCustomizer.options.toonheadRearHair.shoulderHigh"),
+        },
+      ],
+      robotEyes: [
+        {
+          id: "bulging",
+          label: t("avatarCustomizer.options.robotEyes.bulging"),
+        },
+        { id: "dizzy", label: t("avatarCustomizer.options.robotEyes.dizzy") },
+        { id: "eva", label: t("avatarCustomizer.options.robotEyes.eva") },
+        { id: "frame1", label: t("avatarCustomizer.options.robotEyes.frame1") },
+        { id: "frame2", label: t("avatarCustomizer.options.robotEyes.frame2") },
+        { id: "glow", label: t("avatarCustomizer.options.robotEyes.glow") },
+        { id: "happy", label: t("avatarCustomizer.options.robotEyes.happy") },
+        { id: "hearts", label: t("avatarCustomizer.options.robotEyes.hearts") },
+        {
+          id: "robocop",
+          label: t("avatarCustomizer.options.robotEyes.robocop"),
+        },
+        { id: "round", label: t("avatarCustomizer.options.robotEyes.round") },
+        {
+          id: "roundFrame01",
+          label: t("avatarCustomizer.options.robotEyes.roundFrame01"),
+        },
+        {
+          id: "roundFrame02",
+          label: t("avatarCustomizer.options.robotEyes.roundFrame02"),
+        },
+        { id: "sensor", label: t("avatarCustomizer.options.robotEyes.sensor") },
+        {
+          id: "shade01",
+          label: t("avatarCustomizer.options.robotEyes.shade01"),
+        },
+      ],
+      robotMouth: [
+        { id: "bite", label: t("avatarCustomizer.options.robotMouth.bite") },
+        {
+          id: "diagram",
+          label: t("avatarCustomizer.options.robotMouth.diagram"),
+        },
+        {
+          id: "grill01",
+          label: t("avatarCustomizer.options.robotMouth.grill01"),
+        },
+        {
+          id: "grill02",
+          label: t("avatarCustomizer.options.robotMouth.grill02"),
+        },
+        {
+          id: "grill03",
+          label: t("avatarCustomizer.options.robotMouth.grill03"),
+        },
+        {
+          id: "smile01",
+          label: t("avatarCustomizer.options.robotMouth.smile01"),
+        },
+        {
+          id: "smile02",
+          label: t("avatarCustomizer.options.robotMouth.smile02"),
+        },
+        {
+          id: "square01",
+          label: t("avatarCustomizer.options.robotMouth.square01"),
+        },
+        {
+          id: "square02",
+          label: t("avatarCustomizer.options.robotMouth.square02"),
+        },
+      ],
+      robotTop: [
+        {
+          id: "antenna",
+          label: t("avatarCustomizer.options.robotTop.antenna"),
+        },
+        {
+          id: "antennaCrooked",
+          label: t("avatarCustomizer.options.robotTop.antennaCrooked"),
+        },
+        { id: "bulb01", label: t("avatarCustomizer.options.robotTop.bulb01") },
+        {
+          id: "glowingBulb01",
+          label: t("avatarCustomizer.options.robotTop.glowingBulb01"),
+        },
+        {
+          id: "glowingBulb02",
+          label: t("avatarCustomizer.options.robotTop.glowingBulb02"),
+        },
+        { id: "horns", label: t("avatarCustomizer.options.robotTop.horns") },
+        { id: "lights", label: t("avatarCustomizer.options.robotTop.lights") },
+        {
+          id: "pyramid",
+          label: t("avatarCustomizer.options.robotTop.pyramid"),
+        },
+        { id: "radar", label: t("avatarCustomizer.options.robotTop.radar") },
+      ],
+    }),
+    [t],
+  );
+}
 
 // ============================================================================
 // Sub-components
@@ -418,6 +797,7 @@ function OptionGrid({
   onSelect: (id: string) => void;
   label: string;
 }) {
+  const t = useTranslations("components");
   return (
     <Box>
       <Typography variant="caption" color="text.secondary" gutterBottom>
@@ -425,7 +805,7 @@ function OptionGrid({
       </Typography>
       <Stack direction="row" flexWrap="wrap" gap={0.5} sx={{ mt: 0.5 }}>
         <Chip
-          label="Random"
+          label={t("avatarCustomizer.random")}
           size="small"
           variant={!selected || selected.length === 0 ? "filled" : "outlined"}
           color={!selected || selected.length === 0 ? "primary" : "default"}
@@ -462,6 +842,17 @@ export function AvatarCustomizer({
   glowRing,
   robotStylesUnlocked = false,
 }: AvatarCustomizerProps) {
+  const t = useTranslations("components");
+  const avatarOptions = useAvatarOptions();
+  const glowPresetLabels: Record<string, string> = {
+    rainbow: t("avatarCustomizer.glowPresetRainbow"),
+    fire: t("avatarCustomizer.glowPresetFire"),
+    ice: t("avatarCustomizer.glowPresetIce"),
+    aurora: t("avatarCustomizer.glowPresetAurora"),
+    sunset: t("avatarCustomizer.glowPresetSunset"),
+    ocean: t("avatarCustomizer.glowPresetOcean"),
+    neon: t("avatarCustomizer.glowPresetNeon"),
+  };
   const highestTier = useMemo(
     () => getUnlockedStyleTier(level, avatarUnlockConfig),
     [level, avatarUnlockConfig],
@@ -495,27 +886,30 @@ export function AvatarCustomizer({
     [],
   );
 
-  const handleOptionSelect = useCallback((field: string, id: string) => {
-    setDraft((prev) => {
-      if (!id) {
-        const next = { ...prev };
-        delete (next as any)[field];
-        if (field === "facialHair") delete next.facialHairProbability;
-        if (field === "beard") delete next.beardProbability;
-        if (field === "rearHair") delete next.rearHairProbability;
-        if (field === "accessories") delete next.accessoriesProbability;
-        return next;
-      }
-      return {
-        ...prev,
-        [field]: [id],
-        ...(field === "facialHair" ? { facialHairProbability: 100 } : {}),
-        ...(field === "beard" ? { beardProbability: 100 } : {}),
-        ...(field === "rearHair" ? { rearHairProbability: 100 } : {}),
-        ...(field === "accessories" ? { accessoriesProbability: 100 } : {}),
-      };
-    });
-  }, []);
+  const handleOptionSelect = useCallback(
+    (field: keyof AvatarOverrides, id: string) => {
+      setDraft((prev) => {
+        if (!id) {
+          const next = { ...prev };
+          delete next[field];
+          if (field === "facialHair") delete next.facialHairProbability;
+          if (field === "beard") delete next.beardProbability;
+          if (field === "rearHair") delete next.rearHairProbability;
+          if (field === "accessories") delete next.accessoriesProbability;
+          return next;
+        }
+        return {
+          ...prev,
+          [field]: [id],
+          ...(field === "facialHair" ? { facialHairProbability: 100 } : {}),
+          ...(field === "beard" ? { beardProbability: 100 } : {}),
+          ...(field === "rearHair" ? { rearHairProbability: 100 } : {}),
+          ...(field === "accessories" ? { accessoriesProbability: 100 } : {}),
+        };
+      });
+    },
+    [],
+  );
 
   const handleReset = useCallback(() => {
     setDraft({});
@@ -559,8 +953,8 @@ export function AvatarCustomizer({
           justifyContent: "space-between",
         }}
       >
-        Customize Avatar
-        <Tooltip title="Reset to random">
+        {t("avatarCustomizer.title")}
+        <Tooltip title={t("avatarCustomizer.resetToRandom")}>
           <IconButton onClick={handleReset} size="small">
             <RestartAltIcon />
           </IconButton>
@@ -583,7 +977,7 @@ export function AvatarCustomizer({
           {(unlockedStyles.length > 1 || robotStylesUnlocked) && (
             <Box>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Avatar Style
+                {t("avatarCustomizer.avatarStyle")}
               </Typography>
               <Stack direction="row" flexWrap="wrap" gap={0.5}>
                 {[
@@ -618,40 +1012,42 @@ export function AvatarCustomizer({
           {/* ── Simple (avataaars-neutral): colors always, face features always ── */}
           {style === "simple" && (
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Colors</Typography>
+              <Typography variant="subtitle2">
+                {t("avatarCustomizer.colors")}
+              </Typography>
               <ColorPalette
                 colors={BACKGROUND_COLORS}
                 selected={draft.backgroundColor?.[0]}
                 onSelect={(c) => handleColorSelect("backgroundColor", c)}
-                label="Background"
+                label={t("avatarCustomizer.background")}
               />
               <ColorPalette
                 colors={DETAILED_SKIN_COLORS}
                 selected={draft.skinColor?.[0]}
                 onSelect={(c) => handleColorSelect("skinColor", c)}
-                label="Skin Tone"
+                label={t("avatarCustomizer.skinTone")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Face
+                {t("avatarCustomizer.face")}
               </Typography>
               <OptionGrid
-                options={NEUTRAL_EYEBROWS}
+                options={avatarOptions.neutralEyebrows}
                 selected={draft.eyebrows}
                 onSelect={(id) => handleOptionSelect("eyebrows", id)}
-                label="Eyebrows"
+                label={t("avatarCustomizer.eyebrows")}
               />
               <OptionGrid
-                options={NEUTRAL_EYES}
+                options={avatarOptions.neutralEyes}
                 selected={draft.eyes}
                 onSelect={(id) => handleOptionSelect("eyes", id)}
-                label="Eyes"
+                label={t("avatarCustomizer.eyes")}
               />
               <OptionGrid
-                options={NEUTRAL_MOUTH}
+                options={avatarOptions.neutralMouth}
                 selected={draft.mouth}
                 onSelect={(id) => handleOptionSelect("mouth", id)}
-                label="Mouth"
+                label={t("avatarCustomizer.mouth")}
               />
               {!canCustomizeHairClothes && (
                 <Typography
@@ -662,8 +1058,9 @@ export function AvatarCustomizer({
                   <LockIcon
                     sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }}
                   />
-                  Reach Level {hairClothesLevel} to unlock hair, clothing, and
-                  more color options
+                  {t("avatarCustomizer.unlockHairClothingColorOptions", {
+                    level: hairClothesLevel,
+                  })}
                 </Typography>
               )}
             </Stack>
@@ -672,18 +1069,20 @@ export function AvatarCustomizer({
           {/* ── Detailed (avataaars): colors always, features gated progressively ── */}
           {style === "detailed" && (
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Colors</Typography>
+              <Typography variant="subtitle2">
+                {t("avatarCustomizer.colors")}
+              </Typography>
               <ColorPalette
                 colors={BACKGROUND_COLORS}
                 selected={draft.backgroundColor?.[0]}
                 onSelect={(c) => handleColorSelect("backgroundColor", c)}
-                label="Background"
+                label={t("avatarCustomizer.background")}
               />
               <ColorPalette
                 colors={DETAILED_SKIN_COLORS}
                 selected={draft.skinColor?.[0]}
                 onSelect={(c) => handleColorSelect("skinColor", c)}
-                label="Skin Tone"
+                label={t("avatarCustomizer.skinTone")}
               />
               {canCustomizeHairClothes && (
                 <>
@@ -691,55 +1090,55 @@ export function AvatarCustomizer({
                     colors={DETAILED_HAIR_COLORS}
                     selected={draft.hairColor?.[0]}
                     onSelect={(c) => handleColorSelect("hairColor", c)}
-                    label="Hair Color"
+                    label={t("avatarCustomizer.hairColor")}
                   />
                   <ColorPalette
                     colors={DETAILED_CLOTHES_COLORS}
                     selected={draft.clothesColor?.[0] as string | undefined}
                     onSelect={(c) => handleColorSelect("clothesColor", c)}
-                    label="Clothes Color"
+                    label={t("avatarCustomizer.clothesColor")}
                   />
                 </>
               )}
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Face
+                {t("avatarCustomizer.face")}
               </Typography>
               <OptionGrid
-                options={NEUTRAL_EYEBROWS}
+                options={avatarOptions.neutralEyebrows}
                 selected={draft.eyebrows}
                 onSelect={(id) => handleOptionSelect("eyebrows", id)}
-                label="Eyebrows"
+                label={t("avatarCustomizer.eyebrows")}
               />
               <OptionGrid
-                options={NEUTRAL_EYES}
+                options={avatarOptions.neutralEyes}
                 selected={draft.eyes}
                 onSelect={(id) => handleOptionSelect("eyes", id)}
-                label="Eyes"
+                label={t("avatarCustomizer.eyes")}
               />
               <OptionGrid
-                options={NEUTRAL_MOUTH}
+                options={avatarOptions.neutralMouth}
                 selected={draft.mouth}
                 onSelect={(id) => handleOptionSelect("mouth", id)}
-                label="Mouth"
+                label={t("avatarCustomizer.mouth")}
               />
 
               {canCustomizeHairClothes && (
                 <>
                   <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                    Hair &amp; Clothing
+                    {t("avatarCustomizer.hairAndClothing")}
                   </Typography>
                   <OptionGrid
-                    options={DETAILED_TOP}
+                    options={avatarOptions.detailedTop}
                     selected={draft.top}
                     onSelect={(id) => handleOptionSelect("top", id)}
-                    label="Hair / Top"
+                    label={t("avatarCustomizer.hairTop")}
                   />
                   <OptionGrid
-                    options={DETAILED_CLOTHING}
+                    options={avatarOptions.detailedClothing}
                     selected={draft.clothing}
                     onSelect={(id) => handleOptionSelect("clothing", id)}
-                    label="Clothing"
+                    label={t("avatarCustomizer.clothing")}
                   />
                 </>
               )}
@@ -747,19 +1146,19 @@ export function AvatarCustomizer({
               {canCustomizeAccessories && (
                 <>
                   <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                    Accessories &amp; Extras
+                    {t("avatarCustomizer.accessoriesAndExtras")}
                   </Typography>
                   <OptionGrid
-                    options={DETAILED_FACIAL_HAIR}
+                    options={avatarOptions.detailedFacialHair}
                     selected={draft.facialHair}
                     onSelect={(id) => handleOptionSelect("facialHair", id)}
-                    label="Facial Hair"
+                    label={t("avatarCustomizer.facialHair")}
                   />
                   <OptionGrid
-                    options={DETAILED_ACCESSORIES}
+                    options={avatarOptions.detailedAccessories}
                     selected={draft.accessories}
                     onSelect={(id) => handleOptionSelect("accessories", id)}
-                    label="Accessories"
+                    label={t("avatarCustomizer.accessories")}
                   />
                 </>
               )}
@@ -773,8 +1172,9 @@ export function AvatarCustomizer({
                   <LockIcon
                     sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }}
                   />
-                  Reach Level {hairClothesLevel} to unlock hair, clothing, and
-                  more colors
+                  {t("avatarCustomizer.unlockHairClothingColors", {
+                    level: hairClothesLevel,
+                  })}
                 </Typography>
               )}
               {canCustomizeHairClothes && !canCustomizeAccessories && (
@@ -786,8 +1186,9 @@ export function AvatarCustomizer({
                   <LockIcon
                     sx={{ fontSize: 14, verticalAlign: "middle", mr: 0.5 }}
                   />
-                  Reach Level {accessoriesLevel} to unlock facial hair and
-                  accessories
+                  {t("avatarCustomizer.unlockAccessories", {
+                    level: accessoriesLevel,
+                  })}
                 </Typography>
               )}
             </Stack>
@@ -796,84 +1197,86 @@ export function AvatarCustomizer({
           {/* ── Toon Head: colors always, detail features progressive ── */}
           {style === "toonhead" && (
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Colors</Typography>
+              <Typography variant="subtitle2">
+                {t("avatarCustomizer.colors")}
+              </Typography>
               <ColorPalette
                 colors={BACKGROUND_COLORS}
                 selected={draft.backgroundColor?.[0]}
                 onSelect={(c) => handleColorSelect("backgroundColor", c)}
-                label="Background"
+                label={t("avatarCustomizer.background")}
               />
               <ColorPalette
                 colors={TOONHEAD_SKIN_COLORS}
                 selected={draft.skinColor?.[0]}
                 onSelect={(c) => handleColorSelect("skinColor", c)}
-                label="Skin Tone"
+                label={t("avatarCustomizer.skinTone")}
               />
               <ColorPalette
                 colors={TOONHEAD_HAIR_COLORS}
                 selected={draft.hairColor?.[0]}
                 onSelect={(c) => handleColorSelect("hairColor", c)}
-                label="Hair Color"
+                label={t("avatarCustomizer.hairColor")}
               />
               <ColorPalette
                 colors={TOONHEAD_CLOTHES_COLORS}
                 selected={(draft.clothesColor as string[] | undefined)?.[0]}
                 onSelect={(c) => handleColorSelect("clothesColor", c)}
-                label="Clothes Color"
+                label={t("avatarCustomizer.clothesColor")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Face
+                {t("avatarCustomizer.face")}
               </Typography>
               <OptionGrid
-                options={TOONHEAD_EYES}
+                options={avatarOptions.toonheadEyes}
                 selected={draft.eyes}
                 onSelect={(id) => handleOptionSelect("eyes", id)}
-                label="Eyes"
+                label={t("avatarCustomizer.eyes")}
               />
               <OptionGrid
-                options={TOONHEAD_EYEBROWS}
+                options={avatarOptions.toonheadEyebrows}
                 selected={draft.eyebrows}
                 onSelect={(id) => handleOptionSelect("eyebrows", id)}
-                label="Eyebrows"
+                label={t("avatarCustomizer.eyebrows")}
               />
               <OptionGrid
-                options={TOONHEAD_MOUTH}
+                options={avatarOptions.toonheadMouth}
                 selected={draft.mouth}
                 onSelect={(id) => handleOptionSelect("mouth", id)}
-                label="Mouth"
+                label={t("avatarCustomizer.mouth")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Hair &amp; Clothing
+                {t("avatarCustomizer.hairAndClothing")}
               </Typography>
               <OptionGrid
-                options={TOONHEAD_HAIR}
+                options={avatarOptions.toonheadHair}
                 selected={draft.hair}
                 onSelect={(id) => handleOptionSelect("hair", id)}
-                label="Hair"
+                label={t("avatarCustomizer.hair")}
               />
               <OptionGrid
-                options={TOONHEAD_REAR_HAIR}
+                options={avatarOptions.toonheadRearHair}
                 selected={draft.rearHair}
                 onSelect={(id) => handleOptionSelect("rearHair", id)}
-                label="Rear Hair"
+                label={t("avatarCustomizer.rearHair")}
               />
               <OptionGrid
-                options={TOONHEAD_CLOTHES}
+                options={avatarOptions.toonheadClothes}
                 selected={draft.clothes}
                 onSelect={(id) => handleOptionSelect("clothes", id)}
-                label="Clothes"
+                label={t("avatarCustomizer.clothes")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Extras
+                {t("avatarCustomizer.extras")}
               </Typography>
               <OptionGrid
-                options={TOONHEAD_BEARD}
+                options={avatarOptions.toonheadBeard}
                 selected={draft.beard}
                 onSelect={(id) => handleOptionSelect("beard", id)}
-                label="Beard"
+                label={t("avatarCustomizer.beard")}
               />
             </Stack>
           )}
@@ -881,38 +1284,40 @@ export function AvatarCustomizer({
           {/* ── Bottts (robot): unlocked via all Bot Whisperer badges ── */}
           {ROBOT_STYLES.includes(style) && (
             <Stack spacing={1.5}>
-              <Typography variant="subtitle2">Colors</Typography>
+              <Typography variant="subtitle2">
+                {t("avatarCustomizer.colors")}
+              </Typography>
               <ColorPalette
                 colors={BACKGROUND_COLORS}
                 selected={draft.backgroundColor?.[0]}
                 onSelect={(c) => handleColorSelect("backgroundColor", c)}
-                label="Background"
+                label={t("avatarCustomizer.background")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Face
+                {t("avatarCustomizer.face")}
               </Typography>
               <OptionGrid
-                options={ROBOT_EYES}
+                options={avatarOptions.robotEyes}
                 selected={draft.eyes}
                 onSelect={(id) => handleOptionSelect("eyes", id)}
-                label="Eyes"
+                label={t("avatarCustomizer.eyes")}
               />
               <OptionGrid
-                options={ROBOT_MOUTH}
+                options={avatarOptions.robotMouth}
                 selected={draft.mouth}
                 onSelect={(id) => handleOptionSelect("mouth", id)}
-                label="Mouth"
+                label={t("avatarCustomizer.mouth")}
               />
 
               <Typography variant="subtitle2" sx={{ mt: 1 }}>
-                Antenna
+                {t("avatarCustomizer.antenna")}
               </Typography>
               <OptionGrid
-                options={ROBOT_TOP}
+                options={avatarOptions.robotTop}
                 selected={draft.top}
                 onSelect={(id) => handleOptionSelect("top", id)}
-                label="Top"
+                label={t("avatarCustomizer.top")}
               />
             </Stack>
           )}
@@ -940,12 +1345,16 @@ export function AvatarCustomizer({
                   }}
                 />
               }
-              label={<Typography variant="subtitle2">Gradient Ring</Typography>}
+              label={
+                <Typography variant="subtitle2">
+                  {t("avatarCustomizer.gradientRing")}
+                </Typography>
+              }
             />
             {glowDraft?.active && (
               <Stack spacing={1.5} sx={{ mt: 1 }}>
                 <Typography variant="caption" color="text.secondary">
-                  Choose a preset or pick custom colors
+                  {t("avatarCustomizer.choosePreset")}
                 </Typography>
                 <Stack direction="row" flexWrap="wrap" gap={0.5}>
                   {Object.entries(GLOW_COLOR_PRESETS).map(([name, colors]) => {
@@ -954,7 +1363,10 @@ export function AvatarCustomizer({
                     return (
                       <Chip
                         key={name}
-                        label={name.charAt(0).toUpperCase() + name.slice(1)}
+                        label={
+                          glowPresetLabels[name] ??
+                          name.charAt(0).toUpperCase() + name.slice(1)
+                        }
                         size="small"
                         variant={isSelected ? "filled" : "outlined"}
                         color={isSelected ? "primary" : "default"}
@@ -977,7 +1389,7 @@ export function AvatarCustomizer({
                 </Stack>
                 <Box>
                   <Typography variant="caption" color="text.secondary">
-                    Custom color stops
+                    {t("avatarCustomizer.customColorStops")}
                   </Typography>
                   <Stack
                     direction="row"
@@ -1058,9 +1470,9 @@ export function AvatarCustomizer({
         </Stack>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose}>{t("avatarCustomizer.cancel")}</Button>
         <Button onClick={handleSave} variant="contained">
-          Save
+          {t("avatarCustomizer.save")}
         </Button>
       </DialogActions>
     </Dialog>

@@ -13,6 +13,7 @@ import Box from "@mui/material/Box";
 import LockIcon from "@mui/icons-material/Lock";
 import LockOpenIcon from "@mui/icons-material/LockOpen";
 import LinearProgress from "@mui/material/LinearProgress";
+import { useTranslations } from "next-intl";
 import getCachedUrl from "@/utils/getCachedUrl";
 import { getBlurredPreviewPath } from "@/utils/getBlurredPreviewPath";
 
@@ -57,8 +58,13 @@ export function ContentLockCard({
   unlockDate,
   children,
 }: ContentLockCardProps) {
+  const t = useTranslations("components");
   const [blurredUrl, setBlurredUrl] = React.useState<string | null>(null);
   React.useEffect(() => {
+    if (!thumbnailPath) {
+      setBlurredUrl(null);
+      return;
+    }
     const blurredPath = getBlurredPreviewPath(thumbnailPath);
     if (!blurredPath) {
       setBlurredUrl(null);
@@ -132,13 +138,13 @@ export function ContentLockCard({
           color={blurredUrl ? "common.white" : "text.secondary"}
           sx={{ mb: 1 }}
         >
-          Unlock requirements:
+          {t("contentLockCard.unlockRequirements")}
         </Typography>
 
         {requiredXP != null && (
           <Box sx={{ mb: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              {currentXP} / {requiredXP} XP
+              {t("contentLockCard.xpProgress", { currentXP, requiredXP })}
             </Typography>
             <LinearProgress
               variant="determinate"
@@ -155,14 +161,17 @@ export function ContentLockCard({
             display="block"
             sx={{ mb: 0.5 }}
           >
-            🏅 Requires badge: {requiredBadge}
+            {t("contentLockCard.requiresBadge", { badge: requiredBadge })}
           </Typography>
         )}
 
         {requiredCompletion != null && (
           <Box sx={{ mb: 1 }}>
             <Typography variant="caption" color="text.secondary">
-              Module: {currentCompletion}% / {requiredCompletion}%
+              {t("contentLockCard.moduleProgress", {
+                currentCompletion,
+                requiredCompletion,
+              })}
             </Typography>
             <LinearProgress
               variant="determinate"
@@ -179,8 +188,10 @@ export function ContentLockCard({
             display="block"
             sx={{ mb: 0.5 }}
           >
-            🔗 Complete &ldquo;{requiredPriorUnitName || "the previous unit"}
-            &rdquo; first
+            {t("contentLockCard.completePriorUnit", {
+              unitName:
+                requiredPriorUnitName || t("contentLockCard.previousUnit"),
+            })}
           </Typography>
         )}
 
@@ -191,7 +202,9 @@ export function ContentLockCard({
             display="block"
             sx={{ mb: 0.5 }}
           >
-            📅 Unlocks on {new Date(unlockDate).toLocaleDateString()}
+            {t("contentLockCard.unlocksOn", {
+              date: new Date(unlockDate).toLocaleDateString(),
+            })}
           </Typography>
         )}
       </CardContent>

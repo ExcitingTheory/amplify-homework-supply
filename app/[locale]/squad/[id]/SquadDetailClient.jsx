@@ -476,7 +476,7 @@ function SquadPage() {
                     gap: 0.5,
                   }}
                 >
-                  <AvatarDisplay seed={member.studentId} size={64} />
+                  <AvatarDisplay profileUsername={member.studentId} label={friendlyName(member.studentId)} seed={member.studentId} size={64} />
                   <Typography variant="body2" noWrap sx={{ maxWidth: "100%" }}>
                     {friendlyName(member.studentId)}
                   </Typography>
@@ -608,6 +608,8 @@ function SquadPage() {
                 }}
               >
                 <AvatarDisplay
+                  profileUsername={member.studentId}
+                  label={friendlyName(member.studentId)}
                   seed={member.avatarSeed || member.studentId}
                   size={64}
                   style={member.avatarStyle}

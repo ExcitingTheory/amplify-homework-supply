@@ -199,7 +199,7 @@ export const EasyExerciseCompleted = {
           createGrade: async () => console.log("Mock createGrade"),
           session: { username: "test-user" },
         }),
-        [],
+        [completedGradeData],
       );
 
       return (
@@ -323,7 +323,7 @@ export const HardExerciseCompleted = {
           createGrade: async () => console.log("Mock createGrade"),
           session: { username: "test-user" },
         }),
-        [],
+        [completedGradeData],
       );
 
       return (
@@ -444,7 +444,7 @@ export const LearnExerciseCompleted = {
           createGrade: async () => console.log("Mock createGrade"),
           session: { username: "test-user" },
         }),
-        [],
+        [completedGradeData],
       );
 
       return (

@@ -441,11 +441,13 @@ const seedMockData = async () => {
   console.log("[FileManager2.stories] All mock data seeded successfully!");
 };
 
+const EMPTY_CONTEXT = {};
+
 // Debug component to show files count
 const FilesDebug = () => {
-  const filesContext = React.useContext(FilesContext) || {};
+  const filesContext = React.useContext(FilesContext) || EMPTY_CONTEXT;
   const { files = [] } = filesContext;
-  const unitContext = React.useContext(UnitContext) || {};
+  const unitContext = React.useContext(UnitContext) || EMPTY_CONTEXT;
 
   React.useEffect(() => {
     console.log("[FilesDebug] Files in context:", files.length, files);

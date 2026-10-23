@@ -17,6 +17,7 @@ import Divider from '@mui/material/Divider'
 import Stack from '@mui/material/Stack'
 import Chip from '@mui/material/Chip'
 import Link from '@mui/material/Link'
+import { useTranslations } from 'next-intl'
 import { BadgeIcon } from './BadgeIcon'
 import { getBadgeConfig } from './badgeRegistry'
 
@@ -48,26 +49,30 @@ export function StorybookPromoPanel({
   storybookUrl,
   earnedBadgeTypes = new Set(),
 }: StorybookPromoPanelProps) {
-  const earnedPromoCount = PROMO_BADGE_TYPES.filter(t => earnedBadgeTypes.has(t)).length
+  const t = useTranslations('components')
+  const earnedPromoCount = PROMO_BADGE_TYPES.filter((type) => earnedBadgeTypes.has(type)).length
+  const storybookLink = (chunks: React.ReactNode) => (
+    <Link href={storybookUrl} target="_blank" rel="noopener noreferrer">
+      {chunks}
+    </Link>
+  )
 
   return (
     <Paper elevation={2} sx={{ p: 3, maxWidth: 640, mx: 'auto' }}>
       <Typography variant="h5" gutterBottom fontWeight={700}>
-        Documentation Badges
+        {t('storybookPromoPanel.title')}
       </Typography>
 
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Earn special promo badges by completing onboarding tasks in our{' '}
-        <Link href={storybookUrl} target="_blank" rel="noopener noreferrer">
-          Storybook documentation
-        </Link>
-        . Complete the instructor, learner, or translator paths, then
-        sign in on Storybook to claim your badges.
+        {t.rich('storybookPromoPanel.intro', { link: storybookLink })}
       </Typography>
 
       <Box sx={{ mb: 3 }}>
         <Chip
-          label={`${earnedPromoCount} / ${PROMO_BADGE_TYPES.length} badges earned`}
+          label={t('storybookPromoPanel.earnedCount', {
+            earned: earnedPromoCount,
+            total: PROMO_BADGE_TYPES.length,
+          })}
           color={earnedPromoCount === PROMO_BADGE_TYPES.length ? 'success' : 'default'}
           variant="outlined"
           size="small"
@@ -108,27 +113,22 @@ export function StorybookPromoPanel({
 
       {/* Instructions */}
       <Typography variant="subtitle2" gutterBottom>
-        How to Earn Badges
+        {t('storybookPromoPanel.howToTitle')}
       </Typography>
 
       <Typography variant="body2" color="text.secondary" component="div" sx={{ mb: 1 }}>
         <ol style={{ margin: 0, paddingLeft: '1.5em' }}>
-          <li>
-            Visit the{' '}
-            <Link href={storybookUrl} target="_blank" rel="noopener noreferrer">
-              Storybook documentation
-            </Link>
-          </li>
-          <li>Complete onboarding tasks (instructor, learner, or translator paths)</li>
-          <li>Open the Badge Claim panel in Storybook</li>
-          <li>Sign in with your account and click &quot;Claim Badges&quot;</li>
+          <li>{t.rich('storybookPromoPanel.stepVisit', { link: storybookLink })}</li>
+          <li>{t('storybookPromoPanel.stepComplete')}</li>
+          <li>{t('storybookPromoPanel.stepOpenPanel')}</li>
+          <li>{t('storybookPromoPanel.stepSignIn')}</li>
         </ol>
       </Typography>
 
       {earnedPromoCount === PROMO_BADGE_TYPES.length && (
         <Box sx={{ mt: 2, p: 2, bgcolor: 'success.light', borderRadius: 1, textAlign: 'center' }}>
           <Typography variant="body2" color="success.contrastText" fontWeight={700}>
-            🏆 All documentation badges earned! You are a Documentation Champion!
+            {t('storybookPromoPanel.allEarned')}
           </Typography>
         </Box>
       )}

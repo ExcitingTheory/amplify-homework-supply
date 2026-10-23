@@ -13,6 +13,7 @@ import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
 import Chip from '@mui/material/Chip'
 import SchoolIcon from '@mui/icons-material/School'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -49,6 +50,7 @@ export function SectionSelector({
   loading = false,
   disabled = false,
 }: SectionSelectorProps) {
+  const t = useTranslations('components')
   const selectedSection = React.useMemo(
     () => sections.find((s) => s.id === selectedSectionId) || null,
     [sections, selectedSectionId]
@@ -80,7 +82,7 @@ export function SectionSelector({
               </Box>
               {option.studentCount != null && (
                 <Chip
-                  label={`${option.studentCount} students`}
+                  label={t('sectionSelector.studentCount', { count: option.studentCount })}
                   size="small"
                   variant="outlined"
                   sx={{ height: 20, fontSize: '0.65rem' }}
@@ -92,8 +94,8 @@ export function SectionSelector({
         renderInput={(params) => (
           <TextField
             {...params}
-            label="Section"
-            placeholder="Select a section to manage..."
+            label={t('sectionSelector.label')}
+            placeholder={t('sectionSelector.placeholder')}
             size="small"
             InputProps={{
               ...params.InputProps,
@@ -106,12 +108,12 @@ export function SectionSelector({
             }}
           />
         )}
-        noOptionsText="No sections available"
+        noOptionsText={t('sectionSelector.noOptions')}
         sx={{ maxWidth: 400 }}
       />
       {!selectedSectionId && sections.length > 0 && (
         <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-          Select a section to scope gamification settings.
+          {t('sectionSelector.helper')}
         </Typography>
       )}
     </Box>

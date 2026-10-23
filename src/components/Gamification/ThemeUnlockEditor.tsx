@@ -18,6 +18,7 @@ import Stack from '@mui/material/Stack'
 import Chip from '@mui/material/Chip'
 import SaveIcon from '@mui/icons-material/Save'
 import RestoreIcon from '@mui/icons-material/Restore'
+import { useTranslations } from 'next-intl'
 
 // ============================================================================
 // Types
@@ -56,15 +57,6 @@ const DEFAULT_THEME_UNLOCKS: ThemeUnlockEntry[] = [
   { themeId: 'custom', minLevel: 2 },
 ]
 
-const THEME_DISPLAY_NAMES: Record<string, string> = {
-  default: 'Default',
-  midnight: 'Midnight',
-  forest: 'Forest',
-  sunset: 'Sunset',
-  aurora: 'Aurora',
-  custom: 'Custom (User-mixed)',
-}
-
 const THEME_COLORS: Record<string, { bg: string; accent: string }> = {
   default: { bg: '#ffffff', accent: '#1976d2' },
   midnight: { bg: '#1a1a2e', accent: '#00bcd4' },
@@ -74,11 +66,22 @@ const THEME_COLORS: Record<string, { bg: string; accent: string }> = {
   custom: { bg: '#f5f5f5', accent: '#ff4081' },
 }
 
+const FALLBACK_THEME_COLORS = { bg: '#ccc', accent: '#666' }
+
 // ============================================================================
 // Component
 // ============================================================================
 
 export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEditorProps) {
+  const t = useTranslations('components')
+  const themeDisplayNames: Record<string, string> = {
+    default: t('themeUnlockEditor.themeDefault'),
+    midnight: t('themeUnlockEditor.themeMidnight'),
+    forest: t('themeUnlockEditor.themeForest'),
+    sunset: t('themeUnlockEditor.themeSunset'),
+    aurora: t('themeUnlockEditor.themeAurora'),
+    custom: t('themeUnlockEditor.themeCustom'),
+  }
   const [unlocks, setUnlocks] = useState<ThemeUnlockEntry[]>(
     () => config?.unlocks?.length
       ? [...config.unlocks].sort((a, b) => a.minLevel - b.minLevel)
@@ -110,21 +113,19 @@ export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEd
   return (
     <Box>
       <Typography variant="subtitle1" fontWeight={600} gutterBottom>
-        Theme Unlock Levels
+        {t('themeUnlockEditor.title')}
         {sectionName && (
           <Chip label={sectionName} size="small" sx={{ ml: 1 }} variant="outlined" />
         )}
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-        Configure the minimum student level required to unlock each cosmetic theme.
-        The &quot;Default&quot; theme is always available. The &quot;Custom&quot; option
-        lets students mix their own colors once unlocked.
+        {t('themeUnlockEditor.description')}
       </Typography>
 
       <Stack spacing={1}>
         {unlocks.map((entry) => {
-          const colors = THEME_COLORS[entry.themeId] || { bg: '#ccc', accent: '#666' }
-          const name = THEME_DISPLAY_NAMES[entry.themeId] || entry.themeId
+          const colors = THEME_COLORS[entry.themeId] || FALLBACK_THEME_COLORS
+          const name = themeDisplayNames[entry.themeId] || entry.themeId
           const isDefault = entry.themeId === 'default'
 
           return (
@@ -159,7 +160,7 @@ export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEd
               <TextField
                 size="small"
                 type="number"
-                label="Min Level"
+                label={t('themeUnlockEditor.minLevel')}
                 value={entry.minLevel}
                 onChange={(e) => handleLevelChange(entry.themeId, parseInt(e.target.value, 10) || 1)}
                 disabled={isDefault}
@@ -170,7 +171,7 @@ export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEd
               {/* Current level chip */}
               <Chip
                 size="small"
-                label={isDefault ? 'Always' : `Lvl ${entry.minLevel}`}
+                label={isDefault ? t('themeUnlockEditor.always') : t('themeUnlockEditor.levelShort', { level: entry.minLevel })}
                 color={isDefault ? 'success' : 'default'}
                 variant="outlined"
               />
@@ -188,7 +189,7 @@ export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEd
           disabled={!dirty}
           size="small"
         >
-          Save
+          {t('themeUnlockEditor.save')}
         </Button>
         <Button
           variant="outlined"
@@ -196,7 +197,7 @@ export function ThemeUnlockEditor({ config, onSave, sectionName }: ThemeUnlockEd
           onClick={handleReset}
           size="small"
         >
-          Reset to Defaults
+          {t('themeUnlockEditor.resetToDefaults')}
         </Button>
       </Box>
     </Box>

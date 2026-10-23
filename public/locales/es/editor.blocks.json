@@ -6,14 +6,39 @@
     "dialogTitle": "Editar respuesta",
     "emptyState": "No se proporcionó respuesta",
     "instructions": "Crea tu respuesta a continuación",
-    "save": "Guardar"
+    "save": "Guardar",
+    "actionsColumn": "Acciones",
+    "addNewOption": "Añadir \"{value}",
+    "removeNamedWord": "Eliminar {phrase}",
+    "removeWord": "Eliminar palabra",
+    "removeWords": "Eliminar {count, plural, one {# palabra} other {# palabras}}",
+    "title": "Ejercicio de respuesta corta",
+    "titleByDefinition": "Ejercicio de respuesta corta por definición",
+    "titleByWord": "Ejercicio de respuesta corta por palabra"
   },
   "blocks": {
     "meaning_association": "Asociación de Significados"
   },
   "customAIEditor": {
     "title": "Ejercicio calificado por IA",
-    "description": "Crea un ejercicio calificado por IA en el que los estudiantes responden preguntas y la IA evalúa las respuestas según tus criterios de calificación personalizados."
+    "description": "Crea un ejercicio calificado por IA en el que los estudiantes responden preguntas y la IA evalúa las respuestas según tus criterios de calificación personalizados.",
+    "inputModeText": "Texto",
+    "inputModeAudio": "Audio",
+    "inputModeImage": "Imagen",
+    "inputModeDrawing": "Dibujo",
+    "questionPromptHeader": "Enunciado de la pregunta",
+    "expectedAnswerHeader": "Respuesta esperada",
+    "removeQuestion": "Eliminar pregunta",
+    "questionFallback": "Pregunta {id}",
+    "secureGrading": "Calificación segura",
+    "studentInputModes": "Modos de entrada del estudiante",
+    "allowedInputModes": "Modos de entrada permitidos",
+    "gradingCriteria": "Criterios de calificación (instrucciones para la IA)",
+    "criteriaPlaceholder": "Describa cómo debe calificar la IA las respuestas de los estudiantes. Por ejemplo: \"Califique según la comprensión de la fotosíntesis. Otorgue la puntuación máxima si se mencionan las reacciones dependientes de la luz, el ciclo de Calvin y la función de la clorofila.",
+    "criteriaHelperText": "La IA utilizará estos criterios para evaluar las entregas de los estudiantes. Los estudiantes no pueden verlos.",
+    "questionsCount": "Preguntas ({count})",
+    "searchQuestions": "Busque y agregue preguntas del banco de preguntas",
+    "securityNotice": "Seguridad: El prompt de calificación mediante IA está reforzado contra la inyección de prompts, la ruptura de personaje y la fuga de datos. La entrada del estudiante se depura. Los criterios de calificación permanecen ocultos para los estudiantes. La salida se valida y se filtra para eliminar la información de identificación personal (PII)."
   },
   "customAnswerEditor": {
     "add": "Agregar",
@@ -28,7 +53,8 @@
       "hint": "Pista",
       "id": "ID",
       "prompt": "Indicación",
-      "promptAudio": "Audio de Instrucción"
+      "promptAudio": "Audio de Instrucción",
+      "actions": "Acciones"
     },
     "description": "Crea un ejercicio de respuesta corta, que puede presentar al usuario una pregunta y esperar una respuesta breve.",
     "dialogDescription": "Agregar un nuevo par de pregunta y respuesta.",
@@ -43,7 +69,8 @@
     "remove": "eliminar",
     "successGeneratedAudio": "Archivo de audio generado exitosamente",
     "title": "Ejercicio de Respuesta Personalizada",
-    "ttsPreview": "Vista previa de texto a voz"
+    "ttsPreview": "Vista previa de texto a voz",
+    "removeAnswers": "{count, plural, one {Eliminar # respuesta} other {Eliminar # respuestas}}"
   },
   "meaningAssociationEditor": {
     "add": "Agregar",
@@ -60,7 +87,13 @@
     "emptyState": "Aún no se han agregado palabras. Usa el campo de entrada de arriba para agregar palabras del diccionario. Si la palabra que quieres agregar no está en el diccionario, puedes agregarla haciendo clic en el elemento \"Agregar Palabra\" en el menú desplegable o desde el editor de diccionario en la Barra Lateral.",
     "phraseLabel": "frase",
     "pronunciationLabel": "pronunciación",
-    "removeFromAssignment": "Quitar de la tarea"
+    "removeFromAssignment": "Quitar de la tarea",
+    "actionsColumn": "Acciones",
+    "addNewOption": "Agregar \"{value}",
+    "definitionAriaLabel": "Definición",
+    "removeNamedWord": "Eliminar {phrase}",
+    "removeWord": "Eliminar palabra",
+    "removeWords": "Eliminar {count, plural, one {# palabra} other {# palabras}}"
   },
   "questionEditor": {
     "cancel": "Cancelar"

@@ -7,9 +7,12 @@
 import React from 'react';
 import { Alert, Box, Avatar, AvatarGroup, Typography } from '@mui/material';
 import { Info as InfoIcon } from '@mui/icons-material';
+import { useTranslations } from 'next-intl';
 import UnitContext from '../../context/unitContext';
+import { ProfileAvatarLink } from '../ProfileAvatarLink';
 
 export function TutorPresenceBanner() {
+  const t = useTranslations('components');
   const { workbook, workbookEnabled } = React.useContext(UnitContext);
 
   // Don't show if feature disabled or no workbook provider
@@ -39,6 +42,9 @@ export function TutorPresenceBanner() {
         <AvatarGroup max={3} sx={{ '& .MuiAvatar-root': { width: 32, height: 32 } }}>
           {tutors.map((tutor: any, i: number) => (
             <Avatar
+              component={ProfileAvatarLink}
+              username={tutor.username}
+              displayName={tutor.displayName}
               key={i}
               sx={{ bgcolor: tutor.color || '#f59e0b' }}
               title={tutor.displayName}
@@ -49,11 +55,11 @@ export function TutorPresenceBanner() {
         </AvatarGroup>
         
         <Typography variant="body2">
-          <strong>
-            {tutors.map((tutor: any) => tutor.displayName).join(', ')}
-          </strong>
-          {' '}
-          {tutors.length === 1 ? 'is' : 'are'} here to help you
+          {t.rich('tutorPresenceBanner.message', {
+            names: tutors.map((tutor: any) => tutor.displayName).join(', '),
+            count: tutors.length,
+            strong: (chunks) => <strong>{chunks}</strong>,
+          })}
         </Typography>
       </Box>
     </Alert>

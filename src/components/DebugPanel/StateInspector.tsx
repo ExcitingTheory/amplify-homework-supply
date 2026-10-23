@@ -5,6 +5,7 @@
  */
 
 import React, { useState } from 'react';
+import { useTranslations } from 'next-intl';
 import {
   Box,
   Button,
@@ -41,6 +42,7 @@ function formatBytes(bytes: number): string {
  * StateInspector component
  */
 export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord }: StateInspectorProps) {
+  const t = useTranslations('components');
   const [copiedSection, setCopiedSection] = useState<string | null>(null);
   const discordEnabled = isDiscordWebhookConfigured();
 
@@ -55,7 +57,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
     return (
       <Box sx={{ textAlign: 'center', py: 4 }}>
         <Typography variant="body1" color="text.secondary" gutterBottom>
-          No state snapshot available
+          {t('stateInspector.noSnapshot')}
         </Typography>
         <Button
           variant="contained"
@@ -63,7 +65,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
           onClick={onRefresh}
           sx={{ mt: 2 }}
         >
-          Capture State
+          {t('stateInspector.captureState')}
         </Button>
       </Box>
     );
@@ -76,19 +78,21 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       {/* Header */}
       <Stack direction="row" spacing={1} sx={{ mb: 2 }} alignItems="center">
         <Chip
-          label={`Captured: ${new Date(snapshot.timestamp).toLocaleString()}`}
+          label={t('stateInspector.capturedAt', {
+            date: new Date(snapshot.timestamp).toLocaleString(),
+          })}
           size="small"
           variant="outlined"
         />
         <Chip label={formatBytes(snapshotSize)} size="small" color="primary" />
         <Box sx={{ flexGrow: 1 }} />
-        <Tooltip title="Refresh snapshot">
+        <Tooltip title={t('stateInspector.refreshSnapshot')}>
           <IconButton size="small" onClick={onRefresh}>
             <RefreshIcon fontSize="small" />
           </IconButton>
         </Tooltip>
         {discordEnabled && (
-          <Tooltip title="Send to Discord support channel">
+          <Tooltip title={t('stateInspector.sendToDiscord')}>
             <IconButton
               size="small"
               onClick={() => onSendToDiscord?.(snapshot)}
@@ -98,7 +102,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
             </IconButton>
           </Tooltip>
         )}
-        <Tooltip title="Export snapshot">
+        <Tooltip title={t('stateInspector.exportSnapshot')}>
           <IconButton size="small" onClick={() => onExport?.(snapshot)}>
             <DownloadIcon fontSize="small" />
           </IconButton>
@@ -108,27 +112,31 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       {/* Environment Info */}
       <Accordion defaultExpanded>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2">Environment</Typography>
+          <Typography variant="subtitle2">{t('stateInspector.environment')}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={1}>
             <Typography variant="body2">
-              <strong>Version:</strong> {snapshot.version}
+              <strong>{t('stateInspector.versionLabel')}</strong> {snapshot.version}
             </Typography>
             <Typography variant="body2">
-              <strong>User Agent:</strong> {snapshot.environment.userAgent}
+              <strong>{t('stateInspector.userAgentLabel')}</strong> {snapshot.environment.userAgent}
             </Typography>
             <Typography variant="body2">
-              <strong>URL:</strong> {snapshot.environment.url}
+              <strong>{t('stateInspector.urlLabel')}</strong> {snapshot.environment.url}
             </Typography>
             <Typography variant="body2">
-              <strong>Viewport:</strong> {snapshot.environment.viewport.width} × {snapshot.environment.viewport.height}
+              <strong>{t('stateInspector.viewportLabel')}</strong>{' '}
+              {t('stateInspector.viewportSize', {
+                width: snapshot.environment.viewport.width,
+                height: snapshot.environment.viewport.height,
+              })}
             </Typography>
             <Typography variant="body2">
-              <strong>Platform:</strong> {snapshot.environment.platform}
+              <strong>{t('stateInspector.platformLabel')}</strong> {snapshot.environment.platform}
             </Typography>
             <Typography variant="body2">
-              <strong>Language:</strong> {snapshot.environment.language}
+              <strong>{t('stateInspector.languageLabel')}</strong> {snapshot.environment.language}
             </Typography>
           </Stack>
         </AccordionDetails>
@@ -139,7 +147,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Stack direction="row" alignItems="center" sx={{ width: '100%' }}>
             <Typography variant="subtitle2">
-              Local Storage ({Object.keys(snapshot.localStorage).length})
+              {t('stateInspector.localStorage', { count: Object.keys(snapshot.localStorage).length })}
             </Typography>
             <Box sx={{ flexGrow: 1 }} />
             <IconButton
@@ -161,7 +169,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
           </pre>
           {copiedSection === 'localStorage' && (
             <Typography variant="caption" color="success.main">
-              Copied!
+              {t('stateInspector.copied')}
             </Typography>
           )}
         </AccordionDetails>
@@ -171,7 +179,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle2">
-            Session Storage ({Object.keys(snapshot.sessionStorage).length})
+            {t('stateInspector.sessionStorage', { count: Object.keys(snapshot.sessionStorage).length })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
@@ -185,12 +193,14 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <Typography variant="subtitle2">
-            Component Tree ({snapshot.componentTree ? JSON.parse(snapshot.componentTree).length : 0})
+            {t('stateInspector.componentTree', {
+              count: snapshot.componentTree ? JSON.parse(snapshot.componentTree).length : 0,
+            })}
           </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <pre style={{ fontSize: 11, margin: 0, overflow: 'auto', maxHeight: 300 }}>
-            {snapshot.componentTree || 'No component tree data'}
+            {snapshot.componentTree || t('stateInspector.noComponentTreeData')}
           </pre>
         </AccordionDetails>
       </Accordion>
@@ -198,11 +208,13 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       {/* Logs */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2">Logs ({snapshot.logs ? JSON.parse(snapshot.logs).length : 0})</Typography>
+          <Typography variant="subtitle2">
+            {t('stateInspector.logs', { count: snapshot.logs ? JSON.parse(snapshot.logs).length : 0 })}
+          </Typography>
         </AccordionSummary>
         <AccordionDetails>
           <pre style={{ fontSize: 11, margin: 0, overflow: 'auto', maxHeight: 300 }}>
-            {snapshot.logs || 'No log data'}
+            {snapshot.logs || t('stateInspector.noLogData')}
           </pre>
         </AccordionDetails>
       </Accordion>
@@ -210,14 +222,17 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       {/* DataStore */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2">DataStore Models</Typography>
+          <Typography variant="subtitle2">{t('stateInspector.dataStoreModels')}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <Stack spacing={1}>
             {Object.entries(snapshot.dataStore).map(([modelName, models]) => (
               <Box key={modelName}>
                 <Typography variant="caption" fontWeight="bold">
-                  {modelName} ({(models as unknown[]).length})
+                  {t('stateInspector.modelCount', {
+                    modelName,
+                    count: (models as unknown[]).length,
+                  })}
                 </Typography>
                 <pre style={{ fontSize: 10, margin: 0, overflow: 'auto', maxHeight: 200 }}>
                   {JSON.stringify(models, null, 2)}
@@ -231,7 +246,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
       {/* Performance */}
       <Accordion>
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Typography variant="subtitle2">Performance Metrics</Typography>
+          <Typography variant="subtitle2">{t('stateInspector.performanceMetrics')}</Typography>
         </AccordionSummary>
         <AccordionDetails>
           <pre style={{ fontSize: 11, margin: 0, overflow: 'auto', maxHeight: 300 }}>
@@ -245,7 +260,7 @@ export function StateInspector({ snapshot, onRefresh, onExport, onSendToDiscord 
         <Accordion>
           <AccordionSummary expandIcon={<ExpandMoreIcon />}>
             <Typography variant="subtitle2" color="error">
-              Errors ({snapshot.errors.length})
+              {t('stateInspector.errors', { count: snapshot.errors.length })}
             </Typography>
           </AccordionSummary>
           <AccordionDetails>

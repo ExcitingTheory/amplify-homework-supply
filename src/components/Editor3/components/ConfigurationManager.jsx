@@ -223,7 +223,7 @@ export default function ConfigurationManager() {
     };
 
     asyncFunc();
-  }, [filesToUpload]);
+  }, [filesToUpload, identityId, unit?.id]);
 
   // Resolve cover video URL: File ID → signed URL, raw URL → as-is
   React.useEffect(() => {
@@ -325,7 +325,7 @@ export default function ConfigurationManager() {
     };
 
     asyncFunc();
-  }, [videoFilesToUpload]);
+  }, [videoFilesToUpload, identityId, unit?.id]);
 
   const handleDragOver = (e) => {
     console.log("handleDragOver");
@@ -471,9 +471,9 @@ export default function ConfigurationManager() {
         />
         <Typography
           variant="caption"
-          display="block"
           color="text.secondary"
           sx={{
+            display: "block",
             ml: 4,
             wordWrap: "break-word",
             overflowWrap: "break-word",
@@ -769,7 +769,7 @@ export default function ConfigurationManager() {
             disabled={!videoUrlInput.trim()}
             sx={{ whiteSpace: "nowrap", minWidth: "auto", flexShrink: 0 }}
           >
-            Set
+            {t("configurationManager.setVideoUrl")}
           </Button>
         </Box>
       </div>

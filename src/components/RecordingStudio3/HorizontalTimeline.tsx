@@ -189,11 +189,13 @@ export default function HorizontalTimeline({
           disabled={readOnly && !playing}
           color={playing ? "error" : "default"}
           aria-label={
-            playing
-              ? t("recordingStudio3.stop") || "Stop playback"
-              : t("recordingStudio3.play") || "Play timeline"
+            playing ? t("recordingStudio3.stop") : t("recordingStudio3.play")
           }
-          title={playing ? "Stop playback" : "Play timeline"}
+          title={
+            playing
+              ? t("horizontalTimeline.stopPlayback")
+              : t("horizontalTimeline.playTimeline")
+          }
         >
           {playing ? <StopIcon /> : <PlayIcon />}
         </IconButton>
@@ -219,7 +221,7 @@ export default function HorizontalTimeline({
           color="text.secondary"
           sx={{ ml: "auto" }}
         >
-          Zoom: {Math.round(zoom * 100)}%
+          {t("horizontalTimeline.zoom", { percent: Math.round(zoom * 100) })}
         </Typography>
       </Stack>
 

@@ -59,7 +59,19 @@
     "sectionHeading": "Estudio de grabación"
   },
   "audioWaveformPlayer": {
-    "noAudioSource": "No se proporcionó fuente de audio"
+    "noAudioSource": "No se proporcionó fuente de audio",
+    "elapsedTime": "Tiempo transcurrido",
+    "inputVolume": "Volumen de entrada",
+    "muteInput": "Silenciar entrada",
+    "muteOutput": "Silenciar salida",
+    "outputVolume": "Volumen de salida",
+    "pause": "Pausa",
+    "play": "Reproducir",
+    "remainingTime": "Tiempo restante",
+    "startRecording": "Iniciar grabación",
+    "stopRecording": "Detener grabación",
+    "unmuteInput": "Activar entrada de audio",
+    "unmuteOutput": "Activar salida de audio"
   },
   "staticWaveform": {
     "errorLoading": "Error al cargar la forma de onda"
@@ -67,7 +79,8 @@
   "sketchPad": {
     "cancelSubmission": "Cancelar Envío",
     "hoverToStartDrawing": "Pasa el cursor para empezar a dibujar",
-    "submittingInSeconds": "Enviando dibujo para calificación en {countdown} segundos..."
+    "submittingInSeconds": "Enviando dibujo para calificación en {countdown} segundos...",
+    "sketchAlt": "boceto"
   },
   "unitEmbedding": {
     "allSectionsComplete": "¡Todas las secciones completadas!",
@@ -95,6 +108,62 @@
   "wordEmbeddingIntegration": {
     "alertMessage": "Se generarán incrustaciones",
     "successConfirmation": "Embeddings generados exitosamente"
+  },
+  "workbookSSRSkeleton": {
+    "loadingContent": "Cargando contenido..."
+  },
+  "imagePromptMedia": {
+    "help": "Ayuda",
+    "noImage": "Sin imagen",
+    "playlist": "Lista de reproducción"
+  },
+  "mediaPromptBand": {
+    "timecodes": "Códigos de tiempo del contenido multimedia"
+  },
+  "exerciseProgressMeters": {
+    "correctLabel": "Correcto",
+    "defaultAccuracyDescription": "Porcentaje de respuestas requeridas seleccionadas correctamente.",
+    "defaultProgressDescription": "Porcentaje de respuestas obligatorias intentadas.",
+    "meterDescription": "{label}. {description}",
+    "percentValue": "{percent}%",
+    "progressLabel": "Progreso",
+    "valueDescription": "{label}: {percent} %. {description}"
+  },
+  "autocompleteHint": {
+    "movieLabel": "Película"
+  },
+  "audioTakePlaylist": {
+    "compactTakeLabel": "Toma {number} · {duration} · {time}",
+    "deleteTake": "Eliminar toma",
+    "recordedTakes": "Tomas grabadas",
+    "takeLabel": "Toma {number}"
+  },
+  "exerciseResponsePanel": {
+    "cancel": "Cancelar",
+    "cancelSubmission": "Cancelar envío",
+    "submit": "Enviar"
+  },
+  "tableActionMenu": {
+    "addColumnHeader": "Añadir encabezado de columna",
+    "addRowHeader": "Agregar encabezado de fila",
+    "deleteColumn": "Eliminar columna",
+    "deleteRow": "Eliminar fila",
+    "deleteTable": "Eliminar tabla",
+    "insertColumnsLeft": "Insertar {count, plural, one {columna} other {# columnas}} a la izquierda",
+    "insertColumnsRight": "Insertar {count, plural, one {columna} other {# columnas}} a la derecha",
+    "insertRowsAbove": "Insertar {count, plural, one {fila} other {# filas}} arriba",
+    "insertRowsBelow": "Insertar {count, plural, one {fila} other {# filas}} debajo",
+    "removeColumnHeader": "Quitar encabezado de columna",
+    "removeRowHeader": "Quitar encabezado de fila"
+  },
+  "armorEditorBlock": {
+    "editCoatOfArms": "Editar escudo de armas"
+  },
+  "colorPicker": {
+    "hexadecimalColor": "Color hexadecimal"
+  },
+  "youTubePlugin": {
+    "videoTitle": "Vídeo de YouTube"
   },
   "wordEmbedding": {
     "embeddingGenerated": "Incrustación generada: {count} palabras procesadas"
@@ -127,7 +196,8 @@
   "wordBlockPlugin": {
     "audioUnavailable": "Audio no disponible",
     "loadingAudio": "Cargando audio...",
-    "wordNotFound": "Palabra no encontrada: {wordID}"
+    "wordNotFound": "Palabra no encontrada: {wordID}",
+    "selectVocabularyWord": "Seleccione una palabra de vocabulario…"
   },
   "vocabularyReview": {
     "alertMessage": "Revisa el vocabulario antes de continuar",
@@ -185,7 +255,16 @@
     "typeLabel": "Tipo:",
     "unknown": "Desconocido",
     "updatedLabel": "Actualizado:",
-    "variantLabel": "Variante"
+    "variantLabel": "Variante",
+    "autoSaveChip": "Autoguardado",
+    "autoSaved": "Guardado automáticamente",
+    "descriptionLabel": "Descripción",
+    "descriptionPlaceholder": "Añada una descripción para este archivo...",
+    "errorSaving": "Error al guardar: {message}",
+    "fileNameLabel": "Nombre del archivo",
+    "fileNamePlaceholder": "Introduzca el nombre del archivo...",
+    "savedSuccessfully": "Guardado correctamente",
+    "unsavedChip": "Sin guardar"
   },
   "metadataField": {
     "unsavedChanges": "cambios no guardados"
@@ -206,7 +285,12 @@
     "cancel": "Cancelar",
     "instructions": "<strong>Instrucciones:</strong> Pinta sobre las áreas que quieres regenerar. Usa el borrador para eliminar partes de la máscara. Mantén presionado Shift y arrastra para desplazarte. Usa los botones de zoom para ver más detalles.",
     "save": "Guardar",
-    "zoomInfo": "Zoom: {level}% | Mantén Shift presionado para desplazar"
+    "zoomInfo": "Zoom: {level}% | Mantén Shift presionado para desplazar",
+    "clearMask": "Borrar máscara",
+    "redo": "Rehacer",
+    "undo": "Deshacer",
+    "zoomIn": "Acercar",
+    "zoomOut": "Reducir zoom"
   },
   "freeSoloCreateOptionDialog": {
     "cancel": "Cancelar",
@@ -248,7 +332,16 @@
   "playlistEditor": {
     "emptyState": "No hay elementos en la lista de reproducción",
     "menuAttribute": "Menú",
-    "noFilesMessage": "No se han agregado archivos aún. Usa la entrada de arriba para agregar archivos a la lista de reproducción."
+    "noFilesMessage": "No se han agregado archivos aún. Usa la entrada de arriba para agregar archivos a la lista de reproducción.",
+    "addFiles": "Agregar archivos",
+    "addFilesToPlaylist": "Añadir archivos a la lista de reproducción",
+    "columnHeaders": {
+      "size": "Tamaño",
+      "title": "Título"
+    },
+    "dragMediaHere": "Arrastre audio o vídeo aquí",
+    "dropToAddFiles": "Suelte para añadir archivos",
+    "removeFromPlaylist": "Quitar de la lista de reproducción"
   },
   "autoSubmit": {
     "cancelSubmission": "Cancelar",

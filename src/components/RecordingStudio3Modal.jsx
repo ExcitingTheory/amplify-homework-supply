@@ -500,6 +500,7 @@ export default function RecordingStudio3Modal({
                 <Divider />
 
                 {/* Action buttons */}
+                {/* eslint-disable-next-line i18next/no-literal-string -- CSS value */}
                 <Stack direction="row" spacing={2} justifyContent="flex-end">
                   <Button
                     variant="outlined"
@@ -526,11 +527,10 @@ export default function RecordingStudio3Modal({
       </Dialog>
       <ConfirmDialog
         open={confirmCancelOpen}
-        title={
-          t("recordingStudio3Modal.unsavedChangesTitle") || "Unsaved Changes"
-        }
+        title={t("recordingStudio3Modal.unsavedChangesTitle")}
         message={t("recordingStudio3Modal.unsavedChanges")}
-        confirmLabel={t("recordingStudio3Modal.discard") || "Discard"}
+        confirmLabel={t("recordingStudio3Modal.discard")}
+        // eslint-disable-next-line i18next/no-literal-string -- MUI color value
         confirmColor="error"
         onConfirm={() => {
           setConfirmCancelOpen(false);

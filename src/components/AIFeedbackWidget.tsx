@@ -98,14 +98,14 @@ interface AIFeedbackWidgetProps {
   showLabels?: boolean;
 }
 
-const REASON_LABELS: Record<string, string> = {
-  INCORRECT: 'Incorrect information',
-  INCOMPLETE: 'Incomplete or missing details',
-  INAPPROPRIATE: 'Inappropriate content',
-  NOT_HELPFUL: "Doesn't answer the question",
-  IRRELEVANT: 'Off-topic or irrelevant',
-  POOR_QUALITY: 'Poor quality (grammar, formatting, etc.)',
-  OTHER: 'Other (specify below)',
+const REASON_LABEL_KEYS: Record<string, string> = {
+  INCORRECT: 'aiFeedbackWidget.reasonIncorrect',
+  INCOMPLETE: 'aiFeedbackWidget.reasonIncomplete',
+  INAPPROPRIATE: 'aiFeedbackWidget.reasonInappropriate',
+  NOT_HELPFUL: 'aiFeedbackWidget.reasonNotHelpful',
+  IRRELEVANT: 'aiFeedbackWidget.reasonIrrelevant',
+  POOR_QUALITY: 'aiFeedbackWidget.reasonPoorQuality',
+  OTHER: 'aiFeedbackWidget.reasonOther',
 };
 
 export default function AIFeedbackWidget({
@@ -193,7 +193,7 @@ export default function AIFeedbackWidget({
 
       setSnackbar({
         open: true,
-        message: 'Thank you for your feedback!',
+        message: t('aiFeedbackWidget.thankYou'),
         severity: 'success',
       });
 
@@ -209,7 +209,7 @@ export default function AIFeedbackWidget({
       console.error('Error submitting feedback:', error);
       setSnackbar({
         open: true,
-        message: 'Failed to submit feedback. Please try again.',
+        message: t('aiFeedbackWidget.submitError'),
         severity: 'error',
       });
     } finally {
@@ -227,7 +227,7 @@ export default function AIFeedbackWidget({
   return (
     <>
       <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center' }}>
-        <Tooltip title="This was helpful">
+        <Tooltip title={t('aiFeedbackWidget.helpfulTooltip')}>
           <span>
             <IconButton
               size={size}
@@ -252,7 +252,7 @@ export default function AIFeedbackWidget({
           </Typography>
         )}
 
-        <Tooltip title="This needs improvement">
+        <Tooltip title={t('aiFeedbackWidget.needsImprovementTooltip')}>
           <span>
             <IconButton
               size={size}
@@ -302,7 +302,8 @@ export default function AIFeedbackWidget({
               {t('aiFeedbackWidget.selectAllThatApply')}
             </FormLabel>
             <FormGroup>
-              {Object.entries(REASON_LABELS).map(([key, label]) => {
+              {Object.entries(REASON_LABEL_KEYS).map(([key, labelKey]) => {
+                const label = t(labelKey);
                 const reasonKey = key as keyof typeof AiFeedbackReason;
                 return (
                   <FormControlLabel
@@ -325,7 +326,7 @@ export default function AIFeedbackWidget({
             fullWidth
             multiline
             rows={3}
-            placeholder="Additional comments (optional)"
+            placeholder={t('aiFeedbackWidget.commentsPlaceholder')}
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             sx={{ mt: 2 }}

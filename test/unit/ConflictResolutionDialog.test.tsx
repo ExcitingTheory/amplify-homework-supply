@@ -40,10 +40,14 @@ describe("ConflictResolutionDialog", () => {
       />,
     );
 
-    expect(screen.getByText("Sync Conflict Resolution")).toBeInTheDocument();
+    expect(
+      screen.getByText("conflictResolutionDialog.title"),
+    ).toBeInTheDocument();
     expect(screen.getByText(/Offline student answer/)).toBeInTheDocument();
     expect(screen.getByText(/Server answer/)).toBeInTheDocument();
-    expect(screen.getByText(/Score diff: 20 pts/)).toBeInTheDocument();
+    expect(
+      screen.getByText("conflictResolutionDialog.scoreDiff"),
+    ).toBeInTheDocument();
   });
 
   it("does not render when conflict is null", () => {
@@ -73,7 +77,10 @@ describe("ConflictResolutionDialog", () => {
     );
 
     // Click "Keep Local Answers" radio option
-    const localWinsRadio = screen.getByLabelText(/Keep Local Answers/i);
+    const localWinsRadio = screen.getByLabelText(
+      "conflictResolutionDialog.localWinsTitle",
+      { exact: false },
+    );
     fireEvent.click(localWinsRadio);
 
     // Click "Apply & Sync" button
@@ -107,7 +114,7 @@ describe("ConflictResolutionDialog", () => {
       />,
     );
 
-    fireEvent.click(screen.getByText("Cancel"));
+    fireEvent.click(screen.getByText("conflictResolutionDialog.cancel"));
     expect(onClose).toHaveBeenCalled();
   });
 });

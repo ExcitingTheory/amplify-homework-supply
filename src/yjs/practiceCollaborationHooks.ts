@@ -61,12 +61,8 @@ export function usePracticeCollaboration(
   const {
     sessionId,
     user,
-    wsUrl,
-    connect = true,
-    persistence = true,
-    onParticipantJoin,
-    onParticipantLeave,
   } = options || ({} as UsePracticeCollaborationOptions)
+  const username = user?.username
 
   const providerRef = useRef<PracticeCollaborationProvider | null>(null)
   const [participants, setParticipants] = useState<PracticeUser[]>([])
@@ -86,17 +82,25 @@ export function usePracticeCollaboration(
   const [messages, setMessages] = useState<PracticeMessage[]>([])
   const [isConnected, setIsConnected] = useState(false)
 
+  // Latest options are read when the provider is created; only the session/user
+  // identity should recreate the provider.
+  const optionsRef = useRef(options)
   useEffect(() => {
-    if (!options || !sessionId || !user?.username) return
+    optionsRef.current = options
+  })
+
+  useEffect(() => {
+    const latest = optionsRef.current
+    if (!latest || !sessionId || !latest.user?.username) return
 
     const provider = new PracticeCollaborationProvider({
       sessionId,
-      user,
-      wsUrl,
-      connect,
-      persistence,
-      onParticipantJoin,
-      onParticipantLeave,
+      user: latest.user,
+      wsUrl: latest.wsUrl,
+      connect: latest.connect ?? true,
+      persistence: latest.persistence ?? true,
+      onParticipantJoin: latest.onParticipantJoin,
+      onParticipantLeave: latest.onParticipantLeave,
     })
 
     providerRef.current = provider
@@ -150,7 +154,7 @@ export function usePracticeCollaboration(
       provider.destroy()
       providerRef.current = null
     }
-  }, [sessionId, user?.username])
+  }, [sessionId, username])
 
   const submitBlockAnswer = useCallback(
     (blockId: string, answer: { userAnswer: any; complete: boolean; accuracy: number }) => {

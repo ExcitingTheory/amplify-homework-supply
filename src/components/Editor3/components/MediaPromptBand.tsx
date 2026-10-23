@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Box, Typography } from "@mui/material";
 import AudiotrackIcon from "@mui/icons-material/Audiotrack";
 import MovieIcon from "@mui/icons-material/Movie";
+import { useTranslations } from "next-intl";
 
 export interface MediaPromptBandProps {
   children?: ReactNode;
@@ -22,6 +23,7 @@ export default function MediaPromptBand({
   thumbnail,
   title,
 }: MediaPromptBandProps) {
+  const t = useTranslations("editor.shared");
   return (
     <Box
       data-testid="media-prompt-band"
@@ -37,7 +39,7 @@ export default function MediaPromptBand({
       {children && <Box data-testid="media-prompt-body">{children}</Box>}
 
       <Box
-        aria-label="Media timecodes"
+        aria-label={t("mediaPromptBand.timecodes")}
         sx={{
           display: "flex",
           alignItems: "center",

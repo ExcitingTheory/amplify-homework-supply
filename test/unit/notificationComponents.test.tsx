@@ -4,12 +4,18 @@ import React from "react";
 
 // Mock next-intl
 vi.mock("next-intl", () => ({
-  useTranslations: () => (key: string, fallback?: string) => {
+  useTranslations: () => (key: string, values?: Record<string, unknown>) => {
     const map: Record<string, string> = {
       "notification.empty": "No notifications yet",
       "notification.markAllRead": "Mark all read",
     };
-    return map[key] ?? fallback ?? key;
+    if (values) {
+      return Object.entries(values).reduce(
+        (str, [k, v]) => str.replace(`{${k}}`, String(v)),
+        map[key] ?? key,
+      );
+    }
+    return map[key] ?? key;
   },
 }));
 
@@ -158,7 +164,7 @@ describe("NotificationCard", () => {
         onDelete={vi.fn()}
       />,
     );
-    expect(screen.getByText("from System")).toBeInTheDocument();
+    expect(screen.getByText("notification.fromSender")).toBeInTheDocument();
   });
 
   it("renders link label button when linkPath exists", () => {

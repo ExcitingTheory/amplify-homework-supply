@@ -59,6 +59,20 @@
       "disableNotifications": "禁用通知",
       "experimentalFeatures": "实验性功能",
       "studentMode": "学生模式"
+    },
+    "debugModeEnabled": "🐛 调试模式已启用!请刷新页面以激活调试面板。\n\n使用 Cmd/Ctrl + Shift + D 可打开调试面板。",
+    "nav": {
+      "adminDashboard": "管理员仪表板",
+      "analytics": "数据分析",
+      "archives": "归档",
+      "collapseNavigation": "收起导航",
+      "expandNavigation": "展开导航",
+      "files": "文件",
+      "moderation": "内容审核",
+      "questions": "问题",
+      "recycleBin": "回收站",
+      "showNavigation": "显示导航",
+      "words": "词汇"
     }
   },
   "navigation": {
@@ -81,13 +95,23 @@
   },
   "peerReview": {
     "helpful": "同行评审很有帮助",
-    "notHelpful": "同行评审没有帮助"
+    "notHelpful": "同行评审没有帮助",
+    "aiAssistant": "AI 助手",
+    "blockReference": "模块:{blockId}",
+    "didItHelp": "同伴互评对您有帮助吗?",
+    "messagePlaceholder": "输入消息…(如需 AI 帮助,请使用 @AI)",
+    "noMessages": "暂无消息。开始您的同伴互评对话吧!",
+    "sessionEnded": "本次评审环节已结束。",
+    "thanksForFeedback": "感谢您的反馈!",
+    "typing": "{count, plural, one {{names} 正在输入…} other {{names} 正在输入…}}"
   },
   "quizComponent": {
     "grade": "成绩：{grade}"
   },
   "sectionDetail": {
-    "studentHeader": "学生"
+    "studentHeader": "学生",
+    "enrollEmailsPlaceholder": "alice@example.com, bob@example.com",
+    "enrollFailed": "学生注册失败"
   },
   "status": {
     "complete": "完成",
@@ -134,5 +158,42 @@
     "increase": "增加所选时间段",
     "minutes": "分钟",
     "seconds": "秒"
+  },
+  "debugPanel": {
+    "contactLabel": "您的电子邮箱或联系方式(选填)",
+    "contactPlaceholder": "以便我们与您联系并跟进处理",
+    "describeIssueLabel": "描述问题(选填)",
+    "describeIssuePlaceholder": "出现问题时，您正在进行什么操作？",
+    "diagnosticSent": "✅ 诊断信息已发送至支持团队!(S3 链接将于 30 天后失效)",
+    "performanceComingSoon": "性能指标即将推出……",
+    "sendDialogDescription": "此操作将通过 Discord 把您的诊断快照发送给我们的支持团队。您的数据在发送前会经过脱敏处理，以移除敏感信息。",
+    "sendDialogTitle": "向支持团队发送诊断信息",
+    "sendFailed": "发送失败：{error}",
+    "sendingToDiscord": "正在发送至 Discord...",
+    "sendToSupport": "发送给技术支持",
+    "snapshotDownloaded": "诊断快照已下载",
+    "tabs": {
+      "components": "组件",
+      "logs": "日志 ({count})",
+      "performance": "性能",
+      "state": "状态"
+    },
+    "title": "调试面板",
+    "unknownError": "未知错误",
+    "uploadFailed": "上传失败:{error}",
+    "uploadingArtifact": "正在将诊断文件上传至 S3...",
+    "webhookNotConfigured": "未配置 Discord Webhook"
+  },
+  "meaningAssociationExercise": {
+    "accuracyDescription": "在已启用的练习模式中,各次尝试的正确率。",
+    "modes": {
+      "easy": "简单",
+      "hard": "困难",
+      "learn": "学习"
+    },
+    "progressDescription": "已启用练习模式的平均完成率。"
+  },
+  "editor": {
+    "anonymousUser": "匿名用户"
   }
 }

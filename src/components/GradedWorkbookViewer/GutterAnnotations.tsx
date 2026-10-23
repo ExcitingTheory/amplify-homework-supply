@@ -6,6 +6,7 @@
  */
 
 import * as React from 'react'
+import { useTranslations } from 'next-intl'
 import {
   Box,
   Typography,
@@ -41,11 +42,28 @@ interface GutterAnnotationsProps {
 // Block type icons and labels
 // ============================================================================
 
-const BLOCK_TYPE_CONFIG: Record<string, { icon: React.ReactNode; label: string }> = {
-  quiz: { icon: <QuizIcon fontSize="small" />, label: 'Quiz' },
-  'meaning-association': { icon: <CompareArrowsIcon fontSize="small" />, label: 'Matching' },
-  'custom-answer': { icon: <EditNoteIcon fontSize="small" />, label: 'Written Response' },
-  answer: { icon: <MicIcon fontSize="small" />, label: 'Vocabulary' },
+type Translate = ReturnType<typeof useTranslations>
+
+const BLOCK_TYPE_CONFIG: Record<
+  string,
+  { icon: React.ReactNode; getLabel: (t: Translate) => string }
+> = {
+  quiz: {
+    icon: <QuizIcon fontSize="small" />,
+    getLabel: (t) => t('gutterAnnotations.blockTypeQuiz'),
+  },
+  'meaning-association': {
+    icon: <CompareArrowsIcon fontSize="small" />,
+    getLabel: (t) => t('gutterAnnotations.blockTypeMatching'),
+  },
+  'custom-answer': {
+    icon: <EditNoteIcon fontSize="small" />,
+    getLabel: (t) => t('gutterAnnotations.blockTypeWrittenResponse'),
+  },
+  answer: {
+    icon: <MicIcon fontSize="small" />,
+    getLabel: (t) => t('gutterAnnotations.blockTypeVocabulary'),
+  },
 }
 
 // ============================================================================
@@ -57,6 +75,7 @@ export function GutterAnnotations({
   currentAttempt,
   grades,
 }: GutterAnnotationsProps) {
+  const t = useTranslations('components')
   const [expandedBlocks, setExpandedBlocks] = React.useState<Set<string>>(new Set())
 
   const blockIds = Object.keys(wrongAnswersByBlock)
@@ -85,7 +104,7 @@ export function GutterAnnotations({
         sx={{ p: 2, textAlign: 'center' }}
       >
         <Typography variant="body2" color="text.secondary">
-          No incorrect answers to display.
+          {t('gutterAnnotations.empty')}
         </Typography>
       </Paper>
     )
@@ -98,7 +117,7 @@ export function GutterAnnotations({
         <Stack direction="row" alignItems="center" spacing={1}>
           <ErrorOutlineIcon color="error" fontSize="small" />
           <Typography variant="subtitle2">
-            Wrong Answers
+            {t('gutterAnnotations.title')}
           </Typography>
           <Chip
             label={totalWrongCount}
@@ -108,7 +127,7 @@ export function GutterAnnotations({
           />
         </Stack>
         <Typography variant="caption" color="text.secondary">
-          Across {grades.length} attempt{grades.length !== 1 ? 's' : ''}
+          {t('gutterAnnotations.acrossAttempts', { count: grades.length })}
         </Typography>
       </Box>
 
@@ -148,7 +167,7 @@ export function GutterAnnotations({
                 {config.icon}
                 <Box sx={{ flex: 1, minWidth: 0 }}>
                   <Typography variant="body2" fontWeight={500} noWrap>
-                    {config.label}
+                    {config.getLabel(t)}
                   </Typography>
                   <Typography variant="caption" color="text.secondary" noWrap>
                     {blockId}
@@ -184,7 +203,9 @@ export function GutterAnnotations({
                         }}
                       >
                         <Typography variant="caption" fontWeight={600} color="text.secondary">
-                          Attempt #{attemptNum}
+                          {t('gutterAnnotations.attemptNumber', {
+                            attempt: attemptNum,
+                          })}
                         </Typography>
 
                         {attemptAnnotations.map((annotation, idx) => (
@@ -208,12 +229,13 @@ export function GutterAnnotations({
 // ============================================================================
 
 function AnnotationItem({ annotation }: { annotation: WrongAnswerAnnotation }) {
+  const t = useTranslations('components')
   switch (annotation.type) {
     case 'quiz':
       return (
         <Box sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'error.main' }}>
           <Typography variant="caption" color="error.main" fontWeight={500}>
-            Q: {annotation.questionId}
+            {t('gutterAnnotations.questionId', { id: annotation.questionId ?? '' })}
           </Typography>
           <Typography variant="body2" sx={{ fontStyle: 'italic' }}>
             &ldquo;{annotation.wrongAnswer}&rdquo;
@@ -225,7 +247,7 @@ function AnnotationItem({ annotation }: { annotation: WrongAnswerAnnotation }) {
       return (
         <Box sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'warning.main' }}>
           <Typography variant="caption" color="warning.dark">
-            Accuracy: {annotation.accuracy}%
+            {t('gutterAnnotations.accuracy', { percent: annotation.accuracy ?? 0 })}
           </Typography>
         </Box>
       )
@@ -238,7 +260,7 @@ function AnnotationItem({ annotation }: { annotation: WrongAnswerAnnotation }) {
           </Typography>
           {annotation.feedback && (
             <Typography variant="caption" color="text.secondary">
-              Feedback: {annotation.feedback}
+              {t('gutterAnnotations.feedback', { feedback: annotation.feedback })}
             </Typography>
           )}
           {annotation.accuracy != null && (
@@ -257,7 +279,7 @@ function AnnotationItem({ annotation }: { annotation: WrongAnswerAnnotation }) {
       return (
         <Box sx={{ mt: 0.5, pl: 1, borderLeft: 2, borderColor: 'error.main' }}>
           <Typography variant="caption" color="error.main">
-            Vocab response incorrect
+            {t('gutterAnnotations.vocabIncorrect')}
           </Typography>
           {annotation.wrongAnswer && (
             <Typography variant="body2" sx={{ fontStyle: 'italic' }}>

@@ -7,6 +7,7 @@ import Stack from "@mui/material/Stack";
 import LockIcon from "@mui/icons-material/Lock";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import { useTranslations } from "next-intl";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 
 export interface CampaignChapter {
@@ -34,6 +35,7 @@ export function CampaignTimeline({
   chapters,
   compact = false,
 }: CampaignTimelineProps) {
+  const t = useTranslations("components");
   const reducedMotion = useReducedMotion();
   if (!chapters || chapters.length === 0) return null;
 
@@ -48,11 +50,11 @@ export function CampaignTimeline({
   return (
     <Box
       sx={{ py: compact ? 0.5 : 2 }}
-      aria-label={`Campaign progress: ${sorted.length} chapter${sorted.length !== 1 ? "s" : ""}`}
+      aria-label={t("campaignTimeline.ariaLabel", { count: sorted.length })}
     >
       {!compact && (
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
-          Campaign Progress
+          {t("campaignTimeline.title")}
         </Typography>
       )}
       <Stack spacing={compact ? 0.75 : 1.5}>
@@ -67,11 +69,22 @@ export function CampaignTimeline({
           const isCompleted = chapter.currentXP >= chapter.targetXP;
           const isActive = chapter.active && !isCompleted;
           const isLocked = !chapter.active && !isCompleted;
+          const chapterNumber = index + 1;
           const stateLabel = isCompleted
-            ? `Chapter ${index + 1}: ${chapter.title} — Complete`
+            ? t("campaignTimeline.chapterCompleteLabel", {
+                number: chapterNumber,
+                title: chapter.title,
+              })
             : isActive
-              ? `Chapter ${index + 1}: ${chapter.title} — In progress, ${progress}% complete`
-              : `Chapter ${index + 1}: ${chapter.title} — Locked`;
+              ? t("campaignTimeline.chapterInProgressLabel", {
+                  number: chapterNumber,
+                  title: chapter.title,
+                  progress,
+                })
+              : t("campaignTimeline.chapterLockedLabel", {
+                  number: chapterNumber,
+                  title: chapter.title,
+                });
 
           return (
             <Box
@@ -121,11 +134,14 @@ export function CampaignTimeline({
                     fontWeight={600}
                     noWrap
                   >
-                    Chapter {index + 1}: {chapter.title}
+                    {t("campaignTimeline.chapterTitle", {
+                      number: chapterNumber,
+                      title: chapter.title,
+                    })}
                   </Typography>
                   {isCompleted && (
                     <Chip
-                      label="Complete"
+                      label={t("campaignTimeline.complete")}
                       size="small"
                       variant="status"
                       color="success"
@@ -134,7 +150,9 @@ export function CampaignTimeline({
                   )}
                   {isActive && (
                     <Chip
-                      label={`${progress}%`}
+                      label={t("campaignTimeline.progressPercent", {
+                        progress,
+                      })}
                       size="small"
                       variant="status"
                       color="primary"
@@ -143,7 +161,7 @@ export function CampaignTimeline({
                   )}
                   {isLocked && (
                     <Chip
-                      label="Locked"
+                      label={t("campaignTimeline.locked")}
                       size="small"
                       sx={{ height: 18, fontSize: "0.6rem" }}
                     />

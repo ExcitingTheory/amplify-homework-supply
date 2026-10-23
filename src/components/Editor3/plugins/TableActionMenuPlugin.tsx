@@ -47,6 +47,7 @@ import {
   useState,
 } from 'react';
 import { createPortal } from 'react-dom';
+import { useTranslations } from 'next-intl';
 
 // ─── TableActionMenu (the dropdown) ────────────────────────────────────────
 
@@ -63,6 +64,7 @@ function TableActionMenu({
   setIsMenuOpen,
   contextRef,
 }: TableActionMenuProps) {
+  const t = useTranslations('editor.shared');
   const [editor] = useLexicalComposerContext();
   const dropDownRef = useRef<HTMLDivElement | null>(null);
   const [tableCellNode, updateTableCellNode] = useState(_tableCellNode);
@@ -268,7 +270,7 @@ function TableActionMenu({
         data-test-id="table-insert-row-above"
       >
         <span className="table-action-menu-item-text">
-          Insert {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`} above
+          {t('tableActionMenu.insertRowsAbove', { count: selectionCounts.rows })}
         </span>
       </button>
       <button
@@ -278,7 +280,7 @@ function TableActionMenu({
         data-test-id="table-insert-row-below"
       >
         <span className="table-action-menu-item-text">
-          Insert {selectionCounts.rows === 1 ? 'row' : `${selectionCounts.rows} rows`} below
+          {t('tableActionMenu.insertRowsBelow', { count: selectionCounts.rows })}
         </span>
       </button>
       <hr className="table-action-menu-divider" />
@@ -289,7 +291,7 @@ function TableActionMenu({
         data-test-id="table-insert-column-before"
       >
         <span className="table-action-menu-item-text">
-          Insert {selectionCounts.columns === 1 ? 'column' : `${selectionCounts.columns} columns`} left
+          {t('tableActionMenu.insertColumnsLeft', { count: selectionCounts.columns })}
         </span>
       </button>
       <button
@@ -299,7 +301,7 @@ function TableActionMenu({
         data-test-id="table-insert-column-after"
       >
         <span className="table-action-menu-item-text">
-          Insert {selectionCounts.columns === 1 ? 'column' : `${selectionCounts.columns} columns`} right
+          {t('tableActionMenu.insertColumnsRight', { count: selectionCounts.columns })}
         </span>
       </button>
       <hr className="table-action-menu-divider" />
@@ -309,7 +311,9 @@ function TableActionMenu({
         onClick={deleteTableRowAtSelection}
         data-test-id="table-delete-rows"
       >
-        <span className="table-action-menu-item-text">Delete row</span>
+        <span className="table-action-menu-item-text">
+          {t('tableActionMenu.deleteRow')}
+        </span>
       </button>
       <button
         type="button"
@@ -317,7 +321,9 @@ function TableActionMenu({
         onClick={deleteTableColumnAtSelection}
         data-test-id="table-delete-columns"
       >
-        <span className="table-action-menu-item-text">Delete column</span>
+        <span className="table-action-menu-item-text">
+          {t('tableActionMenu.deleteColumn')}
+        </span>
       </button>
       <button
         type="button"
@@ -325,7 +331,9 @@ function TableActionMenu({
         onClick={deleteTableAtSelection}
         data-test-id="table-delete"
       >
-        <span className="table-action-menu-item-text">Delete table</span>
+        <span className="table-action-menu-item-text">
+          {t('tableActionMenu.deleteTable')}
+        </span>
       </button>
       <hr className="table-action-menu-divider" />
       <button
@@ -337,9 +345,8 @@ function TableActionMenu({
         <span className="table-action-menu-item-text">
           {(tableCellNode.__headerState & TableCellHeaderStates.ROW) ===
           TableCellHeaderStates.ROW
-            ? 'Remove'
-            : 'Add'}{' '}
-          row header
+            ? t('tableActionMenu.removeRowHeader')
+            : t('tableActionMenu.addRowHeader')}
         </span>
       </button>
       <button
@@ -351,9 +358,8 @@ function TableActionMenu({
         <span className="table-action-menu-item-text">
           {(tableCellNode.__headerState & TableCellHeaderStates.COLUMN) ===
           TableCellHeaderStates.COLUMN
-            ? 'Remove'
-            : 'Add'}{' '}
-          column header
+            ? t('tableActionMenu.removeColumnHeader')
+            : t('tableActionMenu.addColumnHeader')}
         </span>
       </button>
     </div>,

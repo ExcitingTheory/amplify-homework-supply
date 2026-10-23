@@ -19,6 +19,7 @@ import { ExerciseBlockCard } from "./ExerciseBlockCard";
 import { QuizProgressMeters } from "./QuizProgressMeters";
 import { SEMANTIC_THEME } from "../../../themes/semanticTheme";
 
+const QUIZ_BLOCK_TYPE = "quiz";
 export default function QuestionBlockRo(props) {
   const t = useTranslations("workbook");
   const { nodeKey, data } = props;
@@ -287,7 +288,11 @@ export function QuizView({
       suppressContentEditableWarning={true}
       style={{ userSelect: "none" }}
     >
-      <ExerciseBlockCard blockType="quiz" accuracy={accuracy} graded={graded}>
+      <ExerciseBlockCard
+        blockType={QUIZ_BLOCK_TYPE}
+        accuracy={accuracy}
+        graded={graded}
+      >
         {gradeDisplayText ? (
           <QuizProgressMeters
             percentComplete={percentComplete}

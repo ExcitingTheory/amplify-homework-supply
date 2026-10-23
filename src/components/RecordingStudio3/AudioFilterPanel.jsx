@@ -10,36 +10,38 @@
 import React, { useState, useCallback } from "react";
 import { Box, Chip, Tooltip, Typography } from "@mui/material";
 import GraphicEqIcon from "@mui/icons-material/GraphicEq";
+import { useTranslations } from "next-intl";
 
 const FILTER_PRESETS = [
   {
     id: "derumble",
-    label: "De-rumble",
-    description: "Removes low-frequency vibration, desk/keyboard noise, and hum (highpass @ 80 Hz)",
+    getLabel: (t) => t("audioFilterPanel.derumbleLabel"),
+    getDescription: (t) => t("audioFilterPanel.derumbleDescription"),
   },
   {
     id: "pop",
-    label: "Pop filter",
-    description: "Reduces plosive blasts from \"p\" and \"b\" sounds in close-mic recordings",
+    getLabel: (t) => t("audioFilterPanel.popLabel"),
+    getDescription: (t) => t("audioFilterPanel.popDescription"),
   },
   {
     id: "noisecancel",
-    label: "Noise cancel",
-    description: "ML-powered noise suppression — removes background fans, AC, keyboard, and street noise",
+    getLabel: (t) => t("audioFilterPanel.noiseCancelLabel"),
+    getDescription: (t) => t("audioFilterPanel.noiseCancelDescription"),
   },
   {
     id: "compress",
-    label: "Compress",
-    description: "Evens out loud and quiet sections for consistent playback volume",
+    getLabel: (t) => t("audioFilterPanel.compressLabel"),
+    getDescription: (t) => t("audioFilterPanel.compressDescription"),
   },
   {
     id: "presence",
-    label: "Presence",
-    description: "Boosts speech clarity at 3 kHz — improves intelligibility for language learners",
+    getLabel: (t) => t("audioFilterPanel.presenceLabel"),
+    getDescription: (t) => t("audioFilterPanel.presenceDescription"),
   },
 ];
 
 export default function AudioFilterPanel({ activeFilters, onFiltersChange }) {
+  const t = useTranslations("components");
   const handleToggle = useCallback(
     (filterId) => {
       const next = new Set(activeFilters);
@@ -61,15 +63,15 @@ export default function AudioFilterPanel({ activeFilters, onFiltersChange }) {
         sx={{ display: "flex", alignItems: "center", gap: 0.5, mb: 1 }}
       >
         <GraphicEqIcon fontSize="small" />
-        Audio Filters
+        {t("audioFilterPanel.title")}
       </Typography>
       <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
         {FILTER_PRESETS.map((preset) => {
           const isActive = activeFilters.has(preset.id);
           return (
-            <Tooltip key={preset.id} title={preset.description} arrow>
+            <Tooltip key={preset.id} title={preset.getDescription(t)} arrow>
               <Chip
-                label={preset.label}
+                label={preset.getLabel(t)}
                 variant={isActive ? "filled" : "outlined"}
                 color={isActive ? "primary" : "default"}
                 size="small"

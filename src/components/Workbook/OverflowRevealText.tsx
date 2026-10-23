@@ -16,6 +16,8 @@ import Popover from "@mui/material/Popover";
 import type { SxProps, Theme } from "@mui/material/styles";
 import type { TypographyProps } from "@mui/material/Typography";
 
+const POPUP_KIND = "dialog" as const;
+
 export interface OverflowRevealTextProps {
   text: string;
   variant?: TypographyProps["variant"];
@@ -64,7 +66,7 @@ export function OverflowRevealText({
         variant={variant}
         component={component}
         onClick={handleClick}
-        aria-haspopup={isClipped ? "dialog" : undefined}
+        aria-haspopup={isClipped ? POPUP_KIND : undefined}
         sx={{
           ...sx,
           cursor: isClipped ? "pointer" : "default",

@@ -1399,11 +1399,15 @@ export function createGetAtRiskStudentsTool(ctx: AgentContext) {
           limit: 50,
         });
 
-        const validAssignments = (assignments || []).filter(
-          (a: any) => a != null && a.unitID,
-        );
         const unitIds = [
-          ...new Set(validAssignments.map((a: any) => a.unitID)),
+          ...new Set(
+            (assignments || [])
+              .map((assignment: any) => assignment?.unitID)
+              .filter(
+                (unitId: unknown): unitId is string =>
+                  typeof unitId === "string" && unitId.length > 0,
+              ),
+          ),
         ];
 
         const studentMap: Record<
@@ -1580,11 +1584,19 @@ export function createExportSectionGradesTool(ctx: AgentContext) {
           filter: { sectionID: { eq: targetSectionId } },
           limit: 50,
         });
-        const validAssignments = (assignments || []).filter(
-          (a: any) => a != null && a.unitID,
+        const assignmentItems: unknown[] = Array.isArray(assignments)
+          ? assignments
+          : [];
+        const validAssignments = assignmentItems.filter(
+          (assignment): assignment is { unitID: string } =>
+            typeof assignment === "object" &&
+            assignment !== null &&
+            "unitID" in assignment &&
+            typeof assignment.unitID === "string" &&
+            assignment.unitID.length > 0,
         );
         const unitIds = [
-          ...new Set(validAssignments.map((a: any) => a.unitID)),
+          ...new Set(validAssignments.map((assignment) => assignment.unitID)),
         ];
 
         type Row = {
@@ -1596,15 +1608,15 @@ export function createExportSectionGradesTool(ctx: AgentContext) {
         };
         const rows: Row[] = [];
 
-        for (const uid of unitIds.slice(0, 10)) {
+        for (const unitId of unitIds.slice(0, 10)) {
           const { data: grades } = await (client as any).models.Grade.list({
-            filter: { unitID: { eq: uid } },
+            filter: { unitID: { eq: unitId } },
             limit: 200,
           });
           for (const g of (grades || []).filter((g: any) => g != null)) {
             rows.push({
               studentId: g.owner || "unknown",
-              unitId: uid,
+              unitId,
               accuracy: g.accuracy ?? null,
               complete: !!g.complete,
               completedAt: g.complete ? g.createdAt || null : null,

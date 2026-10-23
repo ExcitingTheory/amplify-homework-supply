@@ -26,6 +26,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import { SEMANTIC_THEME } from "../../themes/semanticTheme";
 import { useTranslations } from "next-intl";
 import type { PresenceUser } from "../../yjs/workbookHooks";
+import { ProfileAvatarLink } from "../ProfileAvatarLink";
 
 // ============================================================================
 // Types
@@ -208,6 +209,9 @@ export function WorkbookInviteShare({
                 }}
               >
                 <Avatar
+                  component={ProfileAvatarLink}
+                  username={user.username}
+                  displayName={user.displayName}
                   sx={{
                     width: 24,
                     height: 24,

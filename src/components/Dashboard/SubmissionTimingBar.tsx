@@ -1,5 +1,6 @@
 "use client";
 import React from "react";
+import { useTranslations } from "next-intl";
 import { Box, Tooltip, Typography } from "@mui/material";
 import { alpha, useTheme } from "@mui/material/styles";
 
@@ -16,10 +17,15 @@ function computeStats(values: number[]) {
   return { min, avg, max };
 }
 
-function formatDays(n: number) {
+function formatDays(
+  n: number,
+  t: (key: string, values?: Record<string, number>) => string,
+) {
   const rounded = Math.round(Math.abs(n) * 10) / 10;
-  if (rounded === 0) return "on the due date";
-  return `${rounded}d ${n < 0 ? "early" : "late"}`;
+  if (rounded === 0) return t("submissionTimingBar.onDueDate");
+  return n < 0
+    ? t("submissionTimingBar.daysEarly", { days: rounded })
+    : t("submissionTimingBar.daysLate", { days: rounded });
 }
 
 /**
@@ -31,6 +37,7 @@ export function SubmissionTimingBar({
   icon,
   offsets,
 }: SubmissionTimingBarProps) {
+  const t = useTranslations("components");
   const theme = useTheme();
   const ink = theme.palette.primary.main;
   const stats = computeStats(offsets);
@@ -48,7 +55,12 @@ export function SubmissionTimingBar({
   return (
     <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
       <Tooltip
-        title={`Submission timing: min ${formatDays(stats.min)} · avg ${formatDays(stats.avg)} · max ${formatDays(stats.max)} · ${offsets.length} student${offsets.length === 1 ? "" : "s"}`}
+        title={t("submissionTimingBar.summaryTooltip", {
+          min: formatDays(stats.min, t),
+          avg: formatDays(stats.avg, t),
+          max: formatDays(stats.max, t),
+          count: offsets.length,
+        })}
       >
         <Box
           component="span"
@@ -80,7 +92,10 @@ export function SubmissionTimingBar({
             }}
           />
           <Tooltip
-            title={`Range: ${formatDays(stats.min)} – ${formatDays(stats.max)}`}
+            title={t("submissionTimingBar.rangeTooltip", {
+              min: formatDays(stats.min, t),
+              max: formatDays(stats.max, t),
+            })}
           >
             <Box
               sx={{
@@ -94,7 +109,7 @@ export function SubmissionTimingBar({
             />
           </Tooltip>
           {offsets.map((v, i) => (
-            <Tooltip key={i} title={formatDays(v)}>
+            <Tooltip key={i} title={formatDays(v, t)}>
               <Box
                 sx={{
                   position: "absolute",
@@ -109,7 +124,11 @@ export function SubmissionTimingBar({
             </Tooltip>
           ))}
         </Box>
-        <Tooltip title={`Avg: ${formatDays(stats.avg)}`}>
+        <Tooltip
+          title={t("submissionTimingBar.avgTooltip", {
+            avg: formatDays(stats.avg, t),
+          })}
+        >
           <Box
             sx={{
               position: "absolute",
@@ -129,13 +148,17 @@ export function SubmissionTimingBar({
         noWrap
         sx={{ flexShrink: 0, fontSize: "0.65rem", color: "text.secondary" }}
       >
-        avg{" "}
-        <Box
-          component="span"
-          sx={{ color: theme.palette.warning.main, fontWeight: 700 }}
-        >
-          {formatDays(stats.avg)}
-        </Box>
+        {t.rich("submissionTimingBar.avgLabel", {
+          avg: formatDays(stats.avg, t),
+          value: (chunks) => (
+            <Box
+              component="span"
+              sx={{ color: theme.palette.warning.main, fontWeight: 700 }}
+            >
+              {chunks}
+            </Box>
+          ),
+        })}
       </Typography>
     </Box>
   );

@@ -8,6 +8,43 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, act } from '@testing-library/react'
 import React from 'react'
+
+// File-local next-intl mock (overrides test/setup.ts): appends interpolation
+// values as JSON so assertions can verify both the message key and its data.
+vi.mock('next-intl', () => {
+  const format = (key: string, values?: Record<string, unknown>) =>
+    values ? `${key} ${JSON.stringify(values)}` : key
+  const createT = () => {
+    const t = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.rich = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.markup = (key: string, values?: Record<string, unknown>) => format(key, values)
+    t.raw = (key: string) => key
+    t.has = () => true
+    return t
+  }
+  return {
+    useTranslations: () => createT(),
+    useLocale: () => 'en',
+    useMessages: () => ({}),
+    useFormatter: () => ({
+      number: (n: number) => String(n),
+      dateTime: (d: Date) => d.toISOString(),
+    }),
+    NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => children,
+  }
+})
+
+/** Text matcher for `key {"name":value,...}` output that checks a subset of the values. */
+const withValues =
+  (key: string, expected: Record<string, unknown>) => (content: string) => {
+    if (!content.startsWith(`${key} `)) return false
+    try {
+      const values = JSON.parse(content.slice(key.length + 1))
+      return Object.entries(expected).every(([k, v]) => values[k] === v)
+    } catch {
+      return false
+    }
+  }
 import { GamificationToastLayer } from '../GamificationToastLayer'
 
 // Mock the context hooks
@@ -46,7 +83,7 @@ describe('GamificationToastLayer', () => {
     // All toast sub-components are rendered but closed (open=false)
     // They shouldn't show visible text when closed
     expect(screen.queryByText(/positions on leaderboard/)).toBeNull()
-    expect(screen.queryByText(/Secret Unlocked/)).toBeNull()
+    expect(screen.queryByText(/^easterEggToast\.message/)).toBeNull()
   })
 
   it('detects easter egg XP log entry and shows toast', () => {
@@ -64,8 +101,14 @@ describe('GamificationToastLayer', () => {
 
     rerender(<GamificationToastLayer />)
     // The easter egg toast should now show
-    expect(screen.getByText(/Secret Unlocked/)).toBeDefined()
-    expect(screen.getByText(/Found the hidden gem/)).toBeDefined()
+    expect(
+      screen.getByText(
+        withValues('easterEggToast.message', {
+          message: 'Found the hidden gem!',
+          xpReward: 25,
+        }),
+      ),
+    ).toBeDefined()
   })
 
   it('detects badge awarded log and shows coin flip', () => {
