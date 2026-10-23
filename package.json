@@ -20,6 +20,7 @@
     "deploy:bootstrap": "node scripts/deploy-bootstrap.mjs",
     "sandbox:with-logs": "npx ampx sandbox --stream-function-logs | tee test/logs/sandbox.log",
     "sandbox:seed": "export $(cat .env.test | xargs) && npx ampx sandbox seed",
+    "seed:remote": "export $(cat .env.test | xargs) && bash scripts/seed-remote.sh",
     "sandbox:delete": "npx ampx sandbox delete",
     "sandbox:secret": "npx ampx sandbox secret set TEST_USER_PASSWORD",
     "crawl": "export $(cat .env.test | xargs) && node scripts/crawl-console.mjs",

@@ -143,6 +143,7 @@ See [amplify/seed/README.md](./amplify/seed/README.md) for what the seed script 
 - [S3 Content Storage](./docs/S3_CONTENT_STORAGE_SPEC.md) — Paths, versioning, lifecycle
 - [S3 Embeddings](./docs/S3_EMBEDDINGS_SPEC.md) — Embedding storage and retrieval
 - [Amplify Deploy Sequencing](./docs/AMPLIFY_DEPLOY_SEQUENCE.md) — AppSync 429 throttle knobs for large-schema sandbox deploys
+- [Demo Site Deployment](./docs/DEMO_SITE_DEPLOYMENT.md) — Demo-only env vars, seeding, and reset procedure
 
 ### Process
 - [Contributing](./CONTRIBUTING.md) — Code standards and PR process

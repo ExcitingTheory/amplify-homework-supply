@@ -1531,12 +1531,13 @@
     "yourSquad": "Ihr Team"
   },
   "devQuickLogin": {
-    "heading": "Schnellanmeldung für Entwickler (vorkonfigurierte Demo-Benutzer)",
+    "heading": "Demo-Konto ausprobieren",
+    "subheading": "Wählen Sie eine Rolle, um die App mit Beispieldaten zu erkunden.",
     "roleAdmin": "Admin",
     "roleInstructor": "Dozent/in",
     "roleStudent": "Student",
     "seededUserLabel": "Vordefinierter Benutzer",
-    "signIn": "Anmelden",
+    "signInAs": "Als {name} anmelden",
     "signingIn": "Anmeldung läuft…",
     "unavailable": "Schnellanmeldung nicht verfügbar"
   },

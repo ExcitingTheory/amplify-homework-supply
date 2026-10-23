@@ -1531,12 +1531,13 @@
     "yourSquad": "Su equipo"
   },
   "devQuickLogin": {
-    "heading": "Inicio de sesión rápido para desarrollo (usuarios de demostración predefinidos)",
+    "heading": "Prueba una cuenta de demostración",
+    "subheading": "Elige un rol para explorar la aplicación con datos de ejemplo.",
     "roleAdmin": "Administrador",
     "roleInstructor": "Instructor",
     "roleStudent": "Estudiante",
     "seededUserLabel": "Usuario de prueba",
-    "signIn": "Iniciar sesión",
+    "signInAs": "Iniciar sesión como {name}",
     "signingIn": "Iniciando sesión…",
     "unavailable": "Inicio de sesión rápido no disponible"
   },

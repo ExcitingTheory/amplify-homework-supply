@@ -1531,12 +1531,13 @@
     "yourSquad": "あなたのチーム"
   },
   "devQuickLogin": {
-    "heading": "開発用クイックサインイン(シード済みデモユーザー)",
+    "heading": "デモアカウントを試す",
+    "subheading": "ロールを選んで、サンプルデータでアプリを体験できます。",
     "roleAdmin": "管理者",
     "roleInstructor": "講師",
     "roleStudent": "学生",
     "seededUserLabel": "シードユーザー",
-    "signIn": "ログイン",
+    "signInAs": "{name}としてログイン",
     "signingIn": "サインインしています…",
     "unavailable": "クイックログインはご利用いただけません"
   },

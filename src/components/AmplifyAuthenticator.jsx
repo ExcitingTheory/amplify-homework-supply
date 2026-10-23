@@ -16,18 +16,19 @@ import React from "react";
 import {
   Authenticator,
   ThemeProvider as AmplifyThemeProvider,
+  useAuthenticator,
 } from "@aws-amplify/ui-react";
 import "@aws-amplify/ui-react/styles.css";
-import { useColorScheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
+import Card from "@mui/material/Card";
+import CardActions from "@mui/material/CardActions";
+import CardContent from "@mui/material/CardContent";
+import CardHeader from "@mui/material/CardHeader";
+import List from "@mui/material/List";
+import ListItemButton from "@mui/material/ListItemButton";
 import ListItemText from "@mui/material/ListItemText";
 import ListSubheader from "@mui/material/ListSubheader";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
-import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
@@ -41,31 +42,43 @@ const ROLE_LABEL_KEYS = {
   student: "devQuickLogin.roleStudent",
 };
 
-// Dev-only one-click sign-in for seeded demo users; requires TEST_USER_PASSWORD_SEED
-// in .env.local and a seeded sandbox (see amplify/seed/seed.ts for the user list).
-function DevQuickLogin() {
-  const t = useTranslations("components");
+// One-click sign-in for seeded demo users. Available in development and on
+// demo deployments that set NEXT_PUBLIC_DEMO_QUICK_LOGIN=true; requires
+// TEST_USER_PASSWORD_SEED server-side and a seeded backend (see
+// amplify/seed/seed.ts for the user list).
+const IS_QUICK_LOGIN_ENABLED =
+  process.env.NODE_ENV === "development" ||
+  process.env.NEXT_PUBLIC_DEMO_QUICK_LOGIN === "true";
+
+function useQuickLoginUsers(enabled) {
   const [users, setUsers] = React.useState([]);
-  const [selectedUsername, setSelectedUsername] = React.useState("");
-  const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(null);
 
   React.useEffect(() => {
+    if (!enabled) return undefined;
     let cancelled = false;
     fetch("/api/dev/quick-login")
       .then((res) => res.json())
       .then((body) => {
-        if (cancelled) return;
-        setUsers(body.users || []);
-        if (body.users?.length) setSelectedUsername(body.users[0].username);
+        if (!cancelled) setUsers(body.users || []);
       })
       .catch(() => {
-        if (!cancelled) setError(t("devQuickLogin.unavailable"));
+        if (!cancelled) setUsers([]);
       });
     return () => {
       cancelled = true;
     };
-  }, [t]);
+  }, [enabled]);
+
+  return users;
+}
+
+function DevQuickLogin({ users }) {
+  const t = useTranslations("components");
+  const [selectedUsername, setSelectedUsername] = React.useState(
+    users[0]?.username ?? "",
+  );
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState(null);
 
   const handleQuickLogin = async () => {
     if (!selectedUsername) return;
@@ -87,158 +100,145 @@ function DevQuickLogin() {
     }
   };
 
-  // Group users by role so the dropdown reads "Admin / Instructor / Student".
+  // Group users by role so the list reads "Admin / Instructor / Student".
   const usersByRole = users.reduce((acc, user) => {
     (acc[user.role] ||= []).push(user);
     return acc;
   }, {});
 
-  if (!users.length) return null;
-
   return (
-    <Box sx={{ maxWidth: 400, mx: "auto", mb: 2, textAlign: "center" }}>
-      <Typography
-        variant="caption"
-        color="text.secondary"
-        // eslint-disable-next-line i18next/no-literal-string -- CSS value
-        display="block"
-        mb={1}
-      >
-        {t("devQuickLogin.heading")}
-      </Typography>
-      {/* eslint-disable-next-line i18next/no-literal-string -- CSS value */}
-      <Stack direction="row" spacing={1} justifyContent="center">
-        <FormControl size="small" sx={{ minWidth: 220 }}>
-          <InputLabel id="dev-quick-login-label">
-            {t("devQuickLogin.seededUserLabel")}
-          </InputLabel>
-          <Select
-            labelId="dev-quick-login-label"
-            label={t("devQuickLogin.seededUserLabel")}
-            value={selectedUsername}
-            onChange={(e) => setSelectedUsername(e.target.value)}
-            renderValue={(value) =>
-              users.find((u) => u.username === value)?.displayName || value
-            }
-            MenuProps={{ PaperProps: { sx: { maxWidth: 360 } } }}
+    <Card variant="outlined" sx={{ width: "100%", maxWidth: 440 }}>
+      <CardHeader
+        title={t("devQuickLogin.heading")}
+        subheader={t("devQuickLogin.subheading")}
+        slotProps={{
+          title: { variant: "h6", component: "h2" },
+        }}
+      />
+      <CardContent sx={{ pt: 0 }}>
+        <List
+          dense
+          disablePadding
+          aria-label={t("devQuickLogin.seededUserLabel")}
+          sx={{ maxHeight: 360, overflowY: "auto" }}
+        >
+          {Object.entries(usersByRole).map(([role, roleUsers]) => (
+            <li key={role}>
+              <ul style={{ padding: 0 }}>
+                <ListSubheader disableSticky>
+                  {ROLE_LABEL_KEYS[role] ? t(ROLE_LABEL_KEYS[role]) : role}
+                </ListSubheader>
+                {roleUsers.map((user) => (
+                  <ListItemButton
+                    key={user.username}
+                    selected={user.username === selectedUsername}
+                    onClick={() => setSelectedUsername(user.username)}
+                    aria-pressed={user.username === selectedUsername}
+                    sx={{ borderRadius: 1 }}
+                  >
+                    <ListItemText
+                      primary={user.displayName}
+                      secondary={user.description}
+                    />
+                  </ListItemButton>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </List>
+        {error && (
+          <Typography
+            variant="caption"
+            color="error"
+            // eslint-disable-next-line i18next/no-literal-string -- CSS value
+            display="block"
+            mt={1}
           >
-            {Object.entries(usersByRole).map(([role, roleUsers]) => [
-              <ListSubheader key={`header-${role}`}>
-                {ROLE_LABEL_KEYS[role] ? t(ROLE_LABEL_KEYS[role]) : role}
-              </ListSubheader>,
-              ...roleUsers.map((user) => (
-                <MenuItem
-                  key={user.username}
-                  value={user.username}
-                  sx={{ whiteSpace: "normal" }}
-                >
-                  <ListItemText
-                    primary={user.displayName}
-                    secondary={user.description}
-                  />
-                </MenuItem>
-              )),
-            ])}
-          </Select>
-        </FormControl>
+            {error}
+          </Typography>
+        )}
+      </CardContent>
+      <CardActions sx={{ px: 2, pb: 2 }}>
         <Button
-          size="small"
+          fullWidth
           variant="outlined"
           disabled={loading || !selectedUsername}
           onClick={handleQuickLogin}
         >
-          {loading ? t("devQuickLogin.signingIn") : t("devQuickLogin.signIn")}
+          {loading
+            ? t("devQuickLogin.signingIn")
+            : t("devQuickLogin.signInAs", {
+                name:
+                  users.find((u) => u.username === selectedUsername)
+                    ?.displayName ?? "",
+              })}
         </Button>
-      </Stack>
-      {error && (
-        <Typography
-          variant="caption"
-          color="error"
-          // eslint-disable-next-line i18next/no-literal-string -- CSS value
-          display="block"
-          mt={1}
-        >
-          {error}
-        </Typography>
-      )}
-    </Box>
+      </CardActions>
+    </Card>
   );
 }
+
+// Amplify UI tokens resolve to the MUI CSS variables, so the widget follows the
+// active theme (cosmetic theme and light/dark scheme) without per-mode overrides.
+const muiVar = (name) => `var(--mui-palette-${name})`;
+const mixPrimary = (percent, into) =>
+  `color-mix(in srgb, ${muiVar("primary-main")} ${percent}%, ${into})`;
+const primaryScale = {
+  10: mixPrimary(10, muiVar("background-paper")),
+  20: mixPrimary(20, muiVar("background-paper")),
+  40: mixPrimary(40, muiVar("background-paper")),
+  60: mixPrimary(70, muiVar("background-paper")),
+  80: muiVar("primary-main"),
+  // Mixing toward the text color darkens in light mode and lightens in dark mode.
+  90: mixPrimary(85, muiVar("text-primary")),
+  100: mixPrimary(70, muiVar("text-primary")),
+};
 
 const amplifyAuthTheme = {
   name: "homework-supply-auth",
   tokens: {
     colors: {
-      brand: {
-        primary: {
-          10: { value: "#eef0fa" },
-          20: { value: "#d5d9f0" },
-          40: { value: "#9aa3e0" },
-          60: { value: "#6f7bd6" },
-          80: { value: "#556cd6" },
-          90: { value: "#4458b8" },
-          100: { value: "#344499" },
-        },
-      },
+      // Amplify components read `colors.primary`, not `colors.brand.primary`.
+      primary: Object.fromEntries(
+        Object.entries(primaryScale).map(([step, value]) => [step, { value }]),
+      ),
       background: {
-        primary: { value: "#fafafa" },
-        secondary: { value: "#ffffff" },
+        primary: { value: muiVar("background-paper") },
+        secondary: { value: muiVar("background-default") },
       },
       font: {
-        primary: { value: "#1a1a1a" },
-        secondary: { value: "#666666" },
+        primary: { value: muiVar("text-primary") },
+        secondary: { value: muiVar("text-secondary") },
+        inverse: { value: muiVar("primary-contrastText") },
       },
       border: {
-        primary: { value: "#e0e0e0" },
+        primary: { value: muiVar("divider") },
+      },
+    },
+    fonts: {
+      default: {
+        variable: { value: "inherit" },
+        static: { value: "inherit" },
       },
     },
     components: {
       authenticator: {
         router: {
-          borderWidth: { value: "0" },
-          boxShadow: { value: "0 4px 24px rgba(0, 0, 0, 0.1)" },
+          boxShadow: { value: "none" },
         },
+      },
+      // Mirror the MUI contained medium button (8px radius, 600 weight, 0.875rem,
+      // ~36.5px tall); the 5px block padding plus the 1px border equals MUI's 6px.
+      button: {
+        borderRadius: { value: "var(--let-radius-control, 8px)" },
+        fontWeight: { value: "600" },
+        fontSize: { value: "0.875rem" },
+        lineHeight: { value: "1.75" },
+        paddingBlockStart: { value: "5px" },
+        paddingBlockEnd: { value: "5px" },
       },
     },
   },
-  overrides: [
-    {
-      colorMode: "dark",
-      tokens: {
-        colors: {
-          brand: {
-            primary: {
-              10: { value: "#1a1e3a" },
-              20: { value: "#2a3060" },
-              40: { value: "#4a5690" },
-              60: { value: "#5560a0" },
-              80: { value: "#4a5690" },
-              90: { value: "#3f4a80" },
-              100: { value: "#354070" },
-            },
-          },
-          background: {
-            primary: { value: "#121212" },
-            secondary: { value: "#1e1e1e" },
-          },
-          font: {
-            primary: { value: "#e0e0e0" },
-            secondary: { value: "#a0a0a0" },
-          },
-          border: {
-            primary: { value: "#333333" },
-          },
-        },
-        components: {
-          authenticator: {
-            router: {
-              boxShadow: { value: "0 4px 24px rgba(0, 0, 0, 0.4)" },
-            },
-          },
-        },
-      },
-    },
-  ],
 };
 
 function getFormFields(t) {
@@ -289,15 +289,54 @@ function getFormFields(t) {
   };
 }
 
+function AuthShell({ users, authenticator }) {
+  const { authStatus } = useAuthenticator((ctx) => [ctx.authStatus]);
+
+  // Once authenticated, render the Authenticator on its own so the app is not
+  // nested inside the sign-in layout.
+  if (!users.length || authStatus === "authenticated") return authenticator;
+
+  return (
+    <Box
+      sx={{
+        display: "grid",
+        gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+        gap: 3,
+        alignItems: "start",
+        justifyItems: "center",
+        maxWidth: 1000,
+        mx: "auto",
+        p: { xs: 2, md: 4 },
+      }}
+    >
+      <DevQuickLogin users={users} />
+      <Box
+        sx={{
+          width: "100%",
+          maxWidth: 440,
+          // Match the demo card's corner radius.
+          "& [data-amplify-router]": {
+            borderRadius: "var(--let-radius-card, 8px)",
+            overflow: "hidden",
+          },
+        }}
+      >
+        {authenticator}
+      </Box>
+    </Box>
+  );
+}
+
 export default function MyAuth({ children }) {
   const t = useTranslations("components");
   const formFields = getFormFields(t);
   const isDevelopment = process.env.NODE_ENV === "development";
+  const loginMechanisms = isDevelopment ? ["email"] : ["email", "phone_number"];
   const router = useRouter();
-  const { mode } = useColorScheme();
   const { user: authUser } = React.useContext(AuthContext);
-  // Map MUI mode to Amplify UI colorMode ('light' | 'dark' | 'system')
-  const colorMode = mode || "system";
+  const quickLoginUsers = useQuickLoginUsers(
+    IS_QUICK_LOGIN_ENABLED && !authUser,
+  );
 
   React.useEffect(() => {
     const hubListener = Hub.listen("auth", ({ payload }) => {
@@ -322,22 +361,28 @@ export default function MyAuth({ children }) {
   }
 
   return (
-    <AmplifyThemeProvider theme={amplifyAuthTheme} colorMode={colorMode}>
-      {isDevelopment && <DevQuickLogin />}
-      <Authenticator
-        variant="modal"
-        formFields={formFields}
-        // eslint-disable-next-line i18next/no-literal-string -- Amplify login mechanism identifiers
-        loginMechanisms={isDevelopment ? ["email"] : ["email", "phone_number"]}
-      >
-        {({ signOut, user }) =>
-          React.Children.map(children, (child) =>
-            React.isValidElement(child) && typeof child.type === "function"
-              ? React.cloneElement(child, { signOut, user })
-              : child,
-          )
-        }
-      </Authenticator>
+    <AmplifyThemeProvider theme={amplifyAuthTheme}>
+      <Authenticator.Provider>
+        <AuthShell
+          users={quickLoginUsers}
+          authenticator={
+            <Authenticator
+              variant="modal"
+              formFields={formFields}
+              loginMechanisms={loginMechanisms}
+            >
+              {({ signOut, user }) =>
+                React.Children.map(children, (child) =>
+                  React.isValidElement(child) &&
+                  typeof child.type === "function"
+                    ? React.cloneElement(child, { signOut, user })
+                    : child,
+                )
+              }
+            </Authenticator>
+          }
+        />
+      </Authenticator.Provider>
     </AmplifyThemeProvider>
   );
 }

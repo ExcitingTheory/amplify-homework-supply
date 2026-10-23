@@ -1564,12 +1564,13 @@
     "yourSquad": "Your Squad"
   },
   "devQuickLogin": {
-    "heading": "Dev quick sign-in (seeded demo users)",
+    "heading": "Try a demo account",
+    "subheading": "Pick a role to explore the app with sample data.",
     "roleAdmin": "Admin",
     "roleInstructor": "Instructor",
     "roleStudent": "Student",
     "seededUserLabel": "Seeded user",
-    "signIn": "Sign in",
+    "signInAs": "Sign in as {name}",
     "signingIn": "Signing in…",
     "unavailable": "Quick login unavailable"
   },

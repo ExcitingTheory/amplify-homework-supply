@@ -1531,12 +1531,13 @@
     "yourSquad": "您的团队"
   },
   "devQuickLogin": {
-    "heading": "开发环境快速登录(预置演示用户)",
+    "heading": "试用演示账户",
+    "subheading": "选择一个角色,使用示例数据体验应用。",
     "roleAdmin": "管理员",
     "roleInstructor": "讲师",
     "roleStudent": "学生",
     "seededUserLabel": "预置用户",
-    "signIn": "登录",
+    "signInAs": "以{name}身份登录",
     "signingIn": "正在登录…",
     "unavailable": "快捷登录不可用"
   },

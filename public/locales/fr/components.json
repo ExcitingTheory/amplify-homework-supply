@@ -1531,12 +1531,13 @@
     "yourSquad": "Votre équipe"
   },
   "devQuickLogin": {
-    "heading": "Connexion rapide développeur (utilisateurs de démonstration préchargés)",
+    "heading": "Essayer un compte de démonstration",
+    "subheading": "Choisissez un rôle pour explorer l'application avec des données d'exemple.",
     "roleAdmin": "Administrateur",
     "roleInstructor": "Formateur",
     "roleStudent": "Étudiant",
     "seededUserLabel": "Utilisateur de test préchargé",
-    "signIn": "Se connecter",
+    "signInAs": "Se connecter en tant que {name}",
     "signingIn": "Connexion en cours…",
     "unavailable": "Connexion rapide indisponible"
   },

@@ -3,8 +3,10 @@
  *
  * Lists the seeded demo users and returns credentials for one of them so the
  * login screen can offer one-click sign-in during local development. Disabled
- * outside NODE_ENV=development; requires TEST_USER_PASSWORD_SEED to be set
- * locally (see .env.local.example) and the sandbox seeded via `npx ampx sandbox seed`.
+ * unless NODE_ENV=development or a demo deployment sets
+ * NEXT_PUBLIC_DEMO_QUICK_LOGIN=true; requires TEST_USER_PASSWORD_SEED to be set
+ * (see .env.local.example) and the backend seeded via `npx ampx sandbox seed`.
+ * Only enable the flag on a deployment whose users are disposable demo data.
  */
 
 import { NextRequest, NextResponse } from "next/server";
@@ -67,8 +69,16 @@ const QUICK_LOGIN_USERS = [
   },
 ] as const;
 
+// Enabled in development, or on a demo deployment that opts in explicitly.
+function isQuickLoginEnabled(): boolean {
+  return (
+    process.env.NODE_ENV === "development" ||
+    process.env.NEXT_PUBLIC_DEMO_QUICK_LOGIN === "true"
+  );
+}
+
 export async function GET(request: NextRequest) {
-  if (process.env.NODE_ENV !== "development") {
+  if (!isQuickLoginEnabled()) {
     return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
 
