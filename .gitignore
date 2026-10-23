@@ -136,3 +136,7 @@ test-results/*
 src/components/Editor3/components/LanguageEditorTheme.css
 PRIVATE*.md
 private*.sh
+
+
+test/e2e-report/*
+!test/e2e-report/.gitkeep
