@@ -79,7 +79,10 @@ export class MediaCDNConstruct extends Construct {
     // -------------------------------------------------------------------------
     let trustedKeyGroups: cloudfront.IKeyGroup[] | undefined;
 
-    const cfPublicKey = new cloudfront.PublicKey(this, "SigningPublicKey", {
+    // CloudFront public keys are immutable. The id carries a version suffix so a
+    // change of key material (e.g. moving to the per-environment SSM prefix)
+    // replaces the resource instead of attempting an in-place UpdatePublicKey.
+    const cfPublicKey = new cloudfront.PublicKey(this, "SigningPublicKeyV2", {
       encodedKey: cfPublicKeyPem,
     });
 
