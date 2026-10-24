@@ -20,6 +20,10 @@ frontend:
         - npm install --cache .npm --prefer-offline
     build:
       commands:
+        # Amplify exposes console variables to the build only; write the demo seed
+        # into .env.production so the SSR runtime (quick-login route) can read it.
+        # No-op on branches that do not define it.
+        - env | grep -E '^TEST_USER_PASSWORD_SEED=' >> .env.production || true
         - env NODE_ENV=production npm run build
   artifacts:
     baseDirectory: .next

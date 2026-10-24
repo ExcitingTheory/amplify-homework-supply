@@ -34,7 +34,7 @@ Set these under **Hosting > Environment variables**, scoped to the demo branch:
 | `NEXT_PUBLIC_DEMO_QUICK_LOGIN` | `true` | Inlined at **build time**; changing it requires a new build |
 | `TEST_USER_PASSWORD_SEED` | random secret | Must exactly match the value used when seeding |
 
-**Confirm:** `TEST_USER_PASSWORD_SEED` is read at request time by the API route. Amplify Hosting exposes console variables to the build, not automatically to the SSR runtime. If the picker shows nothing on the deployed demo and the route returns a "TEST_USER_PASSWORD_SEED is required" error (HTTP 500), the variable is not reaching the runtime and the build needs to write it into the server environment. See [Amplify: environment variables for Next.js SSR](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-environment-variables.html). Changing [amplify.yml](../amplify.yml) requires explicit approval.
+`TEST_USER_PASSWORD_SEED` is read at request time by the API route, but Amplify Hosting exposes console variables to the build, not to the SSR runtime. [amplify.yml](../amplify.yml) therefore appends it to `.env.production` before `npm run build` (a no-op on branches that don't define it). If the route returns a "TEST_USER_PASSWORD_SEED is required" error (HTTP 500) after a build, confirm that build ran with the updated `amplify.yml`. See [Amplify: environment variables for Next.js SSR](https://docs.aws.amazon.com/amplify/latest/userguide/ssr-environment-variables.html).
 
 ## Deploy
 
