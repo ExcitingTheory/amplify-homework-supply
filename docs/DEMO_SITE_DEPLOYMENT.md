@@ -61,7 +61,7 @@ The seed script reads `amplify_outputs.json` from the repo root, so it targets w
    npx ampx sandbox seed
    ```
 
-   **Confirm:** `ampx sandbox seed` may require a running sandbox. If it refuses, run the script directly with `npx tsx amplify/seed/seed.ts` using the same environment and AWS credentials.
+   **Do not use `npx ampx sandbox seed` for a deployed branch.** It sets `AMPLIFY_BACKEND_IDENTIFIER` to your local sandbox, so `@aws-amplify/seed` creates users in the sandbox's Cognito pool while the rest of the script uses the pool from `amplify_outputs.json` (symptom: "User already exists" followed by "User does not exist"). Use `npm run seed:remote`, which runs `npx tsx amplify/seed/seed.ts` with `AMPLIFY_BACKEND_IDENTIFIER` set to the branch (`{"namespace":"<app-id>","name":"<branch>","type":"branch"}`).
 5. Restore your own `amplify_outputs.json`.
 6. Verify: open the demo site signed out and confirm the "Try a demo account" card lists Admin, Instructor and Student users, then sign in as one.
 

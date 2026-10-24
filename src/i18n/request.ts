@@ -100,8 +100,16 @@ export default getRequestConfig(async ({ requestLocale }) => {
             data,
           );
         }
-      } catch {
-        // Namespace files may be absent for a locale; English remains the fallback.
+      } catch (error) {
+        // A missing non-English file is expected (English is the fallback); anything
+        // else, or a missing English file, means translations are broken at runtime.
+        const code = (error as NodeJS.ErrnoException)?.code;
+        if (code !== "ENOENT" || sourceLocale === routing.defaultLocale) {
+          console.error(
+            `[i18n] Failed to load ${sourceLocale}/${ns}.json from ${localesRoot}:`,
+            error,
+          );
+        }
       }
     }
   }

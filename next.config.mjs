@@ -79,6 +79,13 @@ const nextConfig = {
   // Use standalone output for smaller deployments
   output: "standalone",
 
+  // src/i18n/request.ts reads locale JSON with readFileSync on a runtime-built path, which
+  // file tracing cannot discover. Without this the Amplify SSR bundle has no translations
+  // (every message renders as its key) because public/ is served from the CDN only.
+  outputFileTracingIncludes: {
+    "/*": ["./public/locales/**/*.json"],
+  },
+
   // @huggingface/transformers (server actions/agent tools) conditionally requires
   // onnxruntime-node OR onnxruntime-web; file tracing can't resolve the branch so it
   // includes both for every platform. Server always takes the Node.js/linux-x64 path

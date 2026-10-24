@@ -68,4 +68,9 @@ echo
 echo "This deletes ALL data in that backend's DynamoDB tables before reseeding."
 echo
 
-npx ampx sandbox seed
+# `ampx sandbox seed` overwrites AMPLIFY_BACKEND_IDENTIFIER with the local sandbox's id,
+# and @aws-amplify/seed (createAndSignUpUser/addToUserGroup) uses that id to pick the
+# Cognito pool, so it would create users in the sandbox pool while the rest of the seed
+# uses the pool from amplify_outputs.json. Run the script directly with the branch id.
+AMPLIFY_BACKEND_IDENTIFIER="{\"namespace\":\"$APP_ID\",\"name\":\"$BRANCH\",\"type\":\"branch\"}" \
+  npx tsx amplify/seed/seed.ts
