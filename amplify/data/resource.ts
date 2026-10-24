@@ -540,12 +540,23 @@ function filterSchemaForBootstrapPhase<T extends Record<string, unknown>>(
   }
   const phases = computeBootstrapPhases(totalPhases);
   const includedModels = phases[phase - 1];
+  // Models that already exist in the deployed stack must never be dropped: removing
+  // a model deletes its DynamoDB table and all data. deploy-bootstrap.mjs passes the
+  // deployed model names so a phase can only ever add models to an existing stack.
+  const keptModels = new Set(
+    (process.env.AMPLIFY_BOOTSTRAP_KEEP_MODELS ?? "")
+      .split(",")
+      .map((name) => name.trim())
+      .filter(Boolean),
+  );
   const filtered = { ...schemaDefinition } as Record<string, unknown>;
   for (const key of Object.keys(filtered)) {
     // Only ever remove known model names — custom types/mutations/queries
     // are never keys returned by computeBootstrapPhases, so they're kept.
     const isModel = phases[totalPhases - 1].has(key);
-    if (isModel && !includedModels.has(key)) delete filtered[key];
+    if (isModel && !includedModels.has(key) && !keptModels.has(key)) {
+      delete filtered[key];
+    }
   }
   return filtered as T;
 }

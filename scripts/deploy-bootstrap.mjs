@@ -15,8 +15,14 @@
  * — each phase is a strict superset of the previous one, so phases only
  * ever ADD models, never remove ones already deployed.
  *
- * The phase loop (1..T) always runs, whether or not a target stack already
- * exists (as long as it isn't in a FAILED status — see below) — re-running
+ * The phase loop (1..T) runs for a new stack or one that is still being built
+ * up (see below). A healthy stack that already contains the full schema (at
+ * most MAX_NEW_MODELS_FOR_FULL_DEPLOY models missing) skips it and gets ONE
+ * unfiltered deploy: every phase deploy removes the models outside that phase,
+ * which deletes their DynamoDB tables, so looping the phases over a complete
+ * stack wiped and recreated data on every build and took ~50 minutes.
+ *
+ * For the phased path: re-running
  * an already-satisfied phase against a stack that already has those models
  * is a safe no-op update, since phases are cumulative supersets. An earlier
  * version skipped straight to an UNFILTERED full deploy whenever any
@@ -58,11 +64,13 @@ import { spawn } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import {
   CloudFormationClient,
   ListStacksCommand,
   DescribeStacksCommand,
   DescribeStackResourcesCommand,
+  ListStackResourcesCommand,
   DescribeStackEventsCommand,
   DeleteStackCommand,
 } from "@aws-sdk/client-cloudformation";
@@ -195,6 +203,74 @@ async function findDataNestedStack(rootStackName) {
       /^data[0-9a-fA-F]+$/.test(r.LogicalResourceId ?? ""),
   );
   return resource?.PhysicalResourceId ?? null;
+}
+
+// A phase deploy removes every model outside that phase (see
+// filterSchemaForBootstrapPhase in amplify/data/resource.ts), which deletes
+// those models' DynamoDB tables. The phased loop is therefore only safe for a
+// stack that is new or still being built up. An already-complete stack must be
+// updated with the full schema in one operation. When only a few models are
+// new, that single operation stays far below CloudFormation's resource cap.
+const MAX_NEW_MODELS_FOR_FULL_DEPLOY = 3;
+
+/** Model names declared in amplify/data/resource.ts (`Name: a` followed by `.model(`). */
+function readSchemaModelNames() {
+  const schemaPath = path.resolve(
+    path.dirname(fileURLToPath(import.meta.url)),
+    "../amplify/data/resource.ts",
+  );
+  const lines = fs.readFileSync(schemaPath, "utf8").split("\n");
+  const names = new Set();
+  for (let i = 0; i < lines.length; i++) {
+    const decl = lines[i].match(/^\s{2}(\w+):\s*a\s*$/);
+    if (!decl) continue;
+    let next = i + 1;
+    while (next < lines.length && lines[next].trim() === "") next++;
+    if (lines[next]?.trim().startsWith(".model(")) names.add(decl[1]);
+  }
+  return names;
+}
+
+/**
+ * Model names that currently have a nested stack under the data stack. Logical
+ * ids look like `amplifyData<Model>NestedStack<Model>NestedStackResource<HASH>`.
+ */
+async function listDeployedModelNames(rootStackName) {
+  const dataStack = await findDataNestedStack(rootStackName);
+  const names = new Set();
+  if (!dataStack) return names;
+  let nextToken;
+  do {
+    const response = await cfn.send(
+      new ListStackResourcesCommand({ StackName: dataStack, NextToken: nextToken }),
+    );
+    for (const resource of response.StackResourceSummaries ?? []) {
+      if (resource.ResourceType !== "AWS::CloudFormation::Stack") continue;
+      const match =
+        /^amplifyData(\w+?)NestedStack\1NestedStackResource[0-9A-F]+$/.exec(
+          resource.LogicalResourceId ?? "",
+        );
+      if (match) names.add(match[1]);
+    }
+    nextToken = response.NextToken;
+  } while (nextToken);
+  return names;
+}
+
+/**
+ * Returns how many schema models are not deployed yet when the stack is
+ * healthy and (nearly) complete, otherwise null (use the phased loop).
+ */
+async function countNewModelsIfStackIsComplete(stack) {
+  if (!HEALTHY_STACK_STATUSES.has(stack.status)) return null;
+  const expected = readSchemaModelNames();
+  const deployed = await listDeployedModelNames(stack.name);
+  const missing = [...expected].filter((name) => !deployed.has(name));
+  console.log(
+    `[deploy-bootstrap] Schema has ${expected.size} models; ${deployed.size} deployed; ${missing.length} not deployed yet${missing.length ? ` (${missing.join(", ")})` : ""}.`,
+  );
+  if (expected.size === 0 || deployed.size === 0) return null;
+  return missing.length <= MAX_NEW_MODELS_FOR_FULL_DEPLOY ? missing.length : null;
 }
 
 /**
@@ -559,6 +635,25 @@ async function main() {
 
   const existingStack = await findExistingStack(identifier, stackKind);
 
+  if (existingStack && HEALTHY_STACK_STATUSES.has(existingStack.status)) {
+    const newModelCount = await countNewModelsIfStackIsComplete(existingStack);
+    if (newModelCount !== null) {
+      console.log(
+        `[deploy-bootstrap] Stack "${existingStack.name}" already has the full schema (${newModelCount} new model(s)) — running one full deploy instead of the phased bootstrap.`,
+      );
+      await deployPhaseWithRetry(
+        {},
+        "Full deploy of the complete schema",
+        identifier,
+        deployArgs,
+        stackKind,
+        allowRemediation,
+      );
+      console.log("[deploy-bootstrap] Deploy complete.");
+      return;
+    }
+  }
+
   if (existingStack && FAILED_STACK_STATUSES.has(existingStack.status)) {
     if (!allowRemediation) {
       throw new Error(
@@ -600,10 +695,21 @@ async function main() {
   }
 
   for (let phase = 1; phase <= BOOTSTRAP_TOTAL_PHASES; phase++) {
+    // Re-read what is deployed before every phase so a phase can only add models.
+    const currentStack = await findExistingStack(identifier, stackKind);
+    const keptModels = currentStack
+      ? [...(await listDeployedModelNames(currentStack.name))]
+      : [];
+    if (keptModels.length > 0) {
+      console.log(
+        `[deploy-bootstrap] Phase ${phase}: keeping ${keptModels.length} already-deployed model(s) so none are removed.`,
+      );
+    }
     await deployPhaseWithRetry(
       {
         AMPLIFY_BOOTSTRAP_PHASE: String(phase),
         AMPLIFY_BOOTSTRAP_TOTAL_PHASES: String(BOOTSTRAP_TOTAL_PHASES),
+        AMPLIFY_BOOTSTRAP_KEEP_MODELS: keptModels.join(","),
       },
       `Phase ${phase}/${BOOTSTRAP_TOTAL_PHASES}: deploying cumulative model set ${phase}`,
       identifier,
