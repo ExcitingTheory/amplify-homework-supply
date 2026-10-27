@@ -116,7 +116,13 @@ export function SquadLeaderboard({
   }, [sorted, groupBy, t]);
 
   if (filtered.length === 0) {
-    return <EmptyState dense title={t("squadLeaderboard.emptyTitle")} />;
+    return (
+      <EmptyState
+        dense
+        title={t("squadLeaderboard.emptyTitle")}
+        description={t("squadLeaderboard.emptyDescription")}
+      />
+    );
   }
 
   let globalRank = 0;

@@ -47,14 +47,19 @@ import {
 } from "@/utils/settingsValidation";
 
 import SettingsContext from "@/context/settingsContext";
+import { PageHintsPreferenceView } from "@/components/Settings/PageHintsPreferenceView";
+import { usePageHintPreferences } from "@/hooks/usePageHintPreferences";
+import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import { useRouter, usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 
 function Settings() {
   const t = useTranslations("pages");
+  const tComponents = useTranslations("components");
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
+  const hintPreferences = usePageHintPreferences();
   const [user, setUser] = React.useState({});
   const [oldPassword, setOldPassword] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
@@ -472,6 +477,26 @@ function Settings() {
                 selectedLocale={selectedLocale}
                 availableLocales={availableLocales}
                 onChange={handleLocaleChange}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <LightbulbOutlinedIcon color="primary" />
+                <Typography variant="h6">
+                  {tComponents("pageHints.settings.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <PageHintsPreferenceView
+                showTips={hintPreferences.showTips}
+                canReset={hintPreferences.hasSeenTips}
+                disabled={!hintPreferences.ready}
+                onShowTipsChange={hintPreferences.setShowTips}
+                onReset={hintPreferences.resetTips}
               />
             </AccordionDetails>
           </Accordion>

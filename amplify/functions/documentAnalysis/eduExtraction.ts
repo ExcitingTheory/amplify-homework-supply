@@ -3,6 +3,7 @@
  */
 import type { FormatExtractionResult } from "./formatRegistry.js";
 import { getS3Object } from "./textExtraction.js";
+import { PACKAGE_MEDIA_MIME_TYPES } from "./embeddedImages.js";
 import { convert } from "html-to-text";
 
 /**
@@ -119,19 +120,7 @@ export async function extractIMSCC(
   const text = pages.map((p) => p.text).join("\n\n");
 
   // Extract media files (images, audio, video) from the package
-  const mediaExtensions: Record<string, string> = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-    ".svg": "image/svg+xml",
-    ".mp3": "audio/mpeg",
-    ".wav": "audio/wav",
-    ".ogg": "audio/ogg",
-    ".mp4": "video/mp4",
-    ".webm": "video/webm",
-  };
+  const mediaExtensions = PACKAGE_MEDIA_MIME_TYPES;
 
   for (const [path, file] of Object.entries(zip.files)) {
     if (file.dir) continue;
@@ -275,19 +264,7 @@ export async function extractSCORM(
   }
 
   // Extract media files (images, audio, video) from the SCORM package
-  const mediaExtensions: Record<string, string> = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-    ".svg": "image/svg+xml",
-    ".mp3": "audio/mpeg",
-    ".wav": "audio/wav",
-    ".ogg": "audio/ogg",
-    ".mp4": "video/mp4",
-    ".webm": "video/webm",
-  };
+  const mediaExtensions = PACKAGE_MEDIA_MIME_TYPES;
 
   for (const [path, zipFile] of Object.entries(zip.files)) {
     if ((zipFile as any).dir) continue;

@@ -35,6 +35,7 @@ import { useRouter } from "next/navigation";
 import { Hub } from "aws-amplify/utils";
 import { signIn, signOut } from "aws-amplify/auth";
 import AuthContext from "@/context/authContext";
+import { QUICK_LOGIN_USERS } from "@/utils/quickLoginUsers";
 
 const ROLE_LABEL_KEYS = {
   admin: "devQuickLogin.roleAdmin",
@@ -50,33 +51,12 @@ const IS_QUICK_LOGIN_ENABLED =
   process.env.NODE_ENV === "development" ||
   process.env.NEXT_PUBLIC_DEMO_QUICK_LOGIN === "true";
 
-function useQuickLoginUsers(enabled) {
-  const [users, setUsers] = React.useState([]);
-
-  React.useEffect(() => {
-    if (!enabled) return undefined;
-    let cancelled = false;
-    fetch("/api/dev/quick-login")
-      .then((res) => res.json())
-      .then((body) => {
-        if (!cancelled) setUsers(body.users || []);
-      })
-      .catch(() => {
-        if (!cancelled) setUsers([]);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [enabled]);
-
-  return users;
-}
-
 function DevQuickLogin({ users }) {
   const t = useTranslations("components");
   const [selectedUsername, setSelectedUsername] = React.useState(
     users[0]?.username ?? "",
   );
+
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState(null);
 
@@ -107,15 +87,26 @@ function DevQuickLogin({ users }) {
   }, {});
 
   return (
-    <Card variant="outlined" sx={{ width: "100%", maxWidth: 440 }}>
+    <Card
+      variant="outlined"
+      sx={{
+        width: "100%",
+        boxSizing: "border-box",
+        borderRadius: "var(--let-radius-card, 8px)",
+        // Doubled selector outranks the theme's top-level Card max-width and auto margins.
+        "&&": { maxWidth: 440, marginInline: 0 },
+      }}
+    >
+      {/* Insets mirror the Amplify form padding (--amplify-space-xl, 2rem). */}
       <CardHeader
         title={t("devQuickLogin.heading")}
         subheader={t("devQuickLogin.subheading")}
         slotProps={{
           title: { variant: "h6", component: "h2" },
         }}
+        sx={{ px: 4, pt: 4, pb: 2 }}
       />
-      <CardContent sx={{ pt: 0 }}>
+      <CardContent sx={{ px: 4, pt: 0, pb: 2 }}>
         <List
           dense
           disablePadding
@@ -158,7 +149,7 @@ function DevQuickLogin({ users }) {
           </Typography>
         )}
       </CardContent>
-      <CardActions sx={{ px: 2, pb: 2 }}>
+      <CardActions sx={{ px: 4, pt: 0, pb: 4 }}>
         <Button
           fullWidth
           variant="outlined"
@@ -223,6 +214,10 @@ const amplifyAuthTheme = {
     },
     components: {
       authenticator: {
+        // The default 30rem container overflows the 440px column.
+        container: {
+          widthMax: { value: "100%" },
+        },
         router: {
           boxShadow: { value: "none" },
         },
@@ -240,6 +235,9 @@ const amplifyAuthTheme = {
     },
   },
 };
+
+// The Cognito user pool only supports email sign-in (see amplify/auth/resource.ts).
+const LOGIN_MECHANISMS = ["email"];
 
 function getFormFields(t) {
   return {
@@ -262,39 +260,35 @@ function getFormFields(t) {
         isRequired: true,
         order: 3,
       },
-      phone_number: {
-        label: t("authenticator.phoneLabel"),
-        placeholder: t("authenticator.phonePlaceholder"),
-        isRequired: false,
-        order: 4,
-      },
       preferred_username: {
         label: t("authenticator.preferredNameLabel"),
         placeholder: t("authenticator.preferredNamePlaceholder"),
         isRequired: false,
-        order: 5,
+        order: 4,
       },
       password: {
         label: t("authenticator.passwordLabel"),
         placeholder: t("authenticator.passwordPlaceholder"),
         isRequired: false,
-        order: 6,
+        order: 5,
       },
       confirm_password: {
         label: t("authenticator.confirmPasswordLabel"),
         placeholder: t("authenticator.confirmPasswordPlaceholder"),
-        order: 7,
+        order: 6,
       },
     },
   };
 }
 
-function AuthShell({ users, authenticator }) {
+function AuthShell({ authenticator }) {
   const { authStatus } = useAuthenticator((ctx) => [ctx.authStatus]);
 
   // Once authenticated, render the Authenticator on its own so the app is not
   // nested inside the sign-in layout.
-  if (!users.length || authStatus === "authenticated") return authenticator;
+  if (!IS_QUICK_LOGIN_ENABLED || authStatus === "authenticated") {
+    return authenticator;
+  }
 
   return (
     <Box
@@ -309,7 +303,7 @@ function AuthShell({ users, authenticator }) {
         p: { xs: 2, md: 4 },
       }}
     >
-      <DevQuickLogin users={users} />
+      <DevQuickLogin users={QUICK_LOGIN_USERS} />
       <Box
         sx={{
           width: "100%",
@@ -330,13 +324,8 @@ function AuthShell({ users, authenticator }) {
 export default function MyAuth({ children }) {
   const t = useTranslations("components");
   const formFields = getFormFields(t);
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const loginMechanisms = isDevelopment ? ["email"] : ["email", "phone_number"];
   const router = useRouter();
   const { user: authUser } = React.useContext(AuthContext);
-  const quickLoginUsers = useQuickLoginUsers(
-    IS_QUICK_LOGIN_ENABLED && !authUser,
-  );
 
   React.useEffect(() => {
     const hubListener = Hub.listen("auth", ({ payload }) => {
@@ -347,6 +336,10 @@ export default function MyAuth({ children }) {
           console.log("[MyAuth] Redirecting to return URL:", returnUrl);
           sessionStorage.removeItem("returnUrl");
           router.replace(returnUrl);
+        } else if (window.location.pathname === "/") {
+          // Re-run the server page with the new session cookies so admins are
+          // redirected to the admin panel without a manual reload.
+          router.refresh();
         }
       }
     });
@@ -364,12 +357,11 @@ export default function MyAuth({ children }) {
     <AmplifyThemeProvider theme={amplifyAuthTheme}>
       <Authenticator.Provider>
         <AuthShell
-          users={quickLoginUsers}
           authenticator={
             <Authenticator
               variant="modal"
               formFields={formFields}
-              loginMechanisms={loginMechanisms}
+              loginMechanisms={LOGIN_MECHANISMS}
             >
               {({ signOut, user }) =>
                 React.Children.map(children, (child) =>

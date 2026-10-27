@@ -35,7 +35,13 @@ function formatDate(dateStr: string): string {
 export function NailedItWall({ blocks }: NailedItWallProps) {
   const t = useTranslations("components");
   if (!blocks || blocks.length === 0) {
-    return <EmptyState dense title={t("nailedItWall.emptyTitle")} />;
+    return (
+      <EmptyState
+        dense
+        title={t("nailedItWall.emptyTitle")}
+        description={t("nailedItWall.emptyDescription")}
+      />
+    );
   }
 
   return (

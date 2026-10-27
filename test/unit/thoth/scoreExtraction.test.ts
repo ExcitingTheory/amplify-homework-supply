@@ -73,6 +73,32 @@ function factQuestion(
 }
 
 describe("scoreExtraction", () => {
+  it("counts a merged fact and its words for every page they came from", () => {
+    const gt = miniGroundTruth();
+    // Page 4 is the card page; the fact was merged with a repeat on page 9.
+    const merged = (subject: string, field: string, answer: string) => ({
+      ...factQuestion(subject, field, answer, 9),
+      page: 9,
+      pages: [4, 9],
+    });
+    const report = scoreExtraction(gt, {
+      questions: [
+        merged("The Magus", "hebrewLetter", "Beth (B)"),
+        merged("The Magus", "path", "12"),
+        merged("The Magus", "attribution", "Mercury"),
+        merged("The Priestess", "path", "13"),
+      ],
+      words: [
+        { term: "Mercury", definition: "mind and message", page: 3, pages: [3, 5] },
+        { term: "Aleph", definition: "Hebrew letter", page: 6 },
+      ],
+    });
+
+    expect(report.factRecall).toBe(1);
+    expect(report.missingFacts).toEqual([]);
+    expect(report.pageCoverage.missing).toEqual([1, 7, 8, 10]);
+  });
+
   it("scores a perfect match as full recall with no gaps", () => {
     const gt = miniGroundTruth();
     const extracted: ExtractionInput = {

@@ -164,7 +164,7 @@ export const Default: Story = {
         answer:
           "Photosynthesis is the process by which plants convert light energy into chemical energy.",
         hint: "Think about how plants make food",
-        type: "essay",
+        questionType: "essay",
         difficulty: "easy",
         page: 1,
       },
@@ -173,7 +173,7 @@ export const Default: Story = {
         answer:
           "Chloroplasts are organelles where photosynthesis occurs, containing chlorophyll that captures light energy.",
         hint: "Where does photosynthesis happen?",
-        type: "short_answer",
+        questionType: "short_answer",
         difficulty: "medium",
         page: 2,
       },
@@ -181,7 +181,7 @@ export const Default: Story = {
         prompt: "What gases are involved in photosynthesis?",
         answer:
           "Plants take in carbon dioxide and release oxygen during photosynthesis.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "easy",
         page: 2,
       },
@@ -190,7 +190,7 @@ export const Default: Story = {
         answer:
           "Photosynthesis provides oxygen for organisms and forms the base of food chains.",
         hint: "Think about the broader impact",
-        type: "essay",
+        questionType: "essay",
         difficulty: "hard",
         page: 3,
         hasAudio: true,
@@ -198,7 +198,7 @@ export const Default: Story = {
       {
         prompt: "What is the primary product of photosynthesis?",
         answer: "Glucose is the primary product of photosynthesis.",
-        type: "short_answer",
+        questionType: "short_answer",
         difficulty: "medium",
         page: 4,
         hasImage: true,
@@ -260,7 +260,7 @@ export const WithSearchHighlight: Story = {
         answer:
           "Photosynthesis is the process by which plants convert light energy into chemical energy.",
         hint: "Think about how plants make food",
-        type: "essay",
+        questionType: "essay",
         difficulty: "easy",
         page: 1,
       },
@@ -269,7 +269,7 @@ export const WithSearchHighlight: Story = {
         answer:
           "Chloroplasts are organelles where photosynthesis occurs, containing chlorophyll that captures light energy.",
         hint: "Where does photosynthesis happen?",
-        type: "short_answer",
+        questionType: "short_answer",
         difficulty: "medium",
         page: 2,
       },
@@ -277,7 +277,7 @@ export const WithSearchHighlight: Story = {
         prompt: "What gases are involved in photosynthesis?",
         answer:
           "Plants take in carbon dioxide and release oxygen during photosynthesis.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "easy",
         page: 2,
       },
@@ -334,7 +334,7 @@ export const LargeList: Story = {
         prompt: `Question ${i + 1}: What is the role of ${["chloroplasts", "mitochondria", "cell walls", "ribosomes"][i % 4]} in plant cells?`,
         answer: `Answer ${i + 1}: Detailed explanation about cellular organelles and their functions.`,
         hint: i % 3 === 0 ? `Hint for question ${i + 1}` : undefined,
-        type: ["essay", "short_answer", "comprehension", "multiple_choice"][
+        questionType: ["essay", "short_answer", "comprehension", "multiple_choice"][
           i % 4
         ],
         difficulty: ["easy", "medium", "hard"][i % 3],
@@ -393,7 +393,7 @@ export const EssayQuestions: Story = {
         prompt: "Explain the process of photosynthesis in detail.",
         answer:
           "Photosynthesis is a complex process where plants convert light energy into chemical energy through a series of reactions.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "medium",
         page: 1,
       },
@@ -401,7 +401,7 @@ export const EssayQuestions: Story = {
         prompt: "Discuss the importance of photosynthesis for life on Earth.",
         answer:
           "Photosynthesis is essential as it produces oxygen and forms the base of most food chains.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "easy",
         page: 2,
       },
@@ -409,7 +409,7 @@ export const EssayQuestions: Story = {
         prompt: "Compare and contrast cellular respiration and photosynthesis.",
         answer:
           "While photosynthesis stores energy, cellular respiration releases it. Both involve electron transport chains.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "hard",
         page: 3,
       },
@@ -469,21 +469,21 @@ export const ComprehensionQuestions: Story = {
       {
         prompt: "What gases are exchanged during photosynthesis?",
         answer: "Carbon dioxide is taken in and oxygen is released.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "easy",
         page: 1,
       },
       {
         prompt: "Where in plant cells does photosynthesis occur?",
         answer: "Photosynthesis occurs in the chloroplasts.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "easy",
         page: 2,
       },
       {
         prompt: "What is the main product of photosynthesis?",
         answer: "Glucose is the main product of photosynthesis.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "medium",
         page: 3,
       },
@@ -521,7 +521,7 @@ export const MixedDifficulty: Story = {
         prompt: "What is chlorophyll?",
         answer:
           "Chlorophyll is the green pigment in plants that captures light energy.",
-        type: "short_answer",
+        questionType: "short_answer",
         difficulty: "easy",
         page: 1,
       },
@@ -529,7 +529,7 @@ export const MixedDifficulty: Story = {
         prompt: "Describe the light-dependent reactions.",
         answer:
           "Light-dependent reactions occur in the thylakoid membranes and produce ATP and NADPH.",
-        type: "short_answer",
+        questionType: "short_answer",
         difficulty: "medium",
         page: 2,
       },
@@ -537,7 +537,7 @@ export const MixedDifficulty: Story = {
         prompt: "Explain the Calvin cycle and its role in carbon fixation.",
         answer:
           "The Calvin cycle uses ATP and NADPH to fix CO2 into organic compounds through a complex series of enzymatic reactions.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "hard",
         page: 3,
       },
@@ -575,7 +575,7 @@ export const WithMediaAttachments: Story = {
         prompt: "Listen to the explanation and summarize the process.",
         answer:
           "The process involves capturing light energy and converting it to chemical energy.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "medium",
         page: 1,
         hasAudio: true,
@@ -584,7 +584,7 @@ export const WithMediaAttachments: Story = {
         prompt: "Based on the diagram, identify the key structures.",
         answer:
           "The key structures include chloroplasts, thylakoids, and stroma.",
-        type: "comprehension",
+        questionType: "comprehension",
         difficulty: "easy",
         page: 2,
         hasImage: true,
@@ -593,7 +593,7 @@ export const WithMediaAttachments: Story = {
         prompt: "Analyze the image and describe the electron transport chain.",
         answer:
           "The electron transport chain moves electrons through protein complexes, creating a proton gradient.",
-        type: "essay",
+        questionType: "essay",
         difficulty: "hard",
         page: 3,
         hasImage: true,
@@ -656,6 +656,7 @@ export const AlreadyImported: Story = {
         mockParsedContent,
         seedMockDocuments,
         seedMockParsedContent,
+        seedMockDocumentQuestions,
       } = await import("../../.storybook/__mocks__/aws-amplify-data.js");
 
       Object.keys(mockDocuments).forEach(
@@ -664,6 +665,17 @@ export const AlreadyImported: Story = {
       Object.keys(mockParsedContent).forEach(
         (k) => delete (mockParsedContent as any)[k],
       );
+
+      // Imported entries are the ones the document has a link for
+      seedMockDocumentQuestions([
+        {
+          id: "link-photosynthesis",
+          documentID: "mock-doc-imported",
+          questionID: "q-photosynthesis",
+          entryKey: "what is photosynthesis?",
+          page: 1,
+        },
+      ]);
 
       seedMockDocuments([
         {
@@ -684,7 +696,7 @@ export const AlreadyImported: Story = {
             {
               prompt: "What is photosynthesis?",
               answer: "The process of converting light to energy.",
-              type: "short_answer",
+              questionType: "short_answer",
               difficulty: "easy",
               page: 1,
             },
@@ -708,7 +720,106 @@ export const AlreadyImported: Story = {
     docs: {
       description: {
         story:
-          "Shows the interface when questions have already been imported. Import button and checkboxes are hidden.",
+          "Shows the interface when every question has already been imported. Import button and checkboxes are hidden.",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/What is photosynthesis/i);
+    await canvas.findByText(/Imported on/i);
+    expect(canvas.queryAllByRole("checkbox")).toHaveLength(0);
+    expect(canvas.queryByText(/Import to Question Bank/i)).not.toBeInTheDocument();
+  },
+};
+
+/**
+ * A document where some questions are already in the bank
+ */
+export const PartlyImported: Story = {
+  args: {
+    documentId: "mock-doc-partly",
+    unitId: "mock-unit-1",
+    owner: "user-123",
+    identityId: "us-east-1:identity-123",
+    searchTerm: "",
+  },
+  loaders: [
+    async () => {
+      const {
+        mockDocuments,
+        mockParsedContent,
+        seedMockDocuments,
+        seedMockParsedContent,
+        seedMockDocumentQuestions,
+      } = await import("../../.storybook/__mocks__/aws-amplify-data.js");
+
+      Object.keys(mockDocuments).forEach(
+        (k) => delete (mockDocuments as any)[k],
+      );
+      Object.keys(mockParsedContent).forEach(
+        (k) => delete (mockParsedContent as any)[k],
+      );
+
+      seedMockDocumentQuestions([
+        {
+          id: "link-partly-1",
+          documentID: "mock-doc-partly",
+          questionID: "q-photosynthesis",
+          entryKey: "what is photosynthesis?",
+          page: 1,
+        },
+      ]);
+      seedMockDocuments([
+        {
+          id: "mock-doc-partly",
+          filename: "partly-imported.pdf",
+          status: "completed",
+          pageCount: 4,
+          mimeType: "application/pdf",
+          size: 1234567,
+        },
+      ]);
+      seedMockParsedContent([
+        {
+          id: "parsed-mock-doc-partly",
+          documentID: "mock-doc-partly",
+          questionsJSON: JSON.stringify([
+            { prompt: "What is photosynthesis?", answer: "Light to energy.", page: 1 },
+            { prompt: "Where does photosynthesis happen?", answer: "Chloroplasts.", page: 2 },
+            { prompt: "Which gas do plants release?", answer: "Oxygen.", page: 3 },
+          ]),
+          summariesJSON: JSON.stringify([]),
+          objectivesJSON: JSON.stringify([]),
+          status: "completed",
+          importedAt: new Date().toISOString(),
+        },
+      ]);
+      return {};
+    },
+  ],
+  render: (args) => (
+    <Box sx={{ height: "80vh", display: "flex", flexDirection: "column" }}>
+      <QuestionsReview2 {...args} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText(/Where does photosynthesis happen/i);
+
+    // The imported question is marked and cannot be selected; the rest are
+    // selected and can still be imported.
+    expect(await canvas.findAllByText("Already imported")).toHaveLength(1);
+    expect(canvas.getAllByRole("checkbox")).toHaveLength(2);
+    expect(canvas.getByText("2 of 2 selected")).toBeInTheDocument();
+    expect(canvas.getByText(/Import to Question Bank/i)).toBeEnabled();
+    expect(canvas.queryByText(/Imported on/i)).not.toBeInTheDocument();
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Entries are marked one by one from the document's links. Imported ones are not pre-selected; the others can still be imported.",
       },
     },
   },
@@ -750,7 +861,7 @@ export const MinimalData: Story = {
     docs: {
       description: {
         story:
-          "Questions with only required fields (prompt and answer). Optional hint, type, and difficulty fields are omitted.",
+          "Questions with only required fields (prompt and answer). Optional hint, questionType, and difficulty fields are omitted.",
       },
     },
   },

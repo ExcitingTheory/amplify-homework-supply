@@ -1,14 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import {
-  MAX_PARSED_CONTENT_PAYLOAD_BYTES,
   analyzePages,
-  assertParsedContentPayloadSize,
+  buildVerifierCandidates,
   checkPageFacts,
   chunkItemsByJsonSize,
   createPageBatches,
   extractCoverageCandidates,
   filterVerifiedEntries,
   isEquivalentText,
+  mergeDuplicateQuestions,
+  mergeDuplicateVocabulary,
   normaliseQuestionEntries,
   retainDirectQuestionsWithVerifiedMatches,
   retainDirectVocabularyWithVerifiedMatches,
@@ -17,6 +18,7 @@ import {
   segmentTextIntoPages,
   splitTextInHalf,
   type ExhaustiveFact,
+  VERIFIER_SYSTEM_PROMPT,
 } from "../../amplify/functions/documentAnalysis/analysis";
 
 function structuredCompletion(
@@ -34,8 +36,9 @@ function structuredCompletion(
 }
 
 describe("document-analysis profiles and helpers", () => {
-  it("defaults absent or invalid profiles to standard and reports invalid values", () => {
-    expect(resolveAnalysisProfile(undefined)).toEqual({ profile: "standard" });
+  it("defaults absent or invalid profiles to exhaustive and reports invalid values", () => {
+    expect(resolveAnalysisProfile(undefined)).toEqual({ profile: "exhaustive" });
+    expect(resolveAnalysisProfile({})).toEqual({ profile: "exhaustive" });
     expect(resolveAnalysisProfile({ analysisProfile: "exhaustive" })).toEqual({
       profile: "exhaustive",
     });
@@ -43,11 +46,11 @@ describe("document-analysis profiles and helpers", () => {
       profile: "standard",
     });
     expect(resolveAnalysisProfile({ analysisProfile: "unknown" })).toEqual({
-      profile: "standard",
+      profile: "exhaustive",
       invalidValue: "unknown",
     });
     expect(resolveAnalysisProfile("{invalid")).toEqual({
-      profile: "standard",
+      profile: "exhaustive",
       invalidValue: "{invalid",
     });
   });
@@ -191,6 +194,117 @@ describe("document-analysis profiles and helpers", () => {
     ).toThrow("Verification verdicts must cover each candidate exactly once");
   });
 
+  it("indexes verifier candidates so verdicts can reference them explicitly", () => {
+    const fact = (answer: string): ExhaustiveFact => ({
+      subject: "cell",
+      field: "definition",
+      answer,
+      accept: [],
+      page: 1,
+      sourceText: answer,
+    });
+
+    expect(
+      buildVerifierCandidates([
+        { kind: "question", fact: fact("a") },
+        { kind: "vocabulary", fact: fact("b") },
+      ]).map(({ index, kind, answer }) => ({ index, kind, answer })),
+    ).toEqual([
+      { index: 0, kind: "question", answer: "a" },
+      { index: 1, kind: "vocabulary", answer: "b" },
+    ]);
+    expect(VERIFIER_SYSTEM_PROMPT).toContain("exactly one verdict");
+  });
+
+  it("merges a fact repeated on several pages into one question listing every page", () => {
+    const question = (page: number, accept: string[] = []) => ({
+      prompt: "What is path for The Magus?",
+      answer: "12",
+      subject: "The Magus",
+      field: "path",
+      page,
+      accept,
+    });
+    const other = { ...question(3), field: "attribution", answer: "Mercury" };
+
+    const merged = mergeDuplicateQuestions([
+      question(7, ["twelve"]),
+      other,
+      question(3, ["XII"]),
+      question(5),
+    ]);
+
+    expect(merged).toEqual([
+      {
+        ...question(3),
+        pages: [3, 5, 7],
+        accept: ["twelve", "XII"],
+      },
+      { ...other, pages: [3] },
+    ]);
+    expect(normaliseQuestionEntries(merged)[0].pages).toEqual([3, 5, 7]);
+  });
+
+  it("keeps a question whose answer differs and leaves unkeyed entries alone", () => {
+    const base = {
+      prompt: "p",
+      answer: "a",
+      subject: "s",
+      field: "f",
+      page: 1,
+    };
+    expect(
+      mergeDuplicateQuestions([base, { ...base, answer: "b", page: 2 }, "raw"]),
+    ).toHaveLength(3);
+  });
+
+  it("records the source page even when nothing was merged", () => {
+    expect(
+      mergeDuplicateQuestions([
+        { prompt: "p", answer: "a", subject: "s", field: "f", page: 6 },
+        { prompt: "no key", page: 8 },
+      ]),
+    ).toEqual([
+      { prompt: "p", answer: "a", subject: "s", field: "f", page: 6, pages: [6] },
+      { prompt: "no key", page: 8, pages: [8] },
+    ]);
+  });
+
+  it("does not merge distinct questions written in non-Latin scripts", () => {
+    const question = (subject: string, field: string, answer: string, page: number) => ({
+      prompt: `${subject} ${field}`,
+      subject,
+      field,
+      answer,
+      page,
+    });
+    const merged = mergeDuplicateQuestions([
+      question("日本語", "挨拶", "こんにちは", 1),
+      question("日本語", "別れ", "さようなら", 2),
+      question("日本語", "挨拶", "こんにちは", 3),
+      question("Ελληνικά", "χαιρετισμός", "γεια", 4),
+    ]);
+    expect(merged.map(({ answer }) => answer)).toEqual([
+      "こんにちは",
+      "さようなら",
+      "γεια",
+    ]);
+    expect(merged[0].pages).toEqual([1, 3]);
+  });
+
+  it("merges vocabulary with the same term and definition across pages", () => {
+    expect(
+      mergeDuplicateVocabulary([
+        { word: "Path", definition: "A Tree-line", page: 9 },
+        { word: "path", definition: "A Tree-line", page: 2 },
+        { word: "Path", definition: "A road", page: 4 },
+      ]),
+    ).toEqual([
+      { word: "Path", definition: "A Tree-line", page: 2, pages: [2, 9] },
+      { word: "Path", definition: "A road", page: 4, pages: [4] },
+    ]);
+  });
+
   it("matches direct entries only to equivalent verified facts", () => {
     expect(isEquivalentText("<p>What is a cell?</p>", "What is a cell?")).toBe(
       true,
@@ -207,11 +321,11 @@ describe("document-analysis profiles and helpers", () => {
     ];
     const directQuestions = [
       {
-        question: "What is a cell?",
-        correctAnswer: "The basic unit of life.",
+        prompt: "What is a cell?",
+        answer: "The basic unit of life.",
         options: ["Cell", "Atom"],
       },
-      { question: "What is a tissue?", answer: "A group of cells." },
+      { prompt: "What is a tissue?", answer: "A group of cells." },
     ];
     const verifiedVocabulary = [
       { word: "cell", definition: "The basic unit of life." },
@@ -251,24 +365,6 @@ describe("document-analysis profiles and helpers", () => {
     ).toThrow("A synthesis item exceeds the configured size limit");
   });
 
-  it("rejects ParsedContent payloads that exceed the safe item budget", () => {
-    const overhead = JSON.stringify({ content: "" }).length;
-    const atLimit = {
-      content: "x".repeat(MAX_PARSED_CONTENT_PAYLOAD_BYTES - overhead),
-    };
-    const overLimit = {
-      content: `${atLimit.content}x`,
-    };
-
-    expect(() =>
-      assertParsedContentPayloadSize({ small: "content" }),
-    ).not.toThrow();
-    expect(() => assertParsedContentPayloadSize(atLimit)).not.toThrow();
-    expect(() => assertParsedContentPayloadSize(overLimit)).toThrow(
-      /No content was persisted/,
-    );
-  });
-
   it("extracts labelled lines and glossary-style definitions for coverage", () => {
     expect(
       extractCoverageCandidates({
@@ -277,6 +373,7 @@ describe("document-analysis profiles and helpers", () => {
           "FRONTS",
           "Path: 12",
           "Beth — Hebrew letter",
+          "Aleph — Hebrew letter",
           "A sentence with no label.",
         ].join("\n"),
       }),
@@ -287,16 +384,94 @@ describe("document-analysis profiles and helpers", () => {
         answer: "Hebrew letter",
         sourceText: "Beth — Hebrew letter",
       },
+      {
+        field: "Aleph",
+        answer: "Hebrew letter",
+        sourceText: "Aleph — Hebrew letter",
+      },
     ]);
   });
 
-  it("normalizes legacy and current question shapes while preserving metadata", () => {
+  it("does not treat headings, titles or a lone dashed line as facts", () => {
+    expect(
+      extractCoverageCandidates({
+        pageNumber: 1,
+        text: [
+          "CHAPTER 1: THE WATER CYCLE",
+          "# Part 2: Overview",
+          "Unit 3: Weather",
+          "Correspondence flashcards — the full system for reading the deck",
+          "Evaporation: water becomes vapor",
+        ].join("\n"),
+      }),
+    ).toEqual([
+      {
+        field: "Evaporation",
+        answer: "water becomes vapor",
+        sourceText: "Evaporation: water becomes vapor",
+      },
+    ]);
+  });
+
+  it("keeps short all-caps labels and caseless-script lines as facts", () => {
+    expect(
+      extractCoverageCandidates({
+        pageNumber: 1,
+        text: "HP: 20\n挨拶: こんにちは、お元気ですか",
+      }).map(({ sourceText }) => sourceText),
+    ).toEqual(["HP: 20", "挨拶: こんにちは、お元気ですか"]);
+  });
+
+  it("only infers a front/back page role from a standalone marker line", () => {
+    const hint = (text: string) => {
+      const create = vi
+        .fn()
+        .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+      return analyzePages(
+        { chat: { completions: { create } } },
+        [{ pageNumber: 1, text }],
+        "file-1",
+        "document-1",
+        { profile: "exhaustive" },
+      ).then(() => create.mock.calls[0][0].messages[0].content as string);
+    };
+    return Promise.all([
+      hint("BACK\nPath: 12"),
+      hint("Front: The Magus\nPath: 12"),
+      hint("Back to basics\nPath: 12"),
+      hint("Front-end development\nPath: 12"),
+    ]).then(([back, front, backToBasics, frontEnd]) => {
+      expect(back).toContain("Page role hint: back");
+      expect(front).toContain("Page role hint: front");
+      expect(backToBasics).not.toContain("Page role hint");
+      expect(frontEnd).not.toContain("Page role hint");
+    });
+  });
+
+  it("prompts for a neutral subject rather than a card", () => {
+    const create = vi
+      .fn()
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+    return analyzePages(
+      { chat: { completions: { create } } },
+      [{ pageNumber: 1, text: "Plain prose without labels." }],
+      "file-1",
+      "document-1",
+      { profile: "exhaustive" },
+    ).then(() => {
+      const prompt = create.mock.calls[0][0].messages[0].content as string;
+      expect(prompt).not.toMatch(/Terms lines|card or section/);
+      expect(prompt).toContain("glossary entry (term — definition)");
+    });
+  });
+
+  it("normalizes question entries to the bank's fields while preserving metadata", () => {
     expect(
       normaliseQuestionEntries([
         {
-          question: "What is the path?",
-          expectedAnswer: "12",
-          type: "recall",
+          prompt: "What is the path?",
+          answer: "12",
+          questionType: "recall",
           page: 4,
           subject: "The Magus",
           field: "path",
@@ -316,19 +491,20 @@ describe("document-analysis profiles and helpers", () => {
         field: "path",
         sourceText: "Path: 12",
         accept: ["XII"],
-        question: "What is the path?",
-        expectedAnswer: "12",
-        type: "recall",
       },
     ]);
     expect(() => normaliseQuestionEntries([{ answer: "12" }])).toThrow(
       "Extracted question 0 is missing its prompt",
     );
+    // The old field names are no longer read.
+    expect(() =>
+      normaliseQuestionEntries([{ question: "What?", expectedAnswer: "12" }]),
+    ).toThrow("Extracted question 0 is missing its prompt");
   });
 });
 
 describe("analyzePages", () => {
-  it("keeps standard extraction batching and JSON-object responses by default", async () => {
+  it("sends two pages per call and keeps JSON-object responses by default", async () => {
     const create = vi.fn().mockResolvedValue({
       choices: [
         {
@@ -356,7 +532,8 @@ describe("analyzePages", () => {
       "document-1",
     );
 
-    expect(create).toHaveBeenCalledTimes(2);
+    // 11 pages in batches of two: five full batches and one with the last page
+    expect(create).toHaveBeenCalledTimes(6);
     expect(create.mock.calls[0][0].response_format).toEqual({
       type: "json_object",
     });
@@ -406,13 +583,11 @@ describe("analyzePages", () => {
         answer: "12",
         questionType: "recall",
         page: 4,
+        pages: [4],
         subject: "The Magus",
         field: "path",
         sourceText,
         accept: ["XII"],
-        question: "What is path for The Magus?",
-        expectedAnswer: "12",
-        type: "recall",
       },
     ]);
     expect(result.vocabularyJSON[0].page).toBe(4);
@@ -641,6 +816,83 @@ describe("analyzePages", () => {
 
     expect(create).toHaveBeenCalledTimes(2);
     expect(pause).toHaveBeenCalledWith(1000);
+  });
+
+  it("keeps other labelled lines out of the gap-fill context", async () => {
+    const factFor = (sourceText: string) => ({
+      subject: "Page 16",
+      field: sourceText.split(":")[0],
+      answer: sourceText.split(":")[1].trim(),
+      accept: [],
+      page: 16,
+      sourceText,
+    });
+    const create = vi
+      .fn()
+      .mockResolvedValueOnce(
+        structuredCompletion({
+          facts: [factFor("Sun: bright")],
+          vocabulary: [],
+        }),
+      )
+      .mockResolvedValueOnce(
+        structuredCompletion({
+          facts: [factFor("Fire (element): energy and will")],
+          vocabulary: [],
+        }),
+      );
+
+    await analyzePages(
+      { chat: { completions: { create } } },
+      [
+        {
+          pageNumber: 16,
+          text: "FRONT\nSun: bright\nFire (element): energy and will",
+        },
+      ],
+      "file-1",
+      "document-1",
+      { profile: "exhaustive" },
+    );
+
+    const gapFillUser = create.mock.calls[1][0].messages[1].content as string;
+    const [context, pageText] = gapFillUser.split("Page text:\n");
+    expect(context).toContain("FRONT");
+    expect(context).not.toContain("Sun: bright");
+    expect(pageText).toBe("Fire (element): energy and will");
+    // The first, full extraction still sees the whole header.
+    expect(create.mock.calls[0][0].messages[1].content).toContain(
+      "Sun: bright",
+    );
+  });
+
+  it("splits stalled gap-fills, stops early, and reports lines the model never covers", async () => {
+    const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const create = vi
+      .fn()
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+
+    const result = await analyzePages(
+      { chat: { completions: { create } } },
+      [{ pageNumber: 2, text: "Path: 12\nPlanet: Mercury\nElement: Water" }],
+      "file-1",
+      "document-1",
+      { profile: "exhaustive" },
+    );
+
+    expect(result.questionsJSON).toEqual([]);
+    expect(result.uncoveredLines?.map(({ page }) => page)).toEqual([2, 2, 2]);
+    expect(result.uncoveredLines?.map(({ line }) => line).sort()).toEqual([
+      "Element: Water",
+      "Path: 12",
+      "Planet: Mercury",
+    ]);
+    expect(String(warnSpy.mock.calls.at(-1)?.[0])).toContain(
+      "labelled/glossary lines uncovered on page 2",
+    );
+    // Identical retries of the full set are no longer repeated 8 times.
+    expect(create.mock.calls.length).toBeLessThan(20);
+    warnSpy.mockRestore();
   });
 
   it("logs and fails instead of silently dropping an exhaustively analyzed page", async () => {

@@ -265,6 +265,8 @@ export function SquadJoinPanel({
           dense
           title={t("squadJoinPanel.emptyTitle")}
           description={t("squadJoinPanel.emptyDescription")}
+          ctaLabel={t("squadJoinPanel.emptyCta")}
+          ctaHref="/squads"
         />
       ) : (
         <Stack spacing={1.5}>

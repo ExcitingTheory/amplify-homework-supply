@@ -79,6 +79,48 @@ describe("candidateIsCovered", () => {
     expect(candidateIsCovered(candidate, [path, overlay])).toBe(true);
   });
 
+  it("counts the label carried by subject and field when a line is split into value-only facts", () => {
+    const candidate = candidateFor(
+      "♂ Mars (planet): force and drive; energy, aggression, courage.",
+    );
+    const split = (answer: string): ExhaustiveFact => ({
+      subject: "Mars",
+      field: "planet",
+      answer,
+      accept: [],
+      page: 10,
+      sourceText: answer,
+    });
+    expect(
+      candidateIsCovered(candidate, [
+        split("force and drive"),
+        split("energy, aggression, courage"),
+      ]),
+    ).toBe(true);
+    expect(candidateIsCovered(candidate, [split("force and drive")])).toBe(
+      false,
+    );
+  });
+
+  it("covers non-Latin lines instead of treating them as empty", () => {
+    const candidate = candidateFor("挨拶: こんにちは、お元気ですか");
+    expect(
+      candidateIsCovered(candidate, [
+        fact("こんにちは、お元気ですか", "挨拶: こんにちは、お元気ですか"),
+      ]),
+    ).toBe(true);
+    expect(candidateIsCovered(candidate, [])).toBe(false);
+  });
+
+  it("folds irregular plurals when comparing terms", () => {
+    const candidate = candidateFor("Children: the youngest members");
+    expect(
+      candidateIsCovered(candidate, [
+        fact("the youngest member", "Child: the youngest member"),
+      ]),
+    ).toBe(true);
+  });
+
   it("never counts a fact with the wrong answer as coverage", () => {
     const candidate = candidateFor("Path: 23 · Geburah–Hod");
     expect(

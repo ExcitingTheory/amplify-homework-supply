@@ -8,6 +8,7 @@
  */
 
 import React, { useState, useRef, useEffect } from 'react'
+import { hasAIMention } from '../../utils/aiMentionParser'
 import { useTranslations } from 'next-intl'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
@@ -28,7 +29,7 @@ export interface PeerReviewChatProps {
   isClosed: boolean
   onSendMessage: (content: string, messageType?: MessageType, referencedBlockId?: string) => void
   onTypingChange?: (typing: boolean) => void
-  /** Called when a message contains @AI — triggers backend AI response. */
+  /** Called when a message mentions @kai — triggers backend AI response. */
   onAIMention?: (message: string, chatHistory: string) => void
 }
 
@@ -138,8 +139,8 @@ export function PeerReviewChat({
       typingTimeoutRef.current = null
     }
 
-    // Detect @AI mention and trigger AI response
-    if (onAIMention && /@ai\b/i.test(trimmed)) {
+    // Detect a @kai mention and trigger the AI response
+    if (onAIMention && hasAIMention(trimmed)) {
       const chatHistory = messages
         .slice(-20)
         .map(m => `[${m.displayName || m.author}]: ${m.content}`)

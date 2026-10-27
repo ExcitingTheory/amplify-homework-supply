@@ -45,12 +45,14 @@ import {
   Info as InfoIcon,
   Mic as MicIcon,
 } from "@mui/icons-material";
-import { getAmplifyClient } from "../utils/amplifyClient";
 import {
   importVocabularyToUnit,
   updateVocabularyItem,
 } from "../utils/vocabularyImportUtils";
 import { getParsedContentModeration } from "../utils/parsedContentModeration";
+import { useDocumentParsedContent } from "../hooks/useDocumentParsedContent";
+import { useDocumentLinks } from "../hooks/useDocumentLinks";
+import { wordEntryKey } from "../utils/documentLinks";
 import DictionaryContext from "../context/dictionaryContext";
 import AuthContext from "../context/authContext";
 
@@ -86,6 +88,11 @@ export interface VocabularyItem {
   documentID?: string;
   fileID?: string;
   filename?: string;
+  // True when this document already imported the word into the dictionary
+  alreadyImported?: boolean;
+  // Detail of the source link, when known (see useItemSources)
+  sourceText?: string;
+  extraSources?: number;
 }
 
 interface VocabularyReview2Props {
@@ -467,9 +474,11 @@ export function VocabularyCard({
         >
           {item.filename && (
             <Tooltip
-              title={t("vocabularyReview.sourceTooltip", {
-                filename: item.filename,
-              })}
+              title={
+                t("vocabularyReview.sourceTooltip", {
+                  filename: item.filename,
+                }) + (item.sourceText ? ` - "${item.sourceText}"` : "")
+              }
             >
               <Chip
                 label={
@@ -483,6 +492,24 @@ export function VocabularyCard({
                 sx={{ fontSize: "0.65rem", height: "20px", maxWidth: "150px" }}
               />
             </Tooltip>
+          )}
+          {!!item.extraSources && (
+            <Chip
+              label={`+${item.extraSources}`}
+              size="small"
+              variant="outlined"
+              sx={{ fontSize: "0.7rem", height: "20px" }}
+            />
+          )}
+          {item.alreadyImported && (
+            <Chip
+              icon={<CheckCircleIcon />}
+              label={t("vocabularyReview.alreadyImported")}
+              size="small"
+              color="success"
+              variant="outlined"
+              sx={{ fontSize: "0.7rem", height: "20px" }}
+            />
           )}
           {item.page && (
             <Chip
@@ -704,106 +731,71 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     overscan: 5,
   });
 
-  const loadParsedContent = useCallback(async () => {
-    try {
-      dispatch({ type: "LOAD_START" });
+  // The document's chunks, loaded page by page and kept current without
+  // reloading: this changes only when a chunk's _version actually changes.
+  const {
+    parsedContent: content,
+    document: doc,
+    state: loadState,
+    loadingMore,
+    refresh,
+  } = useDocumentParsedContent(documentId, {
+    enabled: !authLoading && hasUser,
+  });
+  // Which of those words this document already imported
+  const {
+    importedKeys,
+    loaded: linksLoaded,
+    refresh: refreshLinks,
+  } = useDocumentLinks(documentId, "word", {
+    enabled: !authLoading && hasUser,
+  });
+  const hasLoaded = useRef(false);
 
-      const client = getAmplifyClient();
-      // Get document
-      const { data: doc } = await client.models.Document.get({
-        id: documentId,
-      });
-
-      // Get parsed content for this document
-      const { data: parsedContents } = await client.models.ParsedContent.list({
-        filter: { documentID: { eq: documentId } },
-      });
-
-      if (parsedContents.length > 0) {
-        const content = parsedContents[0];
-
-        // Parse vocabulary - a.json() fields may be returned as objects or strings
-        const vocab = content.vocabularyJSON
-          ? typeof content.vocabularyJSON === "string"
-            ? JSON.parse(content.vocabularyJSON)
-            : content.vocabularyJSON
-          : [];
-
-        // Enrich vocabulary with source metadata
-        const enrichedVocab = vocab.map((v: VocabularyItem) => ({
-          ...v,
-          documentID: content.documentID,
-          fileID: content.fileID || undefined,
-          filename: doc?.filename || undefined,
-        }));
-
-        // Parse summaries - a.json() fields may be returned as objects or strings
-        const sums = content.summariesJSON
-          ? typeof content.summariesJSON === "string"
-            ? JSON.parse(content.summariesJSON)
-            : content.summariesJSON
-          : [];
-
-        // Parse objectives - a.json() fields may be returned as objects or strings
-        const objs = content.objectivesJSON
-          ? typeof content.objectivesJSON === "string"
-            ? JSON.parse(content.objectivesJSON)
-            : content.objectivesJSON
-          : [];
-
-        dispatch({
-          type: "LOAD_SUCCESS",
-          parsedContent: content,
-          document: doc,
-          items: enrichedVocab,
-          summaries: sums,
-          objectives: objs,
-          autoSelectAll: !content.importedAt,
-        });
-      } else {
-        dispatch({ type: "LOAD_ERROR" });
-      }
-    } catch (error) {
-      console.error("Error loading parsed content:", error);
-      dispatch({ type: "LOAD_ERROR" });
-    }
+  useEffect(() => {
+    hasLoaded.current = false;
+    dispatch({ type: "LOAD_START" });
   }, [documentId]);
 
-  // Fetch ParsedContent and Document
   useEffect(() => {
-    // Wait for authentication
-    if (authLoading || !hasUser) {
-      console.log("[VocabularyReview2] Waiting for authentication", {
-        authLoading,
-        hasUser,
-      });
+    // Wait for the links too, so nothing is pre-selected and then deselected
+    if (loadState === "loading" || !linksLoaded) return;
+    if (!content) {
+      dispatch({ type: "LOAD_ERROR" });
       return;
     }
 
-    loadParsedContent();
+    // a.json() fields may be returned as objects or strings
+    const parse = (value: unknown): any[] =>
+      value ? (typeof value === "string" ? JSON.parse(value) : (value as any[])) : [];
 
-    console.log(
-      "[VocabularyReview2] Setting up ParsedContent subscription for user:",
-      username,
+    // Enrich vocabulary with source metadata
+    const enrichedVocab = parse(content.vocabularyJSON).map(
+      (v: VocabularyItem) => ({
+        ...v,
+        documentID: content.documentID as string,
+        fileID: (content.fileID as string | null | undefined) || undefined,
+        filename: doc?.filename || undefined,
+        alreadyImported: importedKeys.has(wordEntryKey(v.word)),
+      }),
     );
-    const client = getAmplifyClient();
-    const subscription = client.models.ParsedContent.observeQuery().subscribe({
-      next: ({ items }) => {
-        // Filter out null items that can appear during subscription updates
-        const validItems = items.filter(
-          (item: any) => item != null && item.id != null,
-        );
-        loadParsedContent();
-      },
-      error: (error: any) =>
-        console.error(
-          "[VocabularyReview2] ParsedContent subscription error:",
-          error,
-        ),
-    });
 
-    return () => subscription.unsubscribe();
-  }, [authLoading, hasUser, username, loadParsedContent]);
+    dispatch({
+      type: hasLoaded.current ? "CONTENT_UPDATED" : "LOAD_SUCCESS",
+      parsedContent: content,
+      document: doc,
+      items: enrichedVocab,
+      summaries: parse(content.summariesJSON),
+      objectives: parse(content.objectivesJSON),
+      autoSelectAll: true,
+    });
+    hasLoaded.current = true;
+  }, [content, doc, loadState, linksLoaded, importedKeys]);
+
+  const pendingCount = useMemo(
+    () => vocabularyItems.filter((item) => !item.alreadyImported).length,
+    [vocabularyItems],
+  );
 
   const toggleItem = useCallback((index: number) => {
     dispatch({ type: "TOGGLE_SELECT", index });
@@ -814,12 +806,12 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
   }, []);
 
   const toggleAll = useCallback(() => {
-    if (selectedItems.size === vocabularyItems.length) {
+    if (selectedItems.size === pendingCount) {
       dispatch({ type: "DESELECT_ALL" });
     } else {
       dispatch({ type: "SELECT_ALL", count: vocabularyItems.length });
     }
-  }, [selectedItems.size, vocabularyItems.length]);
+  }, [selectedItems.size, pendingCount, vocabularyItems.length]);
 
   const handleUpdate = useCallback(
     async (index: number, field: string, newValue: string) => {
@@ -880,8 +872,9 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       dispatch({ type: "IMPORT_ERROR", result });
     }
 
-    // Reload to show updated status
-    loadParsedContent();
+    // Fetch again to show the updated status
+    refresh();
+    refreshLinks();
   }, [
     parsedContent,
     moderation.blocked,
@@ -891,7 +884,8 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     owner,
     identityId,
     onImportComplete,
-    loadParsedContent,
+    refresh,
+    refreshLinks,
   ]);
 
   if (loading) {
@@ -913,7 +907,9 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     );
   }
 
-  const alreadyImported = !!parsedContent.importedAt;
+  // Entries are marked one by one, so a later page of a partly imported
+  // document can still be imported.
+  const hasPending = pendingCount > 0;
 
   return (
     <Box
@@ -924,6 +920,12 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         overflow: "hidden",
       }}
     >
+      {loadingMore && (
+        <LinearProgress
+          aria-label={t("vocabularyReview.loading")}
+          sx={{ flexShrink: 0 }}
+        />
+      )}
       {/* Header */}
       <Box sx={{ p: 2, flexShrink: 0 }}>
         <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
@@ -949,7 +951,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
           </Alert>
         )}
 
-        {alreadyImported && (
+        {!hasPending && parsedContent.importedAt && (
           <Alert severity="success" sx={{ mt: 1 }} icon={<CheckCircleIcon />}>
             {t("vocabularyReview.importedOn", {
               date: new Date(parsedContent.importedAt).toLocaleString(),
@@ -1023,7 +1025,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       )}
 
       {/* Actions */}
-      {!alreadyImported && (
+      {hasPending && (
         <Box
           sx={{
             px: 2,
@@ -1035,14 +1037,14 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
           }}
         >
           <Button variant="outlined" size="small" onClick={toggleAll}>
-            {selectedItems.size === vocabularyItems.length
+            {selectedItems.size === pendingCount
               ? t("vocabularyReview.deselectAll")
               : t("vocabularyReview.selectAll")}
           </Button>
           <Typography variant="body2" color="text.secondary">
             {t("vocabularyReview.selectedCount", {
               count: selectedItems.size,
-              total: vocabularyItems.length,
+              total: pendingCount,
             })}
           </Typography>
           <Box sx={{ flex: 1 }} />
@@ -1136,7 +1138,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
                   isSelected={selectedItems.has(virtualItem.index)}
                   isExpanded={expandedItems.has(virtualItem.index)}
                   existsInDictionary={existsInDictionary}
-                  alreadyImported={alreadyImported}
+                  alreadyImported={!!item.alreadyImported}
                   searchTerm={searchTerm}
                   onToggleSelect={toggleItem}
                   onToggleExpand={toggleExpand}

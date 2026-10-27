@@ -95,7 +95,7 @@ const Template = ({ editorState, instructions, title }) => {
             <strong>✨ How it works:</strong>
             <br />
             {instructions ||
-              "Type a sentence ending with punctuation (. ! ? 。). After a brief pause, AI will suggest the next sentence."}
+              "Type a few words. After a brief pause, AI will suggest how to continue."}
             <br />
             <br />
             <strong>Keyboard shortcuts:</strong> Tab or → Accept | Esc Dismiss |
@@ -134,8 +134,8 @@ const Template = ({ editorState, instructions, title }) => {
                   pointerEvents: "none",
                 }}
               >
-                Start typing an explanation or description. End with punctuation
-                and wait for AI suggestions...
+                Start typing an explanation or description, then pause for AI
+                suggestions...
               </div>
             }
             ErrorBoundary={LexicalErrorBoundary}
@@ -148,9 +148,9 @@ const Template = ({ editorState, instructions, title }) => {
           <Typography variant="body2" color="text.secondary">
             <strong>💡 Tips:</strong>
             <br />
-            • Write at least 50 characters before suggestions appear
+            • Write at least 3 words before suggestions appear
             <br />
-            • End sentences with punctuation (. ! ? 。)
+            • Punctuation is not required
             <br />
             • Wait ~1 second after typing for the AI to respond
             <br />

@@ -134,27 +134,27 @@ const mockParsedContentJapanese = {
   ],
   questionsJSON: [
     {
-      question:
+      prompt:
         "What is the primary function of chlorophyll in photosynthesis?",
-      expectedAnswer:
+      answer:
         "Chlorophyll absorbs light energy, primarily blue and red wavelengths, which is then used to convert carbon dioxide and water into glucose.",
       hint: "Think about what happens when light hits the chloroplast.",
-      type: "comprehension",
+      questionType: "comprehension",
     },
     {
-      question:
+      prompt:
         "Describe the inputs and outputs of the photosynthesis process.",
-      expectedAnswer:
+      answer:
         "Inputs: carbon dioxide (CO₂), water (H₂O), and light energy. Outputs: glucose (C₆H₁₂O₆) and oxygen (O₂).",
       hint: "What goes in and what comes out?",
-      type: "comprehension",
+      questionType: "comprehension",
     },
     {
-      question: "Why is photosynthesis important for life on Earth?",
-      expectedAnswer:
+      prompt: "Why is photosynthesis important for life on Earth?",
+      answer:
         "Photosynthesis produces oxygen that most organisms need to breathe and creates glucose, the foundation of food chains.",
       hint: "Think about what all living things need.",
-      type: "synthesis",
+      questionType: "synthesis",
     },
   ],
 };
@@ -213,17 +213,17 @@ const mockParsedContentFrench = {
   ],
   questionsJSON: [
     {
-      question: "Quelle saison vient après le printemps?",
-      expectedAnswer: "L'été vient après le printemps.",
+      prompt: "Quelle saison vient après le printemps?",
+      answer: "L'été vient après le printemps.",
       hint: "Think about the order of seasons.",
-      type: "comprehension",
+      questionType: "comprehension",
     },
     {
-      question: "Que se passe-t-il en automne?",
-      expectedAnswer:
+      prompt: "Que se passe-t-il en automne?",
+      answer:
         "En automne, les feuilles changent de couleur et tombent des arbres.",
       hint: "What happens to trees in fall?",
-      type: "comprehension",
+      questionType: "comprehension",
     },
   ],
 };

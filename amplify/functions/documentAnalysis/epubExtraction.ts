@@ -4,6 +4,7 @@
  */
 import type { FormatExtractionResult } from "./formatRegistry.js";
 import { getS3Object } from "./textExtraction.js";
+import { PACKAGE_MEDIA_MIME_TYPES } from "./embeddedImages.js";
 import { convert } from "html-to-text";
 
 /**
@@ -131,19 +132,7 @@ export async function extractEpub(
   }
 
   // Step 8: Extract media files (images, audio) from the EPUB
-  const mediaExtensions: Record<string, string> = {
-    ".jpg": "image/jpeg",
-    ".jpeg": "image/jpeg",
-    ".png": "image/png",
-    ".gif": "image/gif",
-    ".webp": "image/webp",
-    ".svg": "image/svg+xml",
-    ".mp3": "audio/mpeg",
-    ".wav": "audio/wav",
-    ".ogg": "audio/ogg",
-    ".mp4": "video/mp4",
-    ".webm": "video/webm",
-  };
+  const mediaExtensions = PACKAGE_MEDIA_MIME_TYPES;
 
   for (const [path, zipFile] of Object.entries(zip.files)) {
     if ((zipFile as any).dir) continue;

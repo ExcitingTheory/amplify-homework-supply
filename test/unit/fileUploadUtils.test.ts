@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest';
-import { isAnalyzableDocument, detectMimeType } from '../../src/utils/fileUploadUtils';
+import {
+  isAnalyzableDocument,
+  detectMimeType,
+  FILE_INPUT_ACCEPT,
+} from '../../src/utils/fileUploadUtils';
 
 describe('fileUploadUtils', () => {
   describe('isAnalyzableDocument', () => {
@@ -113,8 +117,28 @@ describe('fileUploadUtils', () => {
       expect(detectMimeType(mockFile('slides.odp', 'application/zip'))).toBe('application/vnd.oasis.opendocument.presentation');
     });
 
+    it('corrects RTF files', () => {
+      expect(detectMimeType(mockFile('notes.rtf', 'text/rtf'))).toBe('application/rtf');
+    });
+
     it('preserves type for unknown extensions', () => {
       expect(detectMimeType(mockFile('file.xyz', 'application/octet-stream'))).toBe('application/octet-stream');
+    });
+  });
+
+  describe('RTF', () => {
+    it('is analyzable under both MIME types browsers report', () => {
+      expect(isAnalyzableDocument('application/rtf')).toBe(true);
+      expect(isAnalyzableDocument('text/rtf')).toBe(true);
+    });
+  });
+
+  describe('FILE_INPUT_ACCEPT', () => {
+    it('lists the document extensions the file list and analysis support', () => {
+      const accepted = FILE_INPUT_ACCEPT.split(',');
+      for (const ext of ['.rtf', '.qti', '.qti.xml', '.zip', '.epub', '.imscc', '.gift']) {
+        expect(accepted).toContain(ext);
+      }
     });
   });
 });

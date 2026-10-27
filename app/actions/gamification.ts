@@ -369,7 +369,11 @@ export async function updateLearningMemory(
   weakAreas: string[],
   strongAreas: string[],
   options?: {
-    confusionPairs?: Array<{ item1: string; item2: string; frequency: number }>;
+    confusionPairs?: Array<{
+      conceptA: string;
+      conceptB: string;
+      frequency: number;
+    }>;
     accuracyBySource?: Record<string, number>;
     sourceType?: string;
   },

@@ -44,6 +44,7 @@ import { SectionProvider } from "@/context/sectionContext";
 import DrillGradeAdapter from "@/components/PracticeDrill/DrillGradeAdapter";
 import PracticeDrillProgress from "@/components/PracticeDrill/PracticeDrillProgress";
 import { usePracticeDrill } from "@/components/PracticeDrill/usePracticeDrill";
+import { useUnitDocuments } from "@/hooks/useUnitDocuments";
 import { useDrillLibrary } from "@/components/PracticeDrill/useDrillLibrary";
 import { previewXP } from "@/utils/practiceXPCalculator";
 import { getMissedAnswerCount } from "@/utils/practiceDrillReview";
@@ -70,6 +71,7 @@ function DrillLibraryPicker({
   const { ownIncomplete, templates, loading } = useDrillLibrary(unitId);
   const { unit, dictionary, questionBank } = useContext(UnitContext);
   const [configOpen, setConfigOpen] = useState(false);
+  const unitDocuments = useUnitDocuments(unitId);
 
   const vocabularyCount = dictionary ? Object.keys(dictionary).length : 0;
   const questionCount = questionBank ? Object.keys(questionBank).length : 0;
@@ -153,20 +155,26 @@ function DrillLibraryPicker({
             defaultValue:
               "Generate a drill to practice vocabulary and questions from this unit at your own pace.",
           })}
+          ctaLabel={t("practiceDrill.library.generateNew")}
+          onCtaClick={() => setConfigOpen(true)}
         />
       )}
 
       {/* Generate new */}
-      <Divider sx={{ my: hasOptions ? 2 : 0 }} />
-      <Button
-        variant={hasOptions ? "outlined" : "contained"}
-        startIcon={<AddIcon />}
-        onClick={() => setConfigOpen(true)}
-        fullWidth
-        sx={{ mt: 1 }}
-      >
-        {t("practiceDrill.library.generateNew")}
-      </Button>
+      {hasOptions && (
+        <>
+          <Divider sx={{ my: 2 }} />
+          <Button
+            variant="outlined"
+            startIcon={<AddIcon />}
+            onClick={() => setConfigOpen(true)}
+            fullWidth
+            sx={{ mt: 1 }}
+          >
+            {t("practiceDrill.library.generateNew")}
+          </Button>
+        </>
+      )}
 
       {/* Configuration popup */}
       <PracticeDrillConfigPopup
@@ -180,7 +188,8 @@ function DrillLibraryPicker({
         vocabularyCount={vocabularyCount}
         questionCount={questionCount}
         textBlockCount={0}
-        documentCount={0}
+        documentCount={unitDocuments.length}
+        documents={unitDocuments}
       />
     </Box>
   );

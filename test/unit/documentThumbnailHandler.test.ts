@@ -25,11 +25,13 @@ vi.mock("@aws-sdk/client-s3", () => ({
   GetObjectCommand: vi.fn(),
   PutObjectCommand: vi.fn(),
 }));
-vi.mock("pdf-to-img", () => ({
-  pdf: vi.fn(() => ({
-    [Symbol.asyncIterator]: () => ({
-      next: () => Promise.resolve({ done: true }),
-    }),
+vi.mock("../../amplify/functions/shared/pdfPageRender", () => ({
+  renderPdfPage: vi.fn(async (_pdf: Buffer, pageNumber: number, options: any) => ({
+    image: Buffer.from(`page-${pageNumber}-${options?.targetWidth}`),
+    mimeType: "image/webp",
+    width: options?.targetWidth ?? 0,
+    height: 0,
+    pageCount: 3,
   })),
 }));
 vi.mock("sharp", () => ({

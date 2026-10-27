@@ -886,6 +886,7 @@ export function InstructorGamificationPanel({
               <EmptyState
                 dense
                 title={t("instructorGamificationPanel.noSquads")}
+                description={t("instructorGamificationPanel.noSquadsDescription")}
               />
             )}
           </List>

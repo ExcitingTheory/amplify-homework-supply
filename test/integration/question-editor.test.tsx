@@ -60,7 +60,7 @@ const mockModels = {
           {
             prompt: "What is kanji?",
             answer: "Chinese characters used in Japanese",
-            type: "short_answer",
+            questionType: "short_answer",
           },
         ]),
       },
@@ -74,7 +74,7 @@ const mockModels = {
             {
               prompt: "What is kanji?",
               answer: "Chinese characters used in Japanese",
-              type: "short_answer",
+              questionType: "short_answer",
             },
           ]),
         },
@@ -134,7 +134,7 @@ describe("QuestionEditor2 Integration Tests", () => {
             {
               prompt: "What is kanji?",
               answer: "Chinese characters used in Japanese",
-              type: "short_answer",
+              questionType: "short_answer",
               hint: "",
             },
           ]),
@@ -149,7 +149,7 @@ describe("QuestionEditor2 Integration Tests", () => {
           {
             prompt: "What is kanji?",
             answer: "Chinese characters used in Japanese",
-            type: "short_answer",
+            questionType: "short_answer",
             hint: "",
           },
         ]),
@@ -620,7 +620,7 @@ describe("QuestionEditor2 Integration Tests", () => {
     const largeQuestionList = Array.from({ length: 500 }, (_, i) => ({
       prompt: `Question ${i}?`,
       answer: `Answer ${i}`,
-      type: "short_answer",
+      questionType: "short_answer",
     }));
 
     mockModels.ParsedContent.list.mockResolvedValue({

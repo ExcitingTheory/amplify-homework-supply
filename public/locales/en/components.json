@@ -1712,14 +1712,6 @@
     "onTimeHeader": "On-Time",
     "studentHeader": "Student"
   },
-  "firstRunChecklist": {
-    "createUnit": "Create your first unit",
-    "description": "Choose your next step.",
-    "joinClass": "Join a class",
-    "openWork": "Open assigned work",
-    "setupClass": "Set up a class",
-    "title": "Start here"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "Advanced settings",
     "advancedSettingsTooltip": "Skills, badges, squads, and other advanced gamification settings",
@@ -2025,7 +2017,8 @@
     "visualLayout": "Visual Layout",
     "xpAmount": "{xp} XP",
     "xpMultiplier": "XP ×{multiplier}",
-    "xpTuner": "XP Tuner"
+    "xpTuner": "XP Tuner",
+    "noSquadsDescription": "Squads appear here when students create them. Members’ XP counts toward their squad’s rank."
   },
   "jobsDashboard": {
     "active": "{count} active",
@@ -2193,6 +2186,7 @@
     "xpReward": "+20 XP"
   },
   "nailedItWall": {
+    "emptyDescription": "Nailed It moments are earned when your work shows excellent understanding. Complete assignments to fill this wall.",
     "emptyTitle": "No Nailed It moments yet — keep going!",
     "heading": "🎯 Nailed It",
     "meta": "{homeworkTitle} · {date}"
@@ -2301,6 +2295,116 @@
     "dialogTitle": "Open Peer Review",
     "openForPeerReview": "Open for Peer Review"
   },
+  "pageHints": {
+    "actions": {
+      "createSection": "Create a section",
+      "createUnit": "Create a unit",
+      "joinClass": "Join a class",
+      "moderation": "Open moderation",
+      "openSections": "Open sections",
+      "platformSettings": "Review platform settings"
+    },
+    "admin": {
+      "index": {
+        "body": "Each tool shows what needs attention, such as flagged content or items in the recycle bin. Start with the ones that have a count.",
+        "title": "Admin tools"
+      }
+    },
+    "adminModeration": {
+      "admin": {
+        "body": "Review content that has been flagged and decide what to do with it.",
+        "title": "Moderation queue"
+      }
+    },
+    "adminSettings": {
+      "admin": {
+        "body": "These settings apply platform-wide, so review them before instructors and learners start using the platform.",
+        "title": "Platform settings"
+      }
+    },
+    "dismiss": "Dismiss this tip",
+    "home": {
+      "admin": {
+        "tuneWorkspace": {
+          "body": "Review the platform settings and the moderation queue so the workspace is ready for instructors and learners.",
+          "title": "Tune your workspace"
+        }
+      },
+      "instructor": {
+        "active": {
+          "body": "Open a section to review grades and class health. The chat assistant at the bottom right can help you draft or review content.",
+          "title": "Your classes are set up"
+        },
+        "noAssignment": {
+          "body": "Open one of your sections and assign a unit with a due date so students see it as assigned work.",
+          "title": "Next: assign a unit"
+        },
+        "noSection": {
+          "body": "Create a section, then share its join code so your students can enroll.",
+          "title": "Set up your first class"
+        },
+        "noUnit": {
+          "body": "Units hold your lessons and questions. Build one, then assign it to a section.",
+          "title": "Next: create a unit"
+        }
+      },
+      "learner": {
+        "active": {
+          "body": "Your next assignment appears under Up Next. The chat assistant at the bottom right can explain a topic or help you practice.",
+          "title": "Pick up where you left off"
+        },
+        "noSection": {
+          "body": "Enter the join code from your instructor to see your assigned work here.",
+          "title": "Join your first class"
+        }
+      }
+    },
+    "leaderboard": {
+      "all": {
+        "body": "Rankings come from the XP earned in each section.",
+        "title": "Section leaderboard"
+      }
+    },
+    "optOut": "Don't show tips",
+    "section": {
+      "instructor": {
+        "body": "Assign units to this section and review student grades from here.",
+        "title": "Section overview"
+      },
+      "learner": {
+        "body": "The assignments for this class are listed here with their due dates.",
+        "title": "Your class"
+      }
+    },
+    "sections": {
+      "instructor": {
+        "body": "Create a section, then share its join code so students can enroll.",
+        "title": "Manage your sections"
+      },
+      "learner": {
+        "body": "Use the join code from your instructor to enroll in a section.",
+        "title": "Join a class"
+      }
+    },
+    "settings": {
+      "description": "Tips appear the first time you visit a page.",
+      "heading": "Page tips",
+      "reset": "Show tips again",
+      "showTips": "Show page tips"
+    },
+    "squads": {
+      "all": {
+        "body": "Squads let learners team up within a section. Open a squad to see its members.",
+        "title": "Squads"
+      }
+    },
+    "units": {
+      "instructor": {
+        "body": "Units are lessons built in the editor. Open one to edit it, or create a new unit and then assign it from a section.",
+        "title": "Your units"
+      }
+    }
+  },
   "pdfThumbnail": {
     "failedToLoad": "Failed to load PDF",
     "pageNumber": "{current} / {total}"
@@ -2381,6 +2485,8 @@
       "documentsDesc": "From uploaded PDFs and parsed content",
       "drillType": "Drill type",
       "generating": "Generating...",
+      "limitToDocuments": "Limit to documents",
+      "limitToDocumentsHelp": "Leave empty to use everything in the unit. Text content is left out when documents are chosen.",
       "maxParticipants": "Max participants",
       "mixed": "Mixed",
       "noSourcesWarning": "Enable at least one content source to start practicing.",
@@ -2498,6 +2604,7 @@
     "selectAll": "Select All"
   },
   "questionsReview": {
+    "alreadyImported": "Already imported",
     "answer": "Answer",
     "collapse": "Collapse",
     "deselectAll": "Deselect All",
@@ -2523,6 +2630,7 @@
     "selectQuestion": "Select Question",
     "selectedCount": "{count} of {total} selected",
     "show": "Show",
+    "sourceTooltip": "Source: {filename}",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
   },
@@ -2917,6 +3025,7 @@
   },
   "squadJoinPanel": {
     "cancel": "Cancel",
+    "emptyCta": "Go to Squads",
     "emptyDescription": "Check back soon or create your own squad to get started.",
     "emptyTitle": "No squads available yet",
     "join": "Join",
@@ -2939,6 +3048,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "Squads appear here once students create or join them, ranked by the total XP their members earn.",
     "emptyTitle": "No squads yet",
     "memberCount": "{count, plural, one {# member} other {# members}}",
     "mySquad": "My Squad",
@@ -2982,7 +3092,8 @@
     "deletePost": "Delete post",
     "empty": "No posts yet. Be the first to share something!",
     "newPost": "New Post",
-    "postAriaLabel": "Post: {title}"
+    "postAriaLabel": "Post: {title}",
+    "writeFirstPost": "Write the first post"
   },
   "stateInspector": {
     "capturedAt": "Captured: {date}",
@@ -3286,7 +3397,8 @@
     "definitionPlaceholder": "Enter definition...",
     "contextLabel": "Context",
     "contextPlaceholder": "Enter context or example sentence...",
-    "importSummary": "Imported {imported} new words, {skipped} already existed, {errors} errors"
+    "importSummary": "Imported {imported} new words, {skipped} already existed, {errors} errors",
+    "alreadyImported": "Already imported"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}: {count, plural, one {# submission} other {# submissions}}",

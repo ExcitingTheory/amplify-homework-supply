@@ -12,6 +12,13 @@
  * - Numeric overrides (streakFreezesAllowed): section wins if defined
  */
 
+import { toEntryList } from "./parsedContentLists";
+import {
+  BADGE_CONFIGS_SELECTION,
+  CUSTOM_BADGES_SELECTION,
+  SECTION_GAMIFICATION_CONFIG_SELECTION,
+} from "./typedSelectionsGamificationConfig";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -127,12 +134,12 @@ const GLOBAL_KEY = "__platform_settings__";
 
 const GET_PLATFORM_SETTINGS_FOR_BADGES = `query GetPlatformSettings {
   listPlatformSettings(limit: 1) {
-    items { id badgesEnabled antiBadgesEnabled badgeConfigs customBadges streakFreezesAllowed }
+    items { id badgesEnabled antiBadgesEnabled ${BADGE_CONFIGS_SELECTION} ${CUSTOM_BADGES_SELECTION} streakFreezesAllowed }
   }
 }`;
 
 const GET_SECTION_GAMIFICATION = `query GetSectionGamification($id: ID!) {
-  getSection(id: $id) { id badgesEnabled antiBadgesEnabled gamificationConfig }
+  getSection(id: $id) { id badgesEnabled antiBadgesEnabled ${SECTION_GAMIFICATION_CONFIG_SELECTION} }
 }`;
 
 export async function getGlobalSettings(
@@ -373,23 +380,11 @@ export function clearAllCaches(): void {
 // =============================================================================
 
 function parseBadgeConfigs(raw: any): BadgeConfigEntry[] {
-  if (!raw) return [];
-  try {
-    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return toEntryList<BadgeConfigEntry>(raw);
 }
 
 function parseCustomBadges(raw: any): CustomBadgeDefinitionEntry[] {
-  if (!raw) return [];
-  try {
-    const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
+  return toEntryList<CustomBadgeDefinitionEntry>(raw);
 }
 
 function parseGamificationConfig(raw: any): SectionGamificationConfig {

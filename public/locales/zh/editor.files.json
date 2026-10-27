@@ -34,7 +34,8 @@
       "videoNotSupported": "您的浏览器不支持视频标签。",
       "confirmMoveToRecycleBin": "是否将“{name}”移至回收站?",
       "moveToRecycleBinFailed": "无法将 {name} 移至回收站:{error}",
-      "reAnalyzeError": "重新分析 {name} 时出错:{error}"
+      "reAnalyzeError": "重新分析 {name} 时出错:{error}",
+      "importedContentNote": "从此文档导入的 {questions} 个问题和 {words} 个单词将保留在您的题库和词典中。"
     },
     "generators": {
       "audioPromptPlaceholder": "要转换为音频文件的文本。",

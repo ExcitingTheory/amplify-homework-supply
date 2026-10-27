@@ -30,6 +30,14 @@ import {
   backoffMs,
   isConditionalCheckFailure,
 } from "../shared/concurrency";
+import {
+  BADGES_SELECTION,
+  COSMETIC_REWARDS_SELECTION,
+  LEVEL_THRESHOLDS_SELECTION,
+  readLevelThresholds,
+  toBadgeEntryInputs,
+  toCosmeticRewardInputs,
+} from "../shared/typedSelectionsLeaderboard";
 
 // ============================================================================
 // GraphQL Operations
@@ -57,7 +65,7 @@ const UPDATE_SECTION_PROGRESS = `mutation UpdateSectionProgress($input: UpdateSe
 
 const GET_PLATFORM_SETTINGS = `query GetPlatformSettings {
   listPlatformSettings(limit: 1) {
-    items { id levelThresholds xpMultipliers badgesEnabled antiBadgesEnabled }
+    items { id ${LEVEL_THRESHOLDS_SELECTION} xpMultipliers badgesEnabled antiBadgesEnabled }
   }
 }`;
 
@@ -104,7 +112,7 @@ const CREATE_STUDENT_XP_LOG = `mutation CreateStudentXPLog($input: CreateStudent
 
 const GET_STUDENT_PROFILE_FOR_REWARDS = `query GetStudentProfileForRewards($studentId: String!) {
   listStudentProfiles(filter: { studentId: { eq: $studentId } }) {
-    items { id studentId cosmeticRewards badges _version }
+    items { id studentId ${COSMETIC_REWARDS_SELECTION} ${BADGES_SELECTION} _version }
   }
 }`;
 
@@ -146,7 +154,7 @@ async function grantCosmeticRewardToProfile(
   const profile = data?.listStudentProfiles?.items?.[0];
   if (!profile) return;
 
-  const existing = profile.cosmeticRewards || [];
+  const existing = toCosmeticRewardInputs(profile.cosmeticRewards);
   const alreadyGranted = existing.some(
     (r: any) => r.sourceId === sourceId && r.type === type && r.value === value,
   );
@@ -189,7 +197,7 @@ async function grantChallengeBadgeToProfile(
   const profile = data?.listStudentProfiles?.items?.[0];
   if (!profile) return;
 
-  const existingBadges = profile.badges || [];
+  const existingBadges = toBadgeEntryInputs(profile.badges);
   const alreadyGranted = existingBadges.some(
     (b: any) =>
       b.badgeType === badgeType && b.sourceId === `challenge-${challengeId}`,
@@ -412,19 +420,9 @@ export const handler: DynamoDBStreamHandler = async (event) => {
       }
 
       // Parse level thresholds from section settings
-      const levelThresholds: { level: number; xpRequired: number }[] | null =
-        (() => {
-          if (!sectionSettings?.levelThresholds) return null;
-          try {
-            const parsed =
-              typeof sectionSettings.levelThresholds === "string"
-                ? JSON.parse(sectionSettings.levelThresholds)
-                : sectionSettings.levelThresholds;
-            return Array.isArray(parsed) ? parsed : null;
-          } catch {
-            return null;
-          }
-        })();
+      const levelThresholds = readLevelThresholds(
+        sectionSettings?.levelThresholds,
+      );
 
       // 1. Rollup: increment totalXP on StudentProfile — retried with a fresh
       // re-read on optimistic-concurrency conflict; `newRecords` is this

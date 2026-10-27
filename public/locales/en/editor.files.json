@@ -85,6 +85,7 @@
       "confirmMoveToRecycleBin": "Move to Recycle Bin: {name}?",
       "deleteTooltip": "Delete",
       "downloadTooltip": "Download",
+      "importedContentNote": "{questions, plural, one {# question} other {# questions}} and {words, plural, one {# word} other {# words}} imported from this document stay in your question bank and dictionary.",
       "insertTooltip": "Insert into editor",
       "moveToRecycleBinFailed": "Failed to move {name} to Recycle Bin: {error}",
       "noWaveformAvailable": "No waveform available",

@@ -34,7 +34,8 @@
       "videoNotSupported": "Ihr Browser unterstützt das Video-Tag nicht.",
       "confirmMoveToRecycleBin": "In den Papierkorb verschieben: {name}?",
       "moveToRecycleBinFailed": "{name} konnte nicht in den Papierkorb verschoben werden: {error}",
-      "reAnalyzeError": "Fehler bei der erneuten Analyse von {name}: {error}"
+      "reAnalyzeError": "Fehler bei der erneuten Analyse von {name}: {error}",
+      "importedContentNote": "{questions, plural, one {# Frage} other {# Fragen}} und {words, plural, one {# Wort} other {# Wörter}}, die aus diesem Dokument importiert wurden, bleiben in Ihrer Fragenbank und Ihrem Wörterbuch erhalten."
     },
     "generators": {
       "audioPromptPlaceholder": "Text, der in eine Audiodatei umgewandelt werden soll.",

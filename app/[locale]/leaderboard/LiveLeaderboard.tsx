@@ -238,6 +238,10 @@ export function LiveLeaderboard({
                   defaultValue:
                     "No completion times yet. Finish an assignment to appear here.",
                 })}
+                ctaLabel={t("leaderboard.goToAssignments", {
+                  defaultValue: "Go to my assignments",
+                })}
+                ctaHref="/"
               />
             );
           }
@@ -261,6 +265,10 @@ export function LiveLeaderboard({
             defaultValue:
               "No leaderboard data yet. Complete assignments to earn XP!",
           })}
+          ctaLabel={t("leaderboard.goToAssignments", {
+            defaultValue: "Go to my assignments",
+          })}
+          ctaHref="/"
         />
       )}
     </Container>

@@ -3,10 +3,11 @@
  * Handles: XLS, XLSX, PPT, PPTX, ODT, ODS, ODP
  */
 import { getS3Object } from './textExtraction.js';
+import { chartXmlToText, diagramXmlToText } from './officeCharts.js';
 
 export interface ExtractionResult {
   text: string;
-  pages: Array<{ pageNumber: number; text: string }>;
+  pages: Array<{ pageNumber: number; text: string; imageCount?: number }>;
   pageCount: number;
   metadata?: Record<string, unknown>;
   directContent?: {
@@ -56,6 +57,33 @@ export async function extractSpreadsheetText(s3Key: string): Promise<ExtractionR
 }
 
 /**
+ * Reads the charts and SmartArt diagrams a slide points to through its
+ * relationships file, as text. Slides keep their own data parts, so the
+ * values land on the slide they belong to.
+ */
+async function readSlideVisuals(zip: any, slideFile: string): Promise<string[]> {
+  const slideName = slideFile.split('/').pop() ?? '';
+  const relsFile = zip.files[`ppt/slides/_rels/${slideName}.rels`];
+  if (!relsFile) return [];
+
+  const rels: string = await relsFile.async('text');
+  const visuals: string[] = [];
+  for (const match of rels.matchAll(/Target="([^"]+)"/g)) {
+    const target = match[1].replace(/^\.\.\//, 'ppt/');
+    const part = zip.files[target];
+    if (!part) continue;
+    if (/^ppt\/charts\/chart\d+\.xml$/i.test(target)) {
+      const text = chartXmlToText(await part.async('text'));
+      if (text) visuals.push(text);
+    } else if (/^ppt\/diagrams\/data\d*\.xml$/i.test(target)) {
+      const text = diagramXmlToText(await part.async('text'));
+      if (text) visuals.push(text);
+    }
+  }
+  return visuals;
+}
+
+/**
  * Extract text from PPT/PPTX presentations
  * PPTX is an OOXML ZIP; slide text is in <a:t> elements within ppt/slides/slide*.xml
  */
@@ -82,7 +110,7 @@ export async function extractPresentationText(s3Key: string): Promise<Extraction
       return numA - numB;
     });
   
-  const pages: Array<{ pageNumber: number; text: string }> = [];
+  const pages: Array<{ pageNumber: number; text: string; imageCount: number }> = [];
   
   for (let i = 0; i < slideFiles.length; i++) {
     const slideXml = await zip.files[slideFiles[i]].async('text');
@@ -92,16 +120,24 @@ export async function extractPresentationText(s3Key: string): Promise<Extraction
     const texts: string[] = [];
     extractTextNodes(parsed, texts);
     
-    const slideText = texts.join(' ').replace(/\s+/g, ' ').trim();
-    if (slideText) {
+    const visuals = await readSlideVisuals(zip, slideFiles[i]);
+    const slideText = [texts.join(' '), ...visuals]
+      .join(' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    // Pictures and charts live on the slide itself; a slide with no text but
+    // with either is kept so the vision pass can read it.
+    const imageCount = (slideXml.match(/<(?:p:pic|c:chart)[\s>/]/g) ?? []).length;
+    if (slideText || imageCount > 0) {
       pages.push({
         pageNumber: i + 1,
         text: slideText,
+        imageCount,
       });
     }
   }
   
-  const text = pages.map(p => p.text).join('\n\n');
+  const text = pages.map(p => p.text).filter(Boolean).join('\n\n');
   console.log(`[extractPresentationText] Extracted ${text.length} characters from ${pages.length} slides`);
   
   return {

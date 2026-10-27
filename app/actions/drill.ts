@@ -11,6 +11,14 @@ import { createOpenAI } from "@ai-sdk/openai";
 import { generateObject, generateText, tool, stepCountIs } from "ai";
 import { z } from "zod";
 import { getServerClient } from "../../src/utils/amplifyServerClient";
+import {
+  describeItemSources,
+  documentRefFrom,
+  inDocumentScope,
+  listItemSources,
+  type DocumentLinkKind,
+  type ItemSource,
+} from "../../src/utils/documentLinks";
 
 function getOpenAI() {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -28,6 +36,8 @@ export interface PracticeDrillBlock {
   sourceItemId: string;
   sourceItemIds?: string[] | null;
   sourceType: "vocabulary" | "question" | "text" | "document";
+  // Where an imported word or question came from, taken from its document link
+  documentRef?: { filename: string; page: number | string };
 }
 
 // ============================================================================
@@ -315,6 +325,8 @@ export async function generatePracticeDrill(params: {
     questions?: boolean;
     text?: boolean;
     documents?: boolean;
+    // Limits the drill to content imported from these documents
+    documentIds?: string[];
   };
 }): Promise<{ blocks: PracticeDrillBlock[] }> {
   const openai = getOpenAI();
@@ -371,7 +383,31 @@ export async function generatePracticeDrill(params: {
     id: string;
     type: "vocabulary" | "question" | "text" | "document";
     label: string;
+    sources?: ItemSource[];
   }[] = [];
+
+  // Which documents each imported word or question came from
+  const scopeIds = new Set<string>(
+    (params.sourcesEnabled?.documentIds ?? []).filter(
+      (id): id is string => typeof id === "string" && id.length > 0,
+    ),
+  );
+  const scoped = scopeIds.size > 0;
+  async function sourcesById(
+    kind: DocumentLinkKind,
+    records: any[],
+  ): Promise<Map<string, ItemSource[]>> {
+    const settled = await Promise.allSettled(
+      records.map((record) => listItemSources(client, kind, record.id, record)),
+    );
+    const byId = new Map<string, ItemSource[]>();
+    settled.forEach((result, i) => {
+      if (result.status === "fulfilled" && result.value.length > 0) {
+        byId.set(records[i].id, result.value);
+      }
+    });
+    return byId;
+  }
 
   if (params.sourcesEnabled?.vocabulary !== false) {
     const { data: unitWords } = await client.models.UnitWord.list({
@@ -391,18 +427,29 @@ export async function generatePracticeDrill(params: {
             r.status === "fulfilled",
         )
         .map((r: PromiseFulfilledResult<any>) => r.value);
-      const validWords = words.filter(Boolean);
+      const loadedWords = words.filter(Boolean);
+      const wordSources = await sourcesById("word", loadedWords);
+      const validWords = scoped
+        ? loadedWords.filter((w: any) =>
+            inDocumentScope(wordSources.get(w.id), scopeIds),
+          )
+        : loadedWords;
       if (validWords.length) {
         validWords.forEach((w: any) => validWordIds.add(w.id));
         const startIdx = sourceItems.length;
         validWords.forEach((w: any) => {
-          sourceItems.push({ id: w.id, type: "vocabulary", label: w.phrase });
+          sourceItems.push({
+            id: w.id,
+            type: "vocabulary",
+            label: w.phrase,
+            sources: wordSources.get(w.id),
+          });
         });
         sources.push(
           `Vocabulary (indices ${startIdx}–${sourceItems.length - 1}):\n${validWords
             .map(
               (w: any, i: number) =>
-                `  [${startIdx + i}] phrase: "${w.phrase}" | definition: "${w.definition}"${w.phonetic ? ` | phonetic: "${w.phonetic}"` : ""}`,
+                `  [${startIdx + i}] phrase: "${w.phrase}" | definition: "${w.definition}"${w.phonetic ? ` | phonetic: "${w.phonetic}"` : ""}${describeItemSources(wordSources.get(w.id))}`,
             )
             .join("\n")}`,
         );
@@ -430,7 +477,13 @@ export async function generatePracticeDrill(params: {
             r.status === "fulfilled",
         )
         .map((r: PromiseFulfilledResult<any>) => r.value);
-      const validQuestions = questions.filter(Boolean);
+      const loadedQuestions = questions.filter(Boolean);
+      const questionSources = await sourcesById("question", loadedQuestions);
+      const validQuestions = scoped
+        ? loadedQuestions.filter((q: any) =>
+            inDocumentScope(questionSources.get(q.id), scopeIds),
+          )
+        : loadedQuestions;
       if (validQuestions.length) {
         validQuestions.forEach((q: any) => validQuestionIds.add(q.id));
         const startIdx = sourceItems.length;
@@ -438,14 +491,15 @@ export async function generatePracticeDrill(params: {
           sourceItems.push({
             id: q.id,
             type: "question",
-            label: q.question || q.prompt || "",
+            label: q.prompt || "",
+            sources: questionSources.get(q.id),
           });
         });
         sources.push(
           `Questions (indices ${startIdx}–${sourceItems.length - 1}):\n${validQuestions
             .map(
               (q: any, i: number) =>
-                `  [${startIdx + i}] question: "${q.question}" | answer: "${q.answer}"${q.type ? ` | type: ${q.type}` : ""}`,
+                `  [${startIdx + i}] question: "${q.prompt}" | answer: "${q.answer}"${q.type ? ` | type: ${q.type}` : ""}${describeItemSources(questionSources.get(q.id))}`,
             )
             .join("\n")}`,
         );
@@ -453,8 +507,9 @@ export async function generatePracticeDrill(params: {
     }
   }
 
-  // Extract text blocks from unit Lexical content
-  if (params.sourcesEnabled?.text !== false) {
+  // Extract text blocks from unit Lexical content (not document content, so
+  // left out when the drill is limited to documents)
+  if (!scoped && params.sourcesEnabled?.text !== false) {
     try {
       const { data: unitFull } = await client.models.Unit.get(
         { id: params.unitId },
@@ -490,7 +545,10 @@ export async function generatePracticeDrill(params: {
       });
       if (unitDocs?.length) {
         const docResults = await Promise.allSettled(
-          unitDocs.slice(0, 5).map(async (ud: any) => {
+          unitDocs
+          .filter((ud: any) => !scoped || scopeIds.has(ud.documentID))
+          .slice(0, 5)
+          .map(async (ud: any) => {
             if (!ud.documentID) return null;
             const { data: doc } = await client.models.Document.get({
               id: ud.documentID,
@@ -603,6 +661,7 @@ After generating, call validate_blocks to verify correctness. Fix any errors and
         instruction: b.instruction,
         sourceItemId,
         sourceType,
+        documentRef: documentRefFrom(primarySource?.sources),
         choices: b.choices ?? undefined,
         expectedAnswer: b.expectedAnswer ?? undefined,
         pairs: b.pairs ?? undefined,

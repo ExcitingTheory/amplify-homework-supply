@@ -60,6 +60,17 @@ const nextConfig = {
           { key: "X-DNS-Prefetch-Control", value: "on" },
         ],
       },
+      // The worker script must always be revalidated so deployed updates reach
+      // returning users instead of being served stale by a CDN or proxy.
+      {
+        source: "/sw.js",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "no-cache, no-store, must-revalidate",
+          },
+        ],
+      },
     ];
   },
 

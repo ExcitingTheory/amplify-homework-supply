@@ -42,3 +42,32 @@ export const Dense: Story = {
     description: "Completed items will show up in this panel.",
   },
 };
+
+export const WithLinkCta: Story = {
+  args: {
+    dense: true,
+    icon: <GroupsOutlinedIcon fontSize="inherit" />,
+    title: "No squads yet",
+    description: "Join or create a squad to compete on the leaderboard.",
+    ctaLabel: "Go to Squads",
+    ctaHref: "/squads",
+  },
+};
+
+export const WithClickCta: Story = {
+  args: {
+    dense: true,
+    title: "No units have been shared with you yet",
+    ctaLabel: "Browse community units",
+    onCtaClick: () => {},
+  },
+};
+
+export const WithExternalLinkCta: Story = {
+  args: {
+    dense: true,
+    title: "Nothing to show yet",
+    ctaLabel: "Read the docs",
+    ctaHref: "https://example.com/docs",
+  },
+};

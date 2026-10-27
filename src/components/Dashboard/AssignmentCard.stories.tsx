@@ -133,8 +133,8 @@ export const Completed: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("Chapter 3: Verb Conjugation");
-    // Grade percentage shown
-    await canvas.findByText(/92/);
+    // Grade percentage shown in the status chip
+    await canvas.findByText("92% · Excellent");
   },
 };
 
@@ -147,7 +147,7 @@ export const CompletedLowScore: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("Chapter 3: Verb Conjugation");
-    await canvas.findByText(/55/);
+    await canvas.findByText("55% · Needs work");
   },
 };
 
@@ -177,7 +177,7 @@ export const JustCompletedAnimation: Story = {
     const canvas = within(canvasElement);
     await canvas.findByText("Chapter 3: Verb Conjugation");
     // After the pending→completed transition, the graded check chip appears
-    await canvas.findByText(/92/, {}, { timeout: 3000 });
+    await canvas.findByText("92% · Excellent", {}, { timeout: 3000 });
   },
 };
 

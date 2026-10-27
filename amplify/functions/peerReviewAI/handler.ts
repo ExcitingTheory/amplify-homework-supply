@@ -2,7 +2,7 @@
  * Peer Review AI Handler
  *
  * Handles AI interactions within peer review rooms:
- * - handleAIMention: Processes @AI mentions in chat, generates responses
+ * - handleAIMention: Processes @kai mentions in chat, generates responses
  * - generateReviewSummary: Summarises a completed peer review session
  *
  * Uses OpenAI GPT-4 for generation.
@@ -12,6 +12,11 @@ import type { Handler } from 'aws-lambda'
 import { Amplify } from 'aws-amplify'
 import { generateClient } from 'aws-amplify/data'
 import { createNotification } from '../shared/notificationUtils'
+import {
+  readPublishedUnitContent,
+  summarizeUnitText,
+} from '../shared/unitContent'
+import { MAX_UNIT_CONTENT_CHARS, buildAIMentionPrompt } from './prompt'
 
 // ============================================================================
 // GraphQL Queries
@@ -32,7 +37,7 @@ const GET_GRADE = `query GetGrade($id: ID!) {
 }`
 
 const GET_UNIT = `query GetUnit($id: ID!) {
-  getUnit(id: $id) { id name description data _version _lastChangedAt _deleted }
+  getUnit(id: $id) { id name description _version _lastChangedAt _deleted }
 }`
 
 const GET_STUDENT_MEMORY = `query GetStudentMemory($studentId: String!) {
@@ -131,7 +136,7 @@ export const handler: Handler = async (event) => {
 }
 
 // ============================================================================
-// handleAIMention — Respond to @AI in peer review chat
+// handleAIMention — Respond to @kai in peer review chat
 // ============================================================================
 
 async function handleAIMention(
@@ -164,6 +169,12 @@ async function handleAIMention(
   })
   const unit = unitData?.getUnit
 
+  // Assignment text from the published unit (S3); the review still works without it
+  const unitText = summarizeUnitText(
+    await readPublishedUnitContent(grade.unitID),
+    MAX_UNIT_CONTENT_CHARS,
+  )
+
   // Fetch student memory
   const { data: memoryData } = await gqlClient.graphql({
     query: GET_STUDENT_MEMORY,
@@ -173,7 +184,7 @@ async function handleAIMention(
     memoryData?.listStudentMemoryByStudentId?.items?.[0]?.memoryMarkdown || ''
 
   // Build system prompt
-  const systemPrompt = buildAIMentionPrompt(unit, grade, memory)
+  const systemPrompt = buildAIMentionPrompt(unit, grade, memory, unitText)
 
   const userMessage = chatHistory
     ? `Chat history:\n${chatHistory}\n\nCurrent message: ${message}`
@@ -182,43 +193,6 @@ async function handleAIMention(
   const response = await callOpenAI(systemPrompt, userMessage)
 
   return { response, roomId }
-}
-
-function buildAIMentionPrompt(
-  unit: any,
-  grade: any,
-  memory: string,
-): string {
-  let prompt = `You are an AI teaching assistant helping students during a peer review session.
-You are encouraging, specific, and focused on learning. Keep answers concise (2-3 paragraphs max).
-
-Assignment: ${unit?.name || 'Unknown'}
-Description: ${unit?.description || 'No description'}
-Student's accuracy: ${grade?.accuracy ?? 'Not yet graded'}%
-Completion: ${grade?.complete ? 'Complete' : 'In progress'}
-`
-
-  if (memory) {
-    prompt += `\nStudent's learning profile:\n${memory.slice(0, 2000)}\n`
-  }
-
-  if (grade?.data) {
-    try {
-      const gradeData = JSON.parse(grade.data)
-      const blockSummary = Object.entries(gradeData)
-        .map(([id, block]: [string, any]) => {
-          return `- Block ${id.slice(0, 8)}: ${block.complete ? 'complete' : 'incomplete'}, accuracy: ${block.accuracy ?? 'N/A'}%`
-        })
-        .slice(0, 10)
-        .join('\n')
-      prompt += `\nStudent's work summary:\n${blockSummary}\n`
-    } catch {
-      // Grade data not parseable
-    }
-  }
-
-  prompt += `\nRespond naturally as a helpful tutor. Do not reveal internal data structures.`
-  return prompt
 }
 
 // ============================================================================

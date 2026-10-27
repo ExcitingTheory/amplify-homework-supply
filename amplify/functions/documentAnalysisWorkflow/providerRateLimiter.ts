@@ -14,8 +14,8 @@ export interface ProviderLimits {
 }
 
 export const DEFAULT_PROVIDER_LIMITS: ProviderLimits = {
-  requestsPerMinute: 5,
-  tokensPerMinute: 20_000,
+  requestsPerMinute: 10,
+  tokensPerMinute: 300_000,
   maxConcurrentRequests: 1,
 };
 
@@ -24,6 +24,7 @@ const DEMO_PROVIDER_LIMITS: ProviderLimits = {
 };
 
 const DEFAULT_OUTPUT_TOKEN_RESERVE = 2048;
+const MIN_REQUEST_TOKEN_BUDGET = 270_000;
 const LEASE_TTL_SECONDS = 20 * 60;
 const MAX_CAS_ATTEMPTS = 10;
 const MAX_CONCURRENT_REQUEST_LIMIT = 100;
@@ -72,12 +73,15 @@ export function resolveProviderLimits(
       typeof rawValue !== "number" ||
       !Number.isSafeInteger(rawValue) ||
       rawValue <= 0 ||
+      (key === "tokensPerMinute" && rawValue < MIN_REQUEST_TOKEN_BUDGET) ||
       (key === "maxConcurrentRequests" &&
         rawValue > MAX_CONCURRENT_REQUEST_LIMIT)
     ) {
-      throw new ProviderLimitError(
-        `Invalid ${provider} document analysis limit: ${key}`,
-      );
+      let message = `Invalid ${provider} document analysis limit: ${key}`;
+      if (key === "tokensPerMinute" && typeof rawValue === "number") {
+        message = `${provider} document analysis token budget must be at least ${MIN_REQUEST_TOKEN_BUDGET}`;
+      }
+      throw new ProviderLimitError(message);
     }
     configured[key] = rawValue;
   }
@@ -99,6 +103,14 @@ export function resolveProviderLimits(
   };
 }
 
+/**
+ * Providers bill an image by its dimensions, not by its encoded size, so an
+ * inline base64 image must not be counted as text. This is roughly what a
+ * full-page image costs at the resolutions the vision pass sends.
+ */
+const IMAGE_TOKEN_ESTIMATE = 1500;
+const INLINE_IMAGE_PATTERN = /data:image\/[a-z0-9.+-]+;base64,[A-Za-z0-9+/=]+/gi;
+
 export function estimateRequestTokens(
   request: unknown,
   defaultOutputTokens = DEFAULT_OUTPUT_TOKEN_RESERVE,
@@ -109,6 +121,12 @@ export function estimateRequestTokens(
   } catch {
     throw new ProviderLimitError("Unable to estimate model request tokens");
   }
+
+  let imageTokens = 0;
+  serialized = serialized.replace(INLINE_IMAGE_PATTERN, () => {
+    imageTokens += IMAGE_TOKEN_ESTIMATE;
+    return "";
+  });
 
   const record =
     request !== null && typeof request === "object"
@@ -134,7 +152,9 @@ export function estimateRequestTokens(
 
   return Math.max(
     1,
-    Math.ceil(Buffer.byteLength(serialized, "utf8") / 4) + outputTokens,
+    Math.ceil(Buffer.byteLength(serialized, "utf8") / 4) +
+      imageTokens +
+      outputTokens,
   );
 }
 

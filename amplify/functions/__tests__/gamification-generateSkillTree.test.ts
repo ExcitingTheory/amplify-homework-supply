@@ -104,21 +104,21 @@ describe("gamification handler — generateSkillTree", () => {
       // LIST_UNIT_WORDS
       .mockResolvedValueOnce({
         data: {
-          listUnitWordByUnitID: {
+          listUnitWords: {
             items: [
               {
                 word: {
                   id: "w1",
-                  word: "chloroplast",
-                  phonetic: null,
+                  phrase: "chloroplast",
+                  pronunciation: null,
                   definition: "organelle for photosynthesis",
                 },
               },
               {
                 word: {
                   id: "w2",
-                  word: "glucose",
-                  phonetic: null,
+                  phrase: "glucose",
+                  pronunciation: null,
                   definition: "simple sugar",
                 },
               },
@@ -129,12 +129,12 @@ describe("gamification handler — generateSkillTree", () => {
       // LIST_QUESTION_UNITS
       .mockResolvedValueOnce({
         data: {
-          listQuestionUnitByUnitID: {
+          listQuestionUnits: {
             items: [
               {
                 question: {
                   id: "q1",
-                  question: "What is the role of chlorophyll?",
+                  prompt: "What is the role of chlorophyll?",
                   answer: "Absorbs light",
                 },
               },
@@ -304,9 +304,9 @@ describe("gamification handler — generateSkillTree", () => {
           },
         },
       })
-      .mockResolvedValueOnce({ data: { listUnitWordByUnitID: { items: [] } } })
+      .mockResolvedValueOnce({ data: { listUnitWords: { items: [] } } })
       .mockResolvedValueOnce({
-        data: { listQuestionUnitByUnitID: { items: [] } },
+        data: { listQuestionUnits: { items: [] } },
       })
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
@@ -349,9 +349,9 @@ describe("gamification handler — generateSkillTree", () => {
           },
         },
       })
-      .mockResolvedValueOnce({ data: { listUnitWordByUnitID: { items: [] } } })
+      .mockResolvedValueOnce({ data: { listUnitWords: { items: [] } } })
       .mockResolvedValueOnce({
-        data: { listQuestionUnitByUnitID: { items: [] } },
+        data: { listQuestionUnits: { items: [] } },
       })
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
@@ -440,9 +440,9 @@ describe("gamification handler — generateSkillTree", () => {
           },
         },
       })
-      .mockResolvedValueOnce({ data: { listUnitWordByUnitID: { items: [] } } })
+      .mockResolvedValueOnce({ data: { listUnitWords: { items: [] } } })
       .mockResolvedValueOnce({
-        data: { listQuestionUnitByUnitID: { items: [] } },
+        data: { listQuestionUnits: { items: [] } },
       })
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },
@@ -563,9 +563,9 @@ describe("extractTextFromLexicalJSON (internal)", () => {
           },
         },
       })
-      .mockResolvedValueOnce({ data: { listUnitWordByUnitID: { items: [] } } })
+      .mockResolvedValueOnce({ data: { listUnitWords: { items: [] } } })
       .mockResolvedValueOnce({
-        data: { listQuestionUnitByUnitID: { items: [] } },
+        data: { listQuestionUnits: { items: [] } },
       })
       .mockResolvedValueOnce({
         data: { listUnitDocumentByUnitID: { items: [] } },

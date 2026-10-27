@@ -6,7 +6,7 @@
  * the current context.
  * 
  * Features:
- * - Triggers after typing substantial content (>50 chars)
+ * - Triggers once the current block has a few words (no punctuation required)
  * - Debounced to avoid excessive API calls
  * - Streaming responses for better UX
  * - Accept with Tab/Right Arrow
@@ -44,8 +44,29 @@ import SectionContext from '../../../context/sectionContext';
 
 
 const DEBOUNCE_DELAY = 800; // ms - wait for user to stop typing
-const MIN_CONTENT_LENGTH = 50; // chars - minimum before suggesting
-const TRIGGER_CHARS = ['.', '!', '?', '。']; // Sentence-ending punctuation
+const MIN_WORDS = 3; // words in the current block before suggesting
+const ACCEPT_TAG = 'ai-completion-accept';
+
+const wordSegmenter =
+  typeof Intl !== 'undefined' && typeof Intl.Segmenter === 'function'
+    ? new Intl.Segmenter(undefined, { granularity: 'word' })
+    : null;
+
+/**
+ * Counts words in a block. Uses Intl.Segmenter so unspaced scripts
+ * (e.g. Japanese) are counted correctly; falls back to whitespace splitting.
+ */
+function countWords(text) {
+  if (!text) return 0;
+  if (wordSegmenter) {
+    let count = 0;
+    for (const { isWordLike } of wordSegmenter.segment(text)) {
+      if (isWordLike) count++;
+    }
+    return count;
+  }
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
 
 /**
  * Main plugin component
@@ -202,6 +223,7 @@ export default function AIContentCompletionPlugin() {
       const response = await fetch('/api/content-completion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        signal: abortController.current.signal,
         body: JSON.stringify({
           prompt,
           context: contextData,
@@ -270,15 +292,24 @@ export default function AIContentCompletionPlugin() {
   useEffect(() => {
     return editor.registerUpdateListener(({ editorState, tags }) => {
       // Ignore updates from our own operations and history
-      if (tags && (tags.has('skip-collab') || tags.has('historic') || tags.has('history-push'))) {
+      if (tags && (tags.has('skip-collab') || tags.has('historic') || tags.has('history-push') || tags.has(ACCEPT_TAG))) {
         return;
       }
+
+      // Any user edit invalidates a pending request or visible suggestion
+      if (debounceTimer.current) {
+        clearTimeout(debounceTimer.current);
+        debounceTimer.current = null;
+      }
+      if (abortController.current) {
+        abortController.current.abort();
+      }
+      clearSuggestion();
 
       editorState.read(() => {
         const selection = $getSelection();
         
-        if (!$isRangeSelection(selection)) {
-          clearSuggestion();
+        if (!$isRangeSelection(selection) || !selection.isCollapsed()) {
           return;
         }
         
@@ -288,18 +319,6 @@ export default function AIContentCompletionPlugin() {
         
         // Only trigger if we're at the end of a text node
         if (offset !== text.length) {
-          clearSuggestion();
-          return;
-        }
-        
-        // Check if text is long enough and ends with punctuation
-        const lastChar = text[text.length - 1];
-        const shouldTrigger = 
-          text.length >= MIN_CONTENT_LENGTH &&
-          TRIGGER_CHARS.includes(lastChar);
-        
-        if (!shouldTrigger) {
-          clearSuggestion();
           return;
         }
         
@@ -307,21 +326,21 @@ export default function AIContentCompletionPlugin() {
         const parent = anchorNode.getParent();
         if (!parent || $isHeadingNode(parent)) {
           // Don't suggest in headings
-          clearSuggestion();
+          return;
+        }
+        
+        // Trigger once the block has a couple of words, regardless of punctuation
+        const fullText = parent.getTextContent();
+        if (countWords(fullText) < MIN_WORDS) {
           return;
         }
         
         // Get preceding text for context (last 200 chars)
-        const fullText = parent.getTextContent();
         const contextLength = Math.min(200, fullText.length);
         const contextText = fullText.slice(-contextLength);
         
-        // Debounce the API call
-        if (debounceTimer.current) {
-          clearTimeout(debounceTimer.current);
-        }
-        
         debounceTimer.current = setTimeout(() => {
+          debounceTimer.current = null;
           fetchSuggestion(contextText, {
             subject: 'Japanese language learning',
             level: 'intermediate',
@@ -343,15 +362,23 @@ export default function AIContentCompletionPlugin() {
         return;
       }
       
+      // Suggestions can continue mid-sentence, so only add a separating space when needed
+      const suggestion = currentSuggestion.current;
+      const previousText = node.getPreviousSibling()?.getTextContent() ?? '';
+      const needsSpace =
+        previousText.length > 0 &&
+        !/[\s\u3000-\u303f\u3040-\u30ff\u4e00-\u9fff]$/.test(previousText) &&
+        !/^[\s.,!?;:)\]。、！？]/.test(suggestion);
+
       // Replace suggestion node with actual text
-      const textNode = $createTextNode(' ' + currentSuggestion.current);
+      const textNode = $createTextNode((needsSpace ? ' ' : '') + suggestion);
       node.replace(textNode);
       textNode.selectNext();
       
       // Clear refs
       suggestionNodeKey.current = null;
       currentSuggestion.current = null;
-    });
+    }, { tag: ACCEPT_TAG });
     
     return true;
   }, [editor]);

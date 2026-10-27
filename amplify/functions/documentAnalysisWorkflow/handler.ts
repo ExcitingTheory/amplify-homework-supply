@@ -1,4 +1,5 @@
 import type { Handler } from "aws-lambda";
+import { InvokeCommand, LambdaClient } from "@aws-sdk/client-lambda";
 import {
   DescribeMapRunCommand,
   ListMapRunsCommand,
@@ -15,17 +16,52 @@ import { generateClient } from "aws-amplify/data";
 import OpenAI from "openai";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { type Schema } from "../../data/resource";
-import { extractByFormat } from "../documentAnalysis/formatRegistry.js";
+import { describeGraphQLError } from "./graphqlError.js";
+import { parseJsonCompletion } from "./jsonCompletion.js";
+import { buildPageSummaryItems } from "./hierarchicalSummary.js";
+import {
+  ANTHROPIC_VERIFIER_MAX_OUTPUT_TOKENS,
+  OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
+  OPENAI_SYNTHESIS_MAX_OUTPUT_TOKENS,
+  OPENAI_VERIFIER_MAX_OUTPUT_TOKENS,
+} from "../documentAnalysis/modelLimits.js";
+import { toParsedContentInput } from "../documentAnalysis/parsedContentInput.js";
+import { saveParsedContentChunks } from "../shared/parsedContentChunks";
+import { createGraphqlParsedContentStore } from "../shared/parsedContentGraphql";
+import {
+  extractByFormat,
+  type FormatExtractionResult,
+} from "../documentAnalysis/formatRegistry.js";
+import {
+  imageMimeType,
+  isUnreadableImage,
+  replaceUnreadableMedia,
+  selectImagesForDescription,
+  type EmbeddedImage,
+} from "../documentAnalysis/embeddedImages.js";
+import {
+  describeImages,
+  weaveImageDescriptions,
+  type ImageDescription,
+} from "../documentAnalysis/imageDescriptions.js";
+import {
+  isSparsePage,
+  mergeVisualContent,
+  selectVisionPages,
+} from "./visionSelection.js";
 import {
   analyzePages,
-  assertParsedContentPayloadSize,
+  buildVerifierCandidates,
   checkPageFacts,
   chunkItemsByJsonSize,
   filterVerifiedEntries,
+  mergeDuplicateQuestions,
+  mergeDuplicateVocabulary,
   normaliseQuestionEntries,
   retainDirectQuestionsWithVerifiedMatches,
   retainDirectVocabularyWithVerifiedMatches,
   segmentTextIntoPages,
+  VERIFIER_SYSTEM_PROMPT,
   type AnalysisPage,
   type ExhaustiveFact,
   type FactVerificationVerdict,
@@ -66,6 +102,7 @@ Amplify.configure(
 
 const s3Client = new S3Client();
 const sfnClient = new SFNClient();
+const lambdaClient = new LambdaClient();
 const ssmClient = new SSMClient();
 let openaiInstance: OpenAI | null = null;
 let dataClient: ReturnType<typeof generateClient<Schema>> | null = null;
@@ -112,17 +149,6 @@ const UPDATE_DOCUMENT = /* GraphQL */ `
       sourceFormat
       textExtractedAt
       metadata
-    }
-  }
-`;
-
-const CREATE_PARSED_CONTENT = /* GraphQL */ `
-  mutation CreateParsedContent($input: CreateParsedContentInput!) {
-    createParsedContent(input: $input) {
-      id
-      documentID
-      fileID
-      _version
     }
   }
 `;
@@ -192,6 +218,10 @@ type WorkflowEvent = {
 };
 
 type PageInput = AnalysisPage & {
+  /** Content images on the page, when the extractor can tell. */
+  imageCount?: number;
+  /** True when this page is sent through the vision pass. */
+  needsVision?: boolean;
   prevTail: string;
   nextHead: string;
   sourceFormat: string;
@@ -217,12 +247,24 @@ type PageResult = {
   needsRepair?: boolean;
   repaired?: boolean;
   sparseText?: boolean;
+  /** Read by the state machine to route the page through render + vision. */
+  needsVision?: boolean;
+  uncoveredLines?: string[];
   usageByModel?: Record<string, TokenUsage>;
 };
 
 function getDataClient() {
   dataClient ??= generateClient<Schema>({ authMode: "iam" });
-  return dataClient;
+  const client = dataClient;
+  return {
+    graphql: async (request: any, ...rest: any[]): Promise<any> => {
+      try {
+        return await (client as any).graphql(request, ...rest);
+      } catch (error) {
+        throw describeGraphQLError(error);
+      }
+    },
+  };
 }
 
 function getOpenAI() {
@@ -420,26 +462,30 @@ async function verifySynthesisOutput(
     "gpt-4o-mini",
     getOpenAIForRun(event).chat.completions.create({
       model: "gpt-4o-mini",
-      max_tokens: 2048,
+      max_tokens: OPENAI_VERIFIER_MAX_OUTPUT_TOKENS,
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
           content:
-            'Verify each candidate is fully supported by the source facts. Return JSON {"verdicts":[{"index":0,"supported":true}]} with exactly one verdict for each candidate index.',
+            'Verify each candidate is fully supported by the source facts. Each candidate has an explicit "index". Return only JSON {"verdicts":[{"index":0,"supported":true}]} with exactly one verdict for every candidate index from 0 to N-1: no duplicates, no missing indices, no extra indices.',
         },
         {
           role: "user",
-          content: JSON.stringify({ sourceItems, candidates }),
+          content: JSON.stringify({
+            sourceItems,
+            candidates: candidates.map((candidate, index) => ({
+              index,
+              ...candidate,
+            })),
+          }),
         },
       ],
     }),
   );
-  const content = completion.choices[0]?.message?.content;
-  if (!content) throw new Error("Synthesis verification returned no content");
-  const parsed = JSON.parse(content) as {
+  const parsed = parseJsonCompletion<{
     verdicts?: Array<{ index?: number; supported?: boolean }>;
-  };
+  }>(completion, "Synthesis verification");
   if (
     !Array.isArray(parsed.verdicts) ||
     !parsed.verdicts.every(
@@ -495,6 +541,26 @@ async function getObject(key: string): Promise<Buffer> {
 
 async function readJson<T>(key: string): Promise<T> {
   return JSON.parse((await getObject(key)).toString("utf8")) as T;
+}
+
+/**
+ * `temporary` tags the object so the lifecycle rule expires it. Pass false for
+ * data that must be kept, such as a document's extracted questions.
+ */
+async function putBytes(
+  key: string,
+  body: Buffer,
+  contentType: string,
+): Promise<void> {
+  await s3Client.send(
+    new PutObjectCommand({
+      Bucket: getBucketName(),
+      Key: key,
+      Body: body,
+      ContentType: contentType,
+      Tagging: "analysis-run=true",
+    }),
+  );
 }
 
 async function putJson(key: string, value: unknown): Promise<void> {
@@ -570,12 +636,7 @@ function toFact(question: Record<string, unknown>, pageNumber: number): Exhausti
   return {
     subject: typeof question.subject === "string" ? question.subject : "",
     field: typeof question.field === "string" ? question.field : "",
-    answer:
-      typeof question.answer === "string"
-        ? question.answer
-        : typeof question.expectedAnswer === "string"
-          ? question.expectedAnswer
-          : "",
+    answer: typeof question.answer === "string" ? question.answer : "",
     accept: Array.isArray(question.accept)
       ? question.accept.filter((value): value is string => typeof value === "string")
       : [],
@@ -596,9 +657,6 @@ function toQuestion(fact: ExhaustiveFact): Record<string, unknown> {
     field: fact.field,
     sourceText: fact.sourceText,
     accept: fact.accept,
-    question: prompt,
-    expectedAnswer: fact.answer,
-    type: "recall",
   };
 }
 
@@ -766,15 +824,197 @@ async function upsertAnalysisJob(
   }
 }
 
+function readPositiveInt(name: string, fallback: number): number {
+  const value = Number.parseInt(process.env[name] ?? "", 10);
+  return Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
+// Page images are sent to the vision pass only for these formats: their pages
+// map one-to-one onto pages of the rendered PDF.
+const PAGE_RENDER_FORMATS = new Set(["pdf", "pptx"]);
+
+/**
+ * Describes images embedded in documents whose pages are not rendered (DOCX,
+ * XLSX, ODF, EPUB, course packages). Descriptions are also attached to staged
+ * media so they become alt text.
+ */
+async function describeEmbeddedImages(
+  event: WorkflowEvent,
+  extraction: FormatExtractionResult,
+): Promise<{
+  descriptions: ImageDescription[];
+  usageByModel: Record<string, TokenUsage>;
+}> {
+  const none = { descriptions: [], usageByModel: {} };
+  const maxImages = readPositiveInt("DOCUMENT_IMAGE_MAX", 20);
+  if (maxImages === 0) return none;
+
+  const mediaImages = (extraction.mediaFiles ?? []).filter((media) =>
+    imageMimeType(media.filename),
+  );
+  const candidates = selectImagesForDescription(
+    [...(extraction.embeddedImages ?? []), ...mediaImages],
+    {
+      minBytes: readPositiveInt("DOCUMENT_IMAGE_MIN_BYTES", 8 * 1024),
+      maxImages,
+    },
+  );
+  if (candidates.length === 0) return none;
+
+  const model = process.env.DOCUMENT_IMAGE_MODEL || "gpt-4o-mini";
+  console.log(
+    `[prepare] Describing ${candidates.length} embedded images with ${model}`,
+  );
+  const descriptions = await describeImages(getOpenAIForRun(event), candidates, {
+    model,
+  });
+
+  const byFilename = new Map(
+    descriptions.map((description) => [description.filename, description]),
+  );
+  for (const media of mediaImages) {
+    const description = byFilename.get(media.filename);
+    // Extractors label media "Extracted from <format>"; that is a placeholder,
+    // not a description worth keeping over what the model saw.
+    const isPlaceholder =
+      !media.description || media.description.startsWith("Extracted from ");
+    if (description?.relevant && description.description && isPlaceholder) {
+      media.description = description.description;
+    }
+  }
+
+  const usage = descriptions.reduce<TokenUsage>(
+    (total, { usage: item }) => ({
+      promptTokens: total.promptTokens + item.promptTokens,
+      completionTokens: total.completionTokens + item.completionTokens,
+      totalTokens: total.totalTokens + item.totalTokens,
+    }),
+    { promptTokens: 0, completionTokens: 0, totalTokens: 0 },
+  );
+  return { descriptions, usageByModel: { [model]: usage } };
+}
+
+/**
+ * Converts images a vision model cannot read (EMF, WMF, TIFF, BMP) to PNG with
+ * the LibreOffice-backed thumbnail Lambda. The converted image keeps its
+ * marker, so its description lands where the original image was. An image
+ * that fails to convert is skipped.
+ */
+async function convertUnreadableImages(
+  event: WorkflowEvent,
+  baseKey: string,
+  images: EmbeddedImage[],
+): Promise<EmbeddedImage[]> {
+  const functionName = process.env.DOCUMENT_THUMBNAIL_FUNCTION_NAME;
+  // Vector formats are small even when they hold a full diagram, so the bar
+  // here is far lower than the one for raster images.
+  const selected = selectImagesForDescription(images, {
+    minBytes: readPositiveInt("DOCUMENT_IMAGE_CONVERT_MIN_BYTES", 1024),
+    maxImages: readPositiveInt("DOCUMENT_IMAGE_CONVERT_MAX", 10),
+  });
+  if (!functionName || selected.length === 0) return [];
+
+  const converted: Array<EmbeddedImage | null> = new Array(selected.length).fill(
+    null,
+  );
+  let next = 0;
+  const worker = async () => {
+    while (next < selected.length) {
+      const index = next;
+      next += 1;
+      const image = selected[index];
+      const convertedName = `${image.filename}.png`;
+      const inputKey = `${baseKey}/convert/${index}-${image.filename}`;
+      const outputKey = `${baseKey}/convert/${index}-${convertedName}`;
+      try {
+        await putBytes(inputKey, image.data, "application/octet-stream");
+        const response = await lambdaClient.send(
+          new InvokeCommand({
+            FunctionName: functionName,
+            Payload: Buffer.from(
+              JSON.stringify({
+                workflowMode: "convertImage",
+                s3Key: inputKey,
+                outputKey,
+              }),
+            ),
+          }),
+        );
+        if (response.FunctionError) {
+          throw new Error(Buffer.from(response.Payload ?? []).toString("utf8"));
+        }
+        converted[index] = {
+          filename: convertedName,
+          mimeType: "image/png",
+          converted: true,
+          data: await getObject(outputKey),
+          ...(image.marker ? { marker: image.marker } : {}),
+        };
+      } catch (error) {
+        console.warn(
+          `[prepare] Could not convert ${image.filename}:`,
+          error instanceof Error ? error.message : error,
+        );
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(2, selected.length) }, worker));
+  return converted.filter((image): image is EmbeddedImage => image !== null);
+}
+
 async function prepare(event: WorkflowEvent) {
   await assertRunActive(event);
-  const extraction = await extractByFormat(event.s3Key);
-  const pages =
-    (extraction.sourceFormat === "pdf" || extraction.sourceFormat === "pptx") &&
-    extraction.pages.length > 0
-      ? extraction.pages
-      : segmentTextIntoPages(extraction.text);
   const baseKey = `private/${event.identityId}/documents/${event.documentId}/analysis/${event.runId}`;
+  const extraction = await extractByFormat(event.s3Key);
+  const rendersPages =
+    PAGE_RENDER_FORMATS.has(extraction.sourceFormat) &&
+    extraction.pages.length > 0;
+
+  let pages: AnalysisPage[];
+  if (rendersPages) {
+    pages = extraction.pages;
+  } else {
+    const unreadableMedia = (extraction.mediaFiles ?? []).filter((media) =>
+      isUnreadableImage(media.filename),
+    );
+    if (unreadableMedia.length > 0) {
+      const converted = await convertUnreadableImages(
+        event,
+        baseKey,
+        unreadableMedia,
+      );
+      extraction.mediaFiles = replaceUnreadableMedia(
+        extraction.mediaFiles ?? [],
+        converted,
+      );
+    }
+    if ((extraction.unconvertedImages?.length ?? 0) > 0) {
+      const converted = await convertUnreadableImages(
+        event,
+        baseKey,
+        extraction.unconvertedImages ?? [],
+      );
+      extraction.embeddedImages = [
+        ...(extraction.embeddedImages ?? []),
+        ...converted,
+      ];
+    }
+    const { descriptions, usageByModel } = await describeEmbeddedImages(
+      event,
+      extraction,
+    );
+    if (Object.keys(usageByModel).length > 0) {
+      await putJson(`${baseKey}/prepare-usage.json`, usageByModel);
+    }
+    const visuals = extraction.visualText ?? [];
+    const analysisText =
+      weaveImageDescriptions(extraction.inlineText ?? extraction.text, descriptions) +
+      (visuals.length > 0 ? `\n\n[Charts and diagrams]\n${visuals.join("\n")}` : "");
+    pages = segmentTextIntoPages(analysisText);
+  }
+  const visionPages = rendersPages
+    ? selectVisionPages(pages, readPositiveInt("DOCUMENT_VISION_MAX_PAGES", 30))
+    : new Set<number>();
   const pageManifest = pages.map((page) => {
     const pageKey = String(page.pageNumber).padStart(4, "0");
     return {
@@ -792,6 +1032,7 @@ async function prepare(event: WorkflowEvent) {
     const next = pages[index + 1]?.text ?? "";
     await putJson(pageManifest[index].inputKey, {
       ...page,
+      needsVision: visionPages.has(page.pageNumber),
       prevTail: previous.slice(-1500),
       nextHead: next.slice(0, 1500),
       sourceFormat: extraction.sourceFormat,
@@ -887,6 +1128,26 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
     throw new Error("Page extraction is missing page input metadata");
   }
   const page = await readJson<PageInput>(event.inputKey);
+  const needsVision = page.needsVision === true;
+  if (!page.text.trim()) {
+    // A page with no text layer (a scan, or a slide that is only a picture)
+    // has nothing for the text model; the vision pass reads it instead.
+    const empty: PageResult = {
+      page: page.pageNumber,
+      questionsJSON: [],
+      vocabularyJSON: [],
+      summariesJSON: [],
+      objectivesJSON: [],
+      conceptsJSON: [],
+      suspect: [],
+      needsRepair: false,
+      repaired: false,
+      sparseText: true,
+      needsVision,
+    };
+    await putJson(event.resultKey, empty);
+    return { ...event, ...empty };
+  }
   const extracted = await analyzePages(
     getOpenAIForRun(event),
     [page],
@@ -909,7 +1170,11 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
     suspect: checked.suspect,
     needsRepair: checked.suspect.length > 0,
     repaired: false,
-    sparseText: page.text.trim().length < 200,
+    sparseText: isSparsePage(page),
+    needsVision,
+    ...(extracted.uncoveredLines?.length
+      ? { uncoveredLines: extracted.uncoveredLines.map(({ line }) => line) }
+      : {}),
     usageByModel: { "gpt-4o": extracted.usage },
   };
   await putJson(event.resultKey, result);
@@ -931,15 +1196,14 @@ async function verifyPage(
   const model = process.env.VERIFIER_ANTHROPIC_MODEL || "claude-sonnet-5-5";
   const request = {
     model,
-    max_tokens: 2048,
-    system:
-      'Verify each candidate against only the source page. Return JSON {"verdicts":[{"index":0,"supported":true,"reason":""}],"omissions":[]} where omissions are brief facts present in the source but missing from the candidates.',
+    max_tokens: ANTHROPIC_VERIFIER_MAX_OUTPUT_TOKENS,
+    system: VERIFIER_SYSTEM_PROMPT,
     messages: [
       {
         role: "user",
         content: JSON.stringify({
           page: page.text,
-          candidates: candidates.map(({ kind, fact }) => ({ kind, ...fact })),
+          candidates: buildVerifierCandidates(candidates),
         }),
       },
     ],
@@ -977,9 +1241,15 @@ async function verifyPage(
         model?: string;
         usage?: { input_tokens?: number; output_tokens?: number };
         content?: Array<{ type?: string; text?: string }>;
+        stop_reason?: string | null;
       };
     },
   );
+  if (payload.stop_reason === "max_tokens") {
+    throw new VerifierOutputLimitError(
+      "Anthropic verifier reached its output token limit",
+    );
+  }
   const content = payload.content?.find((block) => block.type === "text")?.text;
   if (!content) throw new Error("Anthropic verifier returned an empty response");
   const promptTokens = payload.usage?.input_tokens ?? 0;
@@ -1006,18 +1276,18 @@ async function verifyWithOpenAI(
     "gpt-4o-mini",
     getOpenAIForRun(event).chat.completions.create({
       model: "gpt-4o-mini",
+      max_tokens: OPENAI_VERIFIER_MAX_OUTPUT_TOKENS,
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
-          content:
-            'Verify each candidate against only the source page. Return JSON {"verdicts":[{"index":0,"supported":true,"reason":""}],"omissions":[]} where omissions are brief facts present in the source but missing from the candidates.',
+          content: VERIFIER_SYSTEM_PROMPT,
         },
         {
           role: "user",
           content: JSON.stringify({
             page: page.text,
-            candidates: candidates.map(({ kind, fact }) => ({ kind, ...fact })),
+            candidates: buildVerifierCandidates(candidates),
           }),
         },
       ],
@@ -1025,6 +1295,11 @@ async function verifyWithOpenAI(
   );
   const content = response.choices[0]?.message?.content;
   if (!content) throw new VerifierResponseError("Verifier returned an empty response");
+  if (response.choices[0]?.finish_reason === "length") {
+    throw new VerifierResponseError(
+      "OpenAI verifier reached its output token limit",
+    );
+  }
   return applyVerification(
     event,
     result,
@@ -1043,6 +1318,13 @@ class VerifierResponseError extends Error {
   constructor(message: string, options?: { cause?: unknown }) {
     super(message, options);
     this.name = "VerifierResponseError";
+  }
+}
+
+class VerifierOutputLimitError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "VerifierOutputLimitError";
   }
 }
 
@@ -1217,7 +1499,7 @@ async function analyzeVisionPage(
     throw new Error("Vision analysis is missing page or image metadata");
   }
   const previous = await readJson<PageResult>(event.resultKey);
-  const page = await readJson<PageInput>(event.inputKey);
+  const inputPage = await readJson<PageInput>(event.inputKey);
   const image = await getObject(event.imageKey);
   const imageUrl = `data:image/webp;base64,${image.toString("base64")}`;
   const completion = await withRateLimitTelemetry(
@@ -1225,19 +1507,23 @@ async function analyzeVisionPage(
     "gpt-4o",
     getOpenAIForRun(event).chat.completions.create({
       model: "gpt-4o",
+      max_tokens: OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
       response_format: { type: "json_object" },
       messages: [
         {
           role: "system",
           content:
-            "Extract discrete educational facts visible on this page. Return JSON with facts, each containing subject, field, answer, accept, page, and sourceText, and vocabulary, each containing term, definition, context, and page. Use only visible page content.",
+            "Extract discrete educational facts visible on this page. Return JSON with: " +
+            "pageText, a transcription of every legible piece of text on the page plus a factual description of each figure, chart, diagram, or table (labels, values, and what it shows); " +
+            "facts, each containing subject, field, answer, accept, page, and sourceText, where sourceText is quoted from pageText; " +
+            "and vocabulary, each containing term, definition, context, and page. Use only visible page content.",
         },
         {
           role: "user",
           content: [
             {
               type: "text",
-              text: `Page ${page.pageNumber}. Existing extracted text: ${page.text}`,
+              text: `Page ${inputPage.pageNumber}. Existing extracted text: ${inputPage.text}`,
             },
             { type: "image_url", image_url: { url: imageUrl } },
           ],
@@ -1245,15 +1531,32 @@ async function analyzeVisionPage(
       ],
     }),
   );
-  const content = completion.choices[0]?.message?.content;
-  if (!content) throw new Error("Vision model returned an empty response");
-  const parsed = JSON.parse(content) as {
+  const parsed = parseJsonCompletion<{
+    pageText?: unknown;
     facts?: unknown[];
     vocabulary?: unknown[];
-  };
+  }>(completion, "Vision analysis");
   if (!Array.isArray(parsed.facts) || !Array.isArray(parsed.vocabulary)) {
     throw new Error("Vision model returned an invalid extraction payload");
   }
+  // Later steps accept a fact only when its quoted source appears in the page
+  // text, so the transcription is merged into the page the whole run reads.
+  const visualContent =
+    typeof parsed.pageText === "string" && parsed.pageText.trim()
+      ? parsed.pageText
+      : parsed.facts
+          .map((fact) =>
+            fact !== null && typeof fact === "object"
+              ? (fact as Record<string, unknown>).sourceText
+              : undefined,
+          )
+          .filter((text): text is string => typeof text === "string")
+          .join("\n");
+  const page: PageInput = {
+    ...inputPage,
+    text: mergeVisualContent(inputPage.text, visualContent),
+  };
+  await putJson(event.inputKey, page);
   const visualFacts = parsed.facts.map((fact) =>
     toFact(
       fact !== null && typeof fact === "object"
@@ -1414,10 +1717,23 @@ async function aggregate(event: WorkflowEvent) {
         verifiedVocabulary,
       )
     : [];
-  const questionsJSON =
-    directQuestions.length > 0 ? directQuestions : verifiedQuestions;
-  const vocabularyJSON =
-    directVocabulary.length > 0 ? directVocabulary : verifiedVocabulary;
+  const questionsJSON = mergeDuplicateQuestions(
+    directQuestions.length > 0 ? directQuestions : verifiedQuestions,
+  );
+  const vocabularyJSON = mergeDuplicateVocabulary(
+    directVocabulary.length > 0 ? directVocabulary : verifiedVocabulary,
+  );
+  // Image descriptions are produced by `prepare`, outside any page result.
+  let prepareUsage: Record<string, TokenUsage> = {};
+  if (event.baseKey) {
+    try {
+      prepareUsage = await readJson<Record<string, TokenUsage>>(
+        `${event.baseKey}/prepare-usage.json`,
+      );
+    } catch (error) {
+      if (!isNotFound(error)) throw error;
+    }
+  }
   const tokenUsageByModel = pageResults.reduce<Record<string, TokenUsage>>(
     (usage, page) => {
       for (const [model, modelUsage] of Object.entries(
@@ -1427,16 +1743,18 @@ async function aggregate(event: WorkflowEvent) {
       }
       return usage;
     },
-    {},
+    { ...prepareUsage },
   );
+  const pageSummaryItems = buildPageSummaryItems(pageResults);
   const synthesisItems = [
+    ...pageSummaryItems,
     ...questionsJSON.map((question) => {
       if (question === null || typeof question !== "object") return question;
       const entry = question as Record<string, unknown>;
       return {
         type: "question",
-        prompt: entry.prompt ?? entry.question,
-        answer: entry.answer ?? entry.expectedAnswer,
+        prompt: entry.prompt,
+        answer: entry.answer,
         subject: entry.subject,
         field: entry.field,
         page: entry.page,
@@ -1453,67 +1771,101 @@ async function aggregate(event: WorkflowEvent) {
       };
     }),
   ];
-  let reductionBatches = chunkItemsByJsonSize(synthesisItems, 32_000);
+  let reductionBatches = chunkItemsByJsonSize(synthesisItems, 16_000);
   if (reductionBatches.length === 0) reductionBatches = [[]];
   let synthesized: Record<string, unknown> = {};
+  const sectionSummaries: unknown[] = [];
+  let synthesisPass = 0;
 
   while (reductionBatches.length > 0) {
+    const finalPass = synthesisPass > 0 && reductionBatches.length === 1;
     const reductions: Array<Record<string, unknown>> = [];
-    for (const batch of reductionBatches) {
+    const pendingBatches = [...reductionBatches];
+    for (let batchIndex = 0; batchIndex < pendingBatches.length; batchIndex += 1) {
+      const batch = pendingBatches[batchIndex];
+      if (!batch) throw new Error("Synthesis batch was unexpectedly missing");
       const completion = await withRateLimitTelemetry(
         "openai",
         "gpt-4o",
         getOpenAIForRun(event).chat.completions.create({
           model: "gpt-4o",
-          max_tokens: 2048,
+          max_tokens: OPENAI_SYNTHESIS_MAX_OUTPUT_TOKENS,
           response_format: { type: "json_object" },
           messages: [
             {
               role: "system",
-              content:
-                "Synthesize concise document summaries, learning objectives, and concepts from the verified facts. Return JSON with summariesJSON, objectivesJSON, and conceptsJSON arrays. Do not add facts absent from the provided material.",
+              content: finalPass
+                ? "Synthesize one concise document-level summary from the supplied page or chapter summaries and verified facts. Return summariesJSON with exactly one item {title, content, pageRange}, using title \"Document summary\" and the full covered page range. Also return concise objectivesJSON and conceptsJSON arrays. Do not add facts absent from the supplied material."
+                : synthesisPass === 0
+                  ? "Create concise page- or chapter-level summaries from the supplied page summaries and verified facts. Preserve distinct page or chapter titles and ranges. Return summariesJSON items as {title, content, pageRange}, plus concise objectivesJSON and conceptsJSON arrays. Do not present a partial batch as a whole-document summary or add facts absent from the supplied material."
+                  : "Consolidate the supplied partial summaries and verified facts into concise chapter or section summaries, preserving page ranges, and combine objectives and concepts without duplication. Return JSON with summariesJSON, objectivesJSON, and conceptsJSON arrays. Do not add facts absent from the supplied material.",
             },
             { role: "user", content: JSON.stringify(batch) },
           ],
         }),
       );
-      const content = completion.choices[0]?.message?.content;
-      if (!content) {
-        throw new Error("Document synthesis returned no content");
+      if (completion.choices[0]?.finish_reason === "length") {
+        if (batch.length < 2) {
+          throw new Error(
+            "Document synthesis reached its output limit for a single bounded input batch",
+          );
+        }
+        const midpoint = Math.ceil(batch.length / 2);
+        pendingBatches.splice(
+          batchIndex,
+          1,
+          batch.slice(0, midpoint),
+          batch.slice(midpoint),
+        );
+        batchIndex -= 1;
+        continue;
       }
-      const reduction = JSON.parse(content) as Record<string, unknown>;
+      const reduction = parseJsonCompletion<Record<string, unknown>>(
+        completion,
+        "Document synthesis",
+      );
       const model = completion.model || "gpt-4o";
       Object.assign(
         tokenUsageByModel,
         addModelUsage(
-        tokenUsageByModel,
-        model,
-        {
-          promptTokens: completion.usage?.prompt_tokens ?? 0,
-          completionTokens: completion.usage?.completion_tokens ?? 0,
-          totalTokens: completion.usage?.total_tokens ?? 0,
-        },
+          tokenUsageByModel,
+          model,
+          {
+            promptTokens: completion.usage?.prompt_tokens ?? 0,
+            completionTokens: completion.usage?.completion_tokens ?? 0,
+            totalTokens: completion.usage?.total_tokens ?? 0,
+          },
         ),
       );
       const verified = await verifySynthesisOutput(batch, reduction, event);
       reductions.push(verified.output);
+      if (synthesisPass === 0 && Array.isArray(verified.output.summariesJSON)) {
+        sectionSummaries.push(...verified.output.summariesJSON);
+      }
       Object.assign(
         tokenUsageByModel,
         addModelUsage(tokenUsageByModel, verified.model, verified.usage),
       );
     }
-    if (reductions.length === 1) {
+    if (reductions.length === 1 && synthesisPass > 0) {
       synthesized = reductions[0];
       break;
     }
-    reductionBatches = chunkItemsByJsonSize(reductions, 32_000);
+    reductionBatches =
+      reductions.length === 1
+        ? [[reductions[0]]]
+        : chunkItemsByJsonSize(reductions, 16_000);
+    synthesisPass += 1;
   }
   const result = {
     questionsJSON,
     vocabularyJSON,
-    summariesJSON: Array.isArray(synthesized.summariesJSON)
-      ? synthesized.summariesJSON
-      : [],
+    summariesJSON: [
+      ...sectionSummaries,
+      ...(Array.isArray(synthesized.summariesJSON)
+        ? synthesized.summariesJSON
+        : []),
+    ],
     objectivesJSON: Array.isArray(synthesized.objectivesJSON)
       ? synthesized.objectivesJSON
       : [],
@@ -1610,65 +1962,33 @@ async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
     quality: Record<string, number>;
     tokenUsageByModel: Record<string, TokenUsage>;
   }>(event.aggregateKey);
-  const existing = await getDataClient().graphql({
-    query: /* GraphQL */ `
-      query ListParsedContents($filter: ModelParsedContentFilterInput) {
-        listParsedContents(filter: $filter, limit: 1) {
-          items { id _version }
-        }
-      }
-    `,
-    variables: {
-      filter: {
-        documentID: { eq: event.documentId },
-        fileID: { eq: event.fileId },
-      },
-    },
-  }) as any;
-  if (existing.errors?.length) {
-    throw new Error(`Unable to check existing ParsedContent for ${event.documentId}`);
-  }
   const pendingMedia = event.pendingMediaKey
     ? await readJson<unknown[]>(event.pendingMediaKey)
     : [];
-  const contentInput = {
-    documentID: event.documentId,
-    fileID: event.fileId,
-    vocabularyJSON: JSON.stringify(result.vocabularyJSON),
-    summariesJSON: JSON.stringify(result.summariesJSON),
-    objectivesJSON: JSON.stringify(result.objectivesJSON),
-    conceptsJSON: JSON.stringify(result.conceptsJSON),
-    questionsJSON: JSON.stringify(normaliseQuestionEntries(result.questionsJSON)),
-    pendingMediaJSON:
-      pendingMedia.length > 0 ? JSON.stringify(pendingMedia) : undefined,
-    modelUsed: "gpt-4o",
-    createdAt: new Date().toISOString(),
-  };
-  assertParsedContentPayloadSize(contentInput);
-  const current = existing.data?.listParsedContents?.items?.[0];
-  if (current) {
-    const update = await getDataClient().graphql({
-      query: /* GraphQL */ `
-        mutation UpdateParsedContent($input: UpdateParsedContentInput!) {
-          updateParsedContent(input: $input) { id _version }
-        }
-      `,
-      variables: {
-        input: { id: current.id, _version: current._version, ...contentInput },
-      },
-    }) as any;
-    if (update.errors?.length || !update.data?.updateParsedContent) {
-      throw new Error(`Unable to update ParsedContent for ${event.documentId}`);
-    }
-  } else {
-    const created = await getDataClient().graphql({
-      query: CREATE_PARSED_CONTENT,
-      variables: { input: contentInput },
-    }) as any;
-    if (created.errors?.length || !created.data?.createParsedContent) {
-      throw new Error(`Unable to create ParsedContent for ${event.documentId}`);
-    }
-  }
+  // Long documents are stored as several records split by page; ParsedContent
+  // inputs are typed lists, and createdAt is generated by Amplify.
+  const saved = await saveParsedContentChunks(
+    createGraphqlParsedContentStore(
+      (request) => getDataClient().graphql(request),
+      event.documentId,
+    ),
+    {
+      documentID: event.documentId,
+      fileID: event.fileId,
+      content: toParsedContentInput({
+        vocabularyJSON: result.vocabularyJSON,
+        summariesJSON: result.summariesJSON,
+        objectivesJSON: result.objectivesJSON,
+        conceptsJSON: result.conceptsJSON,
+        questionsJSON: result.questionsJSON,
+        pendingMedia,
+      }),
+      fields: { modelUsed: "gpt-4o" },
+    },
+  );
+  console.log(
+    `[finalize] Saved ParsedContent for ${event.documentId}: ${saved.chunkCount} chunk(s), ${saved.created} created, ${saved.updated} updated, ${saved.removed} removed`,
+  );
   await upsertAnalysisJob(
     event,
     "processing",

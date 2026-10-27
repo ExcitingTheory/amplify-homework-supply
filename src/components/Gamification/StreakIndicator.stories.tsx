@@ -63,8 +63,6 @@ export const SmallSize: Story = {
   play: async ({ canvasElement }) => {
     const canvas = within(canvasElement);
     await canvas.findByText("3");
-    // Small size uses caption variant text
-    const text = canvasElement.querySelector(".MuiTypography-caption");
-    expect(text).not.toBeNull();
+    expect(canvas.getAllByLabelText("3 day streak").length).toBeGreaterThan(0);
   },
 };

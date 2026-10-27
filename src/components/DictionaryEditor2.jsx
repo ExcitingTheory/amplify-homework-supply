@@ -70,6 +70,7 @@ import UnitContext from "../context/unitContext";
 import { useTabContext } from "../context/tabContext";
 import ShowDeletedToggle from "./ShowDeletedToggle";
 import { useRecycleBin } from "../hooks/useRecycleBin";
+import { useItemSources } from "../hooks/useItemSources";
 
 // Virtualization
 import { useVirtualizer } from "@tanstack/react-virtual";
@@ -1090,6 +1091,9 @@ function WordRowComponent({
   const [recordingDialogOpen, setRecordingDialogOpen] = React.useState(false);
   const [rubyDialogOpen, setRubyDialogOpen] = React.useState(false);
   const { unit } = React.useContext(UnitContext);
+  // Which document(s) the word was imported from, loaded when expanded
+  const sources = useItemSources("word", wordId, { enabled: isExpanded });
+  const source = sources[0];
 
   // Memoize word preset to avoid recreating on every render
   const wordPreset = React.useMemo(
@@ -1262,10 +1266,12 @@ function WordRowComponent({
     context: pronunciation, // Use pronunciation field for phonetic context
     phonetic: pronunciation,
     audio: audio,
-    documentID: documentID,
+    documentID: documentID ?? source?.documentId,
     fileID: fileID,
-    filename: filename,
-    page: page,
+    filename: filename ?? source?.filename ?? undefined,
+    page: page ?? source?.page ?? undefined,
+    sourceText: source?.sourceText ?? undefined,
+    extraSources: Math.max(0, sources.length - 1),
   };
 
   const handleUpdateWrapper = async (itemIndex, field, newValue) => {

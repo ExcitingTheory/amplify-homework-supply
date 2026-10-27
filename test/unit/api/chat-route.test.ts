@@ -28,6 +28,8 @@ vi.mock("@/utils/amplifyServerClient", () => ({
       Section: { get: mockSectionGet },
       PlatformSettings: { list: mockPlatformSettingsList },
       ParsedContent: { list: mockParsedContentList },
+      // No relationship loader, so chunks are found with ParsedContent.list.
+      File: { get: vi.fn(async ({ id }: { id: string }) => ({ data: { id } })) },
     },
   }),
 }));

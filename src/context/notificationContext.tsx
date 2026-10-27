@@ -490,10 +490,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
     async (notificationId: string) => {
       try {
         const client = getAmplifyClient();
-        const item = state.notifications.find((n) => n.id === notificationId);
-        await client.models.Notification.delete({
-          id: notificationId,
-        });
+        await client.models.Notification.delete({ id: notificationId });
       } catch (err) {
         console.error(
           "[NotificationContext] Error permanently deleting notification:",
@@ -501,7 +498,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [state.notifications],
+    [],
   );
 
   const deleteNotificationsForever = useCallback(
@@ -510,10 +507,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
       try {
         const client = getAmplifyClient();
         const results = await Promise.allSettled(
-          notificationIds.map((id) => {
-            const item = state.notifications.find((n) => n.id === id);
-            return client.models.Notification.delete({ id });
-          }),
+          notificationIds.map((id) => client.models.Notification.delete({ id })),
         );
         const failures = results.filter((r) => r.status === "rejected");
         if (failures.length > 0) {
@@ -528,7 +522,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [state.notifications],
+    [],
   );
 
   const contextValue = useMemo(

@@ -3,8 +3,6 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-import Card from "@mui/material/Card";
-import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
@@ -22,6 +20,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
+import { EmptyState } from "@/components/EmptyState";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DescriptionIcon from "@mui/icons-material/Description";
@@ -172,16 +171,18 @@ function RecycleBinContent() {
       </Box>
 
       {filteredItems.length === 0 ? (
-        <Card variant="outlined">
-          <CardContent sx={{ textAlign: "center", py: 6 }}>
-            <FolderIcon sx={{ fontSize: 48, color: "text.disabled", mb: 1 }} />
-            <Typography color="text.secondary">
-              {modelFilter === "all"
-                ? "Recycle bin is empty"
-                : `No deleted ${modelFilter} items`}
-            </Typography>
-          </CardContent>
-        </Card>
+        <EmptyState
+          icon={<FolderIcon fontSize="inherit" />}
+          title={
+            modelFilter === "all"
+              ? "Recycle bin is empty"
+              : `No deleted ${modelFilter} items`
+          }
+          {...(modelFilter !== "all" && {
+            ctaLabel: "Show all deleted items",
+            onCtaClick: () => setModelFilter("all"),
+          })}
+        />
       ) : (
         <List disablePadding>
           {filteredItems.map((item) => (

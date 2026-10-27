@@ -4,6 +4,17 @@ Utility scripts for development, testing, and automation.
 
 ## Testing Scripts
 
+### Document analysis fixtures
+
+**File**: `generate-document-fixtures.mjs`  
+**Purpose**: Regenerates the committed fixtures in `test/mocks/documents/` that exercise image handling in document analysis (embedded images, charts, EMF/WMF/TIFF/BMP media, a scanned PDF). They are committed, so run it only when you change what they contain.
+
+```bash
+node scripts/generate-document-fixtures.mjs
+```
+
+**Prerequisites**: LibreOffice (`soffice`) on the PATH.
+
 ### LLM-as-a-Judge: Chat Tools Testing
 
 **File**: `test-chat-tools-llm-judge.ts`  

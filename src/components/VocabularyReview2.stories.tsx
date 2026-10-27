@@ -409,6 +409,7 @@ export const AlreadyImported: Story = {
         mockParsedContent,
         seedMockDocuments,
         seedMockParsedContent,
+        seedMockDocumentWords,
       } = await import("../../.storybook/__mocks__/aws-amplify-data.js");
 
       Object.keys(mockDocuments).forEach(
@@ -417,6 +418,17 @@ export const AlreadyImported: Story = {
       Object.keys(mockParsedContent).forEach(
         (k) => delete (mockParsedContent as any)[k],
       );
+
+      // Imported entries are the ones the document has a link for
+      seedMockDocumentWords([
+        {
+          id: "link-guangheseng",
+          documentID: "mock-doc-imported",
+          wordID: "w-guangheseng",
+          entryKey: "光合成",
+          page: 1,
+        },
+      ]);
 
       seedMockDocuments([
         {
@@ -460,7 +472,100 @@ export const AlreadyImported: Story = {
     docs: {
       description: {
         story:
-          "Shows the interface when vocabulary has already been imported. Import button and checkboxes are hidden.",
+          "Shows the interface when every word has already been imported. Import button and checkboxes are hidden.",
+      },
+    },
+  },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("光合成");
+    expect(canvas.queryAllByRole("checkbox")).toHaveLength(0);
+  },
+};
+
+/**
+ * A document where some words are already in the dictionary
+ */
+export const PartlyImported: Story = {
+  args: {
+    documentId: "mock-doc-partly",
+    unitId: "mock-unit-1",
+    owner: "user-123",
+    identityId: "us-east-1:identity-123",
+    searchTerm: "",
+  },
+  loaders: [
+    async () => {
+      const {
+        mockDocuments,
+        mockParsedContent,
+        seedMockDocuments,
+        seedMockParsedContent,
+        seedMockDocumentWords,
+      } = await import("../../.storybook/__mocks__/aws-amplify-data.js");
+
+      Object.keys(mockDocuments).forEach(
+        (k) => delete (mockDocuments as any)[k],
+      );
+      Object.keys(mockParsedContent).forEach(
+        (k) => delete (mockParsedContent as any)[k],
+      );
+
+      seedMockDocumentWords([
+        {
+          id: "link-partly-1",
+          documentID: "mock-doc-partly",
+          wordID: "w-chloroplast",
+          entryKey: "chloroplast",
+          page: 1,
+        },
+      ]);
+      seedMockDocuments([
+        {
+          id: "mock-doc-partly",
+          filename: "partly-imported.pdf",
+          status: "completed",
+          pageCount: 4,
+          mimeType: "application/pdf",
+          size: 1234567,
+        },
+      ]);
+      seedMockParsedContent([
+        {
+          id: "parsed-mock-doc-partly",
+          documentID: "mock-doc-partly",
+          vocabularyJSON: JSON.stringify([
+            { word: "Chloroplast", definition: "Organelle that captures light", page: 1 },
+            { word: "Stomata", definition: "Pores in a leaf", page: 2 },
+            { word: "Glucose", definition: "A simple sugar", page: 3 },
+          ]),
+          summariesJSON: JSON.stringify([]),
+          objectivesJSON: JSON.stringify([]),
+          status: "completed",
+          importedAt: new Date().toISOString(),
+        },
+      ]);
+      return {};
+    },
+  ],
+  render: (args) => (
+    <Box sx={{ height: "80vh", display: "flex", flexDirection: "column" }}>
+      <VocabularyReview2 {...args} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByText("Stomata");
+
+    // The imported word is marked and cannot be selected; the rest can be imported.
+    expect(await canvas.findAllByText("Already imported")).toHaveLength(1);
+    expect(canvas.getAllByRole("checkbox")).toHaveLength(2);
+  },
+  parameters: {
+    docs: {
+      description: {
+        story:
+          "Words are marked one by one from the document's links. Imported ones are not pre-selected; the others can still be imported.",
       },
     },
   },

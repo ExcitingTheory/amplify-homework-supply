@@ -32,9 +32,15 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { randomUUID } from "node:crypto";
 import OpenAI from "openai";
 import { extractByFormat } from "./formatRegistry.js";
+import { toParsedContentInput } from "./parsedContentInput.js";
+import { saveParsedContentChunks } from "../shared/parsedContentChunks";
+import { createGraphqlParsedContentStore } from "../shared/parsedContentGraphql";
+import {
+  PENDING_MEDIA_SELECTION,
+  toEntryList,
+} from "../shared/parsedContentLists";
 import {
   analyzePages,
-  normaliseQuestionEntries,
   resolveAnalysisProfile,
   resolveSkipAutoAnalysis,
 } from "./analysis.js";
@@ -163,27 +169,6 @@ const UPDATE_FILE = /* GraphQL */ `
       _lastChangedAt
       _deleted
       documentID
-    }
-  }
-`;
-
-const CREATE_PARSED_CONTENT = /* GraphQL */ `
-  mutation CreateParsedContent($input: CreateParsedContentInput!) {
-    createParsedContent(input: $input) {
-      id
-      _version
-      _lastChangedAt
-      _deleted
-      documentID
-      fileID
-      vocabularyJSON
-      summariesJSON
-      objectivesJSON
-      conceptsJSON
-      questionsJSON
-      pendingMediaJSON
-      modelUsed
-      createdAt
     }
   }
 `;
@@ -516,7 +501,7 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
   const { profile, invalidValue } = resolveAnalysisProfile(file.settings);
   if (invalidValue !== undefined) {
     console.warn(
-      `[Analyze Document] Invalid analysisProfile setting for File ${fileID}; using standard profile:`,
+      `[Analyze Document] Invalid analysisProfile setting for File ${fileID}; using the default profile:`,
       invalidValue,
     );
   }
@@ -692,7 +677,7 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
     const { profile, invalidValue } = resolveAnalysisProfile(file.settings);
     if (invalidValue !== undefined) {
       console.warn(
-        `[Analyze Document] Invalid analysisProfile setting on File ${fileID}; using standard profile:`,
+        `[Analyze Document] Invalid analysisProfile setting on File ${fileID}; using the default profile:`,
         invalidValue,
       );
     }
@@ -958,26 +943,26 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
       }
     }
 
-    await client.graphql({
-      query: CREATE_PARSED_CONTENT,
-      variables: {
-        input: {
-          documentID,
-          fileID,
-          vocabularyJSON: JSON.stringify(parsedContent.vocabularyJSON || []),
-          summariesJSON: JSON.stringify(parsedContent.summariesJSON || []),
-          objectivesJSON: JSON.stringify(parsedContent.objectivesJSON || []),
-          conceptsJSON: JSON.stringify(parsedContent.conceptsJSON || []),
-          questionsJSON: JSON.stringify(
-            normaliseQuestionEntries(parsedContent.questionsJSON ?? []),
-          ),
-          pendingMediaJSON:
-            pendingMedia.length > 0 ? JSON.stringify(pendingMedia) : undefined,
-          modelUsed: "gpt-4o",
-          createdAt: new Date().toISOString(),
-        },
+    // Long documents are stored as several records split by page.
+    await saveParsedContentChunks(
+      createGraphqlParsedContentStore(
+        async (request) => (await client.graphql(request as any)) as any,
+        documentID,
+      ),
+      {
+        documentID,
+        fileID,
+        content: toParsedContentInput({
+          vocabularyJSON: parsedContent.vocabularyJSON ?? [],
+          summariesJSON: parsedContent.summariesJSON ?? [],
+          objectivesJSON: parsedContent.objectivesJSON ?? [],
+          conceptsJSON: parsedContent.conceptsJSON ?? [],
+          questionsJSON: parsedContent.questionsJSON ?? [],
+          pendingMedia,
+        }),
+        fields: { modelUsed: "gpt-4o" },
       },
-    } as any);
+    );
 
     // Update document status to "completed"
     await client.graphql({
@@ -1206,7 +1191,7 @@ const GET_PARSED_CONTENT = /* GraphQL */ `
       fileID
       owner
       identityId
-      pendingMediaJSON
+      ${PENDING_MEDIA_SELECTION}
     }
   }
 `;
@@ -1218,7 +1203,7 @@ const UPDATE_PARSED_CONTENT = /* GraphQL */ `
       _version
       _lastChangedAt
       _deleted
-      pendingMediaJSON
+      ${PENDING_MEDIA_SELECTION}
     }
   }
 `;
@@ -1258,10 +1243,7 @@ async function handleApproveMedia(args: any): Promise<any> {
       size: number;
       description?: string;
       approved?: boolean;
-    }> =
-      typeof parsedContent.pendingMediaJSON === "string"
-        ? JSON.parse(parsedContent.pendingMediaJSON)
-        : parsedContent.pendingMediaJSON || [];
+    }> = toEntryList(parsedContent.pendingMediaJSON);
 
     if (pendingMedia.length === 0) {
       return {
@@ -1328,7 +1310,8 @@ async function handleApproveMedia(args: any): Promise<any> {
       variables: {
         input: {
           id: parsedContentID,
-          pendingMediaJSON: JSON.stringify(pendingMedia),
+          pendingMediaJSON:
+            toParsedContentInput({ pendingMedia }).pendingMediaJSON ?? [],
           _version: parsedContent._version ?? 1,
         },
       },

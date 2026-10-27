@@ -27,6 +27,36 @@ import {
   type EffectiveGamificationConfig,
 } from "../shared/gamificationConfigCache";
 import OpenAI from "openai";
+import { OBJECTIVES_SELECTION, toEntryList } from "../shared/parsedContentLists";
+import {
+  BADGES_SELECTION,
+  CONFUSION_PAIRS_SELECTION,
+  CONTRIBUTIONS_SELECTION,
+  COSMETIC_REWARDS_SELECTION,
+  DISCOVERIES_SELECTION,
+  MEMBERS_SELECTION,
+  MODULE_PROGRESS_SELECTION,
+  PERSONAL_BESTS_SELECTION,
+  SKILL_PROGRESS_SELECTION,
+  STRONG_CONCEPTS_SELECTION,
+  UNIT_MEMORIES_SELECTION,
+  WEAK_CONCEPTS_SELECTION,
+  sanitizeBadges,
+  sanitizeConceptStrengths,
+  sanitizeConfusionPairs,
+  sanitizeContributions,
+  sanitizeCosmeticRewards,
+  sanitizeDiscoveries,
+  sanitizeModuleProgress,
+  sanitizePersonalBests,
+  sanitizeSkillProgress,
+  sanitizeSquadMembers,
+  sanitizeUnitMemories,
+  toJsonInput,
+  toList,
+  toObject,
+} from "./selections";
+import { parseBattleStakes, type BattleStakes } from "./battleStakes";
 
 /**
  * Read published unit content from S3.
@@ -78,30 +108,30 @@ const LIST_XP_LOGS_BY_SECTION = `query ListXPLogsBySection($sectionID: String!) 
 // Easter egg queries/mutations
 const LIST_ACTIVE_EASTER_EGGS = `query ListActiveEasterEggs {
   listEasterEggs(filter: { active: { eq: true } }) {
-    items { id trigger triggerValue xpReward badgeId revealMessage active sectionID discoveries _version _lastChangedAt _deleted }
+    items { id trigger triggerValue xpReward badgeId revealMessage active sectionID ${DISCOVERIES_SELECTION} _version _lastChangedAt _deleted }
   }
 }`;
 
 // Squad queries/mutations (SquadMembership model removed - members embedded in Squad.members)
 
 const GET_SQUAD = `query GetSquad($id: ID!) {
-  getSquad(id: $id) { id name sectionID totalXP members _version _lastChangedAt _deleted }
+  getSquad(id: $id) { id name sectionID totalXP ${MEMBERS_SELECTION} _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_SQUAD = `mutation UpdateSquad($input: UpdateSquadInput!, $condition: ModelSquadConditionInput) {
-  updateSquad(input: $input, condition: $condition) { id name totalXP members _version _lastChangedAt _deleted }
+  updateSquad(input: $input, condition: $condition) { id name totalXP ${MEMBERS_SELECTION} _version _lastChangedAt _deleted }
 }`;
 
 const LIST_SQUADS_BY_SECTION = `query ListSquadsBySection($sectionID: String!) {
   listSquadBySectionID(sectionID: $sectionID) {
-    items { id name sectionID totalXP members _version _lastChangedAt _deleted }
+    items { id name sectionID totalXP ${MEMBERS_SELECTION} _version _lastChangedAt _deleted }
   }
 }`;
 
 // Group challenge queries/mutations
 const LIST_ACTIVE_CHALLENGES_BY_SECTION = `query ListChallengesBySection($sectionID: String!) {
   listGroupChallengeBySectionID(sectionID: $sectionID) {
-    items { id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId contributions _version _lastChangedAt _deleted }
+    items { id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId stakes ${CONTRIBUTIONS_SELECTION} _version _lastChangedAt _deleted }
   }
 }`;
 
@@ -129,7 +159,7 @@ const UPDATE_STUDENT_MEMORY = `mutation UpdateStudentMemory($input: UpdateStuden
 const LIST_UNIT_MEMORY_BY_STUDENT = `query ListUnitMemoryByStudent($studentId: String!) {
   listStudentMemoryByStudentId(studentId: $studentId) {
     items {
-      id studentId unitID weakConcepts strongConcepts confusionPairs
+      id studentId unitID ${WEAK_CONCEPTS_SELECTION} ${STRONG_CONCEPTS_SELECTION} ${CONFUSION_PAIRS_SELECTION}
       accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
   }
 }`;
@@ -137,20 +167,20 @@ const LIST_UNIT_MEMORY_BY_STUDENT = `query ListUnitMemoryByStudent($studentId: S
 const LIST_UNIT_MEMORY_BY_UNIT = `query ListUnitMemoryByUnit($unitID: String!) {
   listStudentMemoryByUnitID(unitID: $unitID) {
     items {
-      id studentId unitID weakConcepts strongConcepts
+      id studentId unitID ${WEAK_CONCEPTS_SELECTION} ${STRONG_CONCEPTS_SELECTION}
       accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
   }
 }`;
 
 const CREATE_UNIT_MEMORY = `mutation CreateStudentMemory($input: CreateStudentMemoryInput!) {
   createStudentMemory(input: $input) {
-    id studentId unitID weakConcepts strongConcepts confusionPairs
+    id studentId unitID ${WEAK_CONCEPTS_SELECTION} ${STRONG_CONCEPTS_SELECTION} ${CONFUSION_PAIRS_SELECTION}
     accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_UNIT_MEMORY = `mutation UpdateStudentMemory($input: UpdateStudentMemoryInput!) {
   updateStudentMemory(input: $input) {
-    id studentId unitID weakConcepts strongConcepts confusionPairs
+    id studentId unitID ${WEAK_CONCEPTS_SELECTION} ${STRONG_CONCEPTS_SELECTION} ${CONFUSION_PAIRS_SELECTION}
     accuracyBySource totalAttempts averageAccuracy reviewPriority lastPracticedAt _version _lastChangedAt _deleted }
 }`;
 
@@ -170,8 +200,8 @@ const LIST_GRADES_BY_SECTION = `query ListGradesBySectionID($sectionID: ID!) {
 
 // Bounded to one student's own rows for a section (byOwnerAndSection index) —
 // used by recomputeProgress instead of scanning every student's attempts.
-const LIST_GRADES_BY_OWNER_AND_SECTION = `query ListGradesByOwnerAndSection($owner: String!, $sectionID: String!) {
-  listGradeByOwnerAndSection(owner: $owner, sectionID: { eq: $sectionID }) {
+const LIST_GRADES_BY_OWNER_AND_SECTION = `query ListGradesByOwnerAndSection($owner: String!, $sectionID: ID!) {
+  listGradeByOwnerAndSectionID(owner: $owner, sectionID: { eq: $sectionID }) {
     items { id unitID complete }
   }
 }`;
@@ -201,21 +231,45 @@ const GET_UNIT = `query GetUnit($id: ID!) {
   getUnit(id: $id) { id name description contentVersion _version _lastChangedAt _deleted }
 }`;
 
-const LIST_UNIT_WORDS = `query ListUnitWords($unitID: String!) {
-  listUnitWordByUnitID(unitID: $unitID) {
-    items { word { id word phonetic definition _version _lastChangedAt _deleted } }
+// The join models have no unitID index, so these are filtered scans: DynamoDB
+// applies the page limit before the filter, hence callers must follow nextToken.
+const LIST_UNIT_WORDS = `query ListUnitWords($unitID: ID!, $nextToken: String) {
+  listUnitWords(filter: { unitID: { eq: $unitID } }, limit: 1000, nextToken: $nextToken) {
+    items { word { id phrase pronunciation definition _version _lastChangedAt _deleted } }
+    nextToken
   }
 }`;
 
-const LIST_QUESTION_UNITS = `query ListQuestionUnits($unitID: String!) {
-  listQuestionUnitByUnitID(unitID: $unitID) {
-    items { question { id question answer _version _lastChangedAt _deleted } }
+const LIST_QUESTION_UNITS = `query ListQuestionUnits($unitID: ID!, $nextToken: String) {
+  listQuestionUnits(filter: { unitID: { eq: $unitID } }, limit: 1000, nextToken: $nextToken) {
+    items { question { id prompt answer _version _lastChangedAt _deleted } }
+    nextToken
   }
 }`;
 
-const LIST_UNIT_DOCUMENTS = `query ListUnitDocuments($unitID: String!) {
-  listUnitDocumentByUnitID(unitID: $unitID) {
-    items { document { id parsedContents { items { id objectivesJSON _version _lastChangedAt _deleted } } _version _lastChangedAt _deleted } }
+/** Collect every page of a filtered list query by following nextToken. */
+async function listAllPages(
+  gqlClient: any,
+  query: string,
+  variables: Record<string, unknown>,
+  field: string,
+): Promise<any[]> {
+  const items: any[] = [];
+  let nextToken: string | null | undefined;
+  do {
+    const { data } = await gqlClient.graphql({
+      query,
+      variables: { ...variables, nextToken },
+    });
+    items.push(...(data?.[field]?.items || []));
+    nextToken = data?.[field]?.nextToken;
+  } while (nextToken);
+  return items;
+}
+
+const LIST_UNIT_DOCUMENTS = `query ListUnitDocuments($unitID: ID!) {
+  listUnitDocuments(filter: { unitID: { eq: $unitID } }) {
+    items { document { id parsedContent { items { id ${OBJECTIVES_SELECTION} _version _lastChangedAt _deleted } } _version _lastChangedAt _deleted } }
   }
 }`;
 
@@ -239,7 +293,7 @@ const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!) {
     items {
       id studentId sectionID studentName totalXP level
       currentStreak longestStreak lastActivityDate freezesRemaining freezesUsed
-      badges moduleProgress personalBests skillProgress unitMemories activeDebuffs cosmeticRewards
+      ${BADGES_SELECTION} ${MODULE_PROGRESS_SELECTION} ${PERSONAL_BESTS_SELECTION} ${SKILL_PROGRESS_SELECTION} ${UNIT_MEMORIES_SELECTION} activeDebuffs ${COSMETIC_REWARDS_SELECTION}
       completedAssignments nailedItCount lastUpdated _version _lastChangedAt _deleted }
   }
 }`;
@@ -251,7 +305,7 @@ const CREATE_STUDENT_PROFILE = `mutation CreateStudentProfile($input: CreateStud
 const UPDATE_STUDENT_PROFILE = `mutation UpdateStudentProfile($input: UpdateStudentProfileInput!, $condition: ModelStudentProfileConditionInput) {
   updateStudentProfile(input: $input, condition: $condition) {
     id studentId totalXP level currentStreak longestStreak
-    badges moduleProgress personalBests skillProgress unitMemories cosmeticPenalty cosmeticRewards activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed reportCard { timeStats { min max avg count } lastUpdated } _version _lastChangedAt _deleted }
+    ${BADGES_SELECTION} ${MODULE_PROGRESS_SELECTION} ${PERSONAL_BESTS_SELECTION} ${SKILL_PROGRESS_SELECTION} ${UNIT_MEMORIES_SELECTION} cosmeticPenalty ${COSMETIC_REWARDS_SELECTION} activeDebuffs freezesRemaining avatarStyle avatarOverrides avatarSeed reportCard { timeStats { min max avg count } lastUpdated } _version _lastChangedAt _deleted }
 }`;
 
 // StudentSkillProgress removed - skill progress now on StudentProfile.skillProgress
@@ -267,11 +321,11 @@ const LIST_PROFILES_BY_SECTION = `query ListProfilesBySection($sectionID: String
 
 // EasterEgg update (for embedded discoveries)
 const GET_EASTER_EGG = `query GetEasterEgg($id: ID!) {
-  getEasterEgg(id: $id) { id trigger triggerValue xpReward badgeId revealMessage active discoveries _version _lastChangedAt _deleted }
+  getEasterEgg(id: $id) { id trigger triggerValue xpReward badgeId revealMessage active ${DISCOVERIES_SELECTION} _version _lastChangedAt _deleted }
 }`;
 
 const UPDATE_EASTER_EGG = `mutation UpdateEasterEgg($input: UpdateEasterEggInput!) {
-  updateEasterEgg(input: $input) { id discoveries _version _lastChangedAt _deleted }
+  updateEasterEgg(input: $input) { id ${DISCOVERIES_SELECTION} _version _lastChangedAt _deleted }
 }`;
 
 // Grade queries for skill evaluation
@@ -296,12 +350,12 @@ const LIST_ALL_BADGES = `query ListAllBadges {
 
 // GroupChallenge update (for embedded contributions)
 const UPDATE_CHALLENGE_WITH_CONTRIBUTIONS = `mutation UpdateGroupChallenge($input: UpdateGroupChallengeInput!, $condition: ModelGroupChallengeConditionInput) {
-  updateGroupChallenge(input: $input, condition: $condition) { id currentXP contributions _version _lastChangedAt _deleted }
+  updateGroupChallenge(input: $input, condition: $condition) { id currentXP ${CONTRIBUTIONS_SELECTION} _version _lastChangedAt _deleted }
 }`;
 
 const GET_GROUP_CHALLENGE = `query GetGroupChallenge($id: ID!) {
   getGroupChallenge(id: $id) {
-    id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId linkedUnitIds contributions _version _lastChangedAt _deleted
+    id sectionID title targetXP currentXP deadline active bonusMultiplier rewardXP rewardBadge rewardCosmetic unlockContentId linkedUnitIds ${CONTRIBUTIONS_SELECTION} _version _lastChangedAt _deleted
   }
 }`;
 
@@ -1544,13 +1598,7 @@ async function handleCheckBadges(
       );
     }
 
-    existingBadges = (() => {
-      try {
-        return JSON.parse(profile.badges || "[]");
-      } catch {
-        return [];
-      }
-    })();
+    existingBadges = toList(profile.badges);
     const existingByType = new Map<string, any>(
       existingBadges.map((b: any) => [b.badgeType, b]),
     );
@@ -1746,7 +1794,7 @@ async function handleCheckBadges(
     const expectedVersion = profile._version ?? 1;
     const updateInput: any = {
       id: profile.id,
-      badges: JSON.stringify(existingBadges),
+      badges: sanitizeBadges(existingBadges),
       activeDebuffs: JSON.stringify(activeDebuffs),
       _version: expectedVersion + 1,
     };
@@ -2179,7 +2227,7 @@ async function handleRebuildLeaderboard(
                   avatarStyle: avatarConfig.avatarStyle,
                 }),
                 ...(avatarConfig?.avatarOverrides && {
-                  avatarOverrides: JSON.stringify(avatarConfig.avatarOverrides),
+                  avatarOverrides: toJsonInput(avatarConfig.avatarOverrides),
                 }),
                 ...(avatarConfig?.avatarSeed && {
                   avatarSeed: avatarConfig.avatarSeed,
@@ -2221,7 +2269,7 @@ async function handleRebuildLeaderboard(
     );
 
     for (const squad of squads) {
-      const members = squad.members || [];
+      const members = toList<any>(squad.members);
       let membersChanged = false;
       const updatedMembers = members.map((m: any) => {
         if (!m?.studentId) return m;
@@ -2232,7 +2280,7 @@ async function handleRebuildLeaderboard(
           ...m,
           avatarStyle: avatar.avatarStyle || m.avatarStyle,
           avatarOverrides: avatar.avatarOverrides
-            ? JSON.stringify(avatar.avatarOverrides)
+            ? toJsonInput(avatar.avatarOverrides)
             : m.avatarOverrides,
           avatarSeed: avatar.avatarSeed || m.avatarSeed || m.studentId,
         };
@@ -2244,7 +2292,7 @@ async function handleRebuildLeaderboard(
           variables: {
             input: {
               id: squad.id,
-              members: updatedMembers,
+              members: sanitizeSquadMembers(updatedMembers),
               _version: squad._version ?? 1,
             },
           },
@@ -2351,13 +2399,7 @@ async function handleBootstrapStudentMemory(
 
   // Get badges from StudentProfile
   const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-  const badges: any[] = (() => {
-    try {
-      return JSON.parse(profile.badges || "[]");
-    } catch {
-      return [];
-    }
-  })();
+  const badges: any[] = toList(profile.badges);
 
   // Count submissions and nailed-its
   const submissions = xpLogs.filter(
@@ -2421,9 +2463,27 @@ interface ConceptEntry {
 }
 
 interface ConfusionPair {
-  item1: string;
-  item2: string;
+  conceptA: string;
+  conceptB: string;
   frequency: number;
+}
+
+/** Callers send {item1, item2}; the schema stores {conceptA, conceptB}. */
+interface IncomingConfusionPair {
+  item1?: string;
+  item2?: string;
+  conceptA?: string;
+  conceptB?: string;
+  frequency?: number;
+}
+
+/** Normalize stored or incoming pairs to the schema's conceptA/conceptB shape. */
+function toConfusionPairs(value: unknown): ConfusionPair[] {
+  return sanitizeConfusionPairs(value).map((p) => ({
+    conceptA: p.conceptA as string,
+    conceptB: p.conceptB as string,
+    frequency: typeof p.frequency === "number" ? p.frequency : 1,
+  }));
 }
 
 const WEAK_THRESHOLD = 70;
@@ -2496,7 +2556,7 @@ async function handleUpdateStudentUnitMemory(
     accuracy: number;
     weakAreas: string[];
     strongAreas: string[];
-    confusionPairs?: ConfusionPair[];
+    confusionPairs?: IncomingConfusionPair[];
     accuracyBySource?: Record<string, number>;
     sourceType?: string;
   },
@@ -2513,6 +2573,7 @@ async function handleUpdateStudentUnitMemory(
   } = args;
 
   const timestamp = new Date().toISOString();
+  const incomingPairList = toConfusionPairs(incomingPairs);
 
   // Fetch existing unit memory
   const { data: listResult } = await gqlClient.graphql({
@@ -2524,18 +2585,13 @@ async function handleUpdateStudentUnitMemory(
 
   if (existing) {
     // Merge concepts
-    const prevWeak: ConceptEntry[] = existing.weakConcepts
-      ? JSON.parse(JSON.stringify(existing.weakConcepts))
-      : [];
-    const prevStrong: ConceptEntry[] = existing.strongConcepts
-      ? JSON.parse(JSON.stringify(existing.strongConcepts))
-      : [];
-    const prevPairs: ConfusionPair[] = existing.confusionPairs
-      ? JSON.parse(JSON.stringify(existing.confusionPairs))
-      : [];
-    const prevAccBySource: Record<string, number> = existing.accuracyBySource
-      ? JSON.parse(JSON.stringify(existing.accuracyBySource))
-      : {};
+    const prevWeak = toList<ConceptEntry>(existing.weakConcepts);
+    const prevStrong = toList<ConceptEntry>(existing.strongConcepts);
+    const prevPairs = toConfusionPairs(existing.confusionPairs);
+    // accuracyBySource is AWSJSON, so it comes back as a JSON string
+    const prevAccBySource = toObject<Record<string, number>>(
+      existing.accuracyBySource,
+    );
     const prevAttempts = existing.totalAttempts || 0;
     const prevAvgAcc = existing.averageAccuracy || 0;
 
@@ -2564,10 +2620,10 @@ async function handleUpdateStudentUnitMemory(
     // Merge confusion pairs
     const pairMap = new Map<string, ConfusionPair>();
     for (const p of prevPairs) {
-      pairMap.set(`${p.item1}|${p.item2}`, p);
+      pairMap.set(`${p.conceptA}|${p.conceptB}`, p);
     }
-    for (const p of incomingPairs) {
-      const key = `${p.item1}|${p.item2}`;
+    for (const p of incomingPairList) {
+      const key = `${p.conceptA}|${p.conceptB}`;
       const prev = pairMap.get(key);
       if (prev) {
         pairMap.set(key, { ...prev, frequency: prev.frequency + p.frequency });
@@ -2609,10 +2665,10 @@ async function handleUpdateStudentUnitMemory(
       variables: {
         input: {
           id: existing.id,
-          weakConcepts: filteredWeak,
-          strongConcepts: filteredStrong,
-          confusionPairs: mergedPairs,
-          accuracyBySource: mergedAccBySource,
+          weakConcepts: sanitizeConceptStrengths(filteredWeak),
+          strongConcepts: sanitizeConceptStrengths(filteredStrong),
+          confusionPairs: sanitizeConfusionPairs(mergedPairs),
+          accuracyBySource: toJsonInput(mergedAccBySource),
           totalAttempts: newAttempts,
           averageAccuracy: newAvgAcc,
           reviewPriority,
@@ -2635,7 +2691,7 @@ async function handleUpdateStudentUnitMemory(
       accuracy,
       weakAreas.length,
       totalConcepts,
-      incomingPairs.length,
+      incomingPairList.length,
       0,
     );
 
@@ -2645,20 +2701,24 @@ async function handleUpdateStudentUnitMemory(
         input: {
           studentId,
           unitID,
-          weakConcepts: weakAreas.map((c) => ({
-            concept: c,
-            sourceType,
-            frequency: 1,
-            lastSeen: timestamp,
-          })),
-          strongConcepts: strongAreas.map((c) => ({
-            concept: c,
-            sourceType,
-            frequency: 1,
-            lastSeen: timestamp,
-          })),
-          confusionPairs: incomingPairs,
-          accuracyBySource: incomingAccBySource,
+          weakConcepts: sanitizeConceptStrengths(
+            weakAreas.map((c) => ({
+              concept: c,
+              sourceType,
+              frequency: 1,
+              lastSeen: timestamp,
+            })),
+          ),
+          strongConcepts: sanitizeConceptStrengths(
+            strongAreas.map((c) => ({
+              concept: c,
+              sourceType,
+              frequency: 1,
+              lastSeen: timestamp,
+            })),
+          ),
+          confusionPairs: sanitizeConfusionPairs(incomingPairList),
+          accuracyBySource: toJsonInput(incomingAccBySource),
           totalAttempts: 1,
           averageAccuracy: accuracy,
           reviewPriority,
@@ -2720,7 +2780,7 @@ async function handleRebuildStudentMemoryProfile(
   const sourceAccSums: Record<string, { sum: number; count: number }> = {};
 
   for (const um of unitMemories) {
-    const weak: ConceptEntry[] = um.weakConcepts || [];
+    const weak = toList<ConceptEntry>(um.weakConcepts);
     for (const w of weak) {
       const prev = weakMap.get(w.concept);
       if (prev) {
@@ -2738,7 +2798,7 @@ async function handleRebuildStudentMemoryProfile(
       }
     }
 
-    const strong: ConceptEntry[] = um.strongConcepts || [];
+    const strong = toList<ConceptEntry>(um.strongConcepts);
     for (const s of strong) {
       const prev = strongMap.get(s.concept);
       if (prev) {
@@ -2756,7 +2816,7 @@ async function handleRebuildStudentMemoryProfile(
       }
     }
 
-    const accBySrc: Record<string, number> = um.accuracyBySource || {};
+    const accBySrc = toObject<Record<string, number>>(um.accuracyBySource);
     for (const [src, acc] of Object.entries(accBySrc)) {
       if (!sourceAccSums[src]) sourceAccSums[src] = { sum: 0, count: 0 };
       sourceAccSums[src].sum += acc;
@@ -2893,13 +2953,7 @@ async function handleCheckPersonalBest(
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
     const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-    const personalBests: any[] = (() => {
-      try {
-        return JSON.parse(profile.personalBests || "[]");
-      } catch {
-        return [];
-      }
-    })();
+    const personalBests: any[] = toList(profile.personalBests);
     const existingPB = personalBests.find((pb: any) => pb.unitID === unitID);
     const expectedVersion = profile._version ?? 1;
 
@@ -2918,7 +2972,7 @@ async function handleCheckPersonalBest(
           variables: {
             input: {
               id: profile.id,
-              personalBests: JSON.stringify(personalBests),
+              personalBests: sanitizePersonalBests(personalBests),
               _version: expectedVersion + 1,
             },
             condition: { _version: { eq: expectedVersion } },
@@ -2952,7 +3006,7 @@ async function handleCheckPersonalBest(
           variables: {
             input: {
               id: profile.id,
-              personalBests: JSON.stringify(personalBests),
+              personalBests: sanitizePersonalBests(personalBests),
               _version: expectedVersion + 1,
             },
             condition: { _version: { eq: expectedVersion } },
@@ -3049,7 +3103,7 @@ async function handleRecomputeProgress(
     }),
   ]);
   const studentGrades =
-    gradesResult.data?.listGradeByOwnerAndSection?.items || [];
+    gradesResult.data?.listGradeByOwnerAndSectionID?.items || [];
   const assignments = assignmentsResult.data?.listAssignments?.items || [];
 
   // Distinct units, not raw row counts — a retaken completed unit shouldn't
@@ -3079,13 +3133,7 @@ async function handleRecomputeProgress(
   let created = false;
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
     const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-    const moduleProgress: any[] = (() => {
-      try {
-        return JSON.parse(profile.moduleProgress || "[]");
-      } catch {
-        return [];
-      }
-    })();
+    const moduleProgress: any[] = toList(profile.moduleProgress);
 
     const existingIdx = moduleProgress.findIndex(
       (p: any) => p.moduleId === moduleId,
@@ -3104,7 +3152,7 @@ async function handleRecomputeProgress(
         variables: {
           input: {
             id: profile.id,
-            moduleProgress: JSON.stringify(moduleProgress),
+            moduleProgress: sanitizeModuleProgress(moduleProgress),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -3152,7 +3200,7 @@ async function handleCheckEasterEggs(
   // Build set of already-discovered egg IDs from EasterEgg.discoveries arrays
   const discoveredIds = new Set<string>();
   for (const egg of eggs) {
-    const discoveriesArr = egg.discoveries || [];
+    const discoveriesArr = toList<any>(egg.discoveries);
     for (const d of discoveriesArr) {
       if (d?.studentId === studentId) discoveredIds.add(egg.id);
     }
@@ -3195,7 +3243,7 @@ async function handleCheckEasterEggs(
     if (matched) {
       // Embed discovery in EasterEgg.discoveries array
       try {
-        const existingDiscoveries = egg.discoveries || [];
+        const existingDiscoveries = toList<any>(egg.discoveries);
         existingDiscoveries.push({
           studentId,
           discoveredAt: new Date().toISOString(),
@@ -3205,7 +3253,7 @@ async function handleCheckEasterEggs(
           variables: {
             input: {
               id: egg.id,
-              discoveries: existingDiscoveries,
+              discoveries: sanitizeDiscoveries(existingDiscoveries),
               _version: egg._version ?? 1,
             },
           },
@@ -3307,7 +3355,7 @@ async function handleDiscoverEasterEgg(
     return { error: "Easter egg not found" };
   }
 
-  const discoveries = eggRecord.discoveries || [];
+  const discoveries = toList<any>(eggRecord.discoveries);
   const alreadyFound = discoveries.some((d: any) => d?.studentId === studentId);
 
   if (alreadyFound) {
@@ -3321,7 +3369,7 @@ async function handleDiscoverEasterEgg(
     variables: {
       input: {
         id: eggRecord.id,
-        discoveries,
+        discoveries: sanitizeDiscoveries(discoveries),
         _version: eggRecord._version ?? 1,
       },
     },
@@ -3373,7 +3421,7 @@ async function handleUpdateSquadXP(
 
   // Find squads where this student is a member
   const memberSquads = allSquads.filter((squad: any) => {
-    const members = squad.members || [];
+    const members = toList<any>(squad.members);
     return members.some((m: any) => m?.studentId === studentId);
   });
 
@@ -3484,7 +3532,7 @@ async function handleContributeToChallenge(
     let updateSucceeded = false;
     let goalReached = false;
     let newTotal = challenge.currentXP || 0;
-    let updatedContributions: any[] = challenge.contributions || [];
+    let updatedContributions: any[] = toList<any>(challenge.contributions);
 
     for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
       let currentChallenge = challenge;
@@ -3499,7 +3547,7 @@ async function handleContributeToChallenge(
 
       newTotal = (currentChallenge.currentXP || 0) + xpContributed;
       goalReached = newTotal >= currentChallenge.targetXP;
-      const existingContributions = currentChallenge.contributions || [];
+      const existingContributions = toList<any>(currentChallenge.contributions);
       updatedContributions = [
         ...existingContributions,
         { studentId, xpContributed, contributedAt: new Date().toISOString() },
@@ -3514,7 +3562,7 @@ async function handleContributeToChallenge(
               id: currentChallenge.id,
               currentXP: newTotal,
               active: goalReached ? false : true,
-              contributions: updatedContributions,
+              contributions: sanitizeContributions(updatedContributions),
               _version: expectedVersion + 1,
             },
             condition: { _version: { eq: expectedVersion } },
@@ -3671,13 +3719,7 @@ async function handleAdvanceSkillProgress(
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
     const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-    const allProgress: any[] = (() => {
-      try {
-        return JSON.parse(profile.skillProgress || "[]");
-      } catch {
-        return [];
-      }
-    })();
+    const allProgress: any[] = toList(profile.skillProgress);
     const existing = allProgress.find((p: any) => p.skillId === skillId);
     const currentStatus = existing?.status || "LOCKED";
 
@@ -3695,7 +3737,7 @@ async function handleAdvanceSkillProgress(
     // If MASTERED, unlock dependent skills
     unlocked = [];
     for (const skill of skillTree) {
-      const prereqs = skill.prerequisites || [];
+      const prereqs: string[] = toList<string>(skill.prerequisites);
       if (!prereqs.includes(skillId)) continue;
 
       // Check if ALL prerequisites are MASTERED
@@ -3736,7 +3778,7 @@ async function handleAdvanceSkillProgress(
         variables: {
           input: {
             id: profile.id,
-            skillProgress: JSON.stringify(allProgress),
+            skillProgress: sanitizeSkillProgress(allProgress),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -3824,13 +3866,7 @@ async function handleEvaluateSkillsForUnit(
 
   for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt++) {
     const profile = await getOrCreateStudentProfile(gqlClient, studentId);
-    const allProgress: any[] = (() => {
-      try {
-        return profile.skillProgress ? JSON.parse(profile.skillProgress) : [];
-      } catch {
-        return [];
-      }
-    })();
+    const allProgress: any[] = toList(profile.skillProgress);
 
     mastered.length = 0;
     inProgress.length = 0;
@@ -3886,7 +3922,7 @@ async function handleEvaluateSkillsForUnit(
         variables: {
           input: {
             id: profile.id,
-            skillProgress: JSON.stringify(allProgress),
+            skillProgress: sanitizeSkillProgress(allProgress),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -4097,7 +4133,7 @@ async function grantCosmeticReward(
     if (!profile) return;
 
     // Avoid duplicate grants from same source
-    const existing = (profile.cosmeticRewards || []) as any[];
+    const existing = toList<any>(profile.cosmeticRewards);
     const alreadyGranted = existing.some(
       (r: any) =>
         r.sourceId === sourceId && r.type === type && r.value === value,
@@ -4113,7 +4149,7 @@ async function grantCosmeticReward(
         variables: {
           input: {
             id: profile.id,
-            cosmeticRewards: updatedRewards,
+            cosmeticRewards: sanitizeCosmeticRewards(updatedRewards),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -4151,7 +4187,7 @@ async function grantChallengeBadge(
     const profile = await getOrCreateStudentProfile(gqlClient, studentId);
     if (!profile) return;
 
-    const existingBadges = (profile.badges || []) as any[];
+    const existingBadges = toList<any>(profile.badges);
 
     // Check for duplicate — same badge from same challenge
     const alreadyGranted = existingBadges.some(
@@ -4176,7 +4212,7 @@ async function grantChallengeBadge(
         variables: {
           input: {
             id: profile.id,
-            badges: updatedBadges,
+            badges: sanitizeBadges(updatedBadges),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -4221,7 +4257,7 @@ async function syncUnitMemoriesToProfile(gqlClient: any, studentId: string) {
         variables: {
           input: {
             id: profile.id,
-            unitMemories: unitMemoriesForProfile,
+            unitMemories: sanitizeUnitMemories(unitMemoriesForProfile),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -4308,22 +4344,26 @@ async function handleGenerateSkillTree(
   const unitText = lexicalData ? extractTextFromLexicalJSON(lexicalData) : "";
 
   // 2. Fetch related vocabulary
-  const { data: wordsResult } = await gqlClient.graphql({
-    query: LIST_UNIT_WORDS,
-    variables: { unitID },
-  });
-  const words = (wordsResult?.listUnitWordByUnitID?.items || [])
+  const wordItems = await listAllPages(
+    gqlClient,
+    LIST_UNIT_WORDS,
+    { unitID },
+    "listUnitWords",
+  );
+  const words = wordItems
     .filter((i: any) => i?.word)
-    .map((i: any) => `${i.word.word}: ${i.word.definition || ""}`);
+    .map((i: any) => `${i.word.phrase}: ${i.word.definition || ""}`);
 
   // 3. Fetch related questions
-  const { data: questionsResult } = await gqlClient.graphql({
-    query: LIST_QUESTION_UNITS,
-    variables: { unitID },
-  });
-  const questions = (questionsResult?.listQuestionUnitByUnitID?.items || [])
+  const questionItems = await listAllPages(
+    gqlClient,
+    LIST_QUESTION_UNITS,
+    { unitID },
+    "listQuestionUnits",
+  );
+  const questions = questionItems
     .filter((i: any) => i?.question)
-    .map((i: any) => i.question.question);
+    .map((i: any) => i.question.prompt);
 
   // 4. Fetch learning objectives from parsed documents (if any)
   let objectives: string[] = [];
@@ -4332,20 +4372,14 @@ async function handleGenerateSkillTree(
       query: LIST_UNIT_DOCUMENTS,
       variables: { unitID },
     });
-    const docs = docsResult?.listUnitDocumentByUnitID?.items || [];
+    const docs = docsResult?.listUnitDocuments?.items || [];
     for (const doc of docs) {
-      const parsedContents = doc?.document?.parsedContents?.items || [];
+      const parsedContents = doc?.document?.parsedContent?.items || [];
       for (const pc of parsedContents) {
-        if (pc?.objectivesJSON) {
-          const parsed =
-            typeof pc.objectivesJSON === "string"
-              ? JSON.parse(pc.objectivesJSON)
-              : pc.objectivesJSON;
-          if (Array.isArray(parsed)) {
-            for (const obj of parsed) {
-              if (obj?.objective) objectives.push(obj.objective);
-            }
-          }
+        for (const obj of toEntryList<{ objective?: string }>(
+          pc?.objectivesJSON,
+        )) {
+          if (obj?.objective) objectives.push(obj.objective);
         }
       }
     }
@@ -4699,13 +4733,7 @@ async function handleClaimStorybookBadges(
       profile = await getOrCreateStudentProfile(gqlClient, studentId);
     }
 
-    existingBadges = (() => {
-      try {
-        return JSON.parse(profile.badges || "[]");
-      } catch {
-        return [];
-      }
-    })();
+    existingBadges = toList(profile.badges);
 
     // Simple rate check: if too many promo badges were updated in the last hour, reject
     const oneHourAgo = new Date(Date.now() - 3600000).toISOString();
@@ -4749,7 +4777,7 @@ async function handleClaimStorybookBadges(
         variables: {
           input: {
             id: profile.id,
-            badges: JSON.stringify(existingBadges),
+            badges: sanitizeBadges(existingBadges),
             _version: expectedVersion + 1,
           },
           condition: { _version: { eq: expectedVersion } },
@@ -4779,21 +4807,6 @@ async function handleClaimStorybookBadges(
 // ============================================================================
 // applyBattleStakes — Applies consequences to all cohort members on battle failure
 // ============================================================================
-
-interface BattleStakesInput {
-  loseLevel: boolean;
-  loseXP: boolean;
-  xpLossAmount: number;
-  loseStreakFreeze: boolean;
-  resetStreak: boolean;
-  loseBadge: boolean;
-  loseBadgeByRarity: boolean;
-  badgeRarityTarget: string; // 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary'
-  streakMissXPPenalty: boolean;
-  streakMissXPPerDay: number;
-  loseCosmetics: boolean;
-  cosmeticPenaltyDays: number;
-}
 
 // Badge rarity classification based on badge type difficulty
 const BADGE_RARITY_MAP: Record<string, string> = {
@@ -4863,10 +4876,10 @@ async function handleApplyBattleStakes(
     );
   }
 
-  // Parse stakes JSON
-  let stakes: BattleStakesInput;
+  // Parse stakes JSON (strict: only literal true enables a penalty)
+  let stakes: BattleStakes;
   try {
-    stakes = JSON.parse(challenge.stakes || "{}");
+    stakes = parseBattleStakes(challenge.stakes);
   } catch {
     throw new Error("Invalid stakes JSON on challenge");
   }
@@ -4988,7 +5001,7 @@ async function handleApplyBattleStakes(
       // Lose most recent badge
       if (stakes.loseBadge) {
         try {
-          const badges: any[] = JSON.parse(profile.badges || "[]");
+          const badges: any[] = toList(profile.badges);
           if (badges.length > 0) {
             badges.sort(
               (a: any, b: any) =>
@@ -4996,7 +5009,7 @@ async function handleApplyBattleStakes(
                 new Date(a.awardedAt).getTime(),
             );
             const removed = badges.shift();
-            updates.badges = JSON.stringify(badges);
+            updates.badges = sanitizeBadges(badges);
             consequences.push(`Lost badge: ${removed.badgeType}`);
           } else {
             consequences.push("No badges to lose (skipped)");
@@ -5009,9 +5022,7 @@ async function handleApplyBattleStakes(
       // Lose a badge of a specific rarity
       if (stakes.loseBadgeByRarity && stakes.badgeRarityTarget) {
         try {
-          const badges: any[] = updates.badges
-            ? JSON.parse(updates.badges)
-            : JSON.parse(profile.badges || "[]");
+          const badges: any[] = toList(updates.badges ?? profile.badges);
           const targetRarity = stakes.badgeRarityTarget;
           // Find badges matching the target rarity
           const matchingIdx = badges.findIndex(
@@ -5020,7 +5031,7 @@ async function handleApplyBattleStakes(
           );
           if (matchingIdx >= 0) {
             const removed = badges.splice(matchingIdx, 1)[0];
-            updates.badges = JSON.stringify(badges);
+            updates.badges = sanitizeBadges(badges);
             consequences.push(
               `Lost ${targetRarity} badge: ${removed.badgeType}`,
             );

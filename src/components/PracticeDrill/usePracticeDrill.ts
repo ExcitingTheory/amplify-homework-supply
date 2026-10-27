@@ -131,7 +131,12 @@ export function usePracticeDrill(
           unitId,
           drillType: config.drillType.toUpperCase(),
           count: config.count,
-          sourcesEnabled: config.sources,
+          sourcesEnabled: {
+            ...config.sources,
+            ...(config.documentIds?.length
+              ? { documentIds: config.documentIds }
+              : {}),
+          },
         });
 
         const blocks: PracticeDrillBlock[] = result.blocks || [];
@@ -173,6 +178,9 @@ export function usePracticeDrill(
             unitId,
             drillType: config.drillType,
             sourcesEnabled: config.sources,
+            ...(config.documentIds?.length
+              ? { documentIds: config.documentIds }
+              : {}),
             ...(result as any)?.metadata,
           },
         });

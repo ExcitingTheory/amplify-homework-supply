@@ -66,6 +66,7 @@ import UnitContext from "../context/unitContext";
 import { useTabContext } from "../context/tabContext";
 import ShowDeletedToggle from "./ShowDeletedToggle";
 import { useRecycleBin } from "../hooks/useRecycleBin";
+import { useItemSources } from "../hooks/useItemSources";
 
 // i18n
 import { useTranslations } from "next-intl";
@@ -618,6 +619,9 @@ function QuestionRowComponent({
   const [fileOperations, setFileOperations] = React.useState([]);
   const [audioFilesToUpload, setAudioFilesToUpload] = React.useState([]);
   const { unit } = React.useContext(UnitContext);
+  // Which document(s) the question was imported from, loaded when expanded
+  const sources = useItemSources("question", questionId, { enabled: isExpanded });
+  const source = sources[0];
 
   const audioUrls = audio || [];
   const hasAudio = audioUrls.length > 0;
@@ -767,10 +771,12 @@ function QuestionRowComponent({
     answer: answer || "",
     hint: hint,
     hasAudio: hasAudio,
-    documentID: documentID,
+    documentID: documentID ?? source?.documentId,
     fileID: fileID,
-    filename: filename,
-    page: page,
+    filename: filename ?? source?.filename ?? undefined,
+    page: page ?? source?.page ?? undefined,
+    sourceText: source?.sourceText ?? undefined,
+    extraSources: Math.max(0, sources.length - 1),
   };
 
   const handleUpdateWrapper = async (itemIndex, field, newValue) => {

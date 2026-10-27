@@ -1680,14 +1680,6 @@
     "onTimeHeader": "准时完成",
     "studentHeader": "学员"
   },
-  "firstRunChecklist": {
-    "createUnit": "创建您的第一个单元",
-    "description": "请选择您的下一步操作。",
-    "joinClass": "加入班级",
-    "openWork": "打开已分配的作业",
-    "setupClass": "设置班级",
-    "title": "从这里开始"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "高级设置",
     "advancedSettingsTooltip": "技能、徽章、战队及其他高级游戏化设置",
@@ -1993,7 +1985,8 @@
     "visualLayout": "视觉布局",
     "xpAmount": "{xp} 经验值",
     "xpMultiplier": "XP ×{multiplier}",
-    "xpTuner": "经验值调节器"
+    "xpTuner": "经验值调节器",
+    "noSquadsDescription": "学生创建小队后会显示在这里。成员的经验值会计入所在小队的排名。"
   },
   "jobsDashboard": {
     "active": "{count} 个进行中",
@@ -2161,6 +2154,7 @@
     "xpReward": "+20 经验值"
   },
   "nailedItWall": {
+    "emptyDescription": "当你的作业展现出出色的理解时，就会获得“完美”时刻。完成作业来填满这面墙。",
     "emptyTitle": "暂无“完美搞定”时刻——请继续加油!",
     "heading": "🎯 完美掌握",
     "meta": "{homeworkTitle} · {date}"
@@ -2347,6 +2341,8 @@
       "documentsDesc": "来自已上传的PDF和已解析的内容",
       "drillType": "练习类型",
       "generating": "生成中...",
+      "limitToDocuments": "限定为文档",
+      "limitToDocumentsHelp": "留空则使用单元中的所有内容。选择文档后将不使用文本内容。",
       "maxParticipants": "最多参与人数",
       "mixed": "混合",
       "noSourcesWarning": "请至少启用一个内容源以开始练习。",
@@ -2459,6 +2455,7 @@
     "selectAll": "全选"
   },
   "questionsReview": {
+    "alreadyImported": "已导入",
     "answer": "答案",
     "collapse": "Collapse",
     "deselectAll": "取消全选",
@@ -2483,6 +2480,7 @@
     "selectAll": "全选",
     "selectedCount": "已选择 {count} / {total} 项",
     "show": "显示",
+    "sourceTooltip": "来源:{filename}",
     "summaries": "摘要",
     "summariesAndObjectives": "摘要与目标"
   },
@@ -2860,6 +2858,7 @@
   },
   "squadJoinPanel": {
     "cancel": "取消",
+    "emptyCta": "前往小队",
     "emptyDescription": "请稍后再来查看,或创建您自己的小队开始使用。",
     "emptyTitle": "暂无可加入的小组",
     "join": "加入",
@@ -2882,6 +2881,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "学生创建或加入小队后会显示在这里，并按成员获得的总经验值排名。",
     "emptyTitle": "暂无小队",
     "memberCount": "{count, plural, one {# 位成员} other {# 位成员}}",
     "mySquad": "我的小队",
@@ -2925,7 +2925,8 @@
     "deletePost": "删除帖子",
     "empty": "暂无帖子，快来发布第一条内容吧！",
     "newPost": "发布新帖",
-    "postAriaLabel": "帖子:{title}"
+    "postAriaLabel": "帖子:{title}",
+    "writeFirstPost": "撰写第一篇帖子"
   },
   "stateInspector": {
     "capturedAt": "捕获时间:{date}",
@@ -3228,7 +3229,8 @@
     "definitionPlaceholder": "请输入释义…",
     "contextLabel": "语境",
     "contextPlaceholder": "请输入语境或例句...",
-    "importSummary": "已导入 {imported} 个新单词,{skipped} 个已存在,{errors} 个出错"
+    "importSummary": "已导入 {imported} 个新单词,{skipped} 个已存在,{errors} 个出错",
+    "alreadyImported": "已导入"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}:{count, plural, one {# 份提交} other {# 份提交}}",

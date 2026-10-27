@@ -1,7 +1,5 @@
 {
-  "Peer Review": {
-    "value": "Revisión entre Pares"
-  },
+  "Peer Review": "Revisión entre Pares",
   "grades": {
     "assignmentHeader": "Tarea",
     "gradeHeader": "Calificación",
@@ -15,19 +13,11 @@
     "completedAssignments": "Tareas Completadas",
     "createNewSection": "Crear nueva sección",
     "editUnit": "Editar Unidad",
-    "greetingAfternoon": {
-      "value": "Buenas tardes, {name}"
-    },
-    "greetingEvening": {
-      "value": "Buenas noches, {name}"
-    },
-    "greetingMorning": {
-      "value": "Buenos días, {name}"
-    },
+    "greetingAfternoon": "Buenas tardes, {name}",
+    "greetingEvening": "Buenas noches, {name}",
+    "greetingMorning": "Buenos días, {name}",
     "joinSection": "¿Unirse a la sección?",
-    "learningPathway": {
-      "value": "Árbol de Habilidades"
-    },
+    "learningPathway": "Árbol de Habilidades",
     "myAssignments": "Mis tareas",
     "mySections": "Mis secciones",
     "noDescription": "Sin descripción",
@@ -42,6 +32,7 @@
     "completionMode": "Completado",
     "empty": "Aún no hay datos de clasificación. ¡Completa tareas para ganar XP\\!",
     "fastestMode": "Más rápido",
+    "goToAssignments": "Ir a mis tareas",
     "heading": "Clasificación general",
     "squadsMode": "Grupos",
     "title": "Tabla de clasificación",
@@ -49,183 +40,81 @@
   },
   "privacy": {
     "childrensPrivacy": {
-      "content": {
-        "value": "Homework Supply está diseñado para uso educativo y puede ser utilizado por estudiantes menores de 13 años con el consentimiento de los padres o de la escuela. Cumplimos con los requisitos de COPPA y no recopilamos intencionalmente información personal de niños sin el consentimiento apropiado. Las escuelas y los instructores son responsables de obtener el consentimiento parental necesario."
-      },
-      "heading": {
-        "value": "Privacidad de Menores"
-      }
+      "content": "Homework Supply está diseñado para uso educativo y puede ser utilizado por estudiantes menores de 13 años con el consentimiento de los padres o de la escuela. Cumplimos con los requisitos de COPPA y no recopilamos intencionalmente información personal de niños sin el consentimiento apropiado. Las escuelas y los instructores son responsables de obtener el consentimiento parental necesario.",
+      "heading": "Privacidad de Menores"
     },
     "contactUs": {
-      "content": {
-        "value": "Si tiene preguntas sobre esta Política de Privacidad o desea ejercer sus derechos de datos, por favor contacte a su instructor o al administrador de la plataforma. Para consultas generales, puede comunicarse con nosotros a través de los canales de soporte disponibles en la plataforma."
-      },
+      "content": "Si tiene preguntas sobre esta Política de Privacidad o desea ejercer sus derechos de datos, por favor contacte a su instructor o al administrador de la plataforma. Para consultas generales, puede comunicarse con nosotros a través de los canales de soporte disponibles en la plataforma.",
       "heading": "Contáctenos"
     },
     "cookies": {
-      "content": {
-        "value": "Utilizamos cookies esenciales y almacenamiento local para la autenticación, gestión de sesiones y funcionalidad sin conexión. No utilizamos cookies de seguimiento de terceros ni cookies publicitarias. El almacenamiento local se utiliza para guardar en caché el contenido de aprendizaje para el acceso sin conexión."
-      },
-      "heading": {
-        "value": "Cookies y almacenamiento local"
-      }
+      "content": "Utilizamos cookies esenciales y almacenamiento local para la autenticación, gestión de sesiones y funcionalidad sin conexión. No utilizamos cookies de seguimiento de terceros ni cookies publicitarias. El almacenamiento local se utiliza para guardar en caché el contenido de aprendizaje para el acceso sin conexión.",
+      "heading": "Cookies y almacenamiento local"
     },
     "dataSharing": {
-      "aiProcessing": {
-        "value": "Procesamiento de IA:"
-      },
-      "aiProcessingText": {
-        "value": "El contenido de audio y texto se envía a OpenAI para transcripción, retroalimentación y evaluación. OpenAI no utiliza estos datos para entrenamiento."
-      },
-      "classmates": {
-        "value": "Compañeros de clase:"
-      },
-      "classmatesText": {
-        "value": "Las clasificaciones del tablero de líderes y la actividad del equipo pueden ser visibles para otros estudiantes de su sección (puede optar por no participar)."
-      },
-      "heading": {
-        "value": "Compartición de Datos"
-      },
-      "instructors": {
-        "value": "Instructores:"
-      },
-      "instructorsText": {
-        "value": "Sus instructores pueden ver sus envíos, calificaciones y progreso de aprendizaje dentro de sus secciones."
-      },
-      "intro": {
-        "value": "No vendemos su información personal. Podemos compartir datos en las siguientes circunstancias limitadas:"
-      },
-      "legal": {
-        "value": "Requisitos Legales:"
-      },
-      "legalText": {
-        "value": "Podemos divulgar información si así lo exige la ley o para proteger la seguridad de nuestros usuarios."
-      }
+      "aiProcessing": "Procesamiento de IA:",
+      "aiProcessingText": "El contenido de audio y texto se envía a OpenAI para transcripción, retroalimentación y evaluación. OpenAI no utiliza estos datos para entrenamiento.",
+      "classmates": "Compañeros de clase:",
+      "classmatesText": "Las clasificaciones del tablero de líderes y la actividad del equipo pueden ser visibles para otros estudiantes de su sección (puede optar por no participar).",
+      "heading": "Compartición de Datos",
+      "instructors": "Instructores:",
+      "instructorsText": "Sus instructores pueden ver sus envíos, calificaciones y progreso de aprendizaje dentro de sus secciones.",
+      "intro": "No vendemos su información personal. Podemos compartir datos en las siguientes circunstancias limitadas:",
+      "legal": "Requisitos Legales:",
+      "legalText": "Podemos divulgar información si así lo exige la ley o para proteger la seguridad de nuestros usuarios."
     },
     "dataStorage": {
-      "heading": {
-        "value": "Almacenamiento y Seguridad de Datos"
-      },
-      "intro": {
-        "value": "Sus datos se almacenan de forma segura utilizando prácticas estándar de la industria:"
-      },
-      "item1": {
-        "value": "Todos los datos se cifran en tránsito (TLS/SSL) y en reposo utilizando los servicios de cifrado de AWS"
-      },
-      "item2": {
-        "value": "Los archivos se almacenan en Amazon S3 con controles de acceso basados en su rol y propiedad"
-      },
-      "item3": {
-        "value": "Los registros de la base de datos se gestionan a través de AWS DynamoDB con control de acceso detallado"
-      },
-      "outro": {
-        "value": "Conservamos sus datos mientras su cuenta esté activa o según sea necesario para proporcionar los servicios. Usted puede solicitar la eliminación de sus datos en cualquier momento."
-      }
+      "heading": "Almacenamiento y Seguridad de Datos",
+      "intro": "Sus datos se almacenan de forma segura utilizando prácticas estándar de la industria:",
+      "item1": "Todos los datos se cifran en tránsito (TLS/SSL) y en reposo utilizando los servicios de cifrado de AWS",
+      "item2": "Los archivos se almacenan en Amazon S3 con controles de acceso basados en su rol y propiedad",
+      "item3": "Los registros de la base de datos se gestionan a través de AWS DynamoDB con control de acceso detallado",
+      "outro": "Conservamos sus datos mientras su cuenta esté activa o según sea necesario para proporcionar los servicios. Usted puede solicitar la eliminación de sus datos en cualquier momento."
     },
     "howWeUseInfo": {
-      "heading": {
-        "value": "Cómo utilizamos su información"
-      },
-      "intro": {
-        "value": "Utilizamos su información para los siguientes propósitos:"
-      },
-      "item1": {
-        "value": "Proporcionar experiencias de aprendizaje personalizadas y tutoría impulsada por inteligencia artificial"
-      },
-      "item2": {
-        "value": "Seguimiento del progreso académico y generación de informes de rendimiento para los instructores"
-      },
-      "item3": {
-        "value": "Procesamiento de audio y texto a través de servicios de IA (OpenAI) para retroalimentación y evaluación"
-      },
+      "heading": "Cómo utilizamos su información",
+      "intro": "Utilizamos su información para los siguientes propósitos:",
+      "item1": "Proporcionar experiencias de aprendizaje personalizadas y tutoría impulsada por inteligencia artificial",
+      "item2": "Seguimiento del progreso académico y generación de informes de rendimiento para los instructores",
+      "item3": "Procesamiento de audio y texto a través de servicios de IA (OpenAI) para retroalimentación y evaluación",
       "item4": "Habilitar funciones de colaboración en tiempo real entre estudiantes e instructores",
-      "item5": {
-        "value": "Mejorar las funcionalidades de la plataforma, corregir errores y optimizar los resultados educativos"
-      }
+      "item5": "Mejorar las funcionalidades de la plataforma, corregir errores y optimizar los resultados educativos"
     },
     "informationWeCollect": {
-      "accountInfo": {
-        "value": "Información de la cuenta:"
-      },
-      "accountInfoText": {
-        "value": "Dirección de correo electrónico, nombre para mostrar y credenciales de autenticación cuando usted crea una cuenta."
-      },
-      "heading": {
-        "value": "Información que Recopilamos"
-      },
-      "intro": {
-        "value": "Recopilamos los siguientes tipos de información para proporcionar y mejorar nuestros servicios educativos:"
-      },
-      "learningData": {
-        "value": "Datos de Aprendizaje:"
-      },
-      "learningDataText": {
-        "value": "Envío de tareas, calificaciones, seguimiento de progreso, XP obtenidos y análisis de aprendizaje."
-      },
-      "usageInfo": {
-        "value": "Información de uso:"
-      },
-      "usageInfoText": {
-        "value": "Información del dispositivo, tipo de navegador, páginas visitadas y patrones de interacción para mejorar la experiencia de la plataforma."
-      },
-      "userContent": {
-        "value": "Contenido Generado por el Usuario:"
-      },
-      "userContentText": {
-        "value": "Grabaciones de audio, respuestas de texto, archivos cargados y mensajes de chat creados durante las actividades de aprendizaje."
-      }
+      "accountInfo": "Información de la cuenta:",
+      "accountInfoText": "Dirección de correo electrónico, nombre para mostrar y credenciales de autenticación cuando usted crea una cuenta.",
+      "heading": "Información que Recopilamos",
+      "intro": "Recopilamos los siguientes tipos de información para proporcionar y mejorar nuestros servicios educativos:",
+      "learningData": "Datos de Aprendizaje:",
+      "learningDataText": "Envío de tareas, calificaciones, seguimiento de progreso, XP obtenidos y análisis de aprendizaje.",
+      "usageInfo": "Información de uso:",
+      "usageInfoText": "Información del dispositivo, tipo de navegador, páginas visitadas y patrones de interacción para mejorar la experiencia de la plataforma.",
+      "userContent": "Contenido Generado por el Usuario:",
+      "userContentText": "Grabaciones de audio, respuestas de texto, archivos cargados y mensajes de chat creados durante las actividades de aprendizaje."
     },
     "introduction": {
-      "content": {
-        "value": "Bienvenido a Homework Supply. Estamos comprometidos con la protección de su privacidad y con garantizar la seguridad de su información personal. Esta Política de Privacidad explica cómo recopilamos, utilizamos, almacenamos y compartimos su información cuando usted utiliza nuestra plataforma educativa."
-      },
-      "heading": {
-        "value": "Introducción"
-      }
+      "content": "Bienvenido a Homework Supply. Estamos comprometidos con la protección de su privacidad y con garantizar la seguridad de su información personal. Esta Política de Privacidad explica cómo recopilamos, utilizamos, almacenamos y compartimos su información cuando usted utiliza nuestra plataforma educativa.",
+      "heading": "Introducción"
     },
-    "lastUpdated": {
-      "value": "Última actualización: mayo de 2026"
-    },
+    "lastUpdated": "Última actualización: mayo de 2026",
     "policyChanges": {
-      "content": {
-        "value": "Podemos actualizar esta Política de Privacidad periódicamente para reflejar cambios en nuestras prácticas o requisitos legales. Notificaremos a los usuarios sobre cambios significativos a través de la plataforma. El uso continuado de la plataforma después de los cambios constituye la aceptación de la política actualizada."
-      },
-      "heading": {
-        "value": "Cambios a Esta Política"
-      }
+      "content": "Podemos actualizar esta Política de Privacidad periódicamente para reflejar cambios en nuestras prácticas o requisitos legales. Notificaremos a los usuarios sobre cambios significativos a través de la plataforma. El uso continuado de la plataforma después de los cambios constituye la aceptación de la política actualizada.",
+      "heading": "Cambios a Esta Política"
     },
-    "title": {
-      "value": "Política de Privacidad"
-    },
+    "title": "Política de Privacidad",
     "yourRights": {
-      "heading": {
-        "value": "Sus Derechos"
-      },
-      "intro": {
-        "value": "Usted tiene los siguientes derechos con respecto a sus datos personales:"
-      },
-      "item1": {
-        "value": "Acceso: Solicite una copia de todos los datos personales que tenemos sobre usted"
-      },
-      "item2": {
-        "value": "Corrección: Actualizar o corregir información personal inexacta"
-      },
-      "item3": {
-        "value": "Eliminación: Solicite la eliminación de su cuenta y los datos asociados"
-      },
+      "heading": "Sus Derechos",
+      "intro": "Usted tiene los siguientes derechos con respecto a sus datos personales:",
+      "item1": "Acceso: Solicite una copia de todos los datos personales que tenemos sobre usted",
+      "item2": "Corrección: Actualizar o corregir información personal inexacta",
+      "item3": "Eliminación: Solicite la eliminación de su cuenta y los datos asociados",
       "item4": "Exportar: Descargue sus datos de aprendizaje en un formato portátil",
-      "item5": {
-        "value": "Exclusión voluntaria: Desactivar la visibilidad de la tabla de clasificación y ciertas funciones de intercambio de datos"
-      },
-      "outro": {
-        "value": "Para ejercer estos derechos, contacte a su instructor o comuníquese con nosotros utilizando la información de contacto que aparece a continuación."
-      }
+      "item5": "Exclusión voluntaria: Desactivar la visibilidad de la tabla de clasificación y ciertas funciones de intercambio de datos",
+      "outro": "Para ejercer estos derechos, contacte a su instructor o comuníquese con nosotros utilizando la información de contacto que aparece a continuación."
     }
   },
   "profile": {
-    "activity": {
-      "value": "Actividad"
-    },
+    "activity": "Actividad",
     "advanced": {
       "clearCache": "Borrar caché local",
       "clearCacheDialog": {
@@ -237,9 +126,7 @@
       "description": "Administrar configuraciones avanzadas y borrar la caché de datos local",
       "heading": "Avanzado"
     },
-    "badges": {
-      "value": "Insignias"
-    },
+    "badges": "Insignias",
     "cancel": "Cancelar",
     "changePassword": {
       "button": "Cambiar contraseña",
@@ -264,13 +151,9 @@
       "heading": "Preferencia de idioma",
       "selectLanguage": "Seleccionar idioma"
     },
-    "nailedItWall": {
-      "value": "Muro de Logros Destacados"
-    },
+    "nailedItWall": "Muro de Logros Destacados",
     "name": "Nombre",
-    "progress": {
-      "value": "Progreso"
-    },
+    "progress": "Progreso",
     "title": "Mi perfil",
     "updateProfile": "Actualizar perfil",
     "userId": "ID de Usuario",
@@ -282,15 +165,9 @@
     "assignmentHeader": "Tarea",
     "assignments": "Tareas",
     "clearAll": "Borrar Todo",
-    "completionGrid": {
-      "value": "Resumen de Finalización"
-    },
-    "coverVideoUrlLabel": {
-      "value": "URL del video"
-    },
-    "coverVideoUrlPlaceholder": {
-      "value": "Pegue una URL de video (https://...)"
-    },
+    "completionGrid": "Resumen de Finalización",
+    "coverVideoUrlLabel": "URL del video",
+    "coverVideoUrlPlaceholder": "Pegue una URL de video (https://...)",
     "curveDebugInfo": "Depuración de Curva:",
     "curveMethod": "Método de Curva",
     "deleteSection": "Eliminar sección",
@@ -303,22 +180,14 @@
     "instructorView": "Vista del instructor",
     "joinCode": "Código de Acceso:",
     "leaderboard": "Tabla de clasificación",
-    "leaderboardEnabled": {
-      "value": "Mostrar Tabla de Clasificación"
-    },
+    "leaderboardEnabled": "Mostrar Tabla de Clasificación",
     "learnerHeader": "Estudiante",
     "linearAdjustmentMethod": "Ajuste Lineal (75% promedio)",
     "loading": "Cargando...",
-    "noCoverVideo": {
-      "value": "No se ha establecido un video de portada."
-    },
-    "noCurve": {
-      "value": "Sin curva"
-    },
+    "noCoverVideo": "No se ha establecido un video de portada.",
+    "noCurve": "Sin curva",
     "noFeaturedImage": "No se ha establecido imagen destacada",
-    "noLeaderboardEntries": {
-      "value": "Aún no hay datos en la tabla de clasificación. Los estudiantes aparecerán aquí a medida que ganen XP."
-    },
+    "noLeaderboardEntries": "Aún no hay datos en la tabla de clasificación. Los estudiantes aparecerán aquí a medida que ganen XP.",
     "overrideGrade": {
       "assignment": "Tarea:",
       "cancel": "Cancelar",
@@ -338,9 +207,7 @@
     "scaleToTopMethod": "Escalar a Puntuación Máxima (100%)",
     "selectAll": "Seleccionar todo",
     "selectAssignmentsToCurve": "Seleccionar tareas para ajustar",
-    "setCoverVideo": {
-      "value": "Establecer video de portada"
-    },
+    "setCoverVideo": "Establecer video de portada",
     "showDraftAssignments": "Mostrar borradores",
     "showFutureAssignments": "Mostrar Futuro",
     "showingAssignments": "(Mostrando {visible} de {total} tareas)",
@@ -356,18 +223,16 @@
     "viewWorkbook": "Ver Cuaderno de Trabajo"
   },
   "sections": {
-    "archive": {
-      "value": "Archivar"
-    },
-    "archiveError": {
-      "value": "No se pudo actualizar la sección. Por favor, inténtelo de nuevo."
-    },
+    "administering": "Administrando",
+    "archive": "Archivar",
+    "archivedSections": "Secciones archivadas",
+    "archiveError": "No se pudo actualizar la sección. Por favor, inténtelo de nuevo.",
     "archived": "Archivado",
-    "archivedSuccess": {
-      "value": "Sección archivada exitosamente"
-    },
+    "archivedSuccess": "Sección archivada exitosamente",
+    "attending": "Asistiendo",
     "createNew": "Crear nuevo",
     "createNewSection": "Crear nueva sección",
+    "draftSections": "Secciones en borrador",
     "joinCode": "Etiqueta de código",
     "loading": "Cargando...",
     "newSection": {
@@ -379,133 +244,80 @@
       "title": "Nueva Sección"
     },
     "noSectionsYet": "Aún no hay secciones",
-    "showArchived": {
-      "value": "Mostrar archivados ({count})"
-    },
+    "publishedSections": "Secciones publicadas",
+    "showArchived": "Mostrar archivados ({count})",
     "title": "Secciones",
-    "unarchive": {
-      "value": "Desarchivar"
-    },
-    "unarchivedSuccess": {
-      "value": "Sección desarchivada exitosamente"
-    },
+    "unarchive": "Desarchivar",
+    "unarchivedSuccess": "Sección desarchivada exitosamente",
     "untitledSection": "Sección sin título",
     "viewSection": "Ver sección"
   },
   "settings": {
     "botCustomizer": {
-      "description": {
-        "value": "Personalice la apariencia de su tutor de IA. Desbloquee más opciones con las insignias de Bot Whisperer."
-      },
-      "heading": {
-        "value": "Avatar del Asistente de IA"
-      }
+      "description": "Personalice la apariencia de su tutor de IA. Desbloquee más opciones con las insignias de Bot Whisperer.",
+      "heading": "Avatar del Asistente de IA"
     },
     "customization": {
-      "description": {
-        "value": "Desbloquee nuevos estilos de avatar y temas de editor a medida que suba de nivel."
-      },
-      "heading": {
-        "value": "Personalización"
-      }
+      "description": "Desbloquee nuevos estilos de avatar y temas de editor a medida que suba de nivel.",
+      "heading": "Personalización"
     },
     "description": "Administre la configuración y las preferencias de su cuenta",
     "heading": "Configuración",
     "privacy": {
-      "heading": {
-        "value": "Privacidad"
-      },
-      "leaderboardOptIn": {
-        "value": "Mostrar mi nombre en las tablas de clasificación"
-      },
-      "leaderboardOptInHint": {
-        "value": "Cuando está desactivado, su nombre aparece como \"Estudiante Anónimo\" en las tablas de clasificación."
-      }
+      "heading": "Privacidad",
+      "leaderboardOptIn": "Mostrar mi nombre en las tablas de clasificación",
+      "leaderboardOptInHint": "Cuando está desactivado, su nombre aparece como \"Estudiante Anónimo\" en las tablas de clasificación."
     },
     "profileInfo": {
-      "description": {
-        "value": "Actualice su nombre visible y dirección de correo electrónico"
-      },
-      "heading": {
-        "value": "Información del Perfil"
-      }
+      "description": "Actualice su nombre visible y dirección de correo electrónico",
+      "heading": "Información del Perfil"
     },
     "title": "Configuración"
   },
   "squads": {
-    "createSquad": {
-      "value": "Iniciar un Nuevo Equipo"
-    },
-    "description": {
-      "value": "Únase a un equipo para competir con su grupo y escalar juntos la tabla de clasificación."
-    },
-    "heading": {
-      "value": "Todos los Escuadrones"
-    },
-    "noSections": {
-      "value": "No se encontraron secciones"
-    },
-    "selectSection": {
-      "value": "Seleccione una Sección"
-    },
-    "squadPosts": {
-      "value": "Publicaciones del Equipo"
-    },
+    "createSquad": "Iniciar un Nuevo Equipo",
+    "description": "Únase a un equipo para competir con su grupo y escalar juntos la tabla de clasificación.",
+    "heading": "Todos los Escuadrones",
+    "noSections": "No se encontraron secciones",
+    "selectSection": "Seleccione una Sección",
+    "squadPosts": "Publicaciones del Equipo",
     "title": "Grupos"
   },
   "unitDetail": {
     "loading": "Cargando…"
   },
   "units": {
+    "administering": "Administrando",
     "archivedUnits": "Unidades archivadas",
+    "browseCommunityUnits": "Explorar unidades de la comunidad",
     "createNew": "Crear nuevo",
     "createNewUnit": "Crear nueva unidad",
     "editUnit": "Editar Unidad",
-    "forkError": {
-      "value": "No se pudo bifurcar la unidad"
-    },
-    "forkSuccess": {
-      "value": "Unidad bifurcada exitosamente"
-    },
-    "forkUnit": {
-      "value": "Bifurcar"
-    },
-    "forking": {
-      "value": "Bifurcando..."
-    },
+    "forkError": "No se pudo bifurcar la unidad",
+    "forkSuccess": "Unidad bifurcada exitosamente",
+    "forkUnit": "Bifurcar",
+    "forking": "Bifurcando...",
     "myDrafts": "Mis borradores",
-    "noCommunityUnits": {
-      "value": "No hay unidades de la comunidad disponibles"
-    },
+    "noCommunityUnits": "No hay unidades de la comunidad disponibles",
+    "noCommunityUnitsDescription": "Las unidades que los instructores publiquen en la comunidad aparecerán aquí, listas para copiar a tu biblioteca.",
     "noPublishedUnits": "Aún no hay unidades publicadas",
-    "noSharedUnits": {
-      "value": "Todavía no se han compartido unidades con usted"
-    },
+    "noSharedUnits": "Todavía no se han compartido unidades con usted",
+    "noSharedUnitsDescription": "Las unidades que otras personas compartan contigo aparecerán aquí.",
     "practice": "Practicar",
     "publishedUnits": "Unidades Publicadas",
-    "tabCommunity": {
-      "value": "Comunidad"
-    },
-    "tabMyUnits": {
-      "value": "Mis Unidades"
-    },
-    "tabSharedWithMe": {
-      "value": "Compartido Conmigo"
-    },
+    "tabCommunity": "Comunidad",
+    "tabMyUnits": "Mis Unidades",
+    "tabSharedWithMe": "Compartido Conmigo",
     "title": "Unidades",
     "untitledUnit": "Unidad sin título",
     "viewWorkbook": "Ver Cuaderno de Trabajo"
   },
   "workbook": {
     "loading": "Cargando…",
-    "reload": {
-      "value": "Recargar"
-    },
+    "reload": "Recargar",
     "start": "Iniciar",
     "timerInstructions": "Este es un ejercicio con tiempo límite, presiona iniciar para comenzar el cronómetro y responder las preguntas.",
-    "unitUpdated": {
-      "value": "Esta unidad ha sido actualizada por el instructor. ¿Desea recargar con la versión más reciente?"
-    }
+    "unitUpdated": "Esta unidad ha sido actualizada por el instructor. ¿Desea recargar con la versión más reciente?"
   },
   "gradeReviewDrawer": {
     "cancel": "Cancelar",

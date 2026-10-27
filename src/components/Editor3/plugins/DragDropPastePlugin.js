@@ -71,6 +71,8 @@ export const ACCEPTABLE_FILE_TYPES = [
     'application/epub+zip',
     'application/x-imscc+zip',
     'application/x-qti+xml',
+    'application/rtf',
+    'text/rtf',
 ];
 
 export const ANY_ACCEPTABLE_TYPES = [

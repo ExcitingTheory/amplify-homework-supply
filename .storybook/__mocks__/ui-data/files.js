@@ -109,16 +109,16 @@ export const mockParsedContent = [
     ]),
     questionsJSON: JSON.stringify([
       {
-        question: "What is the appropriate greeting for afternoon in Japanese?",
-        expectedAnswer: "こんにちは (konnichiwa)",
+        prompt: "What is the appropriate greeting for afternoon in Japanese?",
+        answer: "こんにちは (konnichiwa)",
         hint: "Think about the time of day",
-        type: "short-answer"
+        questionType: "short-answer"
       },
       {
-        question: "When should you use さようなら?",
-        expectedAnswer: "As a formal farewell when you won't see someone for a while",
+        prompt: "When should you use さようなら?",
+        answer: "As a formal farewell when you won't see someone for a while",
         hint: "Consider the formality and duration of separation",
-        type: "short-answer"
+        questionType: "short-answer"
       }
     ]),
     modelUsed: "gpt-4",
@@ -159,9 +159,9 @@ export const mockParsedContent = [
     ]),
     questionsJSON: JSON.stringify([
       {
-        question: "How often are quarterly reports submitted?",
-        expectedAnswer: "Every three months",
-        type: "short-answer"
+        prompt: "How often are quarterly reports submitted?",
+        answer: "Every three months",
+        questionType: "short-answer"
       }
     ]),
     modelUsed: "gpt-4",
@@ -212,9 +212,9 @@ export const mockParsedContent = [
     ]),
     questionsJSON: JSON.stringify([
       {
-        question: "What is the Japanese word for student?",
-        expectedAnswer: "学生 (gakusei)",
-        type: "vocabulary"
+        prompt: "What is the Japanese word for student?",
+        answer: "学生 (gakusei)",
+        questionType: "vocabulary"
       }
     ]),
     modelUsed: "gpt-4-turbo",

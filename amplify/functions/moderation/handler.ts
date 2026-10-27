@@ -18,6 +18,7 @@ import { generateClient } from "aws-amplify/data";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { type Schema } from "../../data/resource";
 import OpenAI from "openai";
+import { MODERATION_SELECTION, buildModerationField } from "./typedSelections";
 
 // Configure Amplify for GraphQL access from Lambda (IAM auth)
 Amplify.configure(
@@ -116,7 +117,7 @@ const UPDATE_MUTATIONS: Record<SupportedModel, string> = {
     mutation UpdateUnit($input: UpdateUnitInput!) {
       updateUnit(input: $input) {
         id
-        moderation
+        ${MODERATION_SELECTION}
       }
     }
   `,
@@ -124,7 +125,7 @@ const UPDATE_MUTATIONS: Record<SupportedModel, string> = {
     mutation UpdateGrade($input: UpdateGradeInput!) {
       updateGrade(input: $input) {
         id
-        moderation
+        ${MODERATION_SELECTION}
       }
     }
   `,
@@ -132,7 +133,7 @@ const UPDATE_MUTATIONS: Record<SupportedModel, string> = {
     mutation UpdateWord($input: UpdateWordInput!) {
       updateWord(input: $input) {
         id
-        moderation
+        ${MODERATION_SELECTION}
       }
     }
   `,
@@ -140,7 +141,7 @@ const UPDATE_MUTATIONS: Record<SupportedModel, string> = {
     mutation UpdateQuestion($input: UpdateQuestionInput!) {
       updateQuestion(input: $input) {
         id
-        moderation
+        ${MODERATION_SELECTION}
       }
     }
   `,
@@ -187,17 +188,7 @@ async function persistModerationToRecord(
   const currentVersion = record._version;
 
   // Step 2: Write moderation result to the record
-  const moderationField = {
-    status: moderationResult.flagged ? "flagged" : "approved",
-    flags: moderationResult.flagged
-      ? JSON.stringify({
-          categories: moderationResult.categories,
-          categoryScores: moderationResult.categoryScores,
-          model: moderationResult.model,
-        })
-      : null,
-    checkedAt: new Date().toISOString(),
-  };
+  const moderationField = buildModerationField(moderationResult);
 
   const updateMutation = UPDATE_MUTATIONS[modelName];
   const { errors: updateErrors } = (await client.graphql({

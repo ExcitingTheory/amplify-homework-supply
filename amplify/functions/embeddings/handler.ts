@@ -16,8 +16,22 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { S3Client, PutObjectCommand } from "@aws-sdk/client-s3";
 import { pipeline, env } from "@huggingface/transformers";
 
-const EMBEDDING_DIMENSIONS = 384;
-const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
+import {
+  EMBEDDING_DIMENSIONS,
+  EMBEDDING_MODEL,
+  buildEmbeddingFile,
+  buildEmbeddingInfo,
+  buildEmbeddingItems,
+  embedItems,
+  embeddingObjectKey,
+  type EmbeddingFile,
+} from "./embeddingItems";
+import {
+  SUMMARIES_SELECTION,
+  VOCABULARY_SELECTION,
+} from "../shared/parsedContentLists";
+import { mergeParsedContentChunks } from "../shared/parsedContentChunks";
+import { listParsedContentChunksByRelation } from "../shared/parsedContentGraphql";
 
 // Configure Amplify at module level (before creating client)
 Amplify.configure(
@@ -58,6 +72,8 @@ function getDataClient() {
 async function getEmbeddingPipeline() {
   if (embeddingPipeline) return embeddingPipeline;
   env.allowLocalModels = false;
+  // /var/task is read-only on Lambda; /tmp is the only writable location.
+  env.cacheDir = "/tmp/transformers-cache";
   embeddingPipeline = await pipeline("feature-extraction", EMBEDDING_MODEL, {
     dtype: "q8",
   });
@@ -75,24 +91,17 @@ const STORAGE_BUCKET = process.env.STORAGE_BUCKET || "";
 
 /**
  * Save embedding vectors to S3.
- * Path: private/{identityId}/embeddings/{modelName}/{modelId}.json
+ * Path: private/{identityId}/embeddings/file/{fileId}.json
  */
 async function saveEmbeddingToS3(
   identityId: string,
-  modelName: string,
-  modelId: string,
-  data: {
-    model: string;
-    dimensions: number;
-    generatedAt: number;
-    wordCount: number;
-    pages: Array<{ page: number; embedding: number[]; text?: string }>;
-  },
+  fileId: string,
+  data: EmbeddingFile,
 ): Promise<void> {
   await s3.send(
     new PutObjectCommand({
       Bucket: STORAGE_BUCKET,
-      Key: `private/${identityId}/embeddings/${modelName}/${modelId}.json`,
+      Key: embeddingObjectKey(identityId, fileId),
       Body: JSON.stringify(data),
       ContentType: "application/json",
     }),
@@ -215,45 +224,17 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       throw new Error(`File not found for ID: ${fileID}`);
     }
 
-    // Query for ParsedContent records by fileID
-    const query = /* GraphQL */ `
-      query ListParsedContents($filter: ModelParsedContentFilterInput) {
-        listParsedContents(filter: $filter) {
-          items {
-            id
-            _version
-            _lastChangedAt
-            _deleted
-            documentID
-            fileID
-            vocabularyJSON
-            summariesJSON
-            objectivesJSON
-            questionsJSON
-          }
-        }
-      }
-    `;
+    // A long document is stored as several ParsedContent chunks; merge them so
+    // every vocabulary entry and summary is embedded, not just the first chunk's.
+    const parsedContent = mergeParsedContentChunks(
+      await listParsedContentChunksByRelation(
+        async (request) => (await client.graphql(request as any)) as any,
+        { type: "File", id: fileID },
+        `${VOCABULARY_SELECTION} ${SUMMARIES_SELECTION}`,
+      ),
+    );
 
-    const { data: parsedData, errors: parsedErrors } = (await client.graphql({
-      query,
-      variables: {
-        filter: {
-          fileID: { eq: fileID },
-        },
-      },
-    })) as any;
-
-    if (parsedErrors) {
-      console.error(
-        "[Generate Embeddings] Error querying ParsedContent:",
-        parsedErrors,
-      );
-    }
-
-    const parsedContents = parsedData?.listParsedContents?.items || [];
-
-    if (parsedContents.length === 0) {
+    if (!parsedContent) {
       console.log(
         "[Generate Embeddings] No parsed content found for fileID:",
         fileID,
@@ -266,103 +247,23 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
       };
     }
 
-    const parsedContent = parsedContents[0];
     let embeddingCount = 0;
 
-    // 2. Extract page-by-page text from vocabularyJSON
-    let pageEmbeddings: any[] = [];
+    // 2. Build the items to embed from the vocabulary and summaries
+    const pageEmbeddings = buildEmbeddingItems(parsedContent);
 
-    // Extract from vocabulary
-    if (parsedContent.vocabularyJSON) {
-      const vocabulary =
-        typeof parsedContent.vocabularyJSON === "string"
-          ? JSON.parse(parsedContent.vocabularyJSON)
-          : parsedContent.vocabularyJSON;
-
-      if (Array.isArray(vocabulary)) {
-        for (const item of vocabulary) {
-          const text = `${item.word} - ${item.definition || ""}${item.context ? " (" + item.context + ")" : ""}`;
-          pageEmbeddings.push({
-            type: "vocabulary",
-            page: item.page || 0,
-            text: text.substring(0, 8000),
-            sourceId: item.word,
-          });
-        }
-      }
-    }
-
-    // Extract from summaries
-    if (parsedContent.summariesJSON) {
-      const summaries =
-        typeof parsedContent.summariesJSON === "string"
-          ? JSON.parse(parsedContent.summariesJSON)
-          : parsedContent.summariesJSON;
-
-      if (Array.isArray(summaries)) {
-        for (const item of summaries) {
-          pageEmbeddings.push({
-            type: "summary",
-            page: item.page || 0,
-            text: item.content?.substring(0, 8000) || "",
-            sourceId: item.title,
-          });
-        }
-      }
-    }
-
-    // 3. Generate embeddings for each page
+    // 3. Generate an embedding for each item
     console.log(
       `[Generate Embeddings] Generating embeddings for ${pageEmbeddings.length} items...`,
     );
-
-    const embeddedPages = [];
-    for (const page of pageEmbeddings) {
-      if (!page.text || page.text.trim().length === 0) {
-        console.log("[Generate Embeddings] Skipping empty text");
-        continue;
-      }
-
-      try {
-        const embedding = await generateEmbeddingVector(page.text);
-
-        embeddedPages.push({
-          page: page.page,
-          type: page.type,
-          text: page.text,
-          sourceId: page.sourceId,
-          embedding: JSON.stringify(embedding),
-          model: EMBEDDING_MODEL,
-          dimensions: embedding.length,
-          tokenCount: Math.ceil(page.text.length / 4),
-        });
-
-        embeddingCount++;
-        console.log(
-          `[Generate Embeddings] Embedded item ${embeddingCount}: ${page.sourceId}`,
-        );
-      } catch (error) {
-        console.error(
-          `[Generate Embeddings] Error embedding "${page.sourceId}":`,
-          error,
-        );
-        // Continue with next item on error
-      }
-    }
-
-    // 4. Batch save PageEmbedding records via GraphQL
-    console.log(
-      `[Generate Embeddings] Saving ${embeddedPages.length} embeddings to database...`,
+    const embeddedPages = await embedItems(
+      pageEmbeddings,
+      generateEmbeddingVector,
     );
+    embeddingCount = embeddedPages.length;
 
-    // Note: PageEmbedding model doesn't exist in schema - storing in S3 and ParsedContent metadata
-    console.log(
-      "[Generate Embeddings] Saving embeddings to S3 and ParsedContent metadata...",
-    );
-
-    // Save all page embeddings to S3 as a single file
+    // 4. Vectors go to S3; File.embedding keeps metadata only
     if (STORAGE_BUCKET && embeddedPages.length > 0) {
-      // Get file owner's identityId from File record
       const getFileOwnerQuery = /* GraphQL */ `
         query GetFile($id: ID!) {
           getFile(id: $id) {
@@ -381,25 +282,15 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
         fileOwnerData?.getFile?.identityId || fileOwnerData?.getFile?.owner;
 
       if (identityId) {
-        await saveEmbeddingToS3(identityId, "file", fileID, {
-          model: EMBEDDING_MODEL,
-          dimensions: EMBEDDING_DIMENSIONS,
-          generatedAt: Date.now(),
-          wordCount: embeddedPages.reduce(
-            (sum: number, p: any) => sum + (p.text?.split(/\s+/).length || 0),
-            0,
-          ),
-          pages: embeddedPages.map((p: any) => ({
-            page: p.page,
-            embedding: JSON.parse(p.embedding),
-            text: p.text?.substring(0, 200),
-          })),
-        });
+        await saveEmbeddingToS3(
+          identityId,
+          fileID,
+          buildEmbeddingFile(embeddedPages),
+        );
         console.log(
           `[Generate Embeddings] Saved ${embeddedPages.length} embeddings to S3`,
         );
 
-        // Update File model with embedding metadata only (no vector)
         const updateFileMutation = /* GraphQL */ `
           mutation UpdateFile($input: UpdateFileInput!) {
             updateFile(input: $input) {
@@ -414,17 +305,7 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
             variables: {
               input: {
                 id: fileID,
-                embedding: JSON.stringify({
-                  model: EMBEDDING_MODEL,
-                  dimensions: EMBEDDING_DIMENSIONS,
-                  version: Date.now(),
-                  wordCount: embeddedPages.reduce(
-                    (sum: number, p: any) =>
-                      sum + (p.text?.split(/\s+/).length || 0),
-                    0,
-                  ),
-                  pageCount: embeddedPages.length,
-                }),
+                embedding: buildEmbeddingInfo(embeddedPages),
                 _version: fileData.getFile._version,
               },
             },
@@ -435,43 +316,6 @@ async function handleGenerateEmbeddings(args: any): Promise<any> {
             error,
           );
         }
-      }
-    }
-
-    // Update ParsedContent with embedding metadata
-    if (parsedContent && parsedContents.length > 0) {
-      const updateParsedContentMutation = /* GraphQL */ `
-        mutation UpdateParsedContent($input: UpdateParsedContentInput!) {
-          updateParsedContent(input: $input) {
-            id
-            _version
-            _lastChangedAt
-            _deleted
-            metadata
-          }
-        }
-      `;
-
-      try {
-        await client.graphql({
-          query: updateParsedContentMutation,
-          variables: {
-            input: {
-              id: parsedContent.id,
-              _version: parsedContent._version ?? 1,
-              metadata: JSON.stringify({
-                embeddings: embeddedPages,
-                embeddingCount,
-                generatedAt: new Date().toISOString(),
-              }),
-            },
-          },
-        } as any);
-      } catch (error) {
-        console.error(
-          "[Generate Embeddings] Error updating ParsedContent metadata:",
-          error,
-        );
       }
     }
 

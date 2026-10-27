@@ -46,6 +46,8 @@ export function isAnalyzableDocument(mimeType) {
     "application/vnd.oasis.opendocument.text",
     "application/vnd.oasis.opendocument.spreadsheet",
     "application/vnd.oasis.opendocument.presentation",
+    "application/rtf",
+    "text/rtf",
     "application/epub+zip",
     "application/x-imscc+zip",
     "application/x-qti+xml",
@@ -53,6 +55,10 @@ export function isAnalyzableDocument(mimeType) {
   ];
   return analyzableTypes.includes(mimeType);
 }
+
+/** `accept` list for the file picker: media plus every supported document extension. */
+export const FILE_INPUT_ACCEPT =
+  "image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx,.fountain,.odt,.ods,.odp,.rtf,.imscc,.epub,.gift,.qti,.qti.xml,.zip";
 
 /**
  * Detect correct MIME type from filename when the browser reports a generic type.
@@ -67,6 +73,7 @@ export function detectMimeType(file) {
     epub: "application/epub+zip",
     gift: "text/x-gift",
     qti: "application/x-qti+xml",
+    rtf: "application/rtf",
     odt: "application/vnd.oasis.opendocument.text",
     ods: "application/vnd.oasis.opendocument.spreadsheet",
     odp: "application/vnd.oasis.opendocument.presentation",

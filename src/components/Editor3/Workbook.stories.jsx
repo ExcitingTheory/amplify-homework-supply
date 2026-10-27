@@ -177,27 +177,27 @@ const mockParsedContentJapaneseGreetings = {
   ],
   questionsJSON: [
     {
-      question: "How do you read the kanji 今日は and what does it mean?",
-      expectedAnswer:
+      prompt: "How do you read the kanji 今日は and what does it mean?",
+      answer:
         '今日は is read as "こんにちは" (konnichiwa) and means "hello" or "good afternoon." It is used as a greeting during the daytime.',
       hint: "Consider both the kanji characters and their hiragana reading.",
-      type: "knowledge",
+      questionType: "knowledge",
     },
     {
-      question:
+      prompt:
         "What is the difference between 学生 (がくせい) and 先生 (せんせい)?",
-      expectedAnswer:
+      answer:
         '学生 (がくせい) means "student" - someone who is learning. 先生 (せんせい) means "teacher" or "professor" - someone who is teaching. The kanji 学 relates to learning/study, while 先 relates to going before or leading.',
       hint: "Look at the meanings of the individual kanji characters.",
-      type: "analysis",
+      questionType: "analysis",
     },
     {
-      question:
+      prompt:
         "Why is it important to learn both kanji and hiragana readings?",
-      expectedAnswer:
+      answer:
         "Kanji represents the meaning and origin of words, while hiragana provides the pronunciation. Knowing both allows you to read Japanese text, understand word meanings, and pronounce words correctly. Most Japanese writing uses a combination of kanji, hiragana, and katakana.",
       hint: "Consider how written Japanese uses multiple writing systems.",
-      type: "evaluation",
+      questionType: "evaluation",
     },
   ],
 };

@@ -5,7 +5,7 @@
  * field via getOrCreateStudentProfile(). `moduleId` is the Section this
  * student is enrolled in (not a Unit) — totalWorkbooks/completedWorkbooks are
  * the distinct units assigned in that section vs. distinct units this student
- * has completed, bounded by this student's own grades (listGradeByOwnerAndSection)
+ * has completed, bounded by this student's own grades (listGradeByOwnerAndSectionID)
  * and the section's own assignment list (listAssignments), never a scan of
  * every student's attempts in the section.
  */
@@ -59,7 +59,7 @@ describe("gamification handler — recomputeProgress", () => {
       if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
           data: {
-            listGradeByOwnerAndSection: {
+            listGradeByOwnerAndSectionID: {
               items: [
                 { id: "g1", unitID: "unit-a", complete: true },
                 { id: "g2", unitID: "unit-b", complete: true },
@@ -125,7 +125,7 @@ describe("gamification handler — recomputeProgress", () => {
       if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
           data: {
-            listGradeByOwnerAndSection: {
+            listGradeByOwnerAndSectionID: {
               items: [
                 { id: "g1", unitID: "unit-a", complete: true },
                 { id: "g2", unitID: "unit-b", complete: true },
@@ -182,7 +182,7 @@ describe("gamification handler — recomputeProgress", () => {
     mockGraphql.mockImplementation(({ query }: any) => {
       if (query?.includes("listGradeByOwnerAndSection")) {
         return Promise.resolve({
-          data: { listGradeByOwnerAndSection: { items: [] } },
+          data: { listGradeByOwnerAndSectionID: { items: [] } },
         });
       }
       if (query?.includes("listAssignments")) {

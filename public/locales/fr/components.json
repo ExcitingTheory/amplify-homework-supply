@@ -1680,14 +1680,6 @@
     "onTimeHeader": "Dans les délais",
     "studentHeader": "Étudiant"
   },
-  "firstRunChecklist": {
-    "createUnit": "Créez votre première unité",
-    "description": "Choisissez votre prochaine étape.",
-    "joinClass": "Rejoindre une classe",
-    "openWork": "Ouvrir le travail assigné",
-    "setupClass": "Configurer une classe",
-    "title": "Commencez ici"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "Paramètres avancés",
     "advancedSettingsTooltip": "Compétences, badges, équipes et autres paramètres avancés de gamification",
@@ -1993,7 +1985,8 @@
     "visualLayout": "Disposition visuelle",
     "xpAmount": "{xp} XP",
     "xpMultiplier": "XP ×{multiplier}",
-    "xpTuner": "Ajusteur d'XP"
+    "xpTuner": "Ajusteur d'XP",
+    "noSquadsDescription": "Les équipes apparaissent ici lorsque des élèves les créent. L’XP des membres compte pour le classement de leur équipe."
   },
   "jobsDashboard": {
     "active": "{count} actif(s)",
@@ -2161,6 +2154,7 @@
     "xpReward": "+20 XP"
   },
   "nailedItWall": {
+    "emptyDescription": "Les moments « Réussi ! » s’obtiennent lorsque votre travail démontre une excellente compréhension. Terminez des devoirs pour remplir ce mur.",
     "emptyTitle": "Aucun moment « Carton plein » pour l’instant — continuez ainsi !",
     "heading": "🎯 Réussi !",
     "meta": "{homeworkTitle} · {date}"
@@ -2347,6 +2341,8 @@
       "documentsDesc": "À partir des PDF téléversés et du contenu analysé",
       "drillType": "Type d'exercice",
       "generating": "Génération en cours...",
+      "limitToDocuments": "Limiter aux documents",
+      "limitToDocumentsHelp": "Laissez vide pour utiliser tout le contenu de l’unité. Le contenu texte est exclu lorsque des documents sont choisis.",
       "maxParticipants": "Nombre maximal de participants",
       "mixed": "Mixte",
       "noSourcesWarning": "Veuillez activer au moins une source de contenu pour commencer à pratiquer.",
@@ -2459,6 +2455,7 @@
     "selectAll": "Tout sélectionner"
   },
   "questionsReview": {
+    "alreadyImported": "Déjà importé",
     "answer": "Answer",
     "collapse": "Collapse",
     "deselectAll": "Deselect All",
@@ -2483,6 +2480,7 @@
     "selectAll": "Select All",
     "selectedCount": "{count} of {total} selected",
     "show": "Show",
+    "sourceTooltip": "Source : {filename}",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
   },
@@ -2860,6 +2858,7 @@
   },
   "squadJoinPanel": {
     "cancel": "Annuler",
+    "emptyCta": "Aller aux équipes",
     "emptyDescription": "Revenez bientôt ou créez votre propre équipe pour commencer.",
     "emptyTitle": "Aucune escouade disponible pour le moment",
     "join": "Rejoindre",
@@ -2882,6 +2881,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "Les équipes apparaissent ici dès que des élèves les créent ou les rejoignent, classées selon l’XP total de leurs membres.",
     "emptyTitle": "Aucune escouade pour le moment",
     "memberCount": "{count, plural, one {# membre} other {# membres}}",
     "mySquad": "Mon escouade",
@@ -2925,7 +2925,8 @@
     "deletePost": "Supprimer la publication",
     "empty": "Aucune publication pour le moment. Soyez le premier à partager quelque chose !",
     "newPost": "Nouvelle publication",
-    "postAriaLabel": "Publication : {title}"
+    "postAriaLabel": "Publication : {title}",
+    "writeFirstPost": "Écrire la première publication"
   },
   "stateInspector": {
     "capturedAt": "Capturé le : {date}",
@@ -3228,7 +3229,8 @@
     "definitionPlaceholder": "Saisissez la définition...",
     "contextLabel": "Contexte",
     "contextPlaceholder": "Saisissez un contexte ou une phrase d'exemple...",
-    "importSummary": "{imported} nouveaux mots importés, {skipped} déjà existants, {errors} erreurs"
+    "importSummary": "{imported} nouveaux mots importés, {skipped} déjà existants, {errors} erreurs",
+    "alreadyImported": "Déjà importé"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date} : {count, plural, one {# soumission} other {# soumissions}}",

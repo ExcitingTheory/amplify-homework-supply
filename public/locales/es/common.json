@@ -68,6 +68,7 @@
       "collapseNavigation": "Contraer navegación",
       "expandNavigation": "Expandir navegación",
       "files": "Archivos",
+      "instructorDashboard": "Panel del instructor",
       "moderation": "Moderación",
       "questions": "Preguntas",
       "recycleBin": "Papelera de reciclaje",
@@ -76,6 +77,8 @@
     }
   },
   "navigation": {
+    "administering": "Administrando",
+    "attending": "Asistiendo",
     "collaboration": "Colaboración",
     "collaborationDesc": "Invitaciones y unirse a sesiones",
     "drafts": "Borradores",
@@ -91,15 +94,26 @@
     "skills": "Árbol de Habilidades",
     "squads": "Grupos",
     "units": "Unidades",
-    "workbook": "Cuaderno"
+    "workbook": "Cuaderno",
+    "xpHistory": "Historial de XP"
+  },
+  "userMenu": {
+    "level": "Nivel {level} · {label}",
+    "levelProgress": "Progreso hacia el siguiente nivel",
+    "roleAdmin": "Administrador",
+    "roleInstructor": "Instructor",
+    "roleLearner": "Estudiante",
+    "roleModerator": "Moderador",
+    "streakDays": "Racha de {count} días",
+    "totalXP": "{xp} XP"
   },
   "peerReview": {
     "helpful": "La revisión por pares fue útil",
     "notHelpful": "La revisión por pares no fue útil",
-    "aiAssistant": "Asistente de IA",
+    "aiAssistant": "Kai",
     "blockReference": "Bloque: {blockId}",
     "didItHelp": "¿Le ayudó la revisión por pares?",
-    "messagePlaceholder": "Escriba un mensaje… (use @AI para obtener ayuda de la IA)",
+    "messagePlaceholder": "Escriba un mensaje… (use @kai para obtener ayuda de la IA)",
     "noMessages": "Aún no hay mensajes. ¡Inicie la conversación de la revisión por pares!",
     "sessionEnded": "Esta sesión de revisión ha finalizado.",
     "thanksForFeedback": "¡Gracias por sus comentarios!",

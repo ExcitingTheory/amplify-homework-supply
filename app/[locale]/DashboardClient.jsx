@@ -67,9 +67,9 @@ import { useRouter } from "next/navigation";
 
 import { createPeerReviewRoom } from "../actions/peerReview";
 import AuthContext from "@/context/authContext";
+import { useReportPageHintProgress } from "@/context/pageHintContext";
 import { AssignmentCard, SectionPanel } from "@/components/Dashboard";
 import { DashboardHeroView } from "@/components/Dashboard/DashboardHeroView";
-import InstructorDashboard from "@/components/InstructorDashboard";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
 function gradeColor(pct = 0) {
@@ -129,6 +129,11 @@ function Index({
   const [assignments, setAssignment] = useState(initialAssignments);
   const [myAssignments, setMyAssignment] = useState([]);
   const [units, setUnits] = useState({});
+  const [loadedSources, setLoadedSources] = useState({
+    sections: false,
+    assignments: false,
+    units: false,
+  });
   const router = useRouter();
 
   const [myGradeMap, setMyGradeMap] = React.useState({});
@@ -166,6 +171,24 @@ function Index({
   const myGroups = authSession?.groups || user?.groups || [];
   const isInstructorOrAdmin = myGroups.some((g) =>
     ["Admins", "Moderators", "Instructors"].includes(g),
+  );
+
+  // Setup progress drives the role-specific "next step" page hint. Report it
+  // only once every source has emitted so we never suggest a finished step.
+  const progressLoaded =
+    loadedSources.sections && loadedSources.assignments && loadedSources.units;
+  const ownedUnitCount = Object.values(units).filter(
+    (unit) => unit?.owner === userId,
+  ).length;
+  useReportPageHintProgress(
+    progressLoaded
+      ? {
+          ownedSectionCount: mySections.length,
+          ownedUnitCount,
+          ownedAssignmentCount: myAssignments.length,
+          joinedSectionCount: sections.length,
+        }
+      : null,
   );
 
   // ── offline seed from IndexedDB ───────────────────────────────────────────
@@ -242,6 +265,9 @@ function Index({
     const subscription = client.models.Assignment.observeQuery().subscribe({
       next: ({ items }) => {
         items = items.filter((item) => item != null && item.id != null);
+        setLoadedSources((prev) =>
+          prev.assignments ? prev : { ...prev, assignments: true },
+        );
         if (
           items.length === assignmentCountRef.current &&
           assignmentCountRef.current > 0
@@ -276,6 +302,9 @@ function Index({
       next: ({ items }) => {
         const validItems = items.filter(
           (item) => item != null && item.id != null,
+        );
+        setLoadedSources((prev) =>
+          prev.sections ? prev : { ...prev, sections: true },
         );
         if (
           validItems.length === sectionCountRef.current &&
@@ -319,6 +348,9 @@ function Index({
           unitsById[unit.id] = unit;
         });
         setUnits(unitsById);
+        setLoadedSources((prev) =>
+          prev.units ? prev : { ...prev, units: true },
+        );
       },
       error: (error) => {
         const msg =
@@ -564,8 +596,6 @@ function Index({
             }
           />
         )}
-        {isInstructorOrAdmin && <InstructorDashboard sections={mySections} />}
-
         {/* ── LEARNER CONTENT (hidden for instructors) ────────────── */}
         {!isInstructorOrAdmin && (
           <>

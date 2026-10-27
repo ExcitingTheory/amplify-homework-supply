@@ -44,8 +44,8 @@ All implementation items in the UX audit are complete. The remaining quality cav
    - Provides offline banners, pending sync actions, and retry flows.
 
 8. [x] Improve first-run orientation and return intent.
-   - Implemented in [src/components/FirstRunChecklist.tsx](../src/components/FirstRunChecklist.tsx)
-   - Adds a role-aware, dismissible first-run checklist.
+   - Implemented in [src/components/PageHint.tsx](../src/components/PageHint.tsx), with the hint catalog in [src/utils/pageHints.ts](../src/utils/pageHints.ts)
+   - Shows one role- and route-specific hint the first time a user visits a page, at the top of the main content. Instructor and learner home hints follow setup progress. Users can dismiss a hint or turn hints off in Settings; preferences are stored on the user's `Settings` record (`pageHintsEnabled`, `pageHintsSeen`).
 
 9. [x] Add destructive-action recovery and sync recency feedback.
    - Recording take deletion now requires confirmation.
@@ -66,4 +66,4 @@ All implementation items in the UX audit are complete. The remaining quality cav
 - [src/components/Dashboard/SectionPanel.tsx](../src/components/Dashboard/SectionPanel.tsx)
 - [src/components/OfflineBanner.tsx](../src/components/OfflineBanner.tsx)
 - [src/components/SyncStatusIndicator.tsx](../src/components/SyncStatusIndicator.tsx)
-- [src/components/FirstRunChecklist.tsx](../src/components/FirstRunChecklist.tsx)
+- [src/components/PageHint.tsx](../src/components/PageHint.tsx)

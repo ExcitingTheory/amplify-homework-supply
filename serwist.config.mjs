@@ -13,4 +13,15 @@ export default serwist({
   },
   // Precache prerendered HTML routes in addition to build assets.
   precachePrerendered: true,
+  // The default "public/**/*" pattern also picks up files that are not served
+  // at their public path. Extensionless LICENSE files go through the locale
+  // middleware and 404, and a single failed precache request fails the
+  // service worker install. The html files in public/ are scratch pages whose
+  // precache URL is wrongly emitted as "/public/<name>".
+  globIgnores: [
+    "public/**/LICENSE*",
+    "public/**/OFL.txt",
+    "public/**/README.txt",
+    "public/_hat_alpha*.html",
+  ],
 });

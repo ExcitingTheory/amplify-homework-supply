@@ -58,6 +58,31 @@ import { buildThothUnits } from "../../scripts/thoth/buildUnitContent";
 import { resolveThothSeedMode } from "../../scripts/thoth/resolveSeedMode";
 import { findFirstFilteredRecord } from "../../scripts/thoth/findFirstFilteredRecord";
 import {
+  collectPages,
+  mergeParsedContentChunks,
+  parsedContentChunkId,
+  saveParsedContentChunks,
+  type ParsedContentListField,
+  type ParsedContentStore,
+} from "../functions/shared/parsedContentChunks";
+import {
+  EMBEDDING_DIMENSIONS,
+  EMBEDDING_MODEL,
+  buildEmbeddingFile,
+  buildEmbeddingInfo,
+  buildEmbeddingItems,
+  embedItems,
+  embeddingObjectKey,
+} from "../functions/embeddings/embeddingItems";
+import {
+  isAnalyzableSeedFile,
+  loadAnalysisSnapshot,
+  resolveSeedAnalysisMode,
+  saveAnalysisSnapshot,
+  sha256Hex,
+  type AnalysisSnapshot,
+} from "../../scripts/seed/analysisSnapshots";
+import {
   scoreExtraction,
   type ExtractionReport,
   type ThothGroundTruth,
@@ -156,6 +181,55 @@ function unwrap<T>(
     }
     return r.data as NonNullable<T>;
   });
+}
+
+// A long document's analysis is stored as several ParsedContent chunks split by
+// page (see functions/shared/parsedContentChunks.ts). These helpers save and
+// read a document's content as one unit, like the analysis Lambdas do.
+
+/** Every ParsedContent chunk of a document, through its indexed relationship. */
+async function listParsedContentChunks(documentID: string): Promise<any[]> {
+  const { data: document } = await client.models.Document.get({ id: documentID });
+  if (!document) return [];
+  return collectPages<any>((nextToken) =>
+    (document as any).parsedContent({ limit: 100, nextToken }),
+  );
+}
+
+function parsedContentStore(documentID: string): ParsedContentStore {
+  const model = client.models.ParsedContent as any;
+  return {
+    list: () => listParsedContentChunks(documentID),
+    create: async (input) => {
+      unwrap([await model.create(input)], `ParsedContent ${input.id}`);
+    },
+    update: async (input) => {
+      unwrap([await model.update(input)], `ParsedContent ${input.id}`);
+    },
+    remove: async ({ id, _version }) => {
+      unwrap(
+        [await model.delete(_version != null ? { id, _version } : { id })],
+        `ParsedContent ${id}`,
+      );
+    },
+  };
+}
+
+function saveParsedContent(
+  documentID: string,
+  fileID: string,
+  content: Partial<Record<ParsedContentListField, unknown>>,
+) {
+  return saveParsedContentChunks(parsedContentStore(documentID), {
+    documentID,
+    fileID,
+    content,
+  });
+}
+
+/** A document's content as one record, or null when none has been written. */
+async function loadParsedContent(documentID: string) {
+  return mergeParsedContentChunks(await listParsedContentChunks(documentID));
 }
 
 // ========================================================================
@@ -1492,8 +1566,68 @@ console.log(
 );
 
 /**
+ * Regenerate a replayed analysis's embeddings locally with the same offline
+ * model the embeddings Lambda uses (no API calls), store the vectors in S3 under
+ * the new file's key, and return the File.embedding metadata. Returns undefined
+ * when there is nothing to embed or the model is unavailable.
+ */
+let seedEmbedder: Promise<(text: string) => Promise<number[]>> | undefined;
+async function regenerateEmbeddings(
+  fileId: string,
+  content: { vocabularyJSON?: unknown; summariesJSON?: unknown },
+) {
+  const items = buildEmbeddingItems(content);
+  if (items.length === 0) return undefined;
+  try {
+    seedEmbedder ??= (async () => {
+      const { pipeline, env } = await import("@huggingface/transformers");
+      env.allowLocalModels = false;
+      const extractor: any = await pipeline("feature-extraction", EMBEDDING_MODEL, {
+        dtype: "q8",
+      });
+      return async (text: string) => {
+        const output = await extractor(text, { pooling: "mean", normalize: true });
+        return Array.from(output.data as Float32Array).slice(0, EMBEDDING_DIMENSIONS);
+      };
+    })();
+    const embedded = await embedItems(items, await seedEmbedder);
+    if (embedded.length === 0) return undefined;
+    await uploadData({
+      path: embeddingObjectKey(instructor1IdentityId, fileId),
+      data: JSON.stringify(buildEmbeddingFile(embedded)),
+      options: { contentType: "application/json" },
+    }).result;
+    return buildEmbeddingInfo(embedded);
+  } catch (error: any) {
+    seedEmbedder = undefined;
+    console.warn(`  ⚠ Could not regenerate embeddings for ${fileId}: ${error.message}`);
+    return undefined;
+  }
+}
+
+// Successful analyses are saved to test/fixtures/seed-analysis/ and replayed on
+// later seeds, so unchanged files are not re-analyzed. SEED_ANALYSIS_MODE:
+//   auto (default) replay a snapshot when the file is unchanged, else analyze live
+//   live           always analyze and refresh the snapshots
+//   off            do not analyze (no parsed content)
+const analysisMode = resolveSeedAnalysisMode(process.env.SEED_ANALYSIS_MODE);
+const analysisSnapshotDir = resolve(
+  seedDir,
+  "../../test/fixtures/seed-analysis",
+);
+console.log(`Seed analysis mode: ${analysisMode}`);
+
+const pendingAnalysisCaptures: Array<{
+  name: string;
+  s3Path: string;
+  sourceSha256: string;
+}> = [];
+
+/**
  * Helper: Create a File record and upload the actual file to S3.
  * The S3 upload triggers EventBridge rules which invoke the processing Lambdas.
+ * Analyzable documents with a saved snapshot skip live analysis and get their
+ * Document and ParsedContent recreated from it instead.
  */
 async function seedFileWithUpload(opts: {
   name: string;
@@ -1514,6 +1648,18 @@ async function seedFileWithUpload(opts: {
   const s3Path = `protected/${instructor1IdentityId}/files/${name}`;
 
   try {
+    const fileBuffer =
+      localPath === thothPdfName
+        ? thothPdfBuffer
+        : await readFile(resolve(mocksDir, localPath));
+    const analyzable = isAnalyzableSeedFile(name);
+    const sourceSha256 = sha256Hex(fileBuffer);
+    const snapshot: AnalysisSnapshot | null =
+      analyzable && analysisMode === "auto"
+        ? await loadAnalysisSnapshot(analysisSnapshotDir, name, sourceSha256)
+        : null;
+    const skipAutoAnalysis = analyzable && (snapshot !== null || analysisMode === "off");
+
     // Create File record FIRST (so Lambda can find it when EventBridge triggers)
     const { data: fileRecord, errors } = await client.models.File.create({
       name,
@@ -1525,6 +1671,9 @@ async function seedFileWithUpload(opts: {
       duration,
       owner: instructor1OwnerSub,
       identityId: instructor1IdentityId,
+      ...(skipAutoAnalysis
+        ? { settings: JSON.stringify({ skipAutoAnalysis: true }) }
+        : {}),
     });
 
     if (errors || !fileRecord) {
@@ -1534,24 +1683,52 @@ async function seedFileWithUpload(opts: {
 
     // Upload actual file to S3 (triggers EventBridge → processing Lambdas)
     try {
-      const fileBuffer =
-        localPath === thothPdfName
-          ? thothPdfBuffer
-          : await readFile(resolve(mocksDir, localPath));
       await uploadData({
         path: s3Path,
         data: fileBuffer,
         options: { contentType: mimeType },
       }).result;
 
+      let documentID: string | undefined;
+      if (snapshot) {
+        const documentResponse = await client.models.Document.create({
+          filename: name,
+          s3Key: s3Path,
+          status: "completed",
+          textExtractedAt: Date.now(),
+          pageCount: snapshot.pageCount,
+          fileSize: fileBuffer.length,
+          mimeType,
+          sourceFormat: snapshot.sourceFormat,
+          uploadedAt: new Date().toISOString(),
+          identityId: instructor1IdentityId,
+          owner: instructor1OwnerSub,
+        });
+        documentID = unwrap([documentResponse], `Document for ${name}`)[0].id;
+      }
+
+      const embedding = snapshot
+        ? await regenerateEmbeddings(fileRecord.id, snapshot)
+        : undefined;
+
       // Update size now that we know it (pass _version for versioned data source)
       await client.models.File.update({
         id: fileRecord.id,
         size: fileBuffer.length,
+        ...(documentID ? { documentID } : {}),
+        ...(embedding ? { embedding } : {}),
         _version: (fileRecord as any)._version ?? 1,
       });
 
-      console.log(`  ✓ ${name} (${mimeType}) → ${s3Path}`);
+      if (snapshot && documentID) {
+        await saveParsedContent(documentID, fileRecord.id, snapshot);
+        console.log(`  ✓ ${name} (${mimeType}) → ${s3Path} [analysis and embeddings replayed from snapshot]`);
+      } else {
+        if (analyzable && !skipAutoAnalysis) {
+          pendingAnalysisCaptures.push({ name, s3Path, sourceSha256 });
+        }
+        console.log(`  ✓ ${name} (${mimeType}) → ${s3Path}`);
+      }
     } catch (uploadErr: any) {
       console.warn(
         `  ⚠ Upload failed for ${name}: ${uploadErr.message} (File record created without S3 file)`,
@@ -1563,6 +1740,95 @@ async function seedFileWithUpload(opts: {
     console.warn(`  ⚠ seedFileWithUpload failed for ${name}: ${err.message}`);
     return null;
   }
+}
+
+/**
+ * Wait for the live analyses started above and save each successful one as a
+ * snapshot. Failed, partial or empty runs are not saved, so the next seed
+ * retries them.
+ */
+async function captureAnalysisSnapshots() {
+  if (pendingAnalysisCaptures.length === 0) return;
+  const timeoutMinutes = Number(process.env.SEED_ANALYSIS_TIMEOUT_MINUTES ?? 60);
+  if (!Number.isFinite(timeoutMinutes) || timeoutMinutes <= 0) {
+    throw new Error("SEED_ANALYSIS_TIMEOUT_MINUTES must be a positive number");
+  }
+  console.log(
+    `\n💾 Waiting for ${pendingAnalysisCaptures.length} document analyses to save as snapshots...`,
+  );
+  const deadline = Date.now() + timeoutMinutes * 60 * 1000;
+  const pending = new Map(pendingAnalysisCaptures.map((c) => [c.s3Path, c]));
+  let saved = 0;
+
+  while (pending.size > 0 && Date.now() < deadline) {
+    for (const capture of [...pending.values()]) {
+      try {
+        const document = await findFirstFilteredRecord(
+          (nextToken) =>
+            client.models.Document.list({
+              filter: { s3Key: { eq: capture.s3Path } },
+              limit: 5,
+              nextToken,
+            }),
+          `Document ${capture.name}`,
+        );
+        if (
+          document?.status === "failed" ||
+          document?.status === "error" ||
+          document?.status === "cancelled"
+        ) {
+          console.warn(
+            `  ⚠ ${capture.name}: analysis ended with status ${document.status}; no snapshot saved`,
+          );
+          pending.delete(capture.s3Path);
+          continue;
+        }
+        if (document?.status !== "completed") continue;
+
+        const parsed = await loadParsedContent(document.id);
+        if (!parsed) continue;
+
+        const written = await saveAnalysisSnapshot(
+          analysisSnapshotDir,
+          capture.name,
+          {
+            sourceSha256: capture.sourceSha256,
+            capturedAt: new Date().toISOString(),
+            sourceFormat: document.sourceFormat ?? undefined,
+            pageCount: document.pageCount ?? undefined,
+            vocabularyJSON: [...(parsed.vocabularyJSON ?? [])],
+            summariesJSON: [...(parsed.summariesJSON ?? [])],
+            objectivesJSON: [...(parsed.objectivesJSON ?? [])],
+            conceptsJSON: [...(parsed.conceptsJSON ?? [])],
+            questionsJSON: [...(parsed.questionsJSON ?? [])],
+            pendingMediaJSON:
+              parsed.pendingMediaJSON.length > 0
+                ? [...parsed.pendingMediaJSON]
+                : undefined,
+          },
+        );
+        console.log(
+          written
+            ? `  ✓ ${capture.name}: snapshot saved`
+            : `  ⚠ ${capture.name}: analysis produced no content; no snapshot saved`,
+        );
+        if (written) saved += 1;
+        pending.delete(capture.s3Path);
+      } catch (error: any) {
+        console.warn(`  ⚠ ${capture.name}: ${error.message}`);
+      }
+    }
+    if (pending.size > 0) {
+      await new Promise((resolveWait) => setTimeout(resolveWait, 5000));
+    }
+  }
+
+  for (const capture of pending.values()) {
+    console.warn(`  ⚠ ${capture.name}: timed out waiting for analysis; no snapshot saved`);
+  }
+  console.log(
+    `✅ Saved ${saved} of ${pendingAnalysisCaptures.length} analysis snapshots to ${analysisSnapshotDir}`,
+  );
 }
 
 // Upload one of every supported document type
@@ -2107,11 +2373,11 @@ if (documents.length > 0 && documents[0]) {
     ] as any,
     questionsJSON: [
       {
-        question: "What is photosynthesis?",
-        expectedAnswer:
+        prompt: "What is photosynthesis?",
+        answer:
           "The process by which plants convert light energy into chemical energy",
         hint: "Think about how plants make food",
-        type: "short_answer",
+        questionType: "short_answer",
       },
     ] as any,
     responseId: "chatcmpl-seed-12345",
@@ -2196,7 +2462,7 @@ const gsResponse = await client.models.PlatformSettings.create({
   ),
   documentAnalysisOpenAiMaxConcurrentRequests: analysisLimit(
     "SEED_ANALYSIS_OPENAI_CONCURRENCY",
-    3,
+    10,
   ),
   // Bot personas
   kaiEnabled: true,
@@ -2270,8 +2536,10 @@ if (thothSeedMode !== "off") {
   let thothDocumentID: string;
   let thothParsedContentID: string;
   let parsedSnapshot: ThothParsedContentSnapshot;
+  // Written only once the extraction gate below passes, so a failed run is retried.
+  let thothSnapshotToSave: string | null = null;
   const analysisTimeoutMinutes = Number(
-    process.env.THOTH_ANALYSIS_TIMEOUT_MINUTES ?? 15,
+    process.env.THOTH_ANALYSIS_TIMEOUT_MINUTES ?? 60,
   );
   if (!Number.isFinite(analysisTimeoutMinutes) || analysisTimeoutMinutes <= 0) {
     throw new Error("THOTH_ANALYSIS_TIMEOUT_MINUTES must be a positive number");
@@ -2314,9 +2582,11 @@ if (thothSeedMode !== "off") {
     )[0];
     thothDocumentID = thothDocument.id;
 
+    const thothEmbedding = await regenerateEmbeddings(thothFile.id, snapshot);
     const linkedFileResponse = await client.models.File.update({
       id: thothFile.id,
       documentID: thothDocument.id,
+      ...(thothEmbedding ? { embedding: thothEmbedding } : {}),
       _version: thothFile._version,
     });
     unwrap([linkedFileResponse], "Thoth File link");
@@ -2328,16 +2598,8 @@ if (thothSeedMode !== "off") {
     }).result;
 
     parsedSnapshot = snapshot;
-    const parsedResponse = await client.models.ParsedContent.create({
-      documentID: thothDocument.id,
-      fileID: thothFile.id,
-      ...parsedSnapshot,
-    });
-    const parsedRecord = unwrap(
-      [parsedResponse],
-      "Thoth ParsedContent",
-    )[0];
-    thothParsedContentID = parsedRecord.id;
+    await saveParsedContent(thothDocument.id, thothFile.id, parsedSnapshot);
+    thothParsedContentID = parsedContentChunkId(thothDocument.id, 0);
   } else {
     await uploadData({
       path: thothPath,
@@ -2382,14 +2644,7 @@ if (thothSeedMode !== "off") {
         );
       }
       if (document?.status === "completed") {
-        const parsed = await findFirstFilteredRecord(
-          (nextToken) => client.models.ParsedContent.list({
-            filter: { documentID: { eq: document.id } },
-            limit: 5,
-            nextToken,
-          }),
-          "Thoth ParsedContent",
-        );
+        const parsed = await loadParsedContent(document.id);
         if (parsed) {
           completedDocumentID = document.id;
           completedParsedContentID = parsed.id;
@@ -2400,7 +2655,7 @@ if (thothSeedMode !== "off") {
             conceptsJSON: parsed.conceptsJSON,
             questionsJSON: parsed.questionsJSON,
             pendingMediaJSON: parsed.pendingMediaJSON,
-          };
+          } as ThothParsedContentSnapshot;
           break;
         }
       }
@@ -2419,13 +2674,10 @@ if (thothSeedMode !== "off") {
     thothDocumentID = completedDocumentID;
     thothParsedContentID = completedParsedContentID;
     parsedSnapshot = completedParsedSnapshot;
-    await writeFile(
-      thothSnapshotPath,
-      JSON.stringify(
-        { sourceSha256: expectedThothPdfSha256, ...parsedSnapshot },
-        null,
-        2,
-      ),
+    thothSnapshotToSave = JSON.stringify(
+      { sourceSha256: expectedThothPdfSha256, ...parsedSnapshot },
+      null,
+      2,
     );
   }
 
@@ -2433,8 +2685,8 @@ if (thothSeedMode !== "off") {
     questions: (parsedSnapshot.questionsJSON ?? [])
       .filter((question) => question != null)
       .map((question) => ({
-        prompt: question.prompt ?? question.question ?? undefined,
-        answer: question.answer ?? question.expectedAnswer ?? undefined,
+        prompt: question.prompt ?? undefined,
+        answer: question.answer ?? undefined,
         subject: question.subject ?? undefined,
         field: question.field ?? undefined,
         sourceText: question.sourceText ?? undefined,
@@ -2466,6 +2718,10 @@ if (thothSeedMode !== "off") {
       throw new Error(`${gateFailure}. Set SEED_THOTH_ALLOW_PARTIAL=1 to continue.`);
     }
     console.warn(`${gateFailure}; continuing because SEED_THOTH_ALLOW_PARTIAL=1`);
+  }
+  if (thothSnapshotToSave !== null && gatePassed) {
+    await writeFile(thothSnapshotPath, thothSnapshotToSave);
+    console.log(`💾 Thoth snapshot saved to ${thothSnapshotPath}`);
   }
 
   async function createThothRecords<T, R>(
@@ -4575,6 +4831,8 @@ const seedFixture = {
     : null,
   platformSettings: gsResponse.data ? { id: gsResponse.data.id } : null,
 };
+
+await captureAnalysisSnapshots();
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = resolve(__dirname, "../../test/integration/seed-data.json");

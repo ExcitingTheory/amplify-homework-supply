@@ -34,7 +34,8 @@
       "videoNotSupported": "Su navegador no soporta la etiqueta de video.",
       "confirmMoveToRecycleBin": "¿Mover a la papelera de reciclaje: {name}?",
       "moveToRecycleBinFailed": "No se pudo mover {name} a la Papelera de reciclaje: {error}",
-      "reAnalyzeError": "Error al volver a analizar {name}: {error}"
+      "reAnalyzeError": "Error al volver a analizar {name}: {error}",
+      "importedContentNote": "{questions, plural, one {# pregunta} other {# preguntas}} y {words, plural, one {# palabra} other {# palabras}} importadas de este documento permanecerán en tu banco de preguntas y tu diccionario."
     },
     "generators": {
       "audioPromptPlaceholder": "Texto para transformar en archivo de audio.",

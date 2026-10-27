@@ -7,11 +7,8 @@
  * exact, then accept[], then a token-set similarity ratio >= 0.9. Known
  * source defects are excluded from required recall.
  *
- * This module has no dependency on the (not-yet-built) exhaustive pipeline;
- * it accepts a generic `ExtractionInput` shape so it can run against either
- * the current Lambda question shape ({prompt, answer, ...}) or the legacy
- * seed shape ({question, expectedAnswer, ...}) referenced in the plan's
- * "Question shape drift" finding.
+ * This module has no dependency on the pipeline; it accepts a generic
+ * `ExtractionInput` shape using the question bank's fields ({prompt, answer, ...}).
  */
 
 export interface GTFact {
@@ -46,16 +43,16 @@ export interface ThothGroundTruth {
   pageIndex: Record<number, string[]>;
 }
 
-/** Extracted question/fact item — tolerant of both known pipeline shapes. */
+/** Extracted question/fact item, in the question bank's shape. */
 export interface ExtractedQuestionLike {
   prompt?: string;
-  question?: string;
   answer?: string;
-  expectedAnswer?: string;
   subject?: string;
   field?: string;
   sourceText?: string;
   page?: number | null;
+  /** Every page a merged duplicate fact appeared on; `page` is the lowest. */
+  pages?: number[];
 }
 
 /** Extracted vocabulary item (DocumentWord-like). */
@@ -64,6 +61,7 @@ export interface ExtractedWordLike {
   word?: string;
   definition?: string;
   page?: number | null;
+  pages?: number[];
 }
 
 export interface ExtractionInput {
@@ -184,13 +182,18 @@ function answerMatches(candidateAnswer: string, fact: GTFact): boolean {
   return false;
 }
 
+/** Pages an item came from: all merged pages, else its single page. */
+function pagesOfItem(item: { page?: number | null; pages?: number[] }): number[] {
+  if (item.pages && item.pages.length > 0) return item.pages;
+  return item.page != null ? [item.page] : [];
+}
+
 function questionIsOnCardPage(
   card: ThothCard,
   question: ExtractedQuestionLike,
 ): boolean {
-  return (
-    question.page != null &&
-    (question.page === card.frontPage || question.page === card.backPage)
+  return pagesOfItem(question).some(
+    (page) => page === card.frontPage || page === card.backPage,
   );
 }
 
@@ -203,7 +206,7 @@ function questionIdentifiesCard(
     return subject === normalise(card.key) || subject === normalise(card.title);
   }
 
-  const prompt = normalise(question.prompt ?? question.question ?? "");
+  const prompt = normalise(question.prompt ?? "");
   return prompt.includes(normalise(card.title));
 }
 
@@ -214,12 +217,12 @@ function questionIdentifiesField(
   if (question.field) return normalise(question.field) === normalise(fact.field);
 
   const fieldWords = fact.field.replace(/([a-z])([A-Z])/g, "$1 $2");
-  const prompt = normalise(question.prompt ?? question.question ?? "");
+  const prompt = normalise(question.prompt ?? "");
   return prompt.includes(normalise(fieldWords));
 }
 
 function extractedAnswerText(q: ExtractedQuestionLike): string {
-  return q.answer ?? q.expectedAnswer ?? "";
+  return q.answer ?? "";
 }
 
 function extractedTermText(w: ExtractedWordLike): string {
@@ -304,8 +307,9 @@ export function scoreExtraction(
 
   const presentPages = new Set<number>();
   for (const q of extracted.questions)
-    if (q.page != null) presentPages.add(q.page);
-  for (const w of extracted.words) if (w.page != null) presentPages.add(w.page);
+    for (const page of pagesOfItem(q)) presentPages.add(page);
+  for (const w of extracted.words)
+    for (const page of pagesOfItem(w)) presentPages.add(page);
   const missingPages: number[] = [];
   for (let p = 1; p <= groundTruth.source.pages; p++) {
     if (p === 2) continue; // page 2 is intentionally blank

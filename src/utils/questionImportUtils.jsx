@@ -5,6 +5,16 @@
 
 import { getAmplifyClient } from "./amplifyClient";
 import { assertParsedContentImportAllowed } from "./parsedContentModeration";
+import { QUESTION_FIELDS, pickEntries, toEntryList } from "./parsedContentLists";
+import {
+  loadMergedParsedContent,
+  updateMergedListEntry,
+} from "./parsedContentChunks";
+import {
+  indexLinksByItem,
+  linkItemToDocument,
+  listDocumentLinks,
+} from "./documentLinks";
 
 /**
  * Check if a question already exists in the bank (by prompt similarity)
@@ -37,21 +47,11 @@ export async function findExistingQuestion(prompt, owner) {
  */
 export async function createQuestion(questionItem, owner, identityId) {
   const client = getAmplifyClient();
-  const {
-    prompt,
-    question,
-    answer,
-    expectedAnswer,
-    hint,
-    options,
-    questionType,
-    type,
-    difficulty,
-  } = questionItem;
+  const { prompt, answer, hint, options, questionType, difficulty } =
+    questionItem;
 
-  // Normalize field names (ParsedContent uses different names than Question model)
-  const questionPrompt = prompt || question || "";
-  const questionAnswer = answer || expectedAnswer || "";
+  const questionPrompt = prompt || "";
+  const questionAnswer = answer || "";
   const questionHint = hint || undefined;
   const resolvedDifficulty = difficulty || "medium";
 
@@ -113,35 +113,29 @@ export async function linkQuestionToUnit(questionId, unitId, owner) {
 }
 
 /**
- * Link a Question to a Document via DocumentQuestion junction table
+ * Link a Question to a Document via DocumentQuestion junction table, once.
+ * The link records the entry's page, source text and key.
  * @param {string} questionId - ID of the Question
  * @param {string} documentId - ID of the Document
  * @param {string} owner - Owner of the relationship
- * @returns {Promise<Object|null>} Created DocumentQuestion relationship or null
+ * @param {Object} [entry] - The extracted question item (page, prompt, sourceText)
+ * @param {Map<string, Object>} [existing] - Links already loaded for the document, by question id
+ * @returns {Promise<Object|null>} The DocumentQuestion link or null
  */
-export async function linkQuestionToDocument(questionId, documentId, owner) {
-  if (!documentId) return null;
-
-  const client = getAmplifyClient();
-  const { data: existing } = await client.models.DocumentQuestion.list({
-    filter: {
-      and: [
-        { questionID: { eq: questionId } },
-        { documentID: { eq: documentId } },
-      ],
-    },
+export async function linkQuestionToDocument(
+  questionId,
+  documentId,
+  owner,
+  entry = null,
+  existing = undefined,
+) {
+  return linkItemToDocument(getAmplifyClient(), "question", {
+    itemId: questionId,
+    documentId,
+    owner,
+    entry,
+    existing,
   });
-
-  if (existing && existing.length > 0) {
-    return existing[0];
-  }
-
-  const { data: docQuestion } = await client.models.DocumentQuestion.create({
-    questionID: questionId,
-    documentID: documentId,
-    owner: owner,
-  });
-  return docQuestion;
 }
 
 /**
@@ -164,8 +158,9 @@ export async function importQuestionsToUnit(
 ) {
   try {
     const client = getAmplifyClient();
-    // Fetch the ParsedContent record
-    const { data: parsedContent } = await client.models.ParsedContent.get({
+    // Fetch the ParsedContent record; a long document is stored as several
+    // chunks, merged into one record here
+    const parsedContent = await loadMergedParsedContent(client, {
       id: parsedContentId,
     });
 
@@ -174,12 +169,7 @@ export async function importQuestionsToUnit(
     }
     await assertParsedContentImportAllowed(client, parsedContent);
 
-    // Parse the questionsJSON
-    const questionItems = parsedContent.questionsJSON
-      ? typeof parsedContent.questionsJSON === "string"
-        ? JSON.parse(parsedContent.questionsJSON)
-        : parsedContent.questionsJSON
-      : [];
+    const questionItems = toEntryList(parsedContent.questionsJSON);
 
     if (questionItems.length === 0) {
       return {
@@ -209,11 +199,15 @@ export async function importQuestionsToUnit(
 
     // Get associated documentID if available
     const documentId = parsedContent.documentID || null;
+    // Links already made for this document, loaded once rather than per question
+    const documentLinks = documentId
+      ? indexLinksByItem("question", await listDocumentLinks(client, documentId, "question"))
+      : undefined;
 
     // Process each question item
     for (let i = 0; i < itemsToImport.length; i++) {
       const item = itemsToImport[i];
-      const promptText = item.prompt || item.question || "";
+      const promptText = item.prompt || "";
 
       if (onProgress) {
         onProgress(i + 1, total, `Processing: ${promptText.slice(0, 50)}...`);
@@ -253,7 +247,13 @@ export async function importQuestionsToUnit(
 
         // Link question to source document
         if (documentId && questionToLink) {
-          await linkQuestionToDocument(questionToLink.id, documentId, owner);
+          await linkQuestionToDocument(
+            questionToLink.id,
+            documentId,
+            owner,
+            item,
+            documentLinks,
+          );
         }
 
         results.importedQuestions.push({
@@ -315,7 +315,7 @@ export async function importQuestionsToUnit(
 export async function updateQuestionItem(parsedContentId, itemIndex, updates) {
   try {
     const client = getAmplifyClient();
-    const { data: parsedContent } = await client.models.ParsedContent.get({
+    const parsedContent = await loadMergedParsedContent(client, {
       id: parsedContentId,
     });
 
@@ -323,28 +323,15 @@ export async function updateQuestionItem(parsedContentId, itemIndex, updates) {
       throw new Error(`ParsedContent not found: ${parsedContentId}`);
     }
 
-    const questionItems = parsedContent.questionsJSON
-      ? typeof parsedContent.questionsJSON === "string"
-        ? JSON.parse(parsedContent.questionsJSON)
-        : parsedContent.questionsJSON
-      : [];
-
-    if (itemIndex < 0 || itemIndex >= questionItems.length) {
-      throw new Error(`Invalid item index: ${itemIndex}`);
-    }
-
-    // Update the item
-    questionItems[itemIndex] = {
-      ...questionItems[itemIndex],
-      ...updates,
-    };
-
-    // Save updated ParsedContent
-    await client.models.ParsedContent.update({
-      id: parsedContent.id,
-      questionsJSON: JSON.stringify(questionItems),
-      _version: parsedContent._version,
-    });
+    // Writes only the chunk that holds the question
+    await updateMergedListEntry(
+      client,
+      parsedContent,
+      "questionsJSON",
+      itemIndex,
+      updates,
+      (entries) => pickEntries(entries, QUESTION_FIELDS),
+    );
 
     return true;
   } catch (error) {

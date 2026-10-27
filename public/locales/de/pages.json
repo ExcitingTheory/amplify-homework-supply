@@ -32,6 +32,7 @@
     "completionMode": "Abschluss",
     "empty": "Noch keine Ranglisten-Daten. Schließe Aufgaben ab, um XP zu verdienen\\!",
     "fastestMode": "Schnellste",
+    "goToAssignments": "Zu meinen Aufgaben",
     "heading": "Gesamtrangliste",
     "squadsMode": "Squads",
     "title": "Rangliste",
@@ -222,12 +223,16 @@
     "viewWorkbook": "Arbeitsbuch anzeigen"
   },
   "sections": {
+    "administering": "Verwaltung",
     "archive": "Archiv",
+    "archivedSections": "Archivierte Kurse",
     "archiveError": "Aktualisierung des Abschnitts fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "archived": "Archiviert",
     "archivedSuccess": "Abschnitt erfolgreich archiviert",
+    "attending": "Teilnahme",
     "createNew": "Neu erstellen",
     "createNewSection": "Neuen Abschnitt erstellen",
+    "draftSections": "Kursentwürfe",
     "joinCode": "Code-Bezeichnung",
     "loading": "Wird geladen...",
     "newSection": {
@@ -239,6 +244,7 @@
       "title": "Neuer Abschnitt"
     },
     "noSectionsYet": "Noch keine Abschnitte",
+    "publishedSections": "Veröffentlichte Kurse",
     "showArchived": "Archivierte anzeigen ({count})",
     "title": "Abschnitte",
     "unarchive": "Archivierung aufheben",
@@ -281,7 +287,9 @@
     "loading": "Wird geladen…"
   },
   "units": {
+    "administering": "Verwaltung",
     "archivedUnits": "Archivierte Einheiten",
+    "browseCommunityUnits": "Community-Einheiten durchsuchen",
     "createNew": "Neu erstellen",
     "createNewUnit": "Neue Einheit erstellen",
     "editUnit": "Einheit bearbeiten",
@@ -291,8 +299,10 @@
     "forking": "Wird verzweigt...",
     "myDrafts": "Meine Entwürfe",
     "noCommunityUnits": "Keine Community-Einheiten verfügbar",
+    "noCommunityUnitsDescription": "Einheiten, die Lehrkräfte für die Community veröffentlichen, erscheinen hier und können in deine Bibliothek kopiert werden.",
     "noPublishedUnits": "Noch keine veröffentlichten Einheiten",
     "noSharedUnits": "Es wurden noch keine Einheiten mit Ihnen geteilt",
+    "noSharedUnitsDescription": "Einheiten, die andere mit dir teilen, erscheinen hier.",
     "practice": "Üben",
     "publishedUnits": "Veröffentlichte Einheiten",
     "tabCommunity": "Gemeinschaft",

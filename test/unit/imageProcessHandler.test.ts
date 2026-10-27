@@ -5,7 +5,7 @@ import { readFileSync } from "fs";
  * Unit tests for imageProcess Lambda handler.
  * Tests the handler's routing logic by verifying source code patterns.
  * Direct import of the handler isn't possible in test env because
- * pdf-to-img is a Lambda-only runtime dependency.
+ * the PDF renderer depends on a native module that is only installed in the Lambda.
  */
 
 const handlerSrc = readFileSync(

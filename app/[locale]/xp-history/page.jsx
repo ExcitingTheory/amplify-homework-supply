@@ -7,6 +7,8 @@ import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
 import Chip from "@mui/material/Chip";
 import Divider from "@mui/material/Divider";
+import EmojiEventsOutlinedIcon from "@mui/icons-material/EmojiEventsOutlined";
+import { EmptyState } from "@/components/EmptyState";
 import { cookies } from "next/headers";
 import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
@@ -94,15 +96,18 @@ export function XPHistoryContent({ logs = [], totalXP = 0 }) {
                 </ListItem>
               </li>
             ))}
-            {logs.length === 0 && (
-              <ListItem>
-                <ListItemText
-                  primary="No XP earned yet"
-                  secondary="Complete assignments and activities to earn XP!"
-                />
-              </ListItem>
-            )}
           </List>
+          {logs.length === 0 && (
+            <EmptyState
+              dense
+              icon={<EmojiEventsOutlinedIcon fontSize="inherit" />}
+              title="No XP earned yet"
+              description="Complete assignments and activities to earn XP!"
+              ctaLabel="Go to my assignments"
+              ctaHref="/"
+              sx={{ border: 0 }}
+            />
+          )}
         </CardContent>
       </Card>
     </Box>

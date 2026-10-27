@@ -60,6 +60,20 @@ export type ImportReviewAction<T> =
       objectives: any[];
       autoSelectAll: boolean;
     }
+  | {
+      /**
+       * New data after the first load (a later page arrived, or an entry was
+       * edited elsewhere). Keeps the user's selection and does not show the
+       * loading state again.
+       */
+      type: "CONTENT_UPDATED";
+      parsedContent: any;
+      document: any;
+      items: T[];
+      summaries: any[];
+      objectives: any[];
+      autoSelectAll: boolean;
+    }
   | { type: "LOAD_ERROR" }
   | { type: "IMPORT_START" }
   | { type: "IMPORT_PROGRESS"; progress: ImportProgress }
@@ -98,6 +112,11 @@ export function createInitialImportReviewState<T>(): ImportReviewState<T> {
 // Reducer
 // ============================================================================
 
+/** True for an entry the review screen has marked as already in the bank. */
+function isImported(item: unknown): boolean {
+  return (item as { alreadyImported?: boolean } | null | undefined)?.alreadyImported === true;
+}
+
 export function importReviewReducer<T>(
   state: ImportReviewState<T>,
   action: ImportReviewAction<T>,
@@ -108,11 +127,38 @@ export function importReviewReducer<T>(
 
     case "LOAD_SUCCESS": {
       const selectedItems = action.autoSelectAll
-        ? new Set(action.items.map((_, i) => i))
+        ? new Set(
+            action.items.flatMap((item, i) => (isImported(item) ? [] : [i])),
+          )
         : state.selectedItems;
       return {
         ...state,
         loading: false,
+        parsedContent: action.parsedContent,
+        document: action.document,
+        items: action.items,
+        summaries: action.summaries,
+        objectives: action.objectives,
+        selectedItems,
+      };
+    }
+
+    case "CONTENT_UPDATED": {
+      // Selection is by index: drop indices that no longer exist or are now
+      // imported, and when the list is being auto-selected, select the entries
+      // that just arrived.
+      const selectedItems = new Set(
+        [...state.selectedItems].filter(
+          (index) => index < action.items.length && !isImported(action.items[index]),
+        ),
+      );
+      if (action.autoSelectAll) {
+        for (let index = state.items.length; index < action.items.length; index += 1) {
+          if (!isImported(action.items[index])) selectedItems.add(index);
+        }
+      }
+      return {
+        ...state,
         parsedContent: action.parsedContent,
         document: action.document,
         items: action.items,
@@ -169,7 +215,9 @@ export function importReviewReducer<T>(
       return {
         ...state,
         selectedItems: new Set(
-          Array.from({ length: action.count }, (_, i) => i),
+          Array.from({ length: action.count }, (_, i) => i).filter(
+            (i) => !isImported(state.items[i]),
+          ),
         ),
       };
 

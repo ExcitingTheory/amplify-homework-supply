@@ -30,6 +30,7 @@
     "completionMode": "Complétion",
     "empty": "Pas encore de données de classement. Terminez des devoirs pour gagner des XP \\!",
     "fastestMode": "Le plus rapide",
+    "goToAssignments": "Aller à mes devoirs",
     "heading": "Classement général",
     "squadsMode": "Équipes",
     "title": "Classement",
@@ -143,9 +144,13 @@
     "viewWorkbook": "Afficher le cahier d'exercices"
   },
   "sections": {
+    "administering": "Administre",
     "archived": "Archivé",
+    "archivedSections": "Sections archivées",
+    "attending": "Participe",
     "createNew": "Créer nouveau",
     "createNewSection": "Créer une nouvelle section",
+    "draftSections": "Sections en brouillon",
     "joinCode": "Étiquette de code",
     "loading": "Chargement...",
     "newSection": {
@@ -157,6 +162,7 @@
       "title": "Nouvelle section"
     },
     "noSectionsYet": "Aucune section pour le moment",
+    "publishedSections": "Sections publiées",
     "title": "Sections",
     "untitledSection": "Section sans titre",
     "viewSection": "Voir la section"
@@ -172,12 +178,16 @@
     "loading": "Chargement…"
   },
   "units": {
+    "administering": "Administre",
     "archivedUnits": "Unités archivées",
+    "browseCommunityUnits": "Parcourir les unités de la communauté",
     "createNew": "Créer nouveau",
     "createNewUnit": "Créer une nouvelle unité",
     "editUnit": "Modifier l'unité",
     "myDrafts": "Mes brouillons",
+    "noCommunityUnitsDescription": "Les unités publiées par les enseignants pour la communauté apparaîtront ici, prêtes à être copiées dans votre bibliothèque.",
     "noPublishedUnits": "Aucune unité publiée pour le moment",
+    "noSharedUnitsDescription": "Les unités que d’autres personnes partagent avec vous apparaîtront ici.",
     "practice": "Pratiquer",
     "publishedUnits": "Unités publiées",
     "title": "Unités",

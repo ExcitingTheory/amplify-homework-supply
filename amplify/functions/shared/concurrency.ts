@@ -23,7 +23,20 @@ export function backoffMs(attempt: number): number {
 
 /** True when the error looks like our optimistic-concurrency condition failing (safe to retry with a fresh read). */
 export function isConditionalCheckFailure(err: any): boolean {
-  const message =
-    err?.errors?.[0]?.message || err?.message || JSON.stringify(err || "");
-  return /ConditionalCheckFailed/i.test(message);
+  // AppSync reports the DynamoDB exception name in `errorType`; `message` only
+  // says "The conditional request failed", so both must be inspected.
+  if (Array.isArray(err?.errors)) {
+    for (const e of err.errors) {
+      if (
+        /ConditionalCheckFailed/i.test(e?.errorType || "") ||
+        /ConditionalCheckFailed|conditional request failed/i.test(
+          e?.message || "",
+        )
+      ) {
+        return true;
+      }
+    }
+  }
+  const message = err?.message || JSON.stringify(err || "");
+  return /ConditionalCheckFailed|conditional request failed/i.test(message);
 }

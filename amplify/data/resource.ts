@@ -347,6 +347,7 @@ const VocabularyEntry = a.customType({
   definition: a.string(),
   context: a.string(),
   page: a.integer(),
+  pages: a.integer().array(), // Every page a merged duplicate appeared on; page is the lowest
 });
 
 const SummaryEntry = a.customType({
@@ -378,15 +379,13 @@ const ConceptEntry = a.customType({
 });
 
 const QuestionEntry = a.customType({
-  question: a.string().required(),
-  expectedAnswer: a.string(),
-  hint: a.string(),
-  type: a.string(),
   prompt: a.string(),
   answer: a.string(),
+  hint: a.string(),
   questionType: a.string(),
   difficulty: a.string(),
   page: a.integer(),
+  pages: a.integer().array(), // Every page a merged duplicate appeared on; page is the lowest
   subject: a.string(),
   field: a.string(),
   sourceText: a.string(),
@@ -1541,6 +1540,30 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
+      // Where in the source document the linked entry came from
+      page: a
+        .integer()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
+      sourceText: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
+      // Normalized prompt or word, so a review screen can tell which extracted
+      // entries are already in the bank without loading each linked record
+      entryKey: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
@@ -1578,6 +1601,30 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
+      // Where in the source document the linked entry came from
+      page: a
+        .integer()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
+      sourceText: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
+      // Normalized prompt or word, so a review screen can tell which extracted
+      // entries are already in the bank without loading each linked record
+      entryKey: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.authenticated().to(["read"]),
+        ]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
@@ -1822,6 +1869,11 @@ const rawSchemaDefinition = {
       document: a.belongsTo("Document", ["documentID"]),
       fileID: a.id(),
       file: a.belongsTo("File", ["fileID"]),
+      // A long document is stored as several records split by page; chunk 0 is
+      // the primary record. Unset means a single record.
+      // See amplify/functions/shared/parsedContentChunks.ts.
+      chunkIndex: a.integer(),
+      chunkCount: a.integer(),
       // Note: This model is referenced by File via parsedContentID for one-to-one relationship
       // Extracted content (as JSON for flexibility)
       vocabularyJSON: a.ref("VocabularyEntry").array(),
@@ -2013,6 +2065,9 @@ const rawSchemaDefinition = {
       leaderboardOptIn: a.boolean(), // Student opt-in for overall leaderboard
       // Recording settings
       audioCleanupStrength: a.string(), // 'off' | 'light' | 'standard' | 'aggressive' (default: 'standard')
+      // First-visit page tips
+      pageHintsEnabled: a.boolean(), // Show first-visit page tips (unset = enabled)
+      pageHintsSeen: a.string().array(), // Hint ids already shown or dismissed
       metadata: a.json(),
     })
     .authorization((allow) => [
@@ -2417,11 +2472,11 @@ const rawSchemaDefinition = {
       // === AI & Document Analysis ===
       autoAnalyzeDocuments: a.boolean().default(true),
       documentAnalysisModel: a.string(), // e.g. "gpt-4", "gpt-4o"
-      documentAnalysisOpenAiRequestsPerMinute: a.integer().default(5),
-      documentAnalysisOpenAiTokensPerMinute: a.integer().default(20000),
+      documentAnalysisOpenAiRequestsPerMinute: a.integer().default(10),
+      documentAnalysisOpenAiTokensPerMinute: a.integer().default(300000),
       documentAnalysisOpenAiMaxConcurrentRequests: a.integer().default(1),
-      documentAnalysisAnthropicRequestsPerMinute: a.integer().default(5),
-      documentAnalysisAnthropicTokensPerMinute: a.integer().default(20000),
+      documentAnalysisAnthropicRequestsPerMinute: a.integer().default(10),
+      documentAnalysisAnthropicTokensPerMinute: a.integer().default(300000),
       documentAnalysisAnthropicMaxConcurrentRequests: a.integer().default(1),
       defaultAIModel: a.string().default("gpt-4o-mini"), // default model for chat/assistant
       // === Bot Personas ===

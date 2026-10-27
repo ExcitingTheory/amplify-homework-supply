@@ -34,7 +34,8 @@
       "videoNotSupported": "Votre navigateur ne prend pas en charge la balise vidéo.",
       "confirmMoveToRecycleBin": "Déplacer vers la corbeille : {name} ?",
       "moveToRecycleBinFailed": "Échec du déplacement de {name} vers la corbeille : {error}",
-      "reAnalyzeError": "Erreur lors de la nouvelle analyse de {name} : {error}"
+      "reAnalyzeError": "Erreur lors de la nouvelle analyse de {name} : {error}",
+      "importedContentNote": "{questions, plural, one {# question} other {# questions}} et {words, plural, one {# mot} other {# mots}} importés depuis ce document resteront dans votre banque de questions et votre dictionnaire."
     },
     "generators": {
       "audioPromptPlaceholder": "Texte à transformer en fichier audio.",

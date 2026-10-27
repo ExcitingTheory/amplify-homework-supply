@@ -28,11 +28,13 @@ export const Default: Story = {
       id: "line-1",
       text: "Hello, welcome to today's lesson.",
       emotion: "neutral",
+      timing: { start: 0.1, end: 2.1 },
     },
     speaker: { name: "Instructor", color: "#1976d2" },
     isSelected: false,
     left: 10,
     width: 200,
+    pxPerSec: 100,
     onClick: () => {},
   },
   play: async ({ canvasElement }) => {
@@ -58,11 +60,13 @@ export const LongText: Story = {
       id: "line-2",
       text: "This is a much longer dialogue line that demonstrates how the timeline card handles overflow text in constrained width scenarios.",
       emotion: "excited",
+      timing: { start: 0.5, end: 3.5 },
     },
     speaker: { name: "Student", color: "#9c27b0" },
     isSelected: false,
     left: 50,
     width: 300,
+    pxPerSec: 100,
     onClick: () => {},
   },
   play: async ({ canvasElement }) => {
@@ -73,11 +77,17 @@ export const LongText: Story = {
 
 export const NarrowCard: Story = {
   args: {
-    line: { id: "line-3", text: "Short", emotion: "calm" },
+    line: {
+      id: "line-3",
+      text: "Short",
+      emotion: "calm",
+      timing: { start: 0, end: 0.8 },
+    },
     speaker: { name: "Narrator", color: "#388e3c" },
     isSelected: false,
     left: 0,
     width: 80,
+    pxPerSec: 100,
     onClick: () => {},
   },
   play: async ({ canvasElement }) => {

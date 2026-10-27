@@ -68,6 +68,7 @@
       "collapseNavigation": "收起导航",
       "expandNavigation": "展开导航",
       "files": "文件",
+      "instructorDashboard": "讲师仪表板",
       "moderation": "内容审核",
       "questions": "问题",
       "recycleBin": "回收站",
@@ -76,6 +77,8 @@
     }
   },
   "navigation": {
+    "administering": "管理中",
+    "attending": "参加中",
     "collaboration": "协作",
     "collaborationDesc": "邀请与加入会话",
     "drafts": "草稿",
@@ -91,15 +94,26 @@
     "skills": "技能树",
     "squads": "小队",
     "units": "单元",
-    "workbook": "作业本"
+    "workbook": "作业本",
+    "xpHistory": "XP 历史"
+  },
+  "userMenu": {
+    "level": "等级 {level} · {label}",
+    "levelProgress": "距下一等级的进度",
+    "roleAdmin": "管理员",
+    "roleInstructor": "教师",
+    "roleLearner": "学习者",
+    "roleModerator": "版主",
+    "streakDays": "连续 {count} 天",
+    "totalXP": "{xp} XP"
   },
   "peerReview": {
     "helpful": "同行评审很有帮助",
     "notHelpful": "同行评审没有帮助",
-    "aiAssistant": "AI 助手",
+    "aiAssistant": "Kai",
     "blockReference": "模块:{blockId}",
     "didItHelp": "同伴互评对您有帮助吗?",
-    "messagePlaceholder": "输入消息…(如需 AI 帮助,请使用 @AI)",
+    "messagePlaceholder": "输入消息…(如需 AI 帮助,请使用 @kai)",
     "noMessages": "暂无消息。开始您的同伴互评对话吧!",
     "sessionEnded": "本次评审环节已结束。",
     "thanksForFeedback": "感谢您的反馈!",

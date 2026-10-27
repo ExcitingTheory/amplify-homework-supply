@@ -1556,10 +1556,56 @@ interface ConceptEntry {
   lastSeen: string;
 }
 
+/** Stored shape (the schema's ConfusionPair). */
 interface ConfusionPair {
-  item1: string;
-  item2: string;
+  conceptA: string;
+  conceptB: string;
   frequency: number;
+}
+
+/** Callers and older records may still use item1/item2. */
+type ConfusionPairInput = Partial<ConfusionPair> & {
+  item1?: string;
+  item2?: string;
+};
+
+export function normaliseConfusionPairs(
+  pairs: ConfusionPairInput[] | null | undefined,
+): ConfusionPair[] {
+  const result: ConfusionPair[] = [];
+  for (const pair of pairs ?? []) {
+    const conceptA = pair?.conceptA ?? pair?.item1;
+    const conceptB = pair?.conceptB ?? pair?.item2;
+    if (!conceptA || !conceptB) continue;
+    result.push({
+      conceptA,
+      conceptB,
+      frequency: Math.max(1, Math.round(pair.frequency ?? 1)),
+    });
+  }
+  return result;
+}
+
+/** Merge incoming pairs into existing ones, summing the frequency of repeats. */
+export function mergeConfusionPairs(
+  existing: ConfusionPairInput[] | null | undefined,
+  incoming: ConfusionPairInput[] | null | undefined,
+): ConfusionPair[] {
+  const pairMap = new Map<string, ConfusionPair>();
+  for (const pair of [
+    ...normaliseConfusionPairs(existing),
+    ...normaliseConfusionPairs(incoming),
+  ]) {
+    const key = `${pair.conceptA}|${pair.conceptB}`;
+    const previous = pairMap.get(key);
+    pairMap.set(
+      key,
+      previous
+        ? { ...previous, frequency: previous.frequency + pair.frequency }
+        : pair,
+    );
+  }
+  return Array.from(pairMap.values());
 }
 
 function mergeConceptLists(
@@ -1620,7 +1666,7 @@ export async function engineUpdateStudentUnitMemory(
     accuracy: number;
     weakAreas: string[];
     strongAreas: string[];
-    confusionPairs?: ConfusionPair[];
+    confusionPairs?: ConfusionPairInput[];
     accuracyBySource?: Record<string, number>;
     sourceType?: string;
   },
@@ -1647,7 +1693,7 @@ export async function engineUpdateStudentUnitMemory(
   if (existing) {
     const prevWeak: ConceptEntry[] = existing.weakConcepts || [];
     const prevStrong: ConceptEntry[] = existing.strongConcepts || [];
-    const prevPairs: ConfusionPair[] = existing.confusionPairs || [];
+    const prevPairs: ConfusionPairInput[] = existing.confusionPairs || [];
     const prevAccBySource: Record<string, number> =
       existing.accuracyBySource || {};
     const prevAttempts = existing.totalAttempts || 0;
@@ -1671,20 +1717,7 @@ export async function engineUpdateStudentUnitMemory(
     const weakSet = new Set(weakAreas);
     const filteredStrong = mergedStrong.filter((c) => !weakSet.has(c.concept));
 
-    const pairMap = new Map<string, ConfusionPair>();
-    for (const p of prevPairs) {
-      pairMap.set(`${p.item1}|${p.item2}`, p);
-    }
-    for (const p of incomingPairs) {
-      const key = `${p.item1}|${p.item2}`;
-      const prev = pairMap.get(key);
-      if (prev) {
-        pairMap.set(key, { ...prev, frequency: prev.frequency + p.frequency });
-      } else {
-        pairMap.set(key, p);
-      }
-    }
-    const mergedPairs = Array.from(pairMap.values());
+    const mergedPairs = mergeConfusionPairs(prevPairs, incomingPairs);
 
     const mergedAccBySource = { ...prevAccBySource };
     for (const [src, acc] of Object.entries(incomingAccBySource)) {
@@ -1746,7 +1779,7 @@ export async function engineUpdateStudentUnitMemory(
         frequency: 1,
         lastSeen: timestamp,
       })),
-      confusionPairs: incomingPairs,
+      confusionPairs: normaliseConfusionPairs(incomingPairs),
       accuracyBySource: incomingAccBySource,
       totalAttempts: 1,
       averageAccuracy: accuracy,

@@ -4,7 +4,7 @@ import { defineFunction, secret } from '@aws-amplify/backend';
  * Peer Review AI Lambda function resource
  *
  * Handles:
- * - handleAIMention: Responds to @AI mentions in peer review chat
+ * - handleAIMention: Responds to @kai mentions in peer review chat
  * - generateReviewSummary: Creates AI summary when a review room closes
  *
  * Authorization: Authenticated users via custom mutations

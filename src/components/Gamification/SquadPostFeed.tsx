@@ -25,6 +25,7 @@ import AddIcon from '@mui/icons-material/Add'
 import { NarrativeReader } from '../Editor3/NarrativeReader'
 import { SquadPostEditor } from './SquadPostEditor'
 import { AvatarDisplay } from './AvatarDisplay'
+import { EmptyState } from '../EmptyState'
 
 // ============================================================================
 // Types
@@ -114,9 +115,15 @@ export function SquadPostFeed({
       {/* Post list */}
       <Stack spacing={2}>
         {posts.length === 0 && (
-          <Typography color="text.secondary" sx={{ py: 4, textAlign: 'center' }}>
-            {t('squadPostFeed.empty')}
-          </Typography>
+          <EmptyState
+            dense
+            title={t('squadPostFeed.empty')}
+            {...(isMember &&
+              !composerOpen && {
+                ctaLabel: t('squadPostFeed.writeFirstPost'),
+                onCtaClick: () => setComposerOpen(true),
+              })}
+          />
         )}
 
         {posts.map((post) => (

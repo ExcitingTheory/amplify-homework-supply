@@ -1680,14 +1680,6 @@
     "onTimeHeader": "期限内",
     "studentHeader": "受講生"
   },
-  "firstRunChecklist": {
-    "createUnit": "最初のユニットを作成しましょう",
-    "description": "次のステップを選んでください。",
-    "joinClass": "クラスに参加する",
-    "openWork": "割り当てられた課題を開く",
-    "setupClass": "クラスを設定する",
-    "title": "ここから始めましょう"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "詳細設定",
     "advancedSettingsTooltip": "スキル、バッジ、スクワッド、その他のゲーミフィケーションの詳細設定",
@@ -1993,7 +1985,8 @@
     "visualLayout": "ビジュアルレイアウト",
     "xpAmount": "{xp} XP",
     "xpMultiplier": "XP ×{multiplier}",
-    "xpTuner": "XPチューナー"
+    "xpTuner": "XPチューナー",
+    "noSquadsDescription": "生徒がチームを作成すると、ここに表示されます。メンバーのXPはチームの順位に加算されます。"
   },
   "jobsDashboard": {
     "active": "{count} 件アクティブ",
@@ -2161,6 +2154,7 @@
     "xpReward": "+20 XP"
   },
   "nailedItWall": {
+    "emptyDescription": "「バッチリ」は、あなたの取り組みが優れた理解を示したときに獲得できます。課題を完了してこのウォールを埋めましょう。",
     "emptyTitle": "まだ「Nailed It」の達成はありません。このまま頑張りましょう!",
     "heading": "🎯 見事達成!",
     "meta": "{homeworkTitle} · {date}"
@@ -2347,6 +2341,8 @@
       "documentsDesc": "アップロードされたPDFと解析されたコンテンツから",
       "drillType": "ドリルの種類",
       "generating": "生成中...",
+      "limitToDocuments": "ドキュメントに限定",
+      "limitToDocumentsHelp": "空のままにすると、ユニット内のすべてが対象になります。ドキュメントを選ぶと、テキストコンテンツは除外されます。",
       "maxParticipants": "最大参加者数",
       "mixed": "混合",
       "noSourcesWarning": "練習を開始するには、少なくとも1つのコンテンツソースを有効にしてください。",
@@ -2459,6 +2455,7 @@
     "selectAll": "すべて選択"
   },
   "questionsReview": {
+    "alreadyImported": "インポート済み",
     "answer": "Answer",
     "collapse": "Collapse",
     "deselectAll": "Deselect All",
@@ -2483,6 +2480,7 @@
     "selectAll": "Select All",
     "selectedCount": "{count} of {total} selected",
     "show": "Show",
+    "sourceTooltip": "出典: {filename}",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
   },
@@ -2860,6 +2858,7 @@
   },
   "squadJoinPanel": {
     "cancel": "キャンセル",
+    "emptyCta": "チームへ移動",
     "emptyDescription": "後ほどもう一度ご確認いただくか、ご自身でスクワッドを作成して始めましょう。",
     "emptyTitle": "参加できるスクワッドはまだありません",
     "join": "参加する",
@@ -2882,6 +2881,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "生徒がチームを作成または参加すると、メンバーの合計XPの順にここに表示されます。",
     "emptyTitle": "まだスクワッドがありません",
     "memberCount": "{count, plural, one {メンバー#人} other {メンバー#人}}",
     "mySquad": "マイスクワッド",
@@ -2925,7 +2925,8 @@
     "deletePost": "投稿を削除",
     "empty": "まだ投稿がありません。最初の投稿をしてみましょう!",
     "newPost": "新規投稿",
-    "postAriaLabel": "投稿: {title}"
+    "postAriaLabel": "投稿: {title}",
+    "writeFirstPost": "最初の投稿を書く"
   },
   "stateInspector": {
     "capturedAt": "取得日時: {date}",
@@ -3228,7 +3229,8 @@
     "definitionPlaceholder": "定義を入力してください...",
     "contextLabel": "文脈",
     "contextPlaceholder": "文脈または例文を入力してください...",
-    "importSummary": "新しい単語を{imported}件インポートしました。{skipped}件は既に存在していたためスキップしました。エラーは{errors}件です。"
+    "importSummary": "新しい単語を{imported}件インポートしました。{skipped}件は既に存在していたためスキップしました。エラーは{errors}件です。",
+    "alreadyImported": "インポート済み"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}: {count, plural, one {#件の提出} other {#件の提出}}",

@@ -249,7 +249,7 @@ export function AIAgentConfig({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
-                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                slotProps={{ htmlInput: { min: 270000, step: 1 } }}
                 helperText={t("aiAgentConfig.tokensPerMinuteHint")}
               />
               <TextField
@@ -297,7 +297,7 @@ export function AIAgentConfig({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
-                slotProps={{ htmlInput: { min: 1, step: 1 } }}
+                slotProps={{ htmlInput: { min: 270000, step: 1 } }}
                 helperText={t("aiAgentConfig.tokensPerMinuteHint")}
               />
               <TextField

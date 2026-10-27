@@ -44,11 +44,17 @@ import {
 import { forkUnit } from "../../actions/forkUnit";
 import { getAsyncContentState } from "@/utils/asyncContentState";
 import { trackEvent, AnalyticsEvents } from "@/utils/analytics";
+import { getOwnerIdentifiers, partitionByAccess } from "@/utils/ownership";
 
 function Units({ initialUnits = [] }) {
   const t = useTranslations("pages");
-  const { user, isLoading: authLoading } = React.useContext(AuthContext) || {
+  const {
+    user,
+    session,
+    isLoading: authLoading,
+  } = React.useContext(AuthContext) || {
     user: undefined,
+    session: undefined,
     isLoading: true,
   };
 
@@ -76,15 +82,48 @@ function Units({ initialUnits = [] }) {
    * Units can be copied by Instructors and Admins.
    */
   // Partition server-pre-fetched units by status for initial render
-  const [draftUnits, setDraftUnits] = useState(() =>
+  const [allDraftUnits, setDraftUnits] = useState(() =>
     initialUnits.filter((u) => !u.published && !u.archived),
   );
-  const [publishedUnits, setPublishedUnits] = useState(() =>
+  const [allPublishedUnits, setPublishedUnits] = useState(() =>
     initialUnits.filter((u) => u.published && !u.archived),
   );
   const [archivedUnits, setArchivedUnits] = useState(() =>
     initialUnits.filter((u) => u.archived),
   );
+
+  // Published/draft lists only hold units the user owns. Learners reach other
+  // units through assignments under the sections they attend, so staff see the
+  // rest under "Administering" and learners see nothing extra.
+  const ownerIds = React.useMemo(() => getOwnerIdentifiers(session), [session]);
+  const userGroups = session?.groups;
+  const isStaff = React.useMemo(
+    () =>
+      (userGroups || []).some((g) =>
+        ["Admins", "Moderators", "Instructors"].includes(g),
+      ),
+    [userGroups],
+  );
+  const { draftUnits, publishedUnits, administeringUnits } =
+    React.useMemo(() => {
+      if (ownerIds.length === 0) {
+        return {
+          draftUnits: allDraftUnits,
+          publishedUnits: allPublishedUnits,
+          administeringUnits: [],
+        };
+      }
+      const groups = userGroups || [];
+      const published = partitionByAccess(allPublishedUnits, ownerIds, groups);
+      const drafts = partitionByAccess(allDraftUnits, ownerIds, groups);
+      return {
+        draftUnits: drafts.owned,
+        publishedUnits: published.owned,
+        administeringUnits: isStaff
+          ? [...published.administering, ...drafts.administering]
+          : [],
+      };
+    }, [allDraftUnits, allPublishedUnits, ownerIds, userGroups, isStaff]);
   const [unitsLoaded, setUnitsLoaded] = useState(false);
 
   // Tab state: 0 = My Units, 1 = Shared With Me, 2 = Community
@@ -154,8 +193,8 @@ function Units({ initialUnits = [] }) {
   // Register page context with global chat
   // Combine all units for chat context
   const allUnits = React.useMemo(
-    () => [...draftUnits, ...publishedUnits, ...archivedUnits],
-    [draftUnits, publishedUnits, archivedUnits],
+    () => [...allDraftUnits, ...allPublishedUnits, ...archivedUnits],
+    [allDraftUnits, allPublishedUnits, archivedUnits],
   );
 
   // Filter units by ?q= search param for URL-driven highlighting
@@ -248,6 +287,70 @@ function Units({ initialUnits = [] }) {
       subscription.unsubscribe();
     };
   }, [user, authLoading]);
+
+  // Units the user does not own, grouped by how access is granted.
+  function renderAccessGroup(heading, units) {
+    if (units.length === 0) return null;
+    const labels = {
+      untitledUnit: t("units.untitledUnit"),
+      viewWorkbook: t("units.viewWorkbook"),
+      practice: t("units.practice", "Practice"),
+      editUnit: t("units.editUnit"),
+    };
+    return (
+      <>
+        <Typography
+          variant="h4"
+          component="div"
+          sx={{
+            flexGrow: 1,
+            width: "80vw",
+            margin: "1rem auto",
+          }}
+        >
+          {heading}
+        </Typography>
+        {units.map(function (unit) {
+          if (unit.status !== "PUBLISHED") {
+            return (
+              <UnitCard
+                key={unit.id}
+                unit={unit}
+                badges={badgesByUnit[unit.id]}
+                disabled={work}
+                labels={labels}
+              />
+            );
+          }
+          const lockStatus = getLockStatus(unit.id);
+          return (
+            <ContentLockCard
+              key={unit.id}
+              id={`unit-${unit.id}`}
+              title={unit.name || t("units.untitledUnit")}
+              isLocked={isLocked(unit.id)}
+              thumbnailPath={unit.featuredImage || unit.thumbnail}
+              requiredXP={lockStatus?.requiredXP}
+              currentXP={totalXP}
+              requiredCompletion={lockStatus?.requiredCompletion}
+              currentCompletion={lockStatus?.currentCompletion}
+              requiredBadge={lockStatus?.requiredBadge}
+              requiredPriorUnitId={lockStatus?.requiredPriorUnitId}
+            >
+              <UnitCard
+                unit={unit}
+                badges={badgesByUnit[unit.id]}
+                disabled={work}
+                showPractice
+                onPractice={() => handleOpenPractice(unit)}
+                labels={labels}
+              />
+            </ContentLockCard>
+          );
+        })}
+      </>
+    );
+  }
 
   async function createUnit(event) {
     setIsWorking(true);
@@ -480,7 +583,13 @@ function Units({ initialUnits = [] }) {
                 </Alert>
               </Box>
             ) : sharedState === "success-empty" ? (
-              <EmptyState dense title={t("units.noSharedUnits")} />
+              <EmptyState
+                dense
+                title={t("units.noSharedUnits")}
+                description={t("units.noSharedUnitsDescription")}
+                ctaLabel={t("units.browseCommunityUnits")}
+                onCtaClick={() => setActiveTab(2)}
+              />
             ) : (
               sharedUnits.map((unit) => (
                 <SharedUnitCard
@@ -535,7 +644,15 @@ function Units({ initialUnits = [] }) {
                 </Alert>
               </Box>
             ) : communityState === "success-empty" ? (
-              <EmptyState dense title={t("units.noCommunityUnits")} />
+              <EmptyState
+                dense
+                title={t("units.noCommunityUnits")}
+                description={t("units.noCommunityUnitsDescription")}
+                ctaLabel={t("units.createNewUnit")}
+                onCtaClick={(event) => {
+                  if (!work) createUnit(event);
+                }}
+              />
             ) : (
               communityUnits.map((unit) => (
                 <CommunityUnitCard
@@ -740,6 +857,8 @@ function Units({ initialUnits = [] }) {
                 })}
               </>
             )}
+
+            {renderAccessGroup(t("units.administering"), administeringUnits)}
 
             {archivedUnits.length > 0 && (
               <>

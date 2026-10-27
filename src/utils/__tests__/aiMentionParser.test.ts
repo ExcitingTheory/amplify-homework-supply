@@ -1,33 +1,38 @@
 import { describe, it, expect } from 'vitest'
 import {
+  AI_MENTION_HANDLE,
   hasAIMention,
   extractAIQuestion,
   parseAIMention,
 } from '../../utils/aiMentionParser'
 
 describe('aiMentionParser', () => {
+  it('exposes the handle the UI tells people to type', () => {
+    expect(AI_MENTION_HANDLE).toBe('@kai')
+  })
+
   describe('hasAIMention', () => {
-    it('detects @AI at start of message', () => {
-      expect(hasAIMention('@AI what about this?')).toBe(true)
+    it('detects @kai at start of message', () => {
+      expect(hasAIMention('@kai what about this?')).toBe(true)
     })
 
-    it('detects @AI in middle of message', () => {
-      expect(hasAIMention('Hey @AI can you explain?')).toBe(true)
+    it('detects @kai in middle of message', () => {
+      expect(hasAIMention('Hey @kai can you explain?')).toBe(true)
     })
 
-    it('detects @AI at end of message', () => {
-      expect(hasAIMention('Help me @AI')).toBe(true)
+    it('detects @kai at end of message', () => {
+      expect(hasAIMention('Help me @kai')).toBe(true)
     })
 
-    it('is case-insensitive (@ai)', () => {
-      expect(hasAIMention('@ai what is this?')).toBe(true)
+    it('is case-insensitive (@KAI)', () => {
+      expect(hasAIMention('@KAI what is this?')).toBe(true)
     })
 
-    it('is case-insensitive (@Ai)', () => {
-      expect(hasAIMention('@Ai help me')).toBe(true)
+    it('is case-insensitive (@Kai)', () => {
+      expect(hasAIMention('@Kai help me')).toBe(true)
     })
 
-    it('returns false for messages without @AI', () => {
+    it('returns false for messages without @kai', () => {
       expect(hasAIMention('just a normal message')).toBe(false)
     })
 
@@ -35,44 +40,69 @@ describe('aiMentionParser', () => {
       expect(hasAIMention('')).toBe(false)
     })
 
-    it('does not match @AIDE or @AIRPLANE (word boundary)', () => {
-      expect(hasAIMention('@AIDE help me')).toBe(false)
+    it('no longer treats @AI as a mention', () => {
+      expect(hasAIMention('@AI what about this?')).toBe(false)
+      expect(hasAIMention('Hey @ai can you explain?')).toBe(false)
+    })
+
+    it('ignores email addresses and handles that merely start with kai', () => {
+      expect(hasAIMention('write to bob@kai.com')).toBe(false)
+      expect(hasAIMention('thanks @kaitlyn')).toBe(false)
+    })
+
+    it('detects @kai next to punctuation', () => {
+      expect(hasAIMention('Ask @kai, please')).toBe(true)
+      expect(hasAIMention('(@kai?)')).toBe(true)
+    })
+
+    it('gives the same answer when called repeatedly', () => {
+      expect(hasAIMention('@kai hi')).toBe(true)
+      expect(hasAIMention('@kai hi')).toBe(true)
+      expect(hasAIMention('@kai hi')).toBe(true)
+    })
+
+    it('does not match @KAISER or @KAIROS (word boundary)', () => {
+      expect(hasAIMention('@KAISER help me')).toBe(false)
     })
   })
 
   describe('extractAIQuestion', () => {
-    it('extracts text after @AI at start', () => {
-      expect(extractAIQuestion('@AI what about this?')).toBe('what about this?')
+    it('extracts text after @kai at start', () => {
+      expect(extractAIQuestion('@kai what about this?')).toBe('what about this?')
     })
 
-    it('extracts text after @AI in middle', () => {
-      expect(extractAIQuestion('Hey @AI can you explain?')).toBe('Hey can you explain?')
+    it('extracts text after @kai in middle', () => {
+      expect(extractAIQuestion('Hey @kai can you explain?')).toBe('Hey can you explain?')
     })
 
-    it('handles @AI at end with no question', () => {
-      expect(extractAIQuestion('@AI')).toBe('')
+    it('handles @kai at end with no question', () => {
+      expect(extractAIQuestion('@kai')).toBe('')
     })
 
-    it('handles @ai lowercase', () => {
-      expect(extractAIQuestion('@ai what is this?')).toBe('what is this?')
+    it('handles @KAI uppercase', () => {
+      expect(extractAIQuestion('@KAI what is this?')).toBe('what is this?')
     })
 
-    it('strips multiple @AI mentions', () => {
-      const result = extractAIQuestion('Check @AI this part and @AI that part')
+    it('strips multiple @kai mentions', () => {
+      const result = extractAIQuestion('Check @kai this part and @kai that part')
       expect(result).toBe('Check this part and that part')
     })
 
     it('returns empty for empty input', () => {
       expect(extractAIQuestion('')).toBe('')
     })
+
+    it('leaves email addresses intact', () => {
+      expect(extractAIQuestion('@kai email bob@kai.com')).toBe('email bob@kai.com')
+    })
   })
 
   describe('parseAIMention', () => {
-    it('returns full result for a message with @AI', () => {
-      const result = parseAIMention('@AI what about this?')
+    it('returns full result for a message with @kai', () => {
+      const result = parseAIMention('@kai what about this?')
       expect(result.hasAIMention).toBe(true)
       expect(result.question).toBe('what about this?')
-      expect(result.originalMessage).toBe('@AI what about this?')
+      expect(result.originalMessage).toBe('@kai what about this?')
     })
 
     it('returns no mention for a normal message', () => {

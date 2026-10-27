@@ -194,3 +194,59 @@ export const PreConfiguredFromChat: Story = {
     expect(checkedBoxes.length).toBeGreaterThan(0)
   },
 }
+
+export const WithDocumentPicker: Story = {
+  args: {
+    open: true,
+    unitName: 'Biology: Cell Structure',
+    vocabularyCount: 30,
+    questionCount: 12,
+    textBlockCount: 5,
+    documentCount: 2,
+    documents: [
+      { id: 'doc-1', filename: 'cell-structure.pdf' },
+      { id: 'doc-2', filename: 'organelles-worksheet.pdf' },
+    ],
+  },
+  play: async ({ canvasElement, args }) => {
+    const body = within(document.body)
+    await body.findByText(/Biology: Cell Structure/)
+
+    // The dialog is in a portal and its buttons are not always exposed by role
+    // while it animates in; the last button is "Start Practice".
+    const start = async () => {
+      const buttons = Array.from(canvasElement.ownerDocument.querySelectorAll('button'))
+      await userEvent.click(buttons[buttons.length - 1])
+    }
+
+    // Nothing is limited until a document is chosen
+    await start()
+    expect(args.onStart).toHaveBeenLastCalledWith(
+      expect.not.objectContaining({ documentIds: expect.anything() }),
+    )
+
+    const picker = await body.findByLabelText(/Limit to documents/i, undefined, { timeout: 5000 })
+    await userEvent.click(picker)
+    await userEvent.click(await body.findByText('organelles-worksheet.pdf'))
+    await start()
+    expect(args.onStart).toHaveBeenLastCalledWith(
+      expect.objectContaining({ documentIds: ['doc-2'] }),
+    )
+  },
+}
+
+export const WithoutDocuments: Story = {
+  args: {
+    open: true,
+    unitName: 'Biology: Cell Structure',
+    vocabularyCount: 30,
+    questionCount: 12,
+    textBlockCount: 5,
+    documentCount: 0,
+  },
+  play: async () => {
+    const body = within(document.body)
+    await body.findByText(/Biology: Cell Structure/)
+    expect(body.queryByText(/Limit to documents/i)).not.toBeInTheDocument()
+  },
+}

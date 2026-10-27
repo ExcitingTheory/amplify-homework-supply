@@ -5,6 +5,9 @@
 
 import { getAmplifyClient } from './amplifyClient';
 import { assertParsedContentImportAllowed } from './parsedContentModeration';
+import { VOCABULARY_FIELDS, pickEntries, toEntryList } from './parsedContentLists';
+import { loadMergedParsedContent, updateMergedListEntry } from './parsedContentChunks';
+import { indexLinksByItem, linkItemToDocument, listDocumentLinks } from './documentLinks';
 // Type import removed - not needed in runtime JS
 
 /**
@@ -86,6 +89,26 @@ export async function linkWordToUnit(wordId, unitId, owner) {
 }
 
 /**
+ * Link a Word to a Document via DocumentWord junction table, once.
+ * The link records the entry's page, source text and key.
+ * @param {string} wordId - ID of the Word
+ * @param {string} documentId - ID of the Document
+ * @param {string} owner - Owner of the relationship
+ * @param {Object} [entry] - The extracted vocabulary item (word, page, context)
+ * @param {Map<string, Object>} [existing] - Links already loaded for the document, by word id
+ * @returns {Promise<Object|null>} The DocumentWord link or null
+ */
+export async function linkWordToDocument(wordId, documentId, owner, entry = null, existing = undefined) {
+    return linkItemToDocument(getAmplifyClient(), 'word', {
+        itemId: wordId,
+        documentId,
+        owner,
+        entry,
+        existing,
+    });
+}
+
+/**
  * Import vocabulary items from ParsedContent to Word dictionary
  * @param {string} parsedContentId - ID of the ParsedContent record
  * @param {string} unitId - ID of the Unit to link words to
@@ -105,8 +128,9 @@ export async function importVocabularyToUnit(
 ) {
     try {
         const client = getAmplifyClient();
-        // Fetch the ParsedContent record
-        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
+        // Fetch the ParsedContent record; a long document is stored as several
+        // chunks, merged into one record here
+        const parsedContent = await loadMergedParsedContent(client, { id: parsedContentId });
         
         if (!parsedContent) {
             throw new Error(`ParsedContent not found: ${parsedContentId}`);
@@ -114,9 +138,7 @@ export async function importVocabularyToUnit(
         await assertParsedContentImportAllowed(client, parsedContent);
         
         // Parse the vocabularyJSON
-        const vocabularyItems = parsedContent.vocabularyJSON 
-            ? JSON.parse(parsedContent.vocabularyJSON) 
-            : [];
+        const vocabularyItems = toEntryList(parsedContent.vocabularyJSON);
         
         if (vocabularyItems.length === 0) {
             return {
@@ -143,6 +165,12 @@ export async function importVocabularyToUnit(
         };
         
         const total = itemsToImport.length;
+
+        // Links already made for this document, loaded once rather than per word
+        const documentId = parsedContent.documentID || null;
+        const documentLinks = documentId
+            ? indexLinksByItem('word', await listDocumentLinks(client, documentId, 'word'))
+            : undefined;
         
         // Process each vocabulary item
         for (let i = 0; i < itemsToImport.length; i++) {
@@ -174,6 +202,11 @@ export async function importVocabularyToUnit(
                 if (unitId) {
                     await linkWordToUnit(wordToLink.id, unitId, owner);
                 }
+
+                // Link word to source document
+                if (documentId) {
+                    await linkWordToDocument(wordToLink.id, documentId, owner, item, documentLinks);
+                }
                 
                 results.importedWords.push({
                     wordId: wordToLink.id,
@@ -195,8 +228,8 @@ export async function importVocabularyToUnit(
         if (parsedContent) {
             await client.models.ParsedContent.update({
                 id: parsedContent.id,
-                approved: true,
                 importedAt: new Date().toISOString(),
+                _version: parsedContent._version,
             });
         }
         
@@ -231,7 +264,7 @@ export async function importVocabularyToUnit(
 export async function getVocabularyImportStatus(parsedContentId) {
     try {
         const client = getAmplifyClient();
-        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
+        const parsedContent = await loadMergedParsedContent(client, { id: parsedContentId });
         
         if (!parsedContent) {
             return {
@@ -241,14 +274,13 @@ export async function getVocabularyImportStatus(parsedContentId) {
             };
         }
         
-        const vocabularyItems = parsedContent.vocabularyJSON 
-            ? JSON.parse(parsedContent.vocabularyJSON) 
-            : [];
+        const vocabularyItems = toEntryList(parsedContent.vocabularyJSON);
         
         return {
             found: true,
             imported: !!parsedContent.importedAt,
-            approved: !!parsedContent.approved,
+            // ParsedContent has no approved field; an import implies approval.
+            approved: !!parsedContent.importedAt,
             importedAt: parsedContent.importedAt,
             itemCount: vocabularyItems.length,
             vocabularyItems: vocabularyItems,
@@ -273,31 +305,21 @@ export async function getVocabularyImportStatus(parsedContentId) {
 export async function updateVocabularyItem(parsedContentId, itemIndex, updates) {
     try {
         const client = getAmplifyClient();
-        const { data: parsedContent } = await client.models.ParsedContent.get({ id: parsedContentId });
+        const parsedContent = await loadMergedParsedContent(client, { id: parsedContentId });
         
         if (!parsedContent) {
             throw new Error(`ParsedContent not found: ${parsedContentId}`);
         }
         
-        const vocabularyItems = parsedContent.vocabularyJSON 
-            ? JSON.parse(parsedContent.vocabularyJSON) 
-            : [];
-        
-        if (itemIndex < 0 || itemIndex >= vocabularyItems.length) {
-            throw new Error(`Invalid item index: ${itemIndex}`);
-        }
-        
-        // Update the item
-        vocabularyItems[itemIndex] = {
-            ...vocabularyItems[itemIndex],
-            ...updates,
-        };
-        
-        // Save updated ParsedContent
-        await client.models.ParsedContent.update({
-            id: parsedContent.id,
-            vocabularyJSON: JSON.stringify(vocabularyItems),
-        });
+        // Writes only the chunk that holds the vocabulary item
+        await updateMergedListEntry(
+            client,
+            parsedContent,
+            'vocabularyJSON',
+            itemIndex,
+            updates,
+            (entries) => pickEntries(entries, VOCABULARY_FIELDS),
+        );
         
         return true;
         

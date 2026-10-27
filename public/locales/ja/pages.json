@@ -32,6 +32,7 @@
     "completionMode": "完了",
     "empty": "まだランキングデータがありません。課題を完了してXPを獲得しましょう！",
     "fastestMode": "最速",
+    "goToAssignments": "自分の課題へ移動",
     "heading": "総合ランキング",
     "squadsMode": "チーム",
     "title": "ランキング",
@@ -222,12 +223,16 @@
     "viewWorkbook": "ワークブックを表示"
   },
   "sections": {
+    "administering": "管理中",
     "archive": "アーカイブ",
+    "archivedSections": "アーカイブ済みセクション",
     "archiveError": "セクションの更新に失敗しました。もう一度お試しください。",
     "archived": "アーカイブ済み",
     "archivedSuccess": "セクションが正常にアーカイブされました",
+    "attending": "参加中",
     "createNew": "新規作成",
     "createNewSection": "新しいセクションを作成",
+    "draftSections": "下書きセクション",
     "joinCode": "コードラベル",
     "loading": "読み込み中です...",
     "newSection": {
@@ -239,6 +244,7 @@
       "title": "新しいセクション"
     },
     "noSectionsYet": "セクションがまだありません",
+    "publishedSections": "公開済みセクション",
     "showArchived": "アーカイブ済みを表示 ({count})",
     "title": "セクション",
     "unarchive": "アーカイブ解除",
@@ -281,7 +287,9 @@
     "loading": "読み込み中…"
   },
   "units": {
+    "administering": "管理中",
     "archivedUnits": "アーカイブされたユニット",
+    "browseCommunityUnits": "コミュニティユニットを見る",
     "createNew": "新規作成",
     "createNewUnit": "新しい単元を作成する",
     "editUnit": "ユニットを編集",
@@ -291,8 +299,10 @@
     "forking": "フォーク中...",
     "myDrafts": "下書き",
     "noCommunityUnits": "コミュニティユニットは利用できません",
+    "noCommunityUnitsDescription": "講師がコミュニティに公開したユニットがここに表示され、ご自分のライブラリにコピーできます。",
     "noPublishedUnits": "公開済みユニットはまだありません",
     "noSharedUnits": "まだ共有されているユニットはありません",
+    "noSharedUnitsDescription": "他のユーザーが共有したユニットがここに表示されます。",
     "practice": "練習",
     "publishedUnits": "公開済みユニット",
     "tabCommunity": "コミュニティ",

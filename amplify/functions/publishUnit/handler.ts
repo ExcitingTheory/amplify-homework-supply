@@ -23,6 +23,7 @@ import {
 } from "@aws-sdk/client-s3";
 import type { Schema } from "../../data/resource";
 
+import { SUMMARIES_SELECTION, toEntryList } from "../shared/parsedContentLists";
 const s3 = new S3Client({ region: process.env.AWS_REGION || "us-east-1" });
 const BUCKET = process.env.STORAGE_BUCKET!;
 
@@ -158,7 +159,7 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
           filename
           parsedContent {
             items {
-              summariesJSON
+              ${SUMMARIES_SELECTION}
             }
           }
         }
@@ -862,11 +863,9 @@ export const handler: Handler = async (event) => {
       documentSummaries.push(doc.filename.replace(/\.[^.]+$/, ""));
     // Also extract summary titles from parsed content
     for (const pc of doc.parsedContent?.items ?? []) {
-      if (pc?.summariesJSON) {
-        for (const entry of pc.summariesJSON) {
-          if (entry?.title && documentSummaries.length < 10) {
-            documentSummaries.push(entry.title);
-          }
+      for (const entry of toEntryList<{ title?: string }>(pc?.summariesJSON)) {
+        if (entry?.title && documentSummaries.length < 10) {
+          documentSummaries.push(entry.title);
         }
       }
     }

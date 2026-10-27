@@ -3,6 +3,8 @@ import React, { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import SectionContext, { SectionProvider } from "@/context/sectionContext";
+import AuthContext from "@/context/authContext";
+import { getOwnerIdentifiers, partitionByAccess } from "@/utils/ownership";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 
 import PeopleIcon from "@mui/icons-material/People";
@@ -96,6 +98,7 @@ function Sections({ user }) {
    */
   const t = useTranslations("pages");
   const { drawerOpen, drawerWidth, isDesktop } = useAppShell();
+  const { session: authSession } = React.useContext(AuthContext) || {};
   const { sections, sectionsLoading, refetchSections } =
     React.useContext(SectionContext);
   const [work, setIsWorking] = useState(false);
@@ -197,6 +200,26 @@ function Sections({ user }) {
     return valid.filter((s) => s.status !== "ARCHIVED");
   }, [sections, showArchived]);
 
+  // Published/draft/archived groups only hold sections the user owns. Other
+  // sections are "Attending" when a learner group grants access, otherwise
+  // "Administering".
+  const ownerIds = React.useMemo(
+    () => getOwnerIdentifiers(authSession),
+    [authSession],
+  );
+  const userGroupNames = authSession?.groups;
+  const {
+    owned: ownedVisible,
+    attending: attendingVisible,
+    administering: administeringVisible,
+  } = React.useMemo(
+    () =>
+      ownerIds.length === 0
+        ? { owned: visibleSections, attending: [], administering: [] }
+        : partitionByAccess(visibleSections, ownerIds, userGroupNames || []),
+    [visibleSections, ownerIds, userGroupNames],
+  );
+
   const archivedCount = React.useMemo(() => {
     if (!sections) return 0;
     return sections.filter((s) => s != null && s.status === "ARCHIVED").length;
@@ -258,7 +281,212 @@ function Sections({ user }) {
 
   // Sections now come from SectionContext - no duplicate subscription needed
 
-  // console.log('sections', sections)
+  function renderSectionCard(section) {
+    return (
+      <Card
+        key={section.id}
+        data-tour="section-card"
+        variant="assignment"
+        sx={{
+          display: "flex",
+          flexDirection: { xs: "column", sm: "row" },
+          margin: "1rem auto",
+          width:
+            isDesktop && drawerOpen ? `calc(90vw - ${drawerWidth}px)` : "90vw",
+          maxWidth: "64rem",
+        }}
+      >
+        <CardMediaThumbnail
+          s3Key={section?.featuredImage}
+          identityId={section?.identityId}
+          title={section?.name}
+          wideOnLarge
+        />
+        <Box
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            flexGrow: "1",
+            p: 0.5,
+          }}
+        >
+          <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
+            <Box
+              sx={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+              }}
+            >
+              <Typography
+                component="div"
+                variant="h5"
+                sx={{ fontWeight: 600, mb: 0.5 }}
+              >
+                {section?.name || t("sections.untitledSection")}
+                {section.status === "ARCHIVED" && (
+                  <Chip
+                    label={t("sections.archived")}
+                    size="small"
+                    color="default"
+                    sx={{ ml: 1, verticalAlign: "middle" }}
+                  />
+                )}
+              </Typography>
+              {(isInstructor || section.owner === userId) && (
+                <IconButton
+                  size="small"
+                  onClick={(e) => handleMenuOpen(e, section.id)}
+                  disabled={work}
+                >
+                  <MoreVertIcon />
+                </IconButton>
+              )}
+            </Box>
+            <Typography
+              variant="body1"
+              color="text.secondary"
+              component="div"
+              sx={{ lineHeight: 1.6 }}
+            >
+              {section?.description || ""}
+            </Typography>
+            {section?.code && (
+              <Box
+                sx={{
+                  mt: 1.5,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 1,
+                }}
+              >
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ fontWeight: 500 }}
+                >
+                  {t("sections.joinCode")}:
+                </Typography>
+                <Chip
+                  data-tour="join-code"
+                  label={section.code}
+                  size="small"
+                  sx={{
+                    fontFamily: "monospace",
+                    fontSize: "0.875rem",
+                    fontWeight: 600,
+                    backgroundColor: "action.selected",
+                    border: "1px solid",
+                    borderColor: "divider",
+                  }}
+                />
+              </Box>
+            )}
+          </CardContent>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexWrap: "wrap",
+              pl: 2,
+              pb: 1.5,
+            }}
+          >
+            <Button
+              variant="outlined"
+              href={`/section/${section.id}`}
+              disabled={work}
+              startIcon={<PeopleIcon />}
+              sx={{
+                textTransform: "none",
+                fontWeight: 600,
+                px: 3,
+                py: 1,
+                borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+                boxShadow: 2,
+                color: "primary.main",
+                borderColor: "primary.main",
+                "&:hover": {
+                  boxShadow: 4,
+                  borderColor: "primary.main",
+                  backgroundColor: "action.hover",
+                },
+              }}
+            >
+              {t("sections.viewSection")}
+            </Button>
+
+            {(isInstructor || section.owner === userId) && (
+              <>
+                <SectionSettingsNavigation sectionId={section.id} />
+                <Button
+                  variant="contained"
+                  color="primary"
+                  disabled={work}
+                  onClick={() => setQuickAssignSection(section)}
+                  startIcon={<AddIcon />}
+                  sx={{
+                    textTransform: "none",
+                    fontWeight: 600,
+                    px: 3,
+                    py: 1,
+                    borderRadius: `${SEMANTIC_THEME.radius.control}px`,
+                    boxShadow: 2,
+                  }}
+                >
+                  {t("sections.assignUnit", "Assign Unit")}
+                </Button>
+                {canViewInstructorDashboard && (
+                  <Button
+                    variant="outlined"
+                    startIcon={<ContentCopyIcon />}
+                    onClick={() => setCadenceCopyOpen(true)}
+                    sx={{
+                      textTransform: "none",
+                      fontWeight: 600,
+                    }}
+                  >
+                    Copy cadence
+                  </Button>
+                )}
+              </>
+            )}
+          </Box>
+        </Box>
+      </Card>
+    );
+  }
+
+  const groupedSections = [
+    {
+      key: "published",
+      heading: t("sections.publishedSections"),
+      items: ownedVisible.filter((s) => s.status === "PUBLISHED"),
+    },
+    {
+      key: "draft",
+      heading: t("sections.draftSections"),
+      items: ownedVisible.filter(
+        (s) => s.status !== "PUBLISHED" && s.status !== "ARCHIVED",
+      ),
+    },
+    {
+      key: "archived",
+      heading: t("sections.archivedSections"),
+      items: ownedVisible.filter((s) => s.status === "ARCHIVED"),
+    },
+    {
+      key: "attending",
+      heading: t("sections.attending"),
+      items: attendingVisible,
+    },
+    {
+      key: "administering",
+      heading: t("sections.administering"),
+      items: administeringVisible,
+    },
+  ].filter((group) => group.items.length > 0);
 
   return (
     <>
@@ -493,185 +721,18 @@ function Sections({ user }) {
               </Box>
             </Card>
           )}
-          {sections &&
-            visibleSections.map(function (section) {
-              return (
-                <Card
-                  key={section.id}
-                  data-tour="section-card"
-                  variant="assignment"
-                  sx={{
-                    display: "flex",
-                    flexDirection: { xs: "column", sm: "row" },
-                    margin: "1rem auto",
-                    width:
-                      isDesktop && drawerOpen
-                        ? `calc(90vw - ${drawerWidth}px)`
-                        : "90vw",
-                    maxWidth: "64rem",
-                  }}
-                >
-                  <CardMediaThumbnail
-                    s3Key={section?.featuredImage}
-                    identityId={section?.identityId}
-                    title={section?.name}
-                    wideOnLarge
-                  />
-                  <Box
-                    sx={{
-                      display: "flex",
-                      flexDirection: "column",
-                      flexGrow: "1",
-                      p: 0.5,
-                    }}
-                  >
-                    <CardContent sx={{ flex: "1 0 auto", pb: 1 }}>
-                      <Box
-                        sx={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <Typography
-                          component="div"
-                          variant="h5"
-                          sx={{ fontWeight: 600, mb: 0.5 }}
-                        >
-                          {section?.name || t("sections.untitledSection")}
-                          {section.status === "ARCHIVED" && (
-                            <Chip
-                              label={t("sections.archived")}
-                              size="small"
-                              color="default"
-                              sx={{ ml: 1, verticalAlign: "middle" }}
-                            />
-                          )}
-                        </Typography>
-                        {(isInstructor || section.owner === userId) && (
-                          <IconButton
-                            size="small"
-                            onClick={(e) => handleMenuOpen(e, section.id)}
-                            disabled={work}
-                          >
-                            <MoreVertIcon />
-                          </IconButton>
-                        )}
-                      </Box>
-                      <Typography
-                        variant="body1"
-                        color="text.secondary"
-                        component="div"
-                        sx={{ lineHeight: 1.6 }}
-                      >
-                        {section?.description || ""}
-                      </Typography>
-                      {section?.code && (
-                        <Box
-                          sx={{
-                            mt: 1.5,
-                            display: "flex",
-                            alignItems: "center",
-                            gap: 1,
-                          }}
-                        >
-                          <Typography
-                            variant="body2"
-                            color="text.secondary"
-                            sx={{ fontWeight: 500 }}
-                          >
-                            {t("sections.joinCode")}:
-                          </Typography>
-                          <Chip
-                            data-tour="join-code"
-                            label={section.code}
-                            size="small"
-                            sx={{
-                              fontFamily: "monospace",
-                              fontSize: "0.875rem",
-                              fontWeight: 600,
-                              backgroundColor: "action.selected",
-                              border: "1px solid",
-                              borderColor: "divider",
-                            }}
-                          />
-                        </Box>
-                      )}
-                    </CardContent>
-                    <Box
-                      sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        gap: 1,
-                        flexWrap: "wrap",
-                        pl: 2,
-                        pb: 1.5,
-                      }}
-                    >
-                      <Button
-                        variant="outlined"
-                        href={`/section/${section.id}`}
-                        disabled={work}
-                        startIcon={<PeopleIcon />}
-                        sx={{
-                          textTransform: "none",
-                          fontWeight: 600,
-                          px: 3,
-                          py: 1,
-                          borderRadius: `${SEMANTIC_THEME.radius.control}px`,
-                          boxShadow: 2,
-                          color: "primary.main",
-                          borderColor: "primary.main",
-                          "&:hover": {
-                            boxShadow: 4,
-                            borderColor: "primary.main",
-                            backgroundColor: "action.hover",
-                          },
-                        }}
-                      >
-                        {t("sections.viewSection")}
-                      </Button>
-
-                      {(isInstructor || section.owner === userId) && (
-                        <>
-                          <SectionSettingsNavigation sectionId={section.id} />
-                          <Button
-                            variant="contained"
-                            color="primary"
-                            disabled={work}
-                            onClick={() => setQuickAssignSection(section)}
-                            startIcon={<AddIcon />}
-                            sx={{
-                              textTransform: "none",
-                              fontWeight: 600,
-                              px: 3,
-                              py: 1,
-                              borderRadius: `${SEMANTIC_THEME.radius.control}px`,
-                              boxShadow: 2,
-                            }}
-                          >
-                            {t("sections.assignUnit", "Assign Unit")}
-                          </Button>
-                          {canViewInstructorDashboard && (
-                            <Button
-                              variant="outlined"
-                              startIcon={<ContentCopyIcon />}
-                              onClick={() => setCadenceCopyOpen(true)}
-                              sx={{
-                                textTransform: "none",
-                                fontWeight: 600,
-                              }}
-                            >
-                              Copy cadence
-                            </Button>
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  </Box>
-                </Card>
-              );
-            })}
+          {groupedSections.map((group) => (
+            <React.Fragment key={group.key}>
+              <Typography
+                variant="h4"
+                component="div"
+                sx={{ width: "90vw", maxWidth: "64rem", margin: "1rem auto" }}
+              >
+                {group.heading}
+              </Typography>
+              {group.items.map(renderSectionCard)}
+            </React.Fragment>
+          ))}
 
           {/* Section actions menu */}
           <Menu

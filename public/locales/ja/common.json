@@ -68,6 +68,7 @@
       "collapseNavigation": "ナビゲーションを折りたたむ",
       "expandNavigation": "ナビゲーションを展開",
       "files": "ファイル",
+      "instructorDashboard": "講師ダッシュボード",
       "moderation": "モデレーション",
       "questions": "質問",
       "recycleBin": "ごみ箱",
@@ -76,6 +77,8 @@
     }
   },
   "navigation": {
+    "administering": "管理中",
+    "attending": "参加中",
     "collaboration": "コラボレーション",
     "collaborationDesc": "招待とセッション参加",
     "drafts": "下書き",
@@ -91,15 +94,26 @@
     "skills": "スキルツリー",
     "squads": "チーム",
     "units": "ユニット",
-    "workbook": "ワークブック"
+    "workbook": "ワークブック",
+    "xpHistory": "XP履歴"
+  },
+  "userMenu": {
+    "level": "レベル {level} · {label}",
+    "levelProgress": "次のレベルまでの進捗",
+    "roleAdmin": "管理者",
+    "roleInstructor": "講師",
+    "roleLearner": "学習者",
+    "roleModerator": "モデレーター",
+    "streakDays": "{count}日連続",
+    "totalXP": "{xp} XP"
   },
   "peerReview": {
     "helpful": "ピアレビューは役に立ちました",
     "notHelpful": "ピアレビューは役に立ちませんでした",
-    "aiAssistant": "AIアシスタント",
+    "aiAssistant": "Kai",
     "blockReference": "ブロック: {blockId}",
     "didItHelp": "ピアレビューは役に立ちましたか?",
-    "messagePlaceholder": "メッセージを入力… (AIのサポートが必要な場合は @AI を使用してください)",
+    "messagePlaceholder": "メッセージを入力… (AIのサポートが必要な場合は @kai を使用してください)",
     "noMessages": "まだメッセージがありません。ピアレビューの会話を始めましょう!",
     "sessionEnded": "このレビューセッションは終了しました。",
     "thanksForFeedback": "フィードバックをありがとうございます!",

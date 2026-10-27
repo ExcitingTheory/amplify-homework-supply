@@ -34,7 +34,8 @@
       "videoNotSupported": "ご利用のブラウザはvideoタグをサポートしていません。",
       "confirmMoveToRecycleBin": "{name} をごみ箱に移動しますか？",
       "moveToRecycleBinFailed": "{name} をごみ箱に移動できませんでした: {error}",
-      "reAnalyzeError": "{name}の再分析中にエラーが発生しました: {error}"
+      "reAnalyzeError": "{name}の再分析中にエラーが発生しました: {error}",
+      "importedContentNote": "このドキュメントからインポートされた問題 {questions} 件と単語 {words} 件は、問題バンクと辞書に残ります。"
     },
     "generators": {
       "audioPromptPlaceholder": "音声ファイルに変換するテキストを入力してください。",

@@ -35,6 +35,8 @@ import ListItemButton from "@mui/material/ListItemButton";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
 import Tooltip from "@mui/material/Tooltip";
+import Chip from "@mui/material/Chip";
+import LinearProgress from "@mui/material/LinearProgress";
 import BatteryUnknownIcon from "@mui/icons-material/BatteryUnknown";
 import HomeIcon from "@mui/icons-material/Home";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
@@ -72,6 +74,7 @@ import { Help, Settings } from "@mui/icons-material";
 import { getAmplifyClient } from "../utils/amplifyClient";
 import { joinSection } from "../../app/actions/section";
 import { trackEvent, AnalyticsEvents } from "../utils/analytics";
+import { getOwnerIdentifiers, partitionByAccess } from "../utils/ownership";
 import { useColorMode } from "../hooks/useColorMode";
 import { LevelBadge } from "./Gamification/LevelBadge";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
@@ -87,6 +90,8 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import TuneIcon from "@mui/icons-material/Tune";
 import DeleteOutlineIcon from "@mui/icons-material/DeleteOutline";
 import DashboardIcon from "@mui/icons-material/Dashboard";
+import SchoolIcon from "@mui/icons-material/School";
+import SupervisorAccountIcon from "@mui/icons-material/SupervisorAccount";
 import FlagIcon from "@mui/icons-material/Flag";
 import InsightsIcon from "@mui/icons-material/Insights";
 import Inventory2Icon from "@mui/icons-material/Inventory2";
@@ -258,14 +263,36 @@ export function HelpMenu() {
   );
 }
 
+// Highest-privilege group first; the first match is the role shown to the user.
+const ROLE_PRIORITY = [
+  ["Admins", "roleAdmin"],
+  ["Moderators", "roleModerator"],
+  ["Instructors", "roleInstructor"],
+  ["Learners", "roleLearner"],
+];
+
 export function UserMenu({ onJoinSection }) {
   const tCommon = useTranslations("common");
   const tAuth = useTranslations("auth");
-  const { level } = useXP();
+  const { level, totalXP } = useXP();
   const { streak } = useProgress();
   const { mySquad } = useSquad();
   const { openPanel } = useNotifications();
-  const { user } = React.useContext(AuthContext);
+  const { user, session: authSession } = React.useContext(AuthContext);
+  const attributes = user?.attributes;
+  const fullName = [attributes?.given_name, attributes?.family_name]
+    .filter(Boolean)
+    .join(" ");
+  const menuDisplayName =
+    attributes?.preferred_username ||
+    fullName ||
+    attributes?.name ||
+    attributes?.email?.split("@")[0] ||
+    tCommon("navigation.profile");
+  const roleKey = ROLE_PRIORITY.find(([group]) =>
+    (authSession?.groups || []).includes(group),
+  )?.[1];
+  const currentStreak = streak?.currentStreak || 0;
   const {
     style: avatarStyle,
     overrides: avatarOverrides,
@@ -329,6 +356,88 @@ export function UserMenu({ onJoinSection }) {
         }}
       >
         {open && [
+          // A disabled item keeps the header out of keyboard focus and menu
+          // typeahead; the opacity override keeps it fully legible.
+          <MenuItem
+            key="summary"
+            disabled
+            sx={{
+              display: "block",
+              minWidth: 260,
+              whiteSpace: "normal",
+              "&.Mui-disabled": { opacity: 1 },
+            }}
+          >
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1.5 }}>
+              {avatarSeed && isLoaded ? (
+                <AvatarDisplay
+                  seed={avatarSeed}
+                  size={40}
+                  style={avatarStyle}
+                  overrides={avatarOverrides}
+                  glowRing={glowRing}
+                  outline
+                  sheen
+                  guildCrestSvg={mySquad?.crestSvg ?? null}
+                  guildName={mySquad?.name}
+                  guildId={mySquad?.id}
+                />
+              ) : (
+                <ProfileIcon sx={{ fontSize: 40 }} />
+              )}
+              <Box sx={{ minWidth: 0 }}>
+                <Typography variant="subtitle1" fontWeight={600} noWrap>
+                  {menuDisplayName}
+                </Typography>
+                {roleKey && (
+                  <Chip
+                    size="small"
+                    variant="outlined"
+                    label={tCommon(`userMenu.${roleKey}`)}
+                  />
+                )}
+              </Box>
+            </Box>
+            <Box sx={{ mt: 1.5 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 2,
+                }}
+              >
+                <Typography variant="body2" fontWeight={600}>
+                  {tCommon("userMenu.level", {
+                    level: level.level,
+                    label: level.label,
+                  })}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  {tCommon("userMenu.totalXP", {
+                    xp: totalXP.toLocaleString(),
+                  })}
+                </Typography>
+              </Box>
+              {level.xpForNextLevel !== null && (
+                <LinearProgress
+                  variant="determinate"
+                  value={level.progress}
+                  aria-label={tCommon("userMenu.levelProgress")}
+                  sx={{ mt: 0.5, height: 6, borderRadius: 3 }}
+                />
+              )}
+              {currentStreak > 0 && (
+                <Typography
+                  variant="caption"
+                  color="text.secondary"
+                  sx={{ display: "block", mt: 0.5 }}
+                >
+                  {tCommon("userMenu.streakDays", { count: currentStreak })}
+                </Typography>
+              )}
+            </Box>
+          </MenuItem>,
+          <Divider key="summary-divider" />,
           <MenuItem
             key="profile"
             onClick={() => {
@@ -383,9 +492,18 @@ export function UserMenu({ onJoinSection }) {
           </MenuItem>,
           <MenuItem
             key="signout"
-            onClick={() => {
-              signOut();
+            onClick={async () => {
               handleClose();
+              try {
+                await signOut();
+              } finally {
+                // The signed-out page re-stores its own path as returnUrl, which
+                // would send the next user (e.g. an instructor after an admin)
+                // back to it. Drop it and reload "/" so the next login is
+                // routed by role.
+                sessionStorage.removeItem("returnUrl");
+                window.location.assign("/");
+              }
             }}
           >
             <LogoutIcon />
@@ -745,11 +863,94 @@ export default function MainToolbar({ children }) {
     }
   }
 
-  // Group units by published status for the nav tree
-  const publishedNavUnits = navUnits.filter((u) => u.status === "PUBLISHED");
-  const draftNavUnits = navUnits.filter((u) => u.status !== "PUBLISHED");
-  const [publishedExpanded, setPublishedExpanded] = React.useState(true);
-  const [draftsExpanded, setDraftsExpanded] = React.useState(false);
+  // Published/draft groups only hold records the user owns. Other records are
+  // "Attending" when a learner group grants access, otherwise "Administering".
+  const ownerIds = React.useMemo(
+    () => getOwnerIdentifiers(authSession),
+    [authSession],
+  );
+  const userGroupNames = authSession?.groups || [];
+  const sectionPartition = partitionByAccess(
+    navSections.filter((s) => s.status !== "ARCHIVED"),
+    ownerIds,
+    userGroupNames,
+  );
+  const attendedSectionIds = new Set(
+    sectionPartition.attending.map((s) => s.id),
+  );
+
+  // Assignments for the open section, shown only for sections the user attends
+  const [attendedAssignments, setAttendedAssignments] = React.useState({});
+  const currentAttendedSectionId =
+    currentSectionId && attendedSectionIds.has(currentSectionId)
+      ? currentSectionId
+      : null;
+  const learnerSub = authSession?.idToken?.payload?.sub;
+
+  React.useEffect(() => {
+    if (!currentAttendedSectionId || !learnerSub) return;
+    if (attendedAssignments[currentAttendedSectionId]) return;
+    let cancelled = false;
+    const client = getAmplifyClient();
+
+    async function fetchAssignments() {
+      try {
+        const { data } = await client.models.Assignment.list({
+          filter: { sectionID: { eq: currentAttendedSectionId } },
+          limit: 200,
+        });
+        const mine = (data || []).filter(
+          (a) =>
+            a != null &&
+            a.deletedAt == null &&
+            a.status !== "DRAFT" &&
+            a.lateStatus !== "DROPPED" &&
+            (!a.studentID || a.studentID === learnerSub),
+        );
+        const unitIds = [...new Set(mine.map((a) => a.unitID))];
+        const units = await Promise.all(
+          unitIds.map((id) =>
+            client.models.Unit.get({ id }).then((res) => res.data),
+          ),
+        );
+        const unitNames = new Map(
+          units.filter(Boolean).map((u) => [u.id, u.name]),
+        );
+        if (cancelled) return;
+        const items = mine
+          .filter((a) => unitNames.has(a.unitID))
+          .map((a) => ({
+            id: a.id,
+            unitID: a.unitID,
+            name: unitNames.get(a.unitID),
+          }));
+        setAttendedAssignments((prev) => ({
+          ...prev,
+          [currentAttendedSectionId]: items,
+        }));
+      } catch (err) {
+        console.warn("[MainToolbar] Failed to fetch assignments:", err);
+      }
+    }
+
+    fetchAssignments();
+    return () => {
+      cancelled = true;
+    };
+  }, [currentAttendedSectionId, learnerSub, attendedAssignments]);
+
+  const [sectionGroupsExpanded, setSectionGroupsExpanded] = React.useState({
+    published: true,
+    drafts: true,
+    attending: true,
+    administering: true,
+  });
+  const [unitGroupsExpanded, setUnitGroupsExpanded] = React.useState({
+    published: true,
+    drafts: false,
+    attending: false,
+    administering: false,
+  });
 
   // Handle unit click - scroll to card if on /units page, otherwise navigate
   const handleUnitClick = React.useCallback(
@@ -778,6 +979,228 @@ export default function MainToolbar({ children }) {
     },
     [currentPathname, hasAppShell, appShell.isDesktop, setDrawerOpen],
   );
+
+  const renderNavSection = (section) => {
+    const isCurrent = section.id === currentSectionId;
+    return (
+      <React.Fragment key={section.id}>
+        <ListItem disablePadding>
+          <ListItemButton
+            component="a"
+            href={`/section/${section.id}`}
+            selected={isCurrent}
+            sx={{ pl: 4 }}
+            onClick={(e) => {
+              if (isCurrent) {
+                e.preventDefault();
+                e.stopPropagation();
+              }
+            }}
+          >
+            <ListItemText
+              primary={section.name}
+              secondary={!isCurrent ? section.description : undefined}
+              primaryTypographyProps={{
+                variant: "body2",
+                fontWeight: isCurrent ? 600 : 400,
+                noWrap: true,
+              }}
+              secondaryTypographyProps={{
+                variant: "caption",
+                noWrap: true,
+              }}
+            />
+          </ListItemButton>
+        </ListItem>
+        {isCurrent &&
+          sectionHeadings
+            .filter((heading) => {
+              if (!isInstructorOrAdmin) {
+                return heading.id !== "nav-section-students";
+              }
+              return true;
+            })
+            .map((heading) => (
+              <ListItem key={heading.id} disablePadding>
+                <ListItemButton
+                  sx={{ pl: 6 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    // Section detail content is now tabbed — ask the
+                    // page to switch to the right tab before scrolling.
+                    window.dispatchEvent(
+                      new CustomEvent("section-detail-nav", {
+                        detail: { headingId: heading.id },
+                      }),
+                    );
+                    document
+                      .getElementById(heading.id)
+                      ?.scrollIntoView({ behavior: "smooth" });
+                    if (!hasAppShell || !appShell.isDesktop) {
+                      setDrawerOpen(false);
+                    }
+                  }}
+                >
+                  <ListItemText
+                    primary={heading.label}
+                    primaryTypographyProps={{
+                      variant: "caption",
+                    }}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+        {isCurrent &&
+          attendedAssignments[section.id]?.map((assignment) => (
+            <ListItem key={assignment.id} disablePadding>
+              <ListItemButton
+                component="a"
+                href={`/workbook/${assignment.unitID}`}
+                sx={{ pl: 7 }}
+              >
+                <ListItemText
+                  primary={assignment.name}
+                  primaryTypographyProps={{
+                    variant: "caption",
+                    noWrap: true,
+                  }}
+                />
+              </ListItemButton>
+            </ListItem>
+          ))}
+      </React.Fragment>
+    );
+  };
+
+  const renderNavUnit = (unit, italic = false) => {
+    const isCurrent = unit.id === currentUnitId;
+    return (
+      <ListItem key={unit.id} disablePadding>
+        <ListItemButton
+          component="a"
+          href={`/unit/${unit.id}`}
+          selected={isCurrent}
+          sx={{ pl: 5 }}
+          onClick={(e) => handleUnitClick(e, unit)}
+        >
+          <ListItemText
+            primary={unit.name}
+            primaryTypographyProps={{
+              variant: "body2",
+              fontWeight: isCurrent ? 600 : 400,
+              fontStyle: italic ? "italic" : undefined,
+              noWrap: true,
+            }}
+            secondaryTypographyProps={{
+              variant: "caption",
+              noWrap: true,
+            }}
+          />
+        </ListItemButton>
+      </ListItem>
+    );
+  };
+
+  const buildNavGroups = ({
+    owned,
+    attending,
+    administering,
+    expandedState,
+    setExpanded,
+  }) =>
+    [
+      {
+        key: "published",
+        label: t("navigation.published"),
+        Icon: PublishIcon,
+        items: owned.filter((item) => item.status === "PUBLISHED"),
+      },
+      {
+        key: "drafts",
+        label: t("navigation.drafts"),
+        Icon: DraftsIcon,
+        italic: true,
+        items: owned.filter((item) => item.status !== "PUBLISHED"),
+      },
+      {
+        key: "attending",
+        label: t("navigation.attending"),
+        Icon: GroupsIcon,
+        items: attending,
+      },
+      {
+        key: "administering",
+        label: t("navigation.administering"),
+        Icon: SupervisorAccountIcon,
+        items: administering,
+      },
+    ].map((group) => ({
+      ...group,
+      expanded: expandedState[group.key],
+      onToggle: () =>
+        setExpanded((prev) => ({ ...prev, [group.key]: !prev[group.key] })),
+    }));
+
+  const sectionNavGroups = buildNavGroups({
+    ...sectionPartition,
+    expandedState: sectionGroupsExpanded,
+    setExpanded: setSectionGroupsExpanded,
+  }).map((group) => ({
+    ...group,
+    groupId: `section-${group.key}`,
+    renderItem: renderNavSection,
+  }));
+
+  const unitNavGroups = buildNavGroups({
+    ...partitionByAccess(navUnits, ownerIds, userGroupNames),
+    // Units reached as a learner appear as assignments under their section.
+    attending: [],
+    expandedState: unitGroupsExpanded,
+    setExpanded: setUnitGroupsExpanded,
+  }).map((group) => ({
+    ...group,
+    groupId: `unit-${group.key}`,
+    renderItem: (unit) => renderNavUnit(unit, group.italic),
+  }));
+
+  const renderNavGroup = ({
+    groupId,
+    label,
+    Icon,
+    items,
+    expanded,
+    onToggle,
+    renderItem,
+  }) => {
+    if (items.length === 0) return null;
+    return (
+      <React.Fragment key={groupId}>
+        <ListItemButton onClick={onToggle} sx={{ pl: 4, py: 0.25 }}>
+          <ListItemIcon sx={{ minWidth: 24 }}>
+            <Icon sx={{ fontSize: 14, color: "text.secondary" }} />
+          </ListItemIcon>
+          <ListItemText
+            primary={label}
+            primaryTypographyProps={{
+              fontSize: "0.7rem",
+              fontWeight: 600,
+              textTransform: "uppercase",
+              letterSpacing: "0.05em",
+              color: "text.secondary",
+            }}
+          />
+          {expanded ? (
+            <ExpandLess sx={{ fontSize: 16 }} />
+          ) : (
+            <ExpandMore sx={{ fontSize: 16 }} />
+          )}
+        </ListItemButton>
+        <Collapse in={expanded} timeout="auto" unmountOnExit>
+          {items.map(renderItem)}
+        </Collapse>
+      </React.Fragment>
+    );
+  };
 
   // Extracted drawer navigation content - shared between persistent and temporary drawers
   const drawerNavContent = (
@@ -831,79 +1254,7 @@ export default function MainToolbar({ children }) {
           onClick={(e) => e.stopPropagation()}
         >
           <List component="div" disablePadding>
-            {navSections.map((section) => {
-              const isCurrent = section.id === currentSectionId;
-              return (
-                <React.Fragment key={section.id}>
-                  <ListItem disablePadding>
-                    <ListItemButton
-                      component="a"
-                      href={`/section/${section.id}`}
-                      selected={isCurrent}
-                      sx={{ pl: 4 }}
-                      onClick={(e) => {
-                        if (isCurrent) {
-                          e.preventDefault();
-                          e.stopPropagation();
-                        }
-                      }}
-                    >
-                      <ListItemText
-                        primary={section.name}
-                        secondary={!isCurrent ? section.description : undefined}
-                        primaryTypographyProps={{
-                          variant: "body2",
-                          fontWeight: isCurrent ? 600 : 400,
-                          noWrap: true,
-                        }}
-                        secondaryTypographyProps={{
-                          variant: "caption",
-                          noWrap: true,
-                        }}
-                      />
-                    </ListItemButton>
-                  </ListItem>
-                  {isCurrent &&
-                    sectionHeadings
-                      .filter((heading) => {
-                        if (!isInstructorOrAdmin) {
-                          return heading.id !== "nav-section-students";
-                        }
-                        return true;
-                      })
-                      .map((heading) => (
-                        <ListItem key={heading.id} disablePadding>
-                          <ListItemButton
-                            sx={{ pl: 6 }}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // Section detail content is now tabbed — ask the
-                              // page to switch to the right tab before scrolling.
-                              window.dispatchEvent(
-                                new CustomEvent("section-detail-nav", {
-                                  detail: { headingId: heading.id },
-                                }),
-                              );
-                              document
-                                .getElementById(heading.id)
-                                ?.scrollIntoView({ behavior: "smooth" });
-                              if (!hasAppShell || !appShell.isDesktop) {
-                                setDrawerOpen(false);
-                              }
-                            }}
-                          >
-                            <ListItemText
-                              primary={heading.label}
-                              primaryTypographyProps={{
-                                variant: "caption",
-                              }}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      ))}
-                </React.Fragment>
-              );
-            })}
+            {sectionNavGroups.map(renderNavGroup)}
           </List>
         </Collapse>
 
@@ -945,125 +1296,7 @@ export default function MainToolbar({ children }) {
             onClick={(e) => e.stopPropagation()}
           >
             <List component="div" disablePadding>
-              {/* Published units — expandable */}
-              {publishedNavUnits.length > 0 && (
-                <>
-                  <ListItemButton
-                    onClick={() => setPublishedExpanded(!publishedExpanded)}
-                    sx={{ pl: 4, py: 0.25 }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 24 }}>
-                      <PublishIcon
-                        sx={{ fontSize: 14, color: "text.secondary" }}
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t("navigation.published")}
-                      primaryTypographyProps={{
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        color: "text.secondary",
-                      }}
-                    />
-                    {publishedExpanded ? (
-                      <ExpandLess sx={{ fontSize: 16 }} />
-                    ) : (
-                      <ExpandMore sx={{ fontSize: 16 }} />
-                    )}
-                  </ListItemButton>
-                  <Collapse in={publishedExpanded} timeout="auto" unmountOnExit>
-                    {publishedNavUnits.map((unit) => {
-                      const isCurrent = unit.id === currentUnitId;
-                      return (
-                        <ListItem key={unit.id} disablePadding>
-                          <ListItemButton
-                            component="a"
-                            href={`/unit/${unit.id}`}
-                            selected={isCurrent}
-                            sx={{ pl: 5 }}
-                            onClick={(e) => handleUnitClick(e, unit)}
-                          >
-                            <ListItemText
-                              primary={unit.name}
-                              primaryTypographyProps={{
-                                variant: "body2",
-                                fontWeight: isCurrent ? 600 : 400,
-                                noWrap: true,
-                              }}
-                              secondaryTypographyProps={{
-                                variant: "caption",
-                                noWrap: true,
-                              }}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      );
-                    })}
-                  </Collapse>
-                </>
-              )}
-              {/* Draft / Unpublished units — expandable */}
-              {draftNavUnits.length > 0 && (
-                <>
-                  <ListItemButton
-                    onClick={() => setDraftsExpanded(!draftsExpanded)}
-                    sx={{ pl: 4, py: 0.25 }}
-                  >
-                    <ListItemIcon sx={{ minWidth: 24 }}>
-                      <DraftsIcon
-                        sx={{ fontSize: 14, color: "text.secondary" }}
-                      />
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={t("navigation.drafts")}
-                      primaryTypographyProps={{
-                        fontSize: "0.7rem",
-                        fontWeight: 600,
-                        textTransform: "uppercase",
-                        letterSpacing: "0.05em",
-                        color: "text.secondary",
-                      }}
-                    />
-                    {draftsExpanded ? (
-                      <ExpandLess sx={{ fontSize: 16 }} />
-                    ) : (
-                      <ExpandMore sx={{ fontSize: 16 }} />
-                    )}
-                  </ListItemButton>
-                  <Collapse in={draftsExpanded} timeout="auto" unmountOnExit>
-                    {draftNavUnits.map((unit) => {
-                      const isCurrent = unit.id === currentUnitId;
-                      return (
-                        <ListItem key={unit.id} disablePadding>
-                          <ListItemButton
-                            component="a"
-                            href={`/unit/${unit.id}`}
-                            selected={isCurrent}
-                            sx={{ pl: 5 }}
-                            onClick={(e) => handleUnitClick(e, unit)}
-                          >
-                            <ListItemText
-                              primary={unit.name}
-                              primaryTypographyProps={{
-                                variant: "body2",
-                                fontWeight: isCurrent ? 600 : 400,
-                                fontStyle: "italic",
-                                noWrap: true,
-                              }}
-                              secondaryTypographyProps={{
-                                variant: "caption",
-                                noWrap: true,
-                              }}
-                            />
-                          </ListItemButton>
-                        </ListItem>
-                      );
-                    })}
-                  </Collapse>
-                </>
-              )}
+              {unitNavGroups.map(renderNavGroup)}
             </List>
           </Collapse>
         )}
@@ -1088,6 +1321,18 @@ export default function MainToolbar({ children }) {
             <ListItemText primary={t("navigation.squads")} />
           </ListItemButton>
         </ListItem>
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <ListItemButton component="a" href="/instructor">
+              <ListItemIcon sx={{ color: "text.primary" }}>
+                <SchoolIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={t("mainToolbar.nav.instructorDashboard")}
+              />
+            </ListItemButton>
+          </ListItem>
+        )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin">
@@ -1401,6 +1646,21 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </Tooltip>
         </ListItem>
+        {isInstructorOrAdmin && (
+          <ListItem disablePadding>
+            <Tooltip
+              title={t("mainToolbar.nav.instructorDashboard")}
+              placement="right"
+              arrow
+            >
+              <ListItemButton component="a" href="/instructor" sx={railItemSx}>
+                <ListItemIcon sx={{ color: "text.primary" }}>
+                  <SchoolIcon />
+                </ListItemIcon>
+              </ListItemButton>
+            </Tooltip>
+          </ListItem>
+        )}
         {isInstructorOrAdmin && (
           <ListItem disablePadding>
             <Tooltip

@@ -1,6 +1,9 @@
 /**
  * OpenAI-powered document analysis
  */
+import {
+  OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
+} from "./modelLimits.js";
 
 export type AnalysisProfile = "standard" | "exhaustive";
 
@@ -16,6 +19,8 @@ interface AnalysisResult {
   conceptsJSON: any[];
   questionsJSON: any[];
   usage: TokenUsage;
+  /** Exhaustive mode: labelled lines no fact covered, by page. */
+  uncoveredLines?: Array<{ page: number; line: string }>;
 }
 
 export interface TokenUsage {
@@ -29,21 +34,6 @@ const EMPTY_TOKEN_USAGE: TokenUsage = {
   completionTokens: 0,
   totalTokens: 0,
 };
-
-export const MAX_PARSED_CONTENT_PAYLOAD_BYTES = 300 * 1024;
-
-export function assertParsedContentPayloadSize(payload: unknown): void {
-  const serialized = JSON.stringify(payload);
-  if (serialized === undefined) {
-    throw new Error("ParsedContent payload is not serializable");
-  }
-  const sizeBytes = Buffer.byteLength(serialized, "utf8");
-  if (sizeBytes > MAX_PARSED_CONTENT_PAYLOAD_BYTES) {
-    throw new Error(
-      `ParsedContent payload is ${sizeBytes} bytes; the safe limit is ${MAX_PARSED_CONTENT_PAYLOAD_BYTES} bytes. No content was persisted.`,
-    );
-  }
-}
 
 function readTokenUsage(completion: any): TokenUsage {
   return {
@@ -103,19 +93,12 @@ export function retainDirectQuestionsWithVerifiedMatches(
   return directEntries.filter((value): value is Record<string, unknown> => {
     const direct = asRecord(value);
     if (!direct) return false;
-    const prompt = firstString(direct, ["prompt", "question"]);
-    const answer = firstString(direct, [
-      "answer",
-      "expectedAnswer",
-      "correctAnswer",
-    ]);
+    const prompt = firstString(direct, ["prompt"]);
+    const answer = firstString(direct, ["answer"]);
     return verifiedEntries.some(
       (verified) =>
-        isEquivalentText(prompt, firstString(verified, ["prompt", "question"])) &&
-        isEquivalentText(
-          answer,
-          firstString(verified, ["answer", "expectedAnswer"]),
-        ),
+        isEquivalentText(prompt, firstString(verified, ["prompt"])) &&
+        isEquivalentText(answer, firstString(verified, ["answer"])),
     );
   });
 }
@@ -186,6 +169,15 @@ export interface FactVerificationVerdict {
   reason?: string;
 }
 
+export const VERIFIER_SYSTEM_PROMPT =
+  'Verify each candidate against only the source page. Each candidate has an explicit "index". Return only JSON {"verdicts":[{"index":0,"supported":true,"reason":""}],"omissions":[]} with exactly one verdict for every candidate index from 0 to N-1: no duplicates, no missing indices, no extra indices. omissions are brief facts present in the source but missing from the candidates.';
+
+export function buildVerifierCandidates<
+  T extends { kind: string; fact: ExhaustiveFact },
+>(candidates: T[]): Array<{ index: number; kind: string } & ExhaustiveFact> {
+  return candidates.map(({ kind, fact }, index) => ({ index, kind, ...fact }));
+}
+
 export function filterVerifiedEntries<T>(
   entries: T[],
   verdicts: FactVerificationVerdict[],
@@ -222,6 +214,8 @@ interface ExhaustivePageResult {
   facts: ExhaustiveFact[];
   vocabulary: ExhaustiveVocabulary[];
   usage: TokenUsage;
+  /** Labelled/glossary lines the model never produced a covering fact for. */
+  uncoveredLines?: string[];
 }
 
 interface CoverageCandidate {
@@ -253,6 +247,9 @@ function isProviderLimitError(error: unknown): boolean {
   );
 }
 
+/** Used when a file's settings do not name a valid profile. */
+export const DEFAULT_ANALYSIS_PROFILE: AnalysisProfile = "exhaustive";
+
 export function resolveAnalysisProfile(settings: unknown): {
   profile: AnalysisProfile;
   invalidValue?: unknown;
@@ -262,7 +259,7 @@ export function resolveAnalysisProfile(settings: unknown): {
     try {
       parsedSettings = JSON.parse(settings);
     } catch {
-      return { profile: "standard", invalidValue: settings };
+      return { profile: DEFAULT_ANALYSIS_PROFILE, invalidValue: settings };
     }
   }
 
@@ -271,16 +268,16 @@ export function resolveAnalysisProfile(settings: unknown): {
     typeof parsedSettings !== "object" ||
     !("analysisProfile" in parsedSettings)
   ) {
-    return { profile: "standard" };
+    return { profile: DEFAULT_ANALYSIS_PROFILE };
   }
 
   const profile = (parsedSettings as { analysisProfile?: unknown })
     .analysisProfile;
-  if (profile === undefined) return { profile: "standard" };
+  if (profile === undefined) return { profile: DEFAULT_ANALYSIS_PROFILE };
   if (profile === "standard" || profile === "exhaustive") {
     return { profile };
   }
-  return { profile: "standard", invalidValue: profile };
+  return { profile: DEFAULT_ANALYSIS_PROFILE, invalidValue: profile };
 }
 
 export function resolveSkipAutoAnalysis(settings: unknown): {
@@ -417,33 +414,72 @@ export function segmentTextIntoPages(text: string): AnalysisPage[] {
   return pages;
 }
 
+/**
+ * Headings and titles share the `Label: value` / `term — definition` shapes
+ * but are not facts, so the model rightly never extracts them.
+ */
+function isHeadingLike(line: string): boolean {
+  if (/^#{1,6}\s/.test(line)) return true;
+  if (/^(?:chapter|section|unit|part|lesson|module|appendix)\b/i.test(line)) {
+    return true;
+  }
+  // "All caps" only means something for scripts that have case.
+  const isAllCaps = /\p{Lu}/u.test(line) && !/\p{Ll}/u.test(line);
+  const words = line.match(/\p{L}{2,}/gu) ?? [];
+  return isAllCaps && words.length >= 3;
+}
+
 export function extractCoverageCandidates(
   page: AnalysisPage,
 ): CoverageCandidate[] {
-  const candidates: CoverageCandidate[] = [];
+  const entries: Array<{ kind: "label" | "glossary"; candidate: CoverageCandidate }> =
+    [];
   for (const rawLine of page.text.split(/\r?\n/)) {
     const sourceText = rawLine.trim();
-    if (!sourceText) continue;
+    if (!sourceText || isHeadingLike(sourceText)) continue;
 
     const labelMatch = sourceText.match(/^([^:\n]{1,100}):\s*(\S.*)$/);
-    const glossaryMatch = sourceText.match(
-      /^([^—–-]{1,100}?)\s+[—–-]\s+(\S.*)$/,
-    );
+    const glossaryMatch = labelMatch
+      ? null
+      : sourceText.match(/^([^—–-]{1,100}?)\s+[—–-]\s+(\S.*)$/);
     const match = labelMatch ?? glossaryMatch;
     if (!match) continue;
 
     const field = match[1].trim();
     const answer = match[2].trim();
-    if (field && answer) candidates.push({ field, answer, sourceText });
+    if (field && answer) {
+      entries.push({
+        kind: labelMatch ? "label" : "glossary",
+        candidate: { field, answer, sourceText },
+      });
+    }
   }
-  return candidates;
+
+  // A dash is ordinary punctuation in titles and prose, so a lone dashed line
+  // is not evidence of a glossary; glossary entries come in runs.
+  const glossaryCount = entries.filter(({ kind }) => kind === "glossary").length;
+  return entries
+    .filter(({ kind }) => kind === "label" || glossaryCount >= 2)
+    .map(({ candidate }) => candidate);
 }
 
+/**
+ * Hint for decks and card-style documents. Only a standalone `Front` / `Back`
+ * marker line (optionally `Front: title` or `Front — title`) counts, so
+ * ordinary headings such as "Back to basics" or "Front-end" do not.
+ */
 function inferPageRole(text: string): string {
-  const header = text.split(/\r?\n/).slice(0, 8).join(" ");
-  if (/\bfronts?\b/i.test(header)) return "front";
-  if (/\bbacks?\b/i.test(header)) return "back";
-  if (/\breference\b|\bglossary\b/i.test(header)) return "reference";
+  const header = text
+    .split(/\r?\n/)
+    .slice(0, 8)
+    .map((line) => line.replace(/^[#*\s]+/, "").replace(/[*\s]+$/, ""));
+  const marker = (word: string) =>
+    new RegExp(`^${word}\\s*(?::.*|\\s[—–·|-]\\s.*)?$`, "i");
+  if (header.some((line) => marker("fronts?").test(line))) return "front";
+  if (header.some((line) => marker("backs?").test(line))) return "back";
+  if (header.some((line) => /^(?:reference|glossary)\b/i.test(line))) {
+    return "reference";
+  }
   return "content";
 }
 
@@ -590,7 +626,9 @@ function tokenSet(value: string): Set<string> {
  * together account for nearly all of its tokens. Wrapped PDF lines and lines
  * holding several statements are quoted differently by the model than they
  * appear on the page, so exact line equality is too strict. A fact with a
- * wrong answer is not related to the line and never counts as coverage.
+ * wrong answer is not related to the line and never counts as coverage. The
+ * fact's subject and field count too, because facts split from one line
+ * usually quote only their value and carry the label as subject/field.
  */
 export function candidateIsCovered(
   candidate: CoverageCandidate,
@@ -621,7 +659,9 @@ export function candidateIsCovered(
     let supported = 0;
     for (const token of answerTokens) if (lineTokens.has(token)) supported += 1;
     if (supported / answerTokens.size < COVERAGE_ANSWER_SUPPORT) continue;
-    for (const token of tokenSet(`${fact.sourceText} ${fact.answer}`)) {
+    for (const token of tokenSet(
+      `${fact.subject} ${fact.field} ${fact.sourceText} ${fact.answer}`,
+    )) {
       if (lineTokens.has(token)) covered.add(token);
     }
   }
@@ -708,17 +748,40 @@ async function createStructuredCompletion(
   }
 }
 
+function describeUncovered(candidates: CoverageCandidate[]): string {
+  const shown = candidates
+    .slice(0, 5)
+    .map(({ sourceText }) => JSON.stringify(sourceText.slice(0, 120)));
+  const more = candidates.length - shown.length;
+  return more > 0 ? `${shown.join("; ")}; and ${more} more` : shown.join("; ");
+}
+
+function describeFacts(result: ExhaustivePageResult): string {
+  const summary = JSON.stringify({
+    facts: result.facts.map(({ subject, field, answer, sourceText }) => ({
+      subject,
+      field,
+      answer,
+      sourceText,
+    })),
+    vocabulary: result.vocabulary.map(({ term }) => term),
+  });
+  return summary.length > 800 ? `${summary.slice(0, 800)}…` : summary;
+}
+
 function exhaustivePrompt(pageRole: string, gapCandidates?: CoverageCandidate[]) {
-  const extractionInstructions = `Extract every discrete fact and every defined vocabulary term from the supplied page. Every labelled line (Label: value) and every enumerated statement must become one fact. Do not summarise or omit repeated boilerplate the first time it appears. A fact must retain its exact sourceText, a concise field, a subject/card name, a short answer, and any acceptable answer alternatives. Include every defined term, including glossary entries and Terms lines. Keep the source page number. Do not infer information that is absent from the source.`;
+  const extractionInstructions = `Extract every discrete fact and every defined vocabulary term from the supplied page. Every labelled line (Label: value), every glossary entry (term — definition) and every enumerated statement must become one fact. Do not summarise or omit repeated boilerplate the first time it appears. Each fact must retain its exact sourceText and have a concise field (the label or attribute), a subject (the card, topic, term or section the fact is about), a short answer, and any acceptable answer alternatives. Include every defined term, including glossary entries and lines that list several terms. Keep the source page number. Do not infer information that is absent from the source.`;
 
   if (gapCandidates?.length) {
     return `${extractionInstructions}
-This is a targeted gap-fill. Return facts for every source line below that was missed previously. Preserve each sourceText exactly. For glossary lines, also return the defined term as vocabulary.
+This is a targeted gap-fill. Return facts for every source line below that was missed previously, and only for those lines: ignore the page header context and any other text on the page. Preserve each sourceText exactly. If a line is a heading or title rather than a fact, return nothing for it. For glossary lines, also return the defined term as vocabulary.
 ${JSON.stringify(gapCandidates)}`;
   }
 
+  const roleHint =
+    pageRole === "content" ? "" : `Page role hint: ${pageRole}. `;
   return `${extractionInstructions}
-Page role hint: ${pageRole}. Identify the page's card or section as the subject for each fact.`;
+${roleHint}Use the topic, term or section the page is about as the subject for each fact.`;
 }
 
 async function analyzeExhaustivePage(
@@ -731,13 +794,28 @@ async function analyzeExhaustivePage(
   const pageRole = inferPageRole(page.text);
 
   const pageContext = page.text.split(/\r?\n/).slice(0, 8).join("\n");
-  const requestForText = (text: string, systemPrompt: string) => ({
+  // Labelled lines in the header context are extractable facts; a gap-fill
+  // that sees them answers about those instead of the lines it was asked for.
+  const labelledLines = new Set(
+    extractCoverageCandidates(page).map(({ sourceText }) => sourceText),
+  );
+  const gapFillContext = page.text
+    .split(/\r?\n/)
+    .slice(0, 8)
+    .filter((line) => !labelledLines.has(line.trim()))
+    .join("\n");
+  const requestForText = (
+    text: string,
+    systemPrompt: string,
+    context = pageContext,
+  ) => ({
     model: "gpt-4o",
+    max_tokens: OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
     messages: [
       { role: "system", content: systemPrompt },
       {
         role: "user",
-        content: `[Page ${page.pageNumber}]\nPage header context:\n${pageContext}\nPage text:\n${text}`,
+        content: `[Page ${page.pageNumber}]\nPage header context:\n${context}\nPage text:\n${text}`,
       },
     ],
     response_format: toStrictRecallFormat(),
@@ -805,6 +883,7 @@ async function analyzeExhaustivePage(
   const fillGaps = async (
     candidates: CoverageCandidate[],
     depth: number,
+    stalled: number,
   ): Promise<ExhaustivePageResult> => {
     let gapFill: ExhaustivePageResult;
     try {
@@ -813,6 +892,7 @@ async function analyzeExhaustivePage(
         requestForText(
           candidates.map((candidate) => candidate.sourceText).join("\n"),
           exhaustivePrompt(pageRole, candidates),
+          gapFillContext,
         ),
         pause,
       );
@@ -835,12 +915,16 @@ async function analyzeExhaustivePage(
         throw error;
       }
       const midpoint = Math.ceil(candidates.length / 2);
-      const left = await fillGaps(candidates.slice(0, midpoint), depth + 1);
-      const right = await fillGaps(candidates.slice(midpoint), depth + 1);
+      const left = await fillGaps(candidates.slice(0, midpoint), depth + 1, 0);
+      const right = await fillGaps(candidates.slice(midpoint), depth + 1, 0);
       return {
         facts: [...left.facts, ...right.facts],
         vocabulary: [...left.vocabulary, ...right.vocabulary],
         usage: addTokenUsage(left.usage, right.usage),
+        uncoveredLines: [
+          ...(left.uncoveredLines ?? []),
+          ...(right.uncoveredLines ?? []),
+        ],
       };
     }
 
@@ -848,42 +932,96 @@ async function analyzeExhaustivePage(
       (candidate) => !candidateIsCovered(candidate, gapFill.facts),
     );
     if (remaining.length > 0) {
-      if (depth >= MAX_SPLIT_DEPTH) {
-        throw new Error(
-          `Exhaustive extraction left ${remaining.length} labelled/glossary lines uncovered on page ${page.pageNumber}`,
+      const progressed = remaining.length < candidates.length;
+      if (
+        depth >= MAX_SPLIT_DEPTH ||
+        (!progressed && remaining.length === 1 && stalled >= 1)
+      ) {
+        // Headings and titles also look like labelled lines, and the model
+        // rightly declines them; keep the page's facts and report the gap
+        // instead of discarding the whole page.
+        console.warn(
+          `[analyzePages] Exhaustive extraction left ${remaining.length} labelled/glossary lines uncovered on page ${page.pageNumber}: ${describeUncovered(remaining)}. Last gap-fill returned ${describeFacts(gapFill)}`,
         );
+        return {
+          ...gapFill,
+          uncoveredLines: remaining.map(({ sourceText }) => sourceText),
+        };
       }
-      const retried = await fillGaps(remaining, depth + 1);
-      return {
-        facts: [...gapFill.facts, ...retried.facts],
-        vocabulary: [...gapFill.vocabulary, ...retried.vocabulary],
-        usage: addTokenUsage(gapFill.usage, retried.usage),
-      };
+      // Re-sending an identical set that made no progress rarely helps; smaller
+      // sets focus the model on fewer lines.
+      const retryBatches =
+        !progressed && remaining.length > 1
+          ? [
+              remaining.slice(0, Math.ceil(remaining.length / 2)),
+              remaining.slice(Math.ceil(remaining.length / 2)),
+            ]
+          : [remaining];
+      const nextStalled = progressed ? 0 : stalled + 1;
+      let facts = gapFill.facts;
+      let vocabulary = gapFill.vocabulary;
+      let usage = gapFill.usage;
+      let uncoveredLines: string[] = [];
+      for (const batch of retryBatches) {
+        const retried = await fillGaps(batch, depth + 1, nextStalled);
+        facts = [...facts, ...retried.facts];
+        vocabulary = [...vocabulary, ...retried.vocabulary];
+        usage = addTokenUsage(usage, retried.usage);
+        uncoveredLines = [...uncoveredLines, ...(retried.uncoveredLines ?? [])];
+      }
+      return { facts, vocabulary, usage, uncoveredLines };
     }
     return gapFill;
   };
-  const gapFill = await fillGaps(missingCandidates, 0);
+  const gapFill = await fillGaps(missingCandidates, 0, 0);
 
   return {
     facts: [...initial.facts, ...gapFill.facts],
     vocabulary: [...initial.vocabulary, ...gapFill.vocabulary],
     usage: addTokenUsage(initial.usage, gapFill.usage),
+    uncoveredLines: gapFill.uncoveredLines ?? [],
   };
 }
 
+/**
+ * Irregular plurals folded to their singular when comparing terms. Regular
+ * English plurals are handled by suffix rules in normaliseTerm.
+ */
+export const IRREGULAR_PLURALS: Readonly<Record<string, string>> = {
+  sephiroth: "sephira",
+  children: "child",
+  people: "person",
+  men: "man",
+  women: "woman",
+  mice: "mouse",
+  feet: "foot",
+  teeth: "tooth",
+  geese: "goose",
+  criteria: "criterion",
+  phenomena: "phenomenon",
+  analyses: "analysis",
+  hypotheses: "hypothesis",
+  theses: "thesis",
+};
+
 function normaliseTerm(term: string): string {
+  // Only Latin diacritics are folded away; combining marks in other scripts
+  // (e.g. Japanese dakuten) are part of the letters and must survive.
   const normalized = term
     .normalize("NFKD")
     .replace(/[\u0300-\u036f]/g, "")
+    .normalize("NFKC")
     .toLowerCase()
-    .replace(/[^a-z0-9\s]/g, " ")
+    .replace(/[^\p{L}\p{N}\p{M}\s]/gu, " ")
     .replace(/\s+/g, " ")
     .trim();
   const invariant = new Set(["news", "series", "species", "means"]);
   return normalized
     .split(" ")
     .map((token) => {
-      if (token === "sephiroth") return "sephira";
+      if (Object.hasOwn(IRREGULAR_PLURALS, token)) {
+        return IRREGULAR_PLURALS[token];
+      }
       if (invariant.has(token) || token.length < 4) return token;
       if (token.endsWith("ies")) return `${token.slice(0, -3)}y`;
       if (/(ches|shes|sses|xes|zes)$/.test(token)) return token.slice(0, -2);
@@ -918,14 +1056,11 @@ function toQuestion(fact: ExhaustiveFact) {
     field: fact.field,
     sourceText: fact.sourceText,
     accept: fact.accept,
-    question: prompt,
-    expectedAnswer: fact.answer,
-    type: "recall",
   };
 }
 
 export function normaliseQuestionEntries(input: unknown): Array<
-  Record<string, string | number | string[] | undefined>
+  Record<string, string | number | string[] | number[] | undefined>
 > {
   if (!Array.isArray(input)) {
     throw new Error("Extracted questions must be an array");
@@ -936,28 +1071,19 @@ export function normaliseQuestionEntries(input: unknown): Array<
       throw new Error(`Extracted question ${index} is not an object`);
     }
     const question = entry as Record<string, unknown>;
-    const prompt =
-      typeof question.prompt === "string"
-        ? question.prompt
-        : question.question;
+    const prompt = question.prompt;
     if (typeof prompt !== "string" || !prompt.trim()) {
       throw new Error(`Extracted question ${index} is missing its prompt`);
     }
 
-    const answer =
-      typeof question.answer === "string"
-        ? question.answer
-        : question.expectedAnswer;
+    const answer = question.answer;
     if (answer !== undefined && typeof answer !== "string") {
       throw new Error(`Extracted question ${index} has an invalid answer`);
     }
 
-    const type =
-      typeof question.questionType === "string"
-        ? question.questionType
-        : question.type;
-    if (type !== undefined && typeof type !== "string") {
-      throw new Error(`Extracted question ${index} has an invalid type`);
+    const questionType = question.questionType;
+    if (questionType !== undefined && typeof questionType !== "string") {
+      throw new Error(`Extracted question ${index} has an invalid questionType`);
     }
 
     const page = question.page;
@@ -991,21 +1117,112 @@ export function normaliseQuestionEntries(input: unknown): Array<
       acceptValues = accept;
     }
 
+    const pages = question.pages;
+    if (
+      pages !== undefined &&
+      (!Array.isArray(pages) ||
+        !pages.every(
+          (value): value is number =>
+            typeof value === "number" && Number.isInteger(value),
+        ))
+    ) {
+      throw new Error(`Extracted question ${index} has invalid pages`);
+    }
+
     return {
       prompt,
       answer,
       hint: optionalString("hint"),
       difficulty: optionalString("difficulty"),
-      questionType: type,
+      questionType,
       page,
+      ...(pages !== undefined ? { pages } : {}),
       subject: optionalString("subject"),
       field: optionalString("field"),
       sourceText: optionalString("sourceText"),
       accept: acceptValues,
-      question: prompt,
-      expectedAnswer: answer,
-      type,
     };
+  });
+}
+
+function pagesOf(entry: Record<string, unknown>): number[] {
+  const pages = Array.isArray(entry.pages) ? entry.pages : [entry.page];
+  return pages.filter(
+    (page): page is number => typeof page === "number" && Number.isInteger(page),
+  );
+}
+
+function mergeDuplicates<T>(
+  items: T[],
+  keyOf: (entry: Record<string, unknown>) => string | undefined,
+): T[] {
+  const merged = new Map<string, Record<string, unknown>>();
+  const result: unknown[] = [];
+  for (const item of items) {
+    const entry =
+      item !== null && typeof item === "object"
+        ? (item as Record<string, unknown>)
+        : undefined;
+    const key = entry && keyOf(entry);
+    if (!entry || !key) {
+      const pages = entry ? pagesOf(entry) : [];
+      result.push(pages.length > 0 ? { ...entry, pages } : item);
+      continue;
+    }
+    const first = merged.get(key);
+    if (!first) {
+      const copy = { ...entry };
+      const pages = pagesOf(copy);
+      if (pages.length > 0) copy.pages = pages;
+      merged.set(key, copy);
+      result.push(copy);
+      continue;
+    }
+    const pages = [...new Set([...pagesOf(first), ...pagesOf(entry)])].sort(
+      (a, b) => a - b,
+    );
+    if (pages.length > 0) {
+      first.page = pages[0];
+      first.pages = pages;
+    }
+    if (Array.isArray(first.accept) || Array.isArray(entry.accept)) {
+      first.accept = [
+        ...new Set([
+          ...(Array.isArray(first.accept) ? first.accept : []),
+          ...(Array.isArray(entry.accept) ? entry.accept : []),
+        ]),
+      ];
+    }
+  }
+  return result as T[];
+}
+
+/**
+ * Merges questions that state the same fact (same subject, field and answer)
+ * so a fact repeated on several pages is kept once. The merged question keeps
+ * the lowest `page` and always lists every source page in `pages`, so page
+ * references survive the merge.
+ */
+export function mergeDuplicateQuestions<T>(questions: T[]): T[] {
+  return mergeDuplicates(questions, (entry) => {
+    const answer = firstString(entry, ["answer"]);
+    const subject = firstString(entry, ["subject"]);
+    const field = firstString(entry, ["field"]);
+    const identity =
+      subject && field ? [subject, field] : [firstString(entry, ["prompt"])];
+    if (!answer || identity.some((part) => !part)) return undefined;
+    return [...identity, answer].map((part) => normaliseTerm(part!)).join("\u0000");
+  });
+}
+
+/** Merges vocabulary entries with the same term and definition across pages. */
+export function mergeDuplicateVocabulary<T>(entries: T[]): T[] {
+  return mergeDuplicates(entries, (entry) => {
+    const term = firstString(entry, ["word", "term"]);
+    if (!term) return undefined;
+    return [term, firstString(entry, ["definition"]) ?? ""]
+      .map(normaliseTerm)
+      .join("\u0000");
   });
 }
 
@@ -1085,6 +1302,13 @@ async function analyzePagesExhaustively(
     extractedPages.flatMap((result) => result.vocabulary),
   );
 
+  const uncoveredLines = results.flatMap((result, index) =>
+    (result?.uncoveredLines ?? []).map((line) => ({
+      page: pages[index].pageNumber,
+      line,
+    })),
+  );
+
   return {
     vocabularyJSON: vocabulary.map((entry) => ({
       word: entry.term,
@@ -1095,11 +1319,12 @@ async function analyzePagesExhaustively(
     summariesJSON: [],
     objectivesJSON: [],
     conceptsJSON: [],
-    questionsJSON: facts.map(toQuestion),
+    questionsJSON: mergeDuplicateQuestions(facts.map(toQuestion)),
     usage: extractedPages.reduce(
       (total, result) => addTokenUsage(total, result.usage),
       EMPTY_TOKEN_USAGE,
     ),
+    ...(uncoveredLines.length > 0 ? { uncoveredLines } : {}),
   };
 }
 
@@ -1124,14 +1349,16 @@ export async function analyzePages(
     );
   }
 
-  const PAGES_PER_BATCH = 10;
+  const PAGES_PER_BATCH = 2;
   const MAX_PARALLEL_BATCHES = 5;
+  const pause = options.sleep ?? sleep;
 
   const allVocabulary: any[] = [];
   const allSummaries: any[] = [];
   const allObjectives: any[] = [];
   const allConcepts: any[] = [];
   const allQuestions: any[] = [];
+  const failedBatches: string[] = [];
   let usage = EMPTY_TOKEN_USAGE;
 
   const batchTasks = createPageBatches(pages, PAGES_PER_BATCH).map(
@@ -1150,12 +1377,15 @@ export async function analyzePages(
         );
 
         try {
-          const completion = await openai.chat.completions.create({
-            model: "gpt-4o",
-            messages: [
-              {
-                role: "system",
-                content: `Extract vocabulary, summaries, objectives, concepts, and generate questions from educational text. Return JSON: {
+          const completion = await createStructuredCompletion(
+            openai,
+            {
+              model: "gpt-4o",
+              max_tokens: OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
+              messages: [
+                {
+                  role: "system",
+                  content: `Extract vocabulary, summaries, objectives, concepts, and generate questions from educational text. Return JSON: {
   vocabularyJSON: [{word, definition, context, page}],
   summariesJSON: [{title, content, page_range}],
   objectivesJSON: [{objective, bloom_level}],
@@ -1175,20 +1405,31 @@ For questionsJSON, generate 2-3 custom answer questions per batch that test comp
 - sourceText: the source passage supporting the answer
 
 Include the page number in all extracted items.`,
+                },
+                { role: "user", content: `Extract from:\n\n${batchText}` },
+              ],
+              response_format: { type: "json_object" },
+              metadata: {
+                fileId: fileID,
+                documentId: documentID,
+                pages: pageNumbers,
               },
-              { role: "user", content: `Extract from:\n\n${batchText}` },
-            ],
-            response_format: { type: "json_object" },
-            metadata: {
-              fileId: fileID,
-              documentId: documentID,
-              pages: pageNumbers,
             },
-          });
-
-          const batchContent = JSON.parse(
-            completion.choices[0]?.message?.content || "{}",
+            pause,
           );
+          if (completion.choices?.[0]?.finish_reason === "length") {
+            throw new IncompletePageAnalysisError(
+              `Extraction response was truncated for pages ${pageNumbers}`,
+            );
+          }
+
+          const content = completion.choices[0]?.message?.content;
+          if (!content) {
+            throw new Error(
+              `Extraction returned no content for pages ${pageNumbers}`,
+            );
+          }
+          const batchContent = JSON.parse(content);
 
           console.log(`[analyzePages] Batch ${pageNumbers} complete:`, {
             vocabulary: batchContent.vocabularyJSON?.length || 0,
@@ -1241,7 +1482,18 @@ Include the page number in all extracted items.`,
       ) {
         throw result.reason;
       }
-      if (result.status !== "fulfilled" || !result.value.success) return;
+      if (result.status !== "fulfilled") {
+        failedBatches.push(
+          result.reason instanceof Error
+            ? result.reason.message
+            : String(result.reason),
+        );
+        return;
+      }
+      if (!result.value.success) {
+        failedBatches.push(result.value.error);
+        return;
+      }
       const { batchContent } = result.value;
       usage = addTokenUsage(usage, result.value.usage);
       if (batchContent.vocabularyJSON)
@@ -1258,6 +1510,15 @@ Include the page number in all extracted items.`,
 
     console.log(
       `[analyzePages] Completed parallel group ${Math.floor(i / MAX_PARALLEL_BATCHES) + 1} of ${Math.ceil(batchTasks.length / MAX_PARALLEL_BATCHES)}`,
+    );
+  }
+
+  if (failedBatches.length > 0) {
+    throw Object.assign(
+      new Error(
+        `Document extraction failed for ${failedBatches.length} page batch(es): ${failedBatches.join("; ")}`,
+      ),
+      { name: "ModelTimeout" },
     );
   }
 

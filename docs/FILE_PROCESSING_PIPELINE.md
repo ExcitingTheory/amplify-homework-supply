@@ -197,10 +197,10 @@ Content (text string or file content)
 | Property | Value |
 |----------|-------|
 | **Trigger** | `analyzeDocument(fileID)` mutation or S3 upload EventBridge rule |
-| **Orchestration** | AWS Step Functions Standard workflow with a Distributed Map (3 pages at a time per document) |
+| **Orchestration** | AWS Step Functions Standard workflow with a Distributed Map (10 pages at a time per document) |
 | **Cancellation** | `cancelDocumentAnalysis(fileID)` stops the recorded execution |
 | **Input** | PDF, DOCX, and other text-bearing documents |
-| **Output** | One `ParsedContent` record per document; extracted text, page inputs, page results, and aggregation artifacts are stored in S3 |
+| **Output** | One or more `ParsedContent` records per document (a long document is split by page into chunks); extracted text, page inputs, page results, and aggregation artifacts are stored in S3 |
 
 **Status progression:**
 
@@ -228,14 +228,15 @@ File in S3
 
 **Records created:**
 - `Document` — top-level analysis record with status tracking
-- `ParsedContent` — consolidated vocabulary, summaries, objectives, concepts, and questions for the document. Embedding metadata is stored with the record; vectors are stored in S3.
+- `ParsedContent` — consolidated vocabulary, summaries, objectives, concepts, and questions for the document, stored as page chunks when it is long (`chunkIndex`, `chunkCount`; chunk 0 is the primary record). Embedding metadata is stored with the record; vectors are stored in S3.
 - `Document.metadata.analysis` — run ID, state, execution ARN, page progress, failed page numbers, and verification quality counts.
 - `Document.metadata.analysis.moderation` — moderation result for the source and aggregate. Flagged results remain available for review but are blocked by the normal review UI and import utilities. This is not yet a server-side guard on direct Word/Question GraphQL mutations.
 - `AgentJob` — one record per document/run (`responseId` equals the analysis run ID), with per-model token counts. No estimated cost is written because no versioned model-price source is configured.
 - `ParsedContent` authorization — Owners/Admins have full access; Instructors can read; Learners have no model-level read access.
 - Temporary analysis artifacts and Map results expire from S3 after 14 days.
-- The Thoth seed reports this progress while polling; its 15-minute default deadline is configurable with `THOTH_ANALYSIS_TIMEOUT_MINUTES`.
-- Shared DynamoDB-backed per-provider RPM/TPM/concurrency limits are implemented in source and editable through Admin Platform Settings; demo mode caps them at 5 RPM, 20,000 TPM, and 1 concurrent request. Final `ParsedContent` persistence rejects serialized payloads over 300 KiB instead of truncating or partially saving. CDK synthesis/deployment, limiter fairness and latency, failed-page redrive, and runtime behavior remain unverified; larger-content chunking is not implemented.
+- The Thoth seed reports this progress while polling; its 60-minute default deadline is configurable with `THOTH_ANALYSIS_TIMEOUT_MINUTES`.
+- Shared DynamoDB-backed per-provider RPM/TPM/concurrency limits are implemented in source and editable through Admin Platform Settings; demo mode caps them at 5 RPM, 20,000 TPM, and 1 concurrent request. Final `ParsedContent` persistence splits the result by page into chunk records (see "ParsedContent chunking" in `DOCUMENT_ANALYSIS_QUEUE_PLAN.md`) rather than rejecting large documents. CDK synthesis/deployment, limiter fairness and latency, failed-page redrive, and runtime behavior remain unverified.
+- Importing a question or word writes a `DocumentQuestion` / `DocumentWord` link to the document, recording the `page`, a short `sourceText` and an `entryKey` (the normalized prompt or word). The review screens read these links to mark entries already imported, so a later page of a partly imported document can still be imported; question and word rows show their source file and page; the recycle-bin confirmation for a file says how many questions and words were imported from it (they stay in the banks); and practice drills cite each item's page and can be limited to chosen documents (`documentIds` in `sourcesEnabled`, supported by the server action and the Lambda; there is no picker in the drill dialog yet).
 
 ---
 

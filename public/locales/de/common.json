@@ -68,6 +68,7 @@
       "collapseNavigation": "Navigation einklappen",
       "expandNavigation": "Navigation erweitern",
       "files": "Dateien",
+      "instructorDashboard": "Lehrkraft-Dashboard",
       "moderation": "Moderation",
       "questions": "Fragen",
       "recycleBin": "Papierkorb",
@@ -76,6 +77,8 @@
     }
   },
   "navigation": {
+    "administering": "Verwaltung",
+    "attending": "Teilnahme",
     "collaboration": "Zusammenarbeit",
     "collaborationDesc": "Einladungen & Sitzungen beitreten",
     "drafts": "Entwürfe",
@@ -91,15 +94,26 @@
     "skills": "Kompetenzbaum",
     "squads": "Squads",
     "units": "Einheiten",
-    "workbook": "Arbeitsbuch"
+    "workbook": "Arbeitsbuch",
+    "xpHistory": "XP-Verlauf"
+  },
+  "userMenu": {
+    "level": "Level {level} · {label}",
+    "levelProgress": "Fortschritt zum nächsten Level",
+    "roleAdmin": "Administrator",
+    "roleInstructor": "Lehrkraft",
+    "roleLearner": "Lernende",
+    "roleModerator": "Moderator",
+    "streakDays": "{count}-Tage-Serie",
+    "totalXP": "{xp} XP"
   },
   "peerReview": {
     "helpful": "Die Peer-Review war hilfreich",
     "notHelpful": "Die Peer-Review war nicht hilfreich",
-    "aiAssistant": "KI-Assistent",
+    "aiAssistant": "Kai",
     "blockReference": "Block: {blockId}",
     "didItHelp": "Hat das Peer-Review geholfen?",
-    "messagePlaceholder": "Nachricht eingeben… (mit @AI erhalten Sie KI-Hilfe)",
+    "messagePlaceholder": "Nachricht eingeben… (mit @kai erhalten Sie KI-Hilfe)",
     "noMessages": "Noch keine Nachrichten vorhanden. Beginnen Sie die Peer-Review-Unterhaltung!",
     "sessionEnded": "Diese Review-Sitzung wurde beendet.",
     "thanksForFeedback": "Vielen Dank für Ihr Feedback!",

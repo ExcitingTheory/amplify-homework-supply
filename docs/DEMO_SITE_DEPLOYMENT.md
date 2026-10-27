@@ -18,7 +18,7 @@ Everything else (`amplify.yml`, build commands, backend pipeline deploy) is shar
 
 ## How the demo login works
 
-- [AmplifyAuthenticator.jsx](../src/components/AmplifyAuthenticator.jsx) shows a two-column layout (demo user card + normal sign-in) when [/api/dev/quick-login](../app/api/dev/quick-login/route.ts) returns users. With no users it shows only the normal sign-in form.
+- [AmplifyAuthenticator.jsx](../src/components/AmplifyAuthenticator.jsx) shows a two-column layout (demo user card + normal sign-in) when quick login is enabled. The user list is the shared constant in [quickLoginUsers.ts](../src/utils/quickLoginUsers.ts); [/api/dev/quick-login](../app/api/dev/quick-login/route.ts) only returns the selected user's credentials.
 - The route is enabled when `NODE_ENV === "development"` **or** `NEXT_PUBLIC_DEMO_QUICK_LOGIN === "true"`. Otherwise it returns 404.
 - Selecting a user makes the route return that user's password, derived from `TEST_USER_PASSWORD_SEED` by [test/devCredentials.ts](../test/devCredentials.ts). The browser then signs in with it.
 - The user list in the route must stay in sync with `TEST_USERS` in [amplify/seed/seed.ts](../amplify/seed/seed.ts).
@@ -71,7 +71,7 @@ Re-run steps 2-5 whenever demo data should be reset, or after rotating `TEST_USE
 
 | Symptom | Likely cause |
 | --- | --- |
-| No demo card, only sign-in form | `NEXT_PUBLIC_DEMO_QUICK_LOGIN` not set at build time, or `/api/dev/quick-login` returns an error (check the network tab) |
+| No demo card, only sign-in form | `NEXT_PUBLIC_DEMO_QUICK_LOGIN` not set at build time |
 | Card shows but sign-in fails | Seed secret on the branch differs from the one used to seed, or the backend was never seeded |
 | Route returns 500 "TEST_USER_PASSWORD_SEED is required" | Variable not available to the SSR runtime (see **Confirm** above) |
 | Route returns 404 | Flag not enabled for this build |
@@ -81,5 +81,6 @@ Re-run steps 2-5 whenever demo data should be reset, or after rotating `TEST_USE
 
 - [AmplifyAuthenticator.jsx](../src/components/AmplifyAuthenticator.jsx)
 - [app/api/dev/quick-login/route.ts](../app/api/dev/quick-login/route.ts)
+- [src/utils/quickLoginUsers.ts](../src/utils/quickLoginUsers.ts)
 - [amplify/seed/seed.ts](../amplify/seed/seed.ts) and [amplify/seed/README.md](../amplify/seed/README.md)
 - [AMPLIFY_DEPLOY_SEQUENCE.md](./AMPLIFY_DEPLOY_SEQUENCE.md)

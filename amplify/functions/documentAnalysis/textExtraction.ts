@@ -31,6 +31,50 @@ export async function getS3Object(s3Key: string): Promise<Buffer> {
   return Buffer.concat(chunks);
 }
 
+/**
+ * Images smaller than this on either side are treated as decoration (logos,
+ * bullets, rules) and do not make a page a candidate for visual analysis.
+ */
+export const MIN_MEANINGFUL_IMAGE_PX = 120;
+
+/**
+ * Counts the raster images that look like content on a PDF page, using the
+ * page's operator list. Vector drawings are not counted.
+ */
+export async function countPageImages(page: {
+  getOperatorList: () => Promise<{ fnArray: number[]; argsArray: any[] }>;
+}): Promise<number> {
+  const { OPS } = pdfjsLib;
+  const { fnArray, argsArray } = await page.getOperatorList();
+  let count = 0;
+  for (let index = 0; index < fnArray.length; index += 1) {
+    const fn = fnArray[index];
+    const args = argsArray[index];
+    let width: unknown;
+    let height: unknown;
+    if (fn === OPS.paintImageXObject || fn === OPS.paintImageXObjectRepeat) {
+      [, width, height] = args ?? [];
+    } else if (
+      fn === OPS.paintInlineImageXObject ||
+      fn === OPS.paintImageMaskXObject
+    ) {
+      width = args?.[0]?.width;
+      height = args?.[0]?.height;
+    } else {
+      continue;
+    }
+    if (
+      typeof width === "number" &&
+      typeof height === "number" &&
+      width >= MIN_MEANINGFUL_IMAGE_PX &&
+      height >= MIN_MEANINGFUL_IMAGE_PX
+    ) {
+      count += 1;
+    }
+  }
+  return count;
+}
+
 export interface PdfTextItem {
   str?: string;
   hasEOL?: boolean;
@@ -78,7 +122,7 @@ export function joinPdfTextItems(items: PdfTextItem[]): string {
  * Extract text from PDF file
  */
 export async function extractPdfText(s3Key: string): Promise<{
-  pages: Array<{ pageNumber: number; text: string }>;
+  pages: Array<{ pageNumber: number; text: string; imageCount: number }>;
   pageCount: number;
 }> {
   const BATCH_SIZE = 10; // Process 10 pages at a time
@@ -98,7 +142,11 @@ export async function extractPdfText(s3Key: string): Promise<{
 
   const pdfDocument = await loadingTask.promise;
   const totalPages = pdfDocument.numPages;
-  const extractedPages: Array<{ pageNumber: number; text: string }> = [];
+  const extractedPages: Array<{
+    pageNumber: number;
+    text: string;
+    imageCount: number;
+  }> = [];
 
   console.log(`[extractPdfText] Processing ${totalPages} pages...`);
 
@@ -127,19 +175,34 @@ export async function extractPdfText(s3Key: string): Promise<{
               textContent.items as PdfTextItem[],
             );
 
+            let imageCount = 0;
+            try {
+              imageCount = await countPageImages(page);
+            } catch (error) {
+              console.warn(
+                `[extractPdfText] Could not inspect images on page ${num}:`,
+                error,
+              );
+            }
+
             page.cleanup();
 
             console.log(
-              `[extractPdfText]   Page ${num}: ${pageText.length} characters`,
+              `[extractPdfText]   Page ${num}: ${pageText.length} characters, ${imageCount} images`,
             );
 
-            return { pageNum: num, text: pageText };
+            return { pageNum: num, text: pageText, imageCount };
           } catch (error) {
             console.error(
               `[extractPdfText] Error extracting page ${num}:`,
               error,
             );
-            return { pageNum: num, text: "", error: (error as Error).message };
+            return {
+              pageNum: num,
+              text: "",
+              imageCount: 0,
+              error: (error as Error).message,
+            };
           }
         })(pageNum),
       );
@@ -161,10 +224,13 @@ export async function extractPdfText(s3Key: string): Promise<{
     batchResults
       .sort((a, b) => a.pageNum - b.pageNum)
       .forEach((result) => {
-        if (result.text) {
+        // A page with images but no text layer is a scan or a figure page; keep
+        // it so the vision pass can read it.
+        if (result.text || result.imageCount > 0) {
           extractedPages.push({
             pageNumber: result.pageNum,
             text: result.text,
+            imageCount: result.imageCount,
           });
         }
       });

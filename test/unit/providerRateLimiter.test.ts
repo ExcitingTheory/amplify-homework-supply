@@ -59,6 +59,11 @@ class MemoryRateLimitStore implements ProviderRateLimitStore {
 
 describe("document-analysis provider rate limits", () => {
   it("uses conservative defaults and caps demo settings at those values", () => {
+    expect(DEFAULT_PROVIDER_LIMITS).toEqual({
+      requestsPerMinute: 10,
+      tokensPerMinute: 300_000,
+      maxConcurrentRequests: 1,
+    });
     expect(
       resolveProviderLimits("openai", {}, false),
     ).toEqual(DEFAULT_PROVIDER_LIMITS);
@@ -85,6 +90,33 @@ describe("document-analysis provider rate limits", () => {
     ).toThrow(ProviderLimitError);
     expect(() =>
       resolveProviderLimits(
+        "anthropic",
+        { documentAnalysisAnthropicTokensPerMinute: 269_999 },
+        false,
+      ),
+    ).toThrow(/at least 270000/);
+    expect(
+      resolveProviderLimits(
+        "openai",
+        {
+          documentAnalysisOpenAiRequestsPerMinute: 1,
+          documentAnalysisOpenAiTokensPerMinute: 300_000,
+        },
+        false,
+      ),
+    ).toMatchObject({ requestsPerMinute: 1 });
+    expect(
+      resolveProviderLimits(
+        "anthropic",
+        {
+          documentAnalysisAnthropicRequestsPerMinute: 2,
+          documentAnalysisAnthropicTokensPerMinute: 270_000,
+        },
+        false,
+      ),
+    ).toMatchObject({ requestsPerMinute: 2, tokensPerMinute: 270_000 });
+    expect(() =>
+      resolveProviderLimits(
         "openai",
         { documentAnalysisOpenAiMaxConcurrentRequests: 101 },
         false,
@@ -106,6 +138,28 @@ describe("document-analysis provider rate limits", () => {
       }),
     ).toBe(19);
     expect(readActualTokenUsage({})).toBeUndefined();
+  });
+
+  it("estimates an inline image by a fixed cost rather than its encoded size", () => {
+    const base64 = "A".repeat(400_000);
+    const withImage = estimateRequestTokens({
+      messages: [
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "Read this page" },
+            {
+              type: "image_url",
+              image_url: { url: `data:image/webp;base64,${base64}` },
+            },
+          ],
+        },
+      ],
+      max_tokens: 100,
+    });
+
+    expect(withImage).toBeGreaterThan(1_500);
+    expect(withImage).toBeLessThan(2_000);
   });
 
   it("keeps concurrent requests within the shared lease cap and reconciles tokens", async () => {

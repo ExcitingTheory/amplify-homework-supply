@@ -35,6 +35,7 @@
     "completionMode": "Completion",
     "empty": "No leaderboard data yet. Complete assignments to earn XP!",
     "fastestMode": "Fastest",
+    "goToAssignments": "Go to my assignments",
     "heading": "Overall Leaderboard",
     "squadsMode": "Squads",
     "title": "Leaderboard",
@@ -237,13 +238,17 @@
     "viewWorkbook": "View Workbook"
   },
   "sections": {
+    "administering": "Administering",
     "archive": "Archive",
+    "archivedSections": "Archived Sections",
     "archiveError": "Failed to update section. Please try again.",
     "archived": "Archived",
     "archivedSuccess": "Section archived successfully",
     "assignUnit": "Assign Unit",
+    "attending": "Attending",
     "createNew": "Create New",
     "createNewSection": "Create New Section",
+    "draftSections": "Draft Sections",
     "joinCode": "Join Code",
     "loading": "Loading...",
     "newSection": {
@@ -255,6 +260,7 @@
       "title": "New Section"
     },
     "noSectionsYet": "No Sections Yet",
+    "publishedSections": "Published Sections",
     "showArchived": "Show Archived ({count})",
     "title": "Sections",
     "unarchive": "Unarchive",
@@ -305,7 +311,9 @@
     "loading": "Loading…"
   },
   "units": {
+    "administering": "Administering",
     "archivedUnits": "Archived Units",
+    "browseCommunityUnits": "Browse community units",
     "createNew": "Create New",
     "createNewUnit": "Create New Unit",
     "editUnit": "Edit Unit",
@@ -315,8 +323,10 @@
     "forking": "Forking...",
     "myDrafts": "My Drafts",
     "noCommunityUnits": "No community units available",
+    "noCommunityUnitsDescription": "Units that instructors publish to the community will appear here, ready to copy into your own library.",
     "noPublishedUnits": "No Published Units Yet",
     "noSharedUnits": "No units have been shared with you yet",
+    "noSharedUnitsDescription": "Units that others share with you will appear here.",
     "practice": "Practice",
     "publishedUnits": "Published Units",
     "tabCommunity": "Community",

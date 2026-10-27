@@ -37,6 +37,8 @@ const dataStores = {
   UnitWord: new Map(),
   UnitFile: new Map(),
   UnitDocument: new Map(),
+  DocumentQuestion: new Map(),
+  DocumentWord: new Map(),
   QuestionUnit: new Map(),
   ParsedContent: new Map(),
   AIFeedback: new Map(),
@@ -75,6 +77,8 @@ const activeSubscriptions = {
   UnitWord: [],
   UnitFile: [],
   UnitDocument: [],
+  DocumentQuestion: [],
+  DocumentWord: [],
   QuestionUnit: [],
   ParsedContent: [],
   AIFeedback: [],
@@ -170,6 +174,18 @@ const relationships = {
     hasMany: {
       files: { targetModel: "File", foreignKey: "documentID" },
       parsedContent: { targetModel: "ParsedContent", foreignKey: "documentID" },
+      documentQuestions: { targetModel: "DocumentQuestion", foreignKey: "documentID" },
+      documentWords: { targetModel: "DocumentWord", foreignKey: "documentID" },
+    },
+  },
+  Question: {
+    hasMany: {
+      documentQuestions: { targetModel: "DocumentQuestion", foreignKey: "questionID" },
+    },
+  },
+  Word: {
+    hasMany: {
+      documentWords: { targetModel: "DocumentWord", foreignKey: "wordID" },
     },
   },
   ParsedContent: {
@@ -463,6 +479,8 @@ const mutationSubscriptions = {
   UnitWord: { onCreate: [], onUpdate: [], onDelete: [] },
   UnitFile: { onCreate: [], onUpdate: [], onDelete: [] },
   UnitDocument: { onCreate: [], onUpdate: [], onDelete: [] },
+  DocumentQuestion: { onCreate: [], onUpdate: [], onDelete: [] },
+  DocumentWord: { onCreate: [], onUpdate: [], onDelete: [] },
   QuestionUnit: { onCreate: [], onUpdate: [], onDelete: [] },
   ParsedContent: { onCreate: [], onUpdate: [], onDelete: [] },
   AIFeedback: { onCreate: [], onUpdate: [], onDelete: [] },
@@ -715,6 +733,8 @@ const mockClient = {
     UnitWord: createMockModel("UnitWord"),
     UnitFile: createMockModel("UnitFile"),
     UnitDocument: createMockModel("UnitDocument"),
+    DocumentQuestion: createMockModel("DocumentQuestion"),
+    DocumentWord: createMockModel("DocumentWord"),
     QuestionUnit: createMockModel("QuestionUnit"),
     ParsedContent: createMockModel("ParsedContent"),
     AIFeedback: createMockModel("AIFeedback"),
@@ -1122,6 +1142,20 @@ export const seedMockQuestionUnits = (questionUnitsArray) => {
   );
   questionUnitsArray.forEach((qunit) => {
     dataStores.QuestionUnit.set(qunit.id, qunit);
+  });
+};
+
+/** Links of imported questions to the documents they came from */
+export const seedMockDocumentQuestions = (linksArray) => {
+  linksArray.forEach((link) => {
+    dataStores.DocumentQuestion.set(link.id, link);
+  });
+};
+
+/** Links of imported words to the documents they came from */
+export const seedMockDocumentWords = (linksArray) => {
+  linksArray.forEach((link) => {
+    dataStores.DocumentWord.set(link.id, link);
   });
 };
 

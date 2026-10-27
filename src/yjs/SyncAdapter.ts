@@ -8,6 +8,20 @@
 import * as Y from "yjs";
 import { getAmplifyClient, type AmplifyClient } from "../utils/amplifyClient";
 import { saveDraftContent, loadContent } from "../utils/unitContentStorage";
+import {
+  CONCEPT_FIELDS,
+  OBJECTIVE_FIELDS,
+  PENDING_MEDIA_FIELDS,
+  QUESTION_FIELDS,
+  SUMMARY_FIELDS,
+  VOCABULARY_FIELDS,
+  pickEntries,
+} from "../utils/parsedContentLists";
+import {
+  createParsedContentStore,
+  loadMergedParsedContent,
+  saveParsedContentChunks,
+} from "../utils/parsedContentChunks";
 
 /**
  * Helper: extract _version from a versioned model record.
@@ -287,34 +301,47 @@ export class SyncAdapter {
   async syncParsedContent(contentId: string, ydoc: Y.Doc): Promise<void> {
     try {
       const parsedData = ydoc.getMap("parsedContent");
+      // status is collaboration state only; ParsedContent has no field to store it.
       const status = (parsedData.get("status") as string) || "pending";
-      const progress = (parsedData.get("progress") as string) || "0%";
 
       const vocabulary = parsedData.get("vocabularyJSON") || [];
       const summaries = parsedData.get("summariesJSON") || [];
       const concepts = parsedData.get("conceptsJSON") || [];
       const questions = parsedData.get("questionsJSON") || [];
 
-      const { data: existing } = await this.client.models.ParsedContent.get({
+      // A long document is stored as several chunks. Re-split the shared
+      // lists and write only the chunks whose content changed, so one edit
+      // writes one record.
+      const merged = await loadMergedParsedContent(this.client as any, {
         id: contentId,
       });
-      if (!existing) {
+      if (!merged) {
         console.warn(
           `[SyncAdapter] ParsedContent ${contentId} not found, skipping sync`,
         );
         return;
       }
 
-      await this.client.models.ParsedContent.update({
-        id: contentId,
-        status,
-        progress,
-        vocabularyJSON: JSON.stringify(vocabulary),
-        summariesJSON: JSON.stringify(summaries),
-        conceptsJSON: JSON.stringify(concepts),
-        questionsJSON: JSON.stringify(questions),
-        _version: getVersion(existing),
-      } as any);
+      await saveParsedContentChunks(
+        createParsedContentStore(this.client as any, merged.documentID as string),
+        {
+          documentID: merged.documentID as string,
+          fileID: merged.fileID as string | undefined,
+          content: {
+            vocabularyJSON: pickEntries(vocabulary, VOCABULARY_FIELDS),
+            summariesJSON: pickEntries(summaries, SUMMARY_FIELDS),
+            conceptsJSON: pickEntries(concepts, CONCEPT_FIELDS),
+            questionsJSON: pickEntries(questions, QUESTION_FIELDS),
+            // Not part of the shared document; kept as stored.
+            objectivesJSON: pickEntries(merged.objectivesJSON, OBJECTIVE_FIELDS),
+            pendingMediaJSON: pickEntries(
+              merged.pendingMediaJSON,
+              PENDING_MEDIA_FIELDS,
+            ),
+          },
+          skipUnchanged: true,
+        },
+      );
 
       console.log(
         `[SyncAdapter] Synced ParsedContent ${contentId} (${status})`,

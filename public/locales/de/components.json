@@ -1680,14 +1680,6 @@
     "onTimeHeader": "Pünktlich",
     "studentHeader": "Student"
   },
-  "firstRunChecklist": {
-    "createUnit": "Erstellen Sie Ihre erste Einheit",
-    "description": "Wählen Sie Ihren nächsten Schritt aus.",
-    "joinClass": "Einem Kurs beitreten",
-    "openWork": "Zugewiesene Aufgaben öffnen",
-    "setupClass": "Kurs einrichten",
-    "title": "Hier beginnen"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "Erweiterte Einstellungen",
     "advancedSettingsTooltip": "Skills, Badges, Squads und weitere erweiterte Gamification-Einstellungen",
@@ -1993,7 +1985,8 @@
     "gatedCount": "{count} gesperrt",
     "linearLockOrder": "Lineare Sperrreihenfolge",
     "percent": "{value} %",
-    "stakes": "Einsatz"
+    "stakes": "Einsatz",
+    "noSquadsDescription": "Squads erscheinen hier, wenn Lernende sie erstellen. Die XP der Mitglieder zählt für den Rang ihres Squads."
   },
   "jobsDashboard": {
     "active": "{count} aktiv",
@@ -2161,6 +2154,7 @@
     "xpReward": "+20 XP"
   },
   "nailedItWall": {
+    "emptyDescription": "„Nailed it“-Momente erhältst du, wenn deine Arbeit ein hervorragendes Verständnis zeigt. Schließe Aufgaben ab, um diese Wand zu füllen.",
     "emptyTitle": "Noch keine „Nailed It\"-Momente – machen Sie weiter so!",
     "heading": "🎯 Volltreffer",
     "meta": "{homeworkTitle} · {date}"
@@ -2347,6 +2341,8 @@
       "documentsDesc": "Aus hochgeladenen PDFs und geparsten Inhalten",
       "drillType": "Übungstyp",
       "generating": "Wird generiert...",
+      "limitToDocuments": "Auf Dokumente beschränken",
+      "limitToDocumentsHelp": "Leer lassen, um alles in der Einheit zu verwenden. Bei ausgewählten Dokumenten wird der Textinhalt weggelassen.",
       "maxParticipants": "Maximale Teilnehmerzahl",
       "mixed": "Gemischt",
       "noSourcesWarning": "Aktivieren Sie mindestens eine Inhaltsquelle, um mit dem Üben zu beginnen.",
@@ -2459,6 +2455,7 @@
     "selectAll": "Alle auswählen"
   },
   "questionsReview": {
+    "alreadyImported": "Bereits importiert",
     "answer": "Answer",
     "collapse": "Collapse",
     "deselectAll": "Deselect All",
@@ -2483,6 +2480,7 @@
     "selectAll": "Select All",
     "selectedCount": "{count} of {total} selected",
     "show": "Show",
+    "sourceTooltip": "Quelle: {filename}",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries & Objectives"
   },
@@ -2860,6 +2858,7 @@
   },
   "squadJoinPanel": {
     "cancel": "Abbrechen",
+    "emptyCta": "Zu den Squads",
     "emptyDescription": "Schauen Sie bald wieder vorbei oder erstellen Sie Ihre eigene Gruppe, um loszulegen.",
     "emptyTitle": "Noch keine Squads verfügbar",
     "join": "Beitreten",
@@ -2882,6 +2881,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "Squads erscheinen hier, sobald Lernende sie erstellen oder beitreten, sortiert nach der Gesamt-XP ihrer Mitglieder.",
     "emptyTitle": "Noch keine Squads vorhanden",
     "memberCount": "{count, plural, one {# Mitglied} other {# Mitglieder}}",
     "mySquad": "Mein Squad",
@@ -2925,7 +2925,8 @@
     "deletePost": "Beitrag löschen",
     "empty": "Noch keine Beiträge vorhanden. Teilen Sie als Erste/r etwas mit der Gruppe!",
     "newPost": "Neuer Beitrag",
-    "postAriaLabel": "Beitrag: {title}"
+    "postAriaLabel": "Beitrag: {title}",
+    "writeFirstPost": "Ersten Beitrag schreiben"
   },
   "stateInspector": {
     "capturedAt": "Erfasst am: {date}",
@@ -3228,7 +3229,8 @@
     "definitionPlaceholder": "Definition eingeben...",
     "contextLabel": "Kontext",
     "contextPlaceholder": "Kontext oder Beispielsatz eingeben...",
-    "importSummary": "{imported} neue Wörter importiert, {skipped} bereits vorhanden, {errors} Fehler"
+    "importSummary": "{imported} neue Wörter importiert, {skipped} bereits vorhanden, {errors} Fehler",
+    "alreadyImported": "Bereits importiert"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}: {count, plural, one {# Einreichung} other {# Einreichungen}}",

@@ -24,7 +24,7 @@ export interface AIMentionResult {
 }
 
 /**
- * Process an @AI mention in a peer review chat room.
+ * Process a @kai mention in a peer review chat room.
  * The AI reads chat context and generates a helpful response.
  */
 export async function handleAIMention(

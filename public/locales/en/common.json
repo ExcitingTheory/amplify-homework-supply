@@ -192,6 +192,7 @@
       "collapseNavigation": "Collapse navigation",
       "expandNavigation": "Expand navigation",
       "files": "Files",
+      "instructorDashboard": "Instructor Dashboard",
       "moderation": "Moderation",
       "questions": "Questions",
       "recycleBin": "Recycle Bin",
@@ -212,6 +213,8 @@
   "missingMetadata": "Missing Metadata",
   "modelSelection": "Model Selection",
   "navigation": {
+    "administering": "Administering",
+    "attending": "Attending",
     "backToSection": "Back to section",
     "collaboration": "Collaboration",
     "collaborationDesc": "Invitations & join sessions",
@@ -234,6 +237,16 @@
     "userProfile": "View {name}'s public profile",
     "xpHistory": "XP history"
   },
+  "userMenu": {
+    "level": "Level {level} · {label}",
+    "levelProgress": "Progress to next level",
+    "roleAdmin": "Admin",
+    "roleInstructor": "Instructor",
+    "roleLearner": "Learner",
+    "roleModerator": "Moderator",
+    "streakDays": "{count}-day streak",
+    "totalXP": "{xp} XP"
+  },
   "needsWork": "Needs Work",
   "newTopicPlaceholder": "New Topic Placeholder",
   "noAssignments": "No Assignments",
@@ -241,11 +254,11 @@
   "onlineCount": "Online Count",
   "overdue": "Overdue",
   "peerReview": {
-    "aiAssistant": "AI Assistant",
+    "aiAssistant": "Kai",
     "blockReference": "Block: {blockId}",
     "didItHelp": "Did peer review help?",
     "helpful": "Peer review was helpful",
-    "messagePlaceholder": "Type a message… (use @AI for AI help)",
+    "messagePlaceholder": "Type a message… (use @kai for AI help)",
     "noMessages": "No messages yet. Start the peer review conversation!",
     "notHelpful": "Peer review was not helpful",
     "sessionEnded": "This review session has ended.",

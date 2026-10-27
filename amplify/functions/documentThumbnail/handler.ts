@@ -7,7 +7,7 @@
  * Pipeline:
  * 1. Download document from S3
  * 2. Convert to PDF using LibreOffice (`libreoffice --headless --convert-to pdf`)
- * 3. Render PDF page 1 to PNG using pdf-to-img (or poppler via the layer)
+ * 3. Render PDF page 1 to PNG with pdfjs and @napi-rs/canvas
  * 4. Convert PNG to WebP via Sharp
  * 5. Upload thumbnail to S3 at protected/{identityId}/{fileId}/thumbnail.webp
  * 6. Update File.thumbnail field via GraphQL
@@ -32,12 +32,19 @@ import {
   writeFileSync,
   readFileSync,
   mkdirSync,
+  mkdtempSync,
   existsSync,
   readdirSync,
   unlinkSync,
 } from "fs";
 import { join, extname } from "path";
 import sharp from "sharp";
+import { renderPdfPage } from "../shared/pdfPageRender";
+import { convertImageToPng } from "../shared/imageConvert";
+
+const THUMBNAIL_WIDTH = 300;
+/** Wide enough for a vision model to read body text on a full page. */
+const ANALYSIS_PAGE_WIDTH = 1600;
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -223,14 +230,15 @@ async function uploadToS3(
 // ---------------------------------------------------------------------------
 
 /**
- * Convert a document to PDF using LibreOffice headless mode.
- * Returns the path to the generated PDF in /tmp.
+ * Convert a file with LibreOffice headless mode and return the output path.
+ * Every call gets its own output folder, so a warm container never returns a
+ * file left behind by an earlier conversion.
  */
-function convertToPdf(inputPath: string): string {
-  const outputDir = join(TMP_DIR, "pdf-output");
-  if (!existsSync(outputDir)) {
-    mkdirSync(outputDir, { recursive: true });
-  }
+function convertWithLibreOffice(
+  inputPath: string,
+  format: "pdf" | "png",
+): string {
+  const outputDir = mkdtempSync(join(TMP_DIR, "lo-output-"));
 
   // LibreOffice needs HOME and a profile directory
   const profileDir = join(TMP_DIR, "lo-profile");
@@ -249,7 +257,7 @@ function convertToPdf(inputPath: string): string {
     "--nocrashreport",
     `"-env:UserInstallation=file://${profileDir}"`,
     "--convert-to",
-    "pdf",
+    format,
     "--outdir",
     outputDir,
     inputPath,
@@ -266,17 +274,20 @@ function convertToPdf(inputPath: string): string {
     },
   });
 
-  // Find the generated PDF
   const files = readdirSync(outputDir);
-  const pdfFile = files.find((f) => f.endsWith(".pdf"));
+  const outputFile = files.find((f) => f.endsWith(`.${format}`));
 
-  if (!pdfFile) {
+  if (!outputFile) {
     throw new Error(
-      `LibreOffice did not produce a PDF. Files in output: ${files.join(", ")}`,
+      `LibreOffice did not produce a ${format.toUpperCase()}. Files in output: ${files.join(", ")}`,
     );
   }
 
-  return join(outputDir, pdfFile);
+  return join(outputDir, outputFile);
+}
+
+function convertToPdf(inputPath: string): string {
+  return convertWithLibreOffice(inputPath, "pdf");
 }
 
 /**
@@ -286,30 +297,16 @@ async function pdfPageToWebp(
   pdfBuffer: Buffer,
   pageNumber = 1,
 ): Promise<Buffer> {
-  const { pdf } = await import("pdf-to-img");
-  const pages = await pdf(pdfBuffer, { scale: 2 });
+  // Render at 2x the thumbnail width so the downscale keeps text legible.
+  const { image } = await renderPdfPage(pdfBuffer, pageNumber, {
+    targetWidth: THUMBNAIL_WIDTH * 2,
+    format: "png",
+  });
 
-  let firstPageBuffer: Buffer | null = null;
-  let currentPage = 0;
-  for await (const page of pages) {
-    currentPage += 1;
-    if (currentPage === pageNumber) {
-      firstPageBuffer = Buffer.from(page);
-      break;
-    }
-  }
-
-  if (!firstPageBuffer) {
-    throw new Error(`PDF does not contain page ${pageNumber}`);
-  }
-
-  // Convert to WebP with Sharp
-  const result = await sharp(firstPageBuffer)
-    .resize(300, undefined, { fit: "inside" })
+  return sharp(image)
+    .resize(THUMBNAIL_WIDTH, undefined, { fit: "inside" })
     .webp({ quality: 80, effort: 4 })
     .toBuffer();
-
-  return result;
 }
 
 // ---------------------------------------------------------------------------
@@ -486,7 +483,9 @@ async function generateDocumentThumbnail(
 
     // Upload thumbnail
     const outputKey = `protected/${identityId}/${fileId}/thumbnail.webp`;
-    await uploadToS3(outputKey, webpBuffer, "image/webp", true);
+    // Not tagged as a temporary analysis artifact: the lifecycle rule would
+    // delete a document's thumbnail after 14 days.
+    await uploadToS3(outputKey, webpBuffer, "image/webp");
 
     console.log(
       `[DocumentThumbnail] Thumbnail uploaded: ${outputKey} (${webpBuffer.length} bytes)`,
@@ -625,6 +624,30 @@ async function handleS3Event(event: any): Promise<void> {
 // Main entry point
 // ---------------------------------------------------------------------------
 
+/**
+ * Returns a document as PDF bytes, converting it with LibreOffice when needed.
+ * Each page of a run renders in its own invocation, so the PDF is cached in
+ * /tmp and reused on a warm container instead of converting once per page.
+ */
+async function loadPdfForRun(s3Key: string, runId: string): Promise<Buffer> {
+  const cachedPdfPath = join(TMP_DIR, `analysis-${runId}.pdf`);
+  if (existsSync(cachedPdfPath)) return readFileSync(cachedPdfPath);
+
+  const fileName = s3Key.split("/").pop() || `document-${runId}.pdf`;
+  const sourceBuffer = await downloadFromS3(s3Key);
+  const preprocessedPath = preprocessEduFormat(sourceBuffer, fileName, runId);
+  const inputPath =
+    preprocessedPath ?? join(TMP_DIR, `analysis-${runId}-${fileName}`);
+  if (!preprocessedPath) writeFileSync(inputPath, sourceBuffer);
+  const pdfPath =
+    extname(inputPath).toLowerCase() === ".pdf"
+      ? inputPath
+      : convertToPdf(inputPath);
+  const pdfBuffer = readFileSync(pdfPath);
+  writeFileSync(cachedPdfPath, pdfBuffer);
+  return pdfBuffer;
+}
+
 export const handler: Handler = async (event, _context) => {
   if (event.workflowMode === "renderPage") {
     const { s3Key, pageNumber, outputKey, runId } = event;
@@ -637,26 +660,31 @@ export const handler: Handler = async (event, _context) => {
     ) {
       throw new Error("Invalid renderPage request");
     }
-    const sourceBuffer = await downloadFromS3(s3Key);
-    const fileName = s3Key.split("/").pop() || `document-${runId}.pdf`;
-    const preprocessedPath = preprocessEduFormat(
-      sourceBuffer,
-      fileName,
-      `${runId}-${pageNumber}`,
+    const pdfBuffer = await loadPdfForRun(s3Key, runId);
+    const { image } = await renderPdfPage(pdfBuffer, pageNumber, {
+      targetWidth: ANALYSIS_PAGE_WIDTH,
+      format: "webp",
+    });
+    await uploadToS3(outputKey, image, "image/webp", true);
+    return { imageKey: outputKey };
+  }
+
+  // Converts an image a vision model cannot read (EMF, WMF, TIFF, BMP) to PNG.
+  if (event.workflowMode === "convertImage") {
+    const { s3Key, outputKey } = event;
+    if (typeof s3Key !== "string" || typeof outputKey !== "string") {
+      throw new Error("Invalid convertImage request");
+    }
+    const png = await convertImageToPng(
+      await downloadFromS3(s3Key),
+      s3Key.split("/").pop() || s3Key,
+      {
+        runLibreOffice: (inputPath) =>
+          convertWithLibreOffice(inputPath, "png"),
+        tmpDir: TMP_DIR,
+      },
     );
-    const inputPath =
-      preprocessedPath ??
-      join(TMP_DIR, `analysis-${runId}-${pageNumber}-${fileName}`);
-    if (!preprocessedPath) writeFileSync(inputPath, sourceBuffer);
-    const pdfPath =
-      extname(inputPath).toLowerCase() === ".pdf"
-        ? inputPath
-        : convertToPdf(inputPath);
-    const webpBuffer = await pdfPageToWebp(
-      readFileSync(pdfPath),
-      pageNumber,
-    );
-    await uploadToS3(outputKey, webpBuffer, "image/webp");
+    await uploadToS3(outputKey, png, "image/png", true);
     return { imageKey: outputKey };
   }
 

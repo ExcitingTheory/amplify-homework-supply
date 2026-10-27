@@ -15,10 +15,13 @@ import React from "react";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
-import Link from "@mui/material/Link";
+import MuiLink from "@mui/material/Link";
 import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import type { SxProps, Theme } from "@mui/material/styles";
+import { Link as LocaleLink } from "@/i18n/navigation";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
+
+const EXTERNAL_HREF = /^([a-z][a-z0-9+.-]*:|\/\/)/i;
 
 export interface EmptyStateProps {
   /** Leading illustration / icon. Defaults to an outlined inbox glyph. Accepts any svg icon, including react-icons. */
@@ -33,9 +36,13 @@ export interface EmptyStateProps {
   secondaryAction?: React.ReactNode;
   /** Convenience text-link CTA, rendered after `action`/`secondaryAction`. */
   ctaLabel?: React.ReactNode;
-  /** Href for the convenience link CTA. Omit and use `onCtaClick` for a button-like link instead. */
+  /**
+   * Href for the convenience link CTA. Root-relative paths are navigated through
+   * the locale-aware router; absolute URLs render a plain anchor. Omit and use
+   * `onCtaClick` for a button-like link instead.
+   */
   ctaHref?: string;
-  onCtaClick?: (event: React.MouseEvent<HTMLAnchorElement>) => void;
+  onCtaClick?: (event: React.MouseEvent<HTMLElement>) => void;
   /** Tighter padding for use inside cards/panels. */
   dense?: boolean;
   /** Escape hatch for layout tweaks at the call site. */
@@ -70,6 +77,11 @@ export function EmptyState({
   isDragActive = false,
 }: EmptyStateProps) {
   const isDropzone = Boolean(onDragOver || onDrop);
+  const ctaLinkProps = !ctaHref
+    ? ({ component: "button", type: "button" } as const)
+    : EXTERNAL_HREF.test(ctaHref)
+      ? ({ component: "a", href: ctaHref } as const)
+      : ({ component: LocaleLink, href: ctaHref } as const);
 
   return (
     <Box
@@ -136,16 +148,14 @@ export function EmptyState({
       )}
 
       {ctaLabel != null && (
-        <Link
-          component={ctaHref ? "a" : "button"}
-          type={ctaHref ? undefined : "button"}
-          href={ctaHref}
+        <MuiLink
+          {...ctaLinkProps}
           onClick={onCtaClick}
           underline="hover"
           sx={{ fontWeight: 600, mt: action || secondaryAction ? 0 : 0.5 }}
         >
           {ctaLabel}
-        </Link>
+        </MuiLink>
       )}
     </Box>
   );

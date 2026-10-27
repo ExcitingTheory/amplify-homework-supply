@@ -22,6 +22,8 @@ import {
   FormControl,
   InputLabel,
   Chip,
+  Autocomplete,
+  TextField,
 } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import QuizIcon from "@mui/icons-material/Quiz";
@@ -48,8 +50,16 @@ export interface CoverageSnapshot {
   documents: { total: number; covered: number };
 }
 
+/** A document of the unit that a drill can be limited to. */
+export interface DrillDocumentOption {
+  id: string;
+  filename: string;
+}
+
 export interface DrillConfig {
   sources: DrillSourceConfig;
+  /** When set, only content imported from these documents is used. */
+  documentIds?: string[];
   count: number;
   drillType: string;
   collaborative?: boolean;
@@ -66,6 +76,8 @@ export interface PracticeDrillConfigPopupProps {
   questionCount: number;
   textBlockCount: number;
   documentCount: number;
+  /** The unit's documents; when given, the drill can be limited to some of them. */
+  documents?: ReadonlyArray<DrillDocumentOption>;
   coverageSnapshot?: CoverageSnapshot;
   initialSources?: Partial<DrillSourceConfig>;
   initialDrillType?: string;
@@ -130,6 +142,7 @@ export default function PracticeDrillConfigPopup({
   questionCount,
   textBlockCount,
   documentCount,
+  documents = [],
   coverageSnapshot,
   initialSources,
   initialDrillType,
@@ -156,6 +169,7 @@ export default function PracticeDrillConfigPopup({
     documents: initialSources?.documents ?? documentCount > 0,
   }));
 
+  const [documentIds, setDocumentIds] = useState<string[]>([]);
   const [count, setCount] = useState(10);
   const [drillType, setDrillType] = useState(initialDrillType ?? "mixed");
   const [collaborative, setCollaborative] = useState(false);
@@ -170,6 +184,7 @@ export default function PracticeDrillConfigPopup({
         text: initialSources?.text ?? textBlockCount > 0,
         documents: initialSources?.documents ?? documentCount > 0,
       });
+      setDocumentIds([]);
       setCount(10);
       setDrillType(initialDrillType ?? "mixed");
       setCollaborative(false);
@@ -211,8 +226,11 @@ export default function PracticeDrillConfigPopup({
   }, [sources, coverageSnapshot]);
 
   const handleStart = () => {
+    // Ignore ids of documents that are no longer offered
+    const chosen = documentIds.filter((id) => documents.some((d) => d.id === id));
     onStart({
       sources,
+      ...(chosen.length > 0 ? { documentIds: chosen } : {}),
       count,
       drillType,
       collaborative,
@@ -328,6 +346,31 @@ export default function PracticeDrillConfigPopup({
               variant="determinate"
               value={coverageTotals.percent}
               sx={{ mt: 0.5, height: 8, borderRadius: 4 }}
+            />
+          </Box>
+        )}
+
+        {/* Limit to documents */}
+        {documents.length > 0 && (
+          <Box sx={{ mt: 2 }}>
+            <Autocomplete
+              multiple
+              size="small"
+              data-testid="drill-document-picker"
+              options={documents as DrillDocumentOption[]}
+              value={documents.filter((d) => documentIds.includes(d.id))}
+              getOptionLabel={(option) => option.filename}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={(_event, selected) =>
+                setDocumentIds(selected.map((d) => d.id))
+              }
+              renderInput={(params) => (
+                <TextField
+                  {...params}
+                  label={t("practiceDrill.config.limitToDocuments")}
+                  helperText={t("practiceDrill.config.limitToDocumentsHelp")}
+                />
+              )}
             />
           </Box>
         )}

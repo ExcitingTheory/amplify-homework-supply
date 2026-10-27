@@ -880,6 +880,9 @@ function AdminAIConfig({
   // Hydrate from PlatformSettings record
   React.useEffect(() => {
     if (!platformSettings) return;
+    const normalizeTokensPerMinute = (
+      configured: number | null | undefined,
+    ) => (configured != null && configured >= 270000 ? configured : 300000);
     setValues({
       defaultAIModel: platformSettings.defaultAIModel || "gpt-4o",
       kaiModel: platformSettings.kaiModel || "",
@@ -910,15 +913,23 @@ function AdminAIConfig({
       kaiTotalTurnBudget: platformSettings.kaiTotalTurnBudget ?? null,
       sageTotalTurnBudget: platformSettings.sageTotalTurnBudget ?? null,
       documentAnalysisOpenAiRequestsPerMinute:
-        platformSettings.documentAnalysisOpenAiRequestsPerMinute ?? 5,
-      documentAnalysisOpenAiTokensPerMinute:
-        platformSettings.documentAnalysisOpenAiTokensPerMinute ?? 20000,
+        platformSettings.documentAnalysisOpenAiRequestsPerMinute ?? 10,
+      documentAnalysisOpenAiTokensPerMinute: Math.max(
+        normalizeTokensPerMinute(
+          platformSettings.documentAnalysisOpenAiTokensPerMinute,
+        ),
+        270000,
+      ),
       documentAnalysisOpenAiMaxConcurrentRequests:
         platformSettings.documentAnalysisOpenAiMaxConcurrentRequests ?? 1,
       documentAnalysisAnthropicRequestsPerMinute:
-        platformSettings.documentAnalysisAnthropicRequestsPerMinute ?? 5,
-      documentAnalysisAnthropicTokensPerMinute:
-        platformSettings.documentAnalysisAnthropicTokensPerMinute ?? 20000,
+        platformSettings.documentAnalysisAnthropicRequestsPerMinute ?? 10,
+      documentAnalysisAnthropicTokensPerMinute: Math.max(
+        normalizeTokensPerMinute(
+          platformSettings.documentAnalysisAnthropicTokensPerMinute,
+        ),
+        270000,
+      ),
       documentAnalysisAnthropicMaxConcurrentRequests:
         platformSettings.documentAnalysisAnthropicMaxConcurrentRequests ?? 1,
     });

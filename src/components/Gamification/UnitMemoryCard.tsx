@@ -32,8 +32,8 @@ interface ConceptEntry {
 }
 
 interface ConfusionPair {
-  item1: string
-  item2: string
+  conceptA: string
+  conceptB: string
   frequency: number
 }
 
@@ -165,7 +165,7 @@ export function UnitMemoryCard({ unitId, studentId }: UnitMemoryCardProps) {
             </Typography>
             {data.confusionPairs.slice(0, 3).map((p, i) => (
               <Typography key={i} variant="body2" sx={{ fontSize: '0.8rem' }}>
-                {p.item1} ↔ {p.item2} <Typography component="span" variant="caption" color="text.secondary">{t('unitMemoryCard.frequency', { frequency: p.frequency })}</Typography>
+                {p.conceptA} ↔ {p.conceptB} <Typography component="span" variant="caption" color="text.secondary">{t('unitMemoryCard.frequency', { frequency: p.frequency })}</Typography>
               </Typography>
             ))}
           </Box>

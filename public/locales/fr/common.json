@@ -68,6 +68,7 @@
       "collapseNavigation": "Réduire la navigation",
       "expandNavigation": "Développer la navigation",
       "files": "Fichiers",
+      "instructorDashboard": "Tableau de bord de l'instructeur",
       "moderation": "Modération",
       "questions": "Questions",
       "recycleBin": "Corbeille",
@@ -76,6 +77,8 @@
     }
   },
   "navigation": {
+    "administering": "Administre",
+    "attending": "Participe",
     "collaboration": "Collaboration",
     "collaborationDesc": "Invitations et sessions à rejoindre",
     "drafts": "Brouillons",
@@ -91,15 +94,26 @@
     "skills": "Arbre de compétences",
     "squads": "Équipes",
     "units": "Unités",
-    "workbook": "Cahier d'exercices"
+    "workbook": "Cahier d'exercices",
+    "xpHistory": "Historique des XP"
+  },
+  "userMenu": {
+    "level": "Niveau {level} · {label}",
+    "levelProgress": "Progression vers le niveau suivant",
+    "roleAdmin": "Administrateur",
+    "roleInstructor": "Enseignant",
+    "roleLearner": "Apprenant",
+    "roleModerator": "Modérateur",
+    "streakDays": "Série de {count} jours",
+    "totalXP": "{xp} XP"
   },
   "peerReview": {
     "helpful": "L'évaluation par les pairs a été utile",
     "notHelpful": "L'évaluation par les pairs n'a pas été utile",
-    "aiAssistant": "Assistant IA",
+    "aiAssistant": "Kai",
     "blockReference": "Bloc : {blockId}",
     "didItHelp": "L'évaluation par les pairs a-t-elle été utile ?",
-    "messagePlaceholder": "Saisissez un message… (utilisez @AI pour obtenir l'aide de l'IA)",
+    "messagePlaceholder": "Saisissez un message… (utilisez @kai pour obtenir l'aide de l'IA)",
     "noMessages": "Aucun message pour le moment. Commencez la conversation d'évaluation par les pairs !",
     "sessionEnded": "Cette session d'évaluation est terminée.",
     "thanksForFeedback": "Merci pour votre retour !",

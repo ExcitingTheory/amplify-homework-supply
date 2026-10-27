@@ -16,6 +16,7 @@ import * as events from "aws-cdk-lib/aws-events";
 import * as targets from "aws-cdk-lib/aws-events-targets";
 import * as logs from "aws-cdk-lib/aws-logs";
 import * as sfn from "aws-cdk-lib/aws-stepfunctions";
+import { Construct } from "constructs";
 import * as tasks from "aws-cdk-lib/aws-stepfunctions-tasks";
 import { Alarm, ComparisonOperator } from "aws-cdk-lib/aws-cloudwatch";
 import { CfnBucket } from "aws-cdk-lib/aws-s3";
@@ -62,6 +63,7 @@ import { analyticsAggregatorHandler } from "./functions/analyticsAggregator/reso
 import { publishUnitHandler } from "./functions/publishUnit/resource";
 import { rebuildNgramIndexHandler } from "./functions/rebuildNgramIndex/resource";
 import { collaboratorHandler } from "./functions/collaborator/resource";
+import { recycleBinHandler } from "./functions/recycleBin/resource";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import {
   DynamoEventSource,
@@ -104,6 +106,7 @@ export const backend = defineBackend({
   publishUnitHandler,
   rebuildNgramIndexHandler,
   collaboratorHandler,
+  recycleBinHandler,
 });
 
 const dataStack = backend.data.resources.cfnResources.cfnGraphqlApi.stack;
@@ -118,7 +121,7 @@ const documentAnalysisLimiterTable = new dynamodb.Table(
     },
     billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
     encryption: dynamodb.TableEncryption.AWS_MANAGED,
-    pointInTimeRecovery: true,
+    pointInTimeRecoverySpecification: { pointInTimeRecoveryEnabled: true },
     timeToLiveAttribute: "expiresAt",
     removalPolicy: cdk.RemovalPolicy.RETAIN,
   },
@@ -542,6 +545,13 @@ backend.documentAnalysisWorkflowHandler.addEnvironment(
   process.env.DOCUMENT_ANALYSIS_DEMO_MODE === "true" ? "true" : "false",
 );
 documentAnalysisLimiterTable.grantReadWriteData(workflowLambda);
+// Images a vision model cannot read (EMF, WMF, TIFF, BMP) are converted to PNG
+// by the thumbnail Lambda, which has sharp, canvas, and the LibreOffice layer.
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "DOCUMENT_THUMBNAIL_FUNCTION_NAME",
+  backend.documentThumbnailHandler.resources.lambda.functionName,
+);
+backend.documentThumbnailHandler.resources.lambda.grantInvoke(workflowLambda);
 
 const workflowAppSyncPolicy = new Policy(
   workflowLambda.stack,
@@ -642,10 +652,13 @@ const prepareTask = workflowInvoke("PrepareDocumentAnalysis", "prepare").addRetr
   maxAttempts: 3,
 });
 
+// The task output replaces the state, so the key that the render step reads
+// next ($.imageKey) must be echoed back through the extract step.
 const extractTask = workflowInvoke("ExtractAnalysisPage", "extract", {
   page: sfn.JsonPath.numberAt("$.page"),
   inputKey: sfn.JsonPath.stringAt("$.inputKey"),
   resultKey: sfn.JsonPath.stringAt("$.resultKey"),
+  imageKey: sfn.JsonPath.stringAt("$.imageKey"),
 }).addRetry({
   errors: transientModelErrors,
   interval: cdk.Duration.seconds(2),
@@ -741,13 +754,22 @@ const visionTask = workflowInvoke("AnalyzeSparsePageVision", "vision", {
 });
 const sparseTextChoice = new sfn.Choice(dataStack, "PageTextIsSparse")
   .when(
-    sfn.Condition.booleanEquals("$.sparseText", true),
+    sfn.Condition.booleanEquals("$.needsVision", true),
     renderPageTask.next(visionTask).next(verifyAnthropicTask),
   )
   .otherwise(verifyAnthropicTask);
 
-const documentPages = new sfn.DistributedMap(dataStack, "DocumentPages", {
-  maxConcurrency: 3,
+// ResultWriterV2 is only honoured when this feature flag is on, and a stack
+// that already has children cannot take new context, so the map lives in its
+// own scope.
+const documentPagesScope = new Construct(dataStack, "DocumentPagesScope");
+documentPagesScope.node.setContext(
+  "@aws-cdk/aws-stepfunctions:useDistributedMapResultWriterV2",
+  true,
+);
+const documentPages = new sfn.DistributedMap(documentPagesScope, "DocumentPages", {
+  // Pages per document. The shared provider limiter caps real model load.
+  maxConcurrency: 10,
   itemReader: new sfn.S3JsonItemReader({
     bucket: backend.storage.resources.bucket,
     key: sfn.JsonPath.stringAt("$.manifestKey"),
@@ -765,7 +787,7 @@ const documentPages = new sfn.DistributedMap(dataStack, "DocumentPages", {
     "resultKey.$": "$$.Map.Item.Value.resultKey",
     "imageKey.$": "$$.Map.Item.Value.imageKey",
   },
-  resultWriter: new sfn.ResultWriter({
+  resultWriterV2: new sfn.ResultWriterV2({
     bucket: backend.storage.resources.bucket,
     prefix: "document-analysis-map-output",
   }),
@@ -802,6 +824,8 @@ const aggregateTask = workflowInvoke("AggregateDocumentAnalysis", "aggregate", {
 });
 const moderateTask = workflowInvoke("ModerateDocumentAnalysis", "moderate", {
   aggregateKey: sfn.JsonPath.stringAt("$.aggregateKey"),
+  // The Lambda echoes its payload as the next state, so finalize needs this here.
+  pendingMediaKey: sfn.JsonPath.stringAt("$.pendingMediaKey"),
 });
 const finalizeTask = workflowInvoke("FinalizeDocumentAnalysis", "finalize", {
   aggregateKey: sfn.JsonPath.stringAt("$.aggregateKey"),
@@ -1606,6 +1630,19 @@ backend.documentThumbnailHandler.resources.lambda.addToRolePolicy(
   }),
 );
 
+// Page renders and converted images for document analysis are tagged so the
+// lifecycle rule expires them; tagging needs its own permission.
+backend.documentThumbnailHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObjectTagging"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects(
+        "private/*/documents/*/analysis/*",
+      ),
+    ],
+  }),
+);
+
 // AppSync GraphQL access (to query/update File records)
 const documentThumbnailAppSyncPolicy = new Policy(
   backend.documentThumbnailHandler.resources.lambda.stack,
@@ -1961,6 +1998,49 @@ backend.gradeRollupStreamHandler.resources.lambda.role?.attachInlinePolicy(
   gradeRollupStreamAppSyncPolicy,
 );
 
+// Recycle bin: calls the data API with its own role and writes permanent-delete
+// archives to the storage bucket under private/archives/.
+backend.recycleBinHandler.addEnvironment(
+  "API_ENDPOINT",
+  backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+backend.recycleBinHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+const recycleBinAppSyncPolicy = new Policy(
+  backend.recycleBinHandler.resources.lambda.stack,
+  "RecycleBinAppSyncPolicy",
+  {
+    statements: [
+      new PolicyStatement({
+        actions: ["appsync:GraphQL"],
+        resources: [
+          `${backend.data.resources.cfnResources.cfnGraphqlApi.attrArn}/*`,
+        ],
+      }),
+    ],
+  },
+);
+backend.recycleBinHandler.resources.lambda.role?.attachInlinePolicy(
+  recycleBinAppSyncPolicy,
+);
+backend.recycleBinHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:PutObject", "s3:GetObject"],
+    resources: [
+      backend.storage.resources.bucket.arnForObjects("private/archives/*"),
+    ],
+  }),
+);
+backend.recycleBinHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:ListBucket"],
+    resources: [backend.storage.resources.bucket.bucketArn],
+    conditions: { StringLike: { "s3:prefix": ["private/archives/*"] } },
+  }),
+);
+
 // Connect DynamoDB Stream from Grade to the rollup stream handler (Grade is a
 // foundational model present in every bootstrap phase, so no existence guard needed).
 const gradeTable = backend.data.resources.tables["Grade"];
@@ -2003,6 +2083,17 @@ if (gradeTable) {
 backend.peerReviewAIHandler.addEnvironment(
   "API_ENDPOINT",
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
+);
+// Reads published unit content (protected/units/{unitId}/published.json) for @kai context
+backend.peerReviewAIHandler.addEnvironment(
+  "STORAGE_BUCKET",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.peerReviewAIHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    actions: ["s3:GetObject"],
+    resources: [`${backend.storage.resources.bucket.bucketArn}/*`],
+  }),
 );
 
 const peerReviewAIAppSyncPolicy = new Policy(

@@ -1,8 +1,10 @@
 /**
  * AI mention parser for peer review chat rooms.
  *
- * Detects `@AI` mentions in chat messages and extracts the question text.
- * Case-insensitive. Handles @AI at start, middle, or end of message.
+ * Detects `@kai` mentions in chat messages and extracts the question text.
+ * Kai is the AI teaching assistant's name across the app. Case-insensitive;
+ * handles @kai at the start, middle, or end of a message. `@kaiser` and
+ * addresses like `bob@kai.com` are not mentions.
  *
  * @module aiMentionParser
  */
@@ -21,47 +23,42 @@ export interface AIMentionResult {
 // Parser Functions
 // ============================================================================
 
-/**
- * Pattern that matches @AI (case-insensitive) followed by optional text.
- * Captures the text after @AI as the question.
- */
-const AI_MENTION_PATTERN = /@ai\b\s*/gi
+/** The handle people type to address the AI assistant. */
+export const AI_MENTION_HANDLE = '@kai'
+
+/** `@kai` as a whole word that does not follow a word character or dot. */
+const MENTION_SOURCE = '(?<![\\w.])@kai\\b'
 
 /**
- * Check if a message contains an @AI mention.
+ * Check if a message contains a @kai mention.
  */
 export function hasAIMention(message: string): boolean {
   if (!message) return false
-  return AI_MENTION_PATTERN.test(message.replace(AI_MENTION_PATTERN, '@AI'))
-    ? true
-    : /@ai\b/i.test(message)
+  return new RegExp(MENTION_SOURCE, 'i').test(message)
 }
 
 /**
- * Extract the question text following an @AI mention.
+ * Extract the question text around @kai mentions.
  *
- * If @AI appears multiple times, concatenates all question parts.
- * If @AI has no text after it, returns an empty string.
+ * If @kai appears multiple times, concatenates all question parts.
+ * If @kai has no text with it, returns an empty string.
  *
  * Examples:
- * - "@AI what about this?" → "what about this?"
- * - "Hey @AI can you explain?" → "can you explain?"
- * - "Check @AI this part and @AI that part" → "this part and that part"
- * - "@AI" → ""
+ * - "@kai what about this?" → "what about this?"
+ * - "Hey @kai can you explain?" → "Hey can you explain?"
+ * - "Check @kai this part and @kai that part" → "Check this part and that part"
+ * - "@kai" → ""
  */
 export function extractAIQuestion(message: string): string {
   if (!message) return ''
 
-  // Replace @AI mentions and capture remaining text
-  const cleaned = message
-    .replace(/@ai\b\s*/gi, '')
+  return message
+    .replace(new RegExp(`${MENTION_SOURCE}\\s*`, 'gi'), '')
     .trim()
-
-  return cleaned
 }
 
 /**
- * Parse a message for @AI mentions and extract the question.
+ * Parse a message for @kai mentions and extract the question.
  * This is the main entry point for the parser.
  */
 export function parseAIMention(message: string): AIMentionResult {

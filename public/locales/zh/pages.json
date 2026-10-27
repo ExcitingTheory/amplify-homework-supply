@@ -32,6 +32,7 @@
     "completionMode": "完成情况",
     "empty": "暂无排行榜数据。完成作业以赚取XP！",
     "fastestMode": "最快",
+    "goToAssignments": "前往我的作业",
     "heading": "总排行榜",
     "squadsMode": "小队",
     "title": "排行榜",
@@ -222,12 +223,16 @@
     "viewWorkbook": "查看工作簿"
   },
   "sections": {
+    "administering": "管理中",
     "archive": "归档",
+    "archivedSections": "已归档的班级",
     "archiveError": "更新章节失败，请重试。",
     "archived": "已归档",
     "archivedSuccess": "章节已成功归档",
+    "attending": "参加中",
     "createNew": "新建",
     "createNewSection": "创建新部分",
+    "draftSections": "草稿班级",
     "joinCode": "代码标签",
     "loading": "加载中...",
     "newSection": {
@@ -239,6 +244,7 @@
       "title": "新建章节"
     },
     "noSectionsYet": "暂无章节",
+    "publishedSections": "已发布的班级",
     "showArchived": "显示已归档 ({count})",
     "title": "部分",
     "unarchive": "取消归档",
@@ -281,7 +287,9 @@
     "loading": "加载中…"
   },
   "units": {
+    "administering": "管理中",
     "archivedUnits": "已归档单元",
+    "browseCommunityUnits": "浏览社区单元",
     "createNew": "创建新项目",
     "createNewUnit": "创建新单元",
     "editUnit": "编辑单元",
@@ -291,8 +299,10 @@
     "forking": "正在复制...",
     "myDrafts": "我的草稿",
     "noCommunityUnits": "暂无社区单元",
+    "noCommunityUnitsDescription": "教师发布到社区的单元将显示在这里，可复制到你自己的库中。",
     "noPublishedUnits": "尚未发布单元",
     "noSharedUnits": "暂无单元与您共享",
+    "noSharedUnitsDescription": "他人与你分享的单元将显示在这里。",
     "practice": "练习",
     "publishedUnits": "已发布单元",
     "tabCommunity": "社区",

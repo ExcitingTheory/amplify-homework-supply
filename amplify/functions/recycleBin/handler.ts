@@ -7,11 +7,18 @@
  * Supported models: Unit, Section, Question, Word, File, Document, AssistantChat
  * Join tables cascade: UnitFile, UnitWord, QuestionUnit, UnitDocument,
  *   QuestionFile, WordFile, QuestionWord, DocumentWord, DocumentQuestion, AssistantChatFile
+ * A document's ParsedContent chunks (no soft delete of their own) are archived
+ *   and removed on permanent delete, and recreated on unarchive.
+ * Deleting a File also deletes its Document (and the Document's links) when no
+ *   other File uses it; restoring or permanently deleting the File follows.
+ * An archive holds every stored field of each record (read from the API's
+ *   schema), so unarchiving restores them completely.
  */
 
 import type { Handler } from "aws-lambda";
 import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
+import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import {
   S3Client,
   PutObjectCommand,
@@ -19,6 +26,12 @@ import {
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
 import { gzipSync, gunzipSync } from "node:zlib";
+import {
+  createInputFields,
+  modelSelection,
+  pickInputFields,
+  type RunGraphql,
+} from "./schemaSelection";
 
 // ============================================================================
 // Configuration
@@ -69,6 +82,23 @@ const CASCADE_MAP: Record<
   Section: [],
 };
 
+/**
+ * Records that belong to a model but have no `deletedAt` of their own. They are
+ * left in place on soft delete and restore, and archived with the record and
+ * removed on permanent delete (a document's ParsedContent chunks).
+ */
+const ARCHIVE_ONLY_MAP: Record<
+  string,
+  Array<{ joinModel: string; foreignKey: string }>
+> = {
+  Document: [{ joinModel: "ParsedContent", foreignKey: "documentID" }],
+};
+
+/** Fields read with a record so its owning relationships can be followed. */
+const REFERENCE_FIELDS: Record<string, string[]> = {
+  File: ["documentID"],
+};
+
 const SUPPORTED_MODELS = Object.keys(CASCADE_MAP);
 
 // ============================================================================
@@ -76,20 +106,16 @@ const SUPPORTED_MODELS = Object.keys(CASCADE_MAP);
 // ============================================================================
 
 function getModelQuery(modelName: string): string {
-  const lower = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+  const extra = (REFERENCE_FIELDS[modelName] || []).join(" ");
   return `query Get${modelName}($id: ID!) {
-    get${modelName}(id: $id) { id owner _version deletedAt deletedBy createdAt updatedAt }
+    get${modelName}(id: $id) { id owner _version deletedAt deletedBy createdAt updatedAt ${extra} }
   }`;
 }
 
-function getFullModelQuery(modelName: string): string {
-  // For archiving we need ALL fields — use introspection-free approach
-  // by selecting known common fields + relying on the full item from DynamoDB
-  const lower = modelName.charAt(0).toLowerCase() + modelName.slice(1);
+/** Reads every stored field of a record, so an archive can recreate it. */
+function getFullModelQuery(modelName: string, selection: string): string {
   return `query Get${modelName}Full($id: ID!) {
-    get${modelName}(id: $id) {
-      id owner _version _lastChangedAt _deleted deletedAt deletedBy createdAt updatedAt
-    }
+    get${modelName}(id: $id) { ${selection} }
   }`;
 }
 
@@ -99,6 +125,7 @@ function updateDeletedAtMutation(modelName: string): string {
   }`;
 }
 
+// The delete input takes only the id.
 function deleteModelMutation(modelName: string): string {
   return `mutation Delete${modelName}($input: Delete${modelName}Input!) {
     delete${modelName}(input: $input) { id }
@@ -111,11 +138,15 @@ function createModelMutation(modelName: string): string {
   }`;
 }
 
-function listByForeignKeyQuery(joinModel: string, foreignKey: string): string {
+function listByForeignKeyQuery(
+  joinModel: string,
+  foreignKey: string,
+  selection = "id _version deletedAt owner",
+): string {
   // Use list query with filter
   return `query List${joinModel}By${foreignKey}($filter: Model${joinModel}FilterInput) {
     list${joinModel}s(filter: $filter) {
-      items { id _version deletedAt owner }
+      items { ${selection} }
       nextToken
     }
   }`;
@@ -127,16 +158,52 @@ function listByForeignKeyQuery(joinModel: string, foreignKey: string): string {
 
 let isConfigured = false;
 
+/** Calls the data API with this function's IAM role, as the other handlers do. */
+function configureAmplify(): void {
+  if (isConfigured) return;
+  const endpoint = process.env.API_ENDPOINT;
+  if (!endpoint) throw new Error("API_ENDPOINT is not configured");
+  Amplify.configure(
+    {
+      API: {
+        GraphQL: {
+          endpoint,
+          region: process.env.AWS_REGION || "us-east-1",
+          defaultAuthMode: "iam",
+        },
+      },
+    },
+    {
+      Auth: {
+        credentialsProvider: {
+          getCredentialsAndIdentityId: async () => ({
+            credentials: await fromNodeProviderChain()(),
+          }),
+          clearCredentialsAndIdentityId: () => {},
+        },
+      },
+    },
+  );
+  isConfigured = true;
+}
+
+/** Runs a GraphQL document through the client and returns its data. */
+function graphqlRunner(client: any): RunGraphql {
+  return async (query, variables) => {
+    const { data } = await client.graphql({ query, variables });
+    return data;
+  };
+}
+
 export const handler: Handler = async (event) => {
-  if (!isConfigured) {
-    const amplifyOutputs = JSON.parse(process.env.AMPLIFY_DATA_OUTPUTS || "{}");
-    if (amplifyOutputs.data) {
-      Amplify.configure(amplifyOutputs);
-    }
-    isConfigured = true;
+  try {
+    configureAmplify();
+  } catch (error: any) {
+    console.error("[recycleBin] Not configured:", error);
+    return { success: false, message: error.message || "Not configured" };
   }
 
-  const client = generateClient<any>();
+  const client = generateClient<any>({ authMode: "iam" });
   const s3 = new S3Client({});
   const bucketName = process.env.STORAGE_BUCKET;
 
@@ -237,12 +304,21 @@ async function handleSoftDelete(
   // Cascade to join tables
   const cascadeCount = await cascadeSoftDelete(client, modelName, id, now);
 
+  // A file's document goes with it, unless another file still uses it
+  const documentDeleted =
+    modelName === "File"
+      ? await bestEffort(`delete the document of file ${id}`, () =>
+          softDeleteFileDocument(client, record, now, username),
+        )
+      : false;
+
   return {
     success: true,
     id,
     modelName,
     deletedAt: now,
     cascadedJoinRecords: cascadeCount,
+    ...(modelName === "File" ? { documentDeleted } : {}),
   };
 }
 
@@ -292,12 +368,21 @@ async function handleRestore(
   // Cascade restore to join tables
   const cascadeCount = await cascadeRestore(client, modelName, id);
 
+  // Bring back the document that was deleted with this file
+  const documentRestored =
+    modelName === "File"
+      ? await bestEffort(`restore the document of file ${id}`, () =>
+          restoreFileDocument(client, record, username),
+        )
+      : false;
+
   return {
     success: true,
     id,
     modelName,
     restoredAt: new Date().toISOString(),
     cascadedJoinRecords: cascadeCount,
+    ...(modelName === "File" ? { documentRestored } : {}),
   };
 }
 
@@ -307,7 +392,7 @@ async function handlePermanentDelete(
   bucketName: string | undefined,
   args: { modelName: string; id: string },
   username: string,
-) {
+): Promise<Record<string, any>> {
   const { modelName, id } = args;
 
   if (!SUPPORTED_MODELS.includes(modelName)) {
@@ -318,9 +403,10 @@ async function handlePermanentDelete(
     return { success: false, message: "Storage bucket not configured" };
   }
 
-  // Get full record for archiving
+  // Get the full record for archiving: every stored field, not a fixed few
+  const run = graphqlRunner(client);
   const { data } = await client.graphql({
-    query: getFullModelQuery(modelName),
+    query: getFullModelQuery(modelName, await modelSelection(run, modelName)),
     variables: { id },
   });
 
@@ -333,9 +419,13 @@ async function handlePermanentDelete(
     return { success: false, message: "Unauthorized: not the record owner" };
   }
 
-  // Collect related join table records
+  // Collect related records: join tables, and records with no soft delete of
+  // their own (a document's ParsedContent chunks), each with all its fields
   const relatedRecords: Record<string, any[]> = {};
-  const cascades = CASCADE_MAP[modelName] || [];
+  const cascades = [
+    ...(CASCADE_MAP[modelName] || []),
+    ...(ARCHIVE_ONLY_MAP[modelName] || []),
+  ];
 
   for (const { joinModel, foreignKey } of cascades) {
     const joinRecords = await listJoinRecords(
@@ -343,6 +433,7 @@ async function handlePermanentDelete(
       joinModel,
       foreignKey,
       id,
+      await modelSelection(run, joinModel),
     );
     if (joinRecords.length > 0) {
       relatedRecords[joinModel] = joinRecords;
@@ -374,14 +465,14 @@ async function handlePermanentDelete(
     }),
   );
 
-  // Delete join table records from DynamoDB
+  // Delete the related records from DynamoDB
   for (const { joinModel } of cascades) {
     const joinRecords = relatedRecords[joinModel] || [];
     for (const jr of joinRecords) {
       try {
         await client.graphql({
           query: deleteModelMutation(joinModel),
-          variables: { input: { id: jr.id, _version: jr._version } },
+          variables: { input: { id: jr.id } },
         });
       } catch (err: any) {
         console.warn(
@@ -395,8 +486,20 @@ async function handlePermanentDelete(
   // Delete the primary record
   await client.graphql({
     query: deleteModelMutation(modelName),
-    variables: { input: { id, _version: record._version } },
+    variables: { input: { id } },
   });
+
+  // The document that went to the recycle bin with this file goes with it
+  const document =
+    modelName === "File"
+      ? await permanentlyDeleteFileDocument(
+          client,
+          s3,
+          bucketName,
+          record,
+          username,
+        )
+      : undefined;
 
   return {
     success: true,
@@ -404,6 +507,7 @@ async function handlePermanentDelete(
     modelName,
     archiveKey,
     archivedAt: archivePayload.archivedAt,
+    ...(document ? { document } : {}),
     relatedRecordCount: Object.values(relatedRecords).reduce(
       (sum, arr) => sum + arr.length,
       0,
@@ -461,7 +565,10 @@ async function handleUnarchive(
     // Record doesn't exist — safe to proceed
   }
 
-  // Recreate primary record (strip internal fields, clear deletedAt)
+  // Recreate primary record (strip internal fields, clear deletedAt). Only
+  // fields the create mutation accepts are sent: it takes no createdAt or
+  // updatedAt, for example.
+  const run = graphqlRunner(client);
   const cleanedRecord = { ...record };
   delete cleanedRecord._version;
   delete cleanedRecord._lastChangedAt;
@@ -471,7 +578,12 @@ async function handleUnarchive(
 
   await client.graphql({
     query: createModelMutation(modelName),
-    variables: { input: cleanedRecord },
+    variables: {
+      input: pickInputFields(
+        cleanedRecord,
+        await createInputFields(run, modelName),
+      ),
+    },
   });
 
   // Recreate join table records
@@ -487,7 +599,12 @@ async function handleUnarchive(
       try {
         await client.graphql({
           query: createModelMutation(joinModel),
-          variables: { input: cleanedJoin },
+          variables: {
+            input: pickInputFields(
+              cleanedJoin,
+              await createInputFields(run, joinModel),
+            ),
+          },
         });
         restoredJoinCount++;
       } catch (err: any) {
@@ -589,6 +706,149 @@ async function handleGetArchive(
 }
 
 // ============================================================================
+// File -> Document
+// ============================================================================
+
+/** Runs a follow-on step; a failure is logged and reported as false, not thrown, because the main change is already made. */
+async function bestEffort(what: string, step: () => Promise<boolean>): Promise<boolean> {
+  try {
+    return await step();
+  } catch (err: any) {
+    console.warn(`[recycleBin] Failed to ${what}:`, err.message);
+    return false;
+  }
+}
+
+function sameInstant(a: string | null | undefined, b: string | null | undefined) {
+  return !!a && !!b && Date.parse(a) === Date.parse(b);
+}
+
+async function getDocumentFor(client: any, file: { documentID?: string | null }) {
+  if (!file.documentID) return null;
+  const { data } = await client.graphql({
+    query: getModelQuery("Document"),
+    variables: { id: file.documentID },
+  });
+  return data?.getDocument ?? null;
+}
+
+/** True when a file other than `fileId` that is not deleted uses the document. */
+async function otherLiveFileUses(
+  client: any,
+  documentId: string,
+  fileId: string,
+): Promise<boolean> {
+  const files = await listJoinRecords(
+    client,
+    "File",
+    "documentID",
+    documentId,
+    "id _version deletedAt owner",
+  );
+  return files.some((file) => file.id !== fileId && !file.deletedAt);
+}
+
+/**
+ * Soft deletes the document of a file that was just soft deleted, with the
+ * same timestamp so restore can tell it went with the file.
+ */
+async function softDeleteFileDocument(
+  client: any,
+  file: { id: string; documentID?: string | null },
+  deletedAt: string,
+  username: string,
+): Promise<boolean> {
+  const document = await getDocumentFor(client, file);
+  if (!document || document.deletedAt || document.owner !== username) return false;
+  if (await otherLiveFileUses(client, document.id, file.id)) return false;
+
+  await client.graphql({
+    query: updateDeletedAtMutation("Document"),
+    variables: {
+      input: {
+        id: document.id,
+        deletedAt,
+        deletedBy: username,
+        _version: document._version,
+      },
+    },
+  });
+  await cascadeSoftDelete(client, "Document", document.id, deletedAt);
+  return true;
+}
+
+/** Restores the document that was deleted together with this file, and only that one. */
+async function restoreFileDocument(
+  client: any,
+  file: { deletedAt?: string | null; documentID?: string | null },
+  username: string,
+): Promise<boolean> {
+  const document = await getDocumentFor(client, file);
+  if (
+    !document ||
+    document.owner !== username ||
+    !sameInstant(document.deletedAt, file.deletedAt)
+  ) {
+    return false;
+  }
+
+  await client.graphql({
+    query: updateDeletedAtMutation("Document"),
+    variables: {
+      input: {
+        id: document.id,
+        deletedAt: null,
+        deletedBy: null,
+        _version: document._version,
+      },
+    },
+  });
+  await cascadeRestore(client, "Document", document.id);
+  return true;
+}
+
+/**
+ * Archives and removes the document that was deleted together with a file that
+ * is now permanently deleted, unless another file has come to use it.
+ */
+async function permanentlyDeleteFileDocument(
+  client: any,
+  s3: S3Client,
+  bucketName: string | undefined,
+  file: { id: string; deletedAt?: string | null; documentID?: string | null },
+  username: string,
+): Promise<{ id: string; archiveKey?: string; error?: string } | undefined> {
+  try {
+    const document = await getDocumentFor(client, file);
+    if (
+      !document ||
+      document.owner !== username ||
+      !sameInstant(document.deletedAt, file.deletedAt) ||
+      (await otherLiveFileUses(client, document.id, file.id))
+    ) {
+      return undefined;
+    }
+    const result = await handlePermanentDelete(
+      client,
+      s3,
+      bucketName,
+      { modelName: "Document", id: document.id },
+      username,
+    );
+    return result.success
+      ? { id: document.id, archiveKey: result.archiveKey }
+      : { id: document.id, error: result.message };
+  } catch (err: any) {
+    // The file is already gone and archived; report the document, do not undo
+    console.warn(
+      `[recycleBin] Failed to delete the document of file ${file.id}:`,
+      err.message,
+    );
+    return { id: file.documentID ?? "", error: err.message };
+  }
+}
+
+// ============================================================================
 // Cascade Helpers
 // ============================================================================
 
@@ -672,12 +932,14 @@ async function listJoinRecords(
   joinModel: string,
   foreignKey: string,
   foreignKeyValue: string,
+  selection?: string,
 ): Promise<
   Array<{
     id: string;
     _version: number;
     deletedAt: string | null;
     owner: string;
+    [field: string]: unknown;
   }>
 > {
   const allItems: any[] = [];
@@ -685,7 +947,7 @@ async function listJoinRecords(
 
   do {
     const filter = { [foreignKey]: { eq: foreignKeyValue } };
-    const query = listByForeignKeyQuery(joinModel, foreignKey);
+    const query = listByForeignKeyQuery(joinModel, foreignKey, selection);
 
     const { data }: { data: any } = await client.graphql({
       query,

@@ -1680,14 +1680,6 @@
     "onTimeHeader": "Puntual",
     "studentHeader": "Estudiante"
   },
-  "firstRunChecklist": {
-    "createUnit": "Cree su primera unidad",
-    "description": "Elija su siguiente paso.",
-    "joinClass": "Unirse a una clase",
-    "openWork": "Abrir el trabajo asignado",
-    "setupClass": "Configurar una clase",
-    "title": "Comience aquí"
-  },
   "gamificationQuickPanel": {
     "advancedSettings": "Configuración avanzada",
     "advancedSettingsTooltip": "Habilidades, insignias, escuadrones y otros ajustes avanzados de gamificación",
@@ -1993,7 +1985,8 @@
     "visualLayout": "Diseño visual",
     "xpAmount": "{xp} XP",
     "xpMultiplier": "XP ×{multiplier}",
-    "xpTuner": "Ajustador de XP"
+    "xpTuner": "Ajustador de XP",
+    "noSquadsDescription": "Los grupos aparecen aquí cuando los estudiantes los crean. El XP de los miembros cuenta para la clasificación de su grupo."
   },
   "jobsDashboard": {
     "active": "{count} activo(s)",
@@ -2161,6 +2154,7 @@
     "xpReward": "+20 XP"
   },
   "nailedItWall": {
+    "emptyDescription": "Los momentos “Lo logré” se obtienen cuando tu trabajo demuestra una excelente comprensión. Completa tareas para llenar este muro.",
     "emptyTitle": "Aún no hay momentos «Lo logré». ¡Siga adelante!",
     "heading": "🎯 ¡Lo lograste!\n\nWait—tone is polite-formal, so \"usted\" form: \"¡Lo logró!\" But a wall heading is generic; a neutral option avoids addressing the user directly.\n\n🎯 ¡Logrado!",
     "meta": "{homeworkTitle} · {date}"
@@ -2347,6 +2341,8 @@
       "documentsDesc": "De PDFs cargados y contenido analizado",
       "drillType": "Tipo de ejercicio",
       "generating": "Generando...",
+      "limitToDocuments": "Limitar a documentos",
+      "limitToDocumentsHelp": "Déjalo vacío para usar todo lo de la unidad. Al elegir documentos se omite el contenido de texto.",
       "maxParticipants": "Máximo de participantes",
       "mixed": "Mixto",
       "noSourcesWarning": "Habilite al menos una fuente de contenido para comenzar a practicar.",
@@ -2459,6 +2455,7 @@
     "selectAll": "Seleccionar todo"
   },
   "questionsReview": {
+    "alreadyImported": "Ya importado",
     "answer": "Respuesta",
     "collapse": "Collapse",
     "deselectAll": "Deseleccionar todo",
@@ -2483,6 +2480,7 @@
     "selectAll": "Seleccionar todo",
     "selectedCount": "{count} de {total} seleccionados",
     "show": "Mostrar",
+    "sourceTooltip": "Fuente: {filename}",
     "summaries": "Resúmenes",
     "summariesAndObjectives": "Resúmenes y Objetivos"
   },
@@ -2860,6 +2858,7 @@
   },
   "squadJoinPanel": {
     "cancel": "Cancelar",
+    "emptyCta": "Ir a Grupos",
     "emptyDescription": "Vuelva a consultar pronto o cree su propio equipo para comenzar.",
     "emptyTitle": "Aún no hay escuadrones disponibles",
     "join": "Unirse",
@@ -2882,6 +2881,7 @@
     "totalXp": "{xp} XP"
   },
   "squadLeaderboard": {
+    "emptyDescription": "Los grupos aparecen aquí cuando los estudiantes los crean o se unen, clasificados por el XP total de sus miembros.",
     "emptyTitle": "Aún no hay escuadrones",
     "memberCount": "{count, plural, one {# miembro} other {# miembros}}",
     "mySquad": "Mi escuadrón",
@@ -2925,7 +2925,8 @@
     "deletePost": "Eliminar publicación",
     "empty": "Aún no hay publicaciones. ¡Sea el primero en compartir algo!",
     "newPost": "Nueva publicación",
-    "postAriaLabel": "Publicación: {title}"
+    "postAriaLabel": "Publicación: {title}",
+    "writeFirstPost": "Escribe la primera publicación"
   },
   "stateInspector": {
     "capturedAt": "Capturado: {date}",
@@ -3228,7 +3229,8 @@
     "definitionPlaceholder": "Introduzca la definición...",
     "contextLabel": "Contexto",
     "contextPlaceholder": "Introduzca un contexto o una oración de ejemplo...",
-    "importSummary": "Se importaron {imported} palabras nuevas, {skipped} ya existían, {errors} errores"
+    "importSummary": "Se importaron {imported} palabras nuevas, {skipped} ya existían, {errors} errores",
+    "alreadyImported": "Ya importado"
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}: {count, plural, one {# entrega} other {# entregas}}",

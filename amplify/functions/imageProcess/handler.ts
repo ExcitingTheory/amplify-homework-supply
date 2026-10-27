@@ -26,6 +26,7 @@ import {
   PutObjectCommand,
 } from "@aws-sdk/client-s3";
 import sharp from "sharp";
+import { renderPdfPage } from "../shared/pdfPageRender";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -273,7 +274,7 @@ async function processImageVariants(
 }
 
 /**
- * Generate a thumbnail from a PDF's first page using pdf-to-img
+ * Generate a thumbnail from a PDF's first page using pdfjs and @napi-rs/canvas
  */
 async function processPdfThumbnail(
   sourceBuffer: Buffer,
@@ -281,21 +282,11 @@ async function processPdfThumbnail(
   identityId: string,
 ): Promise<ProcessedVariant | null> {
   try {
-    const { pdf } = await import("pdf-to-img");
-
-    // Get first page as PNG buffer
-    const pages = await pdf(sourceBuffer, { scale: 2 });
-    let firstPageBuffer: Buffer | null = null;
-
-    for await (const page of pages) {
-      firstPageBuffer = Buffer.from(page);
-      break; // Only need first page
-    }
-
-    if (!firstPageBuffer) {
-      console.warn("[ImageProcess] No pages in PDF");
-      return null;
-    }
+    // Render page 1 at twice the thumbnail width so the downscale stays sharp.
+    const { image: firstPageBuffer } = await renderPdfPage(sourceBuffer, 1, {
+      targetWidth: 600,
+      format: "png",
+    });
 
     // Convert to WebP thumbnail
     const processed = await sharp(firstPageBuffer)

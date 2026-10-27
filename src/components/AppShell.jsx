@@ -47,8 +47,17 @@ function useMatchMedia(query) {
  *
  * On screens ≥ md (900px): sidebar is persistent and inline, content shifts right.
  * On screens < md: sidebar is temporary (modal overlay via SwipeableDrawer in MainToolbar).
+ *
+ * @param {object} props
+ * @param {React.ReactNode} props.children
+ * @param {React.ReactNode} [props.toolbarChildren]
+ * @param {React.ReactNode} [props.contentHeader] Rendered above the page content inside <main>.
  */
-export default function AppShell({ children, toolbarChildren }) {
+export default function AppShell({
+  children,
+  toolbarChildren,
+  contentHeader,
+}) {
   const theme = useTheme();
   const isDesktop = useMatchMedia(
     `(min-width:${theme.breakpoints.values.md}px)`,
@@ -226,6 +235,7 @@ export default function AppShell({ children, toolbarChildren }) {
           }}
         >
           <Box component="main" sx={{ flexGrow: 1, minWidth: 0 }}>
+            {contentHeader}
             {children}
           </Box>
           <AppFooter />

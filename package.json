@@ -57,7 +57,7 @@
     "storybook": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook dev -p 6006",
     "storybook:with-logs": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook dev -p 6006 | tee test/logs/storybook.log",
     "build-storybook": "NODE_OPTIONS='--experimental-import-meta-resolve' storybook build",
-    "test": "vitest",
+    "test:with-logs": "vitest run --reporter=verbose 2>&1 | tee test/logs/test.log",
     "test:unit": "vitest run --project=unit --exclude 'test/integration/**' --exclude 'test/performance/**'",
     "generate": "npx ampx generate graphql-client-code",
     "test:integration": "vitest run --project=integration",

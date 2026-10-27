@@ -15,8 +15,18 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { type Schema } from "../../data/resource";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
 import OpenAI from "openai";
+import {
+  extractTextBlocks,
+  readPublishedUnitContent,
+} from "../shared/unitContent";
+import {
+  CONCEPTS_SELECTION,
+  QUESTIONS_SELECTION,
+  SUMMARIES_SELECTION,
+  VOCABULARY_SELECTION,
+  toEntryList,
+} from "../shared/parsedContentLists";
 
 // ============================================================================
 // Types
@@ -27,6 +37,8 @@ interface SourcesEnabled {
   questions: boolean;
   text: boolean;
   documents: boolean;
+  // Limits the drill to content imported from these documents
+  documentIds?: string[];
 }
 
 interface PracticeDrillBlock {
@@ -113,34 +125,10 @@ const GET_UNIT = /* GraphQL */ `
       name
       identityId
       contentVersion
-      language
       summary
     }
   }
 `;
-
-const s3 = new S3Client({});
-const bucketName = process.env.STORAGE_BUCKET;
-
-/**
- * Read published unit content from S3.
- * Lambda IAM role has full bucket access — no path prefix restrictions.
- * Path: protected/units/{unitId}/published.json (no identityId — type-scoped)
- */
-async function getUnitContentFromS3(unitId: string): Promise<string | null> {
-  if (!bucketName) return null;
-  try {
-    const response = await s3.send(
-      new GetObjectCommand({
-        Bucket: bucketName,
-        Key: `protected/units/${unitId}/published.json`,
-      }),
-    );
-    return (await response.Body?.transformToString()) ?? null;
-  } catch {
-    return null;
-  }
-}
 
 const LIST_UNIT_WORDS = /* GraphQL */ `
   query ListUnitWords($filter: ModelUnitWordFilterInput) {
@@ -150,7 +138,7 @@ const LIST_UNIT_WORDS = /* GraphQL */ `
         _version
         _lastChangedAt
         _deleted
-        wordId
+        wordID
         word {
           id
           _version
@@ -158,9 +146,19 @@ const LIST_UNIT_WORDS = /* GraphQL */ `
           _deleted
           phrase
           definition
-          phonetic
-          language
-          audioPath
+          pronunciation
+          documentWords {
+            items {
+              documentID
+              page
+              deletedAt
+              _deleted
+              document {
+                id
+                filename
+              }
+            }
+          }
         }
       }
     }
@@ -175,7 +173,7 @@ const LIST_QUESTION_UNITS = /* GraphQL */ `
         _version
         _lastChangedAt
         _deleted
-        questionId
+        questionID
         question {
           id
           _version
@@ -184,9 +182,18 @@ const LIST_QUESTION_UNITS = /* GraphQL */ `
           prompt
           answer
           choices
-          type
-          audioPath
-          imagePath
+          documentQuestions {
+            items {
+              documentID
+              page
+              deletedAt
+              _deleted
+              document {
+                id
+                filename
+              }
+            }
+          }
         }
       }
     }
@@ -201,7 +208,7 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
         _version
         _lastChangedAt
         _deleted
-        documentId
+        documentID
         document {
           id
           _version
@@ -216,11 +223,10 @@ const LIST_UNIT_DOCUMENTS = /* GraphQL */ `
               _version
               _lastChangedAt
               _deleted
-              vocabularyJSON
-              questionsJSON
-              summariesJSON
-              conceptsJSON
-              page
+              ${VOCABULARY_SELECTION}
+              ${QUESTIONS_SELECTION}
+              ${SUMMARIES_SELECTION}
+              ${CONCEPTS_SELECTION}
             }
           }
         }
@@ -261,14 +267,14 @@ interface SourceMaterial {
     phrase: string;
     definition: string;
     phonetic?: string;
-    language?: string;
+    sources?: ItemSourceRef[];
   }[];
   questions: {
     id: string;
     prompt: string;
     answer: string;
     choices?: string;
-    type?: string;
+    sources?: ItemSourceRef[];
   }[];
   textBlocks: { id: string; text: string }[];
   documents: {
@@ -278,8 +284,124 @@ interface SourceMaterial {
     vocabulary: any[];
     summaries: any[];
   }[];
+  // Neither Unit nor Word/Question store a content language, so this is unset
+  // and TTS falls back to the default voice.
   language?: string;
   unitSummary?: string;
+}
+
+/** Where an imported word or question came from. */
+export interface ItemSourceRef {
+  documentId: string;
+  filename: string;
+  page?: number;
+}
+
+/** Live (not recycled) DocumentWord / DocumentQuestion links as source refs. */
+export function mapItemSources(
+  links: { items?: any[] | null } | null | undefined,
+): ItemSourceRef[] {
+  return (links?.items || [])
+    .filter((link: any) => link && !link.deletedAt && link._deleted !== true)
+    .map((link: any) => ({
+      documentId: link.documentID || link.document?.id,
+      filename: link.document?.filename || "document",
+      ...(typeof link.page === "number" ? { page: link.page } : {}),
+    }))
+    .filter((source: ItemSourceRef) => !!source.documentId);
+}
+
+export function mapUnitWords(
+  items: any[] | null | undefined,
+): SourceMaterial["vocabulary"] {
+  return (items || [])
+    .filter((uw: any) => uw?.word)
+    .map((uw: any) => ({
+      id: uw.word.id,
+      phrase: uw.word.phrase,
+      definition: uw.word.definition || "",
+      phonetic: uw.word.pronunciation || undefined,
+      ...withSources(mapItemSources(uw.word.documentWords)),
+    }));
+}
+
+export function mapQuestionUnits(
+  items: any[] | null | undefined,
+): SourceMaterial["questions"] {
+  return (items || [])
+    .filter((qu: any) => qu?.question)
+    .map((qu: any) => ({
+      id: qu.question.id,
+      prompt: qu.question.prompt,
+      answer: qu.question.answer || "",
+      choices: qu.question.choices,
+      ...withSources(mapItemSources(qu.question.documentQuestions)),
+    }));
+}
+
+function withSources(sources: ItemSourceRef[]) {
+  return sources.length > 0 ? { sources } : {};
+}
+
+/**
+ * Limits the material to what was imported from the given documents. Unit
+ * text is not document content, so it is left out.
+ */
+export function scopeMaterialToDocuments(
+  material: SourceMaterial,
+  documentIds: readonly string[],
+): SourceMaterial {
+  const ids = new Set(documentIds);
+  const inScope = (item: { sources?: ItemSourceRef[] }) =>
+    !!item.sources?.some((source) => ids.has(source.documentId));
+  return {
+    ...material,
+    vocabulary: material.vocabulary.filter(inScope),
+    questions: material.questions.filter(inScope),
+    textBlocks: [],
+    documents: material.documents.filter((doc) => ids.has(doc.id)),
+  };
+}
+
+/**
+ * Fills in `documentRef` for blocks built from an imported word or question,
+ * so the reference comes from the stored link rather than the model.
+ */
+export function attachDocumentRefs(
+  blocks: PracticeDrillBlock[],
+  material: SourceMaterial,
+): PracticeDrillBlock[] {
+  const sourcesById = new Map<string, ItemSourceRef[]>();
+  for (const item of [...material.vocabulary, ...material.questions]) {
+    if (item.sources) sourcesById.set(item.id, item.sources);
+  }
+  return blocks.map((block) => {
+    if (block.documentRef) return block;
+    if (block.sourceType !== "vocabulary" && block.sourceType !== "question") {
+      return block;
+    }
+    const source = sourcesById
+      .get(block.sourceItemId)
+      ?.find((candidate) => candidate.page !== undefined);
+    return source
+      ? {
+          ...block,
+          documentRef: { filename: source.filename, page: source.page as number },
+        }
+      : block;
+  });
+}
+
+function describeSources(sources: ItemSourceRef[] | undefined): string {
+  if (!sources || sources.length === 0) return "";
+  const parts = sources
+    .slice(0, 2)
+    .map((source) =>
+      source.page !== undefined
+        ? `${source.filename}, p.${source.page}`
+        : source.filename,
+    );
+  return ` [source: ${parts.join("; ")}]`;
 }
 
 async function fetchSourceMaterial(
@@ -301,47 +423,32 @@ async function fetchSourceMaterial(
   })) as any;
   const unit = unitData?.getUnit;
   if (!unit) throw new Error(`Unit ${unitId} not found`);
-  material.language = unit.language;
   material.unitSummary = unit.summary || undefined;
 
   // Fetch vocabulary words
   if (sourcesEnabled.vocabulary) {
     const { data: wordsData } = (await client.graphql({
       query: LIST_UNIT_WORDS,
-      variables: { filter: { unitId: { eq: unitId } } },
+      variables: { filter: { unitID: { eq: unitId } } },
     })) as any;
-    material.vocabulary = (wordsData?.listUnitWords?.items || [])
-      .filter((uw: any) => uw?.word)
-      .map((uw: any) => ({
-        id: uw.word.id,
-        phrase: uw.word.phrase,
-        definition: uw.word.definition || "",
-        phonetic: uw.word.phonetic,
-        language: uw.word.language,
-      }));
+    material.vocabulary = mapUnitWords(wordsData?.listUnitWords?.items);
   }
 
   // Fetch questions
   if (sourcesEnabled.questions) {
     const { data: questionsData } = (await client.graphql({
       query: LIST_QUESTION_UNITS,
-      variables: { filter: { unitId: { eq: unitId } } },
+      variables: { filter: { unitID: { eq: unitId } } },
     })) as any;
-    material.questions = (questionsData?.listQuestionUnits?.items || [])
-      .filter((qu: any) => qu?.question)
-      .map((qu: any) => ({
-        id: qu.question.id,
-        prompt: qu.question.prompt,
-        answer: qu.question.answer || "",
-        choices: qu.question.choices,
-        type: qu.question.type,
-      }));
+    material.questions = mapQuestionUnits(
+      questionsData?.listQuestionUnits?.items,
+    );
   }
 
   // Extract text blocks from Lexical content (read from S3)
   if (sourcesEnabled.text) {
     try {
-      const s3Content = await getUnitContentFromS3(unitId);
+      const s3Content = await readPublishedUnitContent(unitId);
       if (s3Content) {
         const lexicalData =
           typeof s3Content === "string" ? JSON.parse(s3Content) : s3Content;
@@ -360,7 +467,7 @@ async function fetchSourceMaterial(
   if (sourcesEnabled.documents) {
     const { data: docsData } = (await client.graphql({
       query: LIST_UNIT_DOCUMENTS,
-      variables: { filter: { unitId: { eq: unitId } } },
+      variables: { filter: { unitID: { eq: unitId } } },
     })) as any;
     material.documents = (docsData?.listUnitDocuments?.items || [])
       .filter((ud: any) => ud?.document)
@@ -371,13 +478,13 @@ async function fetchSourceMaterial(
           id: doc.id,
           filename: doc.filename || "document",
           concepts: parsedItems.flatMap((p: any) =>
-            safeParseJSON(p.conceptsJSON, []),
+            toEntryList(p.conceptsJSON),
           ),
           vocabulary: parsedItems.flatMap((p: any) =>
-            safeParseJSON(p.vocabularyJSON, []),
+            toEntryList(p.vocabularyJSON),
           ),
           summaries: parsedItems.flatMap((p: any) =>
-            safeParseJSON(p.summariesJSON, []),
+            toEntryList(p.summariesJSON),
           ),
         };
       });
@@ -386,34 +493,11 @@ async function fetchSourceMaterial(
   return material;
 }
 
-function extractTextBlocks(lexicalData: any): string[] {
-  const texts: string[] = [];
-  function walk(node: any) {
-    if (node.type === "text" && node.text) {
-      texts.push(node.text);
-    }
-    if (node.children) {
-      for (const child of node.children) walk(child);
-    }
-  }
-  if (lexicalData?.root) walk(lexicalData.root);
-  return texts.filter((t) => t.trim().length > 10); // Skip very short fragments
-}
-
-function safeParseJSON(str: string | null | undefined, fallback: any): any {
-  if (!str) return fallback;
-  try {
-    return typeof str === "string" ? JSON.parse(str) : str;
-  } catch {
-    return fallback;
-  }
-}
-
 // ============================================================================
 // GPT-4 question generation
 // ============================================================================
 
-function buildGenerationPrompt(
+export function buildGenerationPrompt(
   material: SourceMaterial,
   drillType: string,
   count: number,
@@ -463,7 +547,7 @@ function buildGenerationPrompt(
     parts.push("=== VOCABULARY ===");
     for (const w of material.vocabulary) {
       parts.push(
-        `- ${w.phrase}: ${w.definition}${w.phonetic ? ` (${w.phonetic})` : ""}${w.language ? ` [${w.language}]` : ""}`,
+        `- [id: ${w.id}] ${w.phrase}: ${w.definition}${w.phonetic ? ` (${w.phonetic})` : ""}${describeSources(w.sources)}`,
       );
     }
     parts.push("");
@@ -473,7 +557,7 @@ function buildGenerationPrompt(
     parts.push("=== QUESTION BANK ===");
     for (const q of material.questions) {
       parts.push(
-        `- Q: ${q.prompt} | A: ${q.answer}${q.type ? ` | Type: ${q.type}` : ""}`,
+        `- [id: ${q.id}] Q: ${q.prompt} | A: ${q.answer}${describeSources(q.sources)}`,
       );
     }
     parts.push("");
@@ -518,6 +602,9 @@ function buildGenerationPrompt(
   );
   parts.push(
     "Each object must have: type, instruction, sourceItemId, sourceType",
+  );
+  parts.push(
+    "For a block built from a vocabulary word or a question-bank entry, set sourceItemId to its [id: ...] and sourceType to \"vocabulary\" or \"question\".",
   );
   parts.push(
     "Optional fields: choices (for quiz), expectedAnswer (for answer/custom-answer), pairs (for meaning-association), hint, documentRef, pronunciation",
@@ -722,8 +809,17 @@ export const handler: Handler = async (event: any) => {
   );
   console.log(`[generatePracticeDrill] Sources:`, sourcesEnabled);
 
-  // 1. Fetch all source material
-  const material = await fetchSourceMaterial(unitId, sourcesEnabled);
+  // 1. Fetch all source material, limited to chosen documents when given
+  const fetched = await fetchSourceMaterial(unitId, sourcesEnabled);
+  const documentIds = Array.isArray(sourcesEnabled.documentIds)
+    ? sourcesEnabled.documentIds.filter(
+        (id): id is string => typeof id === "string" && id.length > 0,
+      )
+    : [];
+  const material =
+    documentIds.length > 0
+      ? scopeMaterialToDocuments(fetched, documentIds)
+      : fetched;
   const totalItems =
     material.vocabulary.length +
     material.questions.length +
@@ -743,7 +839,10 @@ export const handler: Handler = async (event: any) => {
   );
 
   // 2. Generate practice blocks via GPT-4
-  const blocks = await generateBlocks(material, drillType, count);
+  const blocks = attachDocumentRefs(
+    await generateBlocks(material, drillType, count),
+    material,
+  );
   console.log(`[generatePracticeDrill] Generated ${blocks.length} blocks`);
 
   // 3. Attach TTS audio to all pronounceable text

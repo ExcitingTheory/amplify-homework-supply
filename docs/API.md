@@ -31,11 +31,13 @@ Schema definition: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
 | **Word** | Vocabulary with phonetic, definition, audio files, embeddings |
 | **File** | S3 objects with metadata (audio/video/images/PDFs/documents) |
 | **Document** | PDF/document analysis results with extracted text |
-| **ParsedContent** | Extracted vocabulary and content from analyzed documents |
+| **ParsedContent** | Extracted vocabulary and content from analyzed documents; a long document is several records split by page (`chunkIndex`, `chunkCount`) |
 
 ### Join Tables (many-to-many)
 
 `UnitFile`, `UnitWord`, `QuestionUnit`, `UnitDocument`, `QuestionFile`, `WordFile`, `QuestionWord`, `DocumentWord`, `DocumentQuestion`, `AssistantChatFile`
+
+`DocumentWord` and `DocumentQuestion` record where an imported word or question came from: the document, the `page`, a short `sourceText`, and an `entryKey` (the normalized word or prompt). Importing writes them (`src/utils/documentLinks.ts`); an entry can be linked to several documents. They drive the "already imported" marks in the review screens, the source chips on question and word rows, the imported-content note when a file is moved to the recycle bin, and per-document scoping and page references in practice drills.
 
 ### AI & Chat
 

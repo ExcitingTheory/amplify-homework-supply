@@ -63,6 +63,7 @@ import SettingsContext from "../../../context/settingsContext";
 import { usePlatformSettings } from "../../../context/gamificationContext";
 
 import { getAmplifyClient } from "../../../utils/amplifyClient";
+import { loadMergedParsedContent } from "../../../utils/parsedContentChunks";
 import { generateEmbedding as generateEmbeddingAction } from "../../../../app/actions/embeddings";
 import {
   generateSpeech as generateSpeechAction,
@@ -78,6 +79,7 @@ import {
   cancelPDFAnalysis,
   generateEmbeddings,
   isAnalyzableDocument,
+  FILE_INPUT_ACCEPT,
 } from "../../../utils/fileUploadUtils";
 import {
   saveEmbeddings,
@@ -1055,8 +1057,8 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
                 description: c?.description,
               })),
               questions: (parsedContent.questionsJSON ?? []).map((q) => ({
-                question: q?.question,
-                answer: q?.expectedAnswer,
+                question: q?.prompt,
+                answer: q?.answer,
               })),
             }
           : null;
@@ -1088,10 +1090,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
     return highlightMatches(text, search);
   };
 
-  const isDocument =
-    file.mimeType === "application/pdf" ||
-    file.mimeType === "text/plain" ||
-    file.mimeType === "text/markdown";
+  const isDocument = isAnalyzableDocument(file.mimeType);
 
   return (
     <Box sx={{ p: 2 }}>
@@ -2344,12 +2343,35 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
           console.error("Error downloading file:", error);
         }
         break;
-      case "delete":
+      case "delete": {
+        // Imported questions and words stay in the bank; say how many there are
+        let importedNote = "";
+        if (file.documentID) {
+          try {
+            const imported = await summarizeDocumentLinks(
+              getAmplifyClient(),
+              file.documentID,
+            );
+            if (imported.questions + imported.words > 0) {
+              importedNote = t("fileManager2.fileDetails.importedContentNote", {
+                questions: imported.questions,
+                words: imported.words,
+              });
+            }
+          } catch (error) {
+            console.warn("[FileManager2] Could not summarize imports:", error);
+          }
+        }
         setConfirmDialog({
           open: true,
-          message: t("fileManager2.fileDetails.confirmMoveToRecycleBin", {
-            name: file.name,
-          }),
+          message: [
+            t("fileManager2.fileDetails.confirmMoveToRecycleBin", {
+              name: file.name,
+            }),
+            importedNote,
+          ]
+            .filter(Boolean)
+            .join(" "),
           severity: "warning",
           onConfirm: async () => {
             try {
@@ -2394,6 +2416,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
           },
         });
         break;
+      }
       case "re-analyze":
         try {
           if (isAnalyzableDocument(file.mimeType)) {
@@ -3047,174 +3070,6 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
 });
 
 /**
- * Helper function to completely delete a file from both Gen2 client and S3
- * @param {FileModel} file - The file model to delete
- * @returns {Promise<void>}
- */
-async function deleteFileCompletely(file) {
-  if (!file) return;
-
-  try {
-    const client = getAmplifyClient();
-
-    // Delete associated Document and all its relationships if it exists
-    if (file.documentID) {
-      const { data: document } = await client.models.Document.get({
-        id: file.documentID,
-      });
-      if (document) {
-        console.log(
-          "Deleting Document and all related records:",
-          file.documentID,
-        );
-
-        // Delete embeddings from IndexedDB
-        try {
-          await deleteEmbeddings(file.documentID);
-          console.log("Deleted embeddings for document:", file.documentID);
-        } catch (embError) {
-          console.warn("Failed to delete embeddings:", embError);
-        }
-
-        // Delete all ParsedContent records associated with this document
-        const { data: parsedContents } = await client.models.ParsedContent.list(
-          {
-            filter: { documentID: { eq: file.documentID } },
-          },
-        );
-        for (const parsedContent of parsedContents || []) {
-          await client.models.ParsedContent.delete({ id: parsedContent.id });
-        }
-        console.log(
-          `Deleted ${parsedContents?.length || 0} ParsedContent records`,
-        );
-
-        // Delete all UnitDocument join table entries
-        const { data: unitDocuments } = await client.models.UnitDocument.list({
-          filter: { documentID: { eq: file.documentID } },
-        });
-        for (const unitDoc of unitDocuments || []) {
-          await client.models.UnitDocument.delete({ id: unitDoc.id });
-        }
-        console.log(`Deleted ${unitDocuments?.length || 0} UnitDocument links`);
-
-        // Delete all DocumentWord join table entries
-        const { data: documentWords } = await client.models.DocumentWord.list({
-          filter: { documentID: { eq: file.documentID } },
-        });
-        for (const docWord of documentWords || []) {
-          await client.models.DocumentWord.delete({ id: docWord.id });
-        }
-        console.log(`Deleted ${documentWords?.length || 0} DocumentWord links`);
-
-        // Delete all DocumentQuestion join table entries
-        const { data: documentQuestions } =
-          await client.models.DocumentQuestion.list({
-            filter: { documentID: { eq: file.documentID } },
-          });
-        for (const docQuestion of documentQuestions || []) {
-          await client.models.DocumentQuestion.delete({ id: docQuestion.id });
-        }
-        console.log(
-          `Deleted ${documentQuestions?.length || 0} DocumentQuestion links`,
-        );
-
-        // Delete all AgentJob records
-        const { data: agentJobs } = await client.models.AgentJob.list({
-          filter: { documentID: { eq: file.documentID } },
-        });
-        for (const job of agentJobs || []) {
-          await client.models.AgentJob.delete({ id: job.id });
-        }
-        console.log(`Deleted ${agentJobs?.length || 0} AgentJob records`);
-
-        // Finally delete the Document model itself
-        await client.models.Document.delete({ id: file.documentID });
-        console.log("Deleted Document model:", file.documentID);
-      }
-    }
-
-    // Delete all File relationship join table entries
-
-    // Delete UnitFile join table entries
-    const { data: unitFiles } = await client.models.UnitFile.list({
-      filter: { fileID: { eq: file.id } },
-    });
-    for (const unitFile of unitFiles || []) {
-      await client.models.UnitFile.delete({ id: unitFile.id });
-    }
-    console.log(`Deleted ${unitFiles?.length || 0} UnitFile links`);
-
-    // Delete WordFile join table entries
-    const { data: wordFiles } = await client.models.WordFile.list({
-      filter: { fileID: { eq: file.id } },
-    });
-    for (const wordFile of wordFiles || []) {
-      await client.models.WordFile.delete({ id: wordFile.id });
-    }
-    console.log(`Deleted ${wordFiles?.length || 0} WordFile links`);
-
-    // Delete QuestionFile join table entries
-    const { data: questionFiles } = await client.models.QuestionFile.list({
-      filter: { fileID: { eq: file.id } },
-    });
-    for (const questionFile of questionFiles || []) {
-      await client.models.QuestionFile.delete({ id: questionFile.id });
-    }
-    console.log(`Deleted ${questionFiles?.length || 0} QuestionFile links`);
-
-    // Delete AssistantChatFile join table entries
-    const { data: chatFiles } = await client.models.AssistantChatFile.list({
-      filter: { fileID: { eq: file.id } },
-    });
-    for (const chatFile of chatFiles || []) {
-      await client.models.AssistantChatFile.delete({ id: chatFile.id });
-    }
-    console.log(`Deleted ${chatFiles?.length || 0} AssistantChatFile links`);
-
-    // Delete ParsedContent associated directly with the file
-    const { data: fileParsedContents } = await client.models.ParsedContent.list(
-      {
-        filter: { fileID: { eq: file.id } },
-      },
-    );
-    for (const parsedContent of fileParsedContents || []) {
-      await client.models.ParsedContent.delete({ id: parsedContent.id });
-    }
-    console.log(
-      `Deleted ${fileParsedContents?.length || 0} ParsedContent records for file`,
-    );
-
-    // Delete the File model itself
-    await client.models.File.delete({ id: file.id });
-    console.log("Successfully deleted File model:", file.id);
-
-    // Delete from S3 - must provide accessLevel and identityId for protected files
-    try {
-      await remove({
-        key: file.path,
-        options: {
-          accessLevel: "protected",
-          identityId: file.identityId,
-        },
-      });
-      console.log("Deleted S3 file:", file.path);
-    } catch (s3Error) {
-      console.error("S3 deletion error (file may not exist):", s3Error);
-      // Don't throw - file model is already deleted
-    }
-  } catch (error) {
-    console.error("Error deleting file:", error);
-    console.error("Error details:", {
-      message: error.message,
-      name: error.name,
-      stack: error.stack,
-    });
-    throw error;
-  }
-}
-
-/**
  * Component to handle selected file view with parsedContent
  * parsedContent is lazy-loaded via Amplify Gen 2 hasMany relationship
  */
@@ -3231,16 +3086,12 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
     const loadParsedContent = async () => {
       const file = selectedFileRef.current;
       try {
-        if (typeof file.parsedContent === "function") {
-          const result = await file.parsedContent();
-          if (!cancelled) {
-            setParsedContent(result?.data?.[0] || null);
-          }
-        } else if (Array.isArray(file.parsedContent)) {
-          if (!cancelled) {
-            setParsedContent(file.parsedContent[0] || null);
-          }
-        }
+        // A long document is stored as several chunks, merged into one record
+        const record = await loadMergedParsedContent(getAmplifyClient(), {
+          fileId: file.id,
+          file,
+        });
+        if (!cancelled) setParsedContent(record);
       } catch (err) {
         console.error("[SelectedFileView] Failed to load parsedContent:", err);
       }
@@ -4008,15 +3859,7 @@ export default function FileManager2() {
         organized[level].scripts.push(file);
       } else if (mimeType === "text/x-fountain") {
         organized[level].scripts.push(file);
-      } else if (
-        mimeType === "application/pdf" ||
-        mimeType === "text/plain" ||
-        mimeType === "text/markdown" ||
-        mimeType === "text/csv" ||
-        mimeType === "application/msword" ||
-        mimeType ===
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-      ) {
+      } else if (isAnalyzableDocument(mimeType)) {
         organized[level].documents.push(file);
       } else {
         // Default to 'other' for unrecognized types
@@ -5021,7 +4864,7 @@ export default function FileManager2() {
                 data-testid="file-upload-input"
                 type="file"
                 multiple
-                accept="image/*,audio/*,video/*,.pdf,.doc,.docx,.txt,.md,.csv,.xls,.xlsx,.ppt,.pptx,.fountain,.odt,.ods,.odp,.imscc,.epub,.gift,.qti.xml"
+                accept={FILE_INPUT_ACCEPT}
                 hidden
                 aria-label={t("fileManager2.toolbar.uploadTooltip")}
                 onChange={(e) => {

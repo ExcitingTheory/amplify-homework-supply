@@ -9,6 +9,16 @@ import {
   getS3Object,
 } from "./textExtraction.js";
 import {
+  EMBEDDED_IMAGE_FORMATS,
+  extractZipMedia,
+  type EmbeddedImage,
+} from "./embeddedImages.js";
+import {
+  extractDocxInline,
+  extractOdfInline,
+  type InlineExtraction,
+} from "./inlineImages.js";
+import {
   extractSpreadsheetText,
   extractPresentationText,
   extractOdfText,
@@ -17,7 +27,8 @@ import {
 
 export interface FormatExtractionResult {
   text: string;
-  pages: Array<{ pageNumber: number; text: string }>;
+  /** `imageCount` is the number of content images on the page, when known. */
+  pages: Array<{ pageNumber: number; text: string; imageCount?: number }>;
   pageCount: number;
   sourceFormat: string;
   metadata?: Record<string, unknown>;
@@ -27,6 +38,23 @@ export interface FormatExtractionResult {
     objectivesJSON?: unknown[];
     summariesJSON?: unknown[];
   };
+  /**
+   * Images found inside formats whose pages cannot be rendered (DOCX, XLSX,
+   * ODF). They are described for analysis, not stored as files.
+   */
+  embeddedImages?: EmbeddedImage[];
+  /**
+   * `text` with a placeholder at each image, when image positions are known.
+   * Each image's `marker` appears in it exactly where the image sits.
+   */
+  inlineText?: string;
+  /** Text read from charts, SmartArt and SVG, with no model call needed. */
+  visualText?: string[];
+  /**
+   * Images the vision model cannot read (EMF, WMF, TIFF, BMP). They are
+   * converted to PNG before being described.
+   */
+  unconvertedImages?: EmbeddedImage[];
   /** Media files extracted from packages (SCORM, IMS CC, EPUB) ready for S3 upload */
   mediaFiles?: Array<{
     filename: string;
@@ -91,7 +119,10 @@ const formatRegistry: Record<string, ExtractorFn> = {
   // --- Existing working formats ---
   pdf: async (s3Key) => {
     const result = await extractPdfText(s3Key);
-    const text = result.pages.map((p) => p.text).join("\n\n");
+    const text = result.pages
+      .map((p) => p.text)
+      .filter(Boolean)
+      .join("\n\n");
     return {
       text,
       pages: result.pages,
@@ -148,6 +179,10 @@ const formatRegistry: Record<string, ExtractorFn> = {
     const result = await extractOdfText(s3Key, "odp");
     return { ...result, sourceFormat: "odp" };
   },
+  rtf: async (s3Key) => {
+    const { extractRtf } = await import("./rtfExtraction.js");
+    return extractRtf(s3Key);
+  },
 
   // --- Phase 2: Educational formats (lazy-loaded) ---
   gift: async (s3Key) => {
@@ -166,8 +201,56 @@ const formatRegistry: Record<string, ExtractorFn> = {
     const { extractQTI } = await import("./eduExtraction.js");
     return extractQTI(s3Key);
   },
+  qti: async (s3Key) => {
+    const { extractQTI } = await import("./eduExtraction.js");
+    return extractQTI(s3Key);
+  },
   // .zip handled separately — requires content detection (see zipDetector)
 };
+
+/** Formats where image positions can be recovered from the document body. */
+const INLINE_IMAGE_FORMATS = new Set(["docx", "odt", "odp"]);
+
+async function readInline(
+  buffer: Buffer,
+  ext: string,
+): Promise<InlineExtraction | null> {
+  try {
+    return ext === "docx"
+      ? await extractDocxInline(buffer)
+      : await extractOdfInline(buffer);
+  } catch (error) {
+    console.warn(`[formatRegistry] Could not place images in ${ext}:`, error);
+    return null;
+  }
+}
+
+/**
+ * Adds charts, SmartArt, SVG text and images to an extraction result. Where
+ * the format allows it, images come with their position in the text.
+ */
+async function attachVisualContent(
+  result: FormatExtractionResult,
+  s3Key: string,
+  ext: string,
+): Promise<void> {
+  const buffer = await getS3Object(s3Key);
+  const inline = INLINE_IMAGE_FORMATS.has(ext)
+    ? await readInline(buffer, ext)
+    : null;
+  const media = await extractZipMedia(buffer, ext, {
+    includeRaster: !inline,
+  });
+
+  const images = inline ? inline.images : media.images;
+  const unconverted = inline ? inline.unconverted : media.unconverted;
+  if (images.length > 0) result.embeddedImages = images;
+  if (unconverted.length > 0) result.unconvertedImages = unconverted;
+  if (media.visualText.length > 0) result.visualText = media.visualText;
+  if (inline && (images.length > 0 || unconverted.length > 0)) {
+    result.inlineText = inline.text;
+  }
+}
 
 /**
  * Check if a file extension is supported for extraction
@@ -198,5 +281,14 @@ export async function extractByFormat(
   }
 
   console.log(`[formatRegistry] Routing .${ext} file to extractor`);
-  return extractor(s3Key);
+  const result = await extractor(s3Key);
+  if (EMBEDDED_IMAGE_FORMATS.has(ext) && !result.embeddedImages) {
+    try {
+      await attachVisualContent(result, s3Key, ext);
+    } catch (error) {
+      // Visual content is an enhancement; never fail text extraction over it.
+      console.warn(`[formatRegistry] Could not read embedded visuals:`, error);
+    }
+  }
+  return result;
 }

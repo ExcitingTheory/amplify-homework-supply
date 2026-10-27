@@ -38,8 +38,11 @@ import {
     Info as InfoIcon,
     QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
-import { getAmplifyClient } from '../utils/amplifyClient';
 import { getParsedContentModeration } from '../utils/parsedContentModeration';
+import { toEntryList } from '../utils/parsedContentLists';
+import { useDocumentParsedContent } from '../hooks/useDocumentParsedContent';
+import { useDocumentLinks } from '../hooks/useDocumentLinks';
+import { questionEntryKey } from '../utils/documentLinks';
 import DictionaryContext from '../context/dictionaryContext';
 import { importQuestionsToUnit, updateQuestionItem } from '../utils/questionImportUtils';
 
@@ -66,7 +69,7 @@ export interface QuestionItem {
     prompt: string;
     answer: string;
     hint?: string;
-    type?: 'essay' | 'short_answer' | 'comprehension' | 'multiple_choice';
+    questionType?: 'essay' | 'short_answer' | 'comprehension' | 'multiple_choice';
     difficulty?: 'easy' | 'medium' | 'hard';
     page?: number;
     hasAudio?: boolean;
@@ -75,6 +78,11 @@ export interface QuestionItem {
     documentID?: string;
     fileID?: string;
     filename?: string;
+    // True when this document already imported the question into the bank
+    alreadyImported?: boolean;
+    // Detail of the source link, when known (see useItemSources)
+    sourceText?: string;
+    extraSources?: number;
 }
 
 interface QuestionsReview2Props {
@@ -317,7 +325,12 @@ export function QuestionCard({
 
                 <Box sx={{ display: 'flex', gap: 0.5, alignItems: 'center', flexShrink: 0 }}>
                     {item.filename && (
-                        <Tooltip title={`Source: ${item.filename}`}>
+                        <Tooltip
+                            title={
+                                t('questionsReview.sourceTooltip', { filename: item.filename }) +
+                                (item.sourceText ? ` - "${item.sourceText}"` : '')
+                            }
+                        >
                             <Chip 
                                 label={item.filename.length > 20 ? `${item.filename.slice(0, 17)}...` : item.filename}
                                 size="small" 
@@ -326,6 +339,24 @@ export function QuestionCard({
                                 sx={{ fontSize: '0.65rem', height: '20px', maxWidth: '150px' }}
                             />
                         </Tooltip>
+                    )}
+                    {!!item.extraSources && (
+                        <Chip
+                            label={`+${item.extraSources}`}
+                            size="small"
+                            variant="outlined"
+                            sx={{ fontSize: '0.65rem', height: '20px' }}
+                        />
+                    )}
+                    {item.alreadyImported && (
+                        <Chip
+                            icon={<CheckCircleIcon />}
+                            label={t('questionsReview.alreadyImported')}
+                            size="small"
+                            color="success"
+                            variant="outlined"
+                            sx={{ fontSize: '0.65rem', height: '20px' }}
+                        />
                     )}
                     {item.page && (
                         <Chip 
@@ -457,107 +488,63 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         overscan: 5,
     });
 
-    const loadParsedContent = useCallback(async () => {
-        try {
-            dispatch({ type: 'LOAD_START' });
-            
-            const client = getAmplifyClient();
-            // Get document
-            const { data: doc } = await client.models.Document.get({ id: documentId });
-            
-            // Get parsed content for this document
-            const { data: parsedContents } = await client.models.ParsedContent.list({
-                filter: { documentID: { eq: documentId } }
-            });
-            
-            if (parsedContents.length > 0) {
-                const content = parsedContents[0];
-                
-                // Parse questions - handle both string and object formats
-                const questions = (() => {
-                    if (!content.questionsJSON) return [];
-                    if (typeof content.questionsJSON === 'string') {
-                        try {
-                            return JSON.parse(content.questionsJSON);
-                        } catch (e) {
-                            console.error('Error parsing questionsJSON:', e);
-                            return [];
-                        }
-                    }
-                    // Already an object/array
-                    return Array.isArray(content.questionsJSON) ? content.questionsJSON : [];
-                })();
-                
-                // Enrich questions with source metadata
-                const enrichedQuestions = questions.map((q: QuestionItem) => ({
-                    ...q,
-                    documentID: content.documentID,
-                    fileID: content.fileID || undefined,
-                    filename: doc?.filename || undefined,
-                }));
-                
-                // Parse summaries - handle both string and object formats
-                const sums = (() => {
-                    if (!content.summariesJSON) return [];
-                    if (typeof content.summariesJSON === 'string') {
-                        try {
-                            return JSON.parse(content.summariesJSON);
-                        } catch (e) {
-                            console.error('Error parsing summariesJSON:', e);
-                            return [];
-                        }
-                    }
-                    return Array.isArray(content.summariesJSON) ? content.summariesJSON : [];
-                })();
-                
-                // Parse objectives - handle both string and object formats
-                const objs = (() => {
-                    if (!content.objectivesJSON) return [];
-                    if (typeof content.objectivesJSON === 'string') {
-                        try {
-                            return JSON.parse(content.objectivesJSON);
-                        } catch (e) {
-                            console.error('Error parsing objectivesJSON:', e);
-                            return [];
-                        }
-                    }
-                    return Array.isArray(content.objectivesJSON) ? content.objectivesJSON : [];
-                })();
+    // The document's chunks, loaded page by page and kept current without
+    // reloading: this changes only when a chunk's _version actually changes.
+    const {
+        parsedContent: content,
+        document: doc,
+        state: loadState,
+        loadingMore,
+        refresh,
+    } = useDocumentParsedContent(documentId);
+    // Which of those questions this document already imported
+    const {
+        importedKeys,
+        loaded: linksLoaded,
+        refresh: refreshLinks,
+    } = useDocumentLinks(documentId, 'question');
+    const hasLoaded = useRef(false);
 
-                dispatch({
-                    type: 'LOAD_SUCCESS',
-                    parsedContent: content,
-                    document: doc,
-                    items: enrichedQuestions,
-                    summaries: sums,
-                    objectives: objs,
-                    autoSelectAll: !content.importedAt,
-                });
-            } else {
-                dispatch({ type: 'LOAD_ERROR' });
-            }
-        } catch (error) {
-            console.error('Error loading parsed content:', error);
-            dispatch({ type: 'LOAD_ERROR' });
-        }
+    useEffect(() => {
+        hasLoaded.current = false;
+        dispatch({ type: 'LOAD_START' });
     }, [documentId]);
 
-    // Fetch ParsedContent and Document
     useEffect(() => {
-        loadParsedContent();
-        
-        const client = getAmplifyClient();
-        const subscription = client.models.ParsedContent.observeQuery().subscribe({
-            next: ({ items }) => {
-                // Filter out null items that can appear during subscription updates
-                const validItems = items.filter((item: any) => item != null && item.id != null);
-                loadParsedContent();
-            },
-            error: (error: any) => console.error('[QuestionsReview2] ParsedContent subscription error:', error)
+        // Wait for the links too, so nothing is pre-selected and then deselected
+        if (loadState === 'loading' || !linksLoaded) return;
+        if (!content) {
+            dispatch({ type: 'LOAD_ERROR' });
+            return;
+        }
+
+        const questions = toEntryList<QuestionItem>(content.questionsJSON);
+
+        // Enrich questions with source metadata
+        const enrichedQuestions = questions.map((q: QuestionItem) => ({
+            ...q,
+            documentID: content.documentID as string,
+            fileID: (content.fileID as string | null | undefined) || undefined,
+            filename: doc?.filename || undefined,
+            alreadyImported: importedKeys.has(questionEntryKey(q.prompt)),
+        }));
+
+        dispatch({
+            type: hasLoaded.current ? 'CONTENT_UPDATED' : 'LOAD_SUCCESS',
+            parsedContent: content,
+            document: doc,
+            items: enrichedQuestions,
+            summaries: toEntryList(content.summariesJSON),
+            objectives: toEntryList(content.objectivesJSON),
+            autoSelectAll: true,
         });
-        
-        return () => subscription.unsubscribe();
-    }, [loadParsedContent]);
+        hasLoaded.current = true;
+    }, [content, doc, loadState, linksLoaded, importedKeys]);
+
+    const pendingCount = useMemo(
+        () => questionItems.filter((item) => !item.alreadyImported).length,
+        [questionItems],
+    );
 
     const toggleItem = useCallback((index: number) => {
         dispatch({ type: 'TOGGLE_SELECT', index });
@@ -568,12 +555,12 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     }, []);
 
     const toggleAll = useCallback(() => {
-        if (selectedItems.size === questionItems.length) {
+        if (selectedItems.size === pendingCount) {
             dispatch({ type: 'DESELECT_ALL' });
         } else {
             dispatch({ type: 'SELECT_ALL', count: questionItems.length });
         }
-    }, [selectedItems.size, questionItems.length]);
+    }, [selectedItems.size, pendingCount, questionItems.length]);
 
     const handleUpdate = useCallback(async (index: number, field: string, newValue: string) => {
         if (!parsedContent) return;
@@ -621,9 +608,10 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             dispatch({ type: 'IMPORT_ERROR', result });
         }
         
-        // Reload to show updated status
-        loadParsedContent();
-    }, [parsedContent, unitId, selectedItems, owner, identityId, onImportComplete, loadParsedContent, moderation.blocked, moderation.error]);
+        // Fetch again to show the updated status
+        refresh();
+        refreshLinks();
+    }, [parsedContent, unitId, selectedItems, owner, identityId, onImportComplete, refresh, refreshLinks, moderation.blocked, moderation.error]);
 
     if (loading) {
         return (
@@ -646,10 +634,15 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
         );
     }
 
-    const alreadyImported = !!parsedContent.importedAt;
+    // Entries are marked one by one, so a later page of a partly imported
+    // document can still be imported.
+    const hasPending = pendingCount > 0;
 
     return (
         <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
+            {loadingMore && (
+                <LinearProgress aria-label={t('questionsReview.loading')} sx={{ flexShrink: 0 }} />
+            )}
             {/* Header */}
             <Box sx={{ p: 2, flexShrink: 0 }}>
                 <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
@@ -674,7 +667,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                     </Alert>
                 )}
                 
-                {alreadyImported && (
+                {!hasPending && parsedContent.importedAt && (
                     <Alert severity="success" sx={{ mt: 1 }} icon={<CheckCircleIcon />}>
                         {t('questionsReview.importedOn', { date: new Date(parsedContent.importedAt).toLocaleString() })}
                     </Alert>
@@ -743,17 +736,17 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             )}
 
             {/* Actions */}
-            {!alreadyImported && (
+            {hasPending && (
                 <Box sx={{ px: 2, pb: 1, display: 'flex', gap: 1, alignItems: 'center', flexShrink: 0 }}>
                     <Button
                         variant="outlined"
                         size="small"
                         onClick={toggleAll}
                     >
-                        {selectedItems.size === questionItems.length ? t('questionsReview.deselectAll') : t('questionsReview.selectAll')}
+                        {selectedItems.size === pendingCount ? t('questionsReview.deselectAll') : t('questionsReview.selectAll')}
                     </Button>
                     <Typography variant="body2" color="text.secondary">
-                        {t('questionsReview.selectedCount', { count: selectedItems.size, total: questionItems.length })}
+                        {t('questionsReview.selectedCount', { count: selectedItems.size, total: pendingCount })}
                     </Typography>
                     <Box sx={{ flex: 1 }} />
                     <Button
@@ -836,7 +829,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                                     isSelected={selectedItems.has(virtualItem.index)}
                                     isExpanded={expandedItems.has(virtualItem.index)}
                                     existsInQuestionBank={existsInQuestionBank}
-                                    alreadyImported={alreadyImported}
+                                    alreadyImported={!!item.alreadyImported}
                                     searchTerm={searchTerm}
                                     onToggleSelect={toggleItem}
                                     onToggleExpand={toggleExpand}

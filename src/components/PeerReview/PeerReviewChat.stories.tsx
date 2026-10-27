@@ -35,7 +35,7 @@ export const ChatStory: StoryObj<typeof PeerReviewChat> = {
           author: "alice",
           authorRole: "learner",
           content:
-            "@AI Can you explain the difference between osmosis and diffusion?",
+            "@kai Can you explain the difference between osmosis and diffusion?",
           messageType: "CHAT" as const,
           createdAt: new Date().toISOString(),
         },
