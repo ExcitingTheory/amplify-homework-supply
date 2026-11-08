@@ -35,6 +35,7 @@ import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhance
 import { ExerciseBlockCard } from "../../components/ExerciseBlockCard";
 import { ExerciseProgressMeters } from "../../components/ExerciseProgressMeters";
 import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../../utils/waveformDefaults";
+import { transcribeSubmission } from "../../../../utils/transcribeSubmission";
 
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
 
@@ -444,40 +445,48 @@ export default function CustomAIComponent({
                             title={displayPrompt}
                             onRecordingComplete={wrapOnRecordingComplete(
                               async (audioFile: any) => {
-                                // For audio, we'd transcribe then grade
-                                // For now, save the audio reference
                                 const currentGradeData = grade?.data || {};
                                 const audioNodeKey = `custom-ai-${questionID}`;
-                                const updatedGradeData = {
-                                  ...currentGradeData,
-                                  [audioNodeKey]: {
-                                    ...currentGradeData[audioNodeKey],
-                                    audioFilePath: audioFile?.path || null,
-                                    audioFileId: audioFile?.id || null,
-                                    // eslint-disable-next-line i18next/no-literal-string -- stored enum value
-                                    inputMethod: "audio",
-                                  },
-                                };
-                                saveGrade(updatedGradeData);
+                                const saveAudioGrade = (extra: Record<string, unknown> = {}) =>
+                                  saveGrade({
+                                    ...currentGradeData,
+                                    [audioNodeKey]: {
+                                      ...currentGradeData[audioNodeKey],
+                                      audioFilePath: audioFile?.path || null,
+                                      audioFileId: audioFile?.id || null,
+                                      // eslint-disable-next-line i18next/no-literal-string -- stored enum value
+                                      inputMethod: "audio",
+                                      ...extra,
+                                    },
+                                  });
+                                saveAudioGrade();
 
                                 try {
-                                  if (audioFile?.path) {
-                                    const result = await gradeWithAI({
-                                      questionId: questionID,
-                                      question: displayPrompt,
-                                      answer: `[Audio submission: ${audioFile.path}]`,
-                                      inputMode: "audio",
-                                      criteria,
-                                    });
-                                    setFeedback((prev) => ({
-                                      ...prev,
-                                      [questionID]: result,
-                                    }));
-                                    workbookApi?.setFeedback?.(nodeKey, {
-                                      text: result.feedback,
-                                      timestamp: Date.now(),
-                                    });
-                                  }
+                                  if (!audioFile?.path) return;
+                                  // The grader reads text, so the recording is
+                                  // transcribed first; grading the file path
+                                  // would mark every spoken answer wrong.
+                                  const transcript = await transcribeSubmission(
+                                    audioFile.path,
+                                  );
+                                  // Keep the transcript with the grade so the
+                                  // instructor can see what was actually heard.
+                                  saveAudioGrade({ transcript });
+                                  const result = await gradeWithAI({
+                                    questionId: questionID,
+                                    question: displayPrompt,
+                                    answer: transcript,
+                                    inputMode: "audio",
+                                    criteria,
+                                  });
+                                  setFeedback((prev) => ({
+                                    ...prev,
+                                    [questionID]: result,
+                                  }));
+                                  workbookApi?.setFeedback?.(nodeKey, {
+                                    text: result.feedback,
+                                    timestamp: Date.now(),
+                                  });
                                 } catch (err) {
                                   console.error(
                                     "[CustomAIComponent] Audio grading error:",

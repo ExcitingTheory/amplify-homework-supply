@@ -366,6 +366,8 @@ const FilesProvider = ({ children }) => {
   const sessionIdentityId = session?.identityId;
 
   React.useEffect(() => {
+    let cancelled = false;
+    let snapshotVersion = 0;
     // Wait for auth to be ready
     if (authLoading || !user || !hasSession) {
       return;
@@ -508,10 +510,27 @@ const FilesProvider = ({ children }) => {
             "updatedAt",
           ],
         }).subscribe({
-          next: ({ items }) => {
-            const allValid = (items || []).filter(
+          next: async ({ items }) => {
+            const revision = ++snapshotVersion;
+            let allValid = (items || []).filter(
               (item) => item != null && item.id != null,
             );
+            try {
+              allValid = await Promise.all(allValid.map(async (item) => {
+                if (item.path != null && item.mimeType != null && item.name != null) return item;
+                // Analysis mutations publish a partial selection, not a full File.
+                const { data, errors } = await client.models.File.get({ id: item.id });
+                if (errors?.length) {
+                  throw new Error(errors.map((error) => error.message).join("; "));
+                }
+                if (!data) throw new Error(`File ${item.id} was not found during refresh`);
+                return data;
+              }));
+            } catch (error) {
+              handleError("File refresh", error);
+              return;
+            }
+            if (cancelled || revision !== snapshotVersion) return;
             const validItems = allValid.filter(
               (item) => item.deletedAt == null,
             );
@@ -564,6 +583,7 @@ const FilesProvider = ({ children }) => {
     fetchFiles();
 
     return () => {
+      cancelled = true;
       if (subscriptionRef.current) {
         subscriptionRef.current.unsubscribe();
       }
@@ -595,6 +615,14 @@ const FilesProvider = ({ children }) => {
               done: progress.done,
               totalPages: progress.totalPages,
               failed: progress.failed,
+              completedPages: Array.isArray(progress.completedPages)
+                ? progress.completedPages
+                : undefined,
+              partialCounts: progress.partialCounts,
+              reviewWarnings: Array.isArray(progress.reviewWarnings)
+                ? progress.reviewWarnings.filter((message) => typeof message === "string")
+                : [],
+              reviewWarningCount: progress.reviewWarningCount,
             };
           }
         } catch (error) {

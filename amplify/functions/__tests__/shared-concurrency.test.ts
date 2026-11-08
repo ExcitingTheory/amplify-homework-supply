@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { isConditionalCheckFailure } from "../shared/concurrency";
+import {
+  isConditionalCheckFailure,
+  toReadableError,
+  versionGuard,
+} from "../shared/concurrency";
 
 describe("isConditionalCheckFailure", () => {
   it("detects AppSync errors that carry the exception name only in errorType", () => {
@@ -39,5 +43,49 @@ describe("isConditionalCheckFailure", () => {
       }),
     ).toBe(false);
     expect(isConditionalCheckFailure(undefined)).toBe(false);
+  });
+});
+
+describe("versionGuard", () => {
+  it("guards rows that already have a _version with an eq condition", () => {
+    expect(versionGuard(3)).toEqual({
+      nextVersion: 4,
+      condition: { _version: { eq: 3 } },
+    });
+  });
+
+  it("treats version 0 as a real version", () => {
+    expect(versionGuard(0)).toEqual({
+      nextVersion: 1,
+      condition: { _version: { eq: 0 } },
+    });
+  });
+
+  it.each([null, undefined])(
+    "guards rows missing _version (%s) with attributeExists: false",
+    (missing) => {
+      expect(versionGuard(missing)).toEqual({
+        nextVersion: 1,
+        condition: { _version: { attributeExists: false } },
+      });
+    },
+  );
+});
+
+describe("toReadableError", () => {
+  it("serializes AppSync error payloads instead of '[object Object]'", () => {
+    const payload = {
+      errors: [{ errorType: "DynamoDB:ConditionalCheckFailedException" }],
+    };
+    const err = toReadableError(payload, "rollup failed");
+    expect(err).toBeInstanceOf(Error);
+    expect(err.message).toContain("rollup failed");
+    expect(err.message).toContain("ConditionalCheckFailedException");
+    expect((err as Error & { cause?: unknown }).cause).toBe(payload);
+  });
+
+  it("returns existing Error instances unchanged", () => {
+    const original = new Error("boom");
+    expect(toReadableError(original, "ctx")).toBe(original);
   });
 });

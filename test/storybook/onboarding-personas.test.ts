@@ -309,6 +309,13 @@ describe("Onboarding System — Persona Filtering", () => {
 });
 
 describe("Onboarding System — getSpotlightConfigForTask", () => {
+  it("highlights the add-block menu when selecting a quiz", () => {
+    const steps = getSpotlightConfigForTask("instructor-add-quiz", "tutorial");
+    const selectQuizStep = steps.find((step) => step.id === "select-quiz");
+
+    expect(selectQuizStep?.targetSelector).toBe('ul[role="menu"]');
+  });
+
   for (const task of ONBOARDING_TASKS) {
     it(`"${task.id}" tutorial steps should be retrievable`, () => {
       const steps = getSpotlightConfigForTask(task.id, "tutorial");

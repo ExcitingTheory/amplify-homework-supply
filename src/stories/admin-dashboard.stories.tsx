@@ -51,6 +51,18 @@ export const NoPendingItems: Story = {
   },
 };
 
+export const LoadingCounts: Story = {
+  args: { flaggedCount: undefined, recycleBinCount: undefined },
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await canvas.findByRole("heading", { name: "Admin", exact: true });
+    await expect(canvas.queryByText("Needs attention")).not.toBeInTheDocument();
+    await expect(
+      canvas.getAllByRole("link", { name: "Open", exact: true }),
+    ).toHaveLength(8);
+  },
+};
+
 export const AccessDenied: Story = {
   parameters: {
     mockAuth: {

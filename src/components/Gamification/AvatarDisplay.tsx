@@ -30,6 +30,7 @@ import type { AvatarStyleTier, AvatarOverrides } from "./DiceBearAvatar";
 import type { GlowRingConfig } from "./AvatarGlowRing";
 import type { LevelInfo } from "../../utils/xpCalculation";
 import { ProfileAvatarLink } from "../ProfileAvatarLink";
+import { getMedallionInitials } from "../../utils/medallionInitials";
 
 // ============================================================================
 // Level icon config (colors come from LevelBadge's shared getLevelColors)
@@ -119,14 +120,6 @@ function hashToColor(str: string): string {
   }
   const hue = Math.abs(hash) % 360;
   return `hsl(${hue}, 60%, 45%)`;
-}
-
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join("");
 }
 
 // ============================================================================
@@ -266,7 +259,7 @@ export function AvatarDisplay({
   const hasGuildBadge = Boolean(guildCrestSvg || guildName);
   const guildBadgeSize = Math.max(18, Math.round(size * 0.3));
   const guildBgColor = hashToColor(guildId || guildName || seed);
-  const guildInitials = getInitials(
+  const guildInitials = getMedallionInitials(
     guildName || t("avatarDisplay.guildFallbackName"),
   );
 

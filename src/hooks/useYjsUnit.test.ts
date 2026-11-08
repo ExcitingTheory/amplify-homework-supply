@@ -321,23 +321,24 @@ describe("useYjsUnit Hook", () => {
       expect(mockClient.models.Unit.update).toHaveBeenCalled();
     });
 
-    it("should stringify editor content for Gen 2", async () => {
+    it("never overwrites the Lexical draft with the unrelated editorContent text", async () => {
       const { result } = renderHook(() => useYjsUnit({ unitId: "unit-1" }));
 
       await waitFor(() => expect(result.current.unit).toBeTruthy());
 
-      mockYText.insert(0, "Test content");
+      mockDoc.get("root", Y.XmlText).insert(0, "Saved Lexical content");
 
       await act(async () => {
         await result.current.forceSave();
       });
 
-      // Content is saved to S3 via saveDraftContent as JSON string
-      expect(mockSaveDraftContent).toHaveBeenCalledWith(
-        "identity-1",
-        "unit-1",
-        expect.stringMatching(/^{.*}$/),
-      );
+      expect(mockSaveDraftContent).not.toHaveBeenCalled();
+      expect(mockSaveYjsSnapshot).toHaveBeenCalled();
+      const restored = new Y.Doc();
+      Y.applyUpdate(restored, mockSaveYjsSnapshot.mock.calls[0][2]);
+      expect(restored.get("root", Y.XmlText).toString()).toBe("Saved Lexical content");
+      expect(mockYText.toString()).toBe("");
+      restored.destroy();
     });
 
     it("should encode Yjs state as Uint8Array snapshot", async () => {
@@ -357,6 +358,18 @@ describe("useYjsUnit Hook", () => {
         "unit-1",
         expect.any(Uint8Array),
       );
+    });
+
+    it("does not advance metadata when snapshot persistence fails", async () => {
+      const { result } = renderHook(() => useYjsUnit({ unitId: "unit-1" }));
+      await waitFor(() => expect(result.current.unit).toBeTruthy());
+      mockSaveYjsSnapshot.mockRejectedValueOnce(new Error("snapshot upload failed"));
+      await act(async () => {
+        await expect(result.current.forceSave()).rejects.toThrow("snapshot upload failed");
+      });
+      expect(mockClient.models.Unit.update).not.toHaveBeenCalled();
+      expect(mockSaveDraftContent).not.toHaveBeenCalled();
+      expect(result.current.error?.message).toBe("snapshot upload failed");
     });
 
     it("should include metadata in save", async () => {
@@ -475,11 +488,11 @@ describe("useYjsUnit Hook", () => {
         await result.current.forceSave();
       });
 
-      // Content is saved to S3 via saveDraftContent
-      expect(mockSaveDraftContent).toHaveBeenCalled();
-      const savedContent = mockSaveDraftContent.mock.calls[0][2];
-      const parsed = JSON.parse(savedContent);
-      expect(parsed.content).toContain("こんにちは");
+      expect(mockSaveDraftContent).not.toHaveBeenCalled();
+      const restored = new Y.Doc();
+      Y.applyUpdate(restored, mockSaveYjsSnapshot.mock.calls[0][2]);
+      expect(restored.getText("editorContent").toString()).toBe('こんにちは 🎌 "quotes"');
+      restored.destroy();
     });
   });
 });

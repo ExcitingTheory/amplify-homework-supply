@@ -61,7 +61,7 @@ describe("document-analysis provider rate limits", () => {
   it("uses conservative defaults and caps demo settings at those values", () => {
     expect(DEFAULT_PROVIDER_LIMITS).toEqual({
       requestsPerMinute: 10,
-      tokensPerMinute: 300_000,
+      tokensPerMinute: 1_000_000,
       maxConcurrentRequests: 1,
     });
     expect(
@@ -72,7 +72,7 @@ describe("document-analysis provider rate limits", () => {
         "anthropic",
         {
           documentAnalysisAnthropicRequestsPerMinute: 100,
-          documentAnalysisAnthropicTokensPerMinute: 500_000,
+          documentAnalysisAnthropicTokensPerMinute: 2_000_000,
           documentAnalysisAnthropicMaxConcurrentRequests: 20,
         },
         true,

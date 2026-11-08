@@ -87,13 +87,22 @@
     "regeneratedAlt": "Regenerated"
   },
   "blockSuggestionMenu": {
+    "accept": "Accept",
+    "reject": "Reject",
+    "error": "Unable to generate or insert this block. Please try again.",
     "aiTitle": "🤖 AI-Powered Suggestions",
     "emptyState": "No suggestions available yet.",
     "emptyStateHelper": "Start typing in the editor to see AI-powered block suggestions.",
     "generateMore": "Generate More Suggestions",
-    "helper": "Click a suggestion to insert it into your lesson",
-    "helperAI": "Click a suggestion or press Tab/Enter to insert",
+    "helper": "Review the block, then accept or reject it.",
+    "helperAI": "Review the block, then accept or reject it.",
     "suggestionsTitle": "💡 Suggested Blocks"
+  },
+  "autocompletePreference": {
+    "heading": "AI autocomplete",
+    "description": "Suggest content while you type in the lesson editor. Block suggestions remain available in their sidebar tab.",
+    "enabled": "Enable AI autocomplete",
+    "error": "Unable to save your autocomplete preference. Please try again."
   },
   "suggestedContent": {
     "identityPlaceholder": "Identity ID",
@@ -115,5 +124,21 @@
     "newSection": "New Section",
     "questionCount": "{count, plural, one {# question} other {# questions}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "Quiz",
+      "answer": "Vocabulary answer",
+      "meaning": "Meaning association",
+      "customAnswer": "Custom answer",
+      "callResponse": "Call and response",
+      "word": "Word",
+      "playlist": "Playlist",
+      "conversationPlaylist": "Conversation playlist",
+      "pdf": "PDF",
+      "image": "Image",
+      "file": "File",
+      "youtube": "YouTube video"
+    }
   }
 }

@@ -5,6 +5,8 @@
  */
 import { describe, it, expect, vi, beforeEach } from "vitest";
 
+const mockSectionGet = vi.hoisted(() => vi.fn());
+
 // Mock the Amplify server client
 vi.mock("@/utils/amplifyServerClient", () => ({
   getServerClient: vi.fn(() => ({
@@ -13,7 +15,7 @@ vi.mock("@/utils/amplifyServerClient", () => ({
         list: vi.fn().mockResolvedValue({ data: [] }),
       },
       Section: {
-        get: vi.fn().mockResolvedValue({ data: null }),
+        get: mockSectionGet,
       },
       ParsedContent: {
         list: vi.fn().mockResolvedValue({ data: [] }),
@@ -26,6 +28,9 @@ vi.mock("@/utils/amplifyServerClient", () => ({
       Assignment: {
         list: vi.fn().mockResolvedValue({ data: [] }),
       },
+      CollaboratorAccess: {
+        list: vi.fn().mockResolvedValue({ data: [], nextToken: null }),
+      },
       AssistantChat: {
         list: vi.fn().mockResolvedValue({ data: [] }),
         create: vi.fn().mockResolvedValue({ data: { id: "mem-1" } }),
@@ -33,6 +38,12 @@ vi.mock("@/utils/amplifyServerClient", () => ({
       },
     },
   })),
+}));
+
+// Query embedding runs locally; stub the model so searches reach the bundle loader.
+vi.mock("@huggingface/transformers", () => ({
+  env: {},
+  pipeline: async () => async () => ({ data: new Float32Array(384) }),
 }));
 
 // Mock serverSearch
@@ -55,6 +66,7 @@ vi.stubGlobal(
 );
 
 import type { AgentContext } from "../../../../app/api/_shared/agentTools";
+import { loadBundleFromS3 } from "../../../../app/api/_shared/serverSearch";
 import {
   createSemanticSearchTool,
   createReadFileContentTool,
@@ -92,6 +104,7 @@ const API_KEY = "test-key";
 describe("Agent Tools", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockSectionGet.mockResolvedValue({ data: null });
   });
 
   describe("buildAgentTools", () => {
@@ -138,6 +151,116 @@ describe("Agent Tools", () => {
         scope: "unit",
         limit: 5,
       });
+      expect(result.results).toEqual([]);
+    });
+
+    const assigningSection = (unitIds: string[]) => ({
+      data: {
+        assignments: async ({ filter }: any) => ({
+          data: unitIds.includes(filter.unitID.eq) ? [{ id: "a1" }] : [],
+          nextToken: null,
+        }),
+      },
+    });
+
+    it("searches the unit bundle for a learner enrolled in a section that assigns it", async () => {
+      mockSectionGet.mockResolvedValue(assigningSection(["unit-1"]));
+      const ctx: AgentContext = {
+        ...STUDENT_CTX,
+        groups: ["Learners", "section-section-1-learners"],
+      };
+      const tool = createSemanticSearchTool(ctx, API_KEY);
+      await (tool as any).execute({ query: "past tense", scope: "unit", limit: 5 });
+
+      expect(loadBundleFromS3).toHaveBeenCalledWith("search-index/unit/unit-1.json");
+    });
+
+    it("does not read the unit bundle for a learner who is not enrolled", async () => {
+      const tool = createSemanticSearchTool(STUDENT_CTX, API_KEY);
+      const result = await (tool as any).execute({
+        query: "past tense",
+        scope: "unit",
+        limit: 5,
+      });
+
+      expect(result.results).toEqual([]);
+      expect(loadBundleFromS3).not.toHaveBeenCalled();
+    });
+
+    it("ignores a client-supplied identityId when deciding ownership", async () => {
+      // identity-1 owns unit-1 in the mocked data, but only the verified
+      // session identity may count; the chat request body is untrusted.
+      const ctx: AgentContext = { ...STUDENT_CTX, identityId: "identity-1" };
+      const tool = createSemanticSearchTool(ctx, API_KEY);
+      await (tool as any).execute({ query: "x", scope: "unit", limit: 5 });
+      expect(loadBundleFromS3).not.toHaveBeenCalled();
+
+      const verified: AgentContext = { ...STUDENT_CTX, sessionIdentityId: "identity-1" };
+      await (createSemanticSearchTool(verified, API_KEY) as any).execute({
+        query: "x",
+        scope: "unit",
+        limit: 5,
+      });
+      expect(loadBundleFromS3).toHaveBeenCalledWith("search-index/unit/unit-1.json");
+    });
+
+    it("authorizes each outline unit separately for section search", async () => {
+      mockSectionGet.mockResolvedValue(assigningSection(["unit-2"]));
+      const ctx: AgentContext = {
+        userId: "student-1",
+        groups: ["Learners", "section-section-1-learners"],
+        courseOutline: [
+          { unitId: "unit-1", name: "One" },
+          { unitId: "unit-2", name: "Two" },
+        ],
+      };
+      await (createSemanticSearchTool(ctx, API_KEY) as any).execute({
+        query: "x",
+        scope: "section",
+        limit: 5,
+      });
+
+      expect(loadBundleFromS3).toHaveBeenCalledTimes(1);
+      expect(loadBundleFromS3).toHaveBeenCalledWith("search-index/unit/unit-2.json");
+    });
+
+    it("uses the merged section bundle for enrolled members", async () => {
+      const ctx: AgentContext = {
+        ...STUDENT_CTX,
+        groups: ["Learners", "section-section-1-learners"],
+      };
+      await (createSemanticSearchTool(ctx, API_KEY) as any).execute({
+        query: "x",
+        scope: "section",
+        limit: 5,
+      });
+      expect(loadBundleFromS3).toHaveBeenCalledWith("search-index/section/section-1.json");
+    });
+
+    it("searches only the caller's own instructor bundle, by verified session identity", async () => {
+      // The request-body identityId points at someone else's bundle.
+      const ctx: AgentContext = {
+        ...INSTRUCTOR_CTX,
+        identityId: "identity-victim",
+        sessionIdentityId: "identity-me",
+      };
+      await (createSemanticSearchTool(ctx, API_KEY) as any).execute({
+        query: "x",
+        scope: "all",
+        limit: 5,
+      });
+      expect(loadBundleFromS3).toHaveBeenCalledTimes(1);
+      expect(loadBundleFromS3).toHaveBeenCalledWith("search-index/instructor/identity-me.json");
+    });
+
+    it("does not fall back to a client-supplied identity for the instructor bundle", async () => {
+      const ctx: AgentContext = { ...INSTRUCTOR_CTX, identityId: "identity-victim" };
+      const result = await (createSemanticSearchTool(ctx, API_KEY) as any).execute({
+        query: "x",
+        scope: "all",
+        limit: 5,
+      });
+      expect(loadBundleFromS3).not.toHaveBeenCalled();
       expect(result.results).toEqual([]);
     });
 

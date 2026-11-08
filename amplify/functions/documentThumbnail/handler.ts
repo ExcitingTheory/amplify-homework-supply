@@ -41,6 +41,7 @@ import { join, extname } from "path";
 import sharp from "sharp";
 import { renderPdfPage } from "../shared/pdfPageRender";
 import { convertImageToPng } from "../shared/imageConvert";
+import { findFileByPath } from "../shared/findFileByPath";
 
 const THUMBNAIL_WIDTH = 300;
 /** Wide enough for a vision model to read body text on a full page. */
@@ -85,6 +86,8 @@ const s3Client = new S3Client({ region: REGION });
 
 /** Document MIME types supported for conversion */
 const DOCUMENT_MIME_TYPES = new Set([
+  // A PDF needs no conversion; its first page is rendered directly.
+  "application/pdf",
   "application/msword",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
   "application/vnd.ms-excel",
@@ -108,6 +111,7 @@ const DOCUMENT_MIME_TYPES = new Set([
 
 /** File extensions that this handler should process (including edu LMS formats) */
 const DOCUMENT_EXTENSIONS = [
+  ".pdf",
   ".doc",
   ".docx",
   ".xls",
@@ -145,24 +149,6 @@ const GET_FILE = /* GraphQL */ `
       name
       identityId
       owner
-    }
-  }
-`;
-
-const LIST_FILES_BY_PATH = /* GraphQL */ `
-  query ListFiles($filter: ModelFileFilterInput) {
-    listFiles(filter: $filter, limit: 1) {
-      items {
-        id
-        _version
-        _lastChangedAt
-        _deleted
-        path
-        mimeType
-        name
-        identityId
-        owner
-      }
     }
   }
 `;
@@ -472,13 +458,18 @@ async function generateDocumentThumbnail(
       writeFileSync(inputPath, sourceBuffer);
     }
 
-    // Convert to PDF via LibreOffice
-    console.log(`[DocumentThumbnail] Converting ${fileName} to PDF...`);
-    const pdfPath = convertToPdf(inputPath);
-    console.log(`[DocumentThumbnail] PDF generated at: ${pdfPath}`);
-
-    // Read PDF and render to WebP
-    const pdfBuffer = readFileSync(pdfPath);
+    // A PDF is already renderable; sending it through LibreOffice would only
+    // risk re-encoding it.
+    const isPdf = /\.pdf$/i.test(inputPath);
+    let pdfBuffer: Buffer;
+    if (isPdf) {
+      pdfBuffer = readFileSync(inputPath);
+    } else {
+      console.log(`[DocumentThumbnail] Converting ${fileName} to PDF...`);
+      const pdfPath = convertToPdf(inputPath);
+      console.log(`[DocumentThumbnail] PDF generated at: ${pdfPath}`);
+      pdfBuffer = readFileSync(pdfPath);
+    }
     const webpBuffer = await pdfPageToWebp(pdfBuffer);
 
     // Upload thumbnail
@@ -570,17 +561,7 @@ async function handleS3Event(event: any): Promise<void> {
   }
 
   // Look up File record
-  const { data, errors } = (await client.graphql({
-    query: LIST_FILES_BY_PATH,
-    variables: { filter: { path: { eq: key } } },
-  })) as any;
-
-  if (errors) {
-    console.error("[DocumentThumbnail] GraphQL error:", errors);
-    return;
-  }
-
-  const file = data?.listFiles?.items?.[0];
+  const file = await findFileByPath(client, key, (message) => console.warn(message));
   if (!file) {
     console.warn(`[DocumentThumbnail] No File record for: ${key}`);
     return;

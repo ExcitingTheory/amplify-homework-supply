@@ -3,10 +3,11 @@ import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "../_components/adminAccess";
 import ModerationClient, { type FlaggedItem } from "./ModerationClient";
 
 /**
- * Content moderation dashboard. Authenticates server-side (Admins/Instructors
+ * Content moderation dashboard. Authenticates server-side (Admins
  * only) and pre-fetches all flagged content across models, delegating the
  * content-type filter to the client.
  */
@@ -24,7 +25,7 @@ export default async function ModerationDashboardPage() {
     // Fall through — treated as no access below
   }
 
-  if (!groups.includes("Admins") && !groups.includes("Instructors")) {
+  if (!canAccessAdminArea(groups)) {
     redirect("/?returnUrl=" + encodeURIComponent("/admin/moderation"));
   }
 

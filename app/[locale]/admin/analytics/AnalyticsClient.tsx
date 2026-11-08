@@ -6,10 +6,6 @@ import CardContent from "@mui/material/CardContent";
 import Grid from "@mui/material/Grid";
 import Typography from "@mui/material/Typography";
 import Skeleton from "@mui/material/Skeleton";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
 import Alert from "@mui/material/Alert";
 import AlertTitle from "@mui/material/AlertTitle";
 import PeopleIcon from "@mui/icons-material/People";
@@ -28,6 +24,10 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import RemoveIcon from "@mui/icons-material/Remove";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
+import AdminSectionSelect, {
+  ALL_SECTIONS_ID,
+} from "../_components/AdminSectionSelect";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { TrendChart } from "./TrendChart";
 import {
@@ -200,42 +200,24 @@ function StatCard({
   );
 }
 
+const DATE_RANGE_OPTIONS = [
+  { value: 7, label: "Last 7 days" },
+  { value: 14, label: "Last 14 days" },
+  { value: 30, label: "Last 30 days" },
+  { value: 90, label: "Last 90 days" },
+];
+
 // ============================================================================
 // Main Analytics Dashboard
 // ============================================================================
 
-function AnalyticsDashboard({
-  initialSections = [],
-}: {
-  initialSections?: any[];
-}) {
+function AnalyticsDashboard() {
   const [summaries, setSummaries] = React.useState<AnalyticsSummaryRecord[]>(
     [],
   );
-  const [sections, setSections] = React.useState<
-    { id: string; name: string }[]
-  >(initialSections.map((s: any) => ({ id: s.id, name: s.name || s.id })));
   const [loading, setLoading] = React.useState(true);
   const [dateRange, setDateRange] = React.useState(7);
-  const [selectedSection, setSelectedSection] = React.useState<string>("all");
-
-  // Fetch sections for the filter dropdown (skip if pre-fetched)
-  React.useEffect(() => {
-    if (sections.length > 0) return;
-    async function fetchSections() {
-      try {
-        const client = getAmplifyClient();
-        const { data: items } = await (client.models as any).Section.list();
-        const valid = (items || [])
-          .filter((s: any) => s != null && s.id)
-          .map((s: any) => ({ id: s.id, name: s.name || s.id }));
-        setSections(valid);
-      } catch (err) {
-        console.warn("[Analytics] Failed to fetch sections:", err);
-      }
-    }
-    fetchSections();
-  }, []);
+  const [selectedSection, setSelectedSection] = React.useState<string>(ALL_SECTIONS_ID);
 
   React.useEffect(() => {
     async function fetchSummaries() {
@@ -246,7 +228,7 @@ function AnalyticsDashboard({
         const filter: any = {
           date: { between: [dates[0], dates[dates.length - 1]] },
         };
-        if (selectedSection === "all") {
+        if (selectedSection === ALL_SECTIONS_ID) {
           filter.sectionId = { attributeExists: false };
         } else {
           filter.sectionId = { eq: selectedSection };
@@ -452,34 +434,17 @@ function AnalyticsDashboard({
       >
         <Typography variant="h4">Platform Analytics</Typography>
         <Box sx={{ display: "flex", gap: 2 }}>
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Section</InputLabel>
-            <Select
-              value={selectedSection}
-              label="Section"
-              onChange={(e) => setSelectedSection(e.target.value)}
-            >
-              <MenuItem value="all">All Sections (Platform)</MenuItem>
-              {sections.map((s) => (
-                <MenuItem key={s.id} value={s.id}>
-                  {s.name}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl size="small" sx={{ minWidth: 150 }}>
-            <InputLabel>Date Range</InputLabel>
-            <Select
-              value={dateRange}
-              label="Date Range"
-              onChange={(e) => setDateRange(Number(e.target.value))}
-            >
-              <MenuItem value={7}>Last 7 days</MenuItem>
-              <MenuItem value={14}>Last 14 days</MenuItem>
-              <MenuItem value={30}>Last 30 days</MenuItem>
-              <MenuItem value={90}>Last 90 days</MenuItem>
-            </Select>
-          </FormControl>
+          <AdminSectionSelect
+            value={selectedSection}
+            onChange={setSelectedSection}
+          />
+          <AdminSelect
+            label="Date Range"
+            value={dateRange}
+            options={DATE_RANGE_OPTIONS}
+            onChange={setDateRange}
+            minWidth={170}
+          />
         </Box>
       </Box>
 
@@ -774,14 +739,10 @@ function AnalyticsDashboard({
 // Page wrapper with auth
 // ============================================================================
 
-export default function AnalyticsPage({
-  initialSections = [],
-}: {
-  initialSections?: any[];
-}) {
+export default function AnalyticsPage() {
   return (
-    <AdminRouteGuard>
-      <AnalyticsDashboard initialSections={initialSections} />
+    <AdminRouteGuard access="staff">
+      <AnalyticsDashboard />
     </AdminRouteGuard>
   );
 }

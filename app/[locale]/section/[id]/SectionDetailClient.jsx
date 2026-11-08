@@ -2,7 +2,7 @@
 import { SectionSettingsNavigation } from "@/components/SectionSettingsNavigation";
 import React, { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import { fetchUserAttributes, getCurrentUser } from "aws-amplify/auth";
 import { uploadData } from "aws-amplify/storage";
@@ -40,6 +40,7 @@ import {
   DialogContentText,
   DialogActions,
   TextField,
+  Autocomplete,
   Paper,
   IconButton,
   Slide,
@@ -53,6 +54,7 @@ import {
   Menu,
   Alert,
   FormControl,
+  FormHelperText,
   InputLabel,
   Skeleton,
   Chip,
@@ -139,6 +141,19 @@ import {
 } from "@/utils/accommodations";
 import { isPlaceholderDueDate } from "@/utils/dueDate";
 import { openDiscussion } from "@/utils/chatDiscussBus";
+
+const ACADEMIC_TERM_SUGGESTIONS = [
+  "Fall Semester",
+  "Spring Semester",
+  "Summer Semester",
+  "Fall Trimester",
+  "Winter Trimester",
+  "Spring Trimester",
+  "Fall Quarter",
+  "Winter Quarter",
+  "Spring Quarter",
+  "Summer Quarter",
+];
 
 // import { fetchAuthSession } from '@aws-amplify/auth';
 
@@ -275,6 +290,33 @@ function FeaturedImage({ style, s3Key, identityId }) {
   );
 }
 
+function formatSectionDate(value, locale) {
+  if (!value) return null;
+  const date = new Date(`${value}T00:00:00Z`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  }).format(date);
+}
+
+function getSectionMeetingLabel(entry, locale) {
+  if (
+    !entry ||
+    !Number.isInteger(entry.dayOfWeek) ||
+    entry.dayOfWeek < 0 ||
+    entry.dayOfWeek > 6 ||
+    !entry.startTime
+  ) {
+    return null;
+  }
+  const day = new Intl.DateTimeFormat(locale, {
+    weekday: "long",
+    timeZone: "UTC",
+  }).format(new Date(Date.UTC(2024, 0, 7 + entry.dayOfWeek)));
+  return `${day}: ${entry.startTime}${entry.endTime ? `–${entry.endTime}` : ""}`;
+}
+
 function SectionDetail({
   user,
   signOut,
@@ -283,6 +325,7 @@ function SectionDetail({
 }) {
   const client = getAmplifyClient();
   const t = useTranslations("pages");
+  const formattingLocale = useLocale();
   const tCommon = useTranslations("common");
   const tComponents = useTranslations("components");
   const { toolbarPortalRef, appBarHeight } = useAppShell();
@@ -306,6 +349,8 @@ function SectionDetail({
   const [currentUser, setCurrentUser] = useState(null);
   const [userAttributes, setUserAttributes] = useState(null);
   const [section, setSection] = useState(initialSection);
+  const [sectionRetrySaving, setSectionRetrySaving] = useState(false);
+  const [sectionRetryError, setSectionRetryError] = useState(false);
   const [sectionStudents, setSectionStudents] = useState([]);
   const [units, setUnits] = useState({});
   const [myGrades, setMyGrades] = useState([]);
@@ -442,6 +487,23 @@ function SectionDetail({
   const [coverVideoUrlInput, setCoverVideoUrlInput] = React.useState("");
   const [coverVideoDialogOpen, setCoverVideoDialogOpen] = React.useState(false);
   const [imageDialogOpen, setImageDialogOpen] = React.useState(false);
+  const [sectionDetailsDialogOpen, setSectionDetailsDialogOpen] =
+    React.useState(false);
+  const [sectionDetailsSaving, setSectionDetailsSaving] = React.useState(false);
+  const [sectionDetailsError, setSectionDetailsError] = React.useState("");
+  const [sectionDetailsDraft, setSectionDetailsDraft] = React.useState({
+    schoolName: "",
+    schoolAddress: "",
+    campus: "",
+    buildingName: "",
+    roomNumber: "",
+    startDate: "",
+    endDate: "",
+    academicTerm: "",
+    acceptWorkOutsideSectionDates: "",
+    classSchedule: [],
+    timezone: "",
+  });
   const [skillTreeOpen, setSkillTreeOpen] = React.useState(false);
   const [configureAnchorEl, setConfigureAnchorEl] = React.useState(null);
   const [joinCodeCopied, setJoinCodeCopied] = React.useState(false);
@@ -745,6 +807,129 @@ function SectionDetail({
     } catch (error) {
       console.error("Error saving section description:", error);
       setSectionDescriptionInput(section?.description || "");
+    }
+  };
+
+  const openSectionDetailsDialog = () => {
+    setSectionDetailsDraft({
+      schoolName: section?.location?.school?.name || "",
+      schoolAddress: section?.location?.school?.address || "",
+      campus: section?.location?.campus || "",
+      buildingName: section?.location?.buildingName || "",
+      roomNumber: section?.location?.roomNumber || "",
+      startDate: section?.startDate || "",
+      endDate: section?.endDate || "",
+      academicTerm: section?.academicTerm || "",
+      acceptWorkOutsideSectionDates:
+        section?.acceptWorkOutsideSectionDates == null
+          ? ""
+          : section.acceptWorkOutsideSectionDates
+            ? "accept"
+            : "flag",
+      classSchedule: (section?.classSchedule || []).map((entry) => ({
+        dayOfWeek: entry?.dayOfWeek ?? 1,
+        startTime: entry?.startTime || "",
+        endTime: entry?.endTime || "",
+      })),
+      timezone:
+        section?.timezone ||
+        Intl.DateTimeFormat().resolvedOptions().timeZone ||
+        "UTC",
+    });
+    setSectionDetailsError("");
+    setSectionDetailsDialogOpen(true);
+  };
+
+  const handleSaveSectionDetails = async () => {
+    if (!section?.id) return;
+
+    const schoolName = sectionDetailsDraft.schoolName.trim();
+    const schoolAddress = sectionDetailsDraft.schoolAddress.trim();
+    if (Boolean(schoolName) !== Boolean(schoolAddress)) {
+      setSectionDetailsError(
+        t("sectionDetail.schoolNameAndAddressRequired"),
+      );
+      return;
+    }
+
+    const startDate = sectionDetailsDraft.startDate || "";
+    const endDate = sectionDetailsDraft.endDate || "";
+    if (startDate && endDate && endDate < startDate) {
+      setSectionDetailsError(t("sectionDetail.invalidSectionDateRange"));
+      return;
+    }
+
+    const timePattern = /^(?:[01]\d|2[0-3]):[0-5]\d$/;
+    const scheduleIsValid = sectionDetailsDraft.classSchedule.every(
+      (entry) =>
+        Number.isInteger(Number(entry.dayOfWeek)) &&
+        Number(entry.dayOfWeek) >= 0 &&
+        Number(entry.dayOfWeek) <= 6 &&
+        timePattern.test(entry.startTime) &&
+        (!entry.endTime || timePattern.test(entry.endTime)),
+    );
+    if (!scheduleIsValid) {
+      setSectionDetailsError(t("sectionDetail.invalidMeetingTime"));
+      return;
+    }
+
+    const timezone = sectionDetailsDraft.timezone.trim();
+    if (timezone) {
+      try {
+        new Intl.DateTimeFormat(locale, { timeZone: timezone });
+      } catch {
+        setSectionDetailsError(t("sectionDetail.invalidTimeZone"));
+        return;
+      }
+    }
+
+    const location = {
+      school:
+        schoolName && schoolAddress
+          ? { name: schoolName, address: schoolAddress }
+          : null,
+      campus: sectionDetailsDraft.campus.trim() || null,
+      buildingName: sectionDetailsDraft.buildingName.trim() || null,
+      roomNumber: sectionDetailsDraft.roomNumber.trim() || null,
+    };
+    const hasLocation = Object.values(location).some((value) =>
+      typeof value === "string" ? Boolean(value) : value != null,
+    );
+
+    setSectionDetailsSaving(true);
+    setSectionDetailsError("");
+    try {
+      const { data, errors } = await client.models.Section.update({
+        id: section.id,
+        _version: section._version,
+        location: hasLocation ? location : null,
+        startDate: startDate || null,
+        endDate: endDate || null,
+        academicTerm: sectionDetailsDraft.academicTerm.trim() || null,
+        acceptWorkOutsideSectionDates:
+          sectionDetailsDraft.acceptWorkOutsideSectionDates === ""
+            ? null
+            : sectionDetailsDraft.acceptWorkOutsideSectionDates === "accept",
+        classSchedule: sectionDetailsDraft.classSchedule.map((entry) => ({
+          dayOfWeek: Number(entry.dayOfWeek),
+          startTime: entry.startTime,
+          endTime: entry.endTime || null,
+        })),
+        timezone: timezone || null,
+      });
+      if (errors?.length || !data) {
+        throw new Error(errors?.[0]?.message || "Section details were not saved.");
+      }
+
+      setSection((current) =>
+        current?.id === data.id ? { ...current, ...data } : current,
+      );
+      setSectionDetailsDialogOpen(false);
+    } catch (error) {
+      console.error("[Section Details] Error saving details:", error);
+      setSectionDetailsError(t("sectionDetail.detailsSaveFailed"));
+    } finally {
+      setSectionDetailsSaving(false);
     }
   };
 
@@ -1851,8 +2036,24 @@ function SectionDetail({
   return (
     <>
       {section && (isOwner || isTeacher) && !viewAsStudent && (
-        <Box sx={{ display: "flex", justifyContent: "flex-end", px: 2, py: 1 }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            gap: 1,
+            px: 2,
+            py: 1,
+            flexWrap: "wrap",
+          }}
+        >
           <SectionSettingsNavigation sectionId={section.id} />
+          <Button
+            variant="outlined"
+            onClick={() => localizedRouter.push(`/section/${id}/students`)}
+          >
+            Student profiles
+          </Button>
         </Box>
       )}
       {/* Title/description live in the main AppBar (same pattern as the Workbook/Unit editor) */}
@@ -2185,6 +2386,125 @@ function SectionDetail({
               </Box>
             )}
 
+          <Box
+            data-tour="section-summary"
+            sx={{ px: { xs: 2, sm: 2.5 }, py: 2, borderTop: "1px solid", borderColor: "divider" }}
+          >
+            <Typography variant="h5" component="h2" sx={{ fontWeight: 600 }}>
+              {section?.name || t("sectionDetail.untitledSection")}
+            </Typography>
+            {section?.description && (
+              <Typography color="text.secondary" sx={{ mt: 0.5 }}>
+                {section.description}
+              </Typography>
+            )}
+            <Box
+              sx={{
+                display: "grid",
+                gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+                gap: 2,
+                mt: 2,
+              }}
+            >
+              {(section?.startDate ||
+                section?.endDate ||
+                section?.academicTerm) && (
+                <Box>
+                  <Typography variant="subtitle2">
+                    {section?.academicTerm
+                      ? `${section.academicTerm}: ${t("sectionDetail.sectionDates")}`
+                      : t("sectionDetail.sectionDates")}
+                  </Typography>
+                  {section?.startDate && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.startDate")}:{" "}
+                      {formatSectionDate(section.startDate, formattingLocale)}
+                    </Typography>
+                  )}
+                  {section?.endDate && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.endDate")}:{" "}
+                      {formatSectionDate(section.endDate, formattingLocale)}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+              {(section?.location?.school?.name ||
+                section?.location?.school?.address ||
+                section?.location?.campus ||
+                section?.location?.buildingName ||
+                section?.location?.roomNumber) && (
+                <Box>
+                  <Typography variant="subtitle2">
+                    {t("sectionDetail.location")}
+                  </Typography>
+                  {section?.location?.school?.name && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.schoolName")}:{" "}
+                      {section.location.school.name}
+                    </Typography>
+                  )}
+                  {section?.location?.school?.address && (
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ whiteSpace: "pre-wrap" }}
+                    >
+                      {t("sectionDetail.schoolAddress")}:{" "}
+                      {section.location.school.address}
+                    </Typography>
+                  )}
+                  {section?.location?.campus && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.campus")}: {section.location.campus}
+                    </Typography>
+                  )}
+                  {section?.location?.buildingName && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.buildingName")}:{" "}
+                      {section.location.buildingName}
+                    </Typography>
+                  )}
+                  {section?.location?.roomNumber && (
+                    <Typography variant="body2" color="text.secondary">
+                      {t("sectionDetail.roomNumber")}:{" "}
+                      {section.location.roomNumber}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+              {(section?.classSchedule || []).some((entry) =>
+                getSectionMeetingLabel(entry, formattingLocale),
+              ) && (
+                <Box>
+                  <Typography variant="subtitle2">
+                    {t("sectionDetail.meetingTimes")}
+                  </Typography>
+                  {(section?.classSchedule || []).map((entry, index) => {
+                    const label = getSectionMeetingLabel(
+                      entry,
+                      formattingLocale,
+                    );
+                    return label ? (
+                      <Typography
+                        key={`${entry.dayOfWeek}-${entry.startTime}-${index}`}
+                        variant="body2"
+                        color="text.secondary"
+                      >
+                        {label}
+                      </Typography>
+                    ) : null;
+                  })}
+                  {section?.timezone && (
+                    <Typography variant="caption" color="text.secondary">
+                      {t("sectionDetail.timeZone")}: {section.timezone}
+                    </Typography>
+                  )}
+                </Box>
+              )}
+            </Box>
+          </Box>
+
           {/* Footer — Configure (secondary, left) and Copy Join Code (primary, right) */}
           <Box
             sx={{
@@ -2252,6 +2572,14 @@ function SectionDetail({
                     </MenuItem>,
                   ]}
                   <Divider />
+                  <MenuItem
+                    onClick={() => {
+                      openSectionDetailsDialog();
+                      setConfigureAnchorEl(null);
+                    }}
+                  >
+                    {t("sectionDetail.editSectionDetails")}
+                  </MenuItem>
                   <MenuItem
                     onClick={() => {
                       setImageDialogOpen(true);
@@ -2327,6 +2655,354 @@ function SectionDetail({
           </Box>
         </Card>
       )}
+
+      <Dialog
+        open={sectionDetailsDialogOpen}
+        onClose={() => {
+          if (!sectionDetailsSaving) setSectionDetailsDialogOpen(false);
+        }}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>{t("sectionDetail.editSectionDetails")}</DialogTitle>
+        <DialogContent dividers>
+          {sectionDetailsError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {sectionDetailsError}
+            </Alert>
+          )}
+          <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: 600 }}>
+            {t("sectionDetail.location")}
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            <TextField
+              label={t("sectionDetail.schoolName")}
+              value={sectionDetailsDraft.schoolName}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  schoolName: event.target.value,
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+            <TextField
+              label={t("sectionDetail.schoolAddress")}
+              value={sectionDetailsDraft.schoolAddress}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  schoolAddress: event.target.value,
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+            <TextField
+              label={t("sectionDetail.campus")}
+              value={sectionDetailsDraft.campus}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  campus: event.target.value,
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+            <TextField
+              label={t("sectionDetail.buildingName")}
+              value={sectionDetailsDraft.buildingName}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  buildingName: event.target.value,
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+            <TextField
+              label={t("sectionDetail.roomNumber")}
+              value={sectionDetailsDraft.roomNumber}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  roomNumber: event.target.value,
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+          </Box>
+
+          <Typography
+            variant="subtitle1"
+            sx={{ mt: 3, mb: 1, fontWeight: 600 }}
+          >
+            {t("sectionDetail.sectionDates")}
+          </Typography>
+          <Box
+            sx={{
+              display: "grid",
+              gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
+              gap: 2,
+            }}
+          >
+            <TextField
+              type="date"
+              label={t("sectionDetail.startDate")}
+              value={sectionDetailsDraft.startDate}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  startDate: event.target.value,
+                }))
+              }
+              InputLabelProps={{ shrink: true }}
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+            <TextField
+              type="date"
+              label={t("sectionDetail.endDate")}
+              value={sectionDetailsDraft.endDate}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  endDate: event.target.value,
+                }))
+              }
+              InputLabelProps={{ shrink: true }}
+              disabled={sectionDetailsSaving}
+              fullWidth
+            />
+          </Box>
+          <Autocomplete
+            freeSolo
+            options={ACADEMIC_TERM_SUGGESTIONS}
+            value={sectionDetailsDraft.academicTerm}
+            onChange={(_, value) =>
+              setSectionDetailsDraft((current) => ({
+                ...current,
+                academicTerm: typeof value === "string" ? value : "",
+              }))
+            }
+            onInputChange={(_, value, reason) => {
+              if (reason === "input" || reason === "clear") {
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  academicTerm: value,
+                }));
+              }
+            }}
+            disabled={sectionDetailsSaving}
+            renderInput={(params) => (
+              <TextField
+                {...params}
+                label={t("sectionDetail.academicTerm")}
+                helperText={t("sectionDetail.academicTermHelp")}
+              />
+            )}
+          />
+          <FormControl fullWidth disabled={sectionDetailsSaving}>
+            <InputLabel id="section-outside-date-policy-label">
+              {t("sectionDetail.outsideDatePolicy")}
+            </InputLabel>
+            <Select
+              labelId="section-outside-date-policy-label"
+              label={t("sectionDetail.outsideDatePolicy")}
+              value={sectionDetailsDraft.acceptWorkOutsideSectionDates}
+              onChange={(event) =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  acceptWorkOutsideSectionDates: event.target.value,
+                }))
+              }
+            >
+              <MenuItem value="">
+                {t("sectionDetail.usePlatformDefault")}
+              </MenuItem>
+              <MenuItem value="accept">
+                {t("sectionDetail.acceptOutsideDates")}
+              </MenuItem>
+              <MenuItem value="flag">
+                {t("sectionDetail.flagOutsideDates")}
+              </MenuItem>
+            </Select>
+            <FormHelperText>
+              {t("sectionDetail.outsideDatePolicyHelp")}
+            </FormHelperText>
+          </FormControl>
+          <Box
+            sx={{
+              mt: 3,
+              mb: 1,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              gap: 2,
+            }}
+          >
+            <Typography variant="subtitle1" sx={{ fontWeight: 600 }}>
+              {t("sectionDetail.meetingTimes")}
+            </Typography>
+            <Button
+              onClick={() =>
+                setSectionDetailsDraft((current) => ({
+                  ...current,
+                  classSchedule: [
+                    ...current.classSchedule,
+                    { dayOfWeek: 1, startTime: "", endTime: "" },
+                  ],
+                }))
+              }
+              disabled={sectionDetailsSaving}
+              size="small"
+            >
+              {t("sectionDetail.addMeetingTime")}
+            </Button>
+          </Box>
+          <Box sx={{ display: "grid", gap: 2 }}>
+            {sectionDetailsDraft.classSchedule.map((entry, index) => (
+              <Box
+                key={`meeting-${index}`}
+                sx={{
+                  display: "grid",
+                  gridTemplateColumns: {
+                    xs: "1fr 1fr",
+                    sm: "1.2fr 1fr 1fr auto",
+                  },
+                  gap: 1.5,
+                  alignItems: "center",
+                }}
+              >
+                <TextField
+                  select
+                  label={t("sectionDetail.dayOfWeek")}
+                  value={entry.dayOfWeek}
+                  onChange={(event) =>
+                    setSectionDetailsDraft((current) => ({
+                      ...current,
+                      classSchedule: current.classSchedule.map(
+                        (scheduled, scheduledIndex) =>
+                          scheduledIndex === index
+                            ? {
+                                ...scheduled,
+                                dayOfWeek: Number(event.target.value),
+                              }
+                            : scheduled,
+                      ),
+                    }))
+                  }
+                  disabled={sectionDetailsSaving}
+                  fullWidth
+                >
+                  {Array.from({ length: 7 }, (_, dayOfWeek) => (
+                    <MenuItem key={dayOfWeek} value={dayOfWeek}>
+                      {new Intl.DateTimeFormat(locale, {
+                        weekday: "long",
+                        timeZone: "UTC",
+                      }).format(new Date(Date.UTC(2024, 0, 7 + dayOfWeek)))}
+                    </MenuItem>
+                  ))}
+                </TextField>
+                <TextField
+                  type="time"
+                  label={t("sectionDetail.startTime")}
+                  value={entry.startTime}
+                  onChange={(event) =>
+                    setSectionDetailsDraft((current) => ({
+                      ...current,
+                      classSchedule: current.classSchedule.map(
+                        (scheduled, scheduledIndex) =>
+                          scheduledIndex === index
+                            ? { ...scheduled, startTime: event.target.value }
+                            : scheduled,
+                      ),
+                    }))
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  disabled={sectionDetailsSaving}
+                  fullWidth
+                />
+                <TextField
+                  type="time"
+                  label={t("sectionDetail.endTime")}
+                  value={entry.endTime}
+                  onChange={(event) =>
+                    setSectionDetailsDraft((current) => ({
+                      ...current,
+                      classSchedule: current.classSchedule.map(
+                        (scheduled, scheduledIndex) =>
+                          scheduledIndex === index
+                            ? { ...scheduled, endTime: event.target.value }
+                            : scheduled,
+                      ),
+                    }))
+                  }
+                  InputLabelProps={{ shrink: true }}
+                  disabled={sectionDetailsSaving}
+                  fullWidth
+                />
+                <Button
+                  color="error"
+                  onClick={() =>
+                    setSectionDetailsDraft((current) => ({
+                      ...current,
+                      classSchedule: current.classSchedule.filter(
+                        (_, scheduledIndex) => scheduledIndex !== index,
+                      ),
+                    }))
+                  }
+                  disabled={sectionDetailsSaving}
+                  aria-label={t("sectionDetail.removeMeetingTime")}
+                >
+                  {t("sectionDetail.removeMeetingTime")}
+                </Button>
+              </Box>
+            ))}
+          </Box>
+          <TextField
+            label={t("sectionDetail.timeZone")}
+            helperText={t("sectionDetail.timeZoneHelp")}
+            value={sectionDetailsDraft.timezone}
+            onChange={(event) =>
+              setSectionDetailsDraft((current) => ({
+                ...current,
+                timezone: event.target.value,
+              }))
+            }
+            disabled={sectionDetailsSaving}
+            fullWidth
+            sx={{ mt: 2 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setSectionDetailsDialogOpen(false)}
+            disabled={sectionDetailsSaving}
+          >
+            {t("sectionDetail.cancel")}
+          </Button>
+          <Button
+            onClick={handleSaveSectionDetails}
+            disabled={sectionDetailsSaving}
+            variant="contained"
+          >
+            {sectionDetailsSaving
+              ? t("sectionDetail.saving")
+              : t("sectionDetail.saveDetails")}
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* Edit featured image — drop/upload target + remove */}
       <Dialog
@@ -2867,6 +3543,74 @@ function SectionDetail({
                     "Show Leaderboard",
                   )}
                 />
+
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={section.retryEnabled !== false}
+                      disabled={sectionRetrySaving}
+                      onChange={async (event) => {
+                        const checked = event.target.checked;
+                        const previous = section.retryEnabled !== false;
+                        setSectionRetrySaving(true);
+                        setSectionRetryError(false);
+                        try {
+                          const { data, errors } =
+                            await client.models.Section.update({
+                              id: section.id,
+                              retryEnabled: checked,
+                              _version: section._version,
+                            });
+                          if (errors?.length || !data) {
+                            console.error(
+                              "Error updating section retryEnabled:",
+                              errors,
+                            );
+                            setSection((current) =>
+                              current?.id === section.id
+                                ? { ...current, retryEnabled: previous }
+                                : current,
+                            );
+                            setSectionRetryError(true);
+                            return;
+                          }
+                          setSection((current) =>
+                            current?.id === data.id
+                              ? { ...current, ...data }
+                              : current,
+                          );
+                        } catch (error) {
+                          console.error(
+                            "Error updating section retryEnabled:",
+                            error,
+                          );
+                          setSection((current) =>
+                            current?.id === section.id
+                              ? { ...current, retryEnabled: previous }
+                              : current,
+                          );
+                          setSectionRetryError(true);
+                        } finally {
+                          setSectionRetrySaving(false);
+                        }
+                      }}
+                      color="primary"
+                      size="small"
+                    />
+                  }
+                  label={t(
+                    "sectionDetail.allowReplay",
+                    "Allow replay by default",
+                  )}
+                />
+                {sectionRetryError && (
+                  <Alert severity="error" sx={{ py: 0 }}>
+                    {t(
+                      "sectionDetail.retrySettingFailed",
+                      "Could not update the replay setting. Try again.",
+                    )}
+                  </Alert>
+                )}
 
                 <Button
                   variant="contained"

@@ -127,7 +127,14 @@
   },
   "pdfViewerComponent": {
     "loadingPdf": "Loading PDF: {filename}",
-    "noPdfToDisplay": "No PDF to display"
+    "noPdfToDisplay": "No PDF to display",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "darkPages": "Dark pages",
+    "enterFullScreen": "Full screen",
+    "exitFullScreen": "Exit full screen"
   },
   "placeholders": {
     "enter_text": "Enter text",

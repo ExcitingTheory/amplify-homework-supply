@@ -7,7 +7,6 @@ import { useTranslations } from "next-intl";
 import { Box } from "@mui/material";
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
 import { CheckListPlugin } from "@lexical/react/LexicalCheckListPlugin";
@@ -47,16 +46,14 @@ import {
   onError,
   DRAWER_WIDTH,
 } from "./editorConfig";
-import { Drawer } from "./styledComponents";
+import { Drawer, LessonContentEditable } from "./styledComponents";
 import { useAppShell } from "../AppShellContext";
-import {
-  TutorPresenceBanner,
-  WorkbookProgress,
-  TutorCursorOverlay,
-  WorkbookPresenceBar,
-  AIFeedbackSnackbar,
-} from "../Workbook";
+import { TutorPresenceBanner } from "../Workbook/TutorPresenceBanner";
+import { TutorCursorOverlay } from "../Workbook/TutorCursorOverlay";
+import { WorkbookPointerOverlay } from "../Workbook/WorkbookPointerOverlay";
+import { AIFeedbackSnackbar } from "../Workbook/AIFeedbackSnackbar";
 import UnitContext from "../../context/unitContext";
+import { EditorToastProvider } from "./context/EditorToastContext";
 
 interface WorkbookProps {
   timerGateOverlay?: React.ReactNode;
@@ -66,11 +63,11 @@ interface WorkbookProps {
  * Workbook component - read-only editor view for students
  * Displays unit content with grading and progress tracking
  */
-export function Workbook({
+function WorkbookContent({
   timerGateOverlay,
 }: WorkbookProps = {}): React.JSX.Element {
   const t = useTranslations("common");
-  const { showUnitComplete } = React.useContext(UnitContext);
+  const { showUnitComplete, workbook, workbookEnabled } = React.useContext(UnitContext);
   const { appBarHeight = 48 } = useAppShell();
   const [openTab, setOpenTab] = React.useState<boolean>(false);
   const [tabValue, setTabValue] = React.useState<number>(0);
@@ -249,22 +246,23 @@ export function Workbook({
                         flexDirection: "column",
                       }}
                     >
+                      <WorkbookPointerOverlay
+                        provider={workbookEnabled ? workbook?.provider ?? null : null}
+                        containerRef={contentRef}
+                      />
                       <Box sx={{ px: 1, pt: 1, flexShrink: 0 }}>
-                        <WorkbookPresenceBar />
                         <TutorPresenceBanner />
-                        <WorkbookProgress variant="compact" />
                       </Box>
                       <TutorCursorOverlay />
-                      <ContentEditable
+                      <LessonContentEditable
                         data-lexical-editor={true}
+                        data-lesson-content
                         aria-label={t("navigation.workbook")}
                         style={{
                           width: "100%",
-                          maxWidth: "100%",
                           boxSizing: "border-box",
                           flex: "1 1 auto",
                           minHeight: 0,
-                          padding: "1rem 2rem 1rem 0.5rem",
                         }}
                       />
                     </div>
@@ -280,6 +278,14 @@ export function Workbook({
         </AudioPlayerProvider>
       </AutocompleteProvider>
     </DndWrapper>
+  );
+}
+
+export function Workbook(props: WorkbookProps = {}): React.JSX.Element {
+  return (
+    <EditorToastProvider>
+      <WorkbookContent {...props} />
+    </EditorToastProvider>
   );
 }
 

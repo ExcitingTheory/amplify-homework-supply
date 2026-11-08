@@ -2,12 +2,14 @@
  * Links between imported Questions/Words and the Document they came from
  * (the DocumentQuestion and DocumentWord join models).
  *
- * A link records where in the document the entry came from (`page`,
- * `sourceText`) and an `entryKey`, the normalized prompt or word, so a review
- * screen can tell which extracted entries are already in the bank. One
- * Question or Word can be linked to several documents.
+ * A link only ties a Question or Word to a Document; one Question or Word can
+ * be linked to several documents. The importer records the other direction on
+ * the document's ParsedContent: each imported entry carries the `questionID` /
+ * `wordID` it became. That reference is how a link finds its entry (for the
+ * page and source snippet) and how a review screen knows an entry is already
+ * imported, so neither depends on the question or word text staying the same.
  */
-import { collectPages } from "./parsedContentChunks";
+import { collectPages, loadMergedParsedContent } from "./parsedContentChunks";
 
 type DataClient = { models: Record<string, any> };
 
@@ -35,9 +37,6 @@ export interface DocumentLink {
   documentID: string;
   questionID?: string;
   wordID?: string;
-  page?: number | null;
-  sourceText?: string | null;
-  entryKey?: string | null;
   owner?: string | null;
   deletedAt?: string | null;
   _deleted?: boolean | null;
@@ -48,42 +47,57 @@ function isLive(link: DocumentLink): boolean {
   return !link.deletedAt && link._deleted !== true;
 }
 
-/** Longest source snippet stored on a link. */
+/** Longest source snippet shown for an entry. */
 export const SOURCE_TEXT_LIMIT = 240;
 
-function normalize(text: unknown): string {
-  return typeof text === "string" ? text.trim().toLowerCase() : "";
+/** Where in its document an extracted entry came from. */
+export interface EntryOrigin {
+  page?: number;
+  sourceText?: string;
 }
 
-/** Same normalization the importers use to find an existing question. */
-export function questionEntryKey(prompt: unknown): string {
-  return normalize(prompt);
-}
+/** Origins keyed by the id of the Question or Word the entry was imported as. */
+export type EntryOrigins = Map<string, EntryOrigin>;
 
-/** Same normalization the importers use to find an existing word. */
-export function wordEntryKey(word: unknown): string {
-  return normalize(word);
-}
-
-export function entryKeyFor(kind: DocumentLinkKind, entry: Record<string, unknown>): string {
-  return kind === "question" ? questionEntryKey(entry.prompt) : wordEntryKey(entry.word);
-}
-
-/** The per-link detail an extracted entry carries. */
-export function linkDetails(
+/**
+ * Where each imported entry of a document's ParsedContent came from: its first
+ * page and a short source snippet (the entry's source text, or a word's
+ * context), keyed by the `questionID` / `wordID` the importer stored on it.
+ * Entries not yet imported have no id and are skipped.
+ */
+export function entryOriginsFrom(
+  content: { questionsJSON?: unknown[]; vocabularyJSON?: unknown[] } | null | undefined,
   kind: DocumentLinkKind,
-  entry: Record<string, unknown> | null | undefined,
-): { page?: number; sourceText?: string; entryKey: string } {
-  const source = entry ?? {};
-  const page = typeof source.page === "number" && Number.isFinite(source.page) ? source.page : undefined;
-  const text = [source.sourceText, source.context].find(
-    (value): value is string => typeof value === "string" && value.trim().length > 0,
-  );
-  return {
-    ...(page !== undefined ? { page } : {}),
-    ...(text ? { sourceText: text.trim().slice(0, SOURCE_TEXT_LIMIT) } : {}),
-    entryKey: entryKeyFor(kind, source),
-  };
+): EntryOrigins {
+  const origins: EntryOrigins = new Map();
+  const entries = (kind === "question" ? content?.questionsJSON : content?.vocabularyJSON) ?? [];
+  for (const raw of entries) {
+    if (raw === null || typeof raw !== "object") continue;
+    const entry = raw as Record<string, unknown>;
+    const id = kind === "question" ? entry.questionID : entry.wordID;
+    if (typeof id !== "string" || !id || origins.has(id)) continue;
+    const pages = Array.isArray(entry.pages)
+      ? entry.pages.filter((value): value is number => typeof value === "number" && Number.isFinite(value))
+      : [];
+    const text = [entry.sourceText, entry.context].find(
+      (value): value is string => typeof value === "string" && value.trim().length > 0,
+    );
+    origins.set(id, {
+      ...(pages.length > 0 ? { page: Math.min(...pages) } : {}),
+      ...(text ? { sourceText: text.trim().slice(0, SOURCE_TEXT_LIMIT) } : {}),
+    });
+  }
+  return origins;
+}
+
+/** Origins of a document's questions or words, read from its ParsedContent. */
+export async function loadEntryOrigins(
+  client: DataClient,
+  documentId: string,
+  kind: DocumentLinkKind,
+): Promise<EntryOrigins> {
+  const merged = await loadMergedParsedContent(client as any, { documentId });
+  return entryOriginsFrom(merged, kind);
 }
 
 function assertNoErrors(result: { errors?: ReadonlyArray<{ message?: string }> | null }, what: string) {
@@ -144,11 +158,18 @@ export function indexLinksByItem(
   return byItem;
 }
 
-/** The normalized keys of the entries a document has already imported. */
-export function importedEntryKeys(links: ReadonlyArray<DocumentLink>): Set<string> {
-  const keys = new Set<string>();
-  for (const link of links) if (link.entryKey) keys.add(link.entryKey);
-  return keys;
+/**
+ * The ids of the Questions or Words a document has already imported (its live
+ * links). An extracted entry is imported when its `questionID` / `wordID` is
+ * in this set.
+ */
+export async function listImportedItemIds(
+  client: DataClient,
+  documentId: string,
+  kind: DocumentLinkKind,
+): Promise<Set<string>> {
+  const links = await listDocumentLinks(client, documentId, kind);
+  return new Set(indexLinksByItem(kind, links).keys());
 }
 
 /**
@@ -163,11 +184,10 @@ export async function linkItemToDocument(
     itemId: string;
     documentId: string;
     owner: string;
-    entry?: Record<string, unknown> | null;
     existing?: Map<string, DocumentLink>;
   },
 ): Promise<DocumentLink | null> {
-  const { itemId, documentId, owner, entry, existing } = params;
+  const { itemId, documentId, owner, existing } = params;
   if (!documentId) return null;
   const config = KIND[kind];
 
@@ -179,7 +199,6 @@ export async function linkItemToDocument(
     [config.itemField]: itemId,
     documentID: documentId,
     owner,
-    ...linkDetails(kind, entry),
   });
   assertNoErrors(result, `Could not create ${config.model}`);
   const created = result.data as DocumentLink | null;
@@ -196,14 +215,18 @@ export interface ItemSource {
 }
 
 /**
- * The documents a Question or Word was imported from. Pass the record when it
- * is already loaded, to skip fetching it again.
+ * The documents a Question or Word was imported from, with the page and
+ * snippet of the entry that became it in each document's ParsedContent (found
+ * by the entry's stored `questionID` / `wordID`). Pass the record when it is
+ * already loaded, and share `originsCache` across calls so each document's
+ * ParsedContent is read once.
  */
 export async function listItemSources(
   client: DataClient,
   kind: DocumentLinkKind,
   itemId: string,
   record?: Record<string, any> | null,
+  options: { originsCache?: Map<string, Promise<EntryOrigins>> } = {},
 ): Promise<ItemSource[]> {
   const config = KIND[kind];
   const item = record ?? (await client.models[config.itemModel].get({ id: itemId })).data;
@@ -229,6 +252,20 @@ export async function listItemSources(
     });
   }
 
+  const originsCache = options.originsCache ?? new Map<string, Promise<EntryOrigins>>();
+  const originsOf = (documentId: string) => {
+    const cacheKey = `${kind}:${documentId}`;
+    let origins = originsCache.get(cacheKey);
+    if (!origins) {
+      origins = loadEntryOrigins(client, documentId, kind).catch((error) => {
+        console.error("[documentLinks] Could not read the document's entries:", error);
+        return new Map() as EntryOrigins;
+      });
+      originsCache.set(cacheKey, origins);
+    }
+    return origins;
+  };
+
   const filenames = new Map<string, string | null>();
   const sources: ItemSource[] = [];
   for (const link of links.filter(isLive)) {
@@ -236,12 +273,13 @@ export async function listItemSources(
       const { data } = await client.models.Document.get({ id: link.documentID });
       filenames.set(link.documentID, data?.filename ?? null);
     }
+    const origin = (await originsOf(link.documentID)).get(itemId);
     sources.push({
       linkId: link.id,
       documentId: link.documentID,
       filename: filenames.get(link.documentID) ?? null,
-      page: link.page ?? null,
-      sourceText: link.sourceText ?? null,
+      page: origin?.page ?? null,
+      sourceText: origin?.sourceText ?? null,
     });
   }
   return sources;

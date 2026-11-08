@@ -30,10 +30,8 @@ import {
   useBadges,
 } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
-import {
-  PracticeDrillConfigPopup,
-  PracticeDrillDialog,
-} from "@/components/PracticeDrill";
+import PracticeDrillConfigPopup from "@/components/PracticeDrill/PracticeDrillConfigPopup";
+import PracticeDrillDialog from "@/components/PracticeDrill/PracticeDrillDialog";
 
 import { fetchAuthSession } from "aws-amplify/auth";
 import { useRouter, useSearchParams } from "next/navigation";

@@ -87,13 +87,22 @@
     "regeneratedAlt": "已重新生成"
   },
   "blockSuggestionMenu": {
+    "accept": "接受",
+    "reject": "拒绝",
+    "error": "无法生成或插入此模块，请重试。",
     "aiTitle": "🤖 AI智能建议",
     "emptyState": "暂无建议",
     "emptyStateHelper": "开始在编辑器中输入以查看AI驱动的块建议。",
     "generateMore": "生成更多建议",
-    "helper": "点击建议将其插入到您的课程中",
-    "helperAI": "点击建议或按Tab/Enter键插入",
+    "helper": "查看模块，然后接受或拒绝。",
+    "helperAI": "查看模块，然后接受或拒绝。",
     "suggestionsTitle": "💡 推荐模块"
+  },
+  "autocompletePreference": {
+    "heading": "AI自动补全",
+    "description": "在课程编辑器中输入时建议内容。模块建议仍可在侧边栏标签页中使用。",
+    "enabled": "启用AI自动补全",
+    "error": "无法保存您的偏好设置，请重试。"
   },
   "suggestedContent": {
     "identityPlaceholder": "身份ID",
@@ -115,5 +124,21 @@
     "newSection": "新建章节",
     "questionCount": "{count, plural, one {# 个问题} other {# 个问题}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "测验",
+      "answer": "词汇作答",
+      "meaning": "词义匹配",
+      "customAnswer": "自定义作答",
+      "callResponse": "呼应练习",
+      "word": "单词",
+      "playlist": "播放列表",
+      "conversationPlaylist": "对话播放列表",
+      "pdf": "PDF",
+      "image": "图片",
+      "file": "文件",
+      "youtube": "YouTube 视频"
+    }
   }
 }

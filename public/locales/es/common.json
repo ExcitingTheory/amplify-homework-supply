@@ -200,6 +200,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "Precisión en todos los intentos en los modos de práctica habilitados.",
+    "replay": "Repetir",
+    "resetting": "Restableciendo...",
+    "resetFailed": "No se pudo restablecer este ejercicio. Inténtalo de nuevo.",
     "modes": {
       "easy": "Fácil",
       "hard": "Difícil",

@@ -200,6 +200,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "有効な練習モードでの、複数回の挑戦を通した正答率です。",
+    "replay": "もう一度プレイ",
+    "resetting": "リセット中...",
+    "resetFailed": "この練習をリセットできませんでした。もう一度お試しください。",
     "modes": {
       "easy": "かんたん",
       "hard": "難しい",

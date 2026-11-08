@@ -1,0 +1,774 @@
+{
+  "sourceSha256": "25c3e895e02d355681f6fb054e80026c7ee2f72d8dcee78c8dd6481dac272ea8",
+  "capturedAt": "2026-10-28T12:55:19.407Z",
+  "sourceFormat": "md",
+  "pageCount": 1,
+  "vocabularyJSON": [
+    {
+      "word": "topic",
+      "definition": "what the sentence is about. It indicates known or previously mentioned information.",
+      "context": "The particle は marks the **topic** of the sentence - what the sentence is about. It indicates known or previously mentioned information.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "subject",
+      "definition": "who or what performs the action. It emphasizes new or specific information.",
+      "context": "The particle が marks the **subject** of the sentence - who or what performs the action. It emphasizes new or specific information.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "direct object",
+      "definition": "the thing that receives the action of the verb.",
+      "context": "The particle を marks the **direct object** - the thing that receives the action of the verb.",
+      "pages": [
+        1
+      ]
+    }
+  ],
+  "summariesJSON": [],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is おはようございます for Japanese greetings?",
+      "answer": "Good morning (formal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "おはようございます",
+      "sourceText": "**おはようございます (Ohayou gozaimasu)** - Good morning (formal) Used until about 10:00 AM. The casual form おはよう is used with friends and family.",
+      "accept": [
+        "Good morning",
+        "Ohayou gozaimasu (formal)"
+      ]
+    },
+    {
+      "prompt": "What is こんにちは for Japanese greetings?",
+      "answer": "Hello / Good afternoon",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "こんにちは",
+      "sourceText": "**こんにちは (Konnichiwa)** - Hello / Good afternoon The standard daytime greeting, used from late morning through late afternoon. This is the most widely recognized Japanese greeting.",
+      "accept": [
+        "Hello",
+        "Good afternoon",
+        "Konnichiwa"
+      ]
+    },
+    {
+      "prompt": "What is こんばんは for Japanese greetings?",
+      "answer": "Good evening",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "こんばんは",
+      "sourceText": "**こんばんは (Konbanwa)** - Good evening Used after sunset and into the evening hours.",
+      "accept": [
+        "Good evening",
+        "Konbanwa"
+      ]
+    },
+    {
+      "prompt": "What is さようなら for Japanese greetings?",
+      "answer": "Goodbye (formal farewell)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "さようなら",
+      "sourceText": "**さようなら (Sayounara)** - Goodbye (formal farewell) A formal farewell that implies a longer separation - you won't be seeing the person again soon. For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead.",
+      "accept": [
+        "Goodbye",
+        "formal farewell",
+        "Sayounara"
+      ]
+    },
+    {
+      "prompt": "What is ありがとうございます for Japanese greetings?",
+      "answer": "Thank you (formal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "ありがとうございます",
+      "sourceText": "**ありがとうございます (Arigatou gozaimasu)** - Thank you (formal) The polite form of thanks. The casual form ありがとう is used with close friends and family.",
+      "accept": [
+        "Thank you",
+        "Arigatou gozaimasu (formal)"
+      ]
+    },
+    {
+      "prompt": "What is どういたしまして for Japanese greetings?",
+      "answer": "You're welcome",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Japanese greetings",
+      "field": "どういたしまして",
+      "sourceText": "**どういたしまして (Dou itashimashite)** - You're welcome The standard reply to ありがとうございます.",
+      "accept": [
+        "You're welcome",
+        "Dou itashimashite"
+      ]
+    },
+    {
+      "prompt": "What is Used until about 10 for greetings?",
+      "answer": "00 AM. The casual form おはよう is used with friends and family.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "greetings",
+      "field": "Used until about 10",
+      "sourceText": "Used until about 10:00 AM. The casual form おはよう is used with friends and family.",
+      "accept": [
+        "00 AM. The casual form おはよう is used with friends and family.",
+        "00 AM"
+      ]
+    },
+    {
+      "prompt": "What is A formal farewell that implies a longer separation for farewell expressions?",
+      "answer": "you won't be seeing the person again soon. For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "farewell expressions",
+      "field": "A formal farewell that implies a longer separation",
+      "sourceText": "A formal farewell that implies a longer separation - you won't be seeing the person again soon. For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead.",
+      "accept": [
+        "you won't be seeing the person again soon. For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead."
+      ]
+    },
+    {
+      "prompt": "What is The particle は marks the **topic** of the sentence for particle は?",
+      "answer": "what the sentence is about. It indicates known or previously mentioned information.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "particle は",
+      "field": "The particle は marks the **topic** of the sentence",
+      "sourceText": "The particle は marks the **topic** of the sentence - what the sentence is about. It indicates known or previously mentioned information.",
+      "accept": [
+        "what the sentence is about. It indicates known or previously mentioned information."
+      ]
+    },
+    {
+      "prompt": "What is The particle が marks the **subject** of the sentence for particle が?",
+      "answer": "who or what performs the action. It emphasizes new or specific information.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "particle が",
+      "field": "The particle が marks the **subject** of the sentence",
+      "sourceText": "The particle が marks the **subject** of the sentence - who or what performs the action. It emphasizes new or specific information.",
+      "accept": [
+        "who or what performs the action. It emphasizes new or specific information."
+      ]
+    },
+    {
+      "prompt": "What is The particle を marks the **direct object** for particle を?",
+      "answer": "the thing that receives the action of the verb.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "particle を",
+      "field": "The particle を marks the **direct object**",
+      "sourceText": "The particle を marks the **direct object** - the thing that receives the action of the verb.",
+      "accept": [
+        "the thing that receives the action of the verb"
+      ]
+    },
+    {
+      "prompt": "What is **Positive for verb conjugations?",
+      "answer": "** 食べます (tabemasu) - I eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "verb conjugations",
+      "field": "**Positive",
+      "sourceText": "**Positive:** 食べます (tabemasu) - I eat",
+      "accept": [
+        "** 食べます (tabemasu) - I eat"
+      ]
+    },
+    {
+      "prompt": "What is **Negative for verb conjugations?",
+      "answer": "** 食べません (tbemasen) - I don't eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "verb conjugations",
+      "field": "**Negative",
+      "sourceText": "**Negative:** 食べません (tbemasen) - I don't eat",
+      "accept": [
+        "** 食べません (tbemasen) - I don't eat"
+      ]
+    },
+    {
+      "prompt": "What is **Past for verb conjugations?",
+      "answer": "** 食べました (tabemashita) - I ate",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "verb conjugations",
+      "field": "**Past",
+      "sourceText": "**Past:** 食べました (tabemashita) - I ate",
+      "accept": [
+        "** 食べました (tabemashita) - I ate"
+      ]
+    },
+    {
+      "prompt": "What is **Past Negative for verb conjugations?",
+      "answer": "** 食べませんでした (tabemasen deshita) - I didn't eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "verb conjugations",
+      "field": "**Past Negative",
+      "sourceText": "**Past Negative:** 食べませんでした (tabemasen deshita) - I didn't eat",
+      "accept": [
+        "** 食べませんでした (tabemasen deshita) - I didn't eat"
+      ]
+    },
+    {
+      "prompt": "What is 4. Translate for translation task?",
+      "answer": "\"I study Japanese\" using the correct object marker.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "translation task",
+      "field": "4. Translate",
+      "sourceText": "4. Translate: \"I study Japanese\" using the correct object marker.",
+      "accept": [
+        "\"I study Japanese\" using the correct object marker."
+      ]
+    },
+    {
+      "prompt": "What is **Example sentences for Example sentences?",
+      "answer": "**",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example sentences",
+      "field": "**Example sentences",
+      "sourceText": "**Example sentences:**",
+      "accept": [
+        "**"
+      ]
+    },
+    {
+      "prompt": "What is おはようございます for Chapter 1: Basic Greetings?",
+      "answer": "Good morning (formal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "おはようございます",
+      "sourceText": "**おはようございます (Ohayou gozaimasu)** - Good morning (formal) Used until about 10:00 AM. The casual form おはよう is used with friends and family.",
+      "accept": [
+        "Good morning (formal)"
+      ]
+    },
+    {
+      "prompt": "What is こんにちは for Chapter 1: Basic Greetings?",
+      "answer": "Hello / Good afternoon",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "こんにちは",
+      "sourceText": "**こんにちは (Konnichiwa)** - Hello / Good afternoon The standard daytime greeting, used from late morning through late afternoon.",
+      "accept": [
+        "Hello / Good afternoon"
+      ]
+    },
+    {
+      "prompt": "What is こんばんは for Chapter 1: Basic Greetings?",
+      "answer": "Good evening",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "こんばんは",
+      "sourceText": "**こんばんは (Konbanwa)** - Good evening Used after sunset and into the evening hours.",
+      "accept": [
+        "Good evening"
+      ]
+    },
+    {
+      "prompt": "What is さようなら for Chapter 1: Basic Greetings?",
+      "answer": "Goodbye (formal farewell)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "さようなら",
+      "sourceText": "**さようなら (Sayounara)** - Goodbye (formal farewell) A formal farewell that implies a longer separation - you won't be seeing the person again soon.",
+      "accept": [
+        "Goodbye (formal farewell)"
+      ]
+    },
+    {
+      "prompt": "What is ありがとうございます for Chapter 1: Basic Greetings?",
+      "answer": "Thank you (formal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "ありがとうございます",
+      "sourceText": "**ありがとうございます (Arigatou gozaimasu)** - Thank you (formal) The polite form of thanks.",
+      "accept": [
+        "Thank you (formal)"
+      ]
+    },
+    {
+      "prompt": "What is どういたしまして for Chapter 1: Basic Greetings?",
+      "answer": "You're welcome",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1: Basic Greetings",
+      "field": "どういたしまして",
+      "sourceText": "**どういたしまして (Dou itashimashite)** - You're welcome The standard reply to ありがとうございます.",
+      "accept": [
+        "You're welcome"
+      ]
+    },
+    {
+      "prompt": "What is は (wa) for Chapter 2: Essential Particles?",
+      "answer": "Topic Marker",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "は (wa)",
+      "sourceText": "### は (wa) - Topic Marker",
+      "accept": [
+        "Topic Marker"
+      ]
+    },
+    {
+      "prompt": "What is が (ga) for Chapter 2: Essential Particles?",
+      "answer": "Subject Marker",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "が (ga)",
+      "sourceText": "### が (ga) - Subject Marker",
+      "accept": [
+        "Subject Marker"
+      ]
+    },
+    {
+      "prompt": "What is を (wo) for Chapter 2: Essential Particles?",
+      "answer": "Object Marker",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "を (wo)",
+      "sourceText": "### を (wo) - Object Marker",
+      "accept": [
+        "Object Marker"
+      ]
+    },
+    {
+      "prompt": "What is 私 は 学生 です。 for Chapter 2: Essential Particles?",
+      "answer": "I am a student.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "私 は 学生 です。",
+      "sourceText": "- 私は学生です。(Watashi **wa** gakusei desu.) - I am a student.",
+      "accept": [
+        "I am a student."
+      ]
+    },
+    {
+      "prompt": "What is 田中先生 は 英語の先生 です。 for Chapter 2: Essential Particles?",
+      "answer": "Tanaka-sensei is an English teacher.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "田中先生 は 英語の先生 です。",
+      "sourceText": "- 田中先生は英語の先生です。(Tanaka-sensei **wa** eigo no sensei desu.) - Tanaka-sensei is an English teacher.",
+      "accept": [
+        "Tanaka-sensei is an English teacher."
+      ]
+    },
+    {
+      "prompt": "What is 日本語 は 難しいです。 for Chapter 2: Essential Particles?",
+      "answer": "Japanese is difficult.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "日本語 は 難しいです。",
+      "sourceText": "- 日本語は難しいです。(Nihongo **wa** muzukashii desu.) - Japanese is difficult.",
+      "accept": [
+        "Japanese is difficult."
+      ]
+    },
+    {
+      "prompt": "What is 誰 が 来ました か？ for Chapter 2: Essential Particles?",
+      "answer": "Who came?",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "誰 が 来ました か？",
+      "sourceText": "- 誰が来ましたか？(Dare **ga** kimashita ka?) - Who came?",
+      "accept": [
+        "Who came?"
+      ]
+    },
+    {
+      "prompt": "What is 雨 が 降っています。 for Chapter 2: Essential Particles?",
+      "answer": "It is raining.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "雨 が 降っています。",
+      "sourceText": "- 雨が降っています。(Ame **ga** futte imasu.) - It is raining.",
+      "accept": [
+        "It is raining."
+      ]
+    },
+    {
+      "prompt": "What is 水 を 飲みます。 for Chapter 2: Essential Particles?",
+      "answer": "I drink water.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "水 を 飲みます。",
+      "sourceText": "- 水を飲みます。(Mizu **wo** nomimasu.) - I drink water.",
+      "accept": [
+        "I drink water."
+      ]
+    },
+    {
+      "prompt": "What is 日本語 を 勉強します。 for Chapter 2: Essential Particles?",
+      "answer": "I study Japanese.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "日本語 を 勉強します。",
+      "sourceText": "- 日本語を勉強します。(Nihongo **wo** benkyou shimasu.) - I study Japanese.",
+      "accept": [
+        "I study Japanese."
+      ]
+    },
+    {
+      "prompt": "What is 本 を 読みます。 for Chapter 2: Essential Particles?",
+      "answer": "I read a book.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "本 を 読みます。",
+      "sourceText": "- 本を読みます。(Hon **wo** yomimasu.) - I read a book.",
+      "accept": [
+        "I read a book."
+      ]
+    },
+    {
+      "prompt": "What is 学校 に 行きます。 for Chapter 2: Essential Particles?",
+      "answer": "I go to school.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "学校 に 行きます。",
+      "sourceText": "- 学校に行きます。(Gakkou **ni** ikimasu.) - I go to school.",
+      "accept": [
+        "I go to school."
+      ]
+    },
+    {
+      "prompt": "What is 7時 に 起きます。 for Chapter 2: Essential Particles?",
+      "answer": "I wake up at 7 o'clock.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "7時 に 起きます。",
+      "sourceText": "- 7時に起きます。(Shichi-ji **ni** okimasu.) - I wake up at 7 o'clock.",
+      "accept": [
+        "I wake up at 7 o'clock."
+      ]
+    },
+    {
+      "prompt": "What is 椅子 に 座って ください。 for Chapter 2: Essential Particles?",
+      "answer": "Please sit in the chair.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "椅子 に 座って ください。",
+      "sourceText": "- 椅子に座ってください。(Isu **ni** suwatte kudasai.) - Please sit in the chair.",
+      "accept": [
+        "Please sit in the chair."
+      ]
+    },
+    {
+      "prompt": "What is 図書館 で 勉強します。 for Chapter 2: Essential Particles?",
+      "answer": "I study at the library.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "図書館 で 勉強します。",
+      "sourceText": "- 図書館で勉強します。(Toshokan **de** benkyou shimasu.) - I study at the library.",
+      "accept": [
+        "I study at the library."
+      ]
+    },
+    {
+      "prompt": "What is バス で 学校に 行きます。 for Chapter 2: Essential Particles?",
+      "answer": "I go to school by bus.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "バス で 学校に 行きます。",
+      "sourceText": "- バスで学校に行きます。(Basu **de** gakkou ni ikimasu.) - I go to school by bus.",
+      "accept": [
+        "I go to school by bus."
+      ]
+    },
+    {
+      "prompt": "What is 日本語 で 話して ください。 for Chapter 2: Essential Particles?",
+      "answer": "Please speak in Japanese.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 2: Essential Particles",
+      "field": "日本語 で 話して ください。",
+      "sourceText": "- 日本語で話してください。(Nihongo **de** hanashite kudasai.) - Please speak in Japanese.",
+      "accept": [
+        "Please speak in Japanese."
+      ]
+    },
+    {
+      "prompt": "What is です for Chapter 3: Basic Sentence Patterns?",
+      "answer": "Polite copula",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "です",
+      "sourceText": "- **です (desu)** - polite copula (is/am/are)",
+      "accept": [
+        "Polite copula"
+      ]
+    },
+    {
+      "prompt": "What is ます for Chapter 3: Basic Sentence Patterns?",
+      "answer": "Polite verb ending",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "ます",
+      "sourceText": "- **ます (masu)** - polite verb ending",
+      "accept": [
+        "Polite verb ending"
+      ]
+    },
+    {
+      "prompt": "What is Positive for Chapter 3: Basic Sentence Patterns?",
+      "answer": "食べます (tabemasu) - I eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "Positive",
+      "sourceText": "**Positive:** 食べます (tabemasu) - I eat",
+      "accept": [
+        "食べます (tabemasu) - I eat"
+      ]
+    },
+    {
+      "prompt": "What is Negative for Chapter 3: Basic Sentence Patterns?",
+      "answer": "食べません (tbemasen) - I don't eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "Negative",
+      "sourceText": "**Negative:** 食べません (tbemasen) - I don't eat",
+      "accept": [
+        "食べません (tbemasen) - I don't eat"
+      ]
+    },
+    {
+      "prompt": "What is Past for Chapter 3: Basic Sentence Patterns?",
+      "answer": "食べました (tabemashita) - I ate",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "Past",
+      "sourceText": "**Past:** 食べました (tabemashita) - I ate",
+      "accept": [
+        "食べました (tabemashita) - I ate"
+      ]
+    },
+    {
+      "prompt": "What is Past Negative for Chapter 3: Basic Sentence Patterns?",
+      "answer": "食べませんでした (tabemasen deshita) - I didn't eat",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "Past Negative",
+      "sourceText": "**Past Negative:** 食べませんでした (tabemasen deshita) - I didn't eat",
+      "accept": [
+        "食べませんでした (tabemasen deshita) - I didn't eat"
+      ]
+    },
+    {
+      "prompt": "What is 学生ですか？ for Chapter 3: Basic Sentence Patterns?",
+      "answer": "Are you a student?",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "学生ですか？",
+      "sourceText": "- 学生ですか？(Gakusei desu **ka**?) - Are you a student?",
+      "accept": [
+        "Are you a student?"
+      ]
+    },
+    {
+      "prompt": "What is 日本語を話しますか？ for Chapter 3: Basic Sentence Patterns?",
+      "answer": "Do you speak Japanese?",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 3: Basic Sentence Patterns",
+      "field": "日本語を話しますか？",
+      "sourceText": "- 日本語を話しますか？(Nihongo wo hanashimasu **ka**?) - Do you speak Japanese?",
+      "accept": [
+        "Do you speak Japanese?"
+      ]
+    },
+    {
+      "prompt": "What is you won't be seeing the person again soon. for A formal farewell that implies a longer separation?",
+      "answer": "For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "A formal farewell that implies a longer separation",
+      "field": "you won't be seeing the person again soon.",
+      "sourceText": "A formal farewell that implies a longer separation - you won't be seeing the person again soon. For short departures, Japanese speakers often say じゃあね (jaa ne) or またね (mata ne) instead.",
+      "accept": [
+        ""
+      ]
+    },
+    {
+      "prompt": "What is what the sentence is about. for The particle は marks the **topic** of the sentence?",
+      "answer": "It indicates known or previously mentioned information.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The particle は marks the **topic** of the sentence",
+      "field": "what the sentence is about.",
+      "sourceText": "The particle は marks the **topic** of the sentence - what the sentence is about. It indicates known or previously mentioned information.",
+      "accept": [
+        ""
+      ]
+    },
+    {
+      "prompt": "What is who or what performs the action. for The particle が marks the **subject** of the sentence?",
+      "answer": "It emphasizes new or specific information.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The particle が marks the **subject** of the sentence",
+      "field": "who or what performs the action.",
+      "sourceText": "The particle が marks the **subject** of the sentence - who or what performs the action. It emphasizes new or specific information.",
+      "accept": [
+        ""
+      ]
+    },
+    {
+      "prompt": "What is 4. Translate for exercise?",
+      "answer": "\"I study Japanese\" using the correct object marker.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "exercise",
+      "field": "4. Translate",
+      "sourceText": "4. Translate: \"I study Japanese\" using the correct object marker.",
+      "accept": [
+        "\"I study Japanese\" using the correct object marker"
+      ]
+    }
+  ]
+}

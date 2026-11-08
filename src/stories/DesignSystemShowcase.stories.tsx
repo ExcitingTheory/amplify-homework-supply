@@ -1,6 +1,7 @@
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
+import { expect, within } from "storybook/test";
 import * as React from "react";
-import { ThemeProvider, createTheme } from "@mui/material/styles";
+import { ThemeProvider, createTheme, styled } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import Stack from "@mui/material/Stack";
 import Paper from "@mui/material/Paper";
@@ -41,7 +42,8 @@ import {
   type CustomThemePaletteInput,
 } from "../components/Gamification/ThemeMixer";
 import { useThemeDrafts } from "../themes/themeDrafts";
-import { SEMANTIC_THEME } from "../themes/semanticTheme";
+import { getSemanticLessonContentStyles, SEMANTIC_THEME } from "../themes/semanticTheme";
+import { ExerciseBlockCard } from "../components/Editor3/components/ExerciseBlockCard";
 import { BadgeIcon } from "../components/Gamification/BadgeIcon";
 import {
   BadgeShelf,
@@ -1247,6 +1249,39 @@ function SurfaceTokens({ scheme }: { scheme: "light" | "dark" }) {
  * Semantic tokens (rounding, elevation, spacing/density, surfaces) that the
  * recurring app patterns should all share instead of solving independently.
  */
+const LessonReadingSurface = styled("div")(({ theme }) => ({
+  "&&": getSemanticLessonContentStyles(theme),
+}));
+
+function LessonReadingPattern() {
+  return (
+    <LessonReadingSurface data-lesson-pattern>
+      <h2>One continuous lesson</h2>
+      <p>
+        Reading and practice share a start-aligned text edge, body typography,
+        and a bounded reading column. Blocks belong to the lesson rather than
+        floating independently as dashboard cards.
+      </p>
+      <ExerciseBlockCard blockType="word-block">
+        <Typography variant="h6" color="primary">Chloroplasts</Typography>
+        <Typography>Organelles in plant cells where photosynthesis occurs.</Typography>
+      </ExerciseBlockCard>
+      <p>Use the definition above to explain how plants make food.</p>
+      <ExerciseBlockCard blockType="answer">
+        <Typography variant="h6" gutterBottom>Check your understanding</Typography>
+        <TextField label="Your explanation" multiline minRows={2} fullWidth />
+        <Button variant="contained" sx={{ mt: 2 }}>Check answer</Button>
+      </ExerciseBlockCard>
+      <ExerciseBlockCard blockType="answer" graded accuracy={90}>
+        <Typography>Grading retains its semantic success accent.</Typography>
+      </ExerciseBlockCard>
+      <ExerciseBlockCard blockType="answer" selected>
+        <Typography>Selection keeps a visible focus ring without elevation.</Typography>
+      </ExerciseBlockCard>
+    </LessonReadingSurface>
+  );
+}
+
 export const SemanticTokens: Story = {
   name: "Semantic Tokens (rounding · elevation · spacing · surface)",
   render: () => {
@@ -1276,10 +1311,59 @@ export const SemanticTokens: Story = {
             <SpacingTokens />
             <SurfaceTokens scheme="light" />
             <SurfaceTokens scheme="dark" />
+            <TokenRow title="Lesson reading flow">
+              <Typography variant="body2" color="text.secondary">
+                {SEMANTIC_THEME.editor.lesson.maxWidth} reading column ·{" "}
+                {SEMANTIC_THEME.editor.lesson.lineHeight} line height ·{" "}
+                {SEMANTIC_THEME.editor.lesson.blockGap}px block spacing.
+                Subtle surfaces have no hover elevation; controls remain distinct.
+              </Typography>
+              <LessonReadingPattern />
+            </TokenRow>
           </Stack>
         </Paper>
       </ThemeProvider>
     );
+  },
+};
+
+export const LessonReadingFlow: Story = {
+  name: "Lesson Reading Flow (semantic pattern)",
+  render: (_args, context) => (
+    <ThemedShowcaseShell
+      title="Lesson Reading Flow"
+      description="Shared lesson tokens and the real exercise card: aligned prose, soft surfaces, distinct controls, and preserved grading and selection cues. Dashboard cards are unchanged."
+      globalScheme={resolveGlobalScheme(context.globals?.colorScheme)}
+    >
+      <LessonReadingPattern />
+    </ThemedShowcaseShell>
+  ),
+  play: async ({ canvasElement, userEvent }) => {
+    const surface = canvasElement.querySelector<HTMLElement>("[data-lesson-pattern]");
+    expect(surface).not.toBeNull();
+    if (!surface) throw new Error("Lesson reading surface did not render");
+    const cards = surface.querySelectorAll<HTMLElement>("[data-block-type]");
+    expect(cards.length).toBe(4);
+    const paragraph = surface.querySelector("p");
+    expect(paragraph).not.toBeNull();
+    if (!paragraph) throw new Error("Lesson prose did not render");
+    const proseStyle = getComputedStyle(paragraph);
+    const textStart = paragraph.getBoundingClientRect().left +
+      parseFloat(proseStyle.paddingLeft);
+    for (const card of cards) {
+      const style = getComputedStyle(card);
+      const cardTextStart = card.getBoundingClientRect().left +
+        parseFloat(style.borderLeftWidth) + parseFloat(style.paddingLeft);
+      expect(Math.abs(textStart - cardTextStart)).toBeLessThanOrEqual(1);
+      expect(style.lineHeight).toBe(proseStyle.lineHeight);
+    }
+    const card = cards[1];
+    const shadow = getComputedStyle(card).boxShadow;
+    await userEvent.hover(card);
+    expect(getComputedStyle(card).boxShadow).toBe(shadow);
+    const input = within(surface).getByRole("textbox", { name: "Your explanation" });
+    await userEvent.type(input, "Plants use light to make food.");
+    expect(input).toHaveValue("Plants use light to make food.");
   },
 };
 
@@ -1495,7 +1579,6 @@ function WorkbookAppBar() {
         <WorkbookContextualToolbarView
           timeString="19:58"
           connection="connected"
-          joinCode="A1B2C3"
           finishedQuestions={3}
           totalQuestions={5}
         />

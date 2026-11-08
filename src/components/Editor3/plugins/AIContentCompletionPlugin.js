@@ -19,7 +19,6 @@ import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext
 import { 
   $getSelection, 
   $isRangeSelection,
-  $createTextNode,
   $getNodeByKey,
   COMMAND_PRIORITY_LOW,
   KEY_ARROW_RIGHT_COMMAND,
@@ -38,8 +37,15 @@ import {
   AILoadingNode,
   AI_SUGGESTION_UUID 
 } from '../components/AIContentSuggestionNode';
+import { $replaceWithMarkdown } from '../utils/insertMarkdown';
+import {
+  buildSuggestionReferenceCatalog,
+  placeMeaningAfterWordBlocks,
+  resolveSuggestionReferences,
+} from './suggestionReferences';
 import UnitContext from '../../../context/unitContext';
 import SectionContext from '../../../context/sectionContext';
+import SettingsContext from '../../../context/settingsContext';
 
 
 
@@ -72,14 +78,38 @@ function countWords(text) {
  * Main plugin component
  */
 export default function AIContentCompletionPlugin() {
+  const { settings, isLoading } = useContext(SettingsContext) || {};
+  const enabled = React.useMemo(() => {
+    try {
+      const metadata = typeof settings?.metadata === 'string'
+        ? JSON.parse(settings.metadata) : settings?.metadata;
+      return metadata?.aiAutocompleteEnabled !== false;
+    } catch (error) {
+      console.error('[AIContentCompletionPlugin] Invalid settings metadata:', error);
+      return true;
+    }
+  }, [settings?.metadata]);
+  return enabled && !isLoading ? React.createElement(AIContentCompletion) : null;
+}
+
+function AIContentCompletion() {
   const [editor] = useLexicalComposerContext();
   const suggestionNodeKey = useRef(null);
   const currentSuggestion = useRef(null);
+  const suggestionReferences = useRef({});
+  const suggestionFiles = useRef({});
+  const suggestionQuestions = useRef({});
+  const suggestionPreviewContext = useRef(null);
   const [lastAcceptedSuggestion, setLastAcceptedSuggestion] = useState(null); // Track for feedback
   const debounceTimer = useRef(null);
   const abortController = useRef(null);
   
-  const { currentUnit } = useContext(UnitContext);
+  const {
+    unit: currentUnit,
+    dictionary,
+    questionBank,
+    files,
+  } = useContext(UnitContext);
   const { sections, assignments } = useContext(SectionContext);
 
   // Derive course outline for the current unit's section(s)
@@ -96,9 +126,16 @@ export default function AIContentCompletionPlugin() {
       const section = sections.find(s => s.id === sectionId);
       if (section?.courseOutline) {
         try {
-          return typeof section.courseOutline === 'string'
+          const outline = typeof section.courseOutline === 'string'
             ? JSON.parse(section.courseOutline)
             : section.courseOutline;
+          if (!Array.isArray(outline)) return null;
+          return outline.map((entry) => ({
+            number: entry.number,
+            name: entry.name,
+            summary: entry.summary,
+            isCurrent: entry.unitId === currentUnit.id,
+          }));
         } catch {
           // Skip malformed outlines
         }
@@ -118,8 +155,18 @@ export default function AIContentCompletionPlugin() {
         suggestionNodeKey.current = null;
       }
       currentSuggestion.current = null;
+      suggestionReferences.current = {};
+      suggestionFiles.current = {};
+      suggestionQuestions.current = {};
+      suggestionPreviewContext.current = null;
     }, { tag: 'skip-collab' });
   }, [editor]);
+
+  useEffect(() => () => {
+    clearTimeout(debounceTimer.current);
+    abortController.current?.abort();
+    clearSuggestion();
+  }, [clearSuggestion]);
 
   // Update or create suggestion node
   const updateSuggestion = useCallback((text) => {
@@ -138,11 +185,11 @@ export default function AIContentCompletionPlugin() {
         if (node instanceof AIContentSuggestionNode) {
           // Update existing suggestion in place (no selection change needed)
           console.log('Updating existing suggestion node in place');
-          node.setSuggestion(text);
+          node.setSuggestion(text, suggestionPreviewContext.current);
         } else if (node !== null && node.isAttached()) {
           // Replace loading node (or other node type) with suggestion node
           console.log('Replacing existing node with suggestion');
-          const newNode = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
+          const newNode = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text, suggestionPreviewContext.current);
           node.replace(newNode);
           suggestionNodeKey.current = newNode.getKey();
         }
@@ -150,7 +197,7 @@ export default function AIContentCompletionPlugin() {
         // Create new node after the anchor (does not affect selection)
         console.log('Creating new suggestion node');
         const anchorNode = selection.anchor.getNode();
-        const node = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text);
+        const node = $createAIContentSuggestionNode(AI_SUGGESTION_UUID, text, suggestionPreviewContext.current);
         suggestionNodeKey.current = node.getKey();
         anchorNode.insertAfter(node);
       }
@@ -162,13 +209,28 @@ export default function AIContentCompletionPlugin() {
   // Fetch AI suggestion
   const fetchSuggestion = useCallback(async (prompt, context) => {
     console.log('fetchSuggestion called with prompt:', prompt);
+    const catalog = buildSuggestionReferenceCatalog(
+      dictionary,
+      questionBank,
+      files,
+      prompt,
+    );
+    suggestionReferences.current = catalog.idByReference;
+    suggestionFiles.current = catalog.fileById;
+    suggestionQuestions.current = catalog.questionById;
+    suggestionPreviewContext.current = {
+      idByReference: catalog.idByReference,
+      fileById: catalog.fileById,
+      questionById: catalog.questionById,
+    };
     
     // Cancel any in-flight requests
     if (abortController.current) {
       abortController.current.abort();
     }
     
-    abortController.current = new AbortController();
+    const controller = new AbortController();
+    abortController.current = controller;
     
     // Show loading indicator
     editor.update(() => {
@@ -206,7 +268,6 @@ export default function AIContentCompletionPlugin() {
 
       const contextData = {
         unit: currentUnit ? {
-          id: currentUnit.id,
           name: currentUnit.name,
           description: currentUnit.description,
         } : null,
@@ -215,6 +276,7 @@ export default function AIContentCompletionPlugin() {
         // Course outline from section (published unit summaries)
         courseOutline: courseOutline || undefined,
         ...context,
+        resources: catalog.resources,
       };
 
       console.log('Making API call to /api/content-completion...');
@@ -223,7 +285,7 @@ export default function AIContentCompletionPlugin() {
       const response = await fetch('/api/content-completion', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        signal: abortController.current.signal,
+        signal: controller.signal,
         body: JSON.stringify({
           prompt,
           context: contextData,
@@ -234,38 +296,22 @@ export default function AIContentCompletionPlugin() {
         throw new Error(`Content completion failed: ${response.status}`);
       }
 
+      if (!response.body) {
+        throw new Error('Content completion response has no body');
+      }
       const reader = response.body.getReader();
       const decoder = new TextDecoder();
       let completion = '';
-      let buffer = '';
 
       console.log('Starting to stream response...');
       
-      // Stream the AI SDK data stream protocol response
-      // Format: each line is TYPE_CODE:JSON_PAYLOAD\n
-      // 0: = text chunk (JSON-encoded string)
+      // The route returns toTextStreamResponse(): raw UTF-8 text deltas.
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
+        if (controller.signal.aborted) return;
         
-        buffer += decoder.decode(value, { stream: true });
-        
-        // Process complete lines
-        const lines = buffer.split('\n');
-        buffer = lines.pop(); // Keep incomplete line in buffer
-        
-        for (const line of lines) {
-          if (!line) continue;
-          // AI SDK data stream: "0:..." for text chunks
-          if (line.startsWith('0:')) {
-            try {
-              const text = JSON.parse(line.slice(2));
-              completion += text;
-            } catch {
-              // Skip unparseable lines
-            }
-          }
-        }
+        completion += decoder.decode(value, { stream: true });
         
         if (completion) {
           console.log('Streaming chunk, total length:', completion.length);
@@ -273,20 +319,31 @@ export default function AIContentCompletionPlugin() {
           updateSuggestion(completion);
         }
       }
+      completion += decoder.decode();
+      if (controller.signal.aborted) return;
       
-      if (!completion) {
+      if (!completion.trim()) {
         throw new Error('No completion returned');
       }
       
       console.log('Final completion:', completion);
-      updateSuggestion(completion.trim());
+      updateSuggestion(placeMeaningAfterWordBlocks(completion.trim()));
     } catch (error) {
       if (error.name !== 'AbortError') {
         console.error('Error fetching suggestion:', error);
         clearSuggestion();
       }
     }
-  }, [currentUnit, courseOutline, updateSuggestion, clearSuggestion, editor]);
+  }, [
+    currentUnit,
+    courseOutline,
+    dictionary,
+    questionBank,
+    files,
+    updateSuggestion,
+    clearSuggestion,
+    editor,
+  ]);
   
   // Detect when to trigger suggestions
   useEffect(() => {
@@ -370,14 +427,43 @@ export default function AIContentCompletionPlugin() {
         !/[\s\u3000-\u303f\u3040-\u30ff\u4e00-\u9fff]$/.test(previousText) &&
         !/^[\s.,!?;:)\]。、！？]/.test(suggestion);
 
-      // Replace suggestion node with actual text
-      const textNode = $createTextNode((needsSpace ? ' ' : '') + suggestion);
-      node.replace(textNode);
-      textNode.selectNext();
+      // Render the markdown into real nodes; surrounding whitespace is kept
+      // outside the parser because markdown parsing would trim it.
+      const leadingWhitespace = suggestion.match(/^\s*/)[0];
+      let resolvedMarkdown;
+      try {
+        resolvedMarkdown = resolveSuggestionReferences(
+          suggestion.slice(leadingWhitespace.length),
+          suggestionReferences.current,
+          suggestionFiles.current,
+          suggestionQuestions.current,
+        );
+      } catch (error) {
+        console.error("[AIContentCompletionPlugin] Rejected invalid block reference:", error);
+        node.remove();
+        suggestionNodeKey.current = null;
+        currentSuggestion.current = null;
+        suggestionReferences.current = {};
+        suggestionFiles.current = {};
+        suggestionQuestions.current = {};
+        return;
+      }
+      $replaceWithMarkdown(
+        node,
+        resolvedMarkdown,
+        leadingWhitespace || (needsSpace ? ' ' : ''),
+        {
+          fileById: suggestionFiles.current,
+          questionById: suggestionQuestions.current,
+        },
+      );
       
       // Clear refs
       suggestionNodeKey.current = null;
       currentSuggestion.current = null;
+      suggestionReferences.current = {};
+      suggestionFiles.current = {};
+      suggestionQuestions.current = {};
     }, { tag: ACCEPT_TAG });
     
     return true;
@@ -457,6 +543,8 @@ export default function AIContentCompletionPlugin() {
     return () => {
       unregisterSuggestion();
       unregisterLoading();
+      removeTab();
+      removeArrowRight();
       removeEscape();
     };
   }, [editor, acceptSuggestion, dismissSuggestion, clearSuggestion]);

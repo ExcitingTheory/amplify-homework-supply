@@ -10,7 +10,9 @@ const BLOCK_TYPE_ACCENT = {
   "custom-answer": "primary.main",
   "custom-ai": "primary.main",
   "meaning-association": "text.primary",
+  "word-block": "text.primary",
 };
+const LESSON = SEMANTIC_THEME.editor.lesson;
 
 export function resolveExerciseAccent(blockType, accuracy, graded) {
   if (graded && typeof accuracy === "number") {
@@ -48,24 +50,35 @@ export function ExerciseBlockCard({
       sx={[
         (theme) => {
           const accentColor = getPaletteColor(theme, accentPath);
-          const rail = `inset 4px 0 0 0 ${accentColor}`;
-          const cardHover = theme.shadows[SEMANTIC_THEME.elevation.cardHover];
-          const overlay = theme.shadows[SEMANTIC_THEME.elevation.overlay];
+          const railWidth = theme.direction === "rtl"
+            ? -LESSON.surface.accentWidth
+            : LESSON.surface.accentWidth;
+          const rail = `inset ${railWidth}px 0 0 0 ${alpha(accentColor, graded ? LESSON.surface.gradedAccentOpacity : LESSON.surface.accentOpacity)}`;
 
           return {
-            my: 2,
-            pr: { xs: 1.75, sm: 2 },
-            py: { xs: 1.75, sm: 2 },
-            pl: { xs: 2.25, sm: 2.5 },
-            border: "1px solid",
+            my: `${LESSON.blockGap}px`,
+            p: `${LESSON.padding.block}px`,
+            // Override the dashboard card theme's independent centering.
+            "&&": { width: "100%", maxWidth: "100%", marginInline: 0 },
+            textAlign: "start",
+            fontSize: theme.typography.body1.fontSize,
+            lineHeight: LESSON.lineHeight,
+            border: `${LESSON.surface.borderWidth}px solid`,
             borderColor: selected
               ? theme.palette.primary.main
-              : alpha(theme.palette.text.primary, 0.23),
+              : alpha(theme.palette.text.primary, LESSON.surface.borderOpacity),
             borderRadius: `${SEMANTIC_THEME.radius.card}px`,
-            bgcolor: "background.paper",
-            boxShadow: selected ? `${rail}, ${overlay}` : rail,
+            bgcolor: alpha(theme.palette.text.primary, LESSON.surface.backgroundOpacity),
+            backgroundImage: "none",
+            boxShadow: selected
+              ? `${rail}, 0 0 0 ${LESSON.surface.selectionWidth}px ${alpha(theme.palette.primary.main, LESSON.surface.selectionOpacity)}`
+              : rail,
             transition: "box-shadow 0.2s, border-color 0.2s",
-            "&:hover": { boxShadow: `${rail}, ${cardHover}` },
+            "&:hover": {
+              borderColor: selected
+                ? theme.palette.primary.main
+                : alpha(theme.palette.text.primary, LESSON.surface.hoverBorderOpacity),
+            },
           };
         },
         sx,

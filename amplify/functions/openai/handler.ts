@@ -23,6 +23,7 @@ import {
 } from "../shared/phoenix-tracer";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import OpenAI from "openai";
+import { getTranscriptionAudioFormat } from "./transcriptionAudioFormat";
 
 // Initialize Phoenix tracing at module load
 initializePhoenixTracing();
@@ -879,8 +880,17 @@ async function handleTranscribeUrl(args: any): Promise<string> {
   try {
     // Fetch audio from S3 URL
     const response = await fetch(audioUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch audio: HTTP ${response.status}`);
+    }
     const audioBuffer = await response.arrayBuffer();
-    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+    const format = getTranscriptionAudioFormat(
+      response.headers.get("content-type"),
+      audioUrl,
+    );
+    const file = new File([audioBuffer], `audio.${format.extension}`, {
+      type: format.mimeType,
+    });
 
     // Transcribe
     const transcriptionResponse = await openai.audio.transcriptions.create({

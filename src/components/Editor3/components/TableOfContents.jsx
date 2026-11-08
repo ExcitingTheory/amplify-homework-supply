@@ -6,10 +6,12 @@
 import * as React from 'react';
 import { useEffect, useState } from 'react';
 import { useLexicalComposerContext } from '@lexical/react/LexicalComposerContext';
-import { $getRoot, $isElementNode } from 'lexical';
+import { $getRoot } from 'lexical';
 import { $isHeadingNode } from '@lexical/rich-text';
 import { List, ListItem, ListItemButton, ListItemText, Typography, Box } from '@mui/material';
 import { useTranslations } from 'next-intl';
+import { useAppShell } from '../../AppShellContext';
+import { scrollToEditorNode } from '../utils/scrollToEditorNode';
 
 /**
  * Extracts heading nodes from the editor state
@@ -36,21 +38,10 @@ function getHeadings(editor) {
   return headings;
 }
 
-/**
- * Scrolls to a specific node in the editor
- */
-function scrollToNode(editor, key) {
-  editor.getEditorState().read(() => {
-    const element = editor.getElementByKey(key);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  });
-}
-
 export default function TableOfContents() {
   const t = useTranslations('editor.shared');
   const [editor] = useLexicalComposerContext();
+  const { appBarHeight } = useAppShell();
   const [headings, setHeadings] = useState([]);
 
   useEffect(() => {
@@ -81,7 +72,7 @@ export default function TableOfContents() {
         {headings.map((heading) => (
           <ListItem key={heading.key} disablePadding>
             <ListItemButton
-              onClick={() => scrollToNode(editor, heading.key)}
+              onClick={() => scrollToEditorNode(editor, heading.key, appBarHeight)}
               sx={{
                 pl: heading.level * 2,
               }}

@@ -4,6 +4,8 @@
 
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
+const { mockGraphql } = vi.hoisted(() => ({ mockGraphql: vi.fn() }));
+
 // Mock AWS SDK modules that hang on import in test environment
 vi.mock("@aws-sdk/client-cloudformation", () => ({
   CloudFormationClient: vi.fn().mockImplementation(() => ({
@@ -38,15 +40,22 @@ vi.mock("aws-amplify", () => ({
 }));
 
 vi.mock("aws-amplify/data", () => ({
-  generateClient: vi.fn(() => ({
-    graphql: vi.fn(),
-  })),
+  generateClient: vi.fn(() => ({ graphql: mockGraphql })),
+}));
+
+vi.mock("../section/groupManager", () => ({
+  GroupManager: class {
+    async createInstructorGroup() {}
+    async createLearnerGroup() {}
+    async addInstructor() {}
+  },
 }));
 
 describe("section handler integration tests", () => {
   beforeEach(() => {
     process.env.API_ENDPOINT = "http://localhost:8080/graphql";
     process.env.USER_POOL_ID = "test-user-pool-id";
+    mockGraphql.mockReset();
     vi.resetModules();
   });
 
@@ -104,6 +113,88 @@ describe("section handler integration tests", () => {
       expect(typeof op).toBe("string");
       expect(op.length).toBeGreaterThan(0);
     });
+  });
+
+  it("applies configured location defaults when creating a section", async () => {
+    const defaultLocation = {
+      school: {
+        name: "North School",
+        address: "10 Main Street",
+      },
+      campus: "East",
+      buildingName: "Learning Center",
+      roomNumber: "204",
+    };
+    mockGraphql.mockImplementation(async ({ query }) => {
+      if (query.includes("query GetDefaultSectionLocation")) {
+        return {
+          data: {
+            listPlatformSettings: {
+              items: [{ defaultSectionLocation: defaultLocation }],
+            },
+          },
+        };
+      }
+      return {
+        data: {
+          createSection: {
+            id: "section-123",
+            _version: 1,
+            code: "ABC123",
+          },
+        },
+      };
+    });
+
+    const { handler } = await import("../section/handler");
+    await handler(
+      {
+        info: { fieldName: "createSectionGroup" },
+        identity: { sub: "instructor-1", username: "instructor@example.com" },
+        arguments: { name: "Biology", description: "" },
+      },
+      {} as any,
+      vi.fn(),
+    );
+
+    const createCall = mockGraphql.mock.calls.find(([request]) =>
+      request.query.includes("mutation CreateSection"),
+    );
+    expect(createCall?.[0].variables.input.location).toEqual(defaultLocation);
+  });
+
+  it("uses a supplied location without loading platform defaults", async () => {
+    const location = {
+      school: {
+        name: "South School",
+        address: "20 Main Street",
+      },
+    };
+    mockGraphql.mockResolvedValue({
+      data: {
+        createSection: {
+          id: "section-456",
+          _version: 1,
+          code: "DEF456",
+        },
+      },
+    });
+
+    const { handler } = await import("../section/handler");
+    await handler(
+      {
+        info: { fieldName: "createSectionGroup" },
+        identity: { sub: "instructor-1", username: "instructor@example.com" },
+        arguments: { name: "Biology", description: "", location },
+      },
+      {} as any,
+      vi.fn(),
+    );
+
+    expect(mockGraphql).toHaveBeenCalledTimes(1);
+    expect(mockGraphql.mock.calls[0][0].variables.input.location).toEqual(
+      location,
+    );
   });
 
   it("should format response with ISO timestamp", () => {

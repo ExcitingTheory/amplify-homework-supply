@@ -39,10 +39,17 @@ import {
     QuestionAnswer as QuestionIcon,
 } from '@mui/icons-material';
 import { getParsedContentModeration } from '../utils/parsedContentModeration';
+import WarningAmberIcon from '@mui/icons-material/WarningAmber';
+import DocumentExtractionWarnings from './DocumentExtractionWarnings';
+import {
+    flaggedFirst,
+    groupReviewWarnings,
+    readReviewWarnings,
+    warningsForQuestion,
+} from '../utils/reviewWarnings';
 import { toEntryList } from '../utils/parsedContentLists';
 import { useDocumentParsedContent } from '../hooks/useDocumentParsedContent';
 import { useDocumentLinks } from '../hooks/useDocumentLinks';
-import { questionEntryKey } from '../utils/documentLinks';
 import DictionaryContext from '../context/dictionaryContext';
 import { importQuestionsToUnit, updateQuestionItem } from '../utils/questionImportUtils';
 
@@ -71,7 +78,12 @@ export interface QuestionItem {
     hint?: string;
     questionType?: 'essay' | 'short_answer' | 'comprehension' | 'multiple_choice';
     difficulty?: 'easy' | 'medium' | 'hard';
-    page?: number;
+    pages?: number[];
+    // What the claim is about, and which of its properties the question asks for
+    subject?: string;
+    field?: string;
+    // The Question this entry was imported as, set by the importer
+    questionID?: string;
     hasAudio?: boolean;
     hasImage?: boolean;
     // Source tracking
@@ -218,7 +230,10 @@ function NestedQuestionField({
 
 export interface QuestionCardProps {
     item: QuestionItem;
+    /** The entry's position in the stored list, used for selection and editing. */
     index: number;
+    /** Why the analysis kept this entry for review, if it did. */
+    reviewWarnings?: string[];
     isSelected: boolean;
     isExpanded: boolean;
     existsInQuestionBank: boolean;
@@ -232,6 +247,7 @@ export interface QuestionCardProps {
 export function QuestionCard({
     item,
     index,
+    reviewWarnings = [],
     isSelected,
     isExpanded,
     existsInQuestionBank,
@@ -261,6 +277,27 @@ export function QuestionCard({
                 },
             }}
         >
+            {reviewWarnings.length > 0 && (
+                <Tooltip title={reviewWarnings.join(' · ')} arrow>
+                    <Box
+                        sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 0.5,
+                            px: 1,
+                            py: 0.25,
+                            color: 'warning.dark',
+                            backgroundColor: 'warning.light',
+                        }}
+                    >
+                        <WarningAmberIcon fontSize="inherit" />
+                        <Typography variant="caption" noWrap>
+                            {reviewWarnings[0]}
+                        </Typography>
+                    </Box>
+                </Tooltip>
+            )}
+
             {/* Header with controls */}
             <Box
                 onClick={(e) => {
@@ -358,9 +395,9 @@ export function QuestionCard({
                             sx={{ fontSize: '0.65rem', height: '20px' }}
                         />
                     )}
-                    {item.page && (
+                    {item.pages && item.pages.length > 0 && (
                         <Chip 
-                            label={`p.${item.page}`} 
+                            label={`p.${Math.min(...item.pages)}`} 
                             size="small" 
                             variant="outlined"
                             sx={{ fontSize: '0.65rem', height: '20px' }}
@@ -464,30 +501,6 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     // Refs for virtual scrolling
     const parentRef = useRef<HTMLDivElement>(null);
 
-    // Filter question items by search term
-    const filteredQuestions = useMemo(() => {
-        if (!searchTerm) return questionItems;
-        
-        const lowerSearch = searchTerm.toLowerCase();
-        return questionItems.filter((item) => {
-            return (
-                item.prompt?.toLowerCase().includes(lowerSearch) ||
-                item.answer?.toLowerCase().includes(lowerSearch) ||
-                item.hint?.toLowerCase().includes(lowerSearch)
-            );
-        });
-    }, [questionItems, searchTerm]);
-
-    // Virtual scrolling setup
-    // estimateSize returns a stable collapsed-row height;
-    // measureElement's ResizeObserver handles actual sizing on expand/collapse
-    const virtualizer = useVirtualizer({
-        count: filteredQuestions.length,
-        getScrollElement: () => parentRef.current,
-        estimateSize: () => 60,
-        overscan: 5,
-    });
-
     // The document's chunks, loaded page by page and kept current without
     // reloading: this changes only when a chunk's _version actually changes.
     const {
@@ -499,10 +512,48 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
     } = useDocumentParsedContent(documentId);
     // Which of those questions this document already imported
     const {
-        importedKeys,
+        importedIds,
         loaded: linksLoaded,
         refresh: refreshLinks,
     } = useDocumentLinks(documentId, 'question');
+    // Why the analysis kept entries for review, attached to the entries they name.
+    const reviewWarnings = useMemo(
+        () => groupReviewWarnings(readReviewWarnings(doc?.metadata)),
+        [doc?.metadata],
+    );
+
+    // Filter question items by search term, keeping each entry's stored
+    // position so selection and editing still address the right entry.
+    const searchedQuestions = useMemo(() => {
+        const positioned = questionItems.map((item, position) => ({ item, position }));
+        if (!searchTerm) return positioned;
+
+        const lowerSearch = searchTerm.toLowerCase();
+        return positioned.filter(({ item }) => {
+            return (
+                item.prompt?.toLowerCase().includes(lowerSearch) ||
+                item.answer?.toLowerCase().includes(lowerSearch) ||
+                item.hint?.toLowerCase().includes(lowerSearch)
+            );
+        });
+    }, [questionItems, searchTerm]);
+
+    // Entries a warning names come first, each carrying its reasons.
+    const filteredQuestions = useMemo(
+        () => flaggedFirst(searchedQuestions, ({ item }) => warningsForQuestion(reviewWarnings, item)),
+        [searchedQuestions, reviewWarnings],
+    );
+
+    // Virtual scrolling setup
+    // estimateSize returns a stable collapsed-row height;
+    // measureElement's ResizeObserver handles actual sizing on expand/collapse
+    const virtualizer = useVirtualizer({
+        count: filteredQuestions.length,
+        getScrollElement: () => parentRef.current,
+        estimateSize: () => 60,
+        overscan: 5,
+    });
+
     const hasLoaded = useRef(false);
 
     useEffect(() => {
@@ -526,7 +577,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             documentID: content.documentID as string,
             fileID: (content.fileID as string | null | undefined) || undefined,
             filename: doc?.filename || undefined,
-            alreadyImported: importedKeys.has(questionEntryKey(q.prompt)),
+            alreadyImported: !!q.questionID && importedIds.has(q.questionID),
         }));
 
         dispatch({
@@ -539,7 +590,7 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             autoSelectAll: true,
         });
         hasLoaded.current = true;
-    }, [content, doc, loadState, linksLoaded, importedKeys]);
+    }, [content, doc, loadState, linksLoaded, importedIds]);
 
     const pendingCount = useMemo(
         () => questionItems.filter((item) => !item.alreadyImported).length,
@@ -655,6 +706,11 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                     </Typography>
                 )}
 
+                <DocumentExtractionWarnings
+                    metadata={doc?.metadata}
+                    flaggedCount={filteredQuestions.filter(({ warnings }) => warnings.length > 0).length}
+                    itemLabel={t('questionsReview.reviewItems')}
+                />
                 {moderation.blocked && (
                     <Alert severity="warning" sx={{ mt: 1 }}>
                         {moderation.error
@@ -761,14 +817,21 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
             )}
 
             {/* Import Progress */}
-            {importing && importProgress && (
+            {importing && (
                 <Box sx={{ px: 2, pb: 1, flexShrink: 0 }}>
-                    <LinearProgress 
-                        variant="determinate" 
-                        value={(importProgress.current / importProgress.total) * 100} 
+                    <LinearProgress
+                        // The total is unknown until the document has loaded, so
+                        // the bar says that work is happening rather than
+                        // showing a false 0%.
+                        variant={importProgress?.total ? "determinate" : "indeterminate"}
+                        value={
+                            importProgress?.total
+                                ? (importProgress.current / importProgress.total) * 100
+                                : undefined
+                        }
                     />
                     <Typography variant="body2" sx={{ mt: 0.5, textAlign: 'center' }}>
-                        {importProgress.message}
+                        {importProgress?.message ?? t('questionsReview.loading')}
                     </Typography>
                 </Box>
             )}
@@ -792,6 +855,8 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                 elevation={2}
                 sx={{ 
                     flex: 1, 
+                    // Warnings above can fill the panel; the virtualizer renders no rows in a zero-height scroller.
+                    minHeight: 320,
                     overflow: 'auto', 
                     mx: 2,
                     mb: 2,
@@ -805,7 +870,8 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                     }}
                 >
                     {virtualizer.getVirtualItems().map((virtualItem) => {
-                        const item = filteredQuestions[virtualItem.index];
+                        const { entry, warnings } = filteredQuestions[virtualItem.index];
+                        const { item, position } = entry;
                         const existsInQuestionBank = questionBank && Object.values(questionBank).some(
                             (q: any) => q.prompt?.toLowerCase().trim() === item.prompt?.toLowerCase().trim()
                         );
@@ -825,9 +891,10 @@ const QuestionsReview2: React.FC<QuestionsReview2Props> = ({
                             >
                                 <QuestionCard
                                     item={item}
-                                    index={virtualItem.index}
-                                    isSelected={selectedItems.has(virtualItem.index)}
-                                    isExpanded={expandedItems.has(virtualItem.index)}
+                                    index={position}
+                                    reviewWarnings={warnings}
+                                    isSelected={selectedItems.has(position)}
+                                    isExpanded={expandedItems.has(position)}
                                     existsInQuestionBank={existsInQuestionBank}
                                     alreadyImported={!!item.alreadyImported}
                                     searchTerm={searchTerm}

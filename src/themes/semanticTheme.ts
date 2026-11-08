@@ -1,4 +1,4 @@
-import type { Components, Theme, ThemeOptions } from "@mui/material/styles";
+import type { Components, CSSObject, Theme, ThemeOptions } from "@mui/material/styles";
 import { alpha } from "@mui/material/styles";
 import { roundedCheckboxIcons } from "../components/RoundedCheckboxIcon";
 
@@ -78,6 +78,30 @@ export const SEMANTIC_THEME = {
     },
   },
   editor: {
+    lesson: {
+      maxWidth: "64rem",
+      lineHeight: 1.65,
+      paragraphGap: 16,
+      blockGap: 24,
+      padding: {
+        inlineMobile: 8,
+        inlineDesktop: 16,
+        top: 16,
+        bottom: 64,
+        block: 16,
+      },
+      surface: {
+        borderWidth: 1,
+        borderOpacity: 0.1,
+        hoverBorderOpacity: 0.22,
+        backgroundOpacity: 0.025,
+        accentWidth: 2,
+        accentOpacity: 0.25,
+        gradedAccentOpacity: 0.8,
+        selectionWidth: 2,
+        selectionOpacity: 0.3,
+      },
+    },
     // Compact heading scale for editor/NarrativeReader content: a real
     // hierarchy that stays tighter than the full page type scale so dense
     // workbook content doesn't balloon. Injected as CSS vars via MuiCssBaseline.
@@ -201,6 +225,32 @@ export const SEMANTIC_THEME = {
 } as const;
 
 export type SemanticTheme = typeof SEMANTIC_THEME;
+
+export function getSemanticLessonContentStyles(theme: Theme): CSSObject {
+  const lesson = SEMANTIC_THEME.editor.lesson;
+  return {
+    ...theme.typography.body1,
+    width: "100%",
+    maxWidth: lesson.maxWidth,
+    marginInline: "auto",
+    padding: `${lesson.padding.top}px ${lesson.padding.inlineMobile}px ${lesson.padding.bottom}px`,
+    boxSizing: "border-box",
+    outline: "none",
+    textAlign: "start",
+    lineHeight: lesson.lineHeight,
+    overflowWrap: "anywhere",
+    "& > :is(p, h1, h2, h3, h4, h5, h6, ul, ol, blockquote)": {
+      paddingInline: `${lesson.padding.block + lesson.surface.borderWidth}px`,
+      marginBlock: lesson.paragraphGap,
+    },
+    "& > h1": { ...theme.typography.h4 },
+    "& > h2": { ...theme.typography.h5, textTransform: "none" },
+    "& > h3": { ...theme.typography.h6, textTransform: "none" },
+    [theme.breakpoints.up("sm")]: {
+      paddingInline: lesson.padding.inlineDesktop,
+    },
+  };
+}
 
 export function getSemanticThemeOptions(): ThemeOptions {
   return {

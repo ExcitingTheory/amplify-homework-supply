@@ -200,6 +200,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "Genauigkeit über alle Versuche in den aktivierten Übungsmodi.",
+    "replay": "Erneut spielen",
+    "resetting": "Wird zurückgesetzt...",
+    "resetFailed": "Diese Übung konnte nicht zurückgesetzt werden. Bitte versuche es erneut.",
     "modes": {
       "easy": "Einfach",
       "hard": "Schwer",

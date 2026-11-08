@@ -95,6 +95,59 @@ npx ampx sandbox     # Deploy Amplify backend locally
 
 See [docs/ONBOARDING.md](./docs/ONBOARDING.md) for full setup and [docs/QUICK_START.md](./docs/QUICK_START.md) for essential links.
 
+### Native vocabulary models
+
+The multilingual vocabulary worker loads Stanza models from private S3, not
+from its container image. Run these commands from the repository root with
+Docker running and AWS credentials authorized to read/write the model prefix:
+
+```bash
+# Package models; automatically exports the preserved all-model image if needed.
+npm run native-vocabulary:models:package
+
+# Upload to the storage bucket/region in amplify_outputs.json.
+npm run native-vocabulary:models:upload
+```
+
+Packaging requires either an existing `.native-vocabulary-models/source`
+directory or the preserved `homework-native-vocabulary:with-models-v1` image.
+For a fresh setup without either, download models using Stanza first:
+
+```bash
+npm run native-vocabulary:build
+npm run native-vocabulary:models:prepare -- --download
+npm run native-vocabulary:models:package
+npm run native-vocabulary:models:upload
+```
+
+Uploads verify checksums and publish immutable releases under
+`protected/models/stanza-{language}-v1/`. Only after all eight releases succeed
+does the uploader update `protected/models/live/manifest.json`; workers remain
+pinned to reviewed release checksums rather than following this alias.
+
+If an upload fails with `EPIPE` or a timeout, rerun
+`npm run native-vocabulary:models:upload`. Transient streaming failures receive
+up to three retries with fresh streams; reruns reuse already verified objects.
+Do not overwrite a release with different model files.
+
+To select another environment:
+
+```bash
+npm run native-vocabulary:models:upload -- --outputs path/to/amplify_outputs.json
+```
+
+After packaging, review the generated model catalog, rebuild and validate the
+runtime image, then deploy the backend separately once model uploads finish:
+
+```bash
+npm run native-vocabulary:build
+npm run native-vocabulary:smoke
+```
+
+These commands do not deploy infrastructure. See
+[File Processing Pipeline](./docs/FILE_PROCESSING_PIPELINE.md#optional-native-multilingual-vocabulary-selection)
+for model preparation, permissions, and versioning details.
+
 ## Testing
 
 ```bash
@@ -167,4 +220,3 @@ Direct Playwright UI command:
 ```bash
 npx playwright test --config=test/e2e/journeys/playwright.config.ts --ui
 ```
-

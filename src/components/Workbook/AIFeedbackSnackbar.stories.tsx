@@ -1,6 +1,7 @@
 import React from "react";
 import { AIFeedbackSnackbar } from "./AIFeedbackSnackbar";
 import { expect, within } from "storybook/test";
+import { EditorToastProvider } from "../Editor3/context/EditorToastContext";
 
 // Minimal mock provider that emits awareness events
 function createMockProvider(opts = {}) {
@@ -44,6 +45,13 @@ function createMockProvider(opts = {}) {
 export default {
   title: "📓 Workbook/AI Feedback Snackbar",
   component: AIFeedbackSnackbar,
+  decorators: [
+    (Story: React.ComponentType) => (
+      <EditorToastProvider>
+        <Story />
+      </EditorToastProvider>
+    ),
+  ],
   parameters: {
     layout: "centered",
     disableUnitContext: true,

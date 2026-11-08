@@ -45,6 +45,7 @@ export interface GradeConflictDetails {
   gradeId: string;
   localVersion?: number;
   serverVersion?: number;
+  outsideSectionDateRange?: boolean;
   localData: Record<string, ConflictBlockData>;
   serverData: Record<string, ConflictBlockData>;
   requiresInstructorReview?: boolean;

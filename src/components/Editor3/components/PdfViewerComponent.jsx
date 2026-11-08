@@ -8,7 +8,8 @@
  */
 
 import React, { useState, useCallback, useEffect, useRef } from 'react';
-import { Box, IconButton, Typography, Paper, ButtonGroup, Skeleton } from '@mui/material';
+import { Box, IconButton, Typography, Paper, ButtonGroup, Skeleton, Tooltip } from '@mui/material';
+import { useColorScheme } from '@mui/material/styles';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/Page/TextLayer.css';
 import 'react-pdf/dist/Page/AnnotationLayer.css';
@@ -37,6 +38,10 @@ import {
     NavigateBefore as NavigateBeforeIcon,
     NavigateNext as NavigateNextIcon,
     PictureAsPdf as PdfIcon,
+    Fullscreen as FullscreenIcon,
+    FullscreenExit as FullscreenExitIcon,
+    DarkMode as DarkModeIcon,
+    LightMode as LightModeIcon,
 } from '@mui/icons-material';
 import getCachedUrl from '../../../utils/getCachedUrl';
 
@@ -44,6 +49,43 @@ import getCachedUrl from '../../../utils/getCachedUrl';
 if (typeof window !== 'undefined' && !pdfjs.GlobalWorkerOptions.workerSrc) {
   pdfjs.GlobalWorkerOptions.workerSrc = '/pdf.worker.min.mjs';
 }
+
+const viewerLayout = {
+    width: '100%',
+    my: 2,
+    boxSizing: 'border-box',
+};
+const SELECTION_OUTLINE_WIDTH = 2;
+const SELECTION_OUTLINE_OFFSET = 2;
+// Reserve room for the frame's outline so ancestors that clip overflow do not cut it off.
+const SELECTION_OUTLINE_INSET = SELECTION_OUTLINE_WIDTH + SELECTION_OUTLINE_OFFSET;
+// Inverting and rotating hue turns white paper dark while keeping colors recognizable.
+const DARK_PAGE_FILTER = 'invert(0.9) hue-rotate(180deg)';
+export const DARK_PAGES_STORAGE_KEY = 'pdfViewer.darkPages';
+
+function readDarkPagesOverride() {
+    try {
+        const value = window.localStorage.getItem(DARK_PAGES_STORAGE_KEY);
+        return value === 'on' ? true : value === 'off' ? false : null;
+    } catch {
+        return null;
+    }
+}
+
+function writeDarkPagesOverride(value) {
+    try {
+        if (value === null) window.localStorage.removeItem(DARK_PAGES_STORAGE_KEY);
+        else window.localStorage.setItem(DARK_PAGES_STORAGE_KEY, value ? 'on' : 'off');
+    } catch {
+        // Storage can be unavailable (private mode); the toggle still works for this session.
+    }
+}
+
+const pdfOptions = {
+    cMapUrl: '/cmaps/',
+    cMapPacked: true,
+    standardFontDataUrl: '/standard_fonts/',
+};
 
 /**
  * PdfViewerComponent - Displays PDF documents with controls.
@@ -72,6 +114,83 @@ export default function PdfViewerComponent({
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [pageWidth, setPageWidth] = useState(600);
+    const [isNativeFullscreen, setIsNativeFullscreen] = useState(false);
+    // Fallback for browsers without element fullscreen (e.g. iPhone Safari).
+    const [isExpanded, setIsExpanded] = useState(false);
+    const isFullscreen = isNativeFullscreen || isExpanded;
+    const { mode, systemMode } = useColorScheme();
+    const prefersDark = (mode === 'system' ? systemMode : mode) === 'dark';
+    const [darkPagesOverride, setDarkPagesOverride] = useState(null);
+    const darkPages = darkPagesOverride ?? prefersDark;
+
+    useEffect(() => {
+        setDarkPagesOverride(readDarkPagesOverride());
+    }, []);
+
+    const toggleDarkPages = () => {
+        const next = !darkPages;
+        // Matching the color scheme clears the override so the viewer follows it again.
+        const override = next === prefersDark ? null : next;
+        setDarkPagesOverride(override);
+        writeDarkPagesOverride(override);
+    };
+
+    useEffect(() => {
+        const sync = () => {
+            const element = document.fullscreenElement ?? document.webkitFullscreenElement;
+            setIsNativeFullscreen(Boolean(element) && element === containerRef.current);
+        };
+        document.addEventListener('fullscreenchange', sync);
+        document.addEventListener('webkitfullscreenchange', sync);
+        return () => {
+            document.removeEventListener('fullscreenchange', sync);
+            document.removeEventListener('webkitfullscreenchange', sync);
+        };
+    }, []);
+
+    useEffect(() => {
+        if (!isExpanded) return undefined;
+        const onKeyDown = (event) => {
+            if (event.key === 'Escape') setIsExpanded(false);
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => window.removeEventListener('keydown', onKeyDown);
+    }, [isExpanded]);
+
+    const toggleFullscreen = async () => {
+        if (isNativeFullscreen) {
+            const exit = document.exitFullscreen ?? document.webkitExitFullscreen;
+            await exit?.call(document);
+            return;
+        }
+        if (isExpanded) {
+            setIsExpanded(false);
+            return;
+        }
+        const element = containerRef.current;
+        const request = element?.requestFullscreen ?? element?.webkitRequestFullscreen;
+        if (request) {
+            try {
+                await request.call(element);
+                return;
+            } catch {
+                // Fall through to the in-page overlay when fullscreen is refused.
+            }
+        }
+        setIsExpanded(true);
+    };
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+        const observer = new ResizeObserver(([entry]) => {
+            if (entry.contentRect.width > 0) {
+                setPageWidth(Math.floor(entry.contentRect.width));
+            }
+        });
+        observer.observe(container);
+        return () => observer.disconnect();
+    }, [loading, error]);
 
     // Callback when PDF document loads successfully
     const onDocumentLoadSuccess = useCallback(({ numPages: pages }) => {
@@ -248,12 +367,10 @@ export default function PdfViewerComponent({
 
     const handleZoomIn = () => {
         setScale(prev => Math.min(prev + 0.25, 3.0));
-        setPageWidth(prev => Math.min(prev * 1.25, 1200));
     };
 
     const handleZoomOut = () => {
         setScale(prev => Math.max(prev - 0.25, 0.5));
-        setPageWidth(prev => Math.max(prev * 0.8, 300));
     };
 
     const handlePrevPage = () => {
@@ -267,12 +384,12 @@ export default function PdfViewerComponent({
     if (loading) {
         return (
             <Paper 
-                elevation={2} 
+                elevation={0}
                 sx={{ 
+                    ...viewerLayout,
                     p: 4, 
                     textAlign: 'center',
-                    bgcolor: 'action.hover',
-                    my: 2,
+                    bgcolor: 'transparent',
                 }}
             >
                 <PdfIcon sx={{ fontSize: 48, color: 'grey.400', mb: 2 }} />
@@ -288,10 +405,10 @@ export default function PdfViewerComponent({
             <Paper 
                 elevation={2} 
                 sx={{ 
+                    ...viewerLayout,
                     p: 4, 
                     textAlign: 'center',
                     bgcolor: 'error.50',
-                    my: 2,
                     border: '1px solid',
                     borderColor: 'error.200',
                 }}
@@ -308,44 +425,81 @@ export default function PdfViewerComponent({
     }
 
     return (
-        <Paper 
+        <Box
             ref={containerRef}
-            elevation={2} 
-            sx={{ 
-                my: 2,
-                overflow: 'hidden',
-                outline: isSelected ? '2px solid #1976d2' : 'none',
-                outlineOffset: '2px',
+            data-pdf-viewport
+            data-fullscreen={isFullscreen || undefined}
+            sx={(theme) => {
+                const fullscreen = {
+                    my: 0,
+                    overflowY: 'auto',
+                    bgcolor: 'background.default',
+                    // The viewport becomes the sticky controls' scroller.
+                    '--editor-scroll-padding': `${SELECTION_OUTLINE_INSET}px`,
+                };
+                return {
+                    ...viewerLayout,
+                    p: `${SELECTION_OUTLINE_INSET}px`,
+                    bgcolor: 'transparent',
+                    '&:fullscreen': fullscreen,
+                    ...(isExpanded && {
+                        ...fullscreen,
+                        position: 'fixed',
+                        inset: 0,
+                        zIndex: theme.zIndex.modal,
+                    }),
+                };
+            }}
+        >
+        <Box
+            data-pdf-page-frame
+            sx={{
+                width: pageWidth * scale,
+                maxWidth: '100%',
+                mx: 'auto',
+                outline: isSelected ? `${SELECTION_OUTLINE_WIDTH}px solid` : 'none',
+                outlineColor: 'primary.main',
+                outlineOffset: `${SELECTION_OUTLINE_OFFSET}px`,
                 cursor: 'pointer',
                 transition: 'outline 0.2s ease-in-out',
             }}
         >
-            {/* Controls Bar */}
+            {/* Controls stay pinned to the top of the document scroller while the page is in view. */}
             <Box 
+                data-pdf-controls
                 sx={{ 
+                    position: 'sticky',
+                    // Sticky offsets start inside the scroller's padding; cancel it to sit flush under the menu.
+                    top: 'calc(-1 * var(--editor-scroll-padding, 0px))',
+                    zIndex: 2,
                     display: 'flex', 
                     alignItems: 'center', 
                     justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: 1,
                     p: 1,
-                    bgcolor: 'action.hover',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    bgcolor: 'background.paper',
                     borderBottom: '1px solid',
                     borderColor: 'divider',
                 }}
             >
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, minWidth: 0 }}>
                     <PdfIcon sx={{ color: 'error.main' }} />
-                    <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                    <Typography variant="body2" sx={{ fontWeight: 500, overflowWrap: 'anywhere', minWidth: 0 }}>
                         {filename}
                     </Typography>
                 </Box>
 
-                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center', flexWrap: 'wrap' }}>
                     {/* Page Navigation */}
                     {numPages && (
                         <ButtonGroup size="small" variant="outlined">
                             <IconButton 
                                 size="small" 
                                 onClick={handlePrevPage}
+                                aria-label={t('pdfViewerComponent.previousPage')}
                                 disabled={currentPage <= 1}
                             >
                                 <NavigateBeforeIcon fontSize="small" />
@@ -367,6 +521,7 @@ export default function PdfViewerComponent({
                             <IconButton 
                                 size="small" 
                                 onClick={handleNextPage}
+                                aria-label={t('pdfViewerComponent.nextPage')}
                                 disabled={currentPage >= numPages}
                             >
                                 <NavigateNextIcon fontSize="small" />
@@ -379,6 +534,7 @@ export default function PdfViewerComponent({
                         <IconButton 
                             size="small" 
                             onClick={handleZoomOut}
+                            aria-label={t('pdfViewerComponent.zoomOut')}
                             disabled={scale <= 0.5}
                         >
                             <ZoomOutIcon fontSize="small" />
@@ -400,27 +556,45 @@ export default function PdfViewerComponent({
                         <IconButton 
                             size="small" 
                             onClick={handleZoomIn}
+                            aria-label={t('pdfViewerComponent.zoomIn')}
                             disabled={scale >= 3.0}
                         >
                             <ZoomInIcon fontSize="small" />
                         </IconButton>
                     </ButtonGroup>
+
+                    <Tooltip title={t('pdfViewerComponent.darkPages')}>
+                        <IconButton
+                            size="small"
+                            onClick={toggleDarkPages}
+                            aria-label={t('pdfViewerComponent.darkPages')}
+                            aria-pressed={darkPages}
+                            color={darkPages ? 'primary' : 'default'}
+                        >
+                            {darkPages ? <DarkModeIcon fontSize="small" /> : <LightModeIcon fontSize="small" />}
+                        </IconButton>
+                    </Tooltip>
+
+                    <Tooltip title={t(isFullscreen ? 'pdfViewerComponent.exitFullScreen' : 'pdfViewerComponent.enterFullScreen')}>
+                        <IconButton
+                            size="small"
+                            onClick={toggleFullscreen}
+                            aria-label={t(isFullscreen ? 'pdfViewerComponent.exitFullScreen' : 'pdfViewerComponent.enterFullScreen')}
+                        >
+                            {isFullscreen ? <FullscreenExitIcon fontSize="small" /> : <FullscreenIcon fontSize="small" />}
+                        </IconButton>
+                    </Tooltip>
                 </Box>
             </Box>
 
             {/* PDF Viewer */}
             <Box 
+                data-pdf-page-content
                 sx={{ 
-                    p: 2,
-                    bgcolor: 'action.hover',
-                    display: 'flex',
-                    justifyContent: 'center',
-                    minHeight: 400,
-                    maxHeight: 800,
-                    overflow: 'auto',
-                    '& .react-pdf__Document': {
-                        minHeight: 400,
-                    },
+                    width: '100%',
+                    // Scroll zoomed pages here: an overflow container around the controls would trap sticky positioning.
+                    overflowX: 'auto',
+                    bgcolor: 'transparent',
                 }}
             >
                 {pdfUrl ? (
@@ -428,11 +602,7 @@ export default function PdfViewerComponent({
                         file={pdfUrl}
                         onLoadSuccess={onDocumentLoadSuccess}
                         onLoadError={onDocumentLoadError}
-                        options={{
-                            cMapUrl: '/cmaps/',
-                            cMapPacked: true,
-                            standardFontDataUrl: '/standard_fonts/',
-                        }}
+                        options={pdfOptions}
                         loading={
                             <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, py: 4 }}>
                                 <Skeleton variant="rectangular" width="80%" height={300} sx={{ borderRadius: 1 }} />
@@ -442,23 +612,28 @@ export default function PdfViewerComponent({
                     >
                         <Box
                             sx={{
-                                display: 'flex',
-                                justifyContent: 'center',
-                                bgcolor: 'white',
-                                boxShadow: 2,
+                                width: 'fit-content',
+                                maxWidth: 'none',
+                                mx: 'auto',
                                 '& .react-pdf__Page': {
-                                    maxWidth: '100%',
+                                    width: '100%',
+                                    filter: darkPages ? DARK_PAGE_FILTER : 'none',
+                                },
+                                // Override the editor's global max-width cap, which squashed zoomed canvases
+                                // horizontally while react-pdf kept their pixel height.
+                                '& .react-pdf__Page, & .react-pdf__Page *': {
+                                    maxWidth: 'none',
                                 },
                                 '& .react-pdf__Page__canvas': {
-                                    maxWidth: '100%',
-                                    height: 'auto !important',
+                                    display: 'block',
                                 },
                             }}
                         >
                             <Page
                                 pageNumber={currentPage}
-                                width={pageWidth}
-                                scale={scale}
+                                width={pageWidth * scale}
+                                onLoadError={onDocumentLoadError}
+                                onRenderError={onDocumentLoadError}
                                 customTextRenderer={({ str }) => str}
                             />
                         </Box>
@@ -469,6 +644,7 @@ export default function PdfViewerComponent({
                     </Typography>
                 )}
             </Box>
-        </Paper>
+        </Box>
+        </Box>
     );
 }

@@ -239,7 +239,10 @@
   },
   "pdfViewerComponent": {
     "loadingPdf": "正在加载PDF：{filename}",
-    "noPdfToDisplay": "没有PDF可显示"
+    "noPdfToDisplay": "没有PDF可显示",
+    "darkPages": "深色页面",
+    "enterFullScreen": "全屏",
+    "exitFullScreen": "退出全屏"
   },
   "metadataEditor": {
     "aiGenerationInfo": "AI生成信息",

@@ -2,6 +2,7 @@ import React from "react";
 import FileMetadataComponent from "./FileMetadataComponent";
 import { Box } from "@mui/material";
 import { expect, within } from "storybook/test";
+import { EditorToastProvider } from "../../context/EditorToastContext";
 
 const mockPdfFile = {
   id: "file-1",
@@ -68,9 +69,11 @@ export default {
   },
   decorators: [
     (Story) => (
-      <Box sx={{ maxWidth: 600, mx: "auto" }}>
-        <Story />
-      </Box>
+      <EditorToastProvider>
+        <Box sx={{ maxWidth: 600, mx: "auto" }}>
+          <Story />
+        </Box>
+      </EditorToastProvider>
     ),
   ],
 };

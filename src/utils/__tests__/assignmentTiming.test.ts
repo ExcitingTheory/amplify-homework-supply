@@ -4,6 +4,8 @@ import {
   resolveTimingWindow,
   getAssignmentWindowState,
   shouldFlagLateSubmission,
+  isOutsideSectionDateRange,
+  shouldFlagOutsideSectionDateSubmission,
 } from "../assignmentTiming";
 
 describe("assignmentTiming", () => {
@@ -95,5 +97,63 @@ describe("assignmentTiming", () => {
         allowLateCompletion: false,
       }),
     ).toBe(false);
+  });
+
+  it("uses inclusive section calendar dates in the configured timezone", () => {
+    const section = {
+      startDate: "2026-09-01",
+      endDate: "2026-09-30",
+      timezone: "America/Los_Angeles",
+    };
+
+    expect(
+      isOutsideSectionDateRange(section, new Date("2026-09-01T07:30:00Z")),
+    ).toBe(false);
+    expect(
+      isOutsideSectionDateRange(section, new Date("2026-09-30T07:30:00Z")),
+    ).toBe(false);
+    expect(
+      isOutsideSectionDateRange(section, new Date("2026-10-01T07:30:00Z")),
+    ).toBe(true);
+    expect(
+      isOutsideSectionDateRange(
+        { ...section, startDate: "2026-09-02" },
+        new Date("2026-09-01T07:30:00Z"),
+      ),
+    ).toBe(true);
+  });
+
+  it("does not flag sections without date boundaries", () => {
+    expect(isOutsideSectionDateRange({}, new Date("2026-09-01T00:00:00Z"))).toBe(
+      false,
+    );
+  });
+
+  it("uses the section override before the platform default for outside-date work", () => {
+    const section = {
+      startDate: "2026-09-01",
+      acceptWorkOutsideSectionDates: null,
+      timezone: "UTC",
+    };
+    const submittedAt = new Date("2026-08-31T12:00:00Z");
+
+    expect(shouldFlagOutsideSectionDateSubmission(section, false, submittedAt))
+      .toBe(true);
+    expect(
+      shouldFlagOutsideSectionDateSubmission(
+        { ...section, acceptWorkOutsideSectionDates: true },
+        false,
+        submittedAt,
+      ),
+    ).toBe(false);
+    expect(
+      shouldFlagOutsideSectionDateSubmission(
+        { ...section, acceptWorkOutsideSectionDates: false },
+        true,
+        submittedAt,
+      ),
+    ).toBe(true);
+    expect(shouldFlagOutsideSectionDateSubmission(section, true, submittedAt))
+      .toBe(false);
   });
 });

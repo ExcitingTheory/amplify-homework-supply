@@ -68,7 +68,8 @@ import { useRouter } from "next/navigation";
 import { createPeerReviewRoom } from "../actions/peerReview";
 import AuthContext from "@/context/authContext";
 import { useReportPageHintProgress } from "@/context/pageHintContext";
-import { AssignmentCard, SectionPanel } from "@/components/Dashboard";
+import { AssignmentCard } from "@/components/Dashboard/AssignmentCard";
+import { SectionPanel } from "@/components/Dashboard/SectionPanel";
 import { DashboardHeroView } from "@/components/Dashboard/DashboardHeroView";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 

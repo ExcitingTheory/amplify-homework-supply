@@ -29,7 +29,8 @@ import {
   addTraceAttributes,
 } from "../shared/phoenix-tracer";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
-import { randomUUID } from "node:crypto";
+import { startAnalysisRun } from "./startAnalysisRun";
+import { versionGuard, toReadableError } from "../shared/concurrency";
 import OpenAI from "openai";
 import { extractByFormat } from "./formatRegistry.js";
 import { toParsedContentInput } from "./parsedContentInput.js";
@@ -43,7 +44,11 @@ import {
   analyzePages,
   resolveAnalysisProfile,
   resolveSkipAutoAnalysis,
+  segmentTextIntoPages,
 } from "./analysis.js";
+import { resolveVocabularySelection, isHybridVocabulary } from "./vocabularySelection.js";
+import { resolveVocabularyLanguage, selectNativeVocabulary } from "./nativeVocabulary.js";
+import { randomUUID } from "node:crypto";
 
 // Initialize Phoenix tracing
 initializePhoenixTracing();
@@ -147,8 +152,8 @@ const CREATE_DOCUMENT = /* GraphQL */ `
 `;
 
 const UPDATE_DOCUMENT = /* GraphQL */ `
-  mutation UpdateDocument($input: UpdateDocumentInput!) {
-    updateDocument(input: $input) {
+  mutation UpdateDocument($input: UpdateDocumentInput!, $condition: ModelDocumentConditionInput) {
+    updateDocument(input: $input, condition: $condition) {
       id
       _version
       _lastChangedAt
@@ -546,112 +551,44 @@ async function handleAnalyzeDocument(args: any): Promise<any> {
   if (documentErrors?.length || !documentData?.getDocument) {
     throw new Error(`Document not found for ID: ${documentId}`);
   }
-  let document = documentData.getDocument;
-  const existingMetadata = parseDocumentMetadata(document.metadata);
-  const previousAnalysis = existingMetadata.analysis ?? {};
-  if (
-    typeof previousAnalysis.executionArn === "string" &&
-    !["completed", "failed", "cancelled"].includes(previousAnalysis.state)
-  ) {
-    await stopExecution(
-      previousAnalysis.executionArn,
-      "Superseded by a new analysis run",
-    );
-  }
-
-  const runId = randomUUID();
-  const analysis = {
-    runId,
-    state: "preparing",
-    startedAt: new Date().toISOString(),
-    totalPages: 0,
-    done: 0,
-    failed: 0,
-  };
-  document = await updateDocumentRecord(document, {
-    status: "analyzing",
-    metadata: JSON.stringify({ ...existingMetadata, analysis }),
-  });
-
-  let startedExecutionArn: string | undefined;
-  try {
-    const execution = await sfnClient.send(
-      new StartExecutionCommand({
-        stateMachineArn,
-        name: runId,
-        input: JSON.stringify({
-          runId,
-          documentId,
-          fileId: fileID,
-          identityId: file.identityId,
-          s3Key: file.path,
-          profile,
-        }),
-      }),
-    );
-    if (!execution.executionArn) {
-      throw new Error("Step Functions did not return an execution ARN");
-    }
-    startedExecutionArn = execution.executionArn;
-    const latestResult = (await client.graphql({
-      query: GET_DOCUMENT,
-      variables: { id: documentId },
-    })) as any;
-    if (latestResult.errors?.length || !latestResult.data?.getDocument) {
-      throw new Error(`Unable to reload Document ${documentId}`);
-    }
-    const latest = latestResult.data.getDocument;
-    const latestMetadata = parseDocumentMetadata(latest.metadata);
-    if (latestMetadata.analysis?.runId === runId) {
-      await updateDocumentRecord(latest, {
-        metadata: JSON.stringify({
-          ...latestMetadata,
-          analysis: {
-            ...latestMetadata.analysis,
-            executionArn: execution.executionArn,
-          },
-        }),
-      });
-    } else {
-      await stopExecution(
-        execution.executionArn,
-        "Superseded by a newer analysis run",
-      );
-    }
-    return {
-      success: true,
-      documentID: documentId,
-      fileID,
-      executionArn: execution.executionArn,
-      message: "Document analysis started",
-    };
-  } catch (error) {
-    if (startedExecutionArn) {
-      await stopExecution(startedExecutionArn, "Unable to register analysis execution");
-    }
-    const latestResult = (await client.graphql({
-      query: GET_DOCUMENT,
-      variables: { id: documentId },
-    })) as any;
-    if (!latestResult.errors?.length && latestResult.data?.getDocument) {
-      const latest = latestResult.data.getDocument;
-      const latestMetadata = parseDocumentMetadata(latest.metadata);
-      if (latestMetadata.analysis?.runId === runId) {
-        await updateDocumentRecord(latest, {
-          status: "failed",
-          metadata: JSON.stringify({
-            ...latestMetadata,
-            analysis: {
-              ...latestMetadata.analysis,
-              state: "failed",
-              error: error instanceof Error ? error.message : String(error),
-            },
-          }),
-        });
+  const run = await startAnalysisRun({
+    stateMachineArn,
+    load: async () => {
+      const { data, errors } = (await client.graphql({
+        query: GET_DOCUMENT, variables: { id: documentId },
+      })) as any;
+      if (errors?.length || !data?.getDocument) {
+        throw new Error(`Unable to reload Document ${documentId}`);
       }
-    }
-    throw error;
-  }
+      return data.getDocument;
+    },
+    claim: async (document, update) => {
+      const guard = versionGuard(document._version);
+      const { data, errors } = (await client.graphql({
+        query: UPDATE_DOCUMENT,
+        variables: {
+          input: { id: document.id, ...update, _version: guard.nextVersion },
+          condition: guard.condition,
+        },
+      })) as any;
+      if (errors?.length) throw toReadableError({ errors }, `Unable to claim Document ${document.id}`);
+      if (!data?.updateDocument) throw new Error(`Unable to claim Document ${document.id}`);
+    },
+    start: async (runId) => {
+      const execution = await sfnClient.send(new StartExecutionCommand({
+        stateMachineArn, name: runId,
+        input: JSON.stringify({
+          runId, documentId, fileId: fileID, identityId: file.identityId,
+          s3Key: file.path, profile,
+        }),
+      }));
+      if (!execution.executionArn) throw new Error("Step Functions did not return an execution ARN");
+    },
+  });
+  return {
+    success: true, documentID: documentId, fileID, executionArn: run.executionArn,
+    message: run.reused ? "Document analysis is already running" : "Document analysis started",
+  };
 }
 
 async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
@@ -674,6 +611,8 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
     }
 
     const file = fileData.getFile;
+    const vocabularySelection = resolveVocabularySelection(file.settings);
+    const vocabularyLanguage = vocabularySelection === "hybrid-native" ? resolveVocabularyLanguage(file.settings) : undefined;
     const { profile, invalidValue } = resolveAnalysisProfile(file.settings);
     if (invalidValue !== undefined) {
       console.warn(
@@ -789,7 +728,8 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
     const extraction = await extractByFormat(s3Key);
 
     const text = extraction.text;
-    const pages = extraction.pages;
+    const pages = extraction.pages.length === 0
+      ? segmentTextIntoPages(extraction.text) : extraction.pages;
     const pageCount = extraction.pageCount;
     const sourceFormat = extraction.sourceFormat;
     const directContent = extraction.directContent;
@@ -841,12 +781,24 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
     }
 
     if (
-      (profile === "exhaustive" || s3Key.toLowerCase().endsWith(".pdf")) &&
       pages.length > 0
     ) {
+      const nativeSelection = vocabularyLanguage ? await selectNativeVocabulary(
+        pages, vocabularyLanguage,
+        `private/${file.identityId}/documents/${documentID}/analysis/${randomUUID()}`,
+      ) : undefined;
       parsedContent = await analyzePages(openai, pages, fileID, documentID, {
         profile,
+        vocabularySelection,
+        vocabularyLanguage,
+        vocabularyCandidates: nativeSelection?.candidates,
       });
+      if (nativeSelection?.reviewWarnings.length) {
+        parsedContent.reviewWarnings = [
+          ...(parsedContent.reviewWarnings ?? []),
+          ...nativeSelection.reviewWarnings.map((message) => ({ page: pages[0].pageNumber, message })),
+        ];
+      }
     } else {
       // Build format-aware system prompt
       const systemPrompt = buildAnalysisPrompt(sourceFormat, directContent);
@@ -964,13 +916,28 @@ async function handleAnalyzeDocumentLegacy(args: any): Promise<any> {
       },
     );
 
-    // Update document status to "completed"
+    const reviewWarnings = [
+      ...(parsedContent.reviewWarnings ?? []).map(({ page, message }: { page: number; message: string }) =>
+        `Page ${page}: ${message}`),
+      ...(parsedContent.uncoveredLines ?? []).map(({ page, line }: { page: number; line: string }) =>
+        `Page ${page}: Review missing source coverage: ${line}`),
+    ];
+    const metadata = parseDocumentMetadata(analyzingUpdate?.data?.updateDocument?.metadata ?? document.metadata);
+    // Keep legacy results editable and surface uncertainty using the workflow's
+    // existing review metadata contract; no verification is implied here.
     await client.graphql({
       query: UPDATE_DOCUMENT,
       variables: {
         input: {
           id: document.id,
           status: "completed",
+          metadata: JSON.stringify({
+            ...metadata, analysis: {
+              ...(metadata.analysis ?? {}), state: "completed",
+              reviewWarnings: reviewWarnings.slice(0, 50).map((message: string) => message.slice(0, 600)),
+              reviewWarningCount: reviewWarnings.length,
+            },
+          }),
           _version:
             analyzingUpdate?.data?.updateDocument?._version ??
             document._version ??

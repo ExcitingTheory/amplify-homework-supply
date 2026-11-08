@@ -1,0 +1,2 @@
+stanza==1.15.0
+wordfreq==3.1.1

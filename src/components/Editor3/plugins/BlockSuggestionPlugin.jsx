@@ -1,985 +1,269 @@
 /**
- * @fileoverview BlockSuggestionPlugin - Suggests pedagogically sound block types.
- *
- * This plugin analyzes the current content structure and suggests relevant block types
- * that should come next based on educational best practices. It uses rule-based patterns
- * to determine what exercises or content blocks would naturally follow.
- *
- * Pedagogical Patterns:
- * - Heading → Explanation paragraph
- * - Explanation → Example, Practice, or Quiz
- * - Example → Practice or Quiz
- * - Practice → Quiz or Summary
- * - Quiz → Summary or new Heading
- *
- * @module BlockSuggestionPlugin
+ * Shares next-block suggestions with the open sidebar. Preview content and
+ * accepted content use the same reference snapshot and Markdown as autocomplete.
  */
-
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import {
+  $createParagraphNode,
+  $createTextNode,
+  $getNodeByKey,
+  $getRoot,
   $getSelection,
   $isRangeSelection,
-  $getRoot,
-  COMMAND_PRIORITY_LOW,
-  KEY_ARROW_DOWN_COMMAND,
-  KEY_ARROW_UP_COMMAND,
-  KEY_ENTER_COMMAND,
-  KEY_ESCAPE_COMMAND,
-  KEY_TAB_COMMAND,
-  DRAGOVER_COMMAND,
-  DROP_COMMAND,
 } from "lexical";
-import { mergeRegister } from "@lexical/utils";
 import { $isHeadingNode, $createHeadingNode } from "@lexical/rich-text";
 import { $isListNode } from "@lexical/list";
-import { $createTextNode, $createParagraphNode } from "lexical";
-import { useCallback, useEffect, useState, useRef, useContext } from "react";
-import * as React from "react";
+import { useCallback, useContext, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
-
-import BlockSuggestionMenu from "../components/BlockSuggestionMenu";
-import { $isQuizNode, INSERT_QUIZ_COMMAND } from "./QuizPlugin";
-import { $isAnswerNode, INSERT_ANSWER_BLOCK_COMMAND } from "./AnswerPlugin";
-import {
-  $isCustomAnswerNode,
-  INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
-} from "./CustomAnswerPlugin";
-import { INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND } from "./MeaningAssociationPlugin";
+import { $createQuizNode, $isQuizNode } from "./QuizPlugin";
+import { $createAnswerNode, $isAnswerNode } from "./AnswerPlugin";
+import { $createCustomAnswerNode, $isCustomAnswerNode } from "./CustomAnswerPlugin";
 import UnitContext from "../../../context/unitContext";
 import SectionContext from "../../../context/sectionContext";
 import { useSuggestions } from "../context/SuggestionContext";
+import { $replaceWithMarkdown } from "../utils/insertMarkdown";
+import {
+  buildSuggestionReferenceCatalog,
+  placeMeaningAfterWordBlocks,
+  resolveSuggestionReferences,
+} from "./suggestionReferences";
 
-/**
- * Block type categories for pattern matching
- */
-const BLOCK_CATEGORIES = {
-  HEADING: "heading",
-  EXPLANATION: "explanation",
-  EXAMPLE: "example",
-  PRACTICE: "practice",
-  QUIZ: "quiz",
-  SUMMARY: "summary",
-};
-
-/**
- * Pedagogical patterns: what blocks typically follow each category
- */
-const PEDAGOGICAL_PATTERNS = {
-  [BLOCK_CATEGORIES.HEADING]: [
-    {
-      type: "paragraph",
-      labelKey: "blockSuggestionPlugin.addExplanation",
-      icon: "📝",
-      category: BLOCK_CATEGORIES.EXPLANATION,
-    },
-  ],
-  [BLOCK_CATEGORIES.EXPLANATION]: [
-    {
-      type: "answer",
-      labelKey: "blockSuggestionPlugin.addVocabularyPractice",
-      icon: "✍️",
-      category: BLOCK_CATEGORIES.PRACTICE,
-    },
-    {
-      type: "custom-answer",
-      labelKey: "blockSuggestionPlugin.addCustomPractice",
-      icon: "📋",
-      category: BLOCK_CATEGORIES.PRACTICE,
-    },
-    {
-      type: "quiz",
-      labelKey: "blockSuggestionPlugin.addQuiz",
-      icon: "📊",
-      category: BLOCK_CATEGORIES.QUIZ,
-    },
-  ],
-  [BLOCK_CATEGORIES.EXAMPLE]: [
-    {
-      type: "answer",
-      labelKey: "blockSuggestionPlugin.addVocabularyPractice",
-      icon: "✍️",
-      category: BLOCK_CATEGORIES.PRACTICE,
-    },
-    {
-      type: "custom-answer",
-      labelKey: "blockSuggestionPlugin.addCustomPractice",
-      icon: "📋",
-      category: BLOCK_CATEGORIES.PRACTICE,
-    },
-    {
-      type: "quiz",
-      labelKey: "blockSuggestionPlugin.addQuiz",
-      icon: "📊",
-      category: BLOCK_CATEGORIES.QUIZ,
-    },
-  ],
-  [BLOCK_CATEGORIES.PRACTICE]: [
-    {
-      type: "quiz",
-      labelKey: "blockSuggestionPlugin.addQuiz",
-      icon: "📊",
-      category: BLOCK_CATEGORIES.QUIZ,
-    },
-    {
-      type: "paragraph",
-      labelKey: "blockSuggestionPlugin.addSummary",
-      icon: "📄",
-      category: BLOCK_CATEGORIES.SUMMARY,
-    },
-    {
-      type: "heading",
-      labelKey: "blockSuggestionPlugin.newSection",
-      icon: "📑",
-      category: BLOCK_CATEGORIES.HEADING,
-    },
-  ],
-  [BLOCK_CATEGORIES.QUIZ]: [
-    {
-      type: "paragraph",
-      labelKey: "blockSuggestionPlugin.addSummary",
-      icon: "📄",
-      category: BLOCK_CATEGORIES.SUMMARY,
-    },
-    {
-      type: "heading",
-      labelKey: "blockSuggestionPlugin.newSection",
-      icon: "📑",
-      category: BLOCK_CATEGORIES.HEADING,
-    },
-  ],
-  [BLOCK_CATEGORIES.SUMMARY]: [
-    {
-      type: "heading",
-      labelKey: "blockSuggestionPlugin.newSection",
-      icon: "📑",
-      category: BLOCK_CATEGORIES.HEADING,
-    },
-  ],
-  default: [
-    {
-      type: "heading",
-      labelKey: "blockSuggestionPlugin.addHeading",
-      icon: "📑",
-      category: BLOCK_CATEGORIES.HEADING,
-    },
-    {
-      type: "paragraph",
-      labelKey: "blockSuggestionPlugin.addExplanation",
-      icon: "📝",
-      category: BLOCK_CATEGORIES.EXPLANATION,
-    },
-  ],
-};
-
-/**
- * Categorizes a Lexical node into a pedagogical block category
- */
 function categorizeNode(node) {
   if (!node) return null;
-
-  if ($isHeadingNode(node)) {
-    return BLOCK_CATEGORIES.HEADING;
-  }
-
-  if ($isQuizNode(node)) {
-    return BLOCK_CATEGORIES.QUIZ;
-  }
-
-  if ($isAnswerNode(node) || $isCustomAnswerNode(node)) {
-    return BLOCK_CATEGORIES.PRACTICE;
-  }
-
-  if ($isListNode(node)) {
-    return BLOCK_CATEGORIES.EXAMPLE;
-  }
-
-  // Heuristic: short paragraphs (< 100 chars) might be examples
+  if ($isHeadingNode(node)) return "heading";
+  if ($isQuizNode(node)) return "quiz";
+  if ($isAnswerNode(node) || $isCustomAnswerNode(node)) return "practice";
+  if ($isListNode(node)) return "example";
   if (node.getType() === "paragraph") {
     const text = node.getTextContent();
-    if (text.length < 100) {
-      return BLOCK_CATEGORIES.EXAMPLE;
-    }
-
-    // Look for summary keywords
-    const summaryKeywords = [
-      "summary",
-      "conclusion",
-      "in summary",
-      "to recap",
-      "in conclusion",
-    ];
-    const lowerText = text.toLowerCase();
-    if (summaryKeywords.some((kw) => lowerText.includes(kw))) {
-      return BLOCK_CATEGORIES.SUMMARY;
-    }
-
-    return BLOCK_CATEGORIES.EXPLANATION;
+    if (text.length < 100) return "example";
+    if (["summary", "conclusion", "in summary", "to recap", "in conclusion"]
+      .some((keyword) => text.toLowerCase().includes(keyword))) return "summary";
+    return "explanation";
   }
-
   return null;
 }
 
-/**
- * Gets block suggestions based on the previous block's category
- */
-function getSuggestions(previousCategory, t) {
-  const patterns =
-    previousCategory && PEDAGOGICAL_PATTERNS[previousCategory]
-      ? PEDAGOGICAL_PATTERNS[previousCategory]
-      : PEDAGOGICAL_PATTERNS.default;
+const PATTERNS = {
+  heading: [["paragraph", "addExplanation"]],
+  explanation: [["answer", "addVocabularyPractice"], ["custom-answer", "addCustomPractice"], ["quiz", "addQuiz"]],
+  example: [["answer", "addVocabularyPractice"], ["custom-answer", "addCustomPractice"], ["quiz", "addQuiz"]],
+  practice: [["quiz", "addQuiz"], ["paragraph", "addSummary"], ["heading", "newSection"]],
+  quiz: [["paragraph", "addSummary"], ["heading", "newSection"]],
+  summary: [["heading", "newSection"]],
+  default: [["heading", "addHeading"], ["paragraph", "addExplanation"]],
+};
 
-  return patterns.map((pattern) => ({
-    ...pattern,
-    label: t(pattern.labelKey),
-  }));
-}
-
-/**
- * Analyzes editor content to determine what block should come next
- */
-function $analyzePreviousBlocks(t) {
-  const selection = $getSelection();
-
-  if (!$isRangeSelection(selection)) {
-    return null;
-  }
-
-  const anchorNode = selection.anchor.getNode();
-  let currentBlock =
-    anchorNode.getType() === "text" ? anchorNode.getParent() : anchorNode;
-
-  // Find the previous sibling block
-  let previousBlock = currentBlock?.getPreviousSibling();
-
-  // Skip empty paragraphs
-  while (
-    previousBlock &&
-    previousBlock.getType() === "paragraph" &&
-    previousBlock.getTextContent().trim() === ""
-  ) {
-    previousBlock = previousBlock.getPreviousSibling();
-  }
-
-  if (!previousBlock) {
-    // At the start of the document
-    return { category: null, suggestions: getSuggestions(null, t) };
-  }
-
-  const category = categorizeNode(previousBlock);
-  const suggestions = getSuggestions(category, t);
-
-  return { category, suggestions };
-}
-
-/**
- * Main plugin component
- * @param {Object} props
- * @param {boolean} props.useAI - Enable AI-powered suggestions with reasoning
- */
 export default function BlockSuggestionPlugin({ useAI = false }) {
-  const t = useTranslations("editor.ai");
   const [editor] = useLexicalComposerContext();
-  // Use suggestion context instead of local state
+  const t = useTranslations("editor.ai");
   const {
-    suggestions,
-    setSuggestions,
-    isLoadingAI,
-    setIsLoadingAI,
-    registerInsertCallback,
+    active, setSuggestions, setIsLoadingAI, registerInsertCallback, setError,
   } = useSuggestions();
-  const [selectedIndex, setSelectedIndex] = useState(0);
-  const [anchorElement, setAnchorElement] = useState(null);
-  const [userHasTyped, setUserHasTyped] = useState(false);
-  const aiRequestTimer = useRef(null);
-  const abortController = useRef(null);
-  const lastAIRequestTime = useRef(0);
-  const isDragging = useRef(false);
-  const AI_COOLDOWN_MS = 5000; // 5 second cooldown between automatic AI suggestions
-
-  const { currentUnit, dictionary, questionBank } = useContext(UnitContext);
+  const { unit, dictionary, questionBank, files } = useContext(UnitContext);
   const { sections, assignments } = useContext(SectionContext);
+  const targetKey = useRef(null);
+  const abortController = useRef(null);
+  const timer = useRef(null);
+  const lastSignature = useRef(null);
 
-  // Derive course outline from section
-  const courseOutline = React.useMemo(() => {
-    if (!currentUnit?.id || !assignments?.length || !sections?.length)
-      return null;
-    const sectionIds = assignments
-      .filter((a) => a.unitID === currentUnit.id)
-      .map((a) => a.sectionID);
-    for (const sId of sectionIds) {
-      const section = sections.find((s) => s.id === sId);
-      if (section?.courseOutline) {
-        try {
-          return typeof section.courseOutline === "string"
-            ? JSON.parse(section.courseOutline)
-            : section.courseOutline;
-        } catch {
-          /* skip */
-        }
-      }
-    }
-    return null;
-  }, [currentUnit?.id, assignments, sections]);
+  const cancelRequest = useCallback(() => {
+    clearTimeout(timer.current);
+    abortController.current?.abort();
+    abortController.current = null;
+    setIsLoadingAI(false);
+  }, [setIsLoadingAI]);
 
-  // Fetch AI-powered suggestions from /suggest-blocks SSE endpoint
-  const fetchAISuggestions = useCallback(
-    async (forceRequest = false) => {
-      if (!useAI) return null;
-
-      // Check cooldown (skip for manual requests)
-      const now = Date.now();
-      if (!forceRequest && now - lastAIRequestTime.current < AI_COOLDOWN_MS) {
-        console.log("AI request throttled, cooldown active");
-        return null;
-      }
-
-      // Cancel any in-flight requests
-      if (abortController.current) {
-        abortController.current.abort();
-      }
-
-      abortController.current = new AbortController();
-      setIsLoadingAI(true);
-      lastAIRequestTime.current = now;
-
-      try {
-        // Extract unit structure
-        const structure = editor.getEditorState().read(() => {
-          const root = $getRoot();
-          const children = root.getChildren();
-
-          return children.map((node) => {
-            const textContent = node.getTextContent?.() || "";
-            return {
-              type: categorizeNode(node) || node.getType(),
-              content:
-                typeof textContent === "string"
-                  ? textContent.substring(0, 200)
-                  : "",
-            };
-          });
-        });
-
-        const lastBlock = structure[structure.length - 1];
-
-        // Call local /api/suggest-blocks Route Handler (no Lambda cold start)
-        const dictArray = dictionary ? Object.values(dictionary) : [];
-        const questionsArray = questionBank ? Object.values(questionBank) : [];
-
-        const response = await fetch("/api/suggest-blocks", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            unitStructure: structure,
-            currentContext: {
-              position: "End of lesson",
-              lastBlockType: lastBlock?.type,
-              lastBlockContent: lastBlock?.content,
-            },
-            dictionary: dictArray.map((w) => ({
-              id: w.id,
-              phrase: w.phrase || w.word,
-              definition: w.definition,
-              phonetic: w.phonetic,
-            })),
-            questionBank: questionsArray.map((q) => ({
-              id: q.id,
-              question: q.question,
-              type: q.type,
-            })),
-            courseOutline: courseOutline || undefined,
-          }),
-          signal: abortController.current.signal,
-        });
-
-        if (!response.ok) {
-          console.error("[SuggestBlocks] Response error:", response.status);
-          setIsLoadingAI(false);
-          return null;
-        }
-
-        // Parse AI SDK data stream protocol from toDataStreamResponse()
-        // Format: each line is TYPE_CODE:JSON_PAYLOAD\n
-        // 9: = tool result, b: = tool call, 0: = text chunk, d: = finish
-        const reader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = "";
-        const toolResults = [];
-
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-
-          // Process complete lines (AI SDK data stream uses \n delimiter)
-          const lines = buffer.split("\n");
-          buffer = lines.pop(); // Keep incomplete line in buffer
-
-          for (const line of lines) {
-            if (!line) continue;
-            // AI SDK data stream: "9:{...}" for tool results
-            if (line.startsWith("9:")) {
-              try {
-                const result = JSON.parse(line.slice(2));
-                toolResults.push(result);
-              } catch {
-                // Skip unparseable lines
-              }
-            }
-          }
-        }
-
-        setIsLoadingAI(false);
-
-        if (toolResults.length > 0) {
-          // Each tool result is a block suggestion from one of the insert_* tools
-          // Format: { toolCallId, toolName, args, result: { success, action, blockType, blockData, preview, reasoning, message } }
-          const suggestions = toolResults
-            .filter(
-              (tr) =>
-                tr.result?.success &&
-                tr.result?.action === "insert_editor_block",
-            )
-            .map((tr) => ({
-              blockType: tr.result.blockType,
-              blockData: tr.result.blockData,
-              preview: tr.result.preview,
-              reasoning: tr.result.reasoning,
-              message: tr.result.message,
-            }));
-
-          if (suggestions.length > 0) {
-            // Enrich suggestions with resolved preview data from local context
-            return suggestions.map((s) => {
-              const enriched = {
-                ...s,
-                confidence: s.confidence || 0.8,
-              };
-
-              // Resolve IDs to actual data for preview rendering
-              if (s.blockData) {
-                const bd = s.blockData;
-                if (bd.wordIDs && dictionary) {
-                  enriched.resolvedWords = bd.wordIDs
-                    .map((id) => dictionary[id])
-                    .filter(Boolean);
-                }
-                if (bd.questionIDs && questionBank) {
-                  enriched.resolvedQuestions = bd.questionIDs
-                    .map((id) => questionBank[id])
-                    .filter(Boolean);
-                }
-              }
-
-              return enriched;
-            });
-          }
-        }
-
-        return null;
-      } catch (error) {
-        if (error.name !== "AbortError") {
-          console.error(
-            "[SuggestBlocks] Error fetching AI suggestions:",
-            error,
-          );
-          setIsLoadingAI(false);
-        }
-        return null;
-      }
-    },
-    [editor, useAI, setIsLoadingAI, dictionary, questionBank, courseOutline],
-  );
-
-  // Update suggestions when selection changes
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState }) => {
-      // Don't show suggestions if user hasn't typed yet or is dragging
-      if (!userHasTyped || isDragging.current) {
-        return;
-      }
-
-      editorState.read(() => {
-        const selection = $getSelection();
-
-        if (!$isRangeSelection(selection)) {
-          setSuggestions(null);
-          return;
-        }
-
-        const anchorNode = selection.anchor.getNode();
-        let currentBlock =
-          anchorNode.getType() === "text" ? anchorNode.getParent() : anchorNode;
-
-        // Only show suggestions on empty paragraph blocks at the end
-        if (currentBlock && currentBlock.getType() === "paragraph") {
-          const text = currentBlock.getTextContent().trim();
-          const isAtEnd =
-            selection.anchor.offset === currentBlock.getTextContentSize();
-
-          // ONLY show suggestions if we're on a completely empty paragraph
-          if (text === "" && isAtEnd) {
-            // Get rule-based analysis synchronously (inside read block)
-            const analysis = $analyzePreviousBlocks(t);
-
-            // Try AI suggestions first if enabled
-            if (useAI) {
-              // Debounce AI requests
-              if (aiRequestTimer.current) {
-                clearTimeout(aiRequestTimer.current);
-              }
-
-              aiRequestTimer.current = setTimeout(async () => {
-                const aiSuggestions = await fetchAISuggestions(false); // false = respect cooldown
-
-                if (aiSuggestions && aiSuggestions.length > 0) {
-                  setSuggestions(aiSuggestions);
-                  setSelectedIndex(0);
-                  return;
-                }
-
-                // Fallback to rule-based if AI fails
-                if (analysis) {
-                  setSuggestions(analysis.suggestions);
-                  setSelectedIndex(0);
-                }
-              }, 1000); // 1 second debounce for AI (longer than before)
-
-              return;
-            }
-
-            // Use rule-based suggestions immediately
-            if (analysis) {
-              setSuggestions(analysis.suggestions);
-              setSelectedIndex(0);
-              return;
-            }
-          }
-        }
-
-        setSuggestions(null);
+  const requestSuggestions = useCallback(async () => {
+    if (!active || !useAI) return;
+    cancelRequest();
+    const controller = new AbortController();
+    abortController.current = controller;
+    setIsLoadingAI(true);
+    setError(null);
+    setSuggestions([]);
+    try {
+      const lastBlocks = editor.getEditorState().read(() => {
+        const nodes = $getRoot().getChildren();
+        const targetIndex = nodes.findIndex((node) => node.getKey() === targetKey.current);
+        return nodes.slice(Math.max(0, targetIndex - 11), targetIndex + 1).map((node) => ({
+          type: node.getType(),
+          content: node.getTextContent().slice(0, 200),
+        }));
       });
-    });
-  }, [editor, useAI, fetchAISuggestions, t, userHasTyped, setSuggestions]);
-
-  // // Get anchor element for menu positioning
-  // useEffect(() => {
-  //   return editor.registerUpdateListener(() => {
-  //     editor.getEditorState().read(() => {
-  //       const selection = $getSelection();
-
-  //       if ($isRangeSelection(selection)) {
-  //         const nativeSelection = window.getSelection();
-  //         if (nativeSelection && nativeSelection.rangeCount > 0) {
-  //           const range = nativeSelection.getRangeAt(0);
-  //           setAnchorElement(range);
-  //         }
-  //       }
-  //     });
-  //   });
-  // }, [editor]);
-
-  /**
-   * Dispatch the appropriate Lexical command for a suggestion, using blockData when available.
-   */
-  const dispatchBlockInsert = useCallback(
-    (suggestion) => {
-      const bd = suggestion.blockData || {};
-
-      editor.update(() => {
-        const selection = $getSelection();
-
-        switch (suggestion.type) {
-          case "quiz":
-            editor.dispatchCommand(INSERT_QUIZ_COMMAND, bd.questionIDs || null);
-            break;
-
-          case "answer":
-            editor.dispatchCommand(INSERT_ANSWER_BLOCK_COMMAND, {
-              wordIDs: bd.wordIDs || [],
-              requestDefinition: bd.requestDefinition || "translation",
-              allowedInput: bd.allowedInput || ["text"],
-              promptMethod: bd.promptMethod || ["phrase"],
-            });
-            break;
-
-          case "custom-answer":
-            editor.dispatchCommand(
-              INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
-              bd.questionIDs || null,
-            );
-            break;
-
-          case "meaning-association":
-            editor.dispatchCommand(
-              INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND,
-              bd.wordIDs || null,
-            );
-            break;
-
-          case "heading": {
-            // Replace current empty paragraph with a heading node containing text
-            if ($isRangeSelection(selection)) {
-              const anchorNode = selection.anchor.getNode();
-              const block =
-                anchorNode.getType() === "text"
-                  ? anchorNode.getParent()
-                  : anchorNode;
-              if (block) {
-                const headingNode = $createHeadingNode(bd.level || "h2");
-                headingNode.append($createTextNode(bd.text || ""));
-                block.replace(headingNode);
-                headingNode.selectEnd();
-              }
-            }
-            break;
-          }
-
-          case "paragraph": {
-            // Insert markdown text into the current paragraph
-            if (bd.markdown && $isRangeSelection(selection)) {
-              const anchorNode = selection.anchor.getNode();
-              const block =
-                anchorNode.getType() === "text"
-                  ? anchorNode.getParent()
-                  : anchorNode;
-              if (block) {
-                // Split markdown into paragraphs
-                const lines = bd.markdown.split("\n\n").filter(Boolean);
-                let target = block;
-                lines.forEach((line, i) => {
-                  if (i === 0) {
-                    target.append($createTextNode(line));
-                  } else {
-                    const p = $createParagraphNode();
-                    p.append($createTextNode(line));
-                    target.insertAfter(p);
-                    target = p;
-                  }
-                });
-                target.selectEnd();
-              }
-            }
-            break;
-          }
-
-          default:
-            console.warn("Unknown block type:", suggestion.type);
-        }
-      });
-    },
-    [editor],
-  );
-
-  const insertSelectedBlock = useCallback(() => {
-    if (!suggestions || selectedIndex >= suggestions.length) return;
-
-    const selected = suggestions[selectedIndex];
-    dispatchBlockInsert(selected);
-    setSuggestions(null);
-  }, [suggestions, selectedIndex, setSuggestions, dispatchBlockInsert]);
-
-  // Handle keyboard navigation
-  const handleKeyCommand = useCallback(
-    (event, command) => {
-      if (!suggestions || suggestions.length === 0) return false;
-
-      switch (command) {
-        case KEY_ARROW_DOWN_COMMAND:
-          event.preventDefault();
-          setSelectedIndex((prev) => (prev + 1) % suggestions.length);
-          return true;
-
-        case KEY_ARROW_UP_COMMAND:
-          event.preventDefault();
-          setSelectedIndex(
-            (prev) => (prev - 1 + suggestions.length) % suggestions.length,
-          );
-          return true;
-
-        case KEY_TAB_COMMAND:
-        case KEY_ENTER_COMMAND:
-          event.preventDefault();
-          insertSelectedBlock();
-          return true;
-
-        case KEY_ESCAPE_COMMAND:
-          event.preventDefault();
-          setSuggestions(null);
-          return true;
-
-        default:
-          return false;
-      }
-    },
-    [suggestions, insertSelectedBlock, setSuggestions],
-  );
-
-  // Track drag operations and user typing
-  useEffect(() => {
-    return mergeRegister(
-      // Track drag operations
-      editor.registerCommand(
-        DRAGOVER_COMMAND,
-        () => {
-          isDragging.current = true;
-          setSuggestions(null);
-          return false; // Don't prevent default
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        DROP_COMMAND,
-        () => {
-          isDragging.current = false;
-          return false; // Don't prevent default
-        },
-        COMMAND_PRIORITY_LOW,
-      ),
-      // Track when user types to enable suggestions
-      editor.registerTextContentListener(() => {
-        if (!isDragging.current) {
-          setUserHasTyped(true);
-        }
-      }),
-    );
-  }, [editor, setSuggestions]);
-
-  useEffect(() => {
-    if (!suggestions) return;
-
-    return mergeRegister(
-      editor.registerCommand(
-        KEY_ARROW_DOWN_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ARROW_DOWN_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ARROW_UP_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ARROW_UP_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_TAB_COMMAND,
-        (event) => handleKeyCommand(event, KEY_TAB_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ENTER_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ENTER_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-      editor.registerCommand(
-        KEY_ESCAPE_COMMAND,
-        (event) => handleKeyCommand(event, KEY_ESCAPE_COMMAND),
-        COMMAND_PRIORITY_LOW,
-      ),
-    );
-  }, [editor, suggestions, handleKeyCommand]);
-
-  // Register the insert callback with the context so the sidebar can use it
-  useEffect(() => {
-    if (registerInsertCallback) {
-      registerInsertCallback(
-        // Insert callback — reuse shared dispatch logic
-        (suggestion) => {
-          dispatchBlockInsert(suggestion);
-          setSuggestions(null);
-        },
-        // Manual AI request callback
-        async () => {
-          if (useAI) {
-            const aiSuggestions = await fetchAISuggestions(true); // true = force, ignore cooldown
-            if (aiSuggestions && aiSuggestions.length > 0) {
-              setSuggestions(aiSuggestions);
-              setSelectedIndex(0);
-            }
-          }
-        },
+      const catalog = buildSuggestionReferenceCatalog(
+        dictionary, questionBank, files,
+        lastBlocks.map((block) => block.content).join(" "),
       );
+      const sectionIds = new Set((assignments || [])
+        .filter((assignment) => assignment.unitID === unit?.id)
+        .map((assignment) => assignment.sectionID));
+      const section = (sections || []).find((item) =>
+        sectionIds.has(item.id) && item.courseOutline,
+      );
+      const outline = typeof section?.courseOutline === "string"
+        ? JSON.parse(section.courseOutline) : section?.courseOutline;
+      const courseOutline = Array.isArray(outline) ? outline.map((entry) => ({
+        number: entry.number,
+        name: entry.name,
+        summary: entry.summary,
+        isCurrent: entry.unitId === unit?.id,
+      })) : undefined;
+      const response = await fetch("/api/content-completion", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        signal: controller.signal,
+        body: JSON.stringify({
+          prompt: "Suggest the next complete lesson block based on the recent lesson content.",
+          context: {
+            mode: "block-suggestion",
+            unit: unit ? { name: unit.name, description: unit.description } : null,
+            lastBlocks,
+            courseOutline,
+            resources: catalog.resources,
+          },
+        }),
+      });
+      if (!response.ok) throw new Error(`Block suggestion failed: ${response.status}`);
+      if (!response.body) throw new Error("Block suggestion response has no body");
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let markdown = "";
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (controller.signal.aborted) return;
+        markdown += decoder.decode(value, { stream: true });
+      }
+      markdown = placeMeaningAfterWordBlocks((markdown + decoder.decode()).trim());
+      if (controller.signal.aborted) return;
+      if (!markdown) throw new Error("No block suggestion returned");
+      resolveSuggestionReferences(markdown, catalog.idByReference, catalog.fileById, catalog.questionById);
+      setSuggestions([{
+        type: "markdown",
+        label: t("blockSuggestionMenu.suggestionsTitle"),
+        markdown,
+        referenceContext: catalog,
+        targetKey: targetKey.current,
+      }]);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        console.error("[BlockSuggestionPlugin] Suggestion failed:", error);
+        setError(t("blockSuggestionMenu.error"));
+      }
+    } finally {
+      if (abortController.current === controller) {
+        abortController.current = null;
+        setIsLoadingAI(false);
+      }
     }
   }, [
-    registerInsertCallback,
-    dispatchBlockInsert,
-    setSuggestions,
-    useAI,
-    fetchAISuggestions,
+    active, useAI, cancelRequest, editor, dictionary, questionBank, files,
+    assignments, sections, unit, setIsLoadingAI, setError, setSuggestions, t,
   ]);
 
-  const handleSuggestionClick = useCallback(
-    (index) => {
-      setSelectedIndex(index);
-      insertSelectedBlock();
-    },
-    [insertSelectedBlock],
-  );
-
-  // Render inline tab-completion hint when suggestions are available
-  if (!suggestions || suggestions.length === 0) {
-    return null;
-  }
-
-  const topSuggestion = suggestions[selectedIndex] || suggestions[0];
-  const bd = topSuggestion.blockData || {};
-
-  /**
-   * Render a content-aware preview snippet for the suggested block.
-   */
-  const renderBlockPreview = () => {
-    switch (topSuggestion.type) {
-      case "heading":
-        return bd.text ? (
-          <span
-            style={{
-              fontWeight: 700,
-              fontSize: bd.level === "h1" ? 18 : bd.level === "h3" ? 13 : 15,
-            }}
-          >
-            {bd.text}
-          </span>
-        ) : null;
-
-      case "paragraph":
-        return bd.markdown ? (
-          <span
-            style={{
-              opacity: 0.85,
-              maxWidth: 360,
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-              display: "inline-block",
-            }}
-          >
-            {bd.markdown.length > 80
-              ? bd.markdown.slice(0, 80) + "…"
-              : bd.markdown}
-          </span>
-        ) : null;
-
-      case "quiz":
-      case "custom-answer": {
-        const questions = topSuggestion.resolvedQuestions || [];
-        if (questions.length === 0) return null;
-        return (
-          <span style={{ opacity: 0.85, fontSize: 11 }}>
-            {t("blockSuggestionPlugin.questionCount", {
-              count: questions.length,
-            })}
-            {questions[0]?.question && (
-              <>
-                {" "}
-                —{" "}
-                <em>
-                  {questions[0].question.slice(0, 50)}
-                  {questions[0].question.length > 50 ? "…" : ""}
-                </em>
-              </>
-            )}
-          </span>
-        );
-      }
-
-      case "answer":
-      case "meaning-association": {
-        const words = topSuggestion.resolvedWords || [];
-        if (words.length === 0) return null;
-        return (
-          <span style={{ opacity: 0.85, fontSize: 11 }}>
-            {words.map((w) => w.phrase || w.word).join(", ")}
-          </span>
-        );
-      }
-
-      default:
-        return null;
+  useEffect(() => {
+    if (!active) {
+      cancelRequest();
+      setSuggestions([]);
+      setError(null);
+      return;
     }
-  };
+    lastSignature.current = null;
+    const update = () => {
+      editor.getEditorState().read(() => {
+        const selection = $getSelection();
+        const node = $isRangeSelection(selection)
+          ? selection.anchor.getNode() : null;
+        const block = node
+          ? node.getTopLevelElement() : $getNodeByKey(targetKey.current);
+        const target = block || $getRoot().getLastChild();
+        if (!target) return;
+        targetKey.current = target.getKey();
+        // JSON preserves custom-block changes even when text content is unchanged.
+        const signature = JSON.stringify([targetKey.current, editor.getEditorState().toJSON()]);
+        if (lastSignature.current === signature) return;
+        lastSignature.current = signature;
+        cancelRequest();
+        setError(null);
+        setSuggestions([]);
+        if (useAI) {
+          timer.current = setTimeout(requestSuggestions, 1000);
+        } else {
+          let previous = target;
+          while (previous?.getType() === "paragraph" && !previous.getTextContent().trim()) {
+            previous = previous.getPreviousSibling();
+          }
+          const patterns = PATTERNS[categorizeNode(previous)] || PATTERNS.default;
+          setSuggestions(patterns.map(([type, label]) => ({
+            type, label: t(`blockSuggestionPlugin.${label}`), targetKey: targetKey.current,
+          })));
+        }
+      });
+    };
+    update();
+    const unregister = editor.registerUpdateListener(({ tags }) => {
+      if (!tags.has("skip-collab") && !tags.has("block-suggestion-accept")) update();
+    });
+    return () => {
+      unregister();
+      cancelRequest();
+    };
+  }, [active, editor, useAI, requestSuggestions, cancelRequest, setSuggestions, setError, t]);
 
-  const preview = renderBlockPreview();
+  const insertSuggestion = useCallback((suggestion) => {
+    if (!active) return;
+    cancelRequest();
+    editor.update(() => {
+      try {
+        const target = $getNodeByKey(suggestion.targetKey);
+        if (!target?.isAttached()) throw new Error("Suggestion insertion block no longer exists");
+        const context = suggestion.referenceContext;
+        const markdown = suggestion.markdown
+          ? resolveSuggestionReferences(
+            suggestion.markdown, context.idByReference, context.fileById, context.questionById,
+          ) : null;
+        let host = target;
+        if (target.getType() !== "paragraph" || target.getTextContent().trim()) {
+          host = $createParagraphNode();
+          target.insertAfter(host);
+        }
+        host.selectEnd();
+        if (markdown) {
+          const marker = $createTextNode("");
+          host.append(marker);
+          $replaceWithMarkdown(marker, markdown, "", context);
+        } else {
+          switch (suggestion.type) {
+            case "heading":
+              host.replace($createHeadingNode("h2")).selectEnd();
+              break;
+            case "quiz":
+              host.replace($createQuizNode([]));
+              break;
+            case "answer":
+              host.replace($createAnswerNode([], "translation", ["text"], ["phrase"]));
+              break;
+            case "custom-answer":
+              host.replace($createCustomAnswerNode([]));
+              break;
+            default:
+              host.selectEnd();
+          }
+        }
+        setSuggestions([]);
+        setError(null);
+      } catch (error) {
+        console.error("[BlockSuggestionPlugin] Cannot accept suggestion:", error);
+        setError(t("blockSuggestionMenu.error"));
+      }
+    }, { tag: "block-suggestion-accept" });
+  }, [active, cancelRequest, editor, setSuggestions, setError, t]);
 
-  return (
-    <div
-      style={{
-        position: "relative",
-        pointerEvents: "none",
-        userSelect: "none",
-      }}
-    >
-      <div
-        data-testid="block-suggestion-hint"
-        style={{
-          position: "fixed",
-          bottom: 16,
-          left: "50%",
-          transform: "translateX(-50%)",
-          pointerEvents: "auto",
-          zIndex: 1000,
-          display: "flex",
-          flexDirection: preview ? "column" : "row",
-          alignItems: "center",
-          gap: preview ? 4 : 8,
-          padding: preview ? "8px 16px" : "6px 16px",
-          borderRadius: preview ? 12 : 20,
-          backgroundColor: "rgba(0, 0, 0, 0.80)",
-          color: "#fff",
-          fontSize: 13,
-          fontFamily: "inherit",
-          backdropFilter: "blur(8px)",
-          boxShadow: "0 2px 12px rgba(0,0,0,0.25)",
-          maxWidth: 480,
-        }}
-      >
-        {/* Top row: icon + label + keyboard hint */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 8,
-            whiteSpace: "nowrap",
-          }}
-        >
-          <span style={{ fontSize: 18 }}>{topSuggestion.icon}</span>
-          <span style={{ fontWeight: 500 }}>{topSuggestion.label}</span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              padding: "1px 6px",
-              borderRadius: 4,
-              backgroundColor: "rgba(255, 255, 255, 0.2)",
-              fontSize: 11,
-              fontWeight: 600,
-              letterSpacing: 0.5,
-            }}
-          >
-            {t("blockSuggestionPlugin.tabKey")}
-          </span>
-          {suggestions.length > 1 && (
-            <span style={{ opacity: 0.7, fontSize: 11 }}>
-              {t("blockSuggestionPlugin.moreSuggestions", {
-                count: suggestions.length - 1,
-              })}
-            </span>
-          )}
-        </div>
-        {/* Preview row: shows block content */}
-        {preview && (
-          <div
-            style={{
-              borderTop: "1px solid rgba(255,255,255,0.15)",
-              paddingTop: 4,
-              width: "100%",
-              textAlign: "center",
-              color: "rgba(255,255,255,0.85)",
-              fontSize: 12,
-            }}
-          >
-            {preview}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+  useEffect(() => {
+    registerInsertCallback(insertSuggestion, requestSuggestions);
+    return () => registerInsertCallback(null, null);
+  }, [registerInsertCallback, insertSuggestion, requestSuggestions]);
+
+  return null;
 }

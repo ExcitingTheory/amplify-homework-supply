@@ -1,4 +1,14 @@
 import { defineConfig } from "@playwright/test";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+
+// The committed fixture is the source of truth; a locally generated file under
+// test-results/ still works for anyone who has one.
+const spokenAnswerCandidates = [
+  resolve(__dirname, "../../mocks/biology-spoken-answer.wav"),
+  resolve(__dirname, "../../../test-results/demos/biology-spoken-answer.wav"),
+];
+const spokenAnswer = spokenAnswerCandidates.find((path) => existsSync(path));
 
 /**
  * Playwright configuration for scripted 1080p product demo recordings.
@@ -35,6 +45,18 @@ export default defineConfig({
     video: "off",
     trace: "off",
     screenshot: "off",
+    launchOptions: {
+      // Without a fake capture device getUserMedia never resolves in headless
+      // Chromium, so recording silently never starts. The spoken answer is
+      // used when it has been generated; see docs/ONBOARDING.md.
+      args: [
+        "--use-fake-device-for-media-stream",
+        "--use-fake-ui-for-media-stream",
+        ...(spokenAnswer
+          ? [`--use-file-for-fake-audio-capture=${spokenAnswer}`]
+          : []),
+      ],
+    },
   },
   projects: [{ name: "chromium", use: { browserName: "chromium" } }],
 });

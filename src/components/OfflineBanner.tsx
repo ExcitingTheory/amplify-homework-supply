@@ -42,6 +42,7 @@ export default function OfflineBanner() {
                   payload.id as string,
                   gradeData,
                   payload._version as number | undefined,
+                  payload.outsideSectionDateRange as boolean | undefined,
                 );
               } else if (operation === "update") {
                 await client.models[model].update(payload);
@@ -89,6 +90,7 @@ export default function OfflineBanner() {
             payload.id as string,
             gradeData,
             payload._version as number | undefined,
+            payload.outsideSectionDateRange as boolean | undefined,
           );
         } else if (operation === "update") {
           await client.models[model].update(payload);

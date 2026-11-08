@@ -19,6 +19,7 @@ import {
   CreateJobCommand,
   DescribeEndpointsCommand,
 } from "@aws-sdk/client-mediaconvert";
+import { findFileByPath } from "../shared/findFileByPath";
 
 // Configure Amplify at module level (same pattern as openai handler)
 Amplify.configure(
@@ -61,23 +62,6 @@ const GET_FILE = /* GraphQL */ `
       mimeType
       identityId
       owner
-    }
-  }
-`;
-
-const LIST_FILES_BY_PATH = /* GraphQL */ `
-  query ListFiles($filter: ModelFileFilterInput) {
-    listFiles(filter: $filter, limit: 1) {
-      items {
-        id
-        _version
-        _lastChangedAt
-        _deleted
-        path
-        mimeType
-        identityId
-        owner
-      }
     }
   }
 `;
@@ -320,17 +304,7 @@ async function handleS3Event(event: any): Promise<void> {
     console.log(`[MediaConvert] S3 upload detected: ${s3Key}`);
 
     // Look up File record by path
-    const { data, errors } = (await client.graphql({
-      query: LIST_FILES_BY_PATH,
-      variables: { filter: { path: { eq: s3Key } } },
-    })) as any;
-
-    if (errors) {
-      console.error("[MediaConvert] GraphQL error:", errors);
-      continue;
-    }
-
-    const file = data?.listFiles?.items?.[0];
+    const file = await findFileByPath(client, s3Key, (message) => console.warn(message));
     if (!file) {
       console.warn(
         `[MediaConvert] No File record for path: ${s3Key}, skipping`,

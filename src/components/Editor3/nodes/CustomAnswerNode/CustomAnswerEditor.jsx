@@ -1,7 +1,7 @@
 import * as React from "react";
 import { lazy, Suspense } from "react";
 import { useTranslations } from "next-intl";
-import { Skeleton, Box } from "@mui/material";
+import { Skeleton, Box, ButtonGroup } from "@mui/material";
 
 // Lazy-load DataGrid only when CustomAnswerEditor is rendered (authoring only)
 const DataGrid = lazy(() =>
@@ -148,7 +148,7 @@ const useColumns = (t) => [
     headerName: t("customAnswerEditor.columnHeaders.prompt"),
     flex: 1,
     minWidth: 100,
-    colSpan: (params) => (params.id === "__empty__" ? 7 : 1),
+    colSpan: (params) => (params?.id === "__empty__" ? 7 : 1),
     renderCell: (params) =>
       params.id === "__empty__" ? (
         <Typography
@@ -236,6 +236,7 @@ export default React.memo(function CustomAnswerEditor({
   ids: questionIDs,
   promptMethod,
   allowedInput,
+  direction,
 }) {
   const t = useTranslations("editor.blocks");
   const [value, setValue] = React.useState(null);
@@ -629,6 +630,18 @@ export default React.memo(function CustomAnswerEditor({
         if ($isCustomAnswerNode(node)) {
           console.log("setPromptMethod", payload);
           node.setPromptMethod(payload);
+        }
+      });
+    },
+    [editor, nodeKey],
+  );
+
+  const setDirection = React.useCallback(
+    (nextDirection) => {
+      editor.update(() => {
+        const node = $getNodeByKey(nodeKey);
+        if ($isCustomAnswerNode(node)) {
+          node.setDirection(nextDirection);
         }
       });
     },
@@ -1082,6 +1095,28 @@ export default React.memo(function CustomAnswerEditor({
             mt: 1.5,
           }}
         >
+          <ButtonGroup size="small" variant="outlined" sx={{ mr: 1 }}>
+            <Button
+              variant={
+                direction === "question-to-answer" ? "contained" : "outlined"
+              }
+              aria-pressed={direction === "question-to-answer"}
+              onClick={() => setDirection("question-to-answer")}
+            >
+              {t("customAnswerEditor.promptLabel")} →{" "}
+              {t("customAnswerEditor.answerLabel")}
+            </Button>
+            <Button
+              variant={
+                direction === "answer-to-question" ? "contained" : "outlined"
+              }
+              aria-pressed={direction === "answer-to-question"}
+              onClick={() => setDirection("answer-to-question")}
+            >
+              {t("customAnswerEditor.answerLabel")} →{" "}
+              {t("customAnswerEditor.promptLabel")}
+            </Button>
+          </ButtonGroup>
           <Box sx={{ order: 2, ml: { xs: 0, sm: "auto" }, flexShrink: 0 }}>
             <AnswerConfigurationSelector
               promptMethod={promptMethod}

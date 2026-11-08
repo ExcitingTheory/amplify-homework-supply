@@ -300,7 +300,7 @@ function Sections({ user }) {
           s3Key={section?.featuredImage}
           identityId={section?.identityId}
           title={section?.name}
-          wideOnLarge
+          fillHeight
         />
         <Box
           sx={{

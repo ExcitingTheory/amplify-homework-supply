@@ -22,6 +22,7 @@ import type {
 } from "../amplify/functions/yjsSync/botObserver";
 import { readFileSync, existsSync } from "fs";
 import { resolve } from "path";
+import { isAllowedLocalOrigin } from "./yjsDevOrigin";
 
 const port = parseInt(process.env.YJS_PORT || "3001", 10);
 
@@ -195,6 +196,8 @@ Provide actionable recommendations with specific details.`;
 
 const server = new YjsWebSocketServer({
   port,
+  host: "localhost",
+  verifyOrigin: isAllowedLocalOrigin,
   tlsOptions,
   botConfig,
   persistCallback: async (roomName, _update, state) => {

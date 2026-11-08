@@ -1,0 +1,14 @@
+{
+  "extractionMode": "nlp-only",
+  "vocabRecall": 1,
+  "factRecall": 1,
+  "pageCoverage": {
+    "missing": []
+  },
+  "missingFacts": [],
+  "missingVocab": [],
+  "duplicates": 0,
+  "unmatchedExtracted": 0,
+  "vocabularyDefinitionRecall": 1,
+  "missingVocabularyDefinitions": []
+}

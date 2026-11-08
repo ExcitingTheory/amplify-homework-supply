@@ -82,6 +82,13 @@ export const Sections: Story = {
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
+    const card = canvasElement.querySelector(
+      '[data-tour="section-card"]',
+    ) as HTMLElement | null;
+    const thumbnail = card?.firstElementChild as HTMLElement | null;
+    if (thumbnail && window.innerWidth >= 600) {
+      expect(getComputedStyle(thumbnail).alignSelf).toBe("stretch");
+    }
   },
 };
 

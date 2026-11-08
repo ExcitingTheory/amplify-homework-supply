@@ -21,7 +21,6 @@ import {
   searchBundle,
   hybridSearchBundle,
 } from "./serverSearch";
-import { toEntryList } from "../../../src/utils/parsedContentLists";
 
 const tracer = trace.getTracer("agent-tools", "1.0.0");
 
@@ -367,22 +366,22 @@ export function createReadFileContentTool(
         const { getServerClient } = await import("@/utils/amplifyServerClient");
         const client = getServerClient();
 
-        // Fetch ParsedContent for this file (contains extracted text). A long
-        // document is stored as several chunks, merged into one record here.
-        const { loadMergedParsedContent } = await import(
-          "@/utils/parsedContentChunks"
-        );
-        const parsed: any = await loadMergedParsedContent(client as any, {
-          fileId,
+        // Fetch ParsedContent for this file (contains extracted text)
+        const { data: parsedContents } = await (
+          client as any
+        ).models.ParsedContent.list({
+          filter: { fileID: { eq: fileId } },
+          limit: 1,
         });
 
-        if (!parsed) {
+        if (!parsedContents?.length) {
           return {
             content: null,
             message: t("readFileContent.noContent"),
           };
         }
 
+        const parsed = parsedContents[0];
         const result: Record<string, any> = { fileId };
 
         if (parsed.fullText) {
@@ -393,11 +392,24 @@ export function createReadFileContentTool(
           }
         }
 
-        const summaries = toEntryList(parsed.summariesJSON);
-        if (summaries.length > 0) result.summaries = summaries;
+        if (parsed.summariesJSON) {
+          try {
+            result.summaries = JSON.parse(parsed.summariesJSON);
+          } catch {
+            // ignore parse errors
+          }
+        }
 
-        const vocab = toEntryList(parsed.vocabularyJSON);
-        if (vocab.length > 0) result.extractedVocabulary = vocab.slice(0, 20);
+        if (parsed.vocabularyJSON) {
+          try {
+            const vocab = JSON.parse(parsed.vocabularyJSON);
+            result.extractedVocabulary = Array.isArray(vocab)
+              ? vocab.slice(0, 20)
+              : vocab;
+          } catch {
+            // ignore parse errors
+          }
+        }
 
         return result;
       } catch (error: any) {

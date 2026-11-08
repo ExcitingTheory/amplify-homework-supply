@@ -631,6 +631,8 @@ export async function POST(req: Request) {
       userId: auth.userId!,
       groups: auth.groups || [],
       identityId: context?.identityId,
+      sessionIdentityId: auth.identityId,
+      ownerIds: auth.ownerIds,
       unitId: context?.unit?.id,
       sectionId: context?.sectionId,
       locale:

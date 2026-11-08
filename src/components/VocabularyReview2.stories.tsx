@@ -133,6 +133,57 @@ Enhanced vocabulary review panel for PDF analysis with modern UX improvements.
 export default meta;
 type Story = StoryObj<typeof VocabularyReview2>;
 
+export const LongTerms: Story = {
+  args: {
+    documentId: "long-terms-document",
+    unitId: "mock-unit-1",
+    owner: "user-123",
+    identityId: "us-east-1:identity-123",
+  },
+  loaders: [
+    createVocabularyLoader("long-terms-document", [
+      {
+        word: "Endoplasmic reticulum",
+        definition:
+          "A network of membranes that transports proteins and other materials throughout the cell.",
+        pages: [1],
+      },
+    ]),
+  ],
+  render: (args) => (
+    <Box sx={{ width: 640, maxWidth: "100%", height: 600, display: "flex", flexDirection: "column" }}>
+      <VocabularyReview2 {...args} />
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const term = await canvas.findByText("Endoplasmic reticulum");
+    const definition = canvas.getByText(/^A network of membranes/);
+    const termStyle = getComputedStyle(term);
+    expect(termStyle.whiteSpace).toBe("nowrap");
+    if (canvasElement.querySelector<HTMLElement>(".MuiBox-root")!.clientWidth > 360) {
+      expect(term.scrollWidth).toBeLessThanOrEqual(term.clientWidth + 1);
+    }
+    expect(term.getBoundingClientRect().height).toBeLessThan(40);
+    expect(definition.getBoundingClientRect().height).toBeGreaterThan(term.getBoundingClientRect().height);
+    expect(canvasElement.scrollWidth).toBeLessThanOrEqual(canvasElement.clientWidth);
+
+    await userEvent.click(term);
+    const editor = canvasElement.querySelector('[contenteditable="true"]');
+    expect(editor).toBeTruthy();
+    expect(getComputedStyle(editor!).whiteSpace).toBe("nowrap");
+  },
+};
+
+export const LongTermsNarrow: Story = {
+  ...LongTerms,
+  render: (args) => (
+    <Box sx={{ width: 360, maxWidth: "100%", height: 600, display: "flex", flexDirection: "column" }}>
+      <VocabularyReview2 {...args} />
+    </Box>
+  ),
+};
+
 /**
  * Default state with 10 vocabulary items ready for review
  */
@@ -152,7 +203,7 @@ export const Default: Story = {
         definition:
           "Photosynthesis - the process by which plants convert light energy into chemical energy",
         context: "植物は光合成によってエネルギーを作ります。",
-        page: 1,
+        pages: [1],
       },
       {
         word: "葉緑体",
@@ -160,28 +211,28 @@ export const Default: Story = {
         definition:
           "Chloroplast - organelle in plant cells where photosynthesis occurs",
         context: "葉緑体は光合成の場所です。",
-        page: 1,
+        pages: [1],
       },
       {
         word: "二酸化炭素",
         phonetic: "にさんかたんそ",
         definition: "Carbon dioxide - gas used by plants in photosynthesis",
         context: "植物は二酸化炭素を吸収します。",
-        page: 2,
+        pages: [2],
       },
       {
         word: "酸素",
         phonetic: "さんそ",
         definition: "Oxygen - gas released by plants during photosynthesis",
         context: "光合成で酸素が作られます。",
-        page: 2,
+        pages: [2],
       },
       {
         word: "グルコース",
         phonetic: "ぐるこーす",
         definition: "Glucose - simple sugar produced by photosynthesis",
         context: "グルコースは植物の栄養源です。",
-        page: 3,
+        pages: [3],
       },
       {
         word: "太陽光",
@@ -189,35 +240,35 @@ export const Default: Story = {
         definition:
           "Sunlight - light energy from the sun used in photosynthesis",
         context: "太陽光は光合成に必要です。",
-        page: 3,
+        pages: [3],
       },
       {
         word: "水分",
         phonetic: "すいぶん",
         definition: "Water - essential component for photosynthesis",
         context: "植物は根から水分を吸収します。",
-        page: 4,
+        pages: [4],
       },
       {
         word: "細胞",
         phonetic: "さいぼう",
         definition: "Cell - basic unit of life in organisms",
         context: "植物の細胞には葉緑体があります。",
-        page: 4,
+        pages: [4],
       },
       {
         word: "栄養素",
         phonetic: "えいようそ",
         definition: "Nutrient - substance providing nourishment",
         context: "光合成で作られた栄養素は植物全体に運ばれます。",
-        page: 5,
+        pages: [5],
       },
       {
         word: "生態系",
         phonetic: "せいたいけい",
         definition: "Ecosystem - biological community of interacting organisms",
         context: "植物は生態系の基礎です。",
-        page: 5,
+        pages: [5],
       },
     ]),
   ],
@@ -277,7 +328,7 @@ export const WithSearchHighlight: Story = {
         definition:
           "Photosynthesis - the process by which plants convert light energy into chemical energy",
         context: "植物は光合成によってエネルギーを作ります。",
-        page: 1,
+        pages: [1],
       },
       {
         word: "葉緑体",
@@ -285,14 +336,14 @@ export const WithSearchHighlight: Story = {
         definition:
           "Chloroplast - organelle in plant cells where photosynthesis occurs",
         context: "葉緑体は光合成の場所です。",
-        page: 1,
+        pages: [1],
       },
       {
         word: "二酸化炭素",
         phonetic: "にさんかたんそ",
         definition: "Carbon dioxide - gas used by plants in photosynthesis",
         context: "植物は二酸化炭素を吸収します。",
-        page: 2,
+        pages: [2],
       },
     ]),
   ],
@@ -425,8 +476,6 @@ export const AlreadyImported: Story = {
           id: "link-guangheseng",
           documentID: "mock-doc-imported",
           wordID: "w-guangheseng",
-          entryKey: "光合成",
-          page: 1,
         },
       ]);
 
@@ -450,7 +499,8 @@ export const AlreadyImported: Story = {
               word: "光合成",
               phonetic: "こうごうせい",
               definition: "Photosynthesis",
-              page: 1,
+              pages: [1],
+              wordID: "w-guangheseng",
             },
           ]),
           summariesJSON: JSON.stringify([]),
@@ -516,8 +566,6 @@ export const PartlyImported: Story = {
           id: "link-partly-1",
           documentID: "mock-doc-partly",
           wordID: "w-chloroplast",
-          entryKey: "chloroplast",
-          page: 1,
         },
       ]);
       seedMockDocuments([
@@ -535,9 +583,9 @@ export const PartlyImported: Story = {
           id: "parsed-mock-doc-partly",
           documentID: "mock-doc-partly",
           vocabularyJSON: JSON.stringify([
-            { word: "Chloroplast", definition: "Organelle that captures light", page: 1 },
-            { word: "Stomata", definition: "Pores in a leaf", page: 2 },
-            { word: "Glucose", definition: "A simple sugar", page: 3 },
+            { word: "Chloroplast", definition: "Organelle that captures light", pages: [1], wordID: "w-chloroplast" },
+            { word: "Stomata", definition: "Pores in a leaf", pages: [2] },
+            { word: "Glucose", definition: "A simple sugar", pages: [3] },
           ]),
           summariesJSON: JSON.stringify([]),
           objectivesJSON: JSON.stringify([]),
@@ -560,6 +608,10 @@ export const PartlyImported: Story = {
     // The imported word is marked and cannot be selected; the rest can be imported.
     expect(await canvas.findAllByText("Already imported")).toHaveLength(1);
     expect(canvas.getAllByRole("checkbox")).toHaveLength(2);
+    await userEvent.click(canvas.getByRole("button", { name: /import to dictionary/i }));
+    await waitFor(() => {
+      expect(canvas.getByText(/Imported 2.*0 errors/i)).toBeVisible();
+    });
   },
   parameters: {
     docs: {
@@ -705,14 +757,14 @@ export const Playground: Story = {
         phonetic: "こうごうせい",
         definition: "Photosynthesis",
         context: "植物は光合成をします。",
-        page: 1,
+        pages: [1],
       },
       {
         word: "葉緑体",
         phonetic: "ようりょくたい",
         definition: "Chloroplast",
         context: "葉緑体は植物にあります。",
-        page: 1,
+        pages: [1],
       },
     ]),
   ],

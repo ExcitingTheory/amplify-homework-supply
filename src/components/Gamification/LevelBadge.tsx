@@ -125,11 +125,13 @@ export function LevelBadge({
           label={`Lvl. ${level.level}`}
           size={isSmall ? "small" : "medium"}
           sx={(theme) => ({
-            bgcolor: color,
-            color: textColor,
+            bgcolor: "#fff",
+            color: theme.palette.grey[900],
+            border: "1px solid",
+            borderColor: color,
             fontWeight: 700,
             fontSize: isSmall ? "0.6875rem" : "0.875rem",
-            "& .MuiChip-icon": { color: textColor },
+            "& .MuiChip-icon": { color: theme.palette.grey[900] },
             ...(isSmall
               ? {
                   height: 20,
@@ -142,16 +144,13 @@ export function LevelBadge({
                   },
                 }
               : {}),
-            // Level 1's neutral grey comes from a fixed light-mode shade (see
-            // getLevelColors) that doesn't track runtime dark/light toggling
-            // under MUI's CSS-variables theming — override it via the
-            // CSS-selector-based applyStyles instead of theme.palette.mode.
-            ...(level.level === 1 &&
-              theme.applyStyles("dark", {
-                bgcolor: theme.palette.grey[700],
-                color: "#f5f5f5",
-                "& .MuiChip-icon": { color: "#f5f5f5" },
-              })),
+            ...theme.applyStyles("dark", {
+              bgcolor: level.level === 1 ? theme.palette.grey[700] : color,
+              color: level.level === 1 ? "#f5f5f5" : textColor,
+              "& .MuiChip-icon": {
+                color: level.level === 1 ? "#f5f5f5" : textColor,
+              },
+            }),
           })}
         />
         {showProgress && level.xpForNextLevel !== null && (

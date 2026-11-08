@@ -2,6 +2,7 @@ import React from "react";
 import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { LevelBadge } from "./LevelBadge";
 import { expect, within } from "storybook/test";
+import Box from "@mui/material/Box";
 
 const meta: Meta<typeof LevelBadge> = {
   title: "🏆 Gamification/XP & Progression/Level Badge",
@@ -154,5 +155,45 @@ export const NoProgress: Story = {
     // No progress bar when showProgress is false
     const progressBar = canvasElement.querySelector('[role="progressbar"]');
     expect(progressBar).toBeNull();
+  },
+};
+
+export const LightModeFills: Story = {
+  globals: { colorScheme: "light" },
+  render: () => (
+    <Box sx={{ display: "flex", gap: 1 }}>
+      {[Beginner, Explorer, Practitioner, Contributor, Expert, Master].map((story) => (
+        <LevelBadge key={story.args!.level!.level} level={story.args!.level!} showProgress={false} />
+      ))}
+    </Box>
+  ),
+  play: async ({ canvasElement }) => {
+    const chips = canvasElement.querySelectorAll(".MuiChip-root");
+    expect(chips).toHaveLength(6);
+    for (const chip of chips) {
+      expect(getComputedStyle(chip).backgroundColor).toBe("rgb(255, 255, 255)");
+      expect(getComputedStyle(chip).borderTopStyle).toBe("solid");
+      expect(getComputedStyle(chip).borderTopWidth).toBe("1px");
+      expect(getComputedStyle(chip).borderTopColor).not.toBe("rgb(255, 255, 255)");
+      expect(getComputedStyle(chip).color).toBe("rgb(33, 33, 33)");
+      expect(getComputedStyle(chip.querySelector(".MuiChip-icon")!).color)
+        .toBe("rgb(33, 33, 33)");
+    }
+  },
+};
+
+export const DarkModeFills: Story = {
+  ...LightModeFills,
+  globals: { colorScheme: "dark" },
+  play: async ({ canvasElement }) => {
+    const chips = canvasElement.querySelectorAll(".MuiChip-root");
+    expect(chips).toHaveLength(6);
+    expect(getComputedStyle(chips[0]).backgroundColor).toBe("rgb(97, 97, 97)");
+    expect(getComputedStyle(chips[0]).color).toBe("rgb(245, 245, 245)");
+    for (const chip of chips) {
+      expect(getComputedStyle(chip).backgroundColor).not.toBe("rgb(255, 255, 255)");
+      expect(getComputedStyle(chip.querySelector(".MuiChip-icon")!).color)
+        .toBe(getComputedStyle(chip).color);
+    }
   },
 };

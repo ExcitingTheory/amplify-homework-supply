@@ -20,6 +20,7 @@ import {
   trackPracticeDrillCompleted,
 } from "../../utils/analytics";
 import type { DrillConfig } from "./PracticeDrillConfigPopup";
+import type { DrillStats } from "./DrillGradeAdapter";
 
 // ============================================================================
 // Types
@@ -84,6 +85,7 @@ interface UsePracticeDrillReturn {
   replayTemplate: (templateSessionId: string, unitId: string) => Promise<void>;
   /** Submit an answer for a block */
   submitAnswer: (blockId: string, answer: BlockAnswer) => void;
+  saveAnswers: (answers: Record<string, BlockAnswer>, stats: DrillStats) => void;
   /** Mark session as complete and award XP */
   completeDrill: () => Promise<void>;
   /** Start a focused retry using the blocks that were answered below 100%. */
@@ -118,6 +120,12 @@ export function usePracticeDrill(
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const sessionIdRef = useRef<string | null>(null);
+  const answerSnapshotRef = useRef<{
+    sessionId: string;
+    answers: Record<string, BlockAnswer>;
+    stats: DrillStats;
+  } | null>(null);
+  const answerSaveQueueRef = useRef<Promise<void>>(Promise.resolve());
 
   const generateDrill = useCallback(
     async (unitId: string, config: DrillConfig) => {
@@ -376,26 +384,77 @@ export function usePracticeDrill(
     [session.answers],
   );
 
+  const saveAnswers = useCallback(
+    (answers: Record<string, BlockAnswer>, stats: DrillStats) => {
+      const sessionId = sessionIdRef.current;
+      if (!sessionId) {
+        const message = "Cannot save drill answers without a session";
+        console.error("[usePracticeDrill]", message);
+        setError(message);
+        return;
+      }
+      answerSnapshotRef.current = { sessionId, answers, stats };
+      setSession((prev) => ({
+        ...prev,
+        answers,
+        accuracy: stats.accuracy,
+        blocksCompleted: stats.blocksCompleted,
+      }));
+
+      const save = answerSaveQueueRef.current
+        .catch(() => undefined)
+        .then(async () => {
+          const { errors } = await getAmplifyClient().models.PracticeSession.update({
+            id: sessionId,
+            data: JSON.stringify(answers),
+            accuracy: stats.accuracy,
+            blocksCompleted: stats.blocksCompleted,
+          });
+          if (errors?.length) throw new Error(errors[0].message);
+        });
+      answerSaveQueueRef.current = save;
+      void save.catch((err: Error) => {
+        console.error("[usePracticeDrill] Save error:", err);
+        if (sessionIdRef.current === sessionId) {
+          setError(err.message || "Failed to save drill answers");
+        }
+      });
+    },
+    [],
+  );
+
   const completeDrill = useCallback(async () => {
     setSaving(true);
     try {
       const client = getAmplifyClient();
+      await answerSaveQueueRef.current;
+      const snapshot = answerSnapshotRef.current;
+      const currentSession =
+        snapshot && snapshot.sessionId === sessionIdRef.current
+          ? {
+              ...session,
+              answers: snapshot.answers,
+              accuracy: snapshot.stats.accuracy,
+              blocksCompleted: snapshot.stats.blocksCompleted,
+            }
+          : session;
 
       // Calculate XP (we'd need sessionsCompletedToday from server, approximate with 0 for now)
       const drillXP = calculateDrillXP(0);
-      const accuracyBonus = calculateAccuracyBonus(session.accuracy);
+      const accuracyBonus = calculateAccuracyBonus(currentSession.accuracy);
       const totalXP = drillXP + accuracyBonus;
 
       // Update PracticeSession
       if (sessionIdRef.current) {
-        await client.models.PracticeSession.update({
+        const { errors } = await client.models.PracticeSession.update({
           id: sessionIdRef.current,
           complete: true,
-          accuracy: session.accuracy,
-          blocksCompleted: session.blocksCompleted,
+          accuracy: currentSession.accuracy,
+          blocksCompleted: currentSession.blocksCompleted,
           xpAwarded: totalXP,
-          data: JSON.stringify(session.answers),
+          data: JSON.stringify(currentSession.answers),
         });
+        if (errors?.length) throw new Error(errors[0].message);
       }
 
       // Create Grade record for this practice attempt
@@ -416,23 +475,20 @@ export function usePracticeDrill(
         }
       }
 
-      try {
-        await client.models.Grade.create({
-          unitID: unitId,
-          practiceSessionID: sessionIdRef.current || undefined,
-          attempt: attemptNumber,
-          data: JSON.stringify(session.answers),
-          accuracy: session.accuracy,
-          complete: true,
-          percentComplete: 100,
-        });
-      } catch (err) {
-        console.error("[usePracticeDrill] Grade creation error:", err);
-      }
+      const { errors: gradeErrors } = await client.models.Grade.create({
+        unitID: unitId,
+        practiceSessionID: sessionIdRef.current || undefined,
+        attempt: attemptNumber,
+        data: JSON.stringify(currentSession.answers),
+        accuracy: currentSession.accuracy,
+        complete: true,
+        percentComplete: 100,
+      });
+      if (gradeErrors?.length) throw new Error(gradeErrors[0].message);
 
       // Build and send student memory feedback
       const feedbackData = buildFeedbackData(
-        session.answers as any,
+        currentSession.answers as any,
         session.blocks as any,
         unitName,
         session.metadata?.drillType || "mixed",
@@ -465,7 +521,7 @@ export function usePracticeDrill(
         updateLearningMemory(
           "", // studentId filled server-side via owner auth
           unitId,
-          session.accuracy,
+          currentSession.accuracy,
           feedbackData.weakAreas,
           feedbackData.strongAreas,
           {
@@ -485,7 +541,7 @@ export function usePracticeDrill(
 
       trackPracticeDrillCompleted(
         unitId,
-        { accuracy: session.accuracy, xpAwarded: totalXP },
+        { accuracy: currentSession.accuracy, xpAwarded: totalXP },
         sessionIdRef.current || undefined,
       );
     } catch (err: any) {
@@ -497,6 +553,7 @@ export function usePracticeDrill(
   }, [session, unitName]);
 
   const retryMissed = useCallback(() => {
+    answerSnapshotRef.current = null;
     setSession((prev) => {
       const answers = Object.values(prev.answers);
       const missedIndexes = new Set(
@@ -523,6 +580,8 @@ export function usePracticeDrill(
   const reset = useCallback(() => {
     setSession(INITIAL_SESSION);
     sessionIdRef.current = null;
+    answerSnapshotRef.current = null;
+    answerSaveQueueRef.current = Promise.resolve();
     setError(null);
   }, []);
 
@@ -535,6 +594,7 @@ export function usePracticeDrill(
     resumeSession,
     replayTemplate,
     submitAnswer,
+    saveAnswers,
     completeDrill,
     retryMissed,
     reset,

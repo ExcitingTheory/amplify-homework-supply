@@ -25,7 +25,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect, within } from "storybook/test";
+import { expect, within, userEvent, waitFor } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Content Completion",
@@ -176,6 +176,43 @@ export const EmptyEditor = {
     const editor = canvasElement.querySelector("[contenteditable]");
     expect(editor).not.toBeNull();
     expect(editor.getAttribute("contenteditable")).toBe("true");
+  },
+};
+
+export const AcceptWithTab = {
+  render: () => (
+    <Template
+      title="Accept Ghost Text with Tab"
+      instructions="Pause after a few words, review the suggestion, then press Tab."
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const originalFetch = window.fetch;
+    const suggestion = "to produce glucose and oxygen.";
+    window.fetch = (input, init) => {
+      if (String(input).endsWith("/api/content-completion")) {
+        return Promise.resolve(new Response(suggestion));
+      }
+      return originalFetch.call(window, input, init);
+    };
+    try {
+      const editor = canvas.getByRole("textbox");
+      await userEvent.click(editor);
+      await userEvent.type(editor, "Plants use sunlight", { delay: 20 });
+      await waitFor(() => {
+        expect(editor.querySelector('[contenteditable="false"]')?.textContent)
+          .toContain(suggestion);
+      });
+      await userEvent.keyboard("{Tab}");
+      await waitFor(() => {
+        expect(editor.querySelector('[data-lexical-text="true"]')?.textContent)
+          .toContain(`Plants use sunlight ${suggestion}`);
+        expect(editor.querySelector('[contenteditable="false"]')).toBeNull();
+      });
+    } finally {
+      window.fetch = originalFetch;
+    }
   },
 };
 

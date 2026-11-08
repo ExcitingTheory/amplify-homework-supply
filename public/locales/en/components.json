@@ -16,6 +16,8 @@
   "aiAgentConfig": {
     "behaviorTuning": "Behavior Tuning",
     "conversationMemory": "Conversation Memory",
+    "enableLlmExtractionByDefault": "Enable LLM extraction by default",
+    "enableLlmExtractionByDefaultDescription": "Use an LLM for document facts and vocabulary by default. Users can choose an account-level override.",
     "documentAnalysisRateLimits": "Document Analysis Provider Limits",
     "documentAnalysisRateLimitsDescription": "Set shared per-provider request, token, and concurrency limits. Demo deployments enforce a hard ceiling of 5 requests/minute, 20,000 tokens/minute, and 1 concurrent request per provider.",
     "requestsPerMinuteLabel": "Requests per minute",
@@ -251,6 +253,11 @@
     "title": "Audio Filters"
   },
   "authenticator": {
+    "recoveryRequired": "Sign-in could not be completed. Clear the saved sign-in data below, then try again.",
+    "resetAuthData": "Clear saved sign-in data",
+    "resettingAuthData": "Clearing sign-in data...",
+    "resetAuthDataDescription": "This resets sign-in only. Your application data, preferences, and offline storage are kept.",
+    "resetAuthDataFailed": "Sign-in data could not be cleared. Check your browser's storage permissions and try again.",
     "confirmPasswordLabel": "Confirm Password:",
     "confirmPasswordPlaceholder": "Please confirm your Password",
     "displayNameLabel": "Display Name:",
@@ -833,6 +840,22 @@
     "showHistory": "Show history",
     "showMore": "Show {count} more..."
   },
+  "blockInsertPreview": {
+    "answerBlockTitle": "Answer Block",
+    "contentBlockTitle": "Content Block",
+    "customAnswerTitle": "Custom Answer",
+    "elementCount": "{count, plural, one {# element} other {# elements}}",
+    "inputMethods": "Input: {methods}",
+    "insertIntoEditor": "Insert into Editor",
+    "meaningAssociationTitle": "Meaning Association",
+    "modes": "Modes: {modes}",
+    "multipleAttempts": "Multiple attempts",
+    "promptMethods": "Prompt: {methods}",
+    "questionCount": "{count, plural, one {# question} other {# questions}}",
+    "quizTitle": "Quiz",
+    "reject": "Reject",
+    "wordCount": "{count, plural, one {# word} other {# words}}"
+  },
   "blockInserterPlugin": {
     "blocks": {
       "answer": {
@@ -931,22 +954,6 @@
     "filterPlaceholder": "Filter blocks...",
     "insertBlock": "Insert block",
     "noMatches": "No blocks match “{filter}”"
-  },
-  "blockInsertPreview": {
-    "answerBlockTitle": "Answer Block",
-    "contentBlockTitle": "Content Block",
-    "customAnswerTitle": "Custom Answer",
-    "elementCount": "{count, plural, one {# element} other {# elements}}",
-    "inputMethods": "Input: {methods}",
-    "insertIntoEditor": "Insert into Editor",
-    "meaningAssociationTitle": "Meaning Association",
-    "modes": "Modes: {modes}",
-    "multipleAttempts": "Multiple attempts",
-    "promptMethods": "Prompt: {methods}",
-    "questionCount": "{count, plural, one {# question} other {# questions}}",
-    "quizTitle": "Quiz",
-    "reject": "Reject",
-    "wordCount": "{count, plural, one {# word} other {# words}}"
   },
   "bossBattleCard": {
     "bonusMultiplier": "{bonusMultiplier}× bonus",
@@ -1712,6 +1719,14 @@
     "onTimeHeader": "On-Time",
     "studentHeader": "Student"
   },
+  "firstRunChecklist": {
+    "createUnit": "Create your first unit",
+    "description": "A couple of steps to get set up.",
+    "joinClass": "Join your class",
+    "openWork": "Open your work",
+    "setupClass": "Set up your class",
+    "title": "Welcome to Homework Supply"
+  },
   "gamificationQuickPanel": {
     "advancedSettings": "Advanced settings",
     "advancedSettingsTooltip": "Skills, badges, squads, and other advanced gamification settings",
@@ -1743,6 +1758,15 @@
     "typeLabelUnits": "UNITS",
     "typeLabelVocabulary": "VOCABULARY"
   },
+  "gradeRangeBar": {
+    "avgLabel": "avg {avg}",
+    "avgTooltip": "Avg: {avg}%",
+    "medianLabel": "med {median}",
+    "medianTooltip": "Median: {median}%",
+    "rangeLabel": "{min}–{max}%",
+    "rangeTooltip": "Range: {min}%–{max}%",
+    "summaryTooltip": "{label}: min {min}% · avg {avg}% · median {median}% · max {max}% · {count, plural, one {# student} other {# students}}"
+  },
   "gradedWorkbookViewer": {
     "accuracyChip": "{percent}% Accuracy",
     "attemptChip": "#{attempt} — {percent}%",
@@ -1756,15 +1780,6 @@
     "summary": "{count, plural, one {# attempt} other {# attempts}} · Latest: {status, select, complete {Complete} other {In Progress}}",
     "summaryWithCompletion": "{count, plural, one {# attempt} other {# attempts}} · Latest: {status, select, complete {Complete} other {In Progress}} · {completion}",
     "title": "{name}'s Workbook"
-  },
-  "gradeRangeBar": {
-    "avgLabel": "avg {avg}",
-    "avgTooltip": "Avg: {avg}%",
-    "medianLabel": "med {median}",
-    "medianTooltip": "Median: {median}%",
-    "rangeLabel": "{min}–{max}%",
-    "rangeTooltip": "Range: {min}%–{max}%",
-    "summaryTooltip": "{label}: min {min}% · avg {avg}% · median {median}% · max {max}% · {count, plural, one {# student} other {# students}}"
   },
   "groupChallengeCard": {
     "bonusMultiplier": "{bonusMultiplier}× bonus",
@@ -2295,6 +2310,14 @@
     "dialogTitle": "Open Peer Review",
     "openForPeerReview": "Open for Peer Review"
   },
+  "documentAnalysisPreference": {
+    "description": "Choose how document facts and vocabulary are extracted. The platform default is currently {defaultMode}.",
+    "heading": "Document analysis",
+    "label": "Facts and vocabulary extraction",
+    "llmOnly": "LLM-assisted",
+    "nlpOnly": "NLP-only",
+    "usePlatformDefault": "Use platform default"
+  },
   "pageHints": {
     "actions": {
       "createSection": "Create a section",
@@ -2571,11 +2594,11 @@
     "retryDownload": "Retry offline download",
     "saveOffline": "Save offline"
   },
-  "progressRings": {
-    "empty": "No modules started yet."
-  },
   "proTip": {
     "message": "Pro tip: Use the editor to create engaging learning materials!"
+  },
+  "progressRings": {
+    "empty": "No modules started yet."
   },
   "questionBlock": {
     "addAnswerPlaceholder": "Add Answer",
@@ -2601,7 +2624,9 @@
     "newQuestion": "New Question",
     "promptField": "Prompt",
     "save": "Save",
-    "selectAll": "Select All"
+    "selectAll": "Select All",
+    "similarQuestionConflict": "answered differently",
+    "similarQuestionsWarning": "Your question bank already has something like this:"
   },
   "questionsReview": {
     "alreadyImported": "Already imported",
@@ -2625,6 +2650,7 @@
     "noQuestions": "No questions found for this document.",
     "pages": "pages",
     "questionPrompt": "Question Prompt",
+    "reviewItems": "questions",
     "sectionHeading": "Questions Review",
     "selectAll": "Select All",
     "selectQuestion": "Select Question",
@@ -3366,39 +3392,40 @@
     "badge": "Up Next"
   },
   "vocabularyReview": {
+    "alreadyImported": "Already imported",
+    "audioFileCount": "{count} audio file(s)",
+    "clickToEdit": "Click to edit",
+    "contextLabel": "Context",
+    "contextPlaceholder": "Enter context or example sentence...",
+    "definitionLabel": "Definition",
+    "definitionPlaceholder": "Enter definition...",
     "deselectAll": "Deselect All",
     "filteringBySearch": "Filtering By Search",
     "from": "From",
+    "hasPhonetic": "Has phonetic notation",
     "hide": "Hide",
+    "importSummary": "Imported {imported} new words, {skipped} already existed, {errors} errors",
     "importToDictionary": "Import To Dictionary",
     "importedOn": "Imported On",
     "learningObjectives": "Learning Objectives",
     "loading": "Loading",
     "noVocabulary": "No Vocabulary",
+    "openAudioStudio": "Open audio studio",
+    "openRubyEditor": "Open ruby tag editor",
+    "pageChip": "p.{page}",
     "pages": "Pages",
+    "phoneticLabel": "Phonetic",
+    "phoneticPlaceholder": "Enter phonetic pronunciation...",
+    "reviewItems": "words",
     "sectionHeading": "Vocabulary Review",
     "selectAll": "Select All",
     "selectedCount": "Selected Count",
     "show": "Show",
+    "sourceTooltip": "Source: {filename}",
     "summaries": "Summaries",
     "summariesAndObjectives": "Summaries And Objectives",
-    "clickToEdit": "Click to edit",
-    "sourceTooltip": "Source: {filename}",
-    "pageChip": "p.{page}",
-    "openRubyEditor": "Open ruby tag editor",
-    "hasPhonetic": "Has phonetic notation",
-    "openAudioStudio": "Open audio studio",
-    "audioFileCount": "{count} audio file(s)",
     "wordLabel": "Word",
-    "wordPlaceholder": "Enter word...",
-    "phoneticLabel": "Phonetic",
-    "phoneticPlaceholder": "Enter phonetic pronunciation...",
-    "definitionLabel": "Definition",
-    "definitionPlaceholder": "Enter definition...",
-    "contextLabel": "Context",
-    "contextPlaceholder": "Enter context or example sentence...",
-    "importSummary": "Imported {imported} new words, {skipped} already existed, {errors} errors",
-    "alreadyImported": "Already imported"
+    "wordPlaceholder": "Enter word..."
   },
   "weeklyParticipationChart": {
     "dayTooltip": "{date}: {count, plural, one {# submission} other {# submissions}}",

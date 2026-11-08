@@ -5,6 +5,23 @@ import {
 } from "../../src/utils/parsedContentModeration";
 
 describe("ParsedContent moderation access", () => {
+  it("allows human-reviewed extraction warnings without overriding moderation blocks", async () => {
+    const analysis = {
+      reviewWarnings: ['Page 2: vocabulary "Lysosomes": answer_not_in_source'],
+      reviewWarningCount: 1,
+      moderation: { flagged: false, categories: {} },
+    };
+    const get = vi.fn().mockResolvedValue({ data: { metadata: { analysis } } });
+    await expect(assertParsedContentImportAllowed(
+      { models: { Document: { get } } }, { documentID: "doc-1" },
+    )).resolves.toBeUndefined();
+    get.mockResolvedValue({ data: { metadata: { analysis: {
+      ...analysis, moderation: { flagged: true, categories: { hate: true } },
+    } } } });
+    await expect(assertParsedContentImportAllowed(
+      { models: { Document: { get } } }, { documentID: "doc-1" },
+    )).rejects.toThrow("flagged for review: hate");
+  });
   it("allows imports when the document has no moderation flag", () => {
     expect(
       getParsedContentModeration({

@@ -19,8 +19,6 @@ import {
   Paper,
   Divider,
   Button,
-  Snackbar,
-  Alert,
 } from '@mui/material';
 import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 import PauseIcon from '@mui/icons-material/Pause';
@@ -31,6 +29,7 @@ import SubtitlesIcon from '@mui/icons-material/Subtitles';
 import ImageIcon from '@mui/icons-material/Image';
 import getCachedUrl from '../../../utils/getCachedUrl';
 import UnitContext from '../../../context/unitContext';
+import { useEditorToast } from '../context/EditorToastContext';
 
 /**
  * @param {Object} props
@@ -49,6 +48,7 @@ export default function ConversationPlayerComponent({
 }) {
   const t = useTranslations('components');
   const { files } = React.useContext(UnitContext);
+  const { showToast } = useEditorToast();
 
   const audioRef = React.useRef(null);
   const [trackIndex, setTrackIndex] = React.useState(0);
@@ -58,7 +58,6 @@ export default function ConversationPlayerComponent({
   const [duration, setDuration] = React.useState(0);
   const [audioSrc, setAudioSrc] = React.useState(null);
   const [stillSrc, setStillSrc] = React.useState(null);
-  const [showMovieToast, setShowMovieToast] = React.useState(false);
   const [showSubtitles, setShowSubtitles] = React.useState(true);
 
   // Resolve signed URL for the current track
@@ -361,7 +360,16 @@ export default function ConversationPlayerComponent({
                 size="small"
                 variant="outlined"
                 startIcon={<MovieIcon />}
-                onClick={() => setShowMovieToast(true)}
+                onClick={() =>
+                  showToast({
+                    message: t(
+                      'conversationPlayer.generateMovieSoon',
+                      'Movie generation from conversation audio + stills is coming soon.',
+                    ),
+                    severity: 'info',
+                    autoHideDuration: 4000,
+                  })
+                }
                 sx={{ ml: 0.5 }}
               >
                 {t('conversationPlayer.generateMovie', 'Generate Movie')}
@@ -384,24 +392,6 @@ export default function ConversationPlayerComponent({
         />
       )}
 
-      {/* Movie generation toast */}
-      <Snackbar
-        open={showMovieToast}
-        autoHideDuration={4000}
-        onClose={() => setShowMovieToast(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
-      >
-        <Alert
-          severity="info"
-          onClose={() => setShowMovieToast(false)}
-          sx={{ width: '100%' }}
-        >
-          {t(
-            'conversationPlayer.generateMovieSoon',
-            'Movie generation from conversation audio + stills is coming soon.',
-          )}
-        </Alert>
-      </Snackbar>
     </Paper>
   );
 }

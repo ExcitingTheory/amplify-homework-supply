@@ -64,7 +64,7 @@ describe("SyncAdapter.syncParsedContent", () => {
     const { adapter, writes } = setup([chunk(0, 1)]);
     const ydoc = docWith({
       progress: "40%",
-      vocabularyJSON: [{ word: "Path", definition: null, page: 2, localId: "x" }],
+      vocabularyJSON: [{ word: "Path", definition: null, pages: [2], localId: "x" }],
       questionsJSON: [{ prompt: "q", answer: "a", ui: true }],
     });
 
@@ -75,7 +75,7 @@ describe("SyncAdapter.syncParsedContent", () => {
     expect(input).toEqual({
       id: "doc-1-chunk-0",
       _version: 4,
-      vocabularyJSON: [{ word: "Path", page: 2 }],
+      vocabularyJSON: [{ word: "Path", pages: [2] }],
       summariesJSON: [],
       objectivesJSON: [],
       conceptsJSON: [],
@@ -127,7 +127,7 @@ describe("SyncAdapter.syncParsedContent", () => {
     const big = (page: number, text: string) => ({
       prompt: `p${page}`,
       answer: text,
-      page,
+      pages: [page],
     });
     const filler = "x".repeat(120_000);
     const { adapter, writes } = setup([

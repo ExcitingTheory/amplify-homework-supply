@@ -16,7 +16,7 @@ import {
 } from "../../../.storybook/__mocks__/media";
 import { within, waitFor, userEvent } from "storybook/test";
 
-import { Workbook } from "./index";
+import { Workbook } from "./Workbook";
 
 export default {
   title: "✏️ Lesson Editor/Workbook",

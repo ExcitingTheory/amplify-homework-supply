@@ -5,11 +5,8 @@ import Box from "@mui/material/Box";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Chip from "@mui/material/Chip";
-import FormControl from "@mui/material/FormControl";
-import InputLabel from "@mui/material/InputLabel";
+import CircularProgress from "@mui/material/CircularProgress";
 import Link from "@mui/material/Link";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -17,10 +14,17 @@ import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
+import TextField from "@mui/material/TextField";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import SearchIcon from "@mui/icons-material/Search";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
+import {
+  mergeSearchResults,
+  useAdminSemanticSearch,
+} from "../_components/adminSemanticSearch";
 
 export interface FlaggedItem {
   id: string;
@@ -38,6 +42,27 @@ export interface FlaggedItem {
 
 type ModelFilter = "all" | "Grade" | "Unit" | "Word" | "Question";
 
+const MODEL_FILTER_OPTIONS: { value: ModelFilter; label: string }[] = [
+  { value: "all", label: "All Types" },
+  { value: "Grade", label: "Grades" },
+  { value: "Unit", label: "Units" },
+  { value: "Word", label: "Words" },
+  { value: "Question", label: "Questions" },
+];
+
+function getFlaggedCategories(item: FlaggedItem): string[] {
+  try {
+    const flags = item.moderation?.flags;
+    if (!flags) return [];
+    const parsed = JSON.parse(flags);
+    return Object.entries(parsed.categories || {})
+      .filter(([, v]) => v === true)
+      .map(([k]) => k);
+  } catch {
+    return [];
+  }
+}
+
 export default function ModerationClient({
   initialItems,
 }: {
@@ -47,23 +72,28 @@ export default function ModerationClient({
   const [loading] = React.useState(false);
   const [modelFilter, setModelFilter] = React.useState<ModelFilter>("all");
 
-  const filteredItems =
-    modelFilter === "all"
-      ? items
-      : items.filter((i) => i.modelName === modelFilter);
+  const [searchQuery, setSearchQuery] = React.useState("");
 
-  function getFlaggedCategories(item: FlaggedItem): string[] {
-    try {
-      const flags = item.moderation?.flags;
-      if (!flags) return [];
-      const parsed = JSON.parse(flags);
-      return Object.entries(parsed.categories || {})
-        .filter(([, v]) => v === true)
-        .map(([k]) => k);
-    } catch {
-      return [];
-    }
-  }
+  // Grades have no search-bundle entries; semantic hits only apply to the rest.
+  const { hits: semanticHits, searching: semanticSearching } =
+    useAdminSemanticSearch(searchQuery, ["unit", "word", "question"]);
+
+  const filteredItems = React.useMemo(() => {
+    const byType =
+      modelFilter === "all"
+        ? items
+        : items.filter((i) => i.modelName === modelFilter);
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return byType;
+    return mergeSearchResults(byType, semanticHits, (item) =>
+      [
+        item.id,
+        item.owner,
+        item.modelName,
+        ...getFlaggedCategories(item),
+      ].some((field) => (field || "").toLowerCase().includes(q)),
+    );
+  }, [items, modelFilter, searchQuery, semanticHits]);
 
   function getReviewLink(item: FlaggedItem): string {
     switch (item.modelName) {
@@ -94,20 +124,31 @@ export default function ModerationClient({
         </Box>
 
         <Box sx={{ display: "flex", gap: 2, mb: 3, alignItems: "center" }}>
-          <FormControl size="small" sx={{ minWidth: 160 }}>
-            <InputLabel>Content Type</InputLabel>
-            <Select
-              value={modelFilter}
-              label="Content Type"
-              onChange={(e) => setModelFilter(e.target.value as ModelFilter)}
-            >
-              <MenuItem value="all">All Types</MenuItem>
-              <MenuItem value="Grade">Grades</MenuItem>
-              <MenuItem value="Unit">Units</MenuItem>
-              <MenuItem value="Word">Words</MenuItem>
-              <MenuItem value="Question">Questions</MenuItem>
-            </Select>
-          </FormControl>
+          <AdminSelect
+            label="Content Type"
+            value={modelFilter}
+            options={MODEL_FILTER_OPTIONS}
+            onChange={setModelFilter}
+            minWidth={160}
+          />
+
+          <TextField
+            size="small"
+            placeholder="Search flagged content..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            slotProps={{
+              input: {
+                startAdornment: (
+                  <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
+                ),
+                endAdornment: semanticSearching ? (
+                  <CircularProgress size={16} aria-label="Searching" />
+                ) : undefined,
+              },
+            }}
+            sx={{ minWidth: 240 }}
+          />
 
           <Typography variant="body2" color="text.secondary">
             {filteredItems.length} flagged item

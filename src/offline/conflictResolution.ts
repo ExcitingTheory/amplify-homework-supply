@@ -102,6 +102,7 @@ export async function syncGradeWithConflictResolution(
   gradeId: string,
   localData: Record<string, GradeBlockData>,
   localVersion?: number,
+  outsideSectionDateRange?: boolean,
 ): Promise<{ success: boolean; requiresReview: boolean }> {
   // Fetch current server state
   const { data: serverGrade } = await client.models.Grade.get({ id: gradeId });
@@ -117,6 +118,9 @@ export async function syncGradeWithConflictResolution(
     await client.models.Grade.update({
       id: gradeId,
       data: JSON.stringify(localData),
+      ...(outsideSectionDateRange !== undefined && {
+        outsideSectionDateRange,
+      }),
       _version: serverVersion,
     });
     return { success: true, requiresReview: false };
@@ -133,6 +137,9 @@ export async function syncGradeWithConflictResolution(
   await client.models.Grade.update({
     id: gradeId,
     data: JSON.stringify(resolution.mergedData),
+    ...(outsideSectionDateRange !== undefined && {
+      outsideSectionDateRange,
+    }),
     _version: serverVersion,
   });
 

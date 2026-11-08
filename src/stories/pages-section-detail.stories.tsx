@@ -18,6 +18,7 @@ import {
   studentAssignments,
 } from "../../.storybook/__mocks__/index-page-examples";
 import { setMockUser } from "../../.storybook/__mocks__/aws-amplify-auth";
+import { seedMockSections } from "../../.storybook/__mocks__/aws-amplify-data";
 import { FilesProvider } from "../../src/context/fileContext";
 import { expect } from "storybook/test";
 import { withAppShell } from "./withAppShell";
@@ -45,6 +46,23 @@ const meta: Meta = {
 export default meta;
 type Story = StoryObj;
 
+const sectionWithDetails = {
+  ...mockSections["section-jpn-101"],
+  startDate: "2024-01-08",
+  endDate: "2024-05-24",
+  classSchedule: [{ dayOfWeek: 1, startTime: "09:00", endTime: "10:00" }],
+  timezone: "America/Los_Angeles",
+  location: {
+    school: {
+      name: "Pacific Prep",
+      address: "100 Harbor Way, Seattle, WA",
+    },
+    campus: "North campus",
+    buildingName: "Learning Center",
+    roomNumber: "204",
+  },
+};
+
 /**
  * Section detail page for instructors — student roster, gradebook, assignments.
  */
@@ -57,6 +75,7 @@ export const SectionDetail: Story = {
         groups: ["Instructors"],
       });
       seedIndexPageData("instructor");
+      seedMockSections([sectionWithDetails]);
       return (
         <FilesProvider>
           <Story />
@@ -66,7 +85,7 @@ export const SectionDetail: Story = {
   ],
   render: () => (
     <SectionDetailClient
-      initialSection={mockSections["section-jpn-101"]}
+      initialSection={sectionWithDetails}
       initialAssignments={studentAssignments}
     />
   ),
@@ -89,6 +108,11 @@ export const SectionDetail: Story = {
   },
   play: async ({ canvasElement }) => {
     expect(canvasElement.innerHTML.length).toBeGreaterThan(0);
+    const summary = canvasElement.querySelector(
+      '[data-tour="section-summary"]',
+    );
+    expect(summary?.textContent).toContain("Pacific Prep");
+    expect(summary?.textContent).toContain("09:00–10:00");
   },
 };
 
@@ -108,6 +132,7 @@ export const SectionDetailStudent: Story = {
         groups: ["section-jpn-101-learners"],
       });
       seedIndexPageData("student");
+      seedMockSections([sectionWithDetails]);
       return (
         <FilesProvider>
           <Story />
@@ -117,7 +142,7 @@ export const SectionDetailStudent: Story = {
   ],
   render: () => (
     <SectionDetailClient
-      initialSection={mockSections["section-jpn-101"]}
+      initialSection={sectionWithDetails}
       initialAssignments={studentAssignments}
     />
   ),

@@ -87,13 +87,22 @@
     "regeneratedAlt": "Neu generiert"
   },
   "blockSuggestionMenu": {
+    "accept": "Annehmen",
+    "reject": "Ablehnen",
+    "error": "Der Block konnte nicht erstellt oder eingefügt werden. Bitte versuchen Sie es erneut.",
     "aiTitle": "🤖 KI-gestützte Vorschläge",
     "emptyState": "Noch keine Vorschläge verfügbar.",
     "emptyStateHelper": "Beginnen Sie mit der Eingabe im Editor, um KI-gestützte Blockvorschläge zu sehen.",
     "generateMore": "Mehr Vorschläge generieren",
-    "helper": "Klicken Sie auf einen Vorschlag, um ihn in Ihre Lektion einzufügen",
-    "helperAI": "Klicken Sie auf einen Vorschlag oder drücken Sie Tab/Enter zum Einfügen",
+    "helper": "Prüfen Sie den Block und nehmen Sie ihn an oder lehnen Sie ihn ab.",
+    "helperAI": "Prüfen Sie den Block und nehmen Sie ihn an oder lehnen Sie ihn ab.",
     "suggestionsTitle": "💡 Vorgeschlagene Blöcke"
+  },
+  "autocompletePreference": {
+    "heading": "KI-Autovervollständigung",
+    "description": "Inhalte beim Schreiben im Lektionseditor vorschlagen. Blockvorschläge bleiben im Seitenleisten-Tab verfügbar.",
+    "enabled": "KI-Autovervollständigung aktivieren",
+    "error": "Ihre Einstellung konnte nicht gespeichert werden. Bitte versuchen Sie es erneut."
   },
   "suggestedContent": {
     "identityPlaceholder": "Identitäts-ID",
@@ -115,5 +124,21 @@
     "newSection": "Neuer Abschnitt",
     "questionCount": "{count, plural, one {# Frage} other {# Fragen}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "Quiz",
+      "answer": "Vokabelantwort",
+      "meaning": "Bedeutungszuordnung",
+      "customAnswer": "Eigene Antwort",
+      "callResponse": "Ruf und Antwort",
+      "word": "Wort",
+      "playlist": "Playlist",
+      "conversationPlaylist": "Gesprächs-Playlist",
+      "pdf": "PDF",
+      "image": "Bild",
+      "file": "Datei",
+      "youtube": "YouTube-Video"
+    }
   }
 }

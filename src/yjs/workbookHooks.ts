@@ -170,18 +170,16 @@ export function useWorkbookCollaboration(options: UseWorkbookCollaborationOption
     }
 
     // Monitor connection status
-    const wsProvider = (provider as any).wsProvider
-    if (wsProvider) {
-      wsProvider.on('sync', (synced: boolean) => {
-        setIsSynced(synced)
-      })
-
-      wsProvider.on('status', ({ status }: { status: string }) => {
-        setIsConnected(status === 'connected')
-      })
-    }
+    const handleSync = (synced: boolean) => setIsSynced(synced)
+    const handleStatus = (status: string) => setIsConnected(status === 'connected')
+    provider.on('sync', handleSync)
+    provider.on('status', handleStatus)
+    setIsSynced(provider.isSynced())
+    setIsConnected(provider.isConnected())
 
     return () => {
+      provider.off('sync', handleSync)
+      provider.off('status', handleStatus)
       unsubscribe()
       unsubscribeAwareness()
       if (typeof window !== 'undefined') {

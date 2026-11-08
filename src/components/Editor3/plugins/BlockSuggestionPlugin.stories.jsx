@@ -9,6 +9,8 @@ import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
 import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { HistoryPlugin } from "@lexical/react/LexicalHistoryPlugin";
+import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
+import { $getRoot } from "lexical";
 import { HeadingNode, QuoteNode } from "@lexical/rich-text";
 import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeNode, CodeHighlightNode } from "@lexical/code";
@@ -16,6 +18,9 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { Box, Paper, Typography } from "@mui/material";
 
 import BlockSuggestionPlugin from "./BlockSuggestionPlugin";
+import BlockNavigationPlugin from "./BlockNavigationPlugin";
+import { SuggestionProvider, useSuggestions } from "../context/SuggestionContext";
+import BlockSuggestionMenu from "../components/BlockSuggestionMenu";
 import QuizPlugin, { QuizNode } from "./QuizPlugin";
 import AnswerPlugin, { AnswerNode } from "./AnswerPlugin";
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
@@ -24,7 +29,7 @@ import {
   seedMockUnit,
   clearMockData,
 } from "../../../../.storybook/__mocks__/aws-amplify-data";
-import { expect } from "storybook/test";
+import { expect, userEvent, waitFor, within } from "storybook/test";
 
 export default {
   title: "✏️ Lesson Editor/AI Suggestions/Block Suggestion",
@@ -61,7 +66,34 @@ const onError = (error) => {
   console.error(error);
 };
 
-const Template = ({ editorState, instructions }) => {
+function SuggestionSidebar() {
+  const { suggestions, insertSuggestion, rejectSuggestion } = useSuggestions();
+  return (
+    <Paper component="aside" aria-label="Block suggestions" sx={{ p: 2, mt: 2 }}>
+      <BlockSuggestionMenu
+        suggestions={suggestions}
+        onSelect={(index) => insertSuggestion(suggestions[index])}
+        onReject={(index) => rejectSuggestion(suggestions[index])}
+      />
+    </Paper>
+  );
+}
+
+function PlaceCursorAboveBlockPlugin() {
+  const [editor] = useLexicalComposerContext();
+  React.useEffect(() => {
+    editor.focus(() => {
+      editor.update(() => {
+        const text = $getRoot().getFirstChildOrThrow().getFirstChildOrThrow();
+        const offset = text.getTextContentSize() - 2;
+        text.select(offset, offset);
+      });
+    });
+  }, [editor]);
+  return null;
+}
+
+const Template = ({ editorState, instructions, placeCursorAboveBlock = false }) => {
   const initialConfig = {
     namespace: "BlockSuggestionDemo",
     theme: LanguageEditorTheme,
@@ -84,6 +116,7 @@ const Template = ({ editorState, instructions }) => {
   };
 
   return (
+    <SuggestionProvider active>
     <LexicalComposer initialConfig={initialConfig}>
       <Box sx={{ p: 4, maxWidth: "900px", margin: "0 auto" }}>
         <Typography variant="h4" gutterBottom>
@@ -148,22 +181,22 @@ const Template = ({ editorState, instructions }) => {
           <AnswerPlugin />
           <CustomAnswerPlugin />
           <BlockSuggestionPlugin />
+          <BlockNavigationPlugin />
+          {placeCursorAboveBlock && <PlaceCursorAboveBlockPlugin />}
         </Paper>
+        <SuggestionSidebar />
 
         <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
           <Typography variant="body2" color="text.secondary">
             <strong>Keyboard shortcuts:</strong>
             <br />
-            • ↑↓ Navigate suggestions
-            <br />
-            • Tab or Enter: Select suggestion
-            <br />
-            • Esc: Dismiss suggestions
+            • ↓ Select the next custom block; ↓ again moves below it
             <br />
           </Typography>
         </Paper>
       </Box>
     </LexicalComposer>
+    </SuggestionProvider>
   );
 };
 
@@ -179,6 +212,20 @@ export const EmptyEditor = {
     const editor = canvasElement.querySelector("[contenteditable]");
     expect(editor).not.toBeNull();
     expect(editor.getAttribute("contenteditable")).toBe("true");
+  },
+};
+
+export const SidebarAcceptReject = {
+  render: () => <Template editorState={null} instructions="Review suggestions in the sidebar, then accept or reject a block." />,
+  play: async ({ canvasElement }) => {
+    const sidebar = within(canvasElement).getByRole("complementary", { name: "Block suggestions" });
+    const panel = within(sidebar);
+    await waitFor(() => expect(panel.getAllByRole("button", { name: "Accept" })).toHaveLength(2));
+    await userEvent.click(panel.getAllByRole("button", { name: "Reject" })[0]);
+    await expect(panel.getAllByRole("button", { name: "Accept" })).toHaveLength(1);
+    await userEvent.click(panel.getByRole("button", { name: "Accept" }));
+    await expect(panel.queryByRole("button", { name: "Accept" })).not.toBeInTheDocument();
+    await expect(canvasElement.querySelector('[data-testid="block-suggestion-hint"]')).toBeNull();
   },
 };
 
@@ -233,6 +280,45 @@ export const AfterHeading = {
     const editor = canvasElement.querySelector("[contenteditable]");
     expect(editor).not.toBeNull();
     expect(editor.textContent).toContain("Japanese Greetings");
+  },
+};
+
+export const ArrowDownPastCustomBlock = {
+  render: () => (
+    <Template
+      editorState={{
+        root: {
+          ...headingState.root,
+          children: [
+            {
+              ...headingState.root.children[1],
+              children: [{
+                ...headingState.root.children[0].children[0],
+                text: "Text directly above the custom block.",
+              }],
+            },
+            { type: "quiz", version: 1, data: [] },
+          ],
+        },
+      }}
+      instructions="ArrowDown selects the quiz; a second ArrowDown creates a paragraph below it."
+      placeCursorAboveBlock
+    />
+  ),
+  play: async ({ canvasElement }) => {
+    const editor = canvasElement.querySelector("[contenteditable]");
+    const paragraph = editor.querySelector(":scope > p");
+    await waitFor(() => {
+      expect(window.getSelection()?.anchorOffset).toBe(paragraph.textContent.length - 2);
+    });
+    await userEvent.keyboard("{ArrowDown}");
+    expect(editor.querySelectorAll(":scope > p")).toHaveLength(1);
+    await userEvent.keyboard("{ArrowDown}");
+    await waitFor(() => {
+      const paragraphs = editor.querySelectorAll(":scope > p");
+      expect(paragraphs).toHaveLength(2);
+      expect(paragraphs[1].contains(window.getSelection()?.anchorNode)).toBe(true);
+    });
   },
 };
 

@@ -6,7 +6,7 @@
  */
 
 import * as Y from "yjs";
-import { WebSocketServer, WebSocket } from "ws";
+import { WebSocketServer, WebSocket, type VerifyClientCallbackSync } from "ws";
 import * as http from "http";
 import * as https from "https";
 import { IncomingMessage } from "http";
@@ -37,6 +37,8 @@ interface YjsWebSocket extends WebSocket {
 
 export interface YjsServerConfig {
   port?: number;
+  host?: string;
+  verifyOrigin?: (origin: string) => boolean;
   persistCallback?: (
     roomName: string,
     update: Uint8Array,
@@ -69,6 +71,8 @@ export class YjsWebSocketServer {
       maxRoomAge: DEFAULT_CONFIG.maxRoomAge,
       botConfig: undefined,
       tlsOptions: undefined,
+      host: undefined,
+      verifyOrigin: undefined,
       ...config,
     } as Required<YjsServerConfig>;
   }
@@ -82,7 +86,19 @@ export class YjsWebSocketServer {
         this.server = this.config.tlsOptions
           ? https.createServer(this.config.tlsOptions)
           : http.createServer();
-        this.wss = new WebSocketServer({ server: this.server });
+        this.wss = new WebSocketServer({
+          server: this.server,
+          verifyClient: ({
+            origin,
+          }: Parameters<VerifyClientCallbackSync>[0]) => {
+            const allowed =
+              !this.config.verifyOrigin || this.config.verifyOrigin(origin);
+            if (!allowed) {
+              console.warn("[YjsServer] Rejected WebSocket origin");
+            }
+            return allowed;
+          },
+        });
 
         // Handle new connections
         this.wss.on("connection", (ws: any, req: IncomingMessage) => {
@@ -93,7 +109,7 @@ export class YjsWebSocketServer {
         this._startHeartbeat();
 
         // Listen on port
-        this.server.listen(this.config.port, () => {
+        this.server.listen(this.config.port, this.config.host, () => {
           console.log(`[YjsServer] Listening on port ${this.config.port}`);
           resolve();
         });

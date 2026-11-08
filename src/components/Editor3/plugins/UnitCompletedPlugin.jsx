@@ -72,6 +72,7 @@ export default function UnitCompletedPlugin() {
     recentGrades = [],
     sectionId,
     session,
+    retryEnabled: retrySetting,
   } = useContext(UnitContext) || {};
 
   const [retrying, setRetrying] = useState(false);
@@ -81,7 +82,7 @@ export default function UnitCompletedPlugin() {
   const { totalXP, xpLogs } = useXP();
   const { assignments } = useContext(SectionContext) || { assignments: [] };
 
-  const retryEnabled = unit?.retryEnabled !== false;
+  const retryEnabled = retrySetting ?? (unit?.retryEnabled !== false);
   // Most recent completed grade for peer review
   const latestCompletedGrade = recentGrades[0];
   const timeLimitSeconds = unit?.timeLimitSeconds || 0;
@@ -212,7 +213,7 @@ export default function UnitCompletedPlugin() {
       open={showUnitComplete}
       onClose={(_, reason) => {
         // Only allow close if retryEnabled, or if there's an active incomplete grade
-        if (retryEnabled || grade) {
+        if (retryEnabled || (grade && !grade.complete)) {
           setShowUnitComplete(false);
         }
         // Otherwise: no backdrop/escape dismiss — student must use Try Again

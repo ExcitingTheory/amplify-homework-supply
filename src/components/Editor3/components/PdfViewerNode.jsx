@@ -13,6 +13,7 @@ import {
 } from 'lexical';
 import * as React from 'react';
 import { Suspense } from 'react';
+import ComponentErrorBoundary from '../../ComponentErrorBoundary';
 
 const PdfViewerComponent = React.lazy(
     () => import('./PdfViewerComponent'),
@@ -162,14 +163,16 @@ export class PdfViewerNode extends DecoratorNode {
 
     decorate() {
         return (
-            <Suspense fallback={<div>Loading PDF...</div>}>
-                <PdfViewerComponent
-                    path={this.__path}
-                    identityId={this.__identityId}
-                    filename={this.__filename}
-                    nodeKey={this.getKey()}
-                />
-            </Suspense>
+            <ComponentErrorBoundary name="PDF Viewer">
+                <Suspense fallback={<div>Loading PDF...</div>}>
+                    <PdfViewerComponent
+                        path={this.__path}
+                        identityId={this.__identityId}
+                        filename={this.__filename}
+                        nodeKey={this.getKey()}
+                    />
+                </Suspense>
+            </ComponentErrorBoundary>
         );
     }
 }

@@ -13,10 +13,11 @@ import { ListNode, ListItemNode } from "@lexical/list";
 import { CodeNode, CodeHighlightNode } from "@lexical/code";
 import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { Button } from "@mui/material";
+import { ThemeProvider, useTheme } from "@mui/material/styles";
 
 import UnitCompletedPlugin from "./UnitCompletedPlugin";
 import LanguageEditorTheme from "../config/LanguageEditorTheme";
-import { expect, within } from "storybook/test";
+import { expect, userEvent, within } from "storybook/test";
 import {
   seedMockUnit,
   clearMockData,
@@ -170,5 +171,62 @@ export const Interactive = {
     const canvas = within(canvasElement);
     await canvas.findByText("Unit Completed Plugin");
     await canvas.findByRole("button", { name: /Trigger Unit Completion/i });
+  },
+};
+
+function RetainedCompletion() {
+  const context = React.useContext(UnitContext);
+  const outerTheme = useTheme();
+  // Use production portal behavior instead of Storybook's inline-modal default.
+  const theme = React.useMemo(() => ({
+    ...outerTheme,
+    components: {
+      ...outerTheme.components,
+      MuiModal: {
+        ...outerTheme.components?.MuiModal,
+        defaultProps: {
+          ...outerTheme.components?.MuiModal?.defaultProps,
+          disablePortal: false,
+        },
+      },
+    },
+  }), [outerTheme]);
+  const [open, setOpen] = React.useState(true);
+  const completedGrade = {
+    id: "completed-attempt",
+    complete: true,
+    accuracy: 100,
+    createdAt: "2026-10-28T15:00:00Z",
+  };
+  return (
+    <UnitContext.Provider
+      value={{
+        ...context,
+        unit: { ...context.unit, retryEnabled: false },
+        name: "Advanced Japanese Vocabulary",
+        grade: completedGrade,
+        recentGrades: [completedGrade],
+        showUnitComplete: open,
+        setShowUnitComplete: setOpen,
+      }}
+    >
+      <ThemeProvider theme={theme}>
+        <UnitCompletedPlugin />
+      </ThemeProvider>
+    </UnitContext.Provider>
+  );
+}
+
+export const CompletedWithoutRetry = {
+  render: () => <RetainedCompletion />,
+  play: async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const heading = await body.findByRole("heading", {
+      name: /Advanced Japanese Vocabulary/,
+    });
+    await userEvent.keyboard("{Escape}");
+    await expect(heading).toBeVisible();
+    await userEvent.click(body.getByRole("button", { name: /Review Answers/i }));
+    await expect(heading).not.toBeVisible();
   },
 };

@@ -23,8 +23,13 @@ function declaredFields(typeName: string): string[] {
   return [...body.matchAll(/^\s{2}(\w+):/gm)].map((match) => match[1]);
 }
 
-const selectedFields = (selection: string) =>
-  selection.slice(selection.indexOf("{") + 1, selection.indexOf("}")).trim().split(/\s+/);
+/** The selection's own fields; a nested selection such as `occurrences { ... }` counts as one field. */
+const selectedFields = (selection: string) => {
+  const body = selection.slice(selection.indexOf("{") + 1, selection.lastIndexOf("}"));
+  let top = body;
+  while (/\{[^{}]*\}/.test(top)) top = top.replace(/\{[^{}]*\}/g, " ");
+  return top.trim().split(/\s+/);
+};
 
 describe("ParsedContent selections", () => {
   const cases: Array<[string, string]> = [
@@ -38,6 +43,13 @@ describe("ParsedContent selections", () => {
 
   it.each(cases)("%s selects every field its entry type declares", (selection, typeName) => {
     expect(selectedFields(selection).sort()).toEqual(declaredFields(typeName).sort());
+  });
+});
+
+describe("nested vocabulary selection", () => {
+  it("selects every field of VocabularyOccurrence for occurrences", () => {
+    const nested = VOCABULARY_SELECTION.match(/occurrences\s*\{([^}]*)\}/)?.[1].trim().split(/\s+/) ?? [];
+    expect(nested.sort()).toEqual(declaredFields("VocabularyOccurrence").sort());
   });
 });
 

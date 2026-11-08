@@ -1,0 +1,542 @@
+{
+  "sourceSha256": "b005a7536c23473bc571b3801096cc1f7ea2bc1b8a05e2d0f980e756b7ac6de3",
+  "capturedAt": "2026-10-28T12:55:09.216Z",
+  "sourceFormat": "rtf",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Page 1",
+      "content": "This page introduces key pre-Socratic philosophers and their ideas. Thales of Miletus, from around 624-546 BCE, proposed water as the fundamental substance and believed everything is made of water, the earth floats on it, and all things are full of gods (animism). Anaximander, a student of Thales, lived circa 610-546 BCE and suggested the 'apeiron' (the infinite) as a primary principle, first mapped the known world, and proposed an early theory of evolution. Heraclitus, from approximately 535-475 BCE, emphasized change with the famous statement \"You cannot step into the same river twice,\" regarded fire as the core element, and developed concepts like the unity of opposites and logos (cosmic reason/order). In contrast, Parmenides (circa 515-450 BCE) argued change is an illusion; reality is static and unchanging, believing \"Being is; non-being is not\" and differentiating between the Way of Truth and the Way of Opinion.",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Document summary",
+      "content": "This document presents an overview of key pre-Socratic philosophers, highlighting their core ideas and philosophies. Thales of Miletus proposed water as the fundamental substance of the universe and introduced early concepts of animism. His student, Anaximander, introduced the concept of the 'apeiron' (the infinite), mapped the known world, and proposed preliminary evolutionary theories. Heraclitus emphasized perpetual change and introduced the concepts of the unity of opposites and logos, considering fire as the primary element. The contrasting philosophy of Parmenides posited that change is an illusion, asserting that reality is static and that 'Being' alone truly exists. These foundational ideas significantly influenced the trajectory of Western philosophical thought.",
+      "pageRange": "Page 1"
+    }
+  ],
+  "objectivesJSON": [
+    {
+      "objective": "Understand key pre-Socratic philosophers and their influential ideas."
+    },
+    {
+      "objective": "Differentiate between the views on change by Heraclitus and Parmenides."
+    }
+  ],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Approximate dates for Thales of Miletus?",
+      "answer": "c. 624-546 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Approximate dates",
+      "sourceText": "1. Thales of Miletus (c. 624-546 BCE)",
+      "accept": [
+        "c. 624-546 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Proposed fundamental substance for Thales of Miletus?",
+      "answer": "Water (hydor)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Proposed fundamental substance",
+      "sourceText": "He proposed that water (hydor) was the fundamental substance (arche) underlying all of reality.",
+      "accept": [
+        "Water",
+        "hydor"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Thales of Miletus?",
+      "answer": "Everything is made of water",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Key idea",
+      "sourceText": "- Everything is made of water",
+      "accept": [
+        "Everything is made of water"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Thales of Miletus?",
+      "answer": "The earth floats on water",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Key idea",
+      "sourceText": "- The earth floats on water",
+      "accept": [
+        "The earth floats on water"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Thales of Miletus?",
+      "answer": "All things are full of gods (animism)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Key idea",
+      "sourceText": "- All things are full of gods (animism)",
+      "accept": [
+        "All things are full of gods",
+        "animism"
+      ]
+    },
+    {
+      "prompt": "What is Approximate dates for Anaximander?",
+      "answer": "c. 610-546 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Approximate dates",
+      "sourceText": "2. Anaximander (c. 610-546 BCE)",
+      "accept": [
+        "c. 610-546 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Anaximander?",
+      "answer": "The apeiron as fundamental principle",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Key idea",
+      "sourceText": "- The apeiron as fundamental principle",
+      "accept": [
+        "The apeiron as fundamental principle"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Anaximander?",
+      "answer": "First to draw a map of the known world",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Key idea",
+      "sourceText": "- First to draw a map of the known world",
+      "accept": [
+        "First to draw a map of the known world"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Anaximander?",
+      "answer": "Proposed early theory of evolution",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Key idea",
+      "sourceText": "- Proposed early theory of evolution",
+      "accept": [
+        "Proposed early theory of evolution"
+      ]
+    },
+    {
+      "prompt": "What is Approximate dates for Heraclitus?",
+      "answer": "c. 535-475 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Approximate dates",
+      "sourceText": "3. Heraclitus (c. 535-475 BCE)",
+      "accept": [
+        "c. 535-475 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Key doctrine for Heraclitus?",
+      "answer": "Change is central to the universe",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Key doctrine",
+      "sourceText": "Known for his doctrine that change is central to the universe.",
+      "accept": [
+        "Change is central to the universe"
+      ]
+    },
+    {
+      "prompt": "What is Famous saying for Heraclitus?",
+      "answer": "You cannot step into the same river twice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Famous saying",
+      "sourceText": "Famous for saying \"You cannot step into the same river twice.\"",
+      "accept": [
+        "You cannot step into the same river twice"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Heraclitus?",
+      "answer": "Fire as the fundamental element",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Key idea",
+      "sourceText": "- Fire as the fundamental element",
+      "accept": [
+        "Fire as the fundamental element"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Heraclitus?",
+      "answer": "Unity of opposites",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Key idea",
+      "sourceText": "- Unity of opposites",
+      "accept": [
+        "Unity of opposites"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Heraclitus?",
+      "answer": "Logos (cosmic reason/order)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Key idea",
+      "sourceText": "- Logos (cosmic reason/order)",
+      "accept": [
+        "Logos",
+        "cosmic reason",
+        "order"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Heraclitus?",
+      "answer": "\"Panta rhei\" - everything flows",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Key idea",
+      "sourceText": "- \"Panta rhei\" - everything flows",
+      "accept": [
+        "Panta rhei",
+        "everything flows"
+      ]
+    },
+    {
+      "prompt": "What is Approximate dates for Parmenides?",
+      "answer": "c. 515-450 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Approximate dates",
+      "sourceText": "4. Parmenides (c. 515-450 BCE)",
+      "accept": [
+        "c. 515-450 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Contrast with Heraclitus for Parmenides?",
+      "answer": "Argued that change is an illusion",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Contrast with Heraclitus",
+      "sourceText": "In direct contrast to Heraclitus, Parmenides argued that change is an illusion and that reality is one, eternal, and unchanging.",
+      "accept": [
+        "Argued that change is an illusion"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Parmenides?",
+      "answer": "Being is; non-being is not",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Key idea",
+      "sourceText": "- Being is; non-being is not",
+      "accept": [
+        "Being is; non-being is not"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Parmenides?",
+      "answer": "Change is impossible (logical argument)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Key idea",
+      "sourceText": "- Change is impossible (logical argument)",
+      "accept": [
+        "Change is impossible"
+      ]
+    },
+    {
+      "prompt": "What is Key idea for Parmenides?",
+      "answer": "The Way of Truth vs The Way of Opinion",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Key idea",
+      "sourceText": "- The Way of Truth vs The Way of Opinion",
+      "accept": [
+        "The Way of Truth vs The Way of Opinion"
+      ]
+    },
+    {
+      "prompt": "What is fundamental substance proposed for Thales of Miletus?",
+      "answer": "water (hydor)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "fundamental substance proposed",
+      "sourceText": "He proposed that water (hydor) was the fundamental substance (arche) underlying all of reality.",
+      "accept": [
+        "water",
+        "hydor"
+      ]
+    },
+    {
+      "prompt": "What is everything is made of for Thales of Miletus?",
+      "answer": "water",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "everything is made of",
+      "sourceText": "- Everything is made of water",
+      "accept": [
+        "water"
+      ]
+    },
+    {
+      "prompt": "What is earth floats on for Thales of Miletus?",
+      "answer": "water",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "earth floats on",
+      "sourceText": "- The earth floats on water",
+      "accept": [
+        "water"
+      ]
+    },
+    {
+      "prompt": "What is animism statement for Thales of Miletus?",
+      "answer": "All things are full of gods",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "animism statement",
+      "sourceText": "- All things are full of gods (animism)",
+      "accept": [
+        "All things are full of gods"
+      ]
+    },
+    {
+      "prompt": "What is student of for Anaximander?",
+      "answer": "Thales",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "student of",
+      "sourceText": "Student of Thales, Anaximander proposed the \"apeiron\" (the boundless/infinite) as the origin of all things rather than any single element.",
+      "accept": [
+        "Thales"
+      ]
+    },
+    {
+      "prompt": "What is first to draw for Anaximander?",
+      "answer": "a map of the known world",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "first to draw",
+      "sourceText": "- First to draw a map of the known world",
+      "accept": [
+        "a map of the known world"
+      ]
+    },
+    {
+      "prompt": "What is early theory proposed for Anaximander?",
+      "answer": "theory of evolution",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "early theory proposed",
+      "sourceText": "- Proposed early theory of evolution",
+      "accept": [
+        "theory of evolution"
+      ]
+    },
+    {
+      "prompt": "What is doctrine known for for Heraclitus?",
+      "answer": "change is central to the universe",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "doctrine known for",
+      "sourceText": "Known for his doctrine that change is central to the universe.",
+      "accept": [
+        "change is central to the universe"
+      ]
+    },
+    {
+      "prompt": "What is fundamental element proposed for Heraclitus?",
+      "answer": "fire",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "fundamental element proposed",
+      "sourceText": "- Fire as the fundamental element",
+      "accept": [
+        "fire"
+      ]
+    },
+    {
+      "prompt": "What is concept of opposites for Heraclitus?",
+      "answer": "Unity of opposites",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "concept of opposites",
+      "sourceText": "- Unity of opposites",
+      "accept": [
+        "Unity of opposites"
+      ]
+    },
+    {
+      "prompt": "What is logos meaning for Heraclitus?",
+      "answer": "cosmic reason/order",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "logos meaning",
+      "sourceText": "- Logos (cosmic reason/order)",
+      "accept": [
+        "cosmic reason",
+        "cosmic order"
+      ]
+    },
+    {
+      "prompt": "What is doctrine in contrast with Heraclitus for Parmenides?",
+      "answer": "change is an illusion and that reality is one, eternal, and unchanging",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "doctrine in contrast with Heraclitus",
+      "sourceText": "In direct contrast to Heraclitus, Parmenides argued that change is an illusion and that reality is one, eternal, and unchanging.",
+      "accept": [
+        "change is an illusion",
+        "reality is one, eternal, and unchanging"
+      ]
+    },
+    {
+      "prompt": "What is being statement for Parmenides?",
+      "answer": "Being is; non-being is not",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "being statement",
+      "sourceText": "- Being is; non-being is not",
+      "accept": [
+        "Being is; non-being is not"
+      ]
+    },
+    {
+      "prompt": "What is argument about change for Parmenides?",
+      "answer": "change is impossible (logical argument)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "argument about change",
+      "sourceText": "- Change is impossible (logical argument)",
+      "accept": [
+        "change is impossible"
+      ]
+    },
+    {
+      "prompt": "What is two ways contrasted for Parmenides?",
+      "answer": "The Way of Truth vs The Way of Opinion",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "two ways contrasted",
+      "sourceText": "- The Way of Truth vs The Way of Opinion",
+      "accept": [
+        "The Way of Truth vs The Way of Opinion"
+      ]
+    }
+  ]
+}

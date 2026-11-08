@@ -12,6 +12,9 @@ import {
   FormControl,
   FormControlLabel,
   FormHelperText,
+  InputLabel,
+  MenuItem,
+  Select,
   Switch,
   Tooltip,
   Box,
@@ -22,7 +25,6 @@ import {
   Button,
   Stack,
   Alert,
-  Snackbar,
   Typography,
 } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
@@ -41,6 +43,7 @@ import {
   resolveTimingWindow,
 } from "../../../utils/assignmentTiming";
 import { TimingPatternPicker } from "../../TimingPatternPicker";
+import { useEditorToast } from "../context/EditorToastContext";
 
 function MeetingCalendar({ sections, dueDate, onSelectDate, t }) {
   const meetingDays = React.useMemo(
@@ -117,6 +120,7 @@ function MeetingCalendar({ sections, dueDate, onSelectDate, t }) {
 
 export default function AssignmentConfiguration() {
   const t = useTranslations("editor.authoring");
+  const { showToast } = useEditorToast();
 
   const { sections, sectionMap, assignments } =
     React.useContext(SectionContext);
@@ -131,15 +135,11 @@ export default function AssignmentConfiguration() {
     date.setHours(23, 59, 0, 0);
     return date.toISOString();
   });
-  const [retryEnabled, setRetryEnabled] = React.useState(
-    unit?.retryEnabled !== false,
+  const [retryOverride, setRetryOverride] = React.useState(
+    unit?.retryEnabled ?? null,
   );
   const [workbookChatEnabled, setWorkbookChatEnabled] = React.useState(true);
   const [aiChatEnabled, setAiChatEnabled] = React.useState(true);
-  const [lastCreatedAssignments, setLastCreatedAssignments] = React.useState(
-    [],
-  );
-  const [undoSnackbarOpen, setUndoSnackbarOpen] = React.useState(false);
   const [creating, setCreating] = React.useState(false);
   const [publishFirst, setPublishFirst] = React.useState(false);
   const [newSectionName, setNewSectionName] = React.useState("");
@@ -158,34 +158,52 @@ export default function AssignmentConfiguration() {
     // Skip sync until context catches up to the version we wrote
     if (unit?._version < lastWrittenVersionRef.current) return;
     lastWrittenVersionRef.current = 0;
-    setRetryEnabled(unit?.retryEnabled !== false);
+    setRetryOverride(unit?.retryEnabled ?? null);
   }, [unit?.retryEnabled, unit?._version]);
 
-  const handleRetryToggle = async (event) => {
-    const checked = event.target.checked;
-    setRetryEnabled(checked);
+  const handleRetryOverrideChange = async (event) => {
+    const previousOverride = retryOverride;
+    const override =
+      event.target.value === "inherit"
+        ? null
+        : event.target.value === "enabled";
+    setRetryOverride(override);
     try {
       const client = getAmplifyClient();
       const { data, errors } = await client.models.Unit.update({
         id: unit.id,
-        retryEnabled: checked,
+        retryEnabled: override,
         _version: unit._version ?? 1,
       });
-      if (errors?.length) {
+      if (errors?.length || !data) {
         console.error(
-          "[AssignmentConfiguration] retryEnabled update returned errors:",
+          "[AssignmentConfiguration] retryEnabled update failed:",
           errors,
         );
-        setRetryEnabled(!checked); // revert on error
-      } else if (data) {
-        lastWrittenVersionRef.current = data._version;
+        setRetryOverride(previousOverride);
+        showToast({
+          message: t(
+            "assignmentConfiguration.retrySettingFailed",
+            "Could not update the unit replay setting.",
+          ),
+          severity: "error",
+        });
+        return;
       }
+      lastWrittenVersionRef.current = data._version;
     } catch (err) {
       console.error(
         "[AssignmentConfiguration] retryEnabled update threw:",
         err,
       );
-      setRetryEnabled(!checked); // revert on error
+      setRetryOverride(previousOverride);
+      showToast({
+        message: t(
+          "assignmentConfiguration.retrySettingFailed",
+          "Could not update the unit replay setting.",
+        ),
+        severity: "error",
+      });
     }
   };
 
@@ -259,7 +277,18 @@ export default function AssignmentConfiguration() {
     setCreatingSection(true);
     try {
       const client = getAmplifyClient();
-      const { data, errors } = await client.models.Section.create({ name });
+      const { data: platformSettings, errors: settingsErrors } =
+        await client.models.PlatformSettings.list({ limit: 1 });
+      if (settingsErrors?.length)
+        throw new Error(
+          settingsErrors[0]?.message || "Failed to load section defaults",
+        );
+      const defaultLocation = platformSettings?.find((setting) => setting != null)
+        ?.defaultSectionLocation;
+      const { data, errors } = await client.models.Section.create({
+        name,
+        location: defaultLocation,
+      });
       if (errors?.length)
         throw new Error(errors[0]?.message || "Failed to create section");
       if (data) {
@@ -274,6 +303,30 @@ export default function AssignmentConfiguration() {
       setCreatingSection(false);
     }
   };
+
+  const undoAssignments = React.useCallback(
+    async (assignmentIds) => {
+      if (assignmentIds.length === 0) return;
+      try {
+        const client = getAmplifyClient();
+        for (const assignmentId of assignmentIds) {
+          const assignment = assignments?.find((a) => a.id === assignmentId);
+          if (assignment) {
+            await client.models.Assignment.delete({
+              id: assignment.id,
+              _version: assignment._version,
+            });
+          }
+        }
+      } catch (err) {
+        console.error(
+          "[AssignmentConfiguration] Error undoing assignments:",
+          err,
+        );
+      }
+    },
+    [assignments],
+  );
 
   const createAssignments = React.useCallback(
     async (sectionIds, dueDateISO) => {
@@ -350,9 +403,27 @@ export default function AssignmentConfiguration() {
           });
         }
 
-        // Store created assignment IDs for potential undo
-        setLastCreatedAssignments(createdIds);
-        setUndoSnackbarOpen(true);
+        showToast({
+          message: t(
+            "assignmentConfiguration.assignmentSuccess",
+            "Assignment created successfully",
+          ),
+          severity: "success",
+          autoHideDuration: 6000,
+          action: (dismiss) => (
+            <Button
+              color="inherit"
+              size="small"
+              startIcon={<UndoIcon />}
+              onClick={() => {
+                dismiss();
+                void undoAssignments(createdIds);
+              }}
+            >
+              {t("assignmentConfiguration.undo", "Undo")}
+            </Button>
+          ),
+        });
 
         // Reset fields after successful save
         setSelectedSections([]);
@@ -381,6 +452,9 @@ export default function AssignmentConfiguration() {
       timingPattern,
       workbookChatEnabled,
       aiChatEnabled,
+      showToast,
+      t,
+      undoAssignments,
     ],
   );
 
@@ -391,29 +465,6 @@ export default function AssignmentConfiguration() {
       id: assignment.id,
       _version: assignment._version,
     });
-  };
-
-  const handleUndoLastAssignments = async () => {
-    if (lastCreatedAssignments.length === 0) return;
-    setUndoSnackbarOpen(false);
-    try {
-      const client = getAmplifyClient();
-      for (const assignmentId of lastCreatedAssignments) {
-        const assignment = assignments?.find((a) => a.id === assignmentId);
-        if (assignment) {
-          await client.models.Assignment.delete({
-            id: assignment.id,
-            _version: assignment._version,
-          });
-        }
-      }
-      setLastCreatedAssignments([]);
-    } catch (err) {
-      console.error(
-        "[AssignmentConfiguration] Error undoing assignments:",
-        err,
-      );
-    }
   };
 
   // Quick due-date options
@@ -503,39 +554,48 @@ export default function AssignmentConfiguration() {
 
       <Divider sx={{ my: 2 }} />
 
-      {/* Retry toggle */}
-      <Box sx={{ px: 2, py: 1 }}>
-        <FormControlLabel
-          control={
-            <Switch
-              checked={retryEnabled}
-              onChange={handleRetryToggle}
-              color="primary"
-            />
+      <FormControl fullWidth sx={{ px: 2, py: 1 }}>
+        <InputLabel id="unit-retry-override-label">
+          {t("assignmentConfiguration.retryOverride", "Unit replay setting")}
+        </InputLabel>
+        <Select
+          labelId="unit-retry-override-label"
+          label={t(
+            "assignmentConfiguration.retryOverride",
+            "Unit replay setting",
+          )}
+          value={
+            retryOverride === null
+              ? "inherit"
+              : retryOverride
+                ? "enabled"
+                : "disabled"
           }
-          label={
-            <Box sx={{ display: "flex", alignItems: "center", gap: 0.5 }}>
-              {t(
-                "assignmentConfiguration.retryEnabled",
-                "Allow students to retry after completing",
-              )}
-              <Tooltip
-                title={t(
-                  "assignmentConfiguration.retryEnabledDescription",
-                  'When enabled, students see a "Try Again" button on the completion screen.',
-                )}
-                arrow
-              >
-                <HelpOutlineIcon
-                  fontSize="small"
-                  color="action"
-                  sx={{ cursor: "pointer" }}
-                />
-              </Tooltip>
-            </Box>
-          }
-        />
-      </Box>
+          onChange={handleRetryOverrideChange}
+        >
+          <MenuItem value="inherit">
+            {t(
+              "assignmentConfiguration.inheritSectionRetry",
+              "Use section default",
+            )}
+          </MenuItem>
+          <MenuItem value="enabled">
+            {t("assignmentConfiguration.retryEnabled", "Allow retries")}
+          </MenuItem>
+          <MenuItem value="disabled">
+            {t(
+              "assignmentConfiguration.retryDisabled",
+              "Do not allow retries",
+            )}
+          </MenuItem>
+        </Select>
+        <FormHelperText>
+          {t(
+            "assignmentConfiguration.retryOverrideDescription",
+            "When inherited, this unit follows the section replay setting.",
+          )}
+        </FormHelperText>
+      </FormControl>
 
       <Box sx={{ px: 2, py: 1 }}>
         <FormControlLabel
@@ -1007,34 +1067,6 @@ export default function AssignmentConfiguration() {
         </Box>
       </Box>
 
-      {/* Undo snackbar for last created assignments */}
-      <Snackbar
-        open={undoSnackbarOpen}
-        autoHideDuration={6000}
-        onClose={() => setUndoSnackbarOpen(false)}
-        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-      >
-        <Alert
-          onClose={() => setUndoSnackbarOpen(false)}
-          severity="success"
-          action={
-            <Button
-              color="inherit"
-              size="small"
-              startIcon={<UndoIcon />}
-              onClick={handleUndoLastAssignments}
-            >
-              {t("assignmentConfiguration.undo", "Undo")}
-            </Button>
-          }
-          sx={{ width: "100%" }}
-        >
-          {t(
-            "assignmentConfiguration.assignmentSuccess",
-            "Assignment created successfully",
-          )}
-        </Alert>
-      </Snackbar>
     </>
   );
 }

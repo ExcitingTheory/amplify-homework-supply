@@ -128,6 +128,13 @@ describe("candidateIsCovered", () => {
     ).toBe(false);
   });
 
+  it("does not mistake a full quotation for extraction of every independent value", () => {
+    const line = "Organelles: nucleus, mitochondria, ribosomes, lysosomes";
+    expect(candidateIsCovered(candidateFor(line), [{
+      ...fact("nucleus", line), subject: "Cells", field: "organelles",
+    }])).toBe(false);
+  });
+
   it("keeps exact matches covered and unrelated facts uncovered", () => {
     const candidate = candidateFor("Path: 23");
     expect(candidateIsCovered(candidate, [fact("23", "Path: 23")])).toBe(true);

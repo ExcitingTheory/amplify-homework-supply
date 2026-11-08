@@ -452,7 +452,7 @@ describe("recycleBin handler", () => {
         questionsJSON: [{ prompt: `Q${i}`, answer: "A", page: i + 1 }],
         createdAt: "2026-01-01T00:00:00.000Z",
       });
-      const link = { id: "dq1", owner: "user-123", documentID: "doc-1", questionID: "q1", page: 3, sourceText: "snippet", entryKey: "q0" };
+      const link = { id: "dq1", owner: "user-123", documentID: "doc-1", questionID: "q1" };
       const empty = (key: string) => () => ({ [key]: { items: [], nextToken: null } });
       routeGraphql({
         GetDocumentFull: () => ({ getDocument: { id: "doc-1", owner: "user-123", filename: "a.pdf", _version: 2 } }),
@@ -478,8 +478,7 @@ describe("recycleBin handler", () => {
       const archive = archivedPayload();
       expect(archive.relatedRecords.ParsedContent.map((c: any) => c.id)).toEqual(["doc-1-chunk-0", "doc-1-chunk-1"]);
       expect(archive.relatedRecords.ParsedContent[1].questionsJSON).toEqual([{ prompt: "Q1", answer: "A", page: 2 }]);
-      // The link keeps where the question came from
-      expect(archive.relatedRecords.DocumentQuestion[0]).toMatchObject({ page: 3, sourceText: "snippet", entryKey: "q0" });
+      expect(archive.relatedRecords.DocumentQuestion[0]).toMatchObject({ id: "dq1", questionID: "q1" });
 
       const deleted = mockGraphql.mock.calls
         .map(([arg]) => arg)
@@ -543,7 +542,7 @@ describe("recycleBin handler", () => {
           },
           relatedRecords: {
             DocumentQuestion: [
-              { id: "dq1", documentID: "doc-1", questionID: "q1", page: 3, sourceText: "snippet", entryKey: "q0", createdAt: "x", updatedAt: "y", deletedAt: "2026-01-01" },
+              { id: "dq1", documentID: "doc-1", questionID: "q1", createdAt: "x", updatedAt: "y", deletedAt: "2026-01-01" },
             ],
             ParsedContent: [
               { id: "doc-1-chunk-0", documentID: "doc-1", chunkIndex: 0, chunkCount: 1, questionsJSON: [{ prompt: "Q", answer: "A", page: 1 }], createdAt: "x", updatedAt: "y" },
@@ -583,9 +582,6 @@ describe("recycleBin handler", () => {
         id: "dq1",
         documentID: "doc-1",
         questionID: "q1",
-        page: 3,
-        sourceText: "snippet",
-        entryKey: "q0",
         deletedAt: null,
       });
       expect(created.CreateParsedContent).toEqual({

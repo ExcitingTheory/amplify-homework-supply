@@ -4,7 +4,6 @@ import Avatar from "@mui/material/Avatar";
 import { expect, within } from "storybook/test";
 import { ProfileAvatarLink } from "./ProfileAvatarLink";
 import { AvatarDisplay } from "./Gamification/AvatarDisplay";
-import { AppFooter } from "./AppFooter";
 
 const meta = {
   title: "Components/ProfileAvatarLink",
@@ -47,13 +46,5 @@ export const Anonymous: Story = {
   render: (args) => <Avatar component={ProfileAvatarLink} {...args}>?</Avatar>,
   play: async ({ canvasElement }) => {
     await expect(within(canvasElement).queryByRole("link")).not.toBeInTheDocument();
-  },
-};
-
-export const Footer: Story = {
-  render: () => <AppFooter />,
-  play: async ({ canvasElement }) => {
-    const footer = within(canvasElement).getByRole("contentinfo");
-    await expect(within(footer).getByRole("link")).toHaveAttribute("href", "/privacy");
   },
 };

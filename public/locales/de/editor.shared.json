@@ -240,7 +240,10 @@
   },
   "pdfViewerComponent": {
     "noPdfToDisplay": "Keine PDF-Datei zum Anzeigen vorhanden",
-    "loadingPdf": "PDF wird geladen: {filename}"
+    "loadingPdf": "PDF wird geladen: {filename}",
+    "darkPages": "Dunkle Seiten",
+    "enterFullScreen": "Vollbild",
+    "exitFullScreen": "Vollbild beenden"
   },
   "metadataEditor": {
     "aiGenerationInfo": "KI-Generierungsinformationen",

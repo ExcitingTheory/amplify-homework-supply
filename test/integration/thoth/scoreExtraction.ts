@@ -86,6 +86,47 @@ export interface ExtractionReport {
   unmatchedExtracted: number;
 }
 
+/** Diagnostic only: this never changes strict matches, recall or passesGate. */
+export function diagnoseExtraction(
+  groundTruth: ThothGroundTruth,
+  extracted: ExtractionInput,
+  candidatesPerFact = 3,
+) {
+  if (!Number.isInteger(candidatesPerFact) || candidatesPerFact < 1 || candidatesPerFact > 10) {
+    throw new Error("candidatesPerFact must be an integer from 1 to 10");
+  }
+  const strict = scoreExtraction(groundTruth, extracted);
+  const mismatches = strict.missingFacts.map((missing) => {
+    const card = groundTruth.cards.find((item) => item.key === missing.card)!;
+    const fact = card.facts.find((item) => item.field === missing.field && item.value === missing.expected)!;
+    const candidates = extracted.questions.map((question, index) => {
+      const page = questionIsOnCardPage(card, question);
+      const subject = questionIdentifiesCard(card, question);
+      const field = questionIdentifiesField(fact, question);
+      const answer = answerMatches(extractedAnswerText(question), fact);
+      const value = normalise(question.answer ?? "");
+      const expectedValues = [fact.value, ...(fact.accept ?? [])].map(normalise);
+      const combinedValue = !expectedValues.includes(value) && expectedValues.some((target) =>
+        target.length > 0 && ` ${value} `.includes(` ${target} `));
+      return { index, page, subject, field, answer, combinedValue,
+        question, agreements: Number(page) + Number(subject) + Number(field) + Number(answer) };
+    }).filter((candidate) => candidate.subject || candidate.field || candidate.answer)
+      .sort((left, right) => right.agreements - left.agreements || left.index - right.index)
+      .slice(0, candidatesPerFact);
+    return { ...missing, candidates };
+  });
+  const counts = { subject: 0, field: 0, answer: 0, page: 0, combinedValue: 0, noCandidate: 0 };
+  for (const mismatch of mismatches) {
+    const best = mismatch.candidates[0];
+    if (!best) { counts.noCandidate += 1; continue; }
+    for (const key of ["subject", "field", "answer", "page"] as const) {
+      if (!best[key]) counts[key] += 1;
+    }
+    if (best.combinedValue) counts.combinedValue += 1;
+  }
+  return { strict, counts, mismatches };
+}
+
 // ---------------------------------------------------------------------------
 // Normalisation + similarity
 // ---------------------------------------------------------------------------
@@ -341,4 +382,115 @@ export function passesGate(report: ExtractionReport): boolean {
     report.factRecall === 1 &&
     report.pageCoverage.missing.length === 0
   );
+}
+
+// ---------------------------------------------------------------------------
+// Content-based score
+// ---------------------------------------------------------------------------
+
+/**
+ * How well an extracted question evidences a ground-truth fact, best first.
+ * - anchored: on the card's page, the answer holds the value, and the card is
+ *   named in the question's subject, prompt or source text.
+ * - onPage: on the card's page and the answer holds the value, but the card is
+ *   not named, so the value could belong to a neighbouring card.
+ * - sourceOnly: on the card's page, but the value appears only in a source
+ *   quotation, not in an answer.
+ * - absent: no extracted question on the card's pages carries the value.
+ */
+export type ContentTier = "anchored" | "onPage" | "sourceOnly" | "absent";
+
+export interface ContentMiss {
+  card: string;
+  field: string;
+  expected: string;
+  tier: Exclude<ContentTier, "anchored">;
+}
+
+export interface ContentScoreReport {
+  totalFacts: number;
+  counts: Record<ContentTier, number>;
+  /** Share of facts evidenced by a question that names the card. */
+  anchoredRecall: number;
+  /** Anchored plus facts whose value is in an answer on the card's page. */
+  answeredRecall: number;
+  /** Answered plus facts whose value is only in a source quotation. */
+  sourcedRecall: number;
+  misses: ContentMiss[];
+}
+
+/** True when `needle` occurs in `haystack` on word boundaries, after normalising both. */
+function containsNormalised(haystack: string, needle: string): boolean {
+  const target = normalise(needle);
+  if (!target) return false;
+  const text = normalise(haystack);
+  // A one- or two-letter value ("I", "B", "12") would match inside any
+  // sentence, so it must be the whole answer.
+  if (target.length < 3) return text === target;
+  return ` ${text} `.includes(` ${target} `);
+}
+
+function cardNames(card: ThothCard): string[] {
+  const names = [card.title, card.title.replace(/^(?:the|a|an)\s+/i, ""), card.key];
+  return [...new Set(names.map(normalise).filter(Boolean))];
+}
+
+function nameCard(card: ThothCard, question: ExtractedQuestionLike): boolean {
+  const text = normalise(
+    [question.subject, question.prompt, question.sourceText].filter(Boolean).join(" "),
+  );
+  return cardNames(card).some((name) => ` ${text} `.includes(` ${name} `));
+}
+
+/**
+ * Scores extraction by whether each fact's value is evidenced on the card's
+ * pages, without requiring the extractor's `subject` and `field` labels to
+ * equal the benchmark's internal ids. Diagnostic only: it grants no credit
+ * toward `passesGate`, which stays strict.
+ */
+export function scoreExtractionByContent(
+  groundTruth: ThothGroundTruth,
+  extracted: ExtractionInput,
+): ContentScoreReport {
+  const counts: Record<ContentTier, number> = { anchored: 0, onPage: 0, sourceOnly: 0, absent: 0 };
+  const misses: ContentMiss[] = [];
+  const byPage = new Map<number, ExtractedQuestionLike[]>();
+  for (const question of extracted.questions) {
+    for (const page of pagesOfItem(question)) {
+      byPage.set(page, [...(byPage.get(page) ?? []), question]);
+    }
+  }
+
+  for (const card of groundTruth.cards) {
+    const onCardPages = [...new Set([card.frontPage, card.backPage])].flatMap(
+      (page) => byPage.get(page) ?? [],
+    );
+    for (const fact of card.facts) {
+      if (!fact.required || fact.sourceDefect) continue;
+      const values = [fact.value, ...(fact.accept ?? [])];
+      const holds = (text: string | undefined) =>
+        values.some((value) => containsNormalised(text ?? "", value));
+      const answering = onCardPages.filter((question) => holds(question.answer));
+      let tier: ContentTier;
+      if (answering.some((question) => nameCard(card, question))) tier = "anchored";
+      else if (answering.length > 0) tier = "onPage";
+      else if (onCardPages.some((question) => holds(question.sourceText))) tier = "sourceOnly";
+      else tier = "absent";
+      counts[tier] += 1;
+      if (tier !== "anchored") {
+        misses.push({ card: card.key, field: fact.field, expected: fact.value, tier });
+      }
+    }
+  }
+
+  const totalFacts = counts.anchored + counts.onPage + counts.sourceOnly + counts.absent;
+  const share = (count: number) => (totalFacts === 0 ? 1 : count / totalFacts);
+  return {
+    totalFacts,
+    counts,
+    anchoredRecall: share(counts.anchored),
+    answeredRecall: share(counts.anchored + counts.onPage),
+    sourcedRecall: share(counts.anchored + counts.onPage + counts.sourceOnly),
+    misses,
+  };
 }

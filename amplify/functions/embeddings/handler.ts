@@ -128,7 +128,25 @@ function requireAuth(event: any) {
   return { userId, username: username || userId };
 }
 
+/** Most texts one `embedTexts` call accepts; keeps the response far under Lambda's payload limit. */
+const MAX_EMBED_TEXTS = 256;
+
 export const handler: Handler = async (event: any, context: any) => {
+  // Used by the document-analysis workflow to compare answers by meaning
+  if (event.workflowMode === "embedTexts") {
+    const texts: unknown = event.texts;
+    if (
+      !Array.isArray(texts) ||
+      texts.length > MAX_EMBED_TEXTS ||
+      !texts.every((text) => typeof text === "string")
+    ) {
+      throw new Error(`embedTexts needs an array of at most ${MAX_EMBED_TEXTS} strings`);
+    }
+    const vectors: number[][] = [];
+    for (const text of texts) vectors.push(await generateEmbeddingVector(text));
+    return { model: EMBEDDING_MODEL, vectors };
+  }
+
   if (event.workflowMode === "generateEmbeddingsForAnalysis") {
     if (typeof event.fileID !== "string" || !event.fileID) {
       throw new Error("Workflow embedding request is missing fileID");

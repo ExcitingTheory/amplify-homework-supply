@@ -1,0 +1,712 @@
+{
+  "sourceSha256": "fcf7d11910f469f72d09e667f103da5664808147e95775eeb84f45fb20f8478c",
+  "capturedAt": "2026-10-28T12:55:11.401Z",
+  "sourceFormat": "txt",
+  "pageCount": 2,
+  "vocabularyJSON": [
+    {
+      "word": "Nous",
+      "definition": "mind or intellect",
+      "context": "Vocabulary: - Nous (νοῦς) - mind or intellect",
+      "pages": [
+        2
+      ]
+    }
+  ],
+  "summariesJSON": [
+    {
+      "title": "Page 1",
+      "content": "This page introduces the Pre-Socratic philosophers, who were pivotal in transitioning from mythological to rational interpretations of the natural world in the 6th-5th centuries BCE. Thales of Miletus is highlighted for proposing water as the fundamental substance of all things. Anaximander, a pupil of Thales, introduced the idea of 'apeiron' and created early maps and evolutionary theories. Heraclitus is noted for his belief in constant change, epitomized by fire, while Parmenides argued for the unchanging nature of reality. Pythagoras emphasized the primacy of numbers in the universe and Empedocles suggested all matter consists of four elements moved by love and strife.",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Page 2",
+      "content": "This page covers Anaxagoras and his concepts of 'nous' as the mind organizing the cosmos, and matter's infinite divisibility. He also was the first to explain eclipses accurately. Democritus developed atomic theory, presenting a mechanistic view of nature where atoms move through empty space, foreshadowing modern atomic theory. The page discusses the Pre-Socratics' legacy, including their naturalistic explanations and influence on Socrates, Plato, and Aristotle. Terms like 'nous' and 'panspermia' are explained in the glossary.",
+      "pageRange": "Page 2"
+    },
+    {
+      "title": "Document summary",
+      "content": "The document explores the transformative role of Pre-Socratic philosophers in moving from mythological to rational understanding of the natural world between the 6th and 5th centuries BCE. Key figures include Thales of Miletus, who proposed water as the fundamental element, and Anaximander, who introduced 'apeiron' and made early contributions to mapping and evolutionary ideas. Heraclitus believed in perpetual change represented by fire, while Parmenides focused on the unchanging nature of reality. Pythagoras emphasized numerical principles, and Empedocles introduced a theory of four elemental forces. Anaxagoras introduced 'nous' as the organizing principle of the cosmos and explained eclipses. Democritus developed atomic theory, describing nature through moving atoms in void space. The legacy of these philosophers is their shift toward naturalistic explanations and significant influence on Socrates, Plato, and Aristotle.",
+      "pageRange": "Page 1-2"
+    }
+  ],
+  "objectivesJSON": [
+    {
+      "objective": "Understand the contributions and beliefs of the Pre-Socratic philosophers."
+    },
+    {
+      "objective": "Explore the foundational ideas laid by these philosophers for Western philosophy and science."
+    },
+    {
+      "objective": "Recognize the influence of Pre-Socratic thought on later philosophers like Socrates, Plato, and Aristotle."
+    }
+  ],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Time period for The Pre-Socratic philosophers?",
+      "answer": "roughly 6th-5th centuries BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Pre-Socratic philosophers",
+      "field": "Time period",
+      "sourceText": "The Pre-Socratic philosophers were ancient Greek thinkers who lived before Socrates (roughly 6th-5th centuries BCE).",
+      "accept": [
+        "6th-5th centuries BCE"
+      ]
+    },
+    {
+      "prompt": "What is Significance for The Pre-Socratic philosophers?",
+      "answer": "first to attempt rational explanations of the natural world",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Pre-Socratic philosophers",
+      "field": "Significance",
+      "sourceText": "They were the first to attempt rational explanations of the natural world, moving away from mythological interpretations.",
+      "accept": [
+        "attempted rational explanations of the natural world"
+      ]
+    },
+    {
+      "prompt": "What is Contribution for The Pre-Socratic philosophers?",
+      "answer": "laid the foundation for Western philosophy and science",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Pre-Socratic philosophers",
+      "field": "Contribution",
+      "sourceText": "Their inquiries laid the foundation for Western philosophy and science.",
+      "accept": [
+        "foundation for Western philosophy and science"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Thales of Miletus?",
+      "answer": "c. 624-546 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Lifespan",
+      "sourceText": "Thales of Miletus (c. 624-546 BCE)",
+      "accept": [
+        "624-546 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Contribution for Thales of Miletus?",
+      "answer": "considered the first philosopher in the Western tradition",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Contribution",
+      "sourceText": "Thales is often considered the first philosopher in the Western tradition.",
+      "accept": [
+        "first philosopher in the Western tradition"
+      ]
+    },
+    {
+      "prompt": "What is Belief for Thales of Miletus?",
+      "answer": "water is the fundamental substance (arche) from which all things originate",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Thales of Miletus",
+      "field": "Belief",
+      "sourceText": "He proposed that water is the fundamental substance (arche) from which all things originate.",
+      "accept": [
+        "water is the fundamental substance",
+        "water is the arche"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Anaximander?",
+      "answer": "c. 610-546 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Lifespan",
+      "sourceText": "Anaximander (c. 610-546 BCE)",
+      "accept": [
+        "610-546 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Contribution for Anaximander?",
+      "answer": "introduced the concept of the \"apeiron\" - the boundless or infinite",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Contribution",
+      "sourceText": "Anaximander, a student of Thales, introduced the concept of the \"apeiron\" - the boundless or infinite.",
+      "accept": [
+        "introduced the concept of the \"apeiron\""
+      ]
+    },
+    {
+      "prompt": "What is Achievements for Anaximander?",
+      "answer": "created one of the first maps of the known world and proposed an early theory of evolution",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Anaximander",
+      "field": "Achievements",
+      "sourceText": "He also created one of the first maps of the known world and proposed an early theory of evolution.",
+      "accept": [
+        "first maps of the known world",
+        "early theory of evolution"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Heraclitus?",
+      "answer": "c. 535-475 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Lifespan",
+      "sourceText": "Heraclitus (c. 535-475 BCE)",
+      "accept": [
+        "535-475 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Belief for Heraclitus?",
+      "answer": "doctrine that \"everything flows\" (panta rhei)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Belief",
+      "sourceText": "Heraclitus is famous for his doctrine that \"everything flows\" (panta rhei).",
+      "accept": [
+        "everything flows",
+        "panta rhei"
+      ]
+    },
+    {
+      "prompt": "What is Element for Heraclitus?",
+      "answer": "Fire was his primary element, representing transformation",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Element",
+      "sourceText": "Fire was his primary element, representing transformation.",
+      "accept": [
+        "Fire",
+        "Fire representing transformation"
+      ]
+    },
+    {
+      "prompt": "What is Philosophy for Heraclitus?",
+      "answer": "constant change is the fundamental essence of the universe",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Heraclitus",
+      "field": "Philosophy",
+      "sourceText": "He believed that constant change is the fundamental essence of the universe.",
+      "accept": [
+        "constant change"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Parmenides?",
+      "answer": "c. 515-450 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Lifespan",
+      "sourceText": "Parmenides (c. 515-450 BCE)",
+      "accept": [
+        "515-450 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Philosophy for Parmenides?",
+      "answer": "argued that change is impossible and that reality is unchanging, eternal, and indivisible",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Parmenides",
+      "field": "Philosophy",
+      "sourceText": "In direct contrast to Heraclitus, Parmenides argued that change is impossible and that reality is unchanging, eternal, and indivisible.",
+      "accept": [
+        "change is impossible",
+        "reality is unchanging",
+        "reality is eternal",
+        "reality is indivisible"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Pythagoras?",
+      "answer": "c. 570-495 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Pythagoras",
+      "field": "Lifespan",
+      "sourceText": "Pythagoras (c. 570-495 BCE)",
+      "accept": [
+        "570-495 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Belief for Pythagoras?",
+      "answer": "numbers are the fundamental reality and that mathematical relationships govern the universe",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Pythagoras",
+      "field": "Belief",
+      "sourceText": "He believed that numbers are the fundamental reality and that mathematical relationships govern the universe.",
+      "accept": [
+        "numbers are the fundamental reality",
+        "mathematical relationships govern the universe"
+      ]
+    },
+    {
+      "prompt": "What is Lifespan for Empedocles?",
+      "answer": "c. 494-434 BCE",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Empedocles",
+      "field": "Lifespan",
+      "sourceText": "Empedocles (c. 494-434 BCE)",
+      "accept": [
+        "494-434 BCE"
+      ]
+    },
+    {
+      "prompt": "What is Theory for Empedocles?",
+      "answer": "all matter consists of four fundamental elements: earth, air, fire, and water",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Empedocles",
+      "field": "Theory",
+      "sourceText": "Empedocles proposed that all matter consists of four fundamental elements: earth, air, fire, and water.",
+      "accept": [
+        "four fundamental elements",
+        "earth, air, fire, and water"
+      ]
+    },
+    {
+      "prompt": "What is Forces for Empedocles?",
+      "answer": "elements are moved by two opposing forces: Love (attraction) and Strife (repulsion)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Empedocles",
+      "field": "Forces",
+      "sourceText": "These elements are moved by two opposing forces: Love (attraction) and Strife (repulsion).",
+      "accept": [
+        "Love (attraction)",
+        "Strife (repulsion)"
+      ]
+    },
+    {
+      "prompt": "What is Ancient Greek Philosophy for Ancient Greek Philosophy?",
+      "answer": "The Pre-Socratics",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Ancient Greek Philosophy",
+      "field": "Ancient Greek Philosophy",
+      "sourceText": "Ancient Greek Philosophy: The Pre-Socratics",
+      "accept": [
+        "The Pre-Socratics"
+      ]
+    },
+    {
+      "prompt": "What is Empedocles proposed that all matter consists of four fundamental elements for Empedocles proposed that all matter consists of four fundamental elements?",
+      "answer": "earth, air, fire, and water. These elements are moved by two opposing forces: Love (attraction) and Strife (repulsion). This theory influenced scientific thought for centuries.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Empedocles proposed that all matter consists of four fundamental elements",
+      "field": "Empedocles proposed that all matter consists of four fundamental elements",
+      "sourceText": "Empedocles proposed that all matter consists of four fundamental elements: earth, air, fire, and water. These elements are moved by two opposing forces: Love (attraction) and Strife (repulsion). This theory influenced scientific thought for centuries.",
+      "accept": [
+        "earth, air, fire, and water. These elements are moved by two opposing forces: Love (attraction) and Strife (repulsion). This theory influenced scientific thought for centuries."
+      ]
+    },
+    {
+      "prompt": "What is Belief about matter for Anaxagoras?",
+      "answer": "Matter is infinitely divisible and that \"everything is in everything.\"",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "Belief about matter",
+      "sourceText": "He believed that matter is infinitely divisible and that \"everything is in everything.\"",
+      "accept": [
+        "Matter is infinitely divisible",
+        "everything is in everything"
+      ]
+    },
+    {
+      "prompt": "What is Theory developed for Democritus?",
+      "answer": "Atomic theory",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Democritus",
+      "field": "Theory developed",
+      "sourceText": "Democritus developed atomic theory, proposing that the universe consists of tiny, indivisible particles called \"atoms\" moving through empty space (the \"void\").",
+      "accept": [
+        "atomic theory"
+      ]
+    },
+    {
+      "prompt": "What is View of nature for Democritus?",
+      "answer": "Mechanistic",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Democritus",
+      "field": "View of nature",
+      "sourceText": "This mechanistic view of nature was remarkably prescient, anticipating modern atomic theory by over two millennia.",
+      "accept": [
+        "mechanistic"
+      ]
+    },
+    {
+      "prompt": "What is eclipses explanation for Anaxagoras?",
+      "answer": "First to explain eclipses correctly",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "eclipses explanation",
+      "sourceText": "He was the first to explain eclipses correctly and was persecuted for suggesting that the sun was a hot rock rather than a deity.",
+      "accept": [
+        "First to explain eclipses correctly"
+      ]
+    },
+    {
+      "prompt": "What is Page header context for Anaxagoras?",
+      "answer": "Anaxagoras introduced the concept of \"nous\" (mind) as the organizing principle of the cosmos",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "Page header context",
+      "sourceText": "Anaxagoras introduced the concept of \"nous\" (mind) as the organizing principle of the cosmos.",
+      "accept": []
+    },
+    {
+      "prompt": "What is Page header context for Anaxagoras?",
+      "answer": "He believed that matter is infinitely divisible and that \"everything is in everything.\"",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "Page header context",
+      "sourceText": "He believed that matter is infinitely divisible and that \"everything is in everything.\"",
+      "accept": []
+    },
+    {
+      "prompt": "What is Page header context for Anaxagoras?",
+      "answer": "He was the first to explain eclipses correctly",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "Page header context",
+      "sourceText": "He was the first to explain eclipses correctly",
+      "accept": []
+    },
+    {
+      "prompt": "What is Naturalism for Democritus?",
+      "answer": "They sought natural rather than supernatural explanations for phenomena",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Democritus",
+      "field": "Naturalism",
+      "sourceText": "1. Naturalism: They sought natural rather than supernatural explanations for phenomena",
+      "accept": [
+        "They sought natural rather than supernatural explanations for phenomena"
+      ]
+    },
+    {
+      "prompt": "What is term for Glossary?",
+      "answer": "Nous (νοῦς)",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Glossary",
+      "field": "term",
+      "sourceText": "- Nous (νοῦς) - mind or intellect",
+      "accept": [
+        "νοῦς",
+        "Nous"
+      ]
+    },
+    {
+      "prompt": "What is term for Glossary?",
+      "answer": "Panspermia",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Glossary",
+      "field": "term",
+      "sourceText": "- Panspermia - the theory that the seeds of all things exist everywhere",
+      "accept": [
+        "Panspermia"
+      ]
+    },
+    {
+      "prompt": "What is term for Glossary?",
+      "answer": "Atheism",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Glossary",
+      "field": "term",
+      "sourceText": "- Atheism - disbelief in gods (he was accused of this)",
+      "accept": [
+        "Atheism"
+      ]
+    },
+    {
+      "prompt": "What is Atheism for Democritus?",
+      "answer": "he was accused of this",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Democritus",
+      "field": "Atheism",
+      "sourceText": "- Atheism - disbelief in gods (he was accused of this)",
+      "accept": [
+        "disbelief in gods"
+      ]
+    },
+    {
+      "prompt": "What is concept of \"nous\" for Anaxagoras?",
+      "answer": "mind",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "concept of \"nous\"",
+      "sourceText": "Anaxagoras introduced the concept of \"nous\" (mind) as the organizing principle of the cosmos.",
+      "accept": [
+        "mind",
+        "intellect"
+      ]
+    },
+    {
+      "prompt": "What is belief about matter for Anaxagoras?",
+      "answer": "Matter is infinitely divisible",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "belief about matter",
+      "sourceText": "He believed that matter is infinitely divisible and that \"everything is in everything.\"",
+      "accept": [
+        "Matter is infinitely divisible"
+      ]
+    },
+    {
+      "prompt": "What is explanation of eclipses for Anaxagoras?",
+      "answer": "He was the first to explain eclipses correctly",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "explanation of eclipses",
+      "sourceText": "He was the first to explain eclipses correctly and was persecuted for suggesting that the sun was a hot rock rather than a deity.",
+      "accept": [
+        "He was the first to explain eclipses correctly"
+      ]
+    },
+    {
+      "prompt": "What is Achievement for Anaxagoras?",
+      "answer": "Was the first to explain eclipses correctly",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "Achievement",
+      "sourceText": "He was the first to explain eclipses correctly and was persecuted for suggesting that the sun was a hot rock rather than a deity.",
+      "accept": [
+        "First to explain eclipses correctly"
+      ]
+    },
+    {
+      "prompt": "What is explanation of eclipses for Anaxagoras?",
+      "answer": "first to explain eclipses correctly",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Anaxagoras",
+      "field": "explanation of eclipses",
+      "sourceText": "He was the first to explain eclipses correctly and was persecuted for suggesting that the sun was a hot rock rather than a deity.",
+      "accept": [
+        "first to explain eclipses correctly"
+      ]
+    },
+    {
+      "prompt": "What is development for Democritus?",
+      "answer": "atomic theory",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Democritus",
+      "field": "development",
+      "sourceText": "Democritus developed atomic theory, proposing that the universe consists of tiny, indivisible particles called \"atoms\" moving through empty space (the \"void\").",
+      "accept": [
+        "atomic theory"
+      ]
+    },
+    {
+      "prompt": "What is lasting contribution for Philosophical Legacy?",
+      "answer": "Naturalism",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Philosophical Legacy",
+      "field": "lasting contribution",
+      "sourceText": "1. Naturalism: They sought natural rather than supernatural explanations for phenomena",
+      "accept": [
+        "Naturalism"
+      ]
+    },
+    {
+      "prompt": "What is lasting contribution for Philosophical Legacy?",
+      "answer": "Rational inquiry",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Philosophical Legacy",
+      "field": "lasting contribution",
+      "sourceText": "2. Rational inquiry: They used logic and observation rather than myth and tradition",
+      "accept": [
+        "Rational inquiry"
+      ]
+    },
+    {
+      "prompt": "What is lasting contribution for Philosophical Legacy?",
+      "answer": "Fundamental questions",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Philosophical Legacy",
+      "field": "lasting contribution",
+      "sourceText": "3. Fundamental questions: They asked questions about the nature of reality, change, and knowledge that still occupy philosophers today",
+      "accept": [
+        "Fundamental questions"
+      ]
+    },
+    {
+      "prompt": "What is lasting contribution for Philosophical Legacy?",
+      "answer": "Scientific method",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Philosophical Legacy",
+      "field": "lasting contribution",
+      "sourceText": "4. Scientific method: Their emphasis on observation and logical reasoning laid groundwork for science",
+      "accept": [
+        "Scientific method"
+      ]
+    },
+    {
+      "prompt": "What is influence subjects for Influence on Later Philosophy?",
+      "answer": "Socrates, Plato, and Aristotle",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Influence on Later Philosophy",
+      "field": "influence subjects",
+      "sourceText": "These early thinkers profoundly influenced Socrates, Plato, and Aristotle.",
+      "accept": [
+        "Socrates, Plato, and Aristotle"
+      ]
+    },
+    {
+      "prompt": "What is influence examples for Influence on Later Philosophy?",
+      "answer": "Plato's theory of Forms echoes Parmenides' unchanging Being",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Influence on Later Philosophy",
+      "field": "influence examples",
+      "sourceText": "Plato's theory of Forms echoes Parmenides' unchanging Being.",
+      "accept": [
+        "Plato's theory of Forms echoes Parmenides' unchanging Being"
+      ]
+    },
+    {
+      "prompt": "What is Aristotle's synthesis for Influence on Later Philosophy?",
+      "answer": "synthesized many Pre-Socratic ideas, particularly regarding the elements and causation",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Influence on Later Philosophy",
+      "field": "Aristotle's synthesis",
+      "sourceText": "Aristotle synthesized many Pre-Socratic ideas, particularly regarding the elements and causation.",
+      "accept": [
+        "synthesized many Pre-Socratic ideas, particularly regarding the elements and causation"
+      ]
+    }
+  ]
+}

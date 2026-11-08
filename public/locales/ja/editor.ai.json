@@ -87,13 +87,22 @@
     "regeneratedAlt": "再生成されました"
   },
   "blockSuggestionMenu": {
+    "accept": "採用",
+    "reject": "却下",
+    "error": "ブロックを生成または挿入できませんでした。もう一度お試しください。",
     "aiTitle": "🤖 AIによる提案",
     "emptyState": "まだ提案がありません。",
     "emptyStateHelper": "エディターで入力を開始すると、AI搭載のブロック提案が表示されます。",
     "generateMore": "さらに提案を生成します",
-    "helper": "提案をクリックしてレッスンに挿入してください",
-    "helperAI": "候補をクリックするか、TabキーまたはEnterキーを押して挿入してください",
+    "helper": "ブロックを確認し、採用または却下してください。",
+    "helperAI": "ブロックを確認し、採用または却下してください。",
     "suggestionsTitle": "💡 推奨ブロック"
+  },
+  "autocompletePreference": {
+    "heading": "AI自動補完",
+    "description": "レッスンの入力中にコンテンツを提案します。ブロックの提案はサイドバーのタブで引き続き利用できます。",
+    "enabled": "AI自動補完を有効にする",
+    "error": "設定を保存できませんでした。もう一度お試しください。"
   },
   "suggestedContent": {
     "identityPlaceholder": "アイデンティティID",
@@ -115,5 +124,21 @@
     "newSection": "新しいセクション",
     "questionCount": "{count, plural, one {#件の質問} other {#件の質問}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "クイズ",
+      "answer": "語彙の解答",
+      "meaning": "意味の関連付け",
+      "customAnswer": "カスタム解答",
+      "callResponse": "コール・アンド・レスポンス",
+      "word": "単語",
+      "playlist": "プレイリスト",
+      "conversationPlaylist": "会話プレイリスト",
+      "pdf": "PDF",
+      "image": "画像",
+      "file": "ファイル",
+      "youtube": "YouTube動画"
+    }
   }
 }

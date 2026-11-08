@@ -41,9 +41,18 @@ function convertCustomAnswerElement(domNode) {
     JSON.parse(
       domNode.getAttribute("data-lexical-custom-answer-prompt-method"),
     ) || {};
+  const direction =
+    domNode.getAttribute("data-lexical-custom-answer-direction") ||
+    "question-to-answer";
 
   if (ids) {
-    const node = $createCustomAnswerNode(ids, allowedInput, promptMethod);
+    const node = $createCustomAnswerNode(
+      ids,
+      allowedInput,
+      promptMethod,
+      undefined,
+      direction,
+    );
     return { node };
   }
   return null;
@@ -63,6 +72,7 @@ export class CustomAnswerNode extends DecoratorNode {
   __promptMethod;
   __allowedInput;
   __format;
+  __direction;
 
   static getType() {
     return "custom-answer";
@@ -74,6 +84,7 @@ export class CustomAnswerNode extends DecoratorNode {
       node.__allowedInput,
       node.__promptMethod,
       node.__format,
+      node.__direction,
       node.__key,
     );
   }
@@ -84,6 +95,7 @@ export class CustomAnswerNode extends DecoratorNode {
       serializedNode.allowedInput,
       serializedNode.promptMethod,
       serializedNode.format,
+      serializedNode.direction,
     );
     if (serializedNode.format !== undefined) {
       node.setFormat(serializedNode.format);
@@ -99,6 +111,7 @@ export class CustomAnswerNode extends DecoratorNode {
       promptMethod: this.__promptMethod,
       allowedInput: this.__allowedInput,
       format: this.__format,
+      direction: this.__direction,
     };
   }
 
@@ -107,6 +120,7 @@ export class CustomAnswerNode extends DecoratorNode {
     allowedInput = [],
     promptMethod = [],
     format = "",
+    direction = "question-to-answer",
     key,
   ) {
     super(key);
@@ -114,6 +128,7 @@ export class CustomAnswerNode extends DecoratorNode {
     this.__promptMethod = promptMethod;
     this.__allowedInput = allowedInput;
     this.__format = format;
+    this.__direction = direction;
   }
 
   exportDOM() {
@@ -126,6 +141,10 @@ export class CustomAnswerNode extends DecoratorNode {
     element.setAttribute(
       "data-lexical-custom-answer-prompt-method",
       JSON.stringify(this.__promptMethod),
+    );
+    element.setAttribute(
+      "data-lexical-custom-answer-direction",
+      this.__direction,
     );
     return { element };
   }
@@ -140,6 +159,10 @@ export class CustomAnswerNode extends DecoratorNode {
     div.setAttribute(
       "data-lexical-custom-answer-prompt-method",
       JSON.stringify(this.__promptMethod),
+    );
+    div.setAttribute(
+      "data-lexical-custom-answer-direction",
+      this.__direction,
     );
     const theme = config.theme;
     const className = theme.image;
@@ -181,6 +204,14 @@ export class CustomAnswerNode extends DecoratorNode {
 
   getIds() {
     return this.__ids;
+  }
+
+  getDirection() {
+    return this.__direction;
+  }
+
+  setDirection(direction) {
+    this.getWritable().__direction = direction;
   }
 
   appendId(id) {
@@ -266,6 +297,7 @@ export class CustomAnswerNode extends DecoratorNode {
               ids={this.__ids}
               allowedInput={this.__allowedInput}
               promptMethod={this.__promptMethod}
+              direction={this.__direction}
             />
           </React.Suspense>
         )}
@@ -278,6 +310,7 @@ export class CustomAnswerNode extends DecoratorNode {
             ids={this.__ids}
             allowedInput={this.__allowedInput}
             promptMethod={this.__promptMethod}
+            direction={this.__direction}
           />
         )}
       </>
@@ -299,8 +332,15 @@ export function $createCustomAnswerNode(
   allowedInput,
   promptMethod,
   format,
+  direction,
 ) {
-  return new CustomAnswerNode(ids, allowedInput, promptMethod, format);
+  return new CustomAnswerNode(
+    ids,
+    allowedInput,
+    promptMethod,
+    format,
+    direction,
+  );
 }
 
 /**

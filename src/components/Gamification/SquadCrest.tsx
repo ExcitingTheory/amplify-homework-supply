@@ -15,6 +15,7 @@ import type { IconType } from "react-icons";
 import { Medallion } from "./Medallion";
 import { useReducedMotion } from "@/hooks/useReducedMotion";
 import { pickTinctures, pickDivision, metalForTier } from "@/themes/heraldry";
+import { getMedallionInitials } from "@/utils/medallionInitials";
 
 export interface SquadCrestProps {
   squadId: string;
@@ -32,14 +33,6 @@ const SIZE_MAP = {
   large: 96,
 };
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join("");
-}
-
 export function SquadCrest({
   squadId,
   squadName,
@@ -51,7 +44,7 @@ export function SquadCrest({
   const reducedMotion = useReducedMotion();
   const theme = useTheme();
   const px = SIZE_MAP[size];
-  const initials = useMemo(() => getInitials(squadName), [squadName]);
+  const initials = useMemo(() => getMedallionInitials(squadName), [squadName]);
   const { field, charge } = useMemo(
     () => pickTinctures(squadId, theme),
     [squadId, theme],

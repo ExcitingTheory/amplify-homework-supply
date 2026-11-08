@@ -70,12 +70,15 @@ function emptyLists(): ParsedContentLists {
 }
 
 function pageOf(entry: unknown): number {
-  const page =
+  const pages =
     entry !== null && typeof entry === "object"
-      ? (entry as Record<string, unknown>).page
+      ? (entry as Record<string, unknown>).pages
       : undefined;
+  const integers = Array.isArray(pages)
+    ? pages.filter((page): page is number => Number.isInteger(page))
+    : [];
   // Entries without a page (direct imports) sort before every numbered page.
-  return typeof page === "number" && Number.isInteger(page) ? page : 0;
+  return integers.length > 0 ? Math.min(...integers) : 0;
 }
 
 interface PagedItem {

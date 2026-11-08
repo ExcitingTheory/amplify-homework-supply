@@ -17,6 +17,7 @@ import {
   inDocumentScope,
   listItemSources,
   type DocumentLinkKind,
+  type EntryOrigins,
   type ItemSource,
 } from "../../src/utils/documentLinks";
 
@@ -393,12 +394,16 @@ export async function generatePracticeDrill(params: {
     ),
   );
   const scoped = scopeIds.size > 0;
+  // Each document's ParsedContent is read once, however many items it sources.
+  const originsCache = new Map<string, Promise<EntryOrigins>>();
   async function sourcesById(
     kind: DocumentLinkKind,
     records: any[],
   ): Promise<Map<string, ItemSource[]>> {
     const settled = await Promise.allSettled(
-      records.map((record) => listItemSources(client, kind, record.id, record)),
+      records.map((record) =>
+        listItemSources(client, kind, record.id, record, { originsCache }),
+      ),
     );
     const byId = new Map<string, ItemSource[]>();
     settled.forEach((result, i) => {

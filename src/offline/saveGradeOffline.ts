@@ -19,6 +19,7 @@ export interface SaveGradeParams {
   accuracy?: number;
   percentComplete?: number;
   complete: boolean;
+  outsideSectionDateRange?: boolean;
   version?: number; // _version for optimistic locking
 }
 
@@ -52,6 +53,7 @@ export async function saveGradeOfflineAware(
     accuracy: params.accuracy,
     percentComplete: params.percentComplete,
     complete: params.complete,
+    outsideSectionDateRange: params.outsideSectionDateRange,
     synced: 0,
     savedAt: Date.now(),
     version: params.version,
@@ -79,6 +81,7 @@ export async function saveGradeOfflineAware(
           accuracy: params.accuracy,
           percentComplete: params.percentComplete,
           complete: params.complete,
+          outsideSectionDateRange: params.outsideSectionDateRange,
           _version: params.version,
         }),
       });
@@ -98,6 +101,7 @@ export async function saveGradeOfflineAware(
       accuracy: params.accuracy,
       percentComplete: params.percentComplete,
       complete: params.complete,
+      outsideSectionDateRange: params.outsideSectionDateRange,
       _version: params.version,
     }),
   });

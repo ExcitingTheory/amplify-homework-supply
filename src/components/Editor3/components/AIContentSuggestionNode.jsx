@@ -10,6 +10,7 @@
 import { DecoratorNode } from "lexical";
 import * as React from "react";
 import { useTranslations } from "next-intl";
+import SuggestionMarkdown from "./SuggestionMarkdown";
 
 export const AI_SUGGESTION_UUID = Math.random()
   .toString(36)
@@ -19,11 +20,13 @@ export const AI_SUGGESTION_UUID = Math.random()
 export class AIContentSuggestionNode extends DecoratorNode {
   __uuid;
   __suggestion;
+  __referenceContext;
 
   static clone(node) {
     return new AIContentSuggestionNode(
       node.__uuid,
       node.__suggestion,
+      node.__referenceContext,
       node.__key,
     );
   }
@@ -45,16 +48,19 @@ export class AIContentSuggestionNode extends DecoratorNode {
     };
   }
 
-  constructor(uuid, suggestion, key) {
+  constructor(uuid, suggestion, referenceContext, key) {
     super(key);
     this.__uuid = uuid;
     this.__suggestion = suggestion || "";
+    this.__referenceContext = referenceContext;
   }
 
   updateDOM(prevNode, dom, config) {
     // Return true to force re-render when suggestion changes
-    const needsUpdate = prevNode.__suggestion !== this.__suggestion;
-    return needsUpdate;
+    return (
+      prevNode.__suggestion !== this.__suggestion ||
+      prevNode.__referenceContext !== this.__referenceContext
+    );
   }
 
   createDOM(config) {
@@ -65,16 +71,22 @@ export class AIContentSuggestionNode extends DecoratorNode {
     if (this.__uuid !== AI_SUGGESTION_UUID) {
       return null;
     }
-    return <AIContentSuggestionComponent suggestion={this.__suggestion} />;
+    return (
+      <AIContentSuggestionComponent
+        suggestion={this.__suggestion}
+        referenceContext={this.__referenceContext}
+      />
+    );
   }
 
   isInline() {
     return true;
   }
 
-  setSuggestion(suggestion) {
+  setSuggestion(suggestion, referenceContext) {
     const writable = this.getWritable();
     writable.__suggestion = suggestion;
+    if (referenceContext) writable.__referenceContext = referenceContext;
   }
 
   getSuggestion() {
@@ -82,8 +94,8 @@ export class AIContentSuggestionNode extends DecoratorNode {
   }
 }
 
-export function $createAIContentSuggestionNode(uuid, suggestion) {
-  return new AIContentSuggestionNode(uuid, suggestion);
+export function $createAIContentSuggestionNode(uuid, suggestion, referenceContext) {
+  return new AIContentSuggestionNode(uuid, suggestion, referenceContext);
 }
 
 export class AILoadingNode extends DecoratorNode {
@@ -175,13 +187,8 @@ function AILoadingComponent() {
   );
 }
 
-function AIContentSuggestionComponent({ suggestion }) {
+function AIContentSuggestionComponent({ suggestion, referenceContext }) {
   const t = useTranslations("editor.ai");
-  console.log(
-    "AIContentSuggestionComponent rendering with suggestion:",
-    suggestion,
-  );
-
   if (!suggestion) {
     return null;
   }
@@ -198,7 +205,8 @@ function AIContentSuggestionComponent({ suggestion }) {
       spellCheck="false"
       contentEditable={false}
     >
-      {suggestion}
+      {/^\s/.test(suggestion) ? " " : null}
+      <SuggestionMarkdown markdown={suggestion} referenceContext={referenceContext} />
       <span
         style={{
           fontSize: "10px",

@@ -1,5 +1,9 @@
 import { Cache } from 'aws-amplify/utils';
 import { getUrl } from 'aws-amplify/storage';
+import { isForbiddenIdentityError, recoverForbiddenIdentity } from './authSessionRecovery';
+
+const PRESIGNED_URL_EXPIRY_SECONDS = 60 * 60;
+const CACHE_EXPIRY_BUFFER_MS = 60_000;
 
 const getCachedUrl = async (filePath) => {
 
@@ -19,16 +23,31 @@ const getCachedUrl = async (filePath) => {
         return `https://${cdnDomain}/${filePath}`;
     }
     
-    const cachePath = 'getCachedUrl_' + filePath;
+    const cachePath = 'getCachedUrl_v3_' + filePath;
     const cachedFile = await Cache.getItem(cachePath);
     if (cachedFile) {
         return cachedFile;
     }
     else {
-        const expires = (new Date()).getTime() + 3540000; // 60 minutes
-        const _file = await getUrl({ path: filePath });
+        let _file;
+        try {
+            _file = await getUrl({
+                path: filePath,
+                options: { expiresIn: PRESIGNED_URL_EXPIRY_SECONDS },
+            });
+        } catch (error) {
+            if (!isForbiddenIdentityError(error)) throw error;
+            await recoverForbiddenIdentity();
+            _file = await getUrl({
+                path: filePath,
+                options: { expiresIn: PRESIGNED_URL_EXPIRY_SECONDS },
+            });
+        }
         const _href = _file?.url?.href;
-        Cache.setItem(cachePath, _href, { expires });
+        const cacheExpiresAt = _file.expiresAt.getTime() - CACHE_EXPIRY_BUFFER_MS;
+        if (cacheExpiresAt > Date.now()) {
+            Cache.setItem(cachePath, _href, { expires: cacheExpiresAt });
+        }
         return _href;
     }
 };

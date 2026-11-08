@@ -6,6 +6,75 @@ Move document analysis out of the single `documentAnalysis` Lambda invocation an
 
 Decision log: always use the workflow (2026-10-19); verify every page with an independent pass (2026-10-19); Claude Sonnet as the verifier when available (2026-10-20); paragraph-aligned segments of about 3,500 characters (2026-10-20); **Step Functions for orchestration (2026-10-20)**. The earlier SQS design is kept in Appendix A.
 
+### Atomic claims and evidence follow-up (2026-10-30, local only)
+
+- Standard and exhaustive extraction now request subject / relationship / value
+  claims before code renders recall questions. These map to existing
+  `subject` / `field` / `answer` fields; no model/schema/dependency changes.
+  Standard mode retains summaries/objectives/concepts, but replaces its former
+  2–3 long comprehension answers with atomic recall claims.
+- `documentAnalysis/evidence.ts` inventories unchanged source blocks, preserving
+  Markdown/chapter/title-like heading context, list lines and available textual
+  layout. IDs are deterministic for the same page text, offsets and headings.
+  Quote anchors are unique exact contiguous matches with page-local UTF-16,
+  end-exclusive offsets. Normalized text is still used for answer-support checks,
+  not to fabricate an exact quotation. Heading inference is heuristic; this is
+  not a new PDF layout parser.
+- Exhaustive checklist repair is reused. Missing prose evidence units now join
+  labelled/glossary gaps. Gap-fill requests contain only missing source passages,
+  with contextual headings marked as context. At most eight gap batches run per
+  page (each may perform the existing initial attempt plus two checklist
+  corrections; existing rate-limit retries remain). Initial extraction retains
+  its existing bounded split-depth handling. Unresolved checklist errors go to
+  human review instead of starting another coverage repair loop.
+- A complete quotation no longer supplies all coverage tokens for a labelled
+  multi-value line: the values actually extracted must account for the line.
+  Prose-unit coverage means at least one anchored claim touches the block,
+  **not** that all facts in the block have been extracted.
+- Normal extraction and workflow repair use the common analyzer. Vision still
+  extracts claims first and code renders questions; it must return a separate
+  page transcription, not manufacture its source from its own fact quotations.
+  The existing independent verifier checks the transcription, not image pixels;
+  that remains a limitation. Native vocabulary selection/model processing is
+  unchanged, including hybrid definition rules.
+- Final `writeResult` rechecks unique exact question quotations in addition to
+  existing deterministic answer checks and independent verdicts. Rejected
+  candidates remain editable with warnings, but are excluded from trusted
+  synthesis. The S3 page result includes a source-derived evidence inventory and
+  coverage recomputed from **independently verified** anchored question claims.
+  Aggregate quality adds `sourceEvidenceUnits` / `coveredEvidenceUnits`; neither
+  is a fact-recall percentage. Moderation behavior is unchanged.
+- Internal `evidenceUnitId` / `sourceStart` / `sourceEnd` metadata survives page
+  processing, splitting and vision reanchoring, but the existing GraphQL
+  allow-list intentionally strips it at `ParsedContent` persistence. Existing
+  `sourceText`, subject, field, answer and pages remain the UI contract. The
+  legacy inline helper uses the shared paged analyzer and preserves review
+  warnings in document metadata; this does not add or imply independent
+  verification to that legacy helper.
+
+Offline annotated scoring and its explicit evidence contract are documented in
+`test/fixtures/biology/README.md`; strict Thoth mismatch diagnostics are in
+`docs/THOTH_CALL_AND_RESPONSE_PLAN.md` §12. No live model evaluation, seed or
+deployment was performed. A fresh extraction is still needed before claiming
+an improvement in actual model recall.
+
+Local validation for this slice:
+
+```bash
+npm run test:unit -- test/unit/{documentAnalysis,documentAnalysisCoverage,documentClaimEvidence,biologyGroundTruth,claimCoverage,vocabularySelection,documentAnalysisTokenBudgets,documentAnalysisFinalize,parsedContentInput}.test.ts test/unit/thoth/{scoreExtraction,diagnoseExtraction}.test.ts amplify/functions/__tests__/documentAnalysisWorkflow-{humanReview,jsonCompletion,hierarchicalSummary}.test.ts
+npx tsc --noEmit --project amplify/tsconfig.json --incremental false
+npx tsc --noEmit --strict --target es2022 --module es2022 --moduleResolution bundler --esModuleInterop --skipLibCheck test/support/scoreClaimCoverage.ts scripts/thoth/diagnoseExtraction.ts test/unit/claimCoverage.test.ts test/unit/thoth/diagnoseExtraction.test.ts
+```
+
+The focused suite passes **201 tests across 14 files**. Backend strict types
+pass; standalone scorer/script/test strict types pass. An expanded run also
+included `test/unit/documentAnalysisPrepare.test.ts`; its 12 tests failed at
+the unmodified prepare boundary because the GraphQL mock does not provide
+`getFile` vocabulary settings (`Unable to load vocabulary settings for File
+file-1`). That unrelated mock was not changed. Targeted ESLint exits zero but
+the existing configuration ignores backend/script/support files (seven
+warnings), so it is not evidence that those sources were linted.
+
 ## 1. Current State (verified against source; synthesis/runtime unverified)
 
 | Aspect | Today | Source |
@@ -45,7 +114,8 @@ Decision log: always use the workflow (2026-10-19); verify every page with an in
 **Non-goals (this plan)**
 
 - Changing text extraction (`textExtraction.ts`, `officeExtraction.ts`, `epubExtraction.ts`, edu formats).
-- Rewriting the extraction prompt itself (verification and repair are separate passes; see §6.9).
+- Domain-specific benchmark aliases or answer-key-driven extraction (the atomic
+  claim follow-up above stays source-derived; verification remains separate).
 - Removing `resumeState` from the schema (schema change; deferred, see §8).
 
 ## 3. Proposed Architecture

@@ -190,6 +190,18 @@ const ClassScheduleEntry = a.customType({
   endTime: a.string(), // 24-hour local time, "HH:mm"
 });
 
+const SectionSchool = a.customType({
+  name: a.string().required(),
+  address: a.string().required(),
+});
+
+const SectionLocation = a.customType({
+  school: a.ref("SectionSchool"),
+  campus: a.string(),
+  buildingName: a.string(),
+  roomNumber: a.string(),
+});
+
 const LateAssignmentStatus = a.enum(["PENDING", "KEPT", "DROPPED"]);
 
 const TimingPattern = a.customType({
@@ -342,12 +354,30 @@ const EasterEggProfileEntry = a.customType({
 });
 
 // --- Document analysis ---
+// A further place a term appears, where its definition or surrounding text differs
+// from the entry's own, so each can be shown in context.
+const VocabularyOccurrence = a.customType({
+  definition: a.string(),
+  contexts: a.string().array(), // Each passage showing this sense, in page order
+  pages: a.integer().array(), // The pages this sense appears on, ascending
+});
+
+// A reviewer's corrections, kept apart from what the analysis extracted so
+// editing never overwrites the source text or its occurrences.
+const VocabularyEdit = a.customType({
+  word: a.string(),
+  definition: a.string(),
+  context: a.string(),
+});
+
 const VocabularyEntry = a.customType({
   word: a.string().required(),
   definition: a.string(),
   context: a.string(),
-  page: a.integer(),
-  pages: a.integer().array(), // Every page a merged duplicate appeared on; page is the lowest
+  pages: a.integer().array(), // Every page the entry appeared on, ascending; the first is where it first appears
+  wordID: a.id(), // The Word this entry was imported as; set by the importer
+  occurrences: a.ref("VocabularyOccurrence").array(), // Each sense of the term, with the passages and pages showing it
+  edited: a.ref("VocabularyEdit"), // Reviewer corrections; these win over the extracted fields
 });
 
 const SummaryEntry = a.customType({
@@ -384,8 +414,8 @@ const QuestionEntry = a.customType({
   hint: a.string(),
   questionType: a.string(),
   difficulty: a.string(),
-  page: a.integer(),
-  pages: a.integer().array(), // Every page a merged duplicate appeared on; page is the lowest
+  pages: a.integer().array(), // Every page the entry appeared on, ascending; the first is where it first appears
+  questionID: a.id(), // The Question this entry was imported as; set by the importer
   subject: a.string(),
   field: a.string(),
   sourceText: a.string(),
@@ -634,6 +664,8 @@ const rawSchemaDefinition = {
   CustomBadgeDefinition,
   SectionGamificationConfig,
   ClassScheduleEntry,
+  SectionSchool,
+  SectionLocation,
   TimingPattern,
   AssignmentSlot,
   BadgeEntry,
@@ -648,6 +680,8 @@ const rawSchemaDefinition = {
   SquadRecapEntry,
   EasterEggDiscoveryEntry,
   EasterEggProfileEntry,
+  VocabularyOccurrence,
+  VocabularyEdit,
   VocabularyEntry,
   SummaryEntry,
   CourseOutlineEntry,
@@ -849,6 +883,7 @@ const rawSchemaDefinition = {
       accuracy: a.float(),
       timerStarted: a.boolean(),
       complete: a.boolean(),
+      outsideSectionDateRange: a.boolean(),
       // Submission data
       data: a.json(), // JSON object keyed by block IDs with { complete, accuracy, userAnswer, feedback }
       feedback: a.json(), // Generated feedback by block
@@ -908,12 +943,18 @@ const rawSchemaDefinition = {
       name: a.string(),
       description: a.string(),
       status: PublishedStatus,
+      retryEnabled: a.boolean().default(true),
       code: a.string(),
       instructor: a.string(), // User ID of instructor
       // Recurring weekly meeting times — powers "Next class" due-date suggestions
       classSchedule: a.ref("ClassScheduleEntry").array(),
       assignmentSlots: a.ref("AssignmentSlot").array(),
       timezone: a.string(), // IANA timezone (e.g. "America/New_York") used to interpret classSchedule
+      location: a.ref("SectionLocation"),
+      startDate: a.date(),
+      endDate: a.date(),
+      academicTerm: a.string(),
+      acceptWorkOutsideSectionDates: a.boolean(),
       // Relationships
       assignments: a.hasMany("Assignment", ["sectionID"]),
       // Gamification items scoped to this section (real FK, replaces sectionID-by-convention)
@@ -1189,6 +1230,12 @@ const rawSchemaDefinition = {
       deletedAt: a.datetime(),
       deletedBy: a.string(),
     })
+    .secondaryIndexes((index) => [
+      // The upload pipeline (thumbnails, image variants, transcoding) is told
+      // only the S3 key, so it has to find the File by its path. Without this
+      // the lookup is a scan of every file in the table.
+      index("path").name("byPath"),
+    ])
     .authorization((allow) => [
       // Owner has full control
       allow.owner(),
@@ -1540,30 +1587,6 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       word: a.belongsTo("Word", ["wordID"]),
-      // Where in the source document the linked entry came from
-      page: a
-        .integer()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
-      sourceText: a
-        .string()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
-      // Normalized prompt or word, so a review screen can tell which extracted
-      // entries are already in the bank without loading each linked record
-      entryKey: a
-        .string()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
@@ -1601,30 +1624,6 @@ const rawSchemaDefinition = {
           allow.authenticated().to(["read"]),
         ]),
       question: a.belongsTo("Question", ["questionID"]),
-      // Where in the source document the linked entry came from
-      page: a
-        .integer()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
-      sourceText: a
-        .string()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
-      // Normalized prompt or word, so a review screen can tell which extracted
-      // entries are already in the bank without loading each linked record
-      entryKey: a
-        .string()
-        .authorization((allow) => [
-          allow.owner().to(["create", "read", "delete"]),
-          allow.group("Admins").to(["create", "read", "delete"]),
-          allow.authenticated().to(["read"]),
-        ]),
       deletedAt: a.datetime(),
     })
     .authorization((allow) => [
@@ -2039,6 +2038,7 @@ const rawSchemaDefinition = {
       // Document analysis
       autoAnalyzeDocuments: a.boolean(),
       documentAnalysisModel: a.string(),
+      documentAnalysisLlmExtractionOverride: a.boolean(),
       // Editor
       editorTheme: a.string(),
       editorFontSize: a.integer(),
@@ -2417,6 +2417,10 @@ const rawSchemaDefinition = {
       easterEggs: a.ref("EasterEggProfileEntry").array(),
       // Report card — rollup of grade accuracy and engaged time stats
       reportCard: a.ref("ReportCard"),
+      summaryText: a.string(),
+      summaryVersion: a.string(),
+      summaryGeneratedAt: a.datetime(),
+      summaryContext: a.json(),
       // Denormalized avatar config — synced from Settings.metadata on save & rebuild
       avatarStyle: a.string(),
       avatarOverrides: a.json(),
@@ -2438,6 +2442,8 @@ const rawSchemaDefinition = {
       _version: a.integer(),
       _lastChangedAt: a.timestamp(),
       _deleted: a.boolean(),
+      defaultSectionLocation: a.ref("SectionLocation"),
+      defaultAcceptWorkOutsideSectionDates: a.boolean().default(true),
       // === Gamification Feature Defaults ===
       // These are the system-wide defaults. Teachers can override per section.
       xpEnabled: a.boolean().default(true), // Master XP toggle
@@ -2472,11 +2478,12 @@ const rawSchemaDefinition = {
       // === AI & Document Analysis ===
       autoAnalyzeDocuments: a.boolean().default(true),
       documentAnalysisModel: a.string(), // e.g. "gpt-4", "gpt-4o"
+      documentAnalysisLlmExtractionEnabled: a.boolean().default(false),
       documentAnalysisOpenAiRequestsPerMinute: a.integer().default(10),
-      documentAnalysisOpenAiTokensPerMinute: a.integer().default(300000),
+      documentAnalysisOpenAiTokensPerMinute: a.integer().default(1000000),
       documentAnalysisOpenAiMaxConcurrentRequests: a.integer().default(1),
       documentAnalysisAnthropicRequestsPerMinute: a.integer().default(10),
-      documentAnalysisAnthropicTokensPerMinute: a.integer().default(300000),
+      documentAnalysisAnthropicTokensPerMinute: a.integer().default(1000000),
       documentAnalysisAnthropicMaxConcurrentRequests: a.integer().default(1),
       defaultAIModel: a.string().default("gpt-4o-mini"), // default model for chat/assistant
       // === Bot Personas ===
@@ -2621,6 +2628,7 @@ const rawSchemaDefinition = {
           allow.group("Admins").to(["create", "read", "delete"]),
           allow.authenticated().to(["read"]),
         ]),
+      sectionID: a.string(), // Section-scoped memory, otherwise global when null
       unitID: a.string(), // null = global memory, set = per-unit memory
       memoryMarkdown: a.string(),
       structuredProfile: a.json(),
@@ -2638,12 +2646,56 @@ const rawSchemaDefinition = {
     })
     .secondaryIndexes((index) => [
       index("studentId").name("byStudent"),
+      index("sectionID").name("bySection"),
       index("unitID").name("byUnit"),
     ])
     .authorization((allow) => [
       allow.owner(),
       allow.group("Admins").to(["create", "read", "update", "delete"]),
       allow.group("Instructors").to(["read"]),
+    ]),
+
+  StudentActionRecord: a
+    .model({
+      _version: a.integer(),
+      _lastChangedAt: a.timestamp(),
+      _deleted: a.boolean(),
+      owner: a
+        .string()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.group("Instructors").to(["read", "create", "update"]),
+        ]),
+      studentId: a
+        .string()
+        .required()
+        .authorization((allow) => [
+          allow.owner().to(["create", "read", "delete"]),
+          allow.group("Admins").to(["create", "read", "delete"]),
+          allow.group("Instructors").to(["read", "create", "update"]),
+        ]),
+      sectionID: a.string().required(),
+      createdBy: a.string().required(),
+      actionType: a.string(),
+      status: a.string().default("planned"),
+      description: a.string().required(),
+      targetDate: a.datetime(),
+      outcome: a.string(),
+      followUp: a.string(),
+      version: a.integer().default(1),
+      previousActionId: a.string(),
+      createdAt: a.datetime(),
+      updatedAt: a.datetime(),
+    })
+    .secondaryIndexes((index) => [
+      index("studentId").name("byStudent"),
+      index("sectionID").name("bySection"),
+    ])
+    .authorization((allow) => [
+      allow.owner(),
+      allow.group("Admins").to(["create", "read", "update", "delete"]),
+      allow.group("Instructors").to(["create", "read", "update"]),
     ]),
 
   EasterEgg: a
@@ -3384,6 +3436,7 @@ const rawSchemaDefinition = {
     .arguments({
       name: a.string().required(),
       description: a.string().required(),
+      location: a.ref("SectionLocation"),
     })
     .returns(a.string())
     .authorization((allow) => [allow.authenticated()])
@@ -3857,6 +3910,7 @@ const schema = a
     allow.resource(moderationHandler),
     allow.resource(recycleBinHandler),
     allow.resource(gradeRollupStreamHandler),
+    allow.resource(sectionHandler).to(["query", "mutate"]),
   ]);
 
 export type Schema = ClientSchema<typeof schema>;

@@ -171,6 +171,44 @@ export function shouldFlagLateSubmission(assignment = {}) {
   return new Date() > availableUntil;
 }
 
+export function isOutsideSectionDateRange(
+  section = {},
+  submittedAt = new Date(),
+) {
+  const { startDate, endDate, timezone } = section;
+  if (!startDate && !endDate) return false;
+
+  // An omitted IANA timezone intentionally uses the learner's local timezone.
+  const dateParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: timezone || undefined,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(submittedAt));
+  const parts = Object.fromEntries(
+    dateParts.map(({ type, value }) => [type, value]),
+  );
+  const submittedDate = `${parts.year}-${parts.month}-${parts.day}`;
+
+  return Boolean(
+    (startDate && submittedDate < startDate) ||
+      (endDate && submittedDate > endDate),
+  );
+}
+
+export function shouldFlagOutsideSectionDateSubmission(
+  section = {},
+  platformDefault = true,
+  submittedAt = new Date(),
+) {
+  const acceptsOutsideDates =
+    section.acceptWorkOutsideSectionDates ?? platformDefault ?? true;
+  return (
+    acceptsOutsideDates === false &&
+    isOutsideSectionDateRange(section, submittedAt)
+  );
+}
+
 export function getAssignmentWindowState(assignment = {}) {
   const now = new Date();
   const lateStatus = assignment.lateStatus || assignment.status;

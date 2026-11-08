@@ -200,6 +200,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "在已启用的练习模式中,各次尝试的正确率。",
+    "replay": "重玩",
+    "resetting": "正在重置...",
+    "resetFailed": "无法重置此练习，请重试。",
     "modes": {
       "easy": "简单",
       "hard": "困难",

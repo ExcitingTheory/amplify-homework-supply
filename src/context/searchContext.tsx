@@ -8,6 +8,7 @@ import {
   search,
   loadUnitBundle,
   loadInstructorBundle,
+  loadLearnerBundle,
   type SearchBundle,
   type SearchResult as BundleSearchResult,
 } from "../utils/searchBundles";
@@ -241,6 +242,10 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
   const loadingBundleRef = React.useRef<Promise<SearchBundle | null> | null>(
     null,
   );
+  const learnerBundleRef = React.useRef<{
+    key: string;
+    bundle: Promise<SearchBundle | null>;
+  } | null>(null);
   const learnerScopeRef = React.useRef<LearnerScopeData>({
     sections: [],
     units: [],
@@ -402,7 +407,7 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
 
       // Safety fallback for privileged users currently in a unit route.
       if (currentUnitId) {
-        const unitBundle = await loadUnitBundle(identityId, currentUnitId);
+        const unitBundle = await loadUnitBundle(currentUnitId);
         if (unitBundle) return unitBundle;
       }
 
@@ -673,6 +678,57 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
           results.push(...scopedResults);
         }
 
+        if (!isPrivileged && parsed.type !== "chat") {
+          // Semantic matches from the sections the learner is enrolled in.
+          // Optional: the lexical results above stand if this is unavailable.
+          try {
+            const groups = session?.groups;
+            const key = (groups ?? []).join("|");
+            if (learnerBundleRef.current?.key !== key) {
+              learnerBundleRef.current = {
+                key,
+                bundle: loadLearnerBundle(groups),
+              };
+            }
+            const learnerBundle = await learnerBundleRef.current.bundle;
+            if (learnerBundle) {
+              const { embedding } = await embed(cleanQuery);
+              const semantic = search(
+                embedding,
+                learnerBundle,
+                10,
+                0.3,
+                cleanQuery,
+              )
+                .map(
+                  (r: BundleSearchResult) =>
+                    ({
+                      type: r.item.type,
+                      id: r.item.id,
+                      title: r.item.title,
+                      description: r.item.meta.preview,
+                      score: r.score,
+                      page: r.item.meta.page,
+                      highlightTerm: cleanQuery,
+                      unitId: r.item.meta.unitId,
+                    }) as SearchResult,
+                )
+                .filter((r) => (parsed.type ? r.type === parsed.type : true));
+
+              // A unit or file found both ways keeps its higher score.
+              for (const hit of semantic) {
+                const existing = results.find(
+                  (r) => r.type === hit.type && r.id === hit.id,
+                );
+                if (!existing) results.push(hit);
+                else if (hit.score > existing.score) existing.score = hit.score;
+              }
+            }
+          } catch (err) {
+            console.warn("[SearchContext] Semantic section search failed:", err);
+          }
+        }
+
         if (includeChat) {
           const chatMatches = await searchChatMessagesAsync(cleanQuery, {
             limit: 10,
@@ -704,7 +760,13 @@ export function SearchProvider({ children }: { children: React.ReactNode }) {
         setState((prev) => ({ ...prev, results: [], searching: false }));
       }
     },
-    [searchChatMessagesAsync, loadBestBundle, loadLearnerScope, isPrivileged],
+    [
+      searchChatMessagesAsync,
+      loadBestBundle,
+      loadLearnerScope,
+      isPrivileged,
+      session?.groups,
+    ],
   );
 
   // Read initial query from URL (mount only; later changes are driven by setQuery)
@@ -783,8 +845,8 @@ export function useLoadSearchBundle() {
   const bundleRef = React.useRef<SearchBundle | null>(null);
 
   const loadForUnit = React.useCallback(
-    async (identityId: string, unitId: string) => {
-      const bundle = await loadUnitBundle(identityId, unitId);
+    async (unitId: string) => {
+      const bundle = await loadUnitBundle(unitId);
       bundleRef.current = bundle;
     },
     [],

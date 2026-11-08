@@ -1,0 +1,552 @@
+{
+  "sourceSha256": "c76c553d0731c3c3c2ce6fda1d5ee0aa0381484d607da89c761d5d50f5b9f0de",
+  "capturedAt": "2026-10-28T12:55:15.928Z",
+  "sourceFormat": "docx",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Document summary",
+      "content": "The document does not contain any provided summaries, objectives, or concepts. There is no content to synthesize into a document-level summary.",
+      "pageRange": "Not provided"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is definition for The Water Cycle?",
+      "answer": "The water cycle, also known as the hydrological cycle, describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "definition",
+      "sourceText": "The water cycle, also known as the hydrological cycle, describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "accept": [
+        "The water cycle, also known as the hydrological cycle, describes the continuous movement of water on, above, and below the surface of the Earth."
+      ]
+    },
+    {
+      "prompt": "What is drivers for The Water Cycle?",
+      "answer": "This cycle is driven by solar energy and gravity.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "drivers",
+      "sourceText": "This cycle is driven by solar energy and gravity.",
+      "accept": [
+        "This cycle is driven by solar energy and gravity."
+      ]
+    },
+    {
+      "prompt": "What is Stage 1 for Stages of the Water Cycle?",
+      "answer": "Evaporation and Transpiration",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Stage 1",
+      "sourceText": "1. Evaporation and Transpiration",
+      "accept": [
+        "Evaporation and Transpiration"
+      ]
+    },
+    {
+      "prompt": "What is Stage 2 for Stages of the Water Cycle?",
+      "answer": "Condensation",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Stage 2",
+      "sourceText": "2. Condensation",
+      "accept": [
+        "Condensation"
+      ]
+    },
+    {
+      "prompt": "What is Stage 3 for Stages of the Water Cycle?",
+      "answer": "Precipitation",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Stage 3",
+      "sourceText": "3. Precipitation",
+      "accept": [
+        "Precipitation"
+      ]
+    },
+    {
+      "prompt": "What is Stage 4 for Stages of the Water Cycle?",
+      "answer": "Collection and Infiltration",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Stage 4",
+      "sourceText": "4. Collection and Infiltration",
+      "accept": [
+        "Collection and Infiltration"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Important Concepts?",
+      "answer": "The average time a water molecule spends in a particular reservoir.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Important Concepts",
+      "field": "Residence Time",
+      "sourceText": "Residence Time - The average time a water molecule spends in a particular reservoir.",
+      "accept": [
+        "The average time a water molecule spends in a particular reservoir."
+      ]
+    },
+    {
+      "prompt": "What is Water Distribution for Important Concepts?",
+      "answer": "Approximately 97% of Earth’s water is saltwater in oceans. Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Important Concepts",
+      "field": "Water Distribution",
+      "sourceText": "Water Distribution - Approximately 97% of Earth’s water is saltwater in oceans. Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "accept": [
+        "Approximately 97% of Earth’s water is saltwater in oceans. Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere."
+      ]
+    },
+    {
+      "prompt": "What is Human Impact for Important Concepts?",
+      "answer": "Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Important Concepts",
+      "field": "Human Impact",
+      "sourceText": "Human Impact - Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution.",
+      "accept": [
+        "Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution."
+      ]
+    },
+    {
+      "prompt": "What is Water Balance Equation for Key Equations?",
+      "answer": "Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Key Equations",
+      "field": "Water Balance Equation",
+      "sourceText": "Water Balance Equation: Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "accept": [
+        "Precipitation = Evapotranspiration + Runoff + Change in Storage"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Water Cycle?",
+      "answer": "The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Water Cycle",
+      "field": "Residence Time",
+      "sourceText": "Residence Time - The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "accept": [
+        "The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days."
+      ]
+    },
+    {
+      "prompt": "What is Precipitation that reaches Earth’s surface either for Precipitation?",
+      "answer": "- Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Precipitation",
+      "field": "Precipitation that reaches Earth’s surface either",
+      "sourceText": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "accept": [
+        "Runs off into bodies of water (rivers, lakes, oceans)",
+        "Infiltrates into the ground to become groundwater",
+        "Is absorbed by plants or evaporates back into the atmosphere"
+      ]
+    },
+    {
+      "prompt": "What is Evaporation for Evaporation?",
+      "answer": "The process by which water changes from liquid to gas or vapor. This occurs when the sun heats water in rivers, lakes, or oceans.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Evaporation",
+      "field": "Evaporation",
+      "sourceText": "Evaporation - The process by which water changes from liquid to gas or vapor. This occurs when the sun heats water in rivers, lakes, or oceans.",
+      "accept": [
+        "The process by which water changes from liquid to gas or vapor. This occurs when the sun heats water in rivers, lakes, or oceans."
+      ]
+    },
+    {
+      "prompt": "What is Condensation for Condensation?",
+      "answer": "The process by which water vapor in the air is changed into liquid water. This is crucial to the formation of clouds.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Condensation",
+      "field": "Condensation",
+      "sourceText": "Condensation - The process by which water vapor in the air is changed into liquid water. This is crucial to the formation of clouds.",
+      "accept": [
+        "The process by which water vapor in the air is changed into liquid water. This is crucial to the formation of clouds."
+      ]
+    },
+    {
+      "prompt": "What is Precipitation for Precipitation?",
+      "answer": "Water released from clouds in the form of rain, sleet, snow, or hail. It is the primary way that water returns to Earth’s surface.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Precipitation",
+      "field": "Precipitation",
+      "sourceText": "Precipitation - Water released from clouds in the form of rain, sleet, snow, or hail. It is the primary way that water returns to Earth’s surface.",
+      "accept": [
+        "Water released from clouds in the form of rain, sleet, snow, or hail. It is the primary way that water returns to Earth’s surface."
+      ]
+    },
+    {
+      "prompt": "What is Transpiration for Transpiration?",
+      "answer": "The process by which plants release water vapor into the atmosphere through their leaves. This accounts for approximately 10% of atmospheric moisture.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Transpiration",
+      "field": "Transpiration",
+      "sourceText": "Transpiration - The process by which plants release water vapor into the atmosphere through their leaves. This accounts for approximately 10% of atmospheric moisture.",
+      "accept": [
+        "The process by which plants release water vapor into the atmosphere through their leaves. This accounts for approximately 10% of atmospheric moisture."
+      ]
+    },
+    {
+      "prompt": "What is Infiltration for Infiltration?",
+      "answer": "The process by which water on the ground surface enters the soil. Water that infiltrates can become groundwater.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Infiltration",
+      "field": "Infiltration",
+      "sourceText": "Infiltration - The process by which water on the ground surface enters the soil. Water that infiltrates can become groundwater.",
+      "accept": [
+        "The process by which water on the ground surface enters the soil. Water that infiltrates can become groundwater."
+      ]
+    },
+    {
+      "prompt": "What is Runoff for Runoff?",
+      "answer": "Water that flows over the land surface and into streams, rivers, and eventually the ocean. This occurs when the ground is saturated or impermeable.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Runoff",
+      "field": "Runoff",
+      "sourceText": "Runoff - Water that flows over the land surface and into streams, rivers, and eventually the ocean. This occurs when the ground is saturated or impermeable.",
+      "accept": [
+        "Water that flows over the land surface and into streams, rivers, and eventually the ocean. This occurs when the ground is saturated or impermeable."
+      ]
+    },
+    {
+      "prompt": "What is Groundwater for Groundwater?",
+      "answer": "Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Groundwater",
+      "field": "Groundwater",
+      "sourceText": "Groundwater - Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "accept": [
+        "Water stored beneath Earth’s surface in soil and rock formations called aquifers."
+      ]
+    },
+    {
+      "prompt": "What is Aquifer for Aquifer?",
+      "answer": "An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Aquifer",
+      "field": "Aquifer",
+      "sourceText": "Aquifer - An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted.",
+      "accept": [
+        "An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted."
+      ]
+    },
+    {
+      "prompt": "What is Percolation for Percolation?",
+      "answer": "The movement of water through soil and porous rock, eventually reaching groundwater reservoirs.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Percolation",
+      "field": "Percolation",
+      "sourceText": "Percolation - The movement of water through soil and porous rock, eventually reaching groundwater reservoirs.",
+      "accept": [
+        "The movement of water through soil and porous rock, eventually reaching groundwater reservoirs."
+      ]
+    },
+    {
+      "prompt": "What is Sublimation for Sublimation?",
+      "answer": "The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Sublimation",
+      "field": "Sublimation",
+      "sourceText": "Sublimation - The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase.",
+      "accept": [
+        "The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase."
+      ]
+    },
+    {
+      "prompt": "What is driving forces for The Water Cycle?",
+      "answer": "This cycle is driven by solar energy and gravity.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "driving forces",
+      "sourceText": "This cycle is driven by solar energy and gravity.",
+      "accept": [
+        "This cycle is driven by solar energy and gravity."
+      ]
+    },
+    {
+      "prompt": "What is definition for Evaporation?",
+      "answer": "The process by which water changes from liquid to gas or vapor.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Evaporation",
+      "field": "definition",
+      "sourceText": "Evaporation - The process by which water changes from liquid to gas or vapor. This occurs when the sun heats water in rivers, lakes, or oceans.",
+      "accept": [
+        "The process by which water changes from liquid to gas or vapor."
+      ]
+    },
+    {
+      "prompt": "What is definition for Condensation?",
+      "answer": "The process by which water vapor in the air is changed into liquid water.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Condensation",
+      "field": "definition",
+      "sourceText": "Condensation - The process by which water vapor in the air is changed into liquid water. This is crucial to the formation of clouds.",
+      "accept": [
+        "The process by which water vapor in the air is changed into liquid water."
+      ]
+    },
+    {
+      "prompt": "What is definition for Precipitation?",
+      "answer": "Water released from clouds in the form of rain, sleet, snow, or hail.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Precipitation",
+      "field": "definition",
+      "sourceText": "Precipitation - Water released from clouds in the form of rain, sleet, snow, or hail. It is the primary way that water returns to Earth’s surface.",
+      "accept": [
+        "Water released from clouds in the form of rain, sleet, snow, or hail."
+      ]
+    },
+    {
+      "prompt": "What is definition for Transpiration?",
+      "answer": "The process by which plants release water vapor into the atmosphere through their leaves.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Transpiration",
+      "field": "definition",
+      "sourceText": "Transpiration - The process by which plants release water vapor into the atmosphere through their leaves. This accounts for approximately 10% of atmospheric moisture.",
+      "accept": [
+        "The process by which plants release water vapor into the atmosphere through their leaves."
+      ]
+    },
+    {
+      "prompt": "What is definition for Infiltration?",
+      "answer": "The process by which water on the ground surface enters the soil.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Infiltration",
+      "field": "definition",
+      "sourceText": "Infiltration - The process by which water on the ground surface enters the soil. Water that infiltrates can become groundwater.",
+      "accept": [
+        "The process by which water on the ground surface enters the soil."
+      ]
+    },
+    {
+      "prompt": "What is definition for Runoff?",
+      "answer": "Water that flows over the land surface and into streams, rivers, and eventually the ocean.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Runoff",
+      "field": "definition",
+      "sourceText": "Runoff - Water that flows over the land surface and into streams, rivers, and eventually the ocean. This occurs when the ground is saturated or impermeable.",
+      "accept": [
+        "Water that flows over the land surface and into streams, rivers, and eventually the ocean."
+      ]
+    },
+    {
+      "prompt": "What is definition for Groundwater?",
+      "answer": "Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Groundwater",
+      "field": "definition",
+      "sourceText": "Groundwater - Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "accept": [
+        "Water stored beneath Earth’s surface in soil and rock formations called aquifers."
+      ]
+    },
+    {
+      "prompt": "What is definition for Aquifer?",
+      "answer": "An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Aquifer",
+      "field": "definition",
+      "sourceText": "Aquifer - An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted.",
+      "accept": [
+        "An underground layer of water-bearing permeable rock or sediment from which groundwater can be extracted."
+      ]
+    },
+    {
+      "prompt": "What is definition for Percolation?",
+      "answer": "The movement of water through soil and porous rock, eventually reaching groundwater reservoirs.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Percolation",
+      "field": "definition",
+      "sourceText": "Percolation - The movement of water through soil and porous rock, eventually reaching groundwater reservoirs.",
+      "accept": [
+        "The movement of water through soil and porous rock, eventually reaching groundwater reservoirs."
+      ]
+    },
+    {
+      "prompt": "What is definition for Sublimation?",
+      "answer": "The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Sublimation",
+      "field": "definition",
+      "sourceText": "Sublimation - The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase.",
+      "accept": [
+        "The transition of water directly from solid (ice/snow) to gas (water vapor) without passing through the liquid phase."
+      ]
+    },
+    {
+      "prompt": "What is Evaporation and Transpiration for Stages of the Water Cycle?",
+      "answer": "Solar radiation heats water in oceans, lakes, and rivers, causing it to evaporate into water vapor. Plants also release water vapor through transpiration. Together, these processes are called evapotranspiration.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Evaporation and Transpiration",
+      "sourceText": "Solar radiation heats water in oceans, lakes, and rivers, causing it to evaporate into water vapor. Plants also release water vapor through transpiration. Together, these processes are called evapotranspiration.",
+      "accept": [
+        "Solar radiation heats water in oceans, lakes, and rivers, causing it to evaporate into water vapor. Plants also release water vapor through transpiration. Together, these processes are called evapotranspiration."
+      ]
+    },
+    {
+      "prompt": "What is Condensation for Stages of the Water Cycle?",
+      "answer": "As water vapor rises into the atmosphere, it cools and condenses around tiny particles to form clouds. This process releases heat energy into the atmosphere.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Condensation",
+      "sourceText": "As water vapor rises into the atmosphere, it cools and condenses around tiny particles to form clouds. This process releases heat energy into the atmosphere.",
+      "accept": [
+        "As water vapor rises into the atmosphere, it cools and condenses around tiny particles to form clouds. This process releases heat energy into the atmosphere."
+      ]
+    },
+    {
+      "prompt": "What is Precipitation for Stages of the Water Cycle?",
+      "answer": "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Precipitation",
+      "sourceText": "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail.",
+      "accept": [
+        "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail."
+      ]
+    },
+    {
+      "prompt": "What is Collection and Infiltration for Stages of the Water Cycle?",
+      "answer": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "Collection and Infiltration",
+      "sourceText": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "accept": [
+        "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Important Concepts?",
+      "answer": "The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Important Concepts",
+      "field": "Residence Time",
+      "sourceText": "Residence Time - The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "accept": [
+        "The average time a water molecule spends in a particular reservoir. Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days."
+      ]
+    }
+  ]
+}

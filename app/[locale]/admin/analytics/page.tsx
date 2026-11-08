@@ -1,34 +1,28 @@
 import { cookies } from "next/headers";
 import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
-import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "../_components/adminAccess";
 import AnalyticsClient from "./AnalyticsClient";
 
 export default async function AnalyticsPage() {
-  // Auth check — admin pages require authentication
+  // Analytics is open to instructors as well as admins.
+  let groups: string[] = [];
   try {
     const session = await runWithAmplifyServerContext({
       nextServerContext: { cookies },
       operation: (contextSpec) => fetchAuthSession(contextSpec),
     });
-    if (!session?.tokens?.idToken) {
-      redirect("/");
-    }
+    const payload = session?.tokens?.idToken?.payload as
+      { "cognito:groups"?: string[] } | undefined;
+    groups = payload?.["cognito:groups"] || [];
   } catch {
-    redirect("/");
+    // Fall through — treated as no access below
   }
 
-  // Pre-fetch sections list for the date-range filter
-  let initialSections = [];
-  try {
-    const client = getServerClient();
-    const { data } = await client.models.Section.list({ limit: 100 });
-    // Strip lazy-load relationship functions (not serializable across RSC boundary)
-    initialSections = JSON.parse(JSON.stringify((data || []).filter((s) => s != null)));
-  } catch (err) {
-    console.error("[Analytics RSC] Failed to pre-fetch sections:", err);
+  if (!canAccessAdminArea(groups, "staff")) {
+    redirect("/?returnUrl=" + encodeURIComponent("/admin/analytics"));
   }
 
-  return <AnalyticsClient initialSections={initialSections} />;
+  return <AnalyticsClient />;
 }

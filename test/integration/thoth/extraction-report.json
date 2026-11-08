@@ -1,6 +1,6 @@
 {
-  "vocabRecall": 0.33495145631067963,
-  "factRecall": 0.031075697211155377,
+  "vocabRecall": 0.6213592233009708,
+  "factRecall": 0.043824701195219126,
   "pageCoverage": {
     "missing": []
   },
@@ -1567,11 +1567,6 @@
     },
     {
       "card": "ace-wands",
-      "field": "title",
-      "expected": "Root of the Powers of Fire"
-    },
-    {
-      "card": "ace-wands",
       "field": "element",
       "expected": "Fire"
     },
@@ -1584,16 +1579,6 @@
       "card": "ace-wands",
       "field": "world",
       "expected": "Atziluth"
-    },
-    {
-      "card": "ace-wands",
-      "field": "rank",
-      "expected": "Ace — Root of the element"
-    },
-    {
-      "card": "ace-wands",
-      "field": "chakra",
-      "expected": "Sahasrara (crown) [overlay]"
     },
     {
       "card": "ace-wands",
@@ -1619,11 +1604,6 @@
       "card": "ace-wands",
       "field": "colourPr",
       "expected": "White flecked gold"
-    },
-    {
-      "card": "ace-cups",
-      "field": "element",
-      "expected": "Water"
     },
     {
       "card": "ace-cups",
@@ -1662,6 +1642,11 @@
     },
     {
       "card": "ace-swords",
+      "field": "title",
+      "expected": "Root of the Powers of Air"
+    },
+    {
+      "card": "ace-swords",
       "field": "element",
       "expected": "Air"
     },
@@ -1674,6 +1659,21 @@
       "card": "ace-swords",
       "field": "world",
       "expected": "Yetzirah"
+    },
+    {
+      "card": "ace-swords",
+      "field": "rank",
+      "expected": "Ace — Root of the element"
+    },
+    {
+      "card": "ace-swords",
+      "field": "chakra",
+      "expected": "Sahasrara (crown) [overlay]"
+    },
+    {
+      "card": "ace-swords",
+      "field": "meaning",
+      "expected": "Primal mind and will-to-truth; the invoked, double-edged idea."
     },
     {
       "card": "ace-swords",
@@ -4442,11 +4442,6 @@
     },
     {
       "card": "court-wands-knight",
-      "field": "element",
-      "expected": "Fire of Fire"
-    },
-    {
-      "card": "court-wands-knight",
       "field": "treeLetter",
       "expected": "Yod"
     },
@@ -4459,16 +4454,6 @@
       "card": "court-wands-knight",
       "field": "world",
       "expected": "Atziluth"
-    },
-    {
-      "card": "court-wands-knight",
-      "field": "rank",
-      "expected": "Knight"
-    },
-    {
-      "card": "court-wands-knight",
-      "field": "chakra",
-      "expected": "Ajna (brow) [overlay]"
     },
     {
       "card": "court-wands-knight",
@@ -4519,11 +4504,6 @@
       "card": "court-wands-queen",
       "field": "title",
       "expected": "Queen of Wands"
-    },
-    {
-      "card": "court-wands-queen",
-      "field": "element",
-      "expected": "Water of Fire"
     },
     {
       "card": "court-wands-queen",
@@ -4617,16 +4597,6 @@
     },
     {
       "card": "court-wands-prince",
-      "field": "rank",
-      "expected": "Prince"
-    },
-    {
-      "card": "court-wands-prince",
-      "field": "chakra",
-      "expected": "Anahata (heart) [overlay]"
-    },
-    {
-      "card": "court-wands-prince",
       "field": "meaning",
       "expected": "Willful and brilliant, at times cruel; swift intellect fused with fiery purpose."
     },
@@ -4692,16 +4662,6 @@
     },
     {
       "card": "court-wands-princess",
-      "field": "rank",
-      "expected": "Princess"
-    },
-    {
-      "card": "court-wands-princess",
-      "field": "chakra",
-      "expected": "Muladhara (root) [overlay]"
-    },
-    {
-      "card": "court-wands-princess",
       "field": "meaning",
       "expected": "Fierce, ardent, individual — the fuel of fire; brave, and vengeful if roused."
     },
@@ -4726,11 +4686,6 @@
       "expected": "Black rayed yellow"
     },
     {
-      "card": "court-wands-princess",
-      "field": "rules",
-      "expected": "A quadrant of the heavens (around the N. Pole); Throne of the Ace"
-    },
-    {
       "card": "court-cups-knight",
       "field": "title",
       "expected": "Knight of Cups"
@@ -4749,16 +4704,6 @@
       "card": "court-cups-knight",
       "field": "world",
       "expected": "Briah"
-    },
-    {
-      "card": "court-cups-knight",
-      "field": "rank",
-      "expected": "Knight"
-    },
-    {
-      "card": "court-cups-knight",
-      "field": "chakra",
-      "expected": "Ajna (brow) [overlay]"
     },
     {
       "card": "court-cups-knight",
@@ -4824,16 +4769,6 @@
       "card": "court-cups-queen",
       "field": "world",
       "expected": "Briah"
-    },
-    {
-      "card": "court-cups-queen",
-      "field": "rank",
-      "expected": "Queen"
-    },
-    {
-      "card": "court-cups-queen",
-      "field": "chakra",
-      "expected": "Ajna (brow) [overlay]"
     },
     {
       "card": "court-cups-queen",
@@ -5012,11 +4947,6 @@
     },
     {
       "card": "court-swords-knight",
-      "field": "rank",
-      "expected": "Knight"
-    },
-    {
-      "card": "court-swords-knight",
       "field": "meaning",
       "expected": "Fierce, skillful, incisive — the mind as a rushing blade; decisive, sometimes reckless."
     },
@@ -5079,11 +5009,6 @@
       "card": "court-swords-queen",
       "field": "world",
       "expected": "Yetzirah"
-    },
-    {
-      "card": "court-swords-queen",
-      "field": "rank",
-      "expected": "Queen"
     },
     {
       "card": "court-swords-queen",
@@ -5262,16 +5187,6 @@
     },
     {
       "card": "court-disks-knight",
-      "field": "rank",
-      "expected": "Knight"
-    },
-    {
-      "card": "court-disks-knight",
-      "field": "chakra",
-      "expected": "Ajna (brow) [overlay]"
-    },
-    {
-      "card": "court-disks-knight",
       "field": "meaning",
       "expected": "Laborious, patient, dependable — the steady worker; dull but productive."
     },
@@ -5334,16 +5249,6 @@
       "card": "court-disks-queen",
       "field": "world",
       "expected": "Assiah"
-    },
-    {
-      "card": "court-disks-queen",
-      "field": "rank",
-      "expected": "Queen"
-    },
-    {
-      "card": "court-disks-queen",
-      "field": "chakra",
-      "expected": "Ajna (brow) [overlay]"
     },
     {
       "card": "court-disks-queen",
@@ -5412,8 +5317,8 @@
     },
     {
       "card": "court-disks-prince",
-      "field": "rank",
-      "expected": "Prince"
+      "field": "chakra",
+      "expected": "Anahata (heart) [overlay]"
     },
     {
       "card": "court-disks-prince",
@@ -5467,6 +5372,11 @@
     },
     {
       "card": "court-disks-princess",
+      "field": "element",
+      "expected": "Earth of Earth"
+    },
+    {
+      "card": "court-disks-princess",
       "field": "treeLetter",
       "expected": "Heh (final)"
     },
@@ -5484,6 +5394,11 @@
       "card": "court-disks-princess",
       "field": "rank",
       "expected": "Princess"
+    },
+    {
+      "card": "court-disks-princess",
+      "field": "chakra",
+      "expected": "Muladhara (root) [overlay]"
     },
     {
       "card": "court-disks-princess",
@@ -5509,6 +5424,11 @@
       "card": "court-disks-princess",
       "field": "colourPr",
       "expected": "Black rayed yellow"
+    },
+    {
+      "card": "court-disks-princess",
+      "field": "rules",
+      "expected": "A quadrant of the heavens (around the N. Pole); Throne of the Ace"
     },
     {
       "card": "ref-reading-these-cards",
@@ -6087,65 +6007,25 @@
     }
   ],
   "missingVocab": [
-    "Qabalah",
-    "Sephira",
-    "Emanation",
-    "Pillars",
-    "Tetragrammaton",
-    "World / plane",
-    "Minutum Mundum",
-    "Triplicity",
-    "Mode",
-    "Chaldean order",
-    "Ascendant / rising sign",
-    "Nativity",
-    "Ecliptic longitude",
-    "Trump / Major Arcana",
-    "Minor Arcana",
-    "Pip / small card",
-    "Court card",
-    "Significator",
-    "Well-/ill-dignified",
-    "Reversal",
-    "Counterchange",
-    "Quadrant",
-    "Colour scales",
-    "Flecked / rayed",
-    "Glyph",
-    "Quintessence / Spirit",
-    "Lotus",
-    "Chesed",
-    "Geburah",
-    "Briah",
-    "Jupiter",
-    "Cancer",
-    "Leo",
-    "Capricorn",
-    "Aquarius",
-    "Fire",
-    "Spirit",
+    "Kether",
+    "Netzach",
+    "Hod",
+    "Yesod",
     "Beth",
     "Gimel",
     "Daleth",
-    "Heh",
-    "Vau",
     "Zain",
     "Cheth",
     "Teth",
-    "Yod",
     "Lamed",
     "Mem",
     "Nun",
     "Samekh",
     "Ayin",
-    "Peh",
     "Tzaddi",
-    "Qoph",
     "Resh",
     "Shin",
     "Tau",
-    "Knight",
-    "Queen",
     "The Fool",
     "The Magus",
     "The Priestess",
@@ -6164,18 +6044,9 @@
     "The Devil",
     "The Tower",
     "The Star",
-    "The Sun",
     "The Aeon",
     "The Universe",
     "Dominion",
-    "Virtue",
-    "Completion",
-    "Strife",
-    "Victory",
-    "Valour",
-    "Swiftness",
-    "Strength",
-    "Oppression",
     "Love",
     "Abundance",
     "Luxury",
@@ -6205,26 +6076,16 @@
     "Wealth",
     "Knight of Wands",
     "Queen of Wands",
+    "Prince of Wands",
+    "Princess of Wands",
     "Knight of Cups",
     "Queen of Cups",
-    "Knight of Swords",
-    "Queen of Swords",
-    "Knight of Disks",
-    "Queen of Disks",
+    "Prince of Cups",
+    "Princess of Cups",
     "Reading These Cards",
-    "The Four Suits & Worlds",
-    "The Sephiroth",
-    "The Court Family",
-    "Court: Person, Force, or Idea?",
-    "The Significator (Crowley)",
-    "Glyphs — all symbols",
-    "The Planets",
-    "The Four Worlds (Planes)",
-    "Trumps as Paths + counterchange",
-    "The Colour Scales",
-    "Glossary — Astrology & time",
-    "Glossary — Tarot & reading"
+    "Numbers & the Tree",
+    "The Colour Scales"
   ],
-  "duplicates": 0,
-  "unmatchedExtracted": 1739
+  "duplicates": 1,
+  "unmatchedExtracted": 1927
 }

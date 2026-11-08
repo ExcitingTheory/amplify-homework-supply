@@ -74,7 +74,7 @@ function historyKey(identityId: string, unitId: string, version: number): string
 
 /**
  * Save draft content to S3.
- * Called by saveEditorContent in unitContext and useYjsUnit save.
+ * Called by saveEditorContent in unitContext.
  */
 export async function saveDraftContent(
   identityId: string,
@@ -317,13 +317,13 @@ await client.models.Unit.update({
 
 **After**:
 ```typescript
-import { saveDraftContent, saveYjsSnapshot } from '../utils/unitContentStorage';
+import { saveYjsSnapshot } from '../utils/unitContentStorage';
 
-// Upload content + snapshot to S3 in parallel (private — owner only)
-await Promise.all([
-  saveDraftContent(unit.identityId, unitId, JSON.stringify({ content: editorContent })),
-  saveYjsSnapshot(unit.identityId, unitId, Y.encodeStateAsUpdate(provider.getDoc())),
-]);
+await saveYjsSnapshot(
+  unit.identityId,
+  unitId,
+  Y.encodeStateAsUpdate(provider.getDoc()),
+);
 
 // Bump contentVersion in DynamoDB (lightweight)
 const nextContentVersion = (currentVersionRef.current || 0) + 1;
@@ -333,6 +333,22 @@ await client.models.Unit.update({
   _version: nextVersionRef.current,
 });
 ```
+
+UnitContext's `saveEditorContent` owns the canonical Lexical JSON draft. The
+collaboration hook only saves the Yjs snapshot: its `editorContent` text is not
+Lexical's shared root and must never overwrite the draft. A failed snapshot
+upload must reject before updating contentVersion.
+
+New units legitimately have no saved editor state. Editor onChange waits for a
+loaded unit ID, not a non-null saved-state ref, so the first edit initializes the
+canonical Lexical state and can be saved.
+
+Metadata-only unit refreshes preserve the current draft and editor-state ref.
+Manual saves serialize the live Lexical editor state, including exercise
+configuration changes. OnChange observes history-tagged content updates without
+throttling away the final change; initialization and datastore loads are excluded.
+Graded blocks are collected recursively because decorators can be nested inside
+paragraphs, and an empty rubric cannot trigger workbook completion.
 
 ### Load — read snapshot from S3
 
@@ -484,7 +500,6 @@ Learner → UnitProvider → Unit.get({ id })
 ```
 Y.Doc change → useYjsUnit debounced save (5s)
   │
-  ├─ S3 PUT: private/{identityId}/units/{id}/draft.json
   ├─ S3 PUT: private/{identityId}/units/{id}/yjs-snapshot.bin
   │
   └─ DynamoDB UPDATE: { contentVersion: N+1 }  (triggers subscription)

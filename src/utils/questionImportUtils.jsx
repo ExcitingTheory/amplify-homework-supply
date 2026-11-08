@@ -8,6 +8,7 @@ import { assertParsedContentImportAllowed } from "./parsedContentModeration";
 import { QUESTION_FIELDS, pickEntries, toEntryList } from "./parsedContentLists";
 import {
   loadMergedParsedContent,
+  patchMergedListEntries,
   updateMergedListEntry,
 } from "./parsedContentChunks";
 import {
@@ -15,27 +16,28 @@ import {
   linkItemToDocument,
   listDocumentLinks,
 } from "./documentLinks";
+import {
+  findExistingByField,
+  IMPORT_CONCURRENCY,
+  listUnitLinkIds,
+  mapWithConcurrency,
+  matchKey,
+  singleFlight,
+} from "./importBatch";
 
 /**
  * Check if a question already exists in the bank (by prompt similarity)
+ *
+ * Shares the batch lookup so a single check matches a prompt exactly as a whole
+ * import would.
  * @param {string} prompt - The question prompt to check
  * @param {string} owner - Owner of the question
  * @returns {Promise<Object|null>} Existing question or null
  */
 export async function findExistingQuestion(prompt, owner) {
   const client = getAmplifyClient();
-  const normalizedPrompt = prompt.trim().toLowerCase();
-
-  // Search by prompt text (exact match)
-  const { data: existingQuestions } = await client.models.Question.list({
-    filter: { prompt: { eq: prompt.trim() } },
-  });
-
-  const exactMatch = existingQuestions?.find(
-    (q) => q.prompt?.trim().toLowerCase() === normalizedPrompt,
-  );
-
-  return exactMatch || null;
+  const found = await findExistingByField(client.models.Question, "prompt", [prompt]);
+  return found.get(matchKey(prompt)) ?? null;
 }
 
 /**
@@ -88,20 +90,26 @@ export async function createQuestion(questionItem, owner, identityId) {
  * @param {string} questionId - ID of the Question
  * @param {string} unitId - ID of the Unit
  * @param {string} owner - Owner of the relationship
+ * @param {Map<string, Object>} [existing] - Links already loaded for the unit, by question id
  * @returns {Promise<Object>} Created QuestionUnit relationship
  */
-export async function linkQuestionToUnit(questionId, unitId, owner) {
+export async function linkQuestionToUnit(questionId, unitId, owner, existing = undefined) {
   const client = getAmplifyClient();
-  // Check if relationship already exists
-  const { data: existing } = await client.models.QuestionUnit.list({
-    filter: {
-      and: [{ questionID: { eq: questionId } }, { unitID: { eq: unitId } }],
-    },
-  });
-
-  if (existing && existing.length > 0) {
-    console.log(`Question ${questionId} already linked to Unit ${unitId}`);
-    return existing[0];
+  // The unit's links are loaded once by a batch import, so only look them up
+  // here when this is a standalone call.
+  if (existing) {
+    const known = existing.get(questionId);
+    if (known) return known;
+  } else {
+    const { data: found } = await client.models.QuestionUnit.list({
+      filter: {
+        and: [{ questionID: { eq: questionId } }, { unitID: { eq: unitId } }],
+      },
+    });
+    if (found && found.length > 0) {
+      console.log(`Question ${questionId} already linked to Unit ${unitId}`);
+      return found[0];
+    }
   }
 
   const { data: questionUnit } = await client.models.QuestionUnit.create({
@@ -114,11 +122,10 @@ export async function linkQuestionToUnit(questionId, unitId, owner) {
 
 /**
  * Link a Question to a Document via DocumentQuestion junction table, once.
- * The link records the entry's page, source text and key.
+ * The page and source snippet are read from the document's ParsedContent, not stored.
  * @param {string} questionId - ID of the Question
  * @param {string} documentId - ID of the Document
  * @param {string} owner - Owner of the relationship
- * @param {Object} [entry] - The extracted question item (page, prompt, sourceText)
  * @param {Map<string, Object>} [existing] - Links already loaded for the document, by question id
  * @returns {Promise<Object|null>} The DocumentQuestion link or null
  */
@@ -126,14 +133,12 @@ export async function linkQuestionToDocument(
   questionId,
   documentId,
   owner,
-  entry = null,
   existing = undefined,
 ) {
   return linkItemToDocument(getAmplifyClient(), "question", {
     itemId: questionId,
     documentId,
     owner,
-    entry,
     existing,
   });
 }
@@ -158,6 +163,11 @@ export async function importQuestionsToUnit(
 ) {
   try {
     const client = getAmplifyClient();
+    // The setup below is several round trips, so it is reported too: the
+    // progress bar is on screen from the click rather than appearing only once
+    // the first question is reached.
+    const report = (current, total, message) => onProgress?.(current, total, message);
+    report(0, 0, "Loading the document…");
     // Fetch the ParsedContent record; a long document is stored as several
     // chunks, merged into one record here
     const parsedContent = await loadMergedParsedContent(client, {
@@ -181,10 +191,13 @@ export async function importQuestionsToUnit(
       };
     }
 
-    // Filter items if specific indices are selected
-    const itemsToImport = selectedIndices
-      ? questionItems.filter((_, index) => selectedIndices.includes(index))
-      : questionItems;
+    // Filter items if specific indices are selected, remembering where each sits in the merged list
+    const indexedItems = questionItems
+      .map((item, index) => ({ item, index }))
+      .filter(({ index }) => !selectedIndices || selectedIndices.includes(index));
+    const itemsToImport = indexedItems.map(({ item }) => item);
+    // The Question each entry became, written back onto the entry afterwards
+    const entryReferences = new Map();
 
     const results = {
       success: true,
@@ -197,69 +210,89 @@ export async function importQuestionsToUnit(
 
     const total = itemsToImport.length;
 
-    // Get associated documentID if available
+    // Everything the loop needs to look up, fetched once. Each of these
+    // replaces one filtered scan per question.
+    report(0, total, "Checking the question bank…");
     const documentId = parsedContent.documentID || null;
-    // Links already made for this document, loaded once rather than per question
-    const documentLinks = documentId
-      ? indexLinksByItem("question", await listDocumentLinks(client, documentId, "question"))
-      : undefined;
+    const [existingQuestions, unitLinks, documentLinks] = await Promise.all([
+      findExistingByField(
+        client.models.Question,
+        "prompt",
+        itemsToImport.map((item) => item.prompt || ""),
+      ),
+      unitId
+        ? listUnitLinkIds(client.models.QuestionUnit, "unitID", unitId, "questionID")
+        : Promise.resolve(new Map()),
+      documentId
+        ? listDocumentLinks(client, documentId, "question").then((links) =>
+            indexLinksByItem("question", links))
+        : Promise.resolve(undefined),
+    ]);
 
-    // Process each question item
-    for (let i = 0; i < itemsToImport.length; i++) {
-      const item = itemsToImport[i];
+    const createOnce = singleFlight();
+    const linkOnce = singleFlight();
+    // Claimed synchronously, before any await, so exactly one entry per prompt
+    // is counted as created however the workers interleave.
+    const claimed = new Set();
+    let completed = 0;
+
+    await mapWithConcurrency(itemsToImport, IMPORT_CONCURRENCY, async (item, i) => {
       const promptText = item.prompt || "";
-
-      if (onProgress) {
-        onProgress(i + 1, total, `Processing: ${promptText.slice(0, 50)}...`);
-      }
-
       if (!promptText) {
         results.errors++;
         results.errorDetails.push({
           question: `(index ${i})`,
           error: "Empty prompt",
         });
-        continue;
+        report(++completed, total, "Skipping a question with no prompt");
+        return;
       }
 
       try {
-        // Check for existing question
-        const existingQuestion = await findExistingQuestion(promptText, owner);
+        const key = matchKey(promptText);
+        const existingQuestion = existingQuestions.get(key) ?? null;
 
         let questionToLink;
-
+        let created = false;
         if (existingQuestion) {
-          // Question already exists, just link to unit
           questionToLink = existingQuestion;
-          console.log(`Question already exists: ${promptText.slice(0, 40)}...`);
-          results.skipped++;
         } else {
-          // Create new question
-          questionToLink = await createQuestion(item, owner, identityId);
-          console.log(`Created new question: ${promptText.slice(0, 40)}...`);
-          results.imported++;
+          created = !claimed.has(key);
+          claimed.add(key);
+          // Whichever entry claims the prompt creates it; the rest wait on that
+          // same create and count as duplicates.
+          questionToLink = await createOnce(key, () =>
+            createQuestion(item, owner, identityId));
         }
+        if (created) results.imported++;
+        else results.skipped++;
 
-        // Link question to unit
-        if (unitId && questionToLink) {
-          await linkQuestionToUnit(questionToLink.id, unitId, owner);
-        }
+        // Several entries can resolve to one question, so its links are made
+        // once rather than once per entry.
+        await linkOnce(questionToLink.id, async () => {
+          if (unitId && !unitLinks.has(questionToLink.id)) {
+            unitLinks.set(
+              questionToLink.id,
+              await linkQuestionToUnit(questionToLink.id, unitId, owner, unitLinks),
+            );
+          }
+          if (documentId) {
+            await linkQuestionToDocument(
+              questionToLink.id,
+              documentId,
+              owner,
+              documentLinks,
+            );
+          }
+          return questionToLink.id;
+        });
 
-        // Link question to source document
-        if (documentId && questionToLink) {
-          await linkQuestionToDocument(
-            questionToLink.id,
-            documentId,
-            owner,
-            item,
-            documentLinks,
-          );
-        }
+        entryReferences.set(indexedItems[i].index, { questionID: questionToLink.id });
 
         results.importedQuestions.push({
           questionId: questionToLink.id,
           prompt: questionToLink.prompt,
-          isNew: !existingQuestion,
+          isNew: created,
         });
       } catch (error) {
         console.error(
@@ -271,9 +304,12 @@ export async function importQuestionsToUnit(
           question: promptText.slice(0, 60),
           error: error.message,
         });
+      } finally {
+        report(++completed, total, `Processing: ${promptText.slice(0, 50)}...`);
       }
-    }
+    });
 
+    report(total, total, "Saving the question bank…");
     // Mark ParsedContent questions as imported
     if (parsedContent) {
       await client.models.ParsedContent.update({
@@ -281,6 +317,23 @@ export async function importQuestionsToUnit(
         importedAt: new Date().toISOString(),
         _version: parsedContent._version,
       });
+    }
+
+    // Record on each entry the Question it became, so its document link can find
+    // its page and source and the review screen can show it as imported
+    if (entryReferences.size > 0) {
+      try {
+        await patchMergedListEntries(
+          client,
+          parsedContent,
+          "questionsJSON",
+          entryReferences,
+          (entries) => pickEntries(entries, QUESTION_FIELDS),
+        );
+      } catch (error) {
+        console.error("Could not record imported questions on their entries:", error);
+        results.warning = `Imported, but could not mark the entries as imported: ${error.message}`;
+      }
     }
 
     if (onProgress) {

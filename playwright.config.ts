@@ -15,6 +15,7 @@ import { defineConfig, devices } from "@playwright/test";
  */
 export default defineConfig({
   testDir: "./test/e2e-collaboration",
+  outputDir: "./test-results/collaboration",
   fullyParallel: false, // Tests share state within a file — run sequentially
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 1 : 0,

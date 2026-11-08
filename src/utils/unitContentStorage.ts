@@ -30,7 +30,7 @@ function plainTextKey(identityId: string, unitId: string): string {
 
 /**
  * Save draft content to S3.
- * Called by saveEditorContent in unitContext and useYjsUnit save.
+ * Called by saveEditorContent in unitContext.
  */
 export async function saveDraftContent(
   identityId: string,

@@ -1,0 +1,2112 @@
+{
+  "sourceSha256": "8996ddc751254bf36f6dc5ad133f0496d39491af4a6a561d6c4fb35f9c63f9d7",
+  "capturedAt": "2026-10-28T12:55:08.152Z",
+  "sourceFormat": "csv",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Spanish for hablar?",
+      "answer": "hablar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "Spanish",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "hablar"
+      ]
+    },
+    {
+      "prompt": "What is English for hablar?",
+      "answer": "to speak",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "English",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "to speak"
+      ]
+    },
+    {
+      "prompt": "What is Example for hablar?",
+      "answer": "Yo hablo español",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "Example",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "Yo hablo español"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for hablar?",
+      "answer": "hablo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "Conjugation_yo",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "hablo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for hablar?",
+      "answer": "hablas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "Conjugation_tú",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "hablas"
+      ]
+    },
+    {
+      "prompt": "What is Category for hablar?",
+      "answer": "Communication",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar",
+      "field": "Category",
+      "sourceText": "Spanish,English,Example,Conjugation_yo,Conjugation_tú,Category\nhablar,to speak,Yo hablo español,hablo,hablas,Communication",
+      "accept": [
+        "Communication"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for trabajar?",
+      "answer": "trabajar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "Spanish",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "trabajar"
+      ]
+    },
+    {
+      "prompt": "What is English for trabajar?",
+      "answer": "to work",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "English",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "to work"
+      ]
+    },
+    {
+      "prompt": "What is Example for trabajar?",
+      "answer": "Ella trabaja en una oficina",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "Example",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "Ella trabaja en una oficina"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for trabajar?",
+      "answer": "trabajo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "Conjugation_yo",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "trabajo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for trabajar?",
+      "answer": "trabajas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "Conjugation_tú",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "trabajas"
+      ]
+    },
+    {
+      "prompt": "What is Category for trabajar?",
+      "answer": "Work",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "trabajar",
+      "field": "Category",
+      "sourceText": "trabajar,to work,Ella trabaja en una oficina,trabajo,trabajas,Work",
+      "accept": [
+        "Work"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for estudiar?",
+      "answer": "estudiar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "Spanish",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "estudiar"
+      ]
+    },
+    {
+      "prompt": "What is English for estudiar?",
+      "answer": "to study",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "English",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "to study"
+      ]
+    },
+    {
+      "prompt": "What is Example for estudiar?",
+      "answer": "Nosotros estudiamos matemáticas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "Example",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "Nosotros estudiamos matemáticas"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for estudiar?",
+      "answer": "estudio",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "Conjugation_yo",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "estudio"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for estudiar?",
+      "answer": "estudias",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "Conjugation_tú",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "estudias"
+      ]
+    },
+    {
+      "prompt": "What is Category for estudiar?",
+      "answer": "Education",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "estudiar",
+      "field": "Category",
+      "sourceText": "estudiar,to study,Nosotros estudiamos matemáticas,estudio,estudias,Education",
+      "accept": [
+        "Education"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for bailar?",
+      "answer": "bailar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "Spanish",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "bailar"
+      ]
+    },
+    {
+      "prompt": "What is English for bailar?",
+      "answer": "to dance",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "English",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "to dance"
+      ]
+    },
+    {
+      "prompt": "What is Example for bailar?",
+      "answer": "Ellos bailan salsa",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "Example",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "Ellos bailan salsa"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for bailar?",
+      "answer": "bailo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "Conjugation_yo",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "bailo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for bailar?",
+      "answer": "bailas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "Conjugation_tú",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "bailas"
+      ]
+    },
+    {
+      "prompt": "What is Category for bailar?",
+      "answer": "Entertainment",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar",
+      "field": "Category",
+      "sourceText": "bailar,to dance,Ellos bailan salsa,bailo,bailas,Entertainment",
+      "accept": [
+        "Entertainment"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for cantar?",
+      "answer": "cantar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Spanish",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "cantar"
+      ]
+    },
+    {
+      "prompt": "What is English for cantar?",
+      "answer": "to sing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "English",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "to sing"
+      ]
+    },
+    {
+      "prompt": "What is Example for cantar?",
+      "answer": "Tú cantas bien",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Example",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "Tú cantas bien"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for cantar?",
+      "answer": "canto",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Conjugation_yo",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "canto"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for cantar?",
+      "answer": "cantas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Conjugation_tú",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "cantas"
+      ]
+    },
+    {
+      "prompt": "What is Category for cantar?",
+      "answer": "Entertainment",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Category",
+      "sourceText": "cantar,to sing,Tú cantas bien,canto,cantas,Entertainment",
+      "accept": [
+        "Entertainment"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for caminar?",
+      "answer": "caminar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "Spanish",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "caminar"
+      ]
+    },
+    {
+      "prompt": "What is English for caminar?",
+      "answer": "to walk",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "English",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "to walk"
+      ]
+    },
+    {
+      "prompt": "What is Example for caminar?",
+      "answer": "Él camina al trabajo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "Example",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "Él camina al trabajo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for caminar?",
+      "answer": "camino",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "Conjugation_yo",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "camino"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for caminar?",
+      "answer": "caminas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "Conjugation_tú",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "caminas"
+      ]
+    },
+    {
+      "prompt": "What is Category for caminar?",
+      "answer": "Movement",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar",
+      "field": "Category",
+      "sourceText": "caminar,to walk,Él camina al trabajo,camino,caminas,Movement",
+      "accept": [
+        "Movement"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for cocinar?",
+      "answer": "cocinar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "Spanish",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "cocinar"
+      ]
+    },
+    {
+      "prompt": "What is English for cocinar?",
+      "answer": "to cook",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "English",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "to cook"
+      ]
+    },
+    {
+      "prompt": "What is Example for cocinar?",
+      "answer": "Mi madre cocina la cena",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "Example",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "Mi madre cocina la cena"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for cocinar?",
+      "answer": "cocino",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "Conjugation_yo",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "cocino"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for cocinar?",
+      "answer": "cocinas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "Conjugation_tú",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "cocinas"
+      ]
+    },
+    {
+      "prompt": "What is Category for cocinar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cocinar",
+      "field": "Category",
+      "sourceText": "cocinar,to cook,Mi madre cocina la cena,cocino,cocinas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for nadar?",
+      "answer": "nadar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "Spanish",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "nadar"
+      ]
+    },
+    {
+      "prompt": "What is English for nadar?",
+      "answer": "to swim",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "English",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "to swim"
+      ]
+    },
+    {
+      "prompt": "What is Example for nadar?",
+      "answer": "Los niños nadan en la piscina",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "Example",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "Los niños nadan en la piscina"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for nadar?",
+      "answer": "nado",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "Conjugation_yo",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "nado"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for nadar?",
+      "answer": "nadas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "Conjugation_tú",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "nadas"
+      ]
+    },
+    {
+      "prompt": "What is Category for nadar?",
+      "answer": "Sports",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "nadar",
+      "field": "Category",
+      "sourceText": "nadar,to swim,Los niños nadan en la piscina,nado,nadas,Sports",
+      "accept": [
+        "Sports"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for escuchar?",
+      "answer": "escuchar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "Spanish",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "escuchar"
+      ]
+    },
+    {
+      "prompt": "What is English for escuchar?",
+      "answer": "to listen",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "English",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "to listen"
+      ]
+    },
+    {
+      "prompt": "What is Example for escuchar?",
+      "answer": "Escucho música",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "Example",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "Escucho música"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for escuchar?",
+      "answer": "escucho",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "Conjugation_yo",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "escucho"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for escuchar?",
+      "answer": "escuchas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "Conjugation_tú",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "escuchas"
+      ]
+    },
+    {
+      "prompt": "What is Category for escuchar?",
+      "answer": "Communication",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "escuchar",
+      "field": "Category",
+      "sourceText": "escuchar,to listen,Escucho música,escucho,escuchas,Communication",
+      "accept": [
+        "Communication"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for mirar?",
+      "answer": "mirar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "Spanish",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "mirar"
+      ]
+    },
+    {
+      "prompt": "What is English for mirar?",
+      "answer": "to watch",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "English",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "to watch"
+      ]
+    },
+    {
+      "prompt": "What is Example for mirar?",
+      "answer": "Miramos la televisión",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "Example",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "Miramos la televisión"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for mirar?",
+      "answer": "miro",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "Conjugation_yo",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "miro"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for mirar?",
+      "answer": "miras",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "Conjugation_tú",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "miras"
+      ]
+    },
+    {
+      "prompt": "What is Category for mirar?",
+      "answer": "Entertainment",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "mirar",
+      "field": "Category",
+      "sourceText": "mirar,to watch,Miramos la televisión,miro,miras,Entertainment",
+      "accept": [
+        "Entertainment"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for comprar?",
+      "answer": "comprar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "Spanish",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "comprar"
+      ]
+    },
+    {
+      "prompt": "What is English for comprar?",
+      "answer": "to buy",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "English",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "to buy"
+      ]
+    },
+    {
+      "prompt": "What is Example for comprar?",
+      "answer": "Compro pan en la panadería",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "Example",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "Compro pan en la panadería"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for comprar?",
+      "answer": "compro",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "Conjugation_yo",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "compro"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for comprar?",
+      "answer": "compras",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "Conjugation_tú",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "compras"
+      ]
+    },
+    {
+      "prompt": "What is Category for comprar?",
+      "answer": "Shopping",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "comprar",
+      "field": "Category",
+      "sourceText": "comprar,to buy,Compro pan en la panadería,compro,compras,Shopping",
+      "accept": [
+        "Shopping"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for viajar?",
+      "answer": "viajar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "Spanish",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "viajar"
+      ]
+    },
+    {
+      "prompt": "What is English for viajar?",
+      "answer": "to travel",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "English",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "to travel"
+      ]
+    },
+    {
+      "prompt": "What is Example for viajar?",
+      "answer": "Viajan a México",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "Example",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "Viajan a México"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for viajar?",
+      "answer": "viajo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "Conjugation_yo",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "viajo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for viajar?",
+      "answer": "viajas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "Conjugation_tú",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "viajas"
+      ]
+    },
+    {
+      "prompt": "What is Category for viajar?",
+      "answer": "Travel",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "viajar",
+      "field": "Category",
+      "sourceText": "viajar,to travel,Viajan a México,viajo,viajas,Travel",
+      "accept": [
+        "Travel"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for descansar?",
+      "answer": "descansar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "Spanish",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "descansar"
+      ]
+    },
+    {
+      "prompt": "What is English for descansar?",
+      "answer": "to rest",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "English",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "to rest"
+      ]
+    },
+    {
+      "prompt": "What is Example for descansar?",
+      "answer": "Descansas después del trabajo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "Example",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "Descansas después del trabajo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for descansar?",
+      "answer": "descanso",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "Conjugation_yo",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "descanso"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for descansar?",
+      "answer": "descansas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "Conjugation_tú",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "descansas"
+      ]
+    },
+    {
+      "prompt": "What is Category for descansar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "descansar",
+      "field": "Category",
+      "sourceText": "descansar,to rest,Descansas después del trabajo,descanso,descansas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for llevar?",
+      "answer": "llevar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "Spanish",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "llevar"
+      ]
+    },
+    {
+      "prompt": "What is English for llevar?",
+      "answer": "to carry/wear",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "English",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "to carry/wear"
+      ]
+    },
+    {
+      "prompt": "What is Example for llevar?",
+      "answer": "Llevo una camisa azul",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "Example",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "Llevo una camisa azul"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for llevar?",
+      "answer": "llevo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "Conjugation_yo",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "llevo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for llevar?",
+      "answer": "llevas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "Conjugation_tú",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "llevas"
+      ]
+    },
+    {
+      "prompt": "What is Category for llevar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llevar",
+      "field": "Category",
+      "sourceText": "llevar,to carry/wear,Llevo una camisa azul,llevo,llevas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for tomar?",
+      "answer": "tomar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "Spanish",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "tomar"
+      ]
+    },
+    {
+      "prompt": "What is English for tomar?",
+      "answer": "to take/drink",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "English",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "to take/drink"
+      ]
+    },
+    {
+      "prompt": "What is Example for tomar?",
+      "answer": "Tomo café por la mañana",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "Example",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "Tomo café por la mañana"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for tomar?",
+      "answer": "tomo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "Conjugation_yo",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "tomo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for tomar?",
+      "answer": "tomas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "Conjugation_tú",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "tomas"
+      ]
+    },
+    {
+      "prompt": "What is Category for tomar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "tomar",
+      "field": "Category",
+      "sourceText": "tomar,to take/drink,Tomo café por la mañana,tomo,tomas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for buscar?",
+      "answer": "buscar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "Spanish",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "buscar"
+      ]
+    },
+    {
+      "prompt": "What is English for buscar?",
+      "answer": "to look for",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "English",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "to look for"
+      ]
+    },
+    {
+      "prompt": "What is Example for buscar?",
+      "answer": "Busco mis llaves",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "Example",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "Busco mis llaves"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for buscar?",
+      "answer": "busco",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "Conjugation_yo",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "busco"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for buscar?",
+      "answer": "buscas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "Conjugation_tú",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "buscas"
+      ]
+    },
+    {
+      "prompt": "What is Category for buscar?",
+      "answer": "Actions",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "buscar",
+      "field": "Category",
+      "sourceText": "buscar,to look for,Busco mis llaves,busco,buscas,Actions",
+      "accept": [
+        "Actions"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for enseñar?",
+      "answer": "enseñar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "Spanish",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "enseñar"
+      ]
+    },
+    {
+      "prompt": "What is English for enseñar?",
+      "answer": "to teach",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "English",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "to teach"
+      ]
+    },
+    {
+      "prompt": "What is Example for enseñar?",
+      "answer": "El profesor enseña español",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "Example",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "El profesor enseña español"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for enseñar?",
+      "answer": "enseño",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "Conjugation_yo",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "enseño"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for enseñar?",
+      "answer": "enseñas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "Conjugation_tú",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "enseñas"
+      ]
+    },
+    {
+      "prompt": "What is Category for enseñar?",
+      "answer": "Education",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "enseñar",
+      "field": "Category",
+      "sourceText": "enseñar,to teach,El profesor enseña español,enseño,enseñas,Education",
+      "accept": [
+        "Education"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for esperar?",
+      "answer": "esperar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "Spanish",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "esperar"
+      ]
+    },
+    {
+      "prompt": "What is English for esperar?",
+      "answer": "to wait",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "English",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "to wait"
+      ]
+    },
+    {
+      "prompt": "What is Example for esperar?",
+      "answer": "Esperamos el autobús",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "Example",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "Esperamos el autobús"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for esperar?",
+      "answer": "espero",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "Conjugation_yo",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "espero"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for esperar?",
+      "answer": "esperas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "Conjugation_tú",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "esperas"
+      ]
+    },
+    {
+      "prompt": "What is Category for esperar?",
+      "answer": "Actions",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "esperar",
+      "field": "Category",
+      "sourceText": "esperar,to wait,Esperamos el autobús,espero,esperas,Actions",
+      "accept": [
+        "Actions"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for ganar?",
+      "answer": "ganar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "Spanish",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "ganar"
+      ]
+    },
+    {
+      "prompt": "What is English for ganar?",
+      "answer": "to win/earn",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "English",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "to win/earn"
+      ]
+    },
+    {
+      "prompt": "What is Example for ganar?",
+      "answer": "Ganan dinero",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "Example",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "Ganan dinero"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for ganar?",
+      "answer": "gano",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "Conjugation_yo",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "gano"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for ganar?",
+      "answer": "ganas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "Conjugation_tú",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "ganas"
+      ]
+    },
+    {
+      "prompt": "What is Category for ganar?",
+      "answer": "Work",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "ganar",
+      "field": "Category",
+      "sourceText": "ganar,to win/earn,Ganan dinero,gano,ganas,Work",
+      "accept": [
+        "Work"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for llegar?",
+      "answer": "llegar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "Spanish",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "llegar"
+      ]
+    },
+    {
+      "prompt": "What is English for llegar?",
+      "answer": "to arrive",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "English",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "to arrive"
+      ]
+    },
+    {
+      "prompt": "What is Example for llegar?",
+      "answer": "Llego a las ocho",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "Example",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "Llego a las ocho"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for llegar?",
+      "answer": "llego",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "Conjugation_yo",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "llego"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for llegar?",
+      "answer": "llegas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "Conjugation_tú",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "llegas"
+      ]
+    },
+    {
+      "prompt": "What is Category for llegar?",
+      "answer": "Movement",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "llegar",
+      "field": "Category",
+      "sourceText": "llegar,to arrive,Llego a las ocho,llego,llegas,Movement",
+      "accept": [
+        "Movement"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for necesitar?",
+      "answer": "necesitar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "Spanish",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "necesitar"
+      ]
+    },
+    {
+      "prompt": "What is English for necesitar?",
+      "answer": "to need",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "English",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "to need"
+      ]
+    },
+    {
+      "prompt": "What is Example for necesitar?",
+      "answer": "Necesitas estudiar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "Example",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "Necesitas estudiar"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for necesitar?",
+      "answer": "necesito",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "Conjugation_yo",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "necesito"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for necesitar?",
+      "answer": "necesitas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "Conjugation_tú",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "necesitas"
+      ]
+    },
+    {
+      "prompt": "What is Category for necesitar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "necesitar",
+      "field": "Category",
+      "sourceText": "necesitar,to need,Necesitas estudiar,necesito,necesitas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for pagar?",
+      "answer": "pagar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "Spanish",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "pagar"
+      ]
+    },
+    {
+      "prompt": "What is English for pagar?",
+      "answer": "to pay",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "English",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "to pay"
+      ]
+    },
+    {
+      "prompt": "What is Example for pagar?",
+      "answer": "Pago la cuenta",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "Example",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "Pago la cuenta"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for pagar?",
+      "answer": "pago",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "Conjugation_yo",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "pago"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for pagar?",
+      "answer": "pagas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "Conjugation_tú",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "pagas"
+      ]
+    },
+    {
+      "prompt": "What is Category for pagar?",
+      "answer": "Shopping",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pagar",
+      "field": "Category",
+      "sourceText": "pagar,to pay,Pago la cuenta,pago,pagas,Shopping",
+      "accept": [
+        "Shopping"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for pasar?",
+      "answer": "pasar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "Spanish",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "pasar"
+      ]
+    },
+    {
+      "prompt": "What is English for pasar?",
+      "answer": "to pass/spend time",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "English",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "to pass/spend time"
+      ]
+    },
+    {
+      "prompt": "What is Example for pasar?",
+      "answer": "Pasamos el verano en la playa",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "Example",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "Pasamos el verano en la playa"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for pasar?",
+      "answer": "paso",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "Conjugation_yo",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "paso"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for pasar?",
+      "answer": "pasas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "Conjugation_tú",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "pasas"
+      ]
+    },
+    {
+      "prompt": "What is Category for pasar?",
+      "answer": "Time",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "pasar",
+      "field": "Category",
+      "sourceText": "pasar,to pass/spend time,Pasamos el verano en la playa,paso,pasas,Time",
+      "accept": [
+        "Time"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for preguntar?",
+      "answer": "preguntar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "Spanish",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "preguntar"
+      ]
+    },
+    {
+      "prompt": "What is English for preguntar?",
+      "answer": "to ask",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "English",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "to ask"
+      ]
+    },
+    {
+      "prompt": "What is Example for preguntar?",
+      "answer": "Pregunto la hora",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "Example",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "Pregunto la hora"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for preguntar?",
+      "answer": "pregunto",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "Conjugation_yo",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "pregunto"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for preguntar?",
+      "answer": "preguntas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "Conjugation_tú",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "preguntas"
+      ]
+    },
+    {
+      "prompt": "What is Category for preguntar?",
+      "answer": "Communication",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preguntar",
+      "field": "Category",
+      "sourceText": "preguntar,to ask,Pregunto la hora,pregunto,preguntas,Communication",
+      "accept": [
+        "Communication"
+      ]
+    },
+    {
+      "prompt": "What is Spanish for preparar?",
+      "answer": "preparar",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "Spanish",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "preparar"
+      ]
+    },
+    {
+      "prompt": "What is English for preparar?",
+      "answer": "to prepare",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "English",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "to prepare"
+      ]
+    },
+    {
+      "prompt": "What is Example for preparar?",
+      "answer": "Preparan la comida",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "Example",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "Preparan la comida"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_yo for preparar?",
+      "answer": "preparo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "Conjugation_yo",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "preparo"
+      ]
+    },
+    {
+      "prompt": "What is Conjugation_tú for preparar?",
+      "answer": "preparas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "Conjugation_tú",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "preparas"
+      ]
+    },
+    {
+      "prompt": "What is Category for preparar?",
+      "answer": "Daily Life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "preparar",
+      "field": "Category",
+      "sourceText": "preparar,to prepare,Preparan la comida,preparo,preparas,Daily Life",
+      "accept": [
+        "Daily Life"
+      ]
+    }
+  ]
+}

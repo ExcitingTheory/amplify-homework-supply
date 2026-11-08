@@ -239,7 +239,10 @@
   },
   "pdfViewerComponent": {
     "loadingPdf": "PDFを読み込み中: {filename}",
-    "noPdfToDisplay": "表示するPDFがありません"
+    "noPdfToDisplay": "表示するPDFがありません",
+    "darkPages": "ダークページ",
+    "enterFullScreen": "全画面表示",
+    "exitFullScreen": "全画面表示を終了"
   },
   "metadataEditor": {
     "aiGenerationInfo": "AI生成情報",

@@ -33,11 +33,15 @@ Schema definition: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
 | **Document** | PDF/document analysis results with extracted text |
 | **ParsedContent** | Extracted vocabulary and content from analyzed documents; a long document is several records split by page (`chunkIndex`, `chunkCount`) |
 
+### Retry and Replay Settings
+
+`Section.retryEnabled` defaults to `true`. A nullable `Unit.retryEnabled` value overrides the section default; when unset, the unit inherits it. Completed meaning-association blocks are read-only, and students can reset the whole block to replay only when the effective setting is enabled.
+
 ### Join Tables (many-to-many)
 
 `UnitFile`, `UnitWord`, `QuestionUnit`, `UnitDocument`, `QuestionFile`, `WordFile`, `QuestionWord`, `DocumentWord`, `DocumentQuestion`, `AssistantChatFile`
 
-`DocumentWord` and `DocumentQuestion` record where an imported word or question came from: the document, the `page`, a short `sourceText`, and an `entryKey` (the normalized word or prompt). Importing writes them (`src/utils/documentLinks.ts`); an entry can be linked to several documents. They drive the "already imported" marks in the review screens, the source chips on question and word rows, the imported-content note when a file is moved to the recycle bin, and per-document scoping and page references in practice drills.
+`DocumentWord` and `DocumentQuestion` link an imported word or question to the document it came from; they store only the two IDs and the owner. Importing writes them (`src/utils/documentLinks.ts`); an entry can be linked to several documents. Where in the document an entry sits is not copied onto the link. Instead the importer writes the other direction onto the document's `ParsedContent`: each imported entry carries the `questionID` / `wordID` it became. A link finds its entry by that id (for the page and source snippet), so editing the question or word afterwards changes nothing, and an entry is shown as already imported when its id has a live link. They drive those marks, the source chips on question and word rows, the imported-content note when a file is moved to the recycle bin, and per-document scoping and page references in practice drills.
 
 ### AI & Chat
 
@@ -66,7 +70,8 @@ Schema definition: [`amplify/data/resource.ts`](../amplify/data/resource.ts)
 |-------|---------|
 | **HomeworkRoom** | Peer review chat rooms with Y.js document sync |
 | **WorkbookComment** | Block-level comments on student workbooks |
-| **Settings** | Per-user preferences (editor theme, font size, locale, etc.) |
+| **Settings** | Per-user preferences (editor theme, font size, locale, document-analysis LLM extraction override, etc.) |
+| **PlatformSettings** | Platform defaults and provider limits, including the default for document-analysis LLM extraction |
 
 ## Auth Rules
 

@@ -10,6 +10,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Save } from '../Save';
 import UnitContext from '../../../../context/unitContext';
+import { EditorToastProvider } from '../../context/EditorToastContext';
 
 describe('Save', () => {
   let saveEditorContent: ReturnType<typeof vi.fn>;
@@ -28,9 +29,11 @@ describe('Save', () => {
       ...overrides,
     };
     return render(
-      <UnitContext.Provider value={contextValue as any}>
-        <Save />
-      </UnitContext.Provider>
+      <EditorToastProvider>
+        <UnitContext.Provider value={contextValue as any}>
+          <Save />
+        </UnitContext.Provider>
+      </EditorToastProvider>
     );
   }
 

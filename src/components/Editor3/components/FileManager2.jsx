@@ -1,5 +1,10 @@
+import DocumentAnalysisProgress from "../../DocumentAnalysisProgress";
+import DocumentExtractionWarnings from "../../DocumentExtractionWarnings";
 import {
   AppBar,
+  Accordion,
+  AccordionSummary,
+  AccordionDetails,
   Box,
   Toolbar,
   Typography,
@@ -30,15 +35,14 @@ import {
   ToggleButton,
   ToggleButtonGroup,
   Badge,
-  Snackbar,
   Alert,
   Chip,
-  Portal,
   Divider,
   LinearProgress,
 } from "@mui/material";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import React from "react";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { isMimeType } from "@lexical/utils";
 import VectorStoreContext from "../../../context/vectorStoreContext";
@@ -166,15 +170,20 @@ import { SuggestedVocabulary, SuggestedQuestions } from "./SuggestedContent";
 import RecordingStudio3Modal from "../../RecordingStudio3Modal";
 import RecordingStudioEnhancedModal from "../../RecordingStudioEnhancedModal";
 import { createConversationPreset } from "../../../utils/recordingStudioPresets";
+import { useEditorToast } from "../context/EditorToastContext";
 
 const BLOCK_SX = { display: "block" };
+const PdfFilePreview = dynamic(() => import("./PdfFilePreview"), {
+  ssr: false,
+  loading: () => <Skeleton variant="rectangular" width="100%" height={240} />,
+});
 const IMAGE_MIME_PREFIX = "image/";
 const AUDIO_MIME_PREFIX = "audio/";
 const VIDEO_MIME_PREFIX = "video/";
+const TEXT_MIME_PREFIX = "text/";
 const IMAGE_MIME_TYPE = "image";
 const AUDIO_MIME_TYPE = "audio";
 const OCTET_STREAM_MIME = "application/octet-stream";
-const DISPLAY_NONE = "none";
 const FILE_LIST_ITEM_TEST_ID = "file-list-item";
 const CONVERSATION_PRESET = "conversation";
 
@@ -895,11 +904,12 @@ function MetadataEditor({ file, onUpdate, onClose }) {
           mb: 2,
         }}
       >
-        <Typography variant="h6">
-          {t("fileManager2.metadataEditor.heading")}
-        </Typography>
         {!editing && (
-          <IconButton size="small" onClick={() => setEditing(true)}>
+          <IconButton
+            size="small"
+            aria-label={t("fileManager2.metadataEditor.editButton")}
+            onClick={() => setEditing(true)}
+          >
             <EditIcon />
           </IconButton>
         )}
@@ -1028,6 +1038,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
   editor,
 }) {
   const t = useTranslations("editor.files");
+  const { unit, session } = React.useContext(UnitContext);
   const [activeTab, setActiveTab] = React.useState(0);
 
   const handleInsertIntoEditor = () => {
@@ -1144,6 +1155,9 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               arrow
             >
               <Tab
+                id={`${file.id}-vocabulary-tab`}
+                aria-controls={`${file.id}-content-panel`}
+                aria-label={t("fileMetadataComponent.vocabulary")}
                 icon={<MenuBookIcon />}
                 label={`(${parsedContent.vocabularyJSON.length})`}
                 iconPosition="start"
@@ -1154,6 +1168,9 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               arrow
             >
               <Tab
+                id={`${file.id}-questions-tab`}
+                aria-controls={`${file.id}-content-panel`}
+                aria-label={t("fileMetadataComponent.questions")}
                 icon={<QuizIcon />}
                 label={`(${parsedContent.questionsJSON.length})`}
                 iconPosition="start"
@@ -1164,6 +1181,9 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               arrow
             >
               <Tab
+                id={`${file.id}-summaries-tab`}
+                aria-controls={`${file.id}-content-panel`}
+                aria-label={t("fileMetadataComponent.summaries")}
                 icon={<SummarizeIcon />}
                 label={`(${parsedContent.summariesJSON.length})`}
                 iconPosition="start"
@@ -1174,6 +1194,9 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               arrow
             >
               <Tab
+                id={`${file.id}-objectives-tab`}
+                aria-controls={`${file.id}-content-panel`}
+                aria-label={t("fileMetadataComponent.objectives")}
                 icon={<FlagIcon />}
                 label={`(${parsedContent.objectivesJSON.length})`}
                 iconPosition="start"
@@ -1184,30 +1207,43 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               arrow
             >
               <Tab
+                id={`${file.id}-concepts-tab`}
+                aria-controls={`${file.id}-content-panel`}
+                aria-label={t("fileMetadataComponent.concepts")}
                 icon={<LightbulbIcon />}
                 label={`(${parsedContent.conceptsJSON.length})`}
                 iconPosition="start"
               />
             </Tooltip>
           </Tabs>
+          <Box
+            role="tabpanel"
+            id={`${file.id}-content-panel`}
+            aria-labelledby={`${file.id}-${["vocabulary", "questions", "summaries", "objectives", "concepts"][activeTab]}-tab`}
+            sx={{ height: "min(32rem, 55vh)", minHeight: 0, overflow: "auto", overscrollBehavior: "contain" }}
+          >
 
           {/* Vocabulary Tab with SuggestedVocabulary */}
           {activeTab === 0 && (
-            <Box sx={{ pt: 2, px: 2 }}>
+            <Box sx={{ pt: 2, px: 2, height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", minHeight: 0 }}>
               {parsedContent.vocabularyJSON.length > 0 ? (
                 <>
-                  <Alert severity="info" sx={{ mb: 2 }}>
+                  <Alert severity="info" sx={{ mb: 2, flexShrink: 0 }}>
                     {t("fileManager2.expandedContent.reviewVocabularyMessage")}
                   </Alert>
-                  <SuggestedVocabulary
-                    documentId={file.documentID}
-                    fileId={file.id}
-                    unitId={editor?.__unit?.id}
-                    enableInlineEditing={true}
-                    onImport={(count) => {
-                      console.log(`Imported ${count} vocabulary words`);
-                    }}
-                  />
+                  <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+                    <SuggestedVocabulary
+                      documentId={file.documentID}
+                      fileId={file.id}
+                      unitId={unit?.id}
+                      owner={session?.username}
+                      identityId={unit?.identityId}
+                      enableInlineEditing={true}
+                      onImport={(count) => {
+                        console.log(`Imported ${count} vocabulary words`);
+                      }}
+                    />
+                  </Box>
                 </>
               ) : (
                 <Typography
@@ -1223,21 +1259,25 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
 
           {/* Questions Tab with SuggestedQuestions */}
           {activeTab === 1 && (
-            <Box sx={{ pt: 2, px: 2 }}>
+            <Box sx={{ pt: 2, px: 2, height: "100%", boxSizing: "border-box", display: "flex", flexDirection: "column", minHeight: 0 }}>
               {parsedContent.questionsJSON.length > 0 ? (
                 <>
-                  <Alert severity="info" sx={{ mb: 2 }}>
+                  <Alert severity="info" sx={{ mb: 2, flexShrink: 0 }}>
                     {t("fileManager2.expandedContent.reviewQuestionsMessage")}
                   </Alert>
-                  <SuggestedQuestions
-                    documentId={file.documentID}
-                    fileId={file.id}
-                    unitId={editor?.__unit?.id}
-                    enableInlineEditing={true}
-                    onImport={(count) => {
-                      console.log(`Imported ${count} questions`);
-                    }}
-                  />
+                  <Box sx={{ flex: 1, minHeight: 0, overflow: "auto" }}>
+                    <SuggestedQuestions
+                      documentId={file.documentID}
+                      fileId={file.id}
+                      unitId={unit?.id}
+                      owner={session?.username}
+                      identityId={unit?.identityId}
+                      enableInlineEditing={true}
+                      onImport={(count) => {
+                        console.log(`Imported ${count} questions`);
+                      }}
+                    />
+                  </Box>
                 </>
               ) : (
                 <Typography
@@ -1404,6 +1444,7 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
               )}
             </Box>
           )}
+          </Box>
         </Box>
       )}
 
@@ -1470,6 +1511,33 @@ const ExpandedFileContent = React.memo(function ExpandedFileContent({
     </Box>
   );
 });
+
+function FileDetailSection({ title, children }) {
+  const id = React.useId();
+  return (
+    <Accordion defaultExpanded disableGutters elevation={0} sx={{ minWidth: 0, flexShrink: 0 }}>
+      <AccordionSummary
+        expandIcon={<ExpandMoreIcon />}
+        id={`${id}-heading`}
+        aria-controls={`${id}-content`}
+      >
+        <Typography variant="subtitle2">{title}</Typography>
+      </AccordionSummary>
+      <AccordionDetails
+        id={`${id}-content`}
+        sx={{
+          p: 0,
+          maxHeight: "65vh",
+          overflow: "auto",
+          minWidth: 0,
+          overscrollBehavior: "contain",
+        }}
+      >
+        {children}
+      </AccordionDetails>
+    </Accordion>
+  );
+}
 
 function NewImageFileForm({ open, toggleNewImageFileForm }) {
   const t = useTranslations("editor.files");
@@ -2245,6 +2313,11 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
   const [imageSizes, setImageSizes] = React.useState(null);
   const [audioUrl, setAudioUrl] = React.useState(null);
   const [videoUrl, setVideoUrl] = React.useState(null);
+  const [documentUrl, setDocumentUrl] = React.useState(null);
+  const [thumbnailUrl, setThumbnailUrl] = React.useState(null);
+  const [isThumbnailLoading, setIsThumbnailLoading] = React.useState(false);
+  const [fileUrl, setFileUrl] = React.useState(null);
+  const [previewError, setPreviewError] = React.useState(false);
   const audioContainerRef = React.useRef(null);
   const [audioWidth, setAudioWidth] = React.useState(400);
 
@@ -2264,21 +2337,47 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
 
   // Load signed URLs for media files
   React.useEffect(() => {
+    let cancelled = false;
+    setPreviewError(false);
+    setImageUrl(null);
+    setImageSrcSet(null);
+    setImageSizes(null);
+    setAudioUrl(null);
+    setVideoUrl(null);
+    setDocumentUrl(null);
+    setThumbnailUrl(null);
+    setFileUrl(null);
+    setIsThumbnailLoading(Boolean(file.thumbnail));
     const loadUrls = async () => {
       try {
+        // Office and course-package formats cannot be shown inline, but the
+        // upload pipeline renders their first page, so that stands in as the
+        // preview.
+        if (file.thumbnail) {
+          getCachedUrl(file.thumbnail)
+            .then((url) => {
+              if (!cancelled) {
+                setThumbnailUrl(url);
+                setIsThumbnailLoading(false);
+              }
+            })
+            .catch((error) => {
+              console.error("[FileDetailsPanel] Failed to load thumbnail:", error);
+              if (!cancelled) setIsThumbnailLoading(false);
+            });
+        }
+        const url = await getCachedUrl(file.path);
+        if (cancelled) return;
+        if (!url) throw new Error("No URL available for file preview");
+        setFileUrl(url);
         if (file.mimeType?.startsWith("image/")) {
-          const url = await getCachedUrl(
-            file.path,
-            file.level?.toLowerCase() || "protected",
-            file.identityId,
-          );
           setImageUrl(url);
 
           // Load responsive srcSet variants
           if (file.id && file.identityId) {
             getResponsiveImageUrls(file.id, file.identityId)
               .then((result) => {
-                if (result) {
+                if (result && !cancelled) {
                   setImageSrcSet(result.srcSet);
                   setImageSizes(result.sizes);
                 }
@@ -2286,27 +2385,21 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
               .catch(() => {});
           }
         } else if (file.mimeType?.startsWith("audio/")) {
-          const url = await getCachedUrl(
-            file.path,
-            file.level?.toLowerCase() || "protected",
-            file.identityId,
-          );
           setAudioUrl(url);
         } else if (file.mimeType?.startsWith("video/")) {
-          const url = await getCachedUrl(
-            file.path,
-            file.level?.toLowerCase() || "protected",
-            file.identityId,
-          );
           setVideoUrl(url);
+        } else {
+          setDocumentUrl(url);
         }
       } catch (error) {
         console.error("Error loading file URL:", error);
+        if (!cancelled) setPreviewError(true);
       }
     };
 
     loadUrls();
-  }, [file.id, file.path, file.level, file.identityId, file.mimeType]);
+    return () => { cancelled = true; };
+  }, [file.id, file.path, file.level, file.identityId, file.mimeType, file.thumbnail]);
 
   const handleMenuAction = async (action) => {
     switch (action) {
@@ -2501,7 +2594,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
       <Box
         sx={{
           width: "100%",
-          minHeight: "200px",
+          minHeight: "120px",
           mb: 2,
           bgcolor: "action.hover",
           borderRadius: 1,
@@ -2511,9 +2604,12 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
           overflow: "hidden",
           flexShrink: 0,
           p: 2,
+          boxSizing: "border-box",
         }}
       >
-        {file.mimeType?.startsWith(IMAGE_MIME_PREFIX) ? (
+        {previewError ? (
+          <Alert severity="error">{t("fileManager2.fileDetails.previewError")}</Alert>
+        ) : file.mimeType?.startsWith(IMAGE_MIME_PREFIX) ? (
           imageUrl ? (
             <Box
               component="img"
@@ -2524,11 +2620,16 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
               sx={{
                 maxWidth: "100%",
                 maxHeight: 300,
-                objectFit: "cover",
+                objectFit: "contain",
                 borderRadius: 1,
               }}
-              onError={(e) => {
-                e.target.style.display = DISPLAY_NONE;
+              onError={() => {
+                if (imageSrcSet) {
+                  setImageSrcSet(null);
+                  setImageSizes(null);
+                } else {
+                  setPreviewError(true);
+                }
               }}
             />
           ) : (
@@ -2571,9 +2672,11 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
           videoUrl ? (
             <video
               controls
+              onError={() => setPreviewError(true)}
               style={{
                 width: "100%",
                 height: "100%",
+                maxHeight: "40vh",
                 objectFit: "contain",
               }}
             >
@@ -2588,6 +2691,51 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
               sx={{ borderRadius: 1 }}
             />
           )
+        ) : file.mimeType === "application/pdf" || file.mimeType?.startsWith(TEXT_MIME_PREFIX) ? (
+          documentUrl ? (
+            file.mimeType === "application/pdf" ? (
+              thumbnailUrl ? (
+                <Box
+                  component="img"
+                  src={thumbnailUrl}
+                  alt={file.name}
+                  onError={() => {
+                    console.error("[FileDetailsPanel] PDF thumbnail image failed:", file.id);
+                    setThumbnailUrl(null);
+                  }}
+                  sx={{ maxWidth: "100%", maxHeight: "40vh", objectFit: "contain" }}
+                />
+              ) : isThumbnailLoading ? (
+                <Skeleton variant="rectangular" width="100%" height={240} />
+              ) : (
+                <PdfFilePreview url={documentUrl} filename={file.name} />
+              )
+            ) : (
+              <Box
+                component="iframe"
+                src={documentUrl}
+                title={file.name}
+                sandbox=""
+                onError={() => setPreviewError(true)}
+                sx={{ width: "100%", height: "40vh", border: 0 }}
+              />
+            )
+          ) : (
+            <Skeleton variant="rectangular" width="100%" height={240} />
+          )
+        ) : thumbnailUrl ? (
+          <Box
+            component="img"
+            src={thumbnailUrl}
+            alt={file.name}
+            onError={() => setThumbnailUrl(null)}
+            sx={{
+              maxWidth: "100%",
+              maxHeight: 300,
+              objectFit: "contain",
+              borderRadius: 1,
+            }}
+          />
         ) : (
           <Box sx={{ textAlign: "center", color: "action.disabled" }}>
             {file.mimeType === "application/pdf" && (
@@ -2596,6 +2744,9 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             {file.mimeType !== "application/pdf" && (
               <DescriptionIcon sx={{ fontSize: "64px" }} />
             )}
+            <Typography variant="body2" color="text.secondary">
+              {t("fileManager2.fileDetails.previewUnavailable")}
+            </Typography>
           </Box>
         )}
       </Box>
@@ -2621,6 +2772,7 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
             variant="outlined"
           />
         )}
+        <DocumentAnalysisProgress documentStatus={documentStatus} />
         <Box
           sx={{
             ml: "auto",
@@ -2652,15 +2804,6 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
                 </IconButton>
               </Tooltip>
             )}
-          <Tooltip title={t("fileManager2.fileDetails.downloadTooltip")}>
-            <IconButton
-              size="small"
-              onClick={() => handleMenuAction("download")}
-              aria-label={t("fileManager2.fileDetails.downloadTooltip")}
-            >
-              <DownloadIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
           {(isAnalyzableDocument(file.mimeType) || file.documentID) && (
             <Tooltip title={t("fileManager2.fileDetails.reAnalyzeTooltip")}>
               <IconButton
@@ -2684,6 +2827,23 @@ const FileDetailsPanel = React.memo(function FileDetailsPanel({
           </Tooltip>
         </Box>
       </Box>
+      <DocumentExtractionWarnings metadata={{ analysis: documentStatus?.analysis }} />
+      {fileUrl && (
+        <Button
+          component="a"
+          href={fileUrl}
+          download={file.name}
+          fullWidth
+          startIcon={<DownloadIcon />}
+          sx={{ mt: 2, borderTop: 1, borderColor: "divider" }}
+          onClick={(event) => {
+            event.preventDefault();
+            handleMenuAction("download");
+          }}
+        >
+          {t("fileManager2.fileDetails.downloadTooltip")}
+        </Button>
+      )}
     </Box>
   );
 });
@@ -3074,8 +3234,9 @@ const ListItemImage = React.memo(function ListItemImage({ file }) {
  * parsedContent is lazy-loaded via Amplify Gen 2 hasMany relationship
  */
 function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
+  const t = useTranslations("editor.files");
   const [parsedContent, setParsedContent] = React.useState(null);
-  // Reload only when the file id/version changes, not on every object identity change
+  // Reload when analysis advances as well as when the file itself changes.
   const selectedFileRef = React.useRef(selectedFile);
   selectedFileRef.current = selectedFile;
 
@@ -3104,26 +3265,53 @@ function SelectedFileView({ selectedFile, documentStatus, search, editor }) {
     return () => {
       cancelled = true;
     };
-  }, [selectedFile?.id, selectedFile?._version]);
+  }, [selectedFile?.id, selectedFile?._version, selectedFile?.documentID, documentStatus?.status]);
+
+  // Pages saved while analysis runs are provisional: finalizing replaces and
+  // reorders them, so they are not offered for review or import until it ends.
+  const analysisInProgress = ["extracting", "analyzing"].includes(
+    documentStatus?.status,
+  );
 
   return (
     <>
-      <FileDetailsPanel
-        file={selectedFile}
-        documentStatus={documentStatus}
-        editor={editor}
-      />
-      {/* Metadata Editor */}
-      <MetadataEditor file={selectedFile} />
-      {/* File Content — parent column owns scrolling, so this just lays out naturally */}
-      <Box sx={{ pb: 3 }}>
+      {/* The preview and the file's own metadata are shown side by side, so
+          neither takes the full width of the panel and the extracted content
+          below stays reachable without scrolling past both. The drawer is
+          resizable, so the split follows the panel's own width rather than the
+          viewport's: a narrow panel stacks them, preview first. */}
+      <Box sx={{ containerType: "inline-size", minWidth: 0 }}>
+        <Box
+          sx={{
+            display: "grid",
+            gap: 1,
+            alignItems: "start",
+            gridTemplateColumns: "minmax(0, 1fr)",
+            "@container (min-width: 720px)": {
+              gridTemplateColumns: "minmax(0, 1fr) minmax(0, 1fr)",
+            },
+          }}
+        >
+          <FileDetailSection title={t("fileManager2.fileDetails.previewHeading")}>
+            <FileDetailsPanel
+              file={selectedFile}
+              documentStatus={documentStatus}
+              editor={editor}
+            />
+          </FileDetailSection>
+          <FileDetailSection title={t("fileManager2.metadataEditor.heading")}>
+            <MetadataEditor key={selectedFile.id} file={selectedFile} />
+          </FileDetailSection>
+        </Box>
+      </Box>
+      <FileDetailSection title={t("fileManager2.expandedContent.extractedContentHeading")}>
         <ExpandedFileContent
           file={selectedFile}
-          parsedContent={parsedContent}
+          parsedContent={analysisInProgress ? null : parsedContent}
           search={search}
           editor={editor}
         />
-      </Box>
+      </FileDetailSection>
     </>
   );
 }
@@ -3245,7 +3433,60 @@ function SelectedFileDetailsPanel({
 
 export default function FileManager2() {
   const t = useTranslations("editor.files");
+  const { showToast, dismissToast } = useEditorToast();
   const [editor] = useLexicalComposerContext();
+  const activeConfirmToastId = React.useRef(null);
+  const setConfirmDialog = React.useCallback(
+    (dialog) => {
+      if (activeConfirmToastId.current !== null) {
+        dismissToast(activeConfirmToastId.current);
+        activeConfirmToastId.current = null;
+      }
+      if (!dialog.open) return;
+
+      let toastId = null;
+      toastId = showToast({
+        message: dialog.message,
+        severity: dialog.severity,
+        autoHideDuration: null,
+        action: (dismissToastItem) => (
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => dialog.onConfirm?.()}
+              variant="outlined"
+            >
+              {t("fileMetadataComponent.confirm")}
+            </Button>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={() => {
+                dismissToastItem();
+                if (activeConfirmToastId.current === toastId) {
+                  activeConfirmToastId.current = null;
+                }
+              }}
+              variant="contained"
+            >
+              {t("fileMetadataComponent.cancel")}
+            </Button>
+          </Box>
+        ),
+      });
+      activeConfirmToastId.current = toastId;
+    },
+    [dismissToast, showToast, t],
+  );
+  React.useEffect(
+    () => () => {
+      if (activeConfirmToastId.current !== null) {
+        dismissToast(activeConfirmToastId.current);
+      }
+    },
+    [dismissToast],
+  );
   // Local search UI moved to the global search bar; `search` stays an inert
   // constant since it's still threaded through to row/detail highlighting.
   const search = "";
@@ -3352,12 +3593,6 @@ export default function FileManager2() {
   }, [expandedItems]);
 
   const [contextMenu, setContextMenu] = React.useState(null);
-  const [confirmDialog, setConfirmDialog] = React.useState({
-    open: false,
-    message: "",
-    onConfirm: null,
-    severity: "warning",
-  });
   const [editingFileId, setEditingFileId] = React.useState(null);
   const [fileEmbeddings, setFileEmbeddings] = React.useState({}); // Cache embeddings
 
@@ -4303,6 +4538,8 @@ export default function FileManager2() {
               flexDirection: "column",
               borderRadius: 1,
               position: "relative",
+              containerType: "inline-size",
+              containerName: "file-manager",
             }}
             onDragOver={handleDragOver}
             onDragLeave={() => setIsDragging(false)}
@@ -4641,6 +4878,9 @@ export default function FileManager2() {
                 minHeight: 0,
                 display: "flex",
                 flexDirection: "row",
+                "@container file-manager (max-width: 520px)": {
+                  flexDirection: "column",
+                },
               }}
             >
               {/* Tree View: Files organized by Protection Level → File Type */}
@@ -4663,9 +4903,10 @@ export default function FileManager2() {
                 <>
                   <Box
                     ref={parentRef}
+                    data-testid="file-browser-list"
                     sx={{
-                      flex: "0 0 35%",
-                      borderRight: "1px solid",
+                      flex: selectedItems.size > 0 ? "0 0 35%" : "1 1 100%",
+                      borderRight: selectedItems.size > 0 ? "1px solid" : "none",
                       borderColor: "divider",
                       overflow: "auto",
                       overflowX: "hidden",
@@ -4676,6 +4917,13 @@ export default function FileManager2() {
                       scrollbarWidth: "thin",
                       scrollbarColor: (theme) =>
                         `${theme.palette.action.disabled} transparent`,
+                      "@container file-manager (max-width: 520px)": {
+                        flex: selectedItems.size > 0 ? "0 0 40%" : "1 1 100%",
+                        borderRight: "none",
+                        borderBottom: selectedItems.size > 0 ? "1px solid" : "none",
+                        borderColor: "divider",
+                        minHeight: 120,
+                      },
                       "&::-webkit-scrollbar": {
                         width: "8px",
                       },
@@ -4812,7 +5060,8 @@ export default function FileManager2() {
                     </div>
                   </Box>
 
-                  <Box
+                  {selectedItems.size > 0 && <Box
+                    data-testid="file-browser-details"
                     sx={{
                       flex: "0 0 65%",
                       display: "flex",
@@ -4825,6 +5074,10 @@ export default function FileManager2() {
                       overflowX: "hidden",
                       bgcolor: "background.paper",
                       minWidth: 0,
+                      "@container file-manager (max-width: 520px)": {
+                        flex: "1 1 0",
+                        minHeight: 0,
+                      },
                     }}
                   >
                     <SelectedFileDetailsPanel
@@ -4834,7 +5087,7 @@ export default function FileManager2() {
                       search={search}
                       editor={editor}
                     />
-                  </Box>
+                  </Box>}
                 </>
               )}
 
@@ -4908,65 +5161,6 @@ export default function FileManager2() {
                 </Box>
               )}
             </Box>
-
-            <Portal>
-              <Snackbar
-                open={confirmDialog.open}
-                anchorOrigin={{ vertical: "top", horizontal: "center" }}
-                onClose={(event, reason) => {
-                  if (reason === "clickaway") {
-                    return;
-                  }
-                  console.log("[Snackbar] onClose triggered");
-                }}
-              >
-                <Alert
-                  severity={confirmDialog.severity}
-                  sx={{
-                    width: "100%",
-                    minWidth: "300px",
-                    boxShadow: 3,
-                  }}
-                  action={
-                    <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
-                      <Button
-                        color="inherit"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log("[Snackbar] Confirm clicked");
-                          if (confirmDialog.onConfirm) {
-                            confirmDialog.onConfirm();
-                          }
-                        }}
-                        variant="outlined"
-                      >
-                        Confirm
-                      </Button>
-                      <Button
-                        color="inherit"
-                        size="small"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          console.log("[Snackbar] Cancel clicked");
-                          setConfirmDialog({
-                            open: false,
-                            message: "",
-                            onConfirm: null,
-                            severity: "warning",
-                          });
-                        }}
-                        variant="contained"
-                      >
-                        Cancel
-                      </Button>
-                    </Box>
-                  }
-                >
-                  {confirmDialog.message}
-                </Alert>
-              </Snackbar>
-            </Portal>
 
             {/* RecordingStudio3 Modal */}
             <RecordingStudio3Modal

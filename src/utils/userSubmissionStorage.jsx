@@ -6,7 +6,7 @@
  * 
  * Key Features:
  * - Uses PRIVATE access level (only owner can access directly)
- * - Gen 2 pattern: private/{userId}/user-submissions/{gradeId}/{nodeKey}/{filename}
+ * - Gen 2 pattern: private/{identityId}/user-submissions/{gradeId}/{nodeKey}/{filename}
  * - Separate from other File storage for cost tracking
  * - Teachers access via special backend endpoint that validates permissions
  * 
@@ -17,7 +17,7 @@
  */
 
 import { uploadData, remove } from 'aws-amplify/storage';
-import { getCurrentUser } from 'aws-amplify/auth';
+import { fetchAuthSession, getCurrentUser } from 'aws-amplify/auth';
 
 /**
  * Upload a student submission file to private storage
@@ -35,12 +35,15 @@ export async function uploadStudentSubmission({ file, gradeId, nodeKey, fileType
     const timestamp = Date.now();
     const filename = `${gradeId}_${nodeKey}_${timestamp}.${fileType}`;
     
-    // Get current user for metadata and path
+    // Private storage paths are scoped to the Cognito Identity Pool identity,
+    // which is distinct from the user-pool sub returned as userId.
+    const { identityId } = await fetchAuthSession();
+    if (!identityId) {
+      throw new Error('Authenticated identity ID is unavailable');
+    }
     const { userId, username } = await getCurrentUser();
     
-    // Gen 2 API: private files use private/{identityId}/* pattern
-    // Note: identityId is automatically added by Amplify when accessing private storage
-    const s3Path = `private/${userId}/user-submissions/${gradeId}/${nodeKey}/${filename}`;
+    const s3Path = `private/${identityId}/user-submissions/${gradeId}/${nodeKey}/${filename}`;
     
     console.log(`[UserSubmission] Uploading to: ${s3Path}`);
     

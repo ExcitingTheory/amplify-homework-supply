@@ -41,6 +41,16 @@
     "textToSpeechPreview": "Text to Speech Preview"
   },
   "fileManager2": {
+    "analysisFailedPages": "{count} pages could not be read",
+    "analysisFound": "{questions} questions, {words} words so far",
+    "analysisPages": "{done} of {total} pages",
+    "analysisState": {
+      "uploaded": "Queued for analysis",
+      "extracting": "Reading the document",
+      "analyzing": "Extracting vocabulary and questions",
+      "aggregating": "Bringing the pages together",
+      "embedding": "Preparing it for search"
+    },
     "contextMenu": {
       "confirmMoveSelected": "Move {count} file(s) to Recycle Bin?",
       "deleteConfirmMessage": "Delete {count} selected file(s)?",
@@ -85,12 +95,22 @@
       "confirmMoveToRecycleBin": "Move to Recycle Bin: {name}?",
       "deleteTooltip": "Delete",
       "downloadTooltip": "Download",
+      "humanReviewMessage": "AI extraction needs human review. The entries below are listed first, each with the reason.",
       "importedContentNote": "{questions, plural, one {# question} other {# questions}} and {words, plural, one {# word} other {# words}} imported from this document stay in your question bank and dictionary.",
       "insertTooltip": "Insert into editor",
+      "moreReviewWarnings": "Showing the first review warnings. Full details are retained in the analysis artifacts.",
       "moveToRecycleBinFailed": "Failed to move {name} to Recycle Bin: {error}",
       "noWaveformAvailable": "No waveform available",
+      "previewError": "Unable to load the file preview. You can still download the file.",
+      "previewHeading": "File preview",
+      "previewUnavailable": "Preview is not available for this file type. Download the file to view it.",
       "reAnalyzeError": "Error re-analyzing {name}: {error}",
       "reAnalyzeTooltip": "Re-analyze",
+      "reviewCount": "{count} {items} need review",
+      "reviewItems": "entries",
+      "reviewQuestions": "questions",
+      "reviewWarningsUnavailable": "Unable to read extraction review warnings. Check the source before importing.",
+      "reviewWords": "words",
       "videoNotSupported": "Your browser does not support the video tag."
     },
     "generators": {
@@ -113,6 +133,7 @@
       "updateFileNameFailed": "Failed to update file name: {error}"
     },
     "metadataEditor": {
+      "editButton": "Edit file metadata",
       "cancelButton": "Cancel",
       "createdLabel": "Created",
       "descriptionLabel": "Description",

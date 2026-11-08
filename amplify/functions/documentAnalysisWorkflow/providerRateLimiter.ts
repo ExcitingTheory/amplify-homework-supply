@@ -15,7 +15,7 @@ export interface ProviderLimits {
 
 export const DEFAULT_PROVIDER_LIMITS: ProviderLimits = {
   requestsPerMinute: 10,
-  tokensPerMinute: 300_000,
+  tokensPerMinute: 1_000_000,
   maxConcurrentRequests: 1,
 };
 

@@ -5,15 +5,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
 import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -32,6 +29,11 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
+import {
+  mergeSearchResults,
+  useAdminSemanticSearch,
+} from "../_components/adminSemanticSearch";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -75,6 +77,16 @@ type FilterMode =
   | "flagged"
   | "generated"
   | "manual";
+
+const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
+  { value: "all", label: "All Questions" },
+  { value: "missing_audio", label: "Missing Audio" },
+  { value: "missing_answer", label: "No Answer/Choices" },
+  { value: "missing_embedding", label: "Missing Embedding" },
+  { value: "flagged", label: "Flagged" },
+  { value: "generated", label: "AI Generated" },
+  { value: "manual", label: "Manual" },
+];
 
 // `choices` is an a.json() field — normally comes back already parsed, but
 // handle a raw JSON string defensively since other json fields in this repo
@@ -191,6 +203,9 @@ export default function QuestionListClient({
     };
   }
 
+  const { hits: semanticHits, searching: semanticSearching } =
+    useAdminSemanticSearch(searchQuery, "question");
+
   const filteredQuestions = React.useMemo(() => {
     let result = questions;
 
@@ -219,7 +234,9 @@ export default function QuestionListClient({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(
+      result = mergeSearchResults(
+        result,
+        semanticHits,
         (item) =>
           (item.prompt || "").toLowerCase().includes(q) ||
           (item.answer || "").toLowerCase().includes(q),
@@ -227,7 +244,7 @@ export default function QuestionListClient({
     }
 
     return result;
-  }, [questions, filter, searchQuery]);
+  }, [questions, filter, searchQuery, semanticHits]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -378,27 +395,21 @@ export default function QuestionListClient({
                 startAdornment: (
                   <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
                 ),
+                endAdornment: semanticSearching ? (
+                  <CircularProgress size={16} aria-label="Searching" />
+                ) : undefined,
               },
             }}
             sx={{ minWidth: 240 }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Filter</InputLabel>
-            <Select
-              value={filter}
-              label="Filter"
-              onChange={(e) => setFilter(e.target.value as FilterMode)}
-            >
-              <MenuItem value="all">All Questions</MenuItem>
-              <MenuItem value="missing_audio">Missing Audio</MenuItem>
-              <MenuItem value="missing_answer">No Answer/Choices</MenuItem>
-              <MenuItem value="missing_embedding">Missing Embedding</MenuItem>
-              <MenuItem value="flagged">Flagged</MenuItem>
-              <MenuItem value="generated">AI Generated</MenuItem>
-              <MenuItem value="manual">Manual</MenuItem>
-            </Select>
-          </FormControl>
+          <AdminSelect
+            label="Filter"
+            value={filter}
+            options={FILTER_OPTIONS}
+            onChange={setFilter}
+            minWidth={180}
+          />
 
           <Typography variant="body2" color="text.secondary">
             {filteredQuestions.length} question

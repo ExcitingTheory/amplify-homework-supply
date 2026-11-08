@@ -25,6 +25,8 @@ import {
   ListItem,
   ListItemText,
   IconButton,
+  Button,
+  Alert,
 } from "@mui/material";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -618,8 +620,18 @@ const MeaningAssociationTabs = ({
   showPronunciation = true,
 }) => {
   const t = useTranslations("common");
-  const { grade } = React.useContext(UnitContext);
+  const {
+    grade,
+    saveGrade,
+    unit,
+    retryEnabled: retrySetting,
+  } = React.useContext(UnitContext);
+  const retryEnabled = retrySetting ?? (unit?.retryEnabled !== false);
   const [liveModeProgress, setLiveModeProgress] = React.useState({});
+  const [resetVersion, setResetVersion] = React.useState(0);
+  const [replayLocked, setReplayLocked] = React.useState(false);
+  const [isResetting, setIsResetting] = React.useState(false);
+  const [replayError, setReplayError] = React.useState(false);
   const gradeData = React.useMemo(() => {
     if (!grade?.data) return {};
     if (typeof grade.data === "string") {
@@ -686,7 +698,9 @@ const MeaningAssociationTabs = ({
   const modeComplete = Object.fromEntries(
     MEANING_MODE_ORDER.map((mode) => [
       mode,
-      inProgress?.[mode]?.complete || false,
+      liveModeProgress[mode]?.complete ??
+        inProgress?.[mode]?.complete ??
+        false,
     ]),
   );
   const modeProgress = availableModes.map(
@@ -715,8 +729,32 @@ const MeaningAssociationTabs = ({
         100
       : 0;
   const allEnabledModesComplete = availableModes.every(
-    (mode) => inProgress?.[mode]?.complete,
+    (mode) => modeComplete[mode],
   );
+  const readOnly = allEnabledModesComplete || replayLocked;
+  const canOfferReplay = allEnabledModesComplete || replayLocked;
+
+  const handleReplay = async () => {
+    if (!retryEnabled || isResetting) return;
+    setReplayLocked(true);
+    setIsResetting(true);
+    setReplayError(false);
+    try {
+      await saveGrade({ [nodeKey]: { tabIndex: availableModes[0] } });
+      setLiveModeProgress({});
+      setActiveMode(availableModes[0]);
+      setResetVersion((version) => version + 1);
+      setReplayLocked(false);
+    } catch (error) {
+      console.error(
+        "[MeaningAssociationExercise] Failed to reset completed exercise:",
+        error,
+      );
+      setReplayError(true);
+    } finally {
+      setIsResetting(false);
+    }
+  };
 
   return (
     <ExerciseBlockCard
@@ -744,6 +782,28 @@ const MeaningAssociationTabs = ({
           "meaningAssociationExercise.accuracyDescription",
         )}
       />
+      {canOfferReplay && retryEnabled && (
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1, mb: 1 }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={handleReplay}
+            disabled={isResetting}
+          >
+            {isResetting
+              ? t("meaningAssociationExercise.resetting", "Resetting...")
+              : t("meaningAssociationExercise.replay", "Replay")}
+          </Button>
+          {replayError && (
+            <Alert severity="error" sx={{ py: 0 }}>
+              {t(
+                "meaningAssociationExercise.resetFailed",
+                "Could not reset this exercise. Try again.",
+              )}
+            </Alert>
+          )}
+        </Box>
+      )}
       <Box
         sx={{
           mb: 1.5,
@@ -799,6 +859,7 @@ const MeaningAssociationTabs = ({
           return (
             <TabPanel key={mode} value={activeMode} index={mode}>
               <ModeComponent
+                key={`${mode}-${grade?.id || "new"}-${resetVersion}`}
                 nodeKey={nodeKey}
                 setTabIndex={setActiveMode}
                 tabIndex={activeMode}
@@ -812,6 +873,7 @@ const MeaningAssociationTabs = ({
                 promptFor={promptFor}
                 showAudio={showAudio}
                 showPronunciation={showPronunciation}
+                readOnly={readOnly}
               />
             </TabPanel>
           );

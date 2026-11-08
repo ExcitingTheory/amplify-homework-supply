@@ -35,6 +35,8 @@ interface LinearIndex {
 }
 
 export interface SearchBundle {
+  /** ETag of the copy served by /api/search-bundle; lets caches revalidate cheaply. */
+  etag?: string;
   version: number;
   dimensions: number;
   model: string;
@@ -105,55 +107,60 @@ async function setCache(key: string, bundle: SearchBundle): Promise<void> {
 
 // --- Bundle Loading ---
 
-export async function loadUnitBundle(
-  identityId: string,
-  unitId: string,
+/**
+ * Fetches a unit, section or instructor bundle through /api/search-bundle,
+ * which only serves people entitled to it (owner, collaborator, or enrolled). The cached copy
+ * is revalidated by ETag, and is the fallback when offline or the bundle has
+ * not been built yet. A 403 means access was lost, so the cache is not served.
+ */
+async function loadScopedBundle(
+  kind: "unit" | "section" | "instructor",
+  id: string,
 ): Promise<SearchBundle | null> {
-  const cacheKey = `unit:${unitId}`;
+  const cacheKey = `${kind}:${id}`;
   const cached = await getCached(cacheKey);
 
-  const path = `protected/${identityId}/search-index/unit/${unitId}.json`;
-
   try {
-    const result = await downloadData({ path }).result;
-    const text = await result.body.text();
-    const bundle: SearchBundle = JSON.parse(text);
+    const response = await fetch(
+      `/api/search-bundle?kind=${kind}&id=${encodeURIComponent(id)}`,
+      {
+        credentials: "same-origin",
+        headers: cached?.etag ? { "If-None-Match": cached.etag } : {},
+      },
+    );
 
-    // Only use cache if version matches
-    if (cached && cached.version >= bundle.version) {
-      return cached;
-    }
+    if (response.status === 304 && cached) return cached;
+    if (response.status === 401 || response.status === 403) return null;
+    if (!response.ok) return cached;
 
+    const bundle: SearchBundle = await response.json();
+    bundle.etag = response.headers.get("ETag") ?? undefined;
     await setCache(cacheKey, bundle);
     return bundle;
   } catch {
-    // Fall back to cache if S3 unavailable
+    // Offline or network failure: serve what was cached for offline search.
     return cached;
   }
 }
 
-export async function loadInstructorBundle(
+export function loadUnitBundle(unitId: string): Promise<SearchBundle | null> {
+  return loadScopedBundle("unit", unitId);
+}
+
+export function loadSectionBundle(
+  sectionId: string,
+): Promise<SearchBundle | null> {
+  return loadScopedBundle("section", sectionId);
+}
+
+/**
+ * The caller's own whole-content bundle. Served only to its owner by
+ * /api/search-bundle (the server checks the id against the session identity).
+ */
+export function loadInstructorBundle(
   identityId: string,
 ): Promise<SearchBundle | null> {
-  const cacheKey = `instructor:${identityId}`;
-  const cached = await getCached(cacheKey);
-
-  const path = `private/${identityId}/search-index/instructor.json`;
-
-  try {
-    const result = await downloadData({ path }).result;
-    const text = await result.body.text();
-    const bundle: SearchBundle = JSON.parse(text);
-
-    if (cached && cached.version >= bundle.version) {
-      return cached;
-    }
-
-    await setCache(cacheKey, bundle);
-    return bundle;
-  } catch {
-    return cached;
-  }
+  return loadScopedBundle("instructor", identityId);
 }
 
 /**
@@ -164,7 +171,7 @@ export async function loadPlatformBundle(): Promise<SearchBundle | null> {
   const cacheKey = "platform:admin";
   const cached = await getCached(cacheKey);
 
-  const path = "private/unit/search-index/platform.json";
+  const path = "admin/search-index/platform.json";
 
   try {
     const result = await downloadData({ path }).result;
@@ -182,39 +189,72 @@ export async function loadPlatformBundle(): Promise<SearchBundle | null> {
   }
 }
 
+/** Merges bundles into one linear bundle, keeping the first copy of each item id. */
+export function mergeBundles(
+  bundles: Array<SearchBundle | null | undefined>,
+): SearchBundle | null {
+  const seen = new Set<string>();
+  const items: BundleItem[] = [];
+  for (const bundle of bundles) {
+    for (const item of bundle?.items ?? []) {
+      if (!item?.id || seen.has(item.id)) continue;
+      seen.add(item.id);
+      items.push(item);
+    }
+  }
+  if (items.length === 0) return null;
+
+  return {
+    version: Date.now(),
+    dimensions: items[0]?.embedding?.length || 384,
+    model: "Xenova/all-MiniLM-L6-v2",
+    index: { strategy: "linear" },
+    items,
+  };
+}
+
 /**
  * Load search bundles for units shared with the current user.
  * Fetches unit bundles for each collaborator-granted unit.
  */
 export async function loadSharedBundles(
-  sharedUnits: Array<{ id: string; identityId: string }>,
+  sharedUnits: Array<{ id: string }>,
 ): Promise<SearchBundle | null> {
   if (!sharedUnits || sharedUnits.length === 0) return null;
 
-  const allItems: BundleItem[] = [];
-
+  const bundles: Array<SearchBundle | null> = [];
   for (const unit of sharedUnits) {
-    if (!unit.identityId || !unit.id) continue;
+    if (!unit.id) continue;
     try {
-      const bundle = await loadUnitBundle(unit.identityId, unit.id);
-      if (bundle?.items) {
-        allItems.push(...bundle.items);
-      }
+      bundles.push(await loadUnitBundle(unit.id));
     } catch {
       // Skip units whose bundles don't exist
     }
   }
+  return mergeBundles(bundles);
+}
 
-  if (allItems.length === 0) return null;
+/** Section ids the user is enrolled in as a learner, from their Cognito groups. */
+export function learnerSectionIds(groups: readonly string[] | undefined): string[] {
+  const ids = new Set<string>();
+  for (const group of groups ?? []) {
+    const match = /^section-(.+)-learners$/.exec(group);
+    if (match) ids.add(match[1]);
+  }
+  return [...ids];
+}
 
-  // Build a merged linear bundle for shared content
-  return {
-    version: Date.now(),
-    dimensions: allItems[0]?.embedding?.length || 384,
-    model: "Xenova/all-MiniLM-L6-v2",
-    index: { strategy: "linear" },
-    items: allItems,
-  };
+/**
+ * The merged search bundle of every section the learner is enrolled in. The
+ * server only serves a section's bundle to its members, so sections a learner
+ * has left simply drop out.
+ */
+export async function loadLearnerBundle(
+  groups: readonly string[] | undefined,
+): Promise<SearchBundle | null> {
+  const sectionIds = learnerSectionIds(groups);
+  if (sectionIds.length === 0) return null;
+  return mergeBundles(await Promise.all(sectionIds.map(loadSectionBundle)));
 }
 
 // --- Search ---
@@ -426,7 +466,9 @@ export function search(
 ): SearchResult[] {
   const normalizedQuery = l2Normalize(query);
 
-  if (!bundle.index || bundle.index.strategy === "linear") {
+  // Platform bundles with 5000+ items carry an "hnsw" graph this client does not
+  // traverse; an exhaustive scan is still fast (a few ms per 10k vectors).
+  if (!bundle.index || bundle.index.strategy !== "ivf") {
     return linearSearch(normalizedQuery, bundle, topK, threshold, queryText);
   }
 

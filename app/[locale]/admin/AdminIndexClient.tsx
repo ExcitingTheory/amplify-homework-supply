@@ -6,6 +6,7 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import Chip from "@mui/material/Chip";
 import Button from "@mui/material/Button";
+import Skeleton from "@mui/material/Skeleton";
 import Grid from "@mui/material/Grid";
 import FlagIcon from "@mui/icons-material/Flag";
 import InsightsIcon from "@mui/icons-material/Insights";
@@ -28,6 +29,8 @@ interface AdminTool {
   description: string;
   // Omit for tools without a cheap/meaningful triage count.
   count?: number;
+  // True while the server is still computing `count` (streamed in via Suspense).
+  countLoading?: boolean;
   countLabel?: string;
   countColor?: "error" | "warning" | "default";
 }
@@ -36,8 +39,8 @@ export default function AdminIndexClient({
   flaggedCount,
   recycleBinCount,
 }: {
-  flaggedCount: number;
-  recycleBinCount: number;
+  flaggedCount?: number;
+  recycleBinCount?: number;
 }) {
   const tools: AdminTool[] = [
     {
@@ -47,8 +50,9 @@ export default function AdminIndexClient({
       title: "Moderation",
       description: "Review flagged grades, units, words, and questions.",
       count: flaggedCount,
+      countLoading: flaggedCount === undefined,
       countLabel: "flagged",
-      countColor: flaggedCount > 0 ? "error" : "default",
+      countColor: (flaggedCount ?? 0) > 0 ? "error" : "default",
     },
     {
       key: "analytics",
@@ -93,8 +97,9 @@ export default function AdminIndexClient({
       title: "Recycle Bin",
       description: "Restore recently soft-deleted content.",
       count: recycleBinCount,
+      countLoading: recycleBinCount === undefined,
       countLabel: "deleted",
-      countColor: recycleBinCount > 0 ? "warning" : "default",
+      countColor: (recycleBinCount ?? 0) > 0 ? "warning" : "default",
     },
     {
       key: "settings",
@@ -181,6 +186,14 @@ export default function AdminIndexClient({
                       {tool.title}
                     </Typography>
                   </Box>
+                  {tool.countLoading && (
+                    <Skeleton
+                      variant="rounded"
+                      width={32}
+                      height={24}
+                      aria-label={`Loading ${tool.countLabel} count`}
+                    />
+                  )}
                   {tool.count != null && (
                     <Chip
                       label={`${tool.count}${tool.count >= 100 ? "+" : ""}`}

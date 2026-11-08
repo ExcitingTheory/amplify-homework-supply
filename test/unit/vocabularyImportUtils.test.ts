@@ -27,8 +27,8 @@ const parsed = (overrides: Record<string, unknown> = {}) => ({
   documentID: "doc-1",
   _version: 3,
   vocabularyJSON: [
-    { word: "Path", definition: "A Tree-line", page: 2, pages: [2, 9] },
-    { word: "Aleph", definition: "Hebrew letter", context: null, page: 3 },
+    { word: "Path", definition: "A Tree-line", pages: [2, 9] },
+    { word: "Aleph", definition: "Hebrew letter", context: null, pages: [3] },
   ],
   ...overrides,
 });
@@ -70,14 +70,12 @@ describe("importVocabularyToUnit", () => {
     );
     expect(models.UnitWord.create).toHaveBeenCalledTimes(2);
 
-    // Each word is linked to its document with where it came from
+    // Each word is linked to its document; the page is read from its content, not copied
     expect(models.DocumentWord.create).toHaveBeenCalledTimes(2);
     expect(models.DocumentWord.create).toHaveBeenCalledWith({
       wordID: "word-Path",
       documentID: "doc-1",
       owner: "owner",
-      page: 2,
-      entryKey: "path",
     });
 
     const update = models.ParsedContent.update.mock.calls[0][0];
@@ -102,14 +100,14 @@ describe("importVocabularyToUnit", () => {
     expect(models.Word.create).not.toHaveBeenCalled();
     // An existing word is still linked to this document
     expect(models.DocumentWord.create).toHaveBeenCalledWith(
-      expect.objectContaining({ wordID: "w1", documentID: "doc-1", entryKey: "aleph" }),
+      expect.objectContaining({ wordID: "w1", documentID: "doc-1" }),
     );
   });
 
   it("does not link a word to the document twice", async () => {
     givenChunks(parsed());
     models.DocumentWord.list.mockResolvedValue({
-      data: [{ id: "dw-1", documentID: "doc-1", wordID: "word-Path", entryKey: "path" }],
+      data: [{ id: "dw-1", documentID: "doc-1", wordID: "word-Path" }],
     });
 
     await importVocabularyToUnit("pc-1", "unit-1", null, "o", "i");
@@ -120,8 +118,66 @@ describe("importVocabularyToUnit", () => {
     );
   });
 
-  it("reports an empty or missing record without throwing", async () => {
-    givenChunks(parsed({ vocabularyJSON: [] }));
+  it("looks the dictionary up once for the whole batch, not once per word", async () => {
+    // Twelve words would previously have meant twelve filtered scans of Word
+    // and twelve of UnitWord, run one after another.
+    const words = Array.from({ length: 12 }, (_, index) => ({
+      word: `Word${index}`,
+      definition: `Definition ${index}`,
+    }));
+    givenChunks(parsed({ vocabularyJSON: words }));
+
+    const result = await importVocabularyToUnit("pc-1", "unit-1", null, "o", "i");
+
+    expect(result).toMatchObject({ success: true, imported: 12 });
+    expect(models.Word.list).toHaveBeenCalledTimes(1);
+    expect(models.Word.list.mock.calls[0][0].filter.or).toHaveLength(12);
+    // The unit's links come from one query on the unit, not one per word.
+    expect(models.UnitWord.list).toHaveBeenCalledTimes(1);
+    expect(models.UnitWord.list.mock.calls[0][0].filter).toEqual({
+      unitID: { eq: "unit-1" },
+    });
+    expect(models.UnitWord.create).toHaveBeenCalledTimes(12);
+  });
+
+  it("creates one word when the same term is selected twice", async () => {
+    givenChunks(
+      parsed({
+        vocabularyJSON: [
+          { word: "Path", definition: "A Tree-line" },
+          { word: " path ", definition: "Same word, spaced differently" },
+        ],
+      }),
+    );
+
+    const result = await importVocabularyToUnit("pc-1", "unit-1", null, "o", "i");
+
+    // Entries run in parallel, so the duplicate has to wait on the first
+    // create rather than racing a second one against it.
+    expect(models.Word.create).toHaveBeenCalledTimes(1);
+    expect(models.UnitWord.create).toHaveBeenCalledTimes(1);
+    expect(result).toMatchObject({ success: true, imported: 1, skipped: 1 });
+  });
+
+  it("reports progress before the first word, so nothing is silent", async () => {
+    givenChunks(parsed());
+    const progress: Array<[number, number, string]> = [];
+
+    await importVocabularyToUnit("pc-1", "unit-1", null, "o", "i", (...args) =>
+      progress.push(args as [number, number, string]),
+    );
+
+    // The setup is several round trips; it is reported with no total yet so the
+    // bar can show that work is happening.
+    expect(progress[0]).toEqual([0, 0, "Loading the document…"]);
+    expect(progress.some(([, , message]) => message === "Checking the dictionary…")).toBe(true);
+    // The count never goes backwards even though entries finish out of order.
+    const counts = progress.map(([current]) => current);
+    expect([...counts].sort((a, b) => a - b)).toEqual(counts);
+    expect(progress.at(-1)?.[2]).toMatch(/^Import complete:/);
+  });
+
+  it("reports an empty or missing record without throwing", async () => {    givenChunks(parsed({ vocabularyJSON: [] }));
     expect(await importVocabularyToUnit("pc-1", "u", null, "o", "i")).toMatchObject({
       success: true,
       imported: 0,
@@ -160,7 +216,7 @@ describe("getVocabularyImportStatus", () => {
 });
 
 describe("updateVocabularyItem", () => {
-  it("writes typed entries with only declared fields and the record version", async () => {
+  it("keeps a correction beside the extracted text, writing only declared fields and the record version", async () => {
     givenChunks(parsed());
 
     const ok = await updateVocabularyItem("pc-1", 0, { definition: "Edited", editedBy: "ui" });
@@ -170,10 +226,33 @@ describe("updateVocabularyItem", () => {
       id: "pc-1",
       _version: 3,
       vocabularyJSON: [
-        { word: "Path", definition: "Edited", page: 2, pages: [2, 9] },
-        { word: "Aleph", definition: "Hebrew letter", page: 3 },
+        // The extracted definition survives; the correction sits under `edited`.
+        { word: "Path", definition: "A Tree-line", edited: { definition: "Edited" }, pages: [2, 9] },
+        { word: "Aleph", definition: "Hebrew letter", pages: [3] },
       ],
     });
+  });
+
+  it("adds to an existing correction instead of replacing it", async () => {
+    givenChunks(parsed({
+      vocabularyJSON: [
+        { word: "Path", definition: "A Tree-line", edited: { definition: "Edited" }, pages: [2] },
+      ],
+    }));
+
+    expect(await updateVocabularyItem("pc-1", 0, { context: "A path joins two Sephiroth." })).toBe(true);
+    expect(models.ParsedContent.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        vocabularyJSON: [
+          {
+            word: "Path",
+            definition: "A Tree-line",
+            edited: { definition: "Edited", context: "A path joins two Sephiroth." },
+            pages: [2],
+          },
+        ],
+      }),
+    );
   });
 
   it("rejects an out-of-range index without writing", async () => {
@@ -190,7 +269,7 @@ describe("a document stored as several chunks", () => {
     _version: 3,
     chunkIndex: 0,
     chunkCount: 2,
-    vocabularyJSON: [{ word: "Path", definition: "A line", page: 1 }],
+    vocabularyJSON: [{ word: "Path", definition: "A line", pages: [1] }],
     ...overrides,
   });
   const chunk1 = (overrides: Record<string, unknown> = {}) => ({
@@ -200,8 +279,8 @@ describe("a document stored as several chunks", () => {
     chunkIndex: 1,
     chunkCount: 2,
     vocabularyJSON: [
-      { word: "Aleph", definition: "Hebrew letter", page: 5 },
-      { word: "Beth", definition: "House", page: 6 },
+      { word: "Aleph", definition: "Hebrew letter", pages: [5] },
+      { word: "Beth", definition: "House", pages: [6] },
     ],
     ...overrides,
   });
@@ -213,11 +292,20 @@ describe("a document stored as several chunks", () => {
 
     expect(result).toMatchObject({ success: true, imported: 3 });
     expect(models.Word.create).toHaveBeenCalledTimes(3);
-    expect(models.ParsedContent.update).toHaveBeenCalledTimes(1);
-    expect(models.ParsedContent.update.mock.calls[0][0]).toMatchObject({
-      id: "doc-1-chunk-0",
-      _version: 3,
-    });
+    const updates = models.ParsedContent.update.mock.calls.map(([input]) => input);
+    const imported = updates.filter((input) => "importedAt" in input);
+    expect(imported).toHaveLength(1);
+    expect(imported[0]).toMatchObject({ id: "doc-1-chunk-0", _version: 3 });
+    // Each chunk is then written once to record the Word each entry became
+    expect(updates.filter((input) => "vocabularyJSON" in input).map((input) => input.id).sort()).toEqual([
+      "doc-1-chunk-0",
+      "doc-1-chunk-1",
+    ]);
+    const referenced = updates
+      .filter((input) => "vocabularyJSON" in input)
+      .flatMap((input) => input.vocabularyJSON as Array<{ wordID?: string }>);
+    expect(referenced).toHaveLength(3);
+    expect(referenced.every((entry) => typeof entry.wordID === "string")).toBe(true);
   });
 
   it("counts the items of every chunk in the import status", async () => {
@@ -240,8 +328,8 @@ describe("a document stored as several chunks", () => {
       id: "doc-1-chunk-1",
       _version: 8,
       vocabularyJSON: [
-        { word: "Aleph", definition: "Hebrew letter", page: 5 },
-        { word: "Beth", definition: "A house", page: 6 },
+        { word: "Aleph", definition: "Hebrew letter", pages: [5] },
+        { word: "Beth", definition: "House", edited: { definition: "A house" }, pages: [6] },
       ],
     });
   });

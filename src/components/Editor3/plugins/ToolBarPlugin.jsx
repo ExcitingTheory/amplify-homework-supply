@@ -97,7 +97,9 @@ import {
   TextField,
   IconButton,
   InputAdornment,
+  Collapse,
 } from "@mui/material";
+import { OverflowRevealText } from "../../Workbook/OverflowRevealText";
 
 import MainToolbar from "../../MainToolbar";
 import UndoIcon from "@mui/icons-material/Undo";
@@ -183,7 +185,11 @@ import { getAmplifyClient } from "../../../utils/amplifyClient";
 
 import { INSERT_QUIZ_COMMAND } from "./QuizPlugin";
 
-import { InsertNewTableDialog } from "./TablePlugin";
+import { InsertNewTableDialog, INSERT_NEW_TABLE_COMMAND } from "./TablePlugin";
+import {
+  OPEN_BLOCK_INSERT_MENU_COMMAND,
+  $selectInsertionPointAfterBlock,
+} from "../constants/blockInsertion";
 
 import { $isAtNodeEnd } from "@lexical/selection";
 const drawerWidth = 400;
@@ -736,6 +742,29 @@ const PreviewModal = () => {
   );
 };
 
+// Compact, read-only title shown in the main app bar while the document is scrolled.
+const CompactUnitTitle = () => {
+  const t = useTranslations("workbook");
+  const { name, description } = useContext(UnitContext);
+  const ellipsis = { overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" };
+  return (
+    <Box data-testid="compact-unit-title" sx={{ mx: 1, overflow: "hidden", minWidth: 0 }}>
+      <OverflowRevealText
+        text={name || t("toolBarRoPlugin.untitledUnit")}
+        variant="body1"
+        component="div"
+        sx={{ fontWeight: 600, ...ellipsis }}
+      />
+      <OverflowRevealText
+        text={description || t("toolBarRoPlugin.noDescription")}
+        variant="caption"
+        component="div"
+        sx={{ display: "block", color: "text.secondary", lineHeight: 1.15, ...ellipsis }}
+      />
+    </Box>
+  );
+};
+
 const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
   const t = useTranslations("editor.authoring");
   const { name, description, saveName, saveDescription } =
@@ -775,6 +804,7 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
         flexDirection: isScrolled ? "row" : "column",
         alignItems: isScrolled ? "center" : "flex-start",
         width: "100%",
+        minWidth: 0,
         transition: "all 0.3s ease",
         gap: isScrolled ? 1 : 0,
         overflow: "hidden",
@@ -784,7 +814,9 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
       <title>{name}</title>
       <Box
         sx={{
-          flex: isScrolled ? "0 1 auto" : "1 0 auto",
+          flex: isScrolled ? "1 1 50%" : "0 0 auto",
+          width: isScrolled ? "auto" : "100%",
+          boxSizing: "border-box",
           maxWidth: isScrolled ? "50%" : "100%",
           px: 2,
           py: isScrolled ? 0.25 : 0.5,
@@ -852,7 +884,9 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
 
       <Box
         sx={{
-          flex: isScrolled ? "1 1 auto" : "1 0 auto",
+          flex: isScrolled ? "1 1 50%" : "0 0 auto",
+          width: isScrolled ? "auto" : "100%",
+          boxSizing: "border-box",
           px: isScrolled ? 0 : 2,
           py: isScrolled ? 0 : 0.5,
           minHeight: isScrolled ? "auto" : "2rem",
@@ -888,9 +922,12 @@ const UnitTitleDescriptionEditor = ({ isScrolled = false }) => {
         )}
         {editDescription && (
           <TextField
+            data-testid="unit-description-input"
             size="small"
             variant="standard"
             fullWidth
+            multiline
+            maxRows={isScrolled ? 1 : 3}
             value={newDescription || ""}
             placeholder={t("toolBarPlugin.addDescription")}
             onChange={(event) => {
@@ -958,7 +995,7 @@ const StatusSelect = () => {
         //     e.stopPropagation();
         // }}
         id="status-select-box"
-        style={{ minWidth: "7rem", margin: "0.25rem" }}
+        style={{ minWidth: "7rem", margin: "0 0.25rem" }}
       >
         <FormControl fullWidth>
           <InputLabel id="status-select-label">
@@ -1179,13 +1216,55 @@ const InsertNodeDropDown = ({
   const t = useTranslations("editor.authoring");
 
   const [anchorEl, setAnchorEl] = useState(null);
+  const insertionBlockKey = useRef(null);
   const open = Boolean(anchorEl);
+  // Lets a gutter button that opened this menu show its pressed state until the menu closes.
+  const notifyInsertMenuClosed = useRef(null);
+  const releaseInsertMenuOpener = () => {
+    notifyInsertMenuClosed.current?.();
+    notifyInsertMenuClosed.current = null;
+  };
   const handleClick = (event) => {
+    releaseInsertMenuOpener();
+    insertionBlockKey.current = null;
     setAnchorEl(event.currentTarget);
   };
   const handleClose = () => {
+    releaseInsertMenuOpener();
+    insertionBlockKey.current = null;
     setAnchorEl(null);
   };
+
+  useEffect(() => mergeRegister(
+    editor.registerCommand(OPEN_BLOCK_INSERT_MENU_COMMAND, ({ anchor, nodeKey, onClose }) => {
+      if (disabled || !editor.isEditable()) return false;
+      releaseInsertMenuOpener();
+      notifyInsertMenuClosed.current = onClose ?? null;
+      insertionBlockKey.current = nodeKey;
+      setAnchorEl(anchor);
+      return true;
+    }, COMMAND_PRIORITY_CRITICAL),
+    ...[
+      INSERT_MEANING_ASSOCIATION_BLOCK_COMMAND,
+      INSERT_WORD_BLOCK_COMMAND,
+      INSERT_ANSWER_BLOCK_COMMAND,
+      INSERT_CUSTOM_ANSWER_BLOCK_COMMAND,
+      INSERT_CUSTOM_AI_BLOCK_COMMAND,
+      INSERT_PLAYLIST_COMMAND,
+      INSERT_CALL_RESPONSE_COMMAND,
+      INSERT_QUIZ_COMMAND,
+      INSERT_HORIZONTAL_RULE_COMMAND,
+      INSERT_LAYOUT_COMMAND,
+      INSERT_CONVERSATION_PLAYLIST_COMMAND,
+      INSERT_NEW_TABLE_COMMAND,
+    ].map((command) => editor.registerCommand(command, (_payload, targetEditor) => {
+      if (targetEditor === editor && insertionBlockKey.current !== null) {
+        $selectInsertionPointAfterBlock(insertionBlockKey.current);
+        insertionBlockKey.current = null;
+      }
+      return false;
+    }, COMMAND_PRIORITY_CRITICAL)),
+  ), [editor, disabled]);
 
   return (
     <>
@@ -1688,7 +1767,7 @@ function BlockFormatDropDown({
       `}</style>
       <Box
         id="block-format-select-box"
-        style={{ minWidth: "auto", margin: "0.25rem" }}
+        style={{ minWidth: "auto", margin: "0 0.25rem" }}
       >
         <FormControl sx={{ minWidth: "auto" }}>
           <InputLabel id="block-format-select-label" sx={{ display: "none" }}>
@@ -2047,7 +2126,7 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
   ref,
 ) {
   const t = useTranslations("editor.authoring");
-  const { toolbarPortalRef, appBarHeight } = useAppShell();
+  const { toolbarPortalRef, toolbarChildrenPortalRef, appBarHeight } = useAppShell();
   const [editor] = useLexicalComposerContext();
   const [activeEditor, setActiveEditor] = useState(editor);
   const [blockType, setBlockType] = useState("paragraph");
@@ -2667,20 +2746,23 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
               flexDirection: "column",
             }}
           >
-            <UnitTitleDescriptionEditor />
+            {/* Collapse keeps an in-progress title/description edit mounted while scrolled. */}
+            <Collapse in={!isScrolled} data-testid="unit-header-collapse">
+              <UnitTitleDescriptionEditor />
+            </Collapse>
             <AppBar
               ref={secondAppBarRef}
               position="relative"
-              color="default"
+              color="transparent"
+              elevation={0}
               data-tour="editor-toolbar"
               sx={{
                 overflowX: "visible",
                 boxShadow: "none",
                 backgroundColor: "transparent",
-                paddingTop: "0.25rem",
+                backgroundImage: "none",
                 borderBottom: 1,
                 borderColor: "divider",
-                paddingBottom: "0.25rem",
               }}
             >
               {/* Left scroll arrow */}
@@ -2726,7 +2808,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
                   maxWidth: "100%",
                   paddingLeft: "3rem",
                   paddingRight: "3rem",
-                  paddingTop: "0.25rem",
+                  // Room for the status select's floating label; the scrolling row clips vertical overflow.
+                  paddingTop: "0.5rem",
                   paddingBottom: "0.25rem",
                   minHeight: "2.5rem",
                   overflowX: "auto",
@@ -3176,6 +3259,8 @@ const ToolBarPlugin = forwardRef(function ToolBarPlugin(
           </Box>,
           toolbarPortalRef.current,
         )}
+      {isScrolled && toolbarChildrenPortalRef?.current &&
+        createPortal(<CompactUnitTitle />, toolbarChildrenPortalRef.current)}
     </>
   );
 });

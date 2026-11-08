@@ -16,11 +16,7 @@
 import { useEffect, useRef, useState, useCallback } from "react";
 import { useYjsProvider } from "../yjs/hooks";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import {
-  saveDraftContent,
-  saveYjsSnapshot,
-  loadYjsSnapshot,
-} from "../utils/unitContentStorage";
+import { saveYjsSnapshot, loadYjsSnapshot } from "../utils/unitContentStorage";
 import * as Y from "yjs";
 
 export interface UseYjsUnitConfig {
@@ -145,11 +141,8 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
     }
 
     try {
-      const ytext = provider.getText("editorContent");
       const ymetadata = provider.getMap("metadata");
 
-      // Extract state
-      const editorContent = ytext.toString();
       const yjsState = Y.encodeStateAsUpdate(provider.getDoc());
 
       // Extract metadata
@@ -168,23 +161,8 @@ export function useYjsUnit(config: UseYjsUnitConfig): UseYjsUnitReturn {
         `[useYjsUnit] Saving unit ${unitId} to S3 + DynamoDB (version ${nextVersionRef.current})`,
       );
 
-      // Upload content + snapshot to S3 in parallel (private — owner only)
-      const saveResults = await Promise.allSettled([
-        saveDraftContent(
-          identityId,
-          unitId,
-          JSON.stringify({ content: editorContent }),
-        ),
-        saveYjsSnapshot(identityId, unitId, yjsState),
-      ]);
-      const saveFailures = saveResults.filter((r) => r.status === "rejected");
-      if (saveFailures.length > 0) {
-        console.error(
-          "[useYjsUnit] S3 save partially failed:",
-          saveFailures.map((f) => (f as PromiseRejectedResult).reason),
-        );
-        // Continue with DynamoDB update even if S3 partially failed
-      }
+      // UnitContext persists Lexical JSON; editorContent is not Lexical's shared root.
+      await saveYjsSnapshot(identityId, unitId, yjsState);
 
       // Bump contentVersion in DynamoDB (lightweight, no content payload)
       const currentContentVersion = (unit as any).contentVersion || 0;

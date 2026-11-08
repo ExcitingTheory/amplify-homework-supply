@@ -90,6 +90,7 @@ export default function PracticeDrillDialog({
     saving,
     error,
     generateDrill,
+    saveAnswers,
     completeDrill,
     reset,
   } = usePracticeDrill(unitName);
@@ -172,9 +173,10 @@ export default function PracticeDrillDialog({
     await completeDrill();
   }, [completeDrill]);
 
-  const handleStatsChange = useCallback((stats: DrillStats) => {
+  const handleStatsChange = useCallback((answers: Parameters<typeof saveAnswers>[0], stats: DrillStats) => {
     setDrillStats(stats);
-  }, []);
+    saveAnswers(answers, stats);
+  }, [saveAnswers]);
 
   const xpPreview = previewXP(sessionsCompletedToday, drillStats.accuracy);
   const allCompleted = drillStats.complete && session.blocks.length > 0;
@@ -278,7 +280,7 @@ export default function PracticeDrillDialog({
               <DrillGradeAdapter
                 sessionId={session.id || ""}
                 blocks={session.blocks as PracticeDrillBlock[]}
-                onGradeChange={(_data, stats) => handleStatsChange(stats)}
+                onGradeChange={handleStatsChange}
               >
                 <Workbook />
               </DrillGradeAdapter>

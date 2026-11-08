@@ -513,7 +513,7 @@ export const AdminAnalytics: Story = {
     seedMockAnalyticsSummary(
       buildMockAnalyticsSummaries(95, "section-jpn-102"),
     );
-    return <AnalyticsClient initialSections={[]} />;
+    return <AnalyticsClient />;
   },
   parameters: {
     mockAuth: {

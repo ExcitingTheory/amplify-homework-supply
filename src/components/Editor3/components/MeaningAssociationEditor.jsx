@@ -80,7 +80,7 @@ const getColumns = (t) => [
     headerName: t("meaningAssociationEditor.columnHeaders.phrase"),
     flex: 1,
     minWidth: 100,
-    colSpan: (params) => (params.id === "__empty__" ? 4 : 1),
+    colSpan: (params) => (params?.id === "__empty__" ? 4 : 1),
     renderCell: (params) =>
       params.id === "__empty__" ? (
         <Typography
@@ -301,7 +301,7 @@ export default function MeaningAssociationEditor({
             <IconButton
               size="small"
               aria-label={removeRowLabel(params.row)}
-              sx={{ color: "common.black" }}
+              sx={{ color: "text.primary" }}
               onClick={(event) => {
                 event.stopPropagation();
                 removeWordIDs([params.row.id]);

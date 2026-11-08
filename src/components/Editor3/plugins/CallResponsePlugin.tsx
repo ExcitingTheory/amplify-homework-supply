@@ -494,7 +494,12 @@ export class CallResponseNode extends DecoratorNode<React.ReactElement> {
     return new CallResponseNode(serializedNode.script);
   }
 
-  constructor(script: CallResponseScript, key?: NodeKey) {
+  // Lexical (and @lexical/yjs collab) instantiate registered nodes with no
+  // arguments, so the script needs a default.
+  constructor(
+    script: CallResponseScript = createEmptyCallResponseScript(),
+    key?: NodeKey,
+  ) {
     super(key);
     if (!isCallResponseScript(script)) {
       throw new Error("CallResponseNode requires a valid script");

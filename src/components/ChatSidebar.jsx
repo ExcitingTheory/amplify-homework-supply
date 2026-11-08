@@ -79,7 +79,7 @@ import {
 } from "../utils/chatTools";
 import AIFeedbackWidget from "./AIFeedbackWidget";
 import SearchResults from "./ChatSidebar/SearchResults";
-import { PracticeDrillDialog } from "./PracticeDrill";
+import PracticeDrillDialog from "./PracticeDrill/PracticeDrillDialog";
 import { TextStreamChatTransport } from "ai";
 import { VirtualizedMessageList } from "./ChatSidebar/VirtualizedMessageList";
 import { LexicalMessageRenderer } from "./ChatSidebar/LexicalMessageRenderer";

@@ -1,0 +1,553 @@
+{
+  "sourceSha256": "492c21f8fa008ee800e325d8f073f3d2041b15ae23f3942351050ef4662de4f4",
+  "capturedAt": "2026-10-28T12:55:30.202Z",
+  "sourceFormat": "pdf",
+  "pageCount": 2,
+  "vocabularyJSON": [
+    {
+      "word": "Water Balance Equation",
+      "definition": "Precipitation = Evapotranspiration + Runoff +",
+      "context": "Water Balance Equation: Precipitation = Evapotranspiration + Runoff +",
+      "pages": [
+        2
+      ]
+    }
+  ],
+  "summariesJSON": [],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is 1 for Stages of the Water Cycle?",
+      "answer": "Evaporation and Transpiration",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "1",
+      "sourceText": "Stages of the Water Cycle\n1. Evaporation and Transpiration\nSolar radiation heats water in oceans, lakes, and rivers, causing it to evaporate\ninto water vapor. Plants also release water vapor through transpiration. Together,\nthese processes are called evapotranspiration.",
+      "accept": []
+    },
+    {
+      "prompt": "What is 2 for Stages of the Water Cycle?",
+      "answer": "Condensation",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Stages of the Water Cycle",
+      "field": "2",
+      "sourceText": "2. Condensation\nAs water vapor rises into the atmosphere, it cools and condenses around tiny\nparticles to form clouds. This process releases heat energy into the atmosphere.",
+      "accept": []
+    },
+    {
+      "prompt": "What is Condensation for Condensation?",
+      "answer": "The process by which water vapor in the air is changed into",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Condensation",
+      "field": "Condensation",
+      "sourceText": "Condensation - The process by which water vapor in the air is changed into",
+      "accept": [
+        "The process by which water vapor in the air is changed into"
+      ]
+    },
+    {
+      "prompt": "What is Precipitation for Precipitation?",
+      "answer": "Water released from clouds in the form of rain, sleet, snow, or",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Precipitation",
+      "field": "Precipitation",
+      "sourceText": "Precipitation - Water released from clouds in the form of rain, sleet, snow, or",
+      "accept": [
+        "Water released from clouds in the form of rain, sleet, snow, or"
+      ]
+    },
+    {
+      "prompt": "What is Transpiration for Transpiration?",
+      "answer": "The process by which plants release water vapor into the",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Transpiration",
+      "field": "Transpiration",
+      "sourceText": "Transpiration - The process by which plants release water vapor into the",
+      "accept": [
+        "The process by which plants release water vapor into the"
+      ]
+    },
+    {
+      "prompt": "What is Runoff for Runoff?",
+      "answer": "Water that flows over the land surface and into streams, rivers, and",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Runoff",
+      "field": "Runoff",
+      "sourceText": "Runoff - Water that flows over the land surface and into streams, rivers, and",
+      "accept": [
+        "Water that flows over the land surface and into streams, rivers, and"
+      ]
+    },
+    {
+      "prompt": "What is Aquifer for Aquifer?",
+      "answer": "An underground layer of water-bearing permeable rock or sediment",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Aquifer",
+      "field": "Aquifer",
+      "sourceText": "Aquifer - An underground layer of water-bearing permeable rock or sediment",
+      "accept": [
+        "An underground layer of water-bearing permeable rock or sediment"
+      ]
+    },
+    {
+      "prompt": "What is Percolation for Percolation?",
+      "answer": "The movement of water through soil and porous rock, eventually",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Percolation",
+      "field": "Percolation",
+      "sourceText": "Percolation - The movement of water through soil and porous rock, eventually",
+      "accept": [
+        "The movement of water through soil and porous rock, eventually"
+      ]
+    },
+    {
+      "prompt": "What is Evaporation for Evaporation?",
+      "answer": "The process by which water changes from liquid to gas or vapor.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Evaporation",
+      "field": "Evaporation",
+      "sourceText": "Evaporation - The process by which water changes from liquid to gas or vapor.",
+      "accept": [
+        "Evaporation"
+      ]
+    },
+    {
+      "prompt": "What is Infiltration for Infiltration?",
+      "answer": "The process by which water on the ground surface enters the soil.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Infiltration",
+      "field": "Infiltration",
+      "sourceText": "Infiltration - The process by which water on the ground surface enters the soil.",
+      "accept": [
+        "Infiltration"
+      ]
+    },
+    {
+      "prompt": "What is Groundwater for Groundwater?",
+      "answer": "Water stored beneath Earth’s surface in soil and rock formations",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Groundwater",
+      "field": "Groundwater",
+      "sourceText": "Groundwater - Water stored beneath Earth’s surface in soil and rock formations",
+      "accept": [
+        "Water stored beneath Earth’s surface in soil and rock formations"
+      ]
+    },
+    {
+      "prompt": "What is Sublimation for Sublimation?",
+      "answer": "The transition of water directly from solid (ice/snow) to gas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Sublimation",
+      "field": "Sublimation",
+      "sourceText": "Sublimation - The transition of water directly from solid (ice/snow) to gas",
+      "accept": [
+        "The transition of water directly from solid (ice/snow) to gas"
+      ]
+    },
+    {
+      "prompt": "What is Key Vocabulary for The Water Cycle?",
+      "answer": "Groundwater - Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "Key Vocabulary",
+      "sourceText": "Groundwater - Water stored beneath Earth’s surface in soil and rock formations called aquifers.",
+      "accept": [
+        "Groundwater - Water stored beneath Earth’s surface in soil and rock formations called aquifers."
+      ]
+    },
+    {
+      "prompt": "What is Stages of the Water Cycle for The Water Cycle?",
+      "answer": "1. Evaporation and Transpiration",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "Stages of the Water Cycle",
+      "sourceText": "1. Evaporation and Transpiration",
+      "accept": [
+        "1. Evaporation and Transpiration"
+      ]
+    },
+    {
+      "prompt": "What is Stages of the Water Cycle for The Water Cycle?",
+      "answer": "2. Condensation",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Water Cycle",
+      "field": "Stages of the Water Cycle",
+      "sourceText": "2. Condensation",
+      "accept": [
+        "2. Condensation"
+      ]
+    },
+    {
+      "prompt": "What is definition for Precipitation?",
+      "answer": "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Precipitation",
+      "field": "definition",
+      "sourceText": "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail.",
+      "accept": [
+        "When cloud droplets combine and become heavy enough, they fall to Earth as precipitation. The form depends on atmospheric temperature - rain, snow, sleet, or hail."
+      ]
+    },
+    {
+      "prompt": "What is definition for Collection and Infiltration?",
+      "answer": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Collection and Infiltration",
+      "field": "definition",
+      "sourceText": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere",
+      "accept": [
+        "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water (rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is absorbed by plants or evaporates back into the atmosphere"
+      ]
+    },
+    {
+      "prompt": "What is description for Water Balance Equation?",
+      "answer": "Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Balance Equation",
+      "field": "description",
+      "sourceText": "Water Balance Equation: Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "accept": [
+        "Precipitation = Evapotranspiration + Runoff + Change in Storage"
+      ]
+    },
+    {
+      "prompt": "What is purpose for Water Balance Equation?",
+      "answer": "This fundamental equation describes how water is partitioned in a given area over time.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Balance Equation",
+      "field": "purpose",
+      "sourceText": "This fundamental equation describes how water is partitioned in a given area over time.",
+      "accept": [
+        "This fundamental equation describes how water is partitioned in a given area over time."
+      ]
+    },
+    {
+      "prompt": "What is The form depends on atmospheric temperature for precipitation?",
+      "answer": "rain, snow, sleet,",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "precipitation",
+      "field": "The form depends on atmospheric temperature",
+      "sourceText": "precipitation. The form depends on atmospheric temperature - rain, snow, sleet,",
+      "accept": [
+        "rain, snow, sleet"
+      ]
+    },
+    {
+      "prompt": "What is either for Precipitation that reaches Earth’s surface?",
+      "answer": "- Runs off into bodies of water",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Precipitation that reaches Earth’s surface",
+      "field": "either",
+      "sourceText": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water",
+      "accept": [
+        "Runs off into bodies of water"
+      ]
+    },
+    {
+      "prompt": "What is either for Precipitation that reaches Earth’s surface?",
+      "answer": "- Infiltrates into the ground to become groundwater",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Precipitation that reaches Earth’s surface",
+      "field": "either",
+      "sourceText": "(rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is",
+      "accept": [
+        "Infiltrates into the ground to become groundwater"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Residence Time?",
+      "answer": "The average time a water molecule spends in a particu-",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Residence Time",
+      "field": "Residence Time",
+      "sourceText": "Residence Time - The average time a water molecule spends in a particu-",
+      "accept": [
+        "The average time a water molecule spends in a particu-"
+      ]
+    },
+    {
+      "prompt": "What is Water Distribution for Water Distribution?",
+      "answer": "Approximately 97% of Earth’s water is saltwater in",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Distribution",
+      "field": "Water Distribution",
+      "sourceText": "Water Distribution - Approximately 97% of Earth’s water is saltwater in",
+      "accept": [
+        "Approximately 97% of Earth’s water is saltwater in"
+      ]
+    },
+    {
+      "prompt": "What is Human Impact for Human Impact?",
+      "answer": "Human activities such as deforestation, urbanization, and",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Human Impact",
+      "field": "Human Impact",
+      "sourceText": "Human Impact - Human activities such as deforestation, urbanization, and",
+      "accept": [
+        "Human activities such as deforestation, urbanization"
+      ]
+    },
+    {
+      "prompt": "What is Water Balance Equation for Water Balance Equation?",
+      "answer": "Precipitation = Evapotranspiration + Runoff +",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Balance Equation",
+      "field": "Water Balance Equation",
+      "sourceText": "Water Balance Equation: Precipitation = Evapotranspiration + Runoff +",
+      "accept": [
+        "Precipitation = Evapotranspiration + Runoff"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Ocean water?",
+      "answer": "about 3,000 years",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Ocean water",
+      "field": "Residence Time",
+      "sourceText": "Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "accept": [
+        "3,000 years",
+        "about 3,000 years"
+      ]
+    },
+    {
+      "prompt": "What is Residence Time for Atmospheric water vapor?",
+      "answer": "only about 9 days",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Atmospheric water vapor",
+      "field": "Residence Time",
+      "sourceText": "Ocean water has a residence time of about 3,000 years, while atmospheric water vapor has a residence time of only about 9 days.",
+      "accept": [
+        "9 days",
+        "only about 9 days"
+      ]
+    },
+    {
+      "prompt": "What is Saltwater percentage for Water Distribution?",
+      "answer": "Approximately 97%",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Distribution",
+      "field": "Saltwater percentage",
+      "sourceText": "Approximately 97% of Earth’s water is saltwater in oceans.",
+      "accept": [
+        "97%",
+        "Approximately 97%"
+      ]
+    },
+    {
+      "prompt": "What is Percentage for Earth’s freshwater?",
+      "answer": "3%",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Earth’s freshwater",
+      "field": "Percentage",
+      "sourceText": "Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "accept": [
+        "3%"
+      ]
+    },
+    {
+      "prompt": "What is Ice caps and glaciers percentage for Freshwater?",
+      "answer": "about 69%",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Freshwater",
+      "field": "Ice caps and glaciers percentage",
+      "sourceText": "Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "accept": [
+        "69%",
+        "about 69%"
+      ]
+    },
+    {
+      "prompt": "What is Groundwater percentage for Freshwater?",
+      "answer": "30%",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Freshwater",
+      "field": "Groundwater percentage",
+      "sourceText": "Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "accept": [
+        "30%"
+      ]
+    },
+    {
+      "prompt": "What is Lakes, rivers, and atmosphere percentage for Freshwater?",
+      "answer": "less than 1%",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Freshwater",
+      "field": "Lakes, rivers, and atmosphere percentage",
+      "sourceText": "Of the remaining 3% freshwater, about 69% is locked in ice caps and glaciers, 30% is groundwater, and less than 1% exists in lakes, rivers, and the atmosphere.",
+      "accept": [
+        "less than 1%"
+      ]
+    },
+    {
+      "prompt": "What is Definition for Human Impact?",
+      "answer": "Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Human Impact",
+      "field": "Definition",
+      "sourceText": "Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution.",
+      "accept": [
+        "Human activities such as deforestation, urbanization, and climate change significantly affect the water cycle by altering evapotranspiration rates, runoff patterns, and precipitation distribution."
+      ]
+    },
+    {
+      "prompt": "What is Equation for Water Balance Equation?",
+      "answer": "Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Water Balance Equation",
+      "field": "Equation",
+      "sourceText": "Water Balance Equation: Precipitation = Evapotranspiration + Runoff + Change in Storage",
+      "accept": [
+        "Precipitation = Evapotranspiration + Runoff + Change in Storage"
+      ]
+    },
+    {
+      "prompt": "What is precipitation. The form depends on atmospheric temperature for precipitation?",
+      "answer": "rain, snow, sleet,",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "precipitation",
+      "field": "precipitation. The form depends on atmospheric temperature",
+      "sourceText": "precipitation. The form depends on atmospheric temperature - rain, snow, sleet,",
+      "accept": [
+        "rain, snow, sleet"
+      ]
+    },
+    {
+      "prompt": "What is Precipitation that reaches Earth’s surface either for Precipitation?",
+      "answer": "- Runs off into bodies of water",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Precipitation",
+      "field": "Precipitation that reaches Earth’s surface either",
+      "sourceText": "Precipitation that reaches Earth’s surface either: - Runs off into bodies of water",
+      "accept": [
+        "Runs off into bodies of water"
+      ]
+    },
+    {
+      "prompt": "What is (rivers, lakes, oceans) for Precipitation?",
+      "answer": "Infiltrates into the ground to become groundwater - Is",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Precipitation",
+      "field": "(rivers, lakes, oceans)",
+      "sourceText": "(rivers, lakes, oceans) - Infiltrates into the ground to become groundwater - Is",
+      "accept": [
+        "Infiltrates into the ground to become groundwater - Is"
+      ]
+    }
+  ]
+}

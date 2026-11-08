@@ -18,7 +18,7 @@ import { getCurrentScope } from './types'
 import TopicList from './TopicList'
 import ThreadView from './ThreadView'
 import MessageInput from './MessageInput'
-import { MiniEditorEditable } from '../MiniEditor'
+import MiniEditorEditable from '../MiniEditor/MiniEditorEditable'
 import type { SerializedEditorState } from 'lexical'
 
 export interface ChatPanelProps {

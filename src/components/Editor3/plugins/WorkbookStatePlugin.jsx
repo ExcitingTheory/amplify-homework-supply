@@ -13,21 +13,21 @@
  * It loads Unit.data while graded blocks use workbookCollaboration.workbookData for answers.
  */
 
-import { useEffect, useContext, useRef, useState } from "react";
+import { useEffect, useContext, useRef } from "react";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { useTranslations } from "next-intl";
-import Snackbar from "@mui/material/Snackbar";
 import Button from "@mui/material/Button";
 import UnitContext from "../../../context/unitContext";
 import { sanitizeEditorStateJSON } from "../editorConfig";
+import { useEditorToast } from "../context/EditorToastContext";
 
 export default function WorkbookStatePlugin() {
   const t = useTranslations("pages");
   const { unit } = useContext(UnitContext);
   const [editor] = useLexicalComposerContext();
+  const { showToast } = useEditorToast();
   const hasLoaded = useRef(false);
   const loadedVersion = useRef(null);
-  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
     // Only load once and only if we have unit data
@@ -85,29 +85,27 @@ export default function WorkbookStatePlugin() {
         "→",
         unit._version,
       );
-      setUpdateAvailable(true);
+      loadedVersion.current = unit._version;
+      showToast({
+        message: t("workbook.unitUpdated"),
+        severity: "info",
+        autoHideDuration: null,
+        action: (dismiss) => (
+          <Button
+            color="inherit"
+            variant="outlined"
+            size="small"
+            onClick={() => {
+              dismiss();
+              window.location.reload();
+            }}
+          >
+            {t("workbook.reload")}
+          </Button>
+        ),
+      });
     }
-  }, [unit?._version]);
+  }, [unit?._version, showToast, t]);
 
-  const handleReload = () => {
-    window.location.reload();
-  };
-
-  return (
-    <Snackbar
-      open={updateAvailable}
-      message={t("workbook.unitUpdated")}
-      anchorOrigin={{ vertical: "top", horizontal: "center" }}
-      action={
-        <Button
-          color="primary"
-          variant="contained"
-          size="small"
-          onClick={handleReload}
-        >
-          {t("workbook.reload")}
-        </Button>
-      }
-    />
-  );
+  return null;
 }

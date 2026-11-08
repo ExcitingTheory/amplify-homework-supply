@@ -8,11 +8,16 @@
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { fetchAuthSession } from "aws-amplify/auth/server";
 import { cookies } from "next/headers";
+import { getOwnerIdentifiers } from "@/utils/ownership";
 
 export interface AuthResult {
   authenticated: boolean;
   userId?: string;
   groups?: string[];
+  /** Cognito identity pool id from the verified session (not client-supplied). */
+  identityId?: string;
+  /** Values a record's `owner` field may hold for this user (sub, username, sub::username). */
+  ownerIds?: string[];
 }
 
 /**
@@ -34,7 +39,13 @@ export async function validateAuth(): Promise<AuthResult> {
     const userId = idToken.payload?.sub as string;
     const groups = (idToken.payload?.["cognito:groups"] as string[]) || [];
 
-    return { authenticated: true, userId, groups };
+    return {
+      authenticated: true,
+      userId,
+      groups,
+      identityId: session?.identityId,
+      ownerIds: getOwnerIdentifiers({ idToken }),
+    };
   } catch {
     return { authenticated: false };
   }

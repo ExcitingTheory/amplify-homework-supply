@@ -68,6 +68,7 @@ export interface AIAgentConfigValues {
   documentAnalysisAnthropicRequestsPerMinute?: number | null;
   documentAnalysisAnthropicTokensPerMinute?: number | null;
   documentAnalysisAnthropicMaxConcurrentRequests?: number | null;
+  documentAnalysisLlmExtractionEnabled?: boolean;
   // Enforcement toggle
   enforceTokenBudget?: boolean;
 }
@@ -222,6 +223,25 @@ export function AIAgentConfig({
               <Typography variant="body2" color="text.secondary">
                 {t("aiAgentConfig.documentAnalysisRateLimitsDescription")}
               </Typography>
+              <Box>
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={values.documentAnalysisLlmExtractionEnabled ?? false}
+                      onChange={(event) =>
+                        update(
+                          "documentAnalysisLlmExtractionEnabled",
+                          event.target.checked,
+                        )
+                      }
+                    />
+                  }
+                  label={t("aiAgentConfig.enableLlmExtractionByDefault")}
+                />
+                <Typography variant="body2" color="text.secondary">
+                  {t("aiAgentConfig.enableLlmExtractionByDefaultDescription")}
+                </Typography>
+              </Box>
               {/* eslint-disable-next-line i18next/no-literal-string -- Provider trademarks are not translated. */}
               <Typography variant="subtitle2">OpenAI</Typography>
               <TextField
@@ -249,16 +269,14 @@ export function AIAgentConfig({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
-                slotProps={{ htmlInput: { min: 270000, step: 1 } }}
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
                 helperText={t("aiAgentConfig.tokensPerMinuteHint")}
               />
               <TextField
                 label={t("aiAgentConfig.maxConcurrentRequestsLabel")}
                 type="number"
                 size="small"
-                value={
-                  values.documentAnalysisOpenAiMaxConcurrentRequests ?? ""
-                }
+                value={values.documentAnalysisOpenAiMaxConcurrentRequests ?? ""}
                 onChange={(e) =>
                   update(
                     "documentAnalysisOpenAiMaxConcurrentRequests",
@@ -297,7 +315,7 @@ export function AIAgentConfig({
                     e.target.value ? Number(e.target.value) : null,
                   )
                 }
-                slotProps={{ htmlInput: { min: 270000, step: 1 } }}
+                slotProps={{ htmlInput: { min: 1, step: 1 } }}
                 helperText={t("aiAgentConfig.tokensPerMinuteHint")}
               />
               <TextField

@@ -60,6 +60,14 @@ function safeParse(text: string): unknown {
   }
 }
 
+/** The first page an entry appeared on, or 0 when it has none. */
+const firstPage = (entry: Record<string, unknown>): number => {
+  const pages = Array.isArray(entry.pages)
+    ? entry.pages.filter((page): page is number => typeof page === "number")
+    : [];
+  return pages.length > 0 ? Math.min(...pages) : 0;
+};
+
 const str = (value: unknown): string => (typeof value === "string" ? value : "");
 
 /** The vocabulary entries and summaries of a ParsedContent record, as embeddable text. */
@@ -73,7 +81,7 @@ export function buildEmbeddingItems(parsed: {
     const context = str(entry.context);
     items.push({
       type: "vocabulary",
-      page: typeof entry.page === "number" ? entry.page : 0,
+      page: firstPage(entry),
       text: `${word} - ${str(entry.definition)}${context ? ` (${context})` : ""}`.substring(
         0,
         MAX_ITEM_TEXT,

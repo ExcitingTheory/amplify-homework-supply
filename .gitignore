@@ -127,6 +127,7 @@ amplifyconfiguration*
 # auto-generated type declarations (but keep our custom ones)
 *.d.ts
 !types/*.d.ts
+!amplify/functions/documentAnalysis/subtlex-word-frequencies.d.ts
 !next-env.d.ts
 tsconfig.tsbuildinfo
 test/certificates
@@ -140,3 +141,5 @@ private*.sh
 
 test/e2e-report/*
 !test/e2e-report/.gitkeep
+# Local Stanza publishing and smoke fixtures (never Docker build inputs).
+.native-vocabulary-models/

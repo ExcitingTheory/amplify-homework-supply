@@ -16,16 +16,10 @@ import {
     Typography,
     Paper,
     Chip,
-    Alert,
-    Snackbar,
     FormHelperText,
     Divider,
     LinearProgress,
 } from '@mui/material';
-import {
-    CheckCircle as CheckIcon,
-    Error as ErrorIcon,
-} from '@mui/icons-material';
 import { LexicalComposer } from '@lexical/react/LexicalComposer';
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin';
 import { ContentEditable } from '@lexical/react/LexicalContentEditable';
@@ -33,6 +27,7 @@ import { HistoryPlugin } from '@lexical/react/LexicalHistoryPlugin';
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin';
 import {LexicalErrorBoundary} from '@lexical/react/LexicalErrorBoundary';
 import { $getRoot, $createTextNode, $createLineBreakNode, $createParagraphNode, EditorState } from 'lexical';
+import { useEditorToast } from '../context/EditorToastContext';
 
 interface MetadataEditorProps {
     file: any;
@@ -186,6 +181,7 @@ export default function MetadataEditor({
     autoSaveDelay = 2000,
 }: MetadataEditorProps) {
     const t = useTranslations('editor.shared');
+    const { showToast } = useEditorToast();
     const [saving, setSaving] = useState(false);
     const [formData, setFormData] = useState<FormData>({
         name: file.name || '',
@@ -194,11 +190,6 @@ export default function MetadataEditor({
         model: file.model || '',
         variant: file.variant || '',
     });
-    const [snackbar, setSnackbar] = useState<{
-        open: boolean;
-        message: string;
-        severity: 'success' | 'error' | 'info';
-    }>({ open: false, message: '', severity: 'info' });
     const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
     
     const autoSaveTimer = useRef<NodeJS.Timeout | null>(null);
@@ -261,17 +252,17 @@ export default function MetadataEditor({
             initialData.current = { ...initialData.current, name: formData.name, description: formData.description };
             setHasUnsavedChanges(false);
             
-            setSnackbar({
-                open: true,
+            showToast({
                 message: isAutoSave ? t('metadataEditor.autoSaved') : t('metadataEditor.savedSuccessfully'),
                 severity: 'success',
+                autoHideDuration: 4000,
             });
         } catch (error: any) {
             console.error('Error updating file:', error);
-            setSnackbar({
-                open: true,
+            showToast({
                 message: t('metadataEditor.errorSaving', { message: error.message }),
                 severity: 'error',
+                autoHideDuration: 4000,
             });
         } finally {
             setSaving(false);
@@ -463,25 +454,6 @@ export default function MetadataEditor({
                 </Box>
             </Box>
 
-            {/* Snackbar Feedback */}
-            <Snackbar
-                open={snackbar.open}
-                autoHideDuration={4000}
-                onClose={() => setSnackbar({ ...snackbar, open: false })}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-            >
-                <Alert 
-                    onClose={() => setSnackbar({ ...snackbar, open: false })} 
-                    severity={snackbar.severity}
-                    sx={{ width: '100%' }}
-                    iconMapping={{
-                        success: <CheckIcon fontSize="inherit" />,
-                        error: <ErrorIcon fontSize="inherit" />,
-                    }}
-                >
-                    {snackbar.message}
-                </Alert>
-            </Snackbar>
         </Paper>
     );
 }

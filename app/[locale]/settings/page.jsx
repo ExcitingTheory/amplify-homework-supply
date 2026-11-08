@@ -11,6 +11,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 import TranslateIcon from "@mui/icons-material/Translate";
+import DescriptionIcon from "@mui/icons-material/Description";
 import ShieldIcon from "@mui/icons-material/Shield";
 import TuneIcon from "@mui/icons-material/Tune";
 import PaletteIcon from "@mui/icons-material/Palette";
@@ -34,7 +35,7 @@ import { CosmeticSelector } from "@/components/Gamification/CosmeticSelector";
 import { BotCustomizer } from "@/components/BotCustomizer";
 import { useAvatarConfig } from "@/hooks/useAvatarConfig";
 import { useBotAvatarConfig } from "@/hooks/useBotAvatarConfig";
-import { useXP, useBadges } from "@/context/gamificationContext";
+import { useXP, useBadges, usePlatformSettings } from "@/context/gamificationContext";
 import { GamificationProviderWrapper } from "@/context/gamificationProviderWrapper";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 
@@ -48,6 +49,8 @@ import {
 
 import SettingsContext from "@/context/settingsContext";
 import { PageHintsPreferenceView } from "@/components/Settings/PageHintsPreferenceView";
+import { DocumentAnalysisPreferenceView } from "@/components/Settings/DocumentAnalysisPreferenceView";
+import { AIAutocompletePreferenceView } from "@/components/Settings/AIAutocompletePreferenceView";
 import { usePageHintPreferences } from "@/hooks/usePageHintPreferences";
 import LightbulbOutlinedIcon from "@mui/icons-material/LightbulbOutlined";
 import { useRouter, usePathname } from "next/navigation";
@@ -56,10 +59,12 @@ import { useLocale } from "next-intl";
 function Settings() {
   const t = useTranslations("pages");
   const tComponents = useTranslations("components");
+  const tAI = useTranslations("editor.ai");
   const router = useRouter();
   const locale = useLocale();
   const pathname = usePathname();
   const hintPreferences = usePageHintPreferences();
+  const { platformSettings } = usePlatformSettings();
   const [user, setUser] = React.useState({});
   const [oldPassword, setOldPassword] = React.useState("");
   const [newPassword, setNewPassword] = React.useState("");
@@ -77,7 +82,17 @@ function Settings() {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [clearDataStoreDialogOpen, setClearDataStoreDialogOpen] =
     React.useState(false);
-  const { settings, updateSettings } = React.useContext(SettingsContext) || {};
+  const {
+    settings,
+    updateSettings,
+    isLoading: settingsLoading,
+  } = React.useContext(SettingsContext) || {};
+  const [analysisPreferenceSaving, setAnalysisPreferenceSaving] =
+    React.useState(false);
+  const [analysisPreferenceError, setAnalysisPreferenceError] =
+    React.useState("");
+  const [autocompleteSaving, setAutocompleteSaving] = React.useState(false);
+  const [autocompleteError, setAutocompleteError] = React.useState("");
 
   // Parse settings.metadata once per render; used to merge avatar/bot updates
   // without clobbering unrelated metadata keys (e.g. glowRing).
@@ -109,6 +124,43 @@ function Settings() {
     updateSettings({
       metadata: { ...metadataRef.current, avatarStyle: tier },
     });
+  };
+
+  const handleAnalysisPreferenceChange = async (value) => {
+    if (!updateSettings) return;
+    setAnalysisPreferenceError("");
+    setAnalysisPreferenceSaving(true);
+    try {
+      await updateSettings({
+        documentAnalysisLlmExtractionOverride:
+          value === "platform" ? null : value === "llm",
+      });
+    } catch (error) {
+      setAnalysisPreferenceError(
+        error instanceof Error
+          ? error.message
+          : "Unable to update document-analysis preference.",
+      );
+    } finally {
+      setAnalysisPreferenceSaving(false);
+    }
+  };
+
+  const handleAutocompleteChange = async (enabled) => {
+    setAutocompleteError("");
+    setAutocompleteSaving(true);
+    try {
+      if (!updateSettings) throw new Error("Settings are not ready");
+      const updated = await updateSettings({
+        metadata: { ...metadataRef.current, aiAutocompleteEnabled: enabled },
+      });
+      if (!updated) throw new Error("Autocomplete preference was not saved");
+    } catch (error) {
+      console.error("[Settings] Unable to save autocomplete preference:", error);
+      setAutocompleteError(tAI("autocompletePreference.error"));
+    } finally {
+      setAutocompleteSaving(false);
+    }
   };
 
   const handleAvatarOverridesSave = (overrides, style) => {
@@ -433,6 +485,53 @@ function Settings() {
                 onConfirmationCodeChange={setConfirmationCode}
                 onConfirmationSubmit={updateEmailConfirmation}
                 onConfirmationClose={() => setNeedsConfirmation(false)}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <TuneIcon color="primary" />
+                <Typography variant="h6">
+                  {tAI("autocompletePreference.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <AIAutocompletePreferenceView
+                enabled={metadataRef.current.aiAutocompleteEnabled !== false}
+                disabled={settingsLoading || !settings || autocompleteSaving}
+                error={autocompleteError}
+                onChange={handleAutocompleteChange}
+              />
+            </AccordionDetails>
+          </Accordion>
+
+          <Accordion>
+            <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+              <Stack direction="row" alignItems="center" spacing={1}>
+                <DescriptionIcon color="primary" />
+                <Typography variant="h6">
+                  {tComponents("documentAnalysisPreference.heading")}
+                </Typography>
+              </Stack>
+            </AccordionSummary>
+            <AccordionDetails>
+              <DocumentAnalysisPreferenceView
+                value={
+                  settings?.documentAnalysisLlmExtractionOverride === true
+                    ? "llm"
+                    : settings?.documentAnalysisLlmExtractionOverride === false
+                      ? "nlp"
+                      : "platform"
+                }
+                platformDefaultEnabled={
+                  platformSettings?.documentAnalysisLlmExtractionEnabled === true
+                }
+                disabled={settingsLoading || analysisPreferenceSaving}
+                error={analysisPreferenceError || null}
+                onChange={handleAnalysisPreferenceChange}
               />
             </AccordionDetails>
           </Accordion>

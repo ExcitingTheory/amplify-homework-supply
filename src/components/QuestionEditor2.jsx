@@ -61,6 +61,7 @@ import {
 
 // Context imports
 import DictionaryContext from "../context/dictionaryContext";
+import { findSimilarQuestions } from "../utils/findSimilarQuestions";
 import FilesContext from "../context/fileContext";
 import UnitContext from "../context/unitContext";
 import { useTabContext } from "../context/tabContext";
@@ -1094,6 +1095,17 @@ export function QuestionEditor2() {
     setNewQuestionFormOpen(!newQuestionFormOpen);
   };
 
+  // Questions already in the bank that this draft restates, so a near-duplicate
+  // is seen before another copy is written.
+  const similarQuestions = React.useMemo(
+    () =>
+      findSimilarQuestions(
+        { prompt: newPrompt, answer: newAnswer },
+        Object.values(questionBank || {}),
+      ),
+    [newPrompt, newAnswer, questionBank],
+  );
+
   const handleCreateQuestion = async (event) => {
     event.preventDefault();
 
@@ -1342,6 +1354,23 @@ export function QuestionEditor2() {
               label={t("questionEditor.answerField")}
               variant="outlined"
             />
+            {similarQuestions.length > 0 && (
+              <Alert severity="warning" sx={{ mt: 1 }}>
+                {t("questionEditor.similarQuestionsWarning")}
+                <Box component="ul" sx={{ pl: 2, mb: 0 }}>
+                  {similarQuestions.map(({ question, kind }) => (
+                    <li key={question.id}>
+                      {question.answer
+                        ? `${question.prompt} — ${question.answer}`
+                        : question.prompt}
+                      {kind === "conflict"
+                        ? ` (${t("questionEditor.similarQuestionConflict")})`
+                        : ""}
+                    </li>
+                  ))}
+                </Box>
+              </Alert>
+            )}
             <Button variant="contained" type="submit" sx={{ mt: 2 }}>
               {t("questionEditor.save")}
             </Button>

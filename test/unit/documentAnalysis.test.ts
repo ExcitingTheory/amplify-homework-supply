@@ -1,15 +1,19 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   analyzePages,
   buildVerifierCandidates,
   checkPageFacts,
+  completeVerificationVerdicts,
   chunkItemsByJsonSize,
   createPageBatches,
   extractCoverageCandidates,
   filterVerifiedEntries,
   isEquivalentText,
+  answersAreSimilar,
   mergeDuplicateQuestions,
+  mergeDuplicateQuestionsByMeaning,
   mergeDuplicateVocabulary,
+  mergeDuplicateVocabularyByMeaning,
   normaliseQuestionEntries,
   retainDirectQuestionsWithVerifiedMatches,
   retainDirectVocabularyWithVerifiedMatches,
@@ -21,15 +25,50 @@ import {
   VERIFIER_SYSTEM_PROMPT,
 } from "../../amplify/functions/documentAnalysis/analysis";
 
+describe("completeVerificationVerdicts", () => {
+  it("preserves explicit verdicts and marks only missing candidates unverified", () => {
+    const verdicts = completeVerificationVerdicts(["first", "second", "third"], [
+      { index: 2, supported: false, reason: "Unsupported" },
+      { index: 0, supported: true },
+    ]);
+    expect(verdicts).toEqual([
+      { index: 2, supported: false, reason: "Unsupported" },
+      { index: 0, supported: true },
+      { index: 1, supported: false, reason: expect.stringContaining("Verifier omitted") },
+    ]);
+    expect(filterVerifiedEntries(["first", "second", "third"], verdicts)).toEqual(["first"]);
+  });
+  it.each([
+    { verdicts: [{ index: 0, supported: true }, { index: 0, supported: false }] },
+    { verdicts: [{ index: 2, supported: true }] },
+    { verdicts: [{ index: -1, supported: true }] },
+  ])("still rejects ambiguous or invalid indices (%j)", ({ verdicts }) => {
+    expect(() => completeVerificationVerdicts(["candidate"], verdicts)).toThrow(
+      "Verification verdicts must cover each candidate exactly once",
+    );
+  });
+});
+
 function structuredCompletion(
-  result: { facts: unknown[]; vocabulary: unknown[] },
+  result: { facts: unknown[]; vocabulary: unknown[]; checklist?: Record<string, unknown> },
   finishReason = "stop",
+  page = 1,
 ) {
   return {
     choices: [
       {
         finish_reason: finishReason,
-        message: { content: JSON.stringify(result) },
+        message: { content: JSON.stringify({
+          ...result,
+          checklist: result.checklist ?? {
+            sourcePage: page,
+            factsReviewed: result.facts.length,
+            vocabularyReviewed: result.vocabulary.length,
+            vocabularyEvidenceChecked: true,
+            coverageReviewed: true,
+            missingSourceLines: [],
+          },
+        }) },
       },
     ],
   };
@@ -172,6 +211,25 @@ describe("document-analysis profiles and helpers", () => {
         },
       ],
     });
+
+  });
+
+  it("accepts equivalent quotation typography without relaxing evidence words", () => {
+    const text = 'Lysosomes are the "recycling centers" of the cell.';
+    const fact: ExhaustiveFact = {
+      subject: "Lysosomes",
+      field: "definition",
+      answer: "the 'recycling centers' of the cell.",
+      sourceText: text,
+      page: 2,
+      accept: [],
+    };
+    expect(checkPageFacts({ pageNumber: 2, text }, [fact]).suspect).toEqual([]);
+    expect(
+      checkPageFacts({ pageNumber: 2, text }, [
+        { ...fact, answer: "the 'energy centers' of the cell." },
+      ]).suspect[0].reasons,
+    ).toContain("answer_not_in_source");
   });
 
   it("retains only verified entries and rejects incomplete or duplicate verdicts", () => {
@@ -292,17 +350,207 @@ describe("document-analysis profiles and helpers", () => {
     expect(merged[0].pages).toEqual([1, 3]);
   });
 
-  it("merges vocabulary with the same term and definition across pages", () => {
+  it("keeps one entry per term, grouping its senses and every passage showing them", () => {
     expect(
       mergeDuplicateVocabulary([
-        { word: "Path", definition: "A Tree-line", page: 9 },
-        { word: "path", definition: "A Tree-line", page: 2 },
-        { word: "Path", definition: "A road", page: 4 },
+        { word: "Path", definition: "A Tree-line joining two Sephiroth", context: "A path is a Tree-line joining two Sephiroth.", page: 9 },
+        // The same sense worded differently: its passage joins the first sense.
+        { word: "path", definition: "a tree line joining two sephiroth!", context: "Each path joins two Sephiroth.", page: 2 },
+        { word: "Paths", definition: "A road for walkers", context: "A path is a road for walkers.", page: 4 },
+        { word: "Sephira", definition: "A sphere", page: 3 },
       ]),
     ).toEqual([
-      { word: "Path", definition: "A Tree-line", page: 2, pages: [2, 9] },
-      { word: "Path", definition: "A road", page: 4, pages: [4] },
+      {
+        word: "Path",
+        definition: "A Tree-line joining two Sephiroth",
+        context: "A path is a Tree-line joining two Sephiroth.",
+        page: 2,
+        pages: [2, 4, 9],
+        occurrences: [
+          {
+            definition: "A Tree-line joining two Sephiroth",
+            contexts: [
+              "A path is a Tree-line joining two Sephiroth.",
+              "Each path joins two Sephiroth.",
+            ],
+            pages: [2, 9],
+          },
+          {
+            definition: "A road for walkers",
+            contexts: ["A path is a road for walkers."],
+            pages: [4],
+          },
+        ],
+      },
+      // One sense shown once, so the entry's own fields already describe it.
+      { word: "Sephira", definition: "A sphere", page: 3, pages: [3] },
     ]);
+  });
+
+  it("fills a blank definition from a later appearance of the same term", () => {
+    const [entry] = mergeDuplicateVocabulary([
+      { word: "Cell", definition: "", context: "", page: 1 },
+      { word: "Cell", definition: "The basic unit of life", context: "A cell is the basic unit of life.", page: 2 },
+    ]) as Array<Record<string, any>>;
+    expect(entry).toMatchObject({
+      definition: "The basic unit of life",
+      context: "A cell is the basic unit of life.",
+      pages: [1, 2],
+    });
+  });
+
+  it("merges definitions of one term that mean the same although worded differently", async () => {
+    const vectors: Record<string, number[]> = {
+      "Organelles that release energy from food": [1, 0, 0],
+      "The parts of a cell that supply its power": [0.95, 0.1, 0],
+      "A ring of protein around the cell": [0, 1, 0],
+    };
+    const embed = async (texts: string[]) => texts.map((text) => vectors[text] ?? [0, 0, 1]);
+    const merged = (await mergeDuplicateVocabularyByMeaning([
+      { word: "Mitochondria", definition: "Organelles that release energy from food", context: "c1", page: 1 },
+      { word: "Mitochondria", definition: "The parts of a cell that supply its power", context: "c2", page: 2 },
+      { word: "Mitochondria", definition: "A ring of protein around the cell", context: "c3", page: 3 },
+    ], embed)) as Array<Record<string, any>>;
+
+    expect(merged).toHaveLength(1);
+    expect(merged[0].occurrences).toEqual([
+      {
+        definition: "Organelles that release energy from food",
+        contexts: ["c1", "c2"],
+        pages: [1, 2],
+      },
+      { definition: "A ring of protein around the cell", contexts: ["c3"], pages: [3] },
+    ]);
+  });
+
+  it("compares definitions by meaning only when a term is defined more than once", async () => {
+    const embedded: string[][] = [];
+    const embed = async (texts: string[]) => {
+      embedded.push(texts);
+      return texts.map(() => [1, 0, 0]);
+    };
+    await mergeDuplicateVocabularyByMeaning([
+      { word: "Cell", definition: "The basic unit of life", page: 1 },
+      { word: "Nucleus", definition: "The control centre of the cell", page: 2 },
+    ], embed);
+    expect(embedded).toEqual([]);
+  });
+
+  it("merges questions whose answers are worded differently and keeps the variant as accepted", () => {
+    const question = (answer: string, page: number) => ({
+      prompt: "What is the Hebrew letter for The Hermit?",
+      subject: "The Hermit",
+      field: "hebrewLetter",
+      answer,
+      page,
+      accept: [] as string[],
+    });
+    const merged = mergeDuplicateQuestions([
+      question("Yod", 4),
+      question("Yod (Y)", 3),
+      question("yod", 9),
+      question("Resh", 5),
+    ]);
+    expect(merged.map(({ answer }) => answer)).toEqual(["Yod", "Resh"]);
+    expect(merged[0]).toMatchObject({ pages: [3, 4, 9], page: 3, accept: ["Yod (Y)"] });
+  });
+
+  it("does not merge answers that disagree on a number or on negation", () => {
+    const question = (answer: string) => ({ prompt: "p", subject: "s", field: "f", answer, page: 1 });
+    expect(mergeDuplicateQuestions([
+      question("Path 12 joins Kether and Binah"),
+      question("Path 13 joins Kether and Binah"),
+    ])).toHaveLength(2);
+    expect(mergeDuplicateQuestions([
+      question("The nucleus contains DNA"),
+      question("The nucleus does not contain DNA"),
+    ])).toHaveLength(2);
+  });
+
+  it("keeps separate members of the same list as separate questions", () => {
+    const question = (answer: string) => ({ prompt: "p", subject: "Eukaryotes", field: "members", answer, page: 1 });
+    expect(mergeDuplicateQuestions([
+      question("Animals"),
+      question("Plants"),
+      question("Fungi"),
+    ])).toHaveLength(3);
+  });
+
+  it("compares answers on their words rather than their exact text", () => {
+    expect(answersAreSimilar("The basic unit of life.", "basic unit of life")).toBe(true);
+    expect(answersAreSimilar("energy converted into glucose", "glucose converted into energy")).toBe(false);
+    expect(answersAreSimilar("The control centre of the cell", "The control center of the cell")).toBe(true);
+    expect(answersAreSimilar("The nucleus stores DNA", "The ribosome makes protein")).toBe(false);
+    expect(answersAreSimilar("a", "b")).toBe(false);
+    expect(answersAreSimilar("", "")).toBe(false);
+  });
+
+  describe("paraphrased answers", () => {
+    const question = (answer: string, page: number, field = "function") => ({
+      prompt: `What is the ${field} of Mitochondria?`,
+      subject: "Mitochondria",
+      field,
+      answer,
+      page,
+    });
+    /** Stands in for the embedding model: each phrase maps to a fixed direction. */
+    const vectors: Record<string, number[]> = {
+      "Produces energy for the cell": [1, 0, 0],
+      "Generates the cell's power supply": [0.9, 0.2, 0],
+      "Makes proteins": [0, 1, 0],
+      "Produces energy for 2 cells": [1, 0, 0],
+      "Does not produce energy for the cell": [1, 0, 0],
+    };
+    let embedded: string[][] = [];
+    const embed = async (texts: string[]) => {
+      embedded.push(texts);
+      return texts.map((text) => vectors[text] ?? [0, 0, 1]);
+    };
+    beforeEach(() => { embedded = []; });
+
+    it("merges answers that mean the same although worded differently, keeping the variant as accepted", async () => {
+      const merged = await mergeDuplicateQuestionsByMeaning([
+        question("Produces energy for the cell", 2),
+        question("Generates the cell's power supply", 5),
+        question("Makes proteins", 6),
+      ], embed);
+      expect(merged.map(({ answer }) => answer)).toEqual(["Produces energy for the cell", "Makes proteins"]);
+      expect(merged[0]).toMatchObject({ pages: [2, 5], accept: ["Generates the cell's power supply"] });
+    });
+
+    it("never merges answers that differ on a number or on negation, however close their vectors", async () => {
+      const merged = await mergeDuplicateQuestionsByMeaning([
+        question("Produces energy for the cell", 2),
+        question("Produces energy for 2 cells", 3),
+        question("Does not produce energy for the cell", 4),
+      ], embed);
+      expect(merged).toHaveLength(3);
+    });
+
+    it("only embeds answers that can be confused with another answer to the same question", async () => {
+      await mergeDuplicateQuestionsByMeaning([
+        question("Produces energy for the cell", 2),
+        question("Produces energy for the cell", 3),
+        question("Makes proteins", 4, "role"),
+      ], embed);
+      expect(embedded).toEqual([]);
+    });
+
+    it("compares short answers on their wording only", async () => {
+      const merged = await mergeDuplicateQuestionsByMeaning([
+        question("ATP", 2),
+        question("Energy", 3),
+      ], embed);
+      expect(merged).toHaveLength(2);
+      expect(embedded).toEqual([]);
+    });
+
+    it("rejects an embedder that returns the wrong number of vectors", async () => {
+      await expect(mergeDuplicateQuestionsByMeaning([
+        question("Produces energy for the cell", 2),
+        question("Generates the cell's power supply", 3),
+      ], async () => [[1, 0, 0]])).rejects.toThrow(/vectors for 2 answers/);
+    });
   });
 
   it("matches direct entries only to equivalent verified facts", () => {
@@ -504,6 +752,57 @@ describe("document-analysis profiles and helpers", () => {
 });
 
 describe("analyzePages", () => {
+  const completedChecklist = {
+    sourcePage: 1, factsReviewed: 0, vocabularyReviewed: 0,
+    vocabularyEvidenceChecked: true, coverageReviewed: true, missingSourceLines: [],
+  };
+
+  it.each([
+    ["wrong page", { sourcePage: 2 }, "sourcePage must be 1"],
+    ["wrong fact count", { factsReviewed: 7 }, "factsReviewed must be 0"],
+    ["wrong vocabulary count", { vocabularyReviewed: 7 }, "vocabularyReviewed must be 0"],
+    ["unchecked evidence", { vocabularyEvidenceChecked: false }, "Check every vocabulary"],
+    ["unchecked coverage", { coverageReviewed: false }, "Review source coverage"],
+    ["reported omissions", { missingSourceLines: ["A missing line"] }, "reported missing source lines"],
+  ])("requests fixes for %s before accepting a corrected checklist", async (_label, incomplete, expected) => {
+    const create = vi.fn()
+      .mockResolvedValueOnce(structuredCompletion({
+        facts: [], vocabulary: [], checklist: { ...completedChecklist, ...incomplete },
+      }))
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      await analyzePages(
+        { chat: { completions: { create } } },
+        [{ pageNumber: 1, text: "Heading" }], "file-1", "document-1", { profile: "exhaustive" },
+      );
+      expect(create).toHaveBeenCalledTimes(2);
+      expect(create.mock.calls[1][0].messages.at(-1).content).toContain(expected);
+    } finally { warning.mockRestore(); }
+  });
+
+  it("requests a missing checklist twice then returns reviewable output without splitting the page", async () => {
+    const create = vi.fn().mockResolvedValue({
+      choices: [{ finish_reason: "stop", message: { content: '{"facts":[],"vocabulary":[]}' } }],
+    });
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const result = await analyzePages(
+        { chat: { completions: { create } } },
+        [{ pageNumber: 1, text: "Plain prose. ".repeat(100) }],
+        "file-1", "document-1", { profile: "exhaustive" },
+      );
+      expect(create).toHaveBeenCalledTimes(3);
+      expect(warning).toHaveBeenCalledTimes(3);
+      expect(error).not.toHaveBeenCalled();
+      expect(result.reviewWarnings).toEqual([{ page: 1, message: "Missing procedural checklist" }]);
+    } finally {
+      warning.mockRestore();
+      error.mockRestore();
+    }
+  });
+
   it("sends two pages per call and keeps JSON-object responses by default", async () => {
     const create = vi.fn().mockResolvedValue({
       choices: [
@@ -514,7 +813,7 @@ describe("analyzePages", () => {
               summariesJSON: [],
               objectivesJSON: [],
               conceptsJSON: [],
-              questionsJSON: [],
+              factsJSON: [],
             }),
           },
         },
@@ -549,7 +848,7 @@ describe("analyzePages", () => {
             field: "path",
             answer: "12",
             accept: ["XII"],
-            page: 99,
+            page: 4,
             sourceText,
           },
         ],
@@ -557,15 +856,15 @@ describe("analyzePages", () => {
           {
             term: "Sephira",
             definition: "A sphere on the Tree",
-            context: "Tree of Life",
+            context: "Sephira means A sphere on the Tree.",
             page: 99,
           },
         ],
-      }),
+      }, "stop", 4),
     );
     const result = await analyzePages(
       { chat: { completions: { create } } },
-      [{ pageNumber: 4, text: "BACK\nPath: 12" }],
+      [{ pageNumber: 4, text: "BACK\nPath: 12\nSephira means A sphere on the Tree." }],
       "file-1",
       "document-1",
       { profile: "exhaustive" },
@@ -577,6 +876,8 @@ describe("analyzePages", () => {
     expect(request.response_format.json_schema.schema.properties.facts.items)
       .toBeDefined();
     expect(request.messages[0].content).toContain("Page role hint: back");
+    expect(request.messages[0].content).toContain("one independent claim per code");
+    expect(request.messages[0].content).toContain("links that entity to another named entity");
     expect(result.questionsJSON).toEqual([
       {
         prompt: "What is path for The Magus?",
@@ -588,12 +889,100 @@ describe("analyzePages", () => {
         field: "path",
         sourceText,
         accept: ["XII"],
+        evidenceUnitId: expect.stringMatching(/^evidence-/),
+        sourceStart: 5,
+        sourceEnd: 13,
       },
     ]);
     expect(result.vocabularyJSON[0].page).toBe(4);
   });
 
-  it("gap-fills a labelled line when its extracted answer is wrong", async () => {
+  it.each([
+    ["Cytology", "the study of cells", "Cytology is the study of cells."],
+    [
+      "Lysosomes",
+      "Organelles containing digestive enzymes that break down waste materials, cellular debris, and foreign substances. Sometimes called the 'recycling centers' of the cell.",
+      'Lysosomes - Organelles containing digestive enzymes that break down waste materials, cellular debris, and foreign substances. Sometimes called the "recycling centers" of the cell.',
+    ],
+  ])("preserves supported vocabulary evidence for %s without unnecessary repairs", async (term, definition, text) => {
+    const create = vi.fn().mockResolvedValue(structuredCompletion({
+      facts: [{ subject: term, field: "definition", answer: definition, sourceText: text, page: 1, accept: [] }],
+      vocabulary: [{ term, definition, context: text, page: 1 }],
+    }));
+    const result = await analyzePages(
+      { chat: { completions: { create } } },
+      [{ pageNumber: 1, text }], "file-1", "document-1", { profile: "exhaustive" },
+    );
+    expect(create.mock.calls[0][0].messages[0].content).toContain("context to the exact source passage");
+    expect(create).toHaveBeenCalledTimes(1);
+    const entry = result.vocabularyJSON[0];
+    expect(entry.context).toBe(text);
+    expect(checkPageFacts({ pageNumber: 1, text }, [{
+      subject: entry.word, field: "definition", answer: entry.definition,
+      sourceText: entry.context, page: 1, accept: [],
+    }]).suspect).toEqual([]);
+  });
+
+  it.each([
+    ["Definition on page 1", "the study of cells"],
+    ["Cytology is the study of cells.", "the study of plants"],
+  ])("retains unsupported vocabulary for human editing with explicit warnings (%s)", async (context, definition) => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      const create = vi.fn().mockResolvedValue(structuredCompletion({
+        facts: [], vocabulary: [{ term: "Cytology", definition, context, page: 1 }],
+      }));
+      const result = await analyzePages(
+        { chat: { completions: { create } } },
+        [{ pageNumber: 1, text: "Cytology is the study of cells." }],
+        "file-1", "document-1", { profile: "exhaustive" },
+      );
+      expect(create).toHaveBeenCalledTimes(3);
+      expect(result.vocabularyJSON).toEqual([{ word: "Cytology", definition, context, page: 1 }]);
+      expect(result.reviewWarnings).toEqual([{
+        page: 1, message: expect.stringContaining('Vocabulary evidence for "Cytology" must quote the source passage'),
+      }]);
+      expect(error).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
+  });
+
+  it("repairs invalid vocabulary quotations without splitting away their definitions", async () => {
+    const text = "Cytology - The study of cells.";
+    const create = vi.fn()
+      .mockResolvedValueOnce(structuredCompletion({
+        facts: [],
+        vocabulary: [{ term: "Cytology", definition: "The study of cells.", context: "Definition on page 1", page: 1 }],
+      }))
+      .mockResolvedValue(structuredCompletion({
+        facts: [{
+          subject: "Cytology", field: "definition", answer: "The study of cells.",
+          accept: [], sourceText: text, page: 1,
+        }],
+        vocabulary: [{ term: "Cytology", definition: "The study of cells.", context: text, page: 1 }],
+      }));
+    const warning = vi.spyOn(console, "warn").mockImplementation(() => {});
+    try {
+      const result = await analyzePages(
+        { chat: { completions: { create } } },
+        [{ pageNumber: 1, text }], "file-1", "document-1", { profile: "exhaustive" },
+      );
+      expect(create).toHaveBeenCalledTimes(2);
+      expect(create.mock.calls[1][0].messages.at(-1).content).toContain("source_not_on_page");
+      expect(create.mock.calls[1][0].messages[1].content).toContain(text);
+      expect(result.vocabularyJSON).toEqual([{
+        word: "Cytology", definition: "The study of cells.", context: text, page: 1,
+      }]);
+      expect(warning).toHaveBeenCalledWith(expect.stringContaining(
+        "Repairing extraction checklist on page 1 (attempt 1)",
+      ));
+    } finally {
+      warning.mockRestore();
+    }
+  });
+
+  it("repairs a labelled claim when its extracted answer is wrong", async () => {
     const create = vi
       .fn()
       .mockResolvedValueOnce(
@@ -635,11 +1024,12 @@ describe("analyzePages", () => {
     );
 
     expect(create).toHaveBeenCalledTimes(2);
-    expect(create.mock.calls[1][0].messages[0].content).toContain(
-      "targeted gap-fill",
+    // The repair prompt must carry the failure, and it now names the claim it
+    // is about rather than dumping the fact as JSON.
+    expect(create.mock.calls[1][0].messages.at(-1).content).toContain(
+      'question "The Magus" (path): answer_not_in_source',
     );
     expect(result.questionsJSON.map((question) => question.answer)).toEqual([
-      "13",
       "12",
     ]);
   });
@@ -650,10 +1040,10 @@ describe("analyzePages", () => {
       .mockResolvedValueOnce(
         structuredCompletion({ facts: [], vocabulary: [] }, "length"),
       )
-      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }, "stop", 7));
     const result = await analyzePages(
       { chat: { completions: { create } } },
-      [{ pageNumber: 7, text: "x".repeat(400) }],
+      [{ pageNumber: 7, text: "# " + "x".repeat(400) }],
       "file-1",
       "document-1",
       { profile: "exhaustive" },
@@ -669,11 +1059,11 @@ describe("analyzePages", () => {
       .mockResolvedValueOnce({
         choices: [{ finish_reason: "stop", message: { content: "not json" } }],
       })
-      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }, "stop", 8));
 
     await analyzePages(
       { chat: { completions: { create } } },
-      [{ pageNumber: 8, text: "x".repeat(400) }],
+      [{ pageNumber: 8, text: "# " + "x".repeat(400) }],
       "file-1",
       "document-1",
       { profile: "exhaustive" },
@@ -704,7 +1094,7 @@ describe("analyzePages", () => {
             {
               term: "Shared",
               definition: "First definition",
-              context: "first page",
+              context: "Shared means First definition.",
               page: 1,
             },
           ],
@@ -717,7 +1107,7 @@ describe("analyzePages", () => {
             {
               term: "Shared",
               definition: "Later definition",
-              context: "later page",
+              context: "Shared means Later definition.",
               page: 1,
             },
           ],
@@ -726,7 +1116,7 @@ describe("analyzePages", () => {
 
     const result = await analyzePages(
       { chat: { completions: { create } } },
-      [{ pageNumber: 1, text: "Path: 12\nPlanet: Mercury" }],
+      [{ pageNumber: 1, text: "Path: 12\nPlanet: Mercury\nShared means First definition.\nShared means Later definition." }],
       "file-1",
       "document-1",
       { profile: "exhaustive" },
@@ -738,7 +1128,7 @@ describe("analyzePages", () => {
       {
         word: "Shared",
         definition: "First definition",
-        context: "first page",
+        context: "Shared means First definition.",
         page: 1,
       },
     ]);
@@ -757,16 +1147,17 @@ describe("analyzePages", () => {
         await new Promise((resolve) => setTimeout(resolve, 2));
         activeCalls -= 1;
         return structuredCompletion({
-          facts: [],
+          facts: [{ subject: "Shared", field: "definition", answer: `definition from ${pageNumber}`,
+            sourceText: `Shared means definition from ${pageNumber}.`, page: pageNumber, accept: [] }],
           vocabulary: [
             {
               term: "Shared",
               definition: `definition from ${pageNumber}`,
-              context: `page ${pageNumber}`,
+              context: `Shared means definition from ${pageNumber}.`,
               page: pageNumber,
             },
           ],
-        });
+        }, "stop", pageNumber);
       },
     );
 
@@ -774,7 +1165,7 @@ describe("analyzePages", () => {
       { chat: { completions: { create } } },
       Array.from({ length: 11 }, (_, index) => ({
         pageNumber: index + 1,
-        text: `Page prose ${index + 1}`,
+        text: `Shared means definition from ${index + 1}.`,
       })),
       "file-1",
       "document-1",
@@ -788,7 +1179,7 @@ describe("analyzePages", () => {
       {
         word: "Shared",
         definition: "definition from 1",
-        context: "page 1",
+        context: "Shared means definition from 1.",
         page: 1,
       },
     ]);
@@ -808,7 +1199,7 @@ describe("analyzePages", () => {
 
     await analyzePages(
       { chat: { completions: { create } } },
-      [{ pageNumber: 1, text: "plain prose with no labelled facts" }],
+      [{ pageNumber: 1, text: "# Heading" }],
       "file-1",
       "document-1",
       { profile: "exhaustive", sleep: pause },
@@ -833,13 +1224,13 @@ describe("analyzePages", () => {
         structuredCompletion({
           facts: [factFor("Sun: bright")],
           vocabulary: [],
-        }),
+        }, "stop", 16),
       )
       .mockResolvedValueOnce(
         structuredCompletion({
           facts: [factFor("Fire (element): energy and will")],
           vocabulary: [],
-        }),
+        }, "stop", 16),
       );
 
     await analyzePages(
@@ -856,11 +1247,11 @@ describe("analyzePages", () => {
     );
 
     const gapFillUser = create.mock.calls[1][0].messages[1].content as string;
-    const [context, pageText] = gapFillUser.split("Page text:\n");
+    const [context, pageText] = gapFillUser.split("Page text (the only source of evidence):\n");
     expect(context).toContain("FRONT");
     expect(context).not.toContain("Sun: bright");
     expect(pageText).toBe("Fire (element): energy and will");
-    // The first, full extraction still sees the whole header.
+    // The first extraction sees those lines in source text, not repeated hints.
     expect(create.mock.calls[0][0].messages[1].content).toContain(
       "Sun: bright",
     );
@@ -870,7 +1261,7 @@ describe("analyzePages", () => {
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     const create = vi
       .fn()
-      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }));
+      .mockResolvedValue(structuredCompletion({ facts: [], vocabulary: [] }, "stop", 2));
 
     const result = await analyzePages(
       { chat: { completions: { create } } },

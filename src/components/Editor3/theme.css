@@ -9,18 +9,22 @@
 /* CSS custom properties for dark mode support */
 :root {
     --editor-placeholder: var(--mui-palette-text-secondary, #757575);
-    --editor-drag-hover: var(--mui-palette-action-hover, #efefef);
     --editor-drag-target: var(--mui-palette-primary-main, #0099ff);
     --editor-drag-target-glow: rgba(0, 153, 255, 0.6);
     --editor-drag-icon: var(--mui-palette-text-primary, #222222);
+    --editor-gutter-outline: var(--mui-palette-action-active, rgba(0, 0, 0, 0.54));
+    --editor-gutter-pressed: var(--mui-palette-action-selected, rgba(0, 0, 0, 0.08));
+    --editor-gutter-pressed-shadow: rgba(0, 0, 0, 0.3);
 }
 
 [data-mui-color-scheme="dark"] {
     --editor-placeholder: var(--mui-palette-text-secondary, #666666);
-    --editor-drag-hover: var(--mui-palette-action-hover, #333333);
     --editor-drag-target: var(--mui-palette-primary-main, #4db8ff);
     --editor-drag-target-glow: rgba(77, 184, 255, 0.6);
     --editor-drag-icon: var(--mui-palette-text-primary, #cccccc);
+    --editor-gutter-outline: var(--mui-palette-action-active, rgba(255, 255, 255, 0.56));
+    --editor-gutter-pressed: var(--mui-palette-action-selected, rgba(255, 255, 255, 0.16));
+    --editor-gutter-pressed-shadow: rgba(0, 0, 0, 0.6);
 }
 
 .editor-paragraph {
@@ -71,7 +75,8 @@ div.ImageNode__contentEditable {
 .editor-container {
     /* min-height: calc(100vh - var(--app-bar-height, 11rem)); */
     max-width: 100%;
-    overflow-x: hidden;
+    /* clip, unlike hidden, does not create a scroll container that would trap sticky block controls. */
+    overflow-x: clip;
     box-sizing: border-box;
 }
 
@@ -139,56 +144,105 @@ p {
     margin-block-start: 1rem;
 }
 
-.draggable-block-menu {
-    border-radius: 4px;
-    padding: 2px 1px;
-    cursor: grab;
-    opacity: 0;
+.editor-gutter-button {
     position: absolute;
-    left: 2px;
-    top: 0;
-    will-change: transform;
-    transition: opacity 0.2s ease;
-    z-index: 10;
-    width: 20px;
-    height: 20px;
+    box-sizing: border-box;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
     display: flex;
     align-items: center;
     justify-content: center;
+    border: 1px solid transparent;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--editor-drag-icon);
+    font: inherit;
+    z-index: 10;
+  }
+
+  /* The handle is already an affordance, so only the number and insert buttons react to hover. */
+  .editor-block-number:hover,
+  .editor-block-insert:hover {
+    border-color: var(--editor-gutter-outline);
+  }
+
+  .editor-gutter-button:focus-visible {
+    outline: 2px solid var(--editor-drag-target);
+    outline-offset: 1px;
+  }
+
+  .editor-block-number[aria-current],
+  .editor-block-insert[aria-expanded="true"],
+  .draggable-block-menu.is-pressed {
+    border-color: var(--editor-gutter-outline);
+    background-color: var(--editor-gutter-pressed);
+    box-shadow: inset 0 1px 3px var(--editor-gutter-pressed-shadow);
+  }
+
+  .draggable-block-menu {
+    cursor: grab;
+    opacity: 0;
+    left: 0;
+    top: 0;
+    will-change: transform;
+    transition: opacity 0.2s ease;
+  }
+
+  .draggable-block-menu .icon {
+    width: 18px;
+    height: 18px;
     -webkit-mask-image: url(./images/draggable-block-menu.svg);
     mask-image: url(./images/draggable-block-menu.svg);
     -webkit-mask-repeat: no-repeat;
     mask-repeat: no-repeat;
     -webkit-mask-position: center;
     mask-position: center;
-    -webkit-mask-size: 16px 16px;
-    mask-size: 16px 16px;
+    -webkit-mask-size: 18px 18px;
+    mask-size: 18px 18px;
     background-color: var(--editor-drag-icon);
   }
-  
-  .draggable-block-menu .icon {
-    width: 16px;
-    height: 16px;
-    opacity: 0.3;
-  }
-  
+
   .draggable-block-menu:active {
     cursor: grabbing;
   }
-  
-  .draggable-block-menu:hover {
-    background-color: var(--editor-drag-hover);
-  }
-  
-  /* Show drag handle when hovering near a block */
-  .editor-container:hover .draggable-block-menu {
-    opacity: 1;
-  }
-  
-  .draggable-block-menu:hover {
+
+  .draggable-block-menu:hover,
+  .draggable-block-menu.is-pressed {
     opacity: 1 !important;
   }
-  
+
+  .draggable-block-menu[hidden] {
+    display: none;
+  }
+
+  .editor-block-gutter {
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .editor-block-number {
+    font-size: 12px;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    color: var(--editor-placeholder);
+    pointer-events: auto;
+    text-decoration: none;
+  }
+
+  .editor-block-number::after {
+    content: ".";
+  }
+
+  .editor-block-insert {
+    cursor: pointer;
+  }
+
+  .editor-block-insert .MuiSvgIcon-root {
+    font-size: 24px;
+  }
+
   .draggable-block-target-line {
     pointer-events: none;
     background: var(--editor-drag-target);

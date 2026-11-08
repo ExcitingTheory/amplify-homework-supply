@@ -1,0 +1,94 @@
+{
+  "sourceSha256": "8c7b98fe7b3551c937a19009a9f32ab5e83b83d8fa88291b03a990effc746041",
+  "capturedAt": "2026-10-28T12:55:24.005Z",
+  "sourceFormat": "imscc-1.1",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Page 1",
+      "content": "The particle は, pronounced \"wa,\" functions as the topic marker in Japanese sentences, indicating what the sentence is about. Examples include: \"私は学生です。\" (I am a student), \"東京は大きいです。\" (Tokyo is big), and \"猫はかわいいです。\" (Cats are cute).",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Document summary",
+      "content": "The Japanese particle は, pronounced \"wa,\" serves as the topic marker in sentences, highlighting what the sentence is about. It is utilized in forming basic sentences such as \"私は学生です。\" (I am a student), \"東京は大きいです。\" (Tokyo is big), and \"猫はかわいいです。\" (Cats are cute).",
+      "pageRange": "Page 1"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is pronunciation for THE TOPIC MARKER: は (WA)?",
+      "answer": "wa",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "THE TOPIC MARKER: は (WA)",
+      "field": "pronunciation",
+      "sourceText": "The particle は (pronounced \"wa\") marks the topic of the sentence — what the sentence is about.",
+      "accept": [
+        "wa"
+      ]
+    },
+    {
+      "prompt": "What is function for THE TOPIC MARKER: は (WA)?",
+      "answer": "marks the topic of the sentence",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "THE TOPIC MARKER: は (WA)",
+      "field": "function",
+      "sourceText": "The particle は (pronounced \"wa\") marks the topic of the sentence — what the sentence is about.",
+      "accept": [
+        "marks the topic of the sentence",
+        "what the sentence is about"
+      ]
+    },
+    {
+      "prompt": "What is example for THE TOPIC MARKER: は (WA)?",
+      "answer": "私は学生です。(Watashi wa gakusei desu.) — I am a student.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "THE TOPIC MARKER: は (WA)",
+      "field": "example",
+      "sourceText": "* 私は学生です。(Watashi wa gakusei desu.) — I am a student.",
+      "accept": [
+        "私は学生です。(Watashi wa gakusei desu.) — I am a student."
+      ]
+    },
+    {
+      "prompt": "What is example for THE TOPIC MARKER: は (WA)?",
+      "answer": "東京は大きいです。(Tōkyō wa ōkii desu.) — Tokyo is big.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "THE TOPIC MARKER: は (WA)",
+      "field": "example",
+      "sourceText": "* 東京は大きいです。(Tōkyō wa ōkii desu.) — Tokyo is big.",
+      "accept": [
+        "東京は大きいです。(Tōkyō wa ōkii desu.) — Tokyo is big."
+      ]
+    },
+    {
+      "prompt": "What is example for THE TOPIC MARKER: は (WA)?",
+      "answer": "猫はかわいいです。(Neko wa kawaii desu.) — Cats are cute.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "THE TOPIC MARKER: は (WA)",
+      "field": "example",
+      "sourceText": "* 猫はかわいいです。(Neko wa kawaii desu.) — Cats are cute.",
+      "accept": [
+        "猫はかわいいです。(Neko wa kawaii desu.) — Cats are cute."
+      ]
+    }
+  ]
+}

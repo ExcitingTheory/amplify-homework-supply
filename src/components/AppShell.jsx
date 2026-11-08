@@ -12,7 +12,6 @@ import Box from "@mui/material/Box";
 import AppBar from "@mui/material/AppBar";
 import { useTheme } from "@mui/material/styles";
 import MainToolbar from "./MainToolbar";
-import { AppFooter } from "./AppFooter";
 import { AppShellContext, DRAWER_WIDTH, RAIL_WIDTH } from "./AppShellContext";
 import { SEMANTIC_THEME } from "../themes/semanticTheme";
 
@@ -205,7 +204,7 @@ export default function AppShell({
       <Box
         sx={{
           display: "flex",
-          marginTop: `${appBarHeight}px`,
+          paddingTop: `${appBarHeight}px`,
           position: "relative",
           zIndex: 0,
         }}
@@ -238,7 +237,6 @@ export default function AppShell({
             {contentHeader}
             {children}
           </Box>
-          <AppFooter />
         </Box>
       </Box>
     </AppShellContext.Provider>

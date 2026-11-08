@@ -24,8 +24,6 @@ import {
   Divider,
   Checkbox,
   Tooltip,
-  Portal,
-  Snackbar,
   Alert,
 } from "@mui/material";
 import {
@@ -44,6 +42,7 @@ import {
   Delete as DeleteIcon,
   Info as InfoIcon,
 } from "@mui/icons-material";
+import { useEditorToast } from "../../context/EditorToastContext";
 
 // Highlight search terms in text
 const highlightMatches = (text, searchTerm) => {
@@ -107,6 +106,7 @@ export default function FileMetadataComponent({
   index = 0,
 }) {
   const t = useTranslations("editor.files");
+  const { showToast, dismissToast } = useEditorToast();
   const [isExpanded, setIsExpanded] = useState(false);
   const [isSelected, setIsSelected] = useState(false);
   const [editingFileName, setEditingFileName] = useState(false);
@@ -114,14 +114,17 @@ export default function FileMetadataComponent({
   const [localSearch, setLocalSearch] = useState(search || "");
   const [selectedTab, setSelectedTab] = useState(0);
   const [expandedSections, setExpandedSections] = useState(new Set(["basic"]));
-  const [confirmDialog, setConfirmDialog] = useState({
-    open: false,
-    message: "",
-    onConfirm: null,
-    severity: "warning",
-  });
-
+  const confirmToastId = React.useRef(null);
   const isEvenRow = index % 2 === 0;
+
+  useEffect(
+    () => () => {
+      if (confirmToastId.current !== null) {
+        dismissToast(confirmToastId.current);
+      }
+    },
+    [dismissToast],
+  );
 
   // Update local search when prop changes
   useEffect(() => {
@@ -540,22 +543,48 @@ export default function FileMetadataComponent({
                   size="small"
                   onClick={(e) => {
                     e.stopPropagation();
-                    setConfirmDialog({
-                      open: true,
+                    if (confirmToastId.current !== null) {
+                      dismissToast(confirmToastId.current);
+                    }
+
+                    let toastId = null;
+                    const dismissConfirmation = (dismiss) => {
+                      dismiss();
+                      if (confirmToastId.current === toastId) {
+                        confirmToastId.current = null;
+                      }
+                    };
+                    toastId = showToast({
                       message: t("fileMetadataComponent.deleteConfirmation", {
                         fileName: file?.name,
                       }),
                       severity: "warning",
-                      onConfirm: () => {
-                        onRemove && onRemove(nodeKey);
-                        setConfirmDialog({
-                          open: false,
-                          message: "",
-                          onConfirm: null,
-                          severity: "warning",
-                        });
-                      },
+                      autoHideDuration: null,
+                      action: (dismiss) => (
+                        <Box sx={{ display: "flex", gap: 1 }}>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => {
+                              onRemove?.(nodeKey);
+                              dismissConfirmation(dismiss);
+                            }}
+                            variant="outlined"
+                          >
+                            {t("fileMetadataComponent.confirm")}
+                          </Button>
+                          <Button
+                            color="inherit"
+                            size="small"
+                            onClick={() => dismissConfirmation(dismiss)}
+                            variant="contained"
+                          >
+                            {t("fileMetadataComponent.cancel")}
+                          </Button>
+                        </Box>
+                      ),
                     });
+                    confirmToastId.current = toastId;
                   }}
                   color="error"
                 >
@@ -757,62 +786,6 @@ export default function FileMetadataComponent({
         )}
       </ListItem>
 
-      {/* Confirmation Snackbar - Rendered in Portal to escape container overflow */}
-      <Portal>
-        <Snackbar
-          open={confirmDialog.open}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-          onClose={(event, reason) => {
-            if (reason === "clickaway") {
-              return;
-            }
-          }}
-        >
-          <Alert
-            severity={confirmDialog.severity}
-            sx={{
-              width: "100%",
-              minWidth: "300px",
-              boxShadow: 3,
-            }}
-            action={
-              <Box sx={{ display: "flex", gap: 1, ml: 2 }}>
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirmDialog.onConfirm) {
-                      confirmDialog.onConfirm();
-                    }
-                  }}
-                  variant="outlined"
-                >
-                  {t("fileMetadataComponent.confirm")}
-                </Button>
-                <Button
-                  color="inherit"
-                  size="small"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setConfirmDialog({
-                      open: false,
-                      message: "",
-                      onConfirm: null,
-                      severity: "warning",
-                    });
-                  }}
-                  variant="contained"
-                >
-                  {t("fileMetadataComponent.cancel")}
-                </Button>
-              </Box>
-            }
-          >
-            {confirmDialog.message}
-          </Alert>
-        </Snackbar>
-      </Portal>
     </Box>
   );
 }

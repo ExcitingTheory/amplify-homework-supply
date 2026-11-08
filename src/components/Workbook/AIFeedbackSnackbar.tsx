@@ -8,21 +8,14 @@
  * @module AIFeedbackSnackbar
  */
 
-import React, { useEffect, useState, useCallback } from 'react'
-import Snackbar from '@mui/material/Snackbar'
+import React, { useEffect } from 'react'
 import { useTranslations } from 'next-intl'
-import Alert from '@mui/material/Alert'
-import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome'
 import type { WorkbookCollaborationProvider } from '../../yjs/WorkbookCollaborationProvider'
+import { useEditorToast } from '../Editor3/context/EditorToastContext'
 
 export interface AIFeedbackSnackbarProps {
   provider: WorkbookCollaborationProvider | null
   currentUsername: string
-}
-
-interface FeedbackNotification {
-  blockId: string
-  message: string
 }
 
 export function AIFeedbackSnackbar({
@@ -30,8 +23,7 @@ export function AIFeedbackSnackbar({
   currentUsername,
 }: AIFeedbackSnackbarProps) {
   const t = useTranslations('components')
-  const [notification, setNotification] = useState<FeedbackNotification | null>(null)
-  const [open, setOpen] = useState(false)
+  const { showToast } = useEditorToast()
 
   useEffect(() => {
     if (!provider) return
@@ -43,13 +35,13 @@ export function AIFeedbackSnackbar({
       if (event.transaction.local) return
 
       for (const [blockId] of event.changes.keys) {
-        setNotification({
-          blockId,
+        showToast({
           message: t('aiFeedbackSnackbar.receivedForBlock', {
             block: blockId.slice(0, 8),
           }),
+          severity: 'info',
+          autoHideDuration: 5000,
         })
-        setOpen(true)
       }
     }
 
@@ -58,34 +50,9 @@ export function AIFeedbackSnackbar({
     return () => {
       feedbackMap.unobserve(handleFeedbackChange)
     }
-  }, [provider, currentUsername, t])
+  }, [provider, currentUsername, showToast, t])
 
-  const handleClose = useCallback(
-    (_event?: React.SyntheticEvent | Event, reason?: string) => {
-      if (reason === 'clickaway') return
-      setOpen(false)
-    },
-    [],
-  )
-
-  return (
-    <Snackbar
-      open={open}
-      autoHideDuration={5000}
-      onClose={handleClose}
-      anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-    >
-      <Alert
-        onClose={handleClose}
-        severity="info"
-        variant="filled"
-        icon={<AutoAwesomeIcon />}
-        sx={{ width: '100%' }}
-      >
-        {notification?.message || t('aiFeedbackSnackbar.received')}
-      </Alert>
-    </Snackbar>
-  )
+  return null
 }
 
 export default AIFeedbackSnackbar

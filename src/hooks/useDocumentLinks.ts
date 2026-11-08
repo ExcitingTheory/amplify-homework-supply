@@ -1,10 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getAmplifyClient } from "../utils/amplifyClient";
-import {
-  importedEntryKeys,
-  listDocumentLinks,
-  type DocumentLinkKind,
-} from "../utils/documentLinks";
+import { listImportedItemIds, type DocumentLinkKind } from "../utils/documentLinks";
 
 const NO_KEYS: ReadonlySet<string> = new Set();
 
@@ -21,11 +17,11 @@ function sameKeys(a: ReadonlySet<string>, b: ReadonlySet<string>): boolean {
 }
 
 /**
- * The entries of a document already imported into the bank, as normalized
- * keys (see `questionEntryKey` / `wordEntryKey`). `loaded` is false until the
- * first answer, so a screen can wait before choosing what to pre-select.
- * The set keeps its identity while the keys are unchanged. Call `refresh()`
- * after an import.
+ * The ids of the Questions or Words a document has already imported; an
+ * extracted entry is imported when its `questionID` / `wordID` is in the set.
+ * `loaded` is false until the first answer, so a screen can wait before
+ * choosing what to pre-select. The set keeps its identity while the ids are
+ * unchanged. Call `refresh()` after an import.
  */
 export function useDocumentLinks(
   documentId: string | undefined,
@@ -44,7 +40,7 @@ export function useDocumentLinks(
     (async () => {
       let keys: ReadonlySet<string>;
       try {
-        keys = importedEntryKeys(await listDocumentLinks(getAmplifyClient(), documentId, kind));
+        keys = await listImportedItemIds(getAmplifyClient(), documentId, kind);
       } catch (error) {
         // Without links every entry is simply offered for import.
         console.error("[useDocumentLinks] Could not load document links:", error);
@@ -65,5 +61,5 @@ export function useDocumentLinks(
   const refresh = useCallback(() => setRefreshCount((count) => count + 1), []);
 
   const current = state && state.documentId === documentId && state.kind === kind ? state : null;
-  return { importedKeys: current?.keys ?? NO_KEYS, loaded: current !== null, refresh };
+  return { importedIds: current?.keys ?? NO_KEYS, loaded: current !== null, refresh };
 }

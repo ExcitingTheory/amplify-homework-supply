@@ -5,7 +5,7 @@
  * test/unit/shared/parsedContentLists.test.ts checks them against it.
  */
 export const VOCABULARY_SELECTION =
-  "vocabularyJSON { word definition context page pages }";
+  "vocabularyJSON { word definition context pages wordID occurrences { definition contexts pages } edited { word definition context } }";
 export const SUMMARIES_SELECTION =
   "summariesJSON { title content pageRange }";
 export const OBJECTIVES_SELECTION =
@@ -13,7 +13,7 @@ export const OBJECTIVES_SELECTION =
 export const CONCEPTS_SELECTION =
   "conceptsJSON { concept description relatedVocabulary }";
 export const QUESTIONS_SELECTION =
-  "questionsJSON { prompt answer hint questionType difficulty page pages subject field sourceText accept }";
+  "questionsJSON { prompt answer hint questionType difficulty pages questionID subject field sourceText accept }";
 export const PENDING_MEDIA_SELECTION =
   "pendingMediaJSON { filename mimeType s3Key size description approved }";
 

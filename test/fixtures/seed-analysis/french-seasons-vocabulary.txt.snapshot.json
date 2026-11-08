@@ -1,0 +1,289 @@
+{
+  "sourceSha256": "d5cc6247f44bffa7fbf657b521733c3dabdadf02f844292d3ef68f1bc0d96bc5",
+  "capturedAt": "2026-10-28T12:55:26.613Z",
+  "sourceFormat": "txt",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Les Saisons en France",
+      "content": "This section outlines the characteristics of the four seasons in France. Spring (Le Printemps) arrives in March and lasts until May, symbolizing renewal. Summer (L'Été) begins in June and ends in August, being the hottest season of the year. Autumn (L'Automne) spreads from September to November, marked by changing leaf colors. Winter (L'Hiver) spans from December to February and is noted as the coldest and darkest season. Additionally, there's an emphasis on the cultural significance of seasons in France, with each season bringing its unique traditions and celebrations.",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Document summary",
+      "content": "The document describes the four seasons in France and their characteristics. Spring spans March to May and symbolizes renewal. Summer occurs from June to August as the hottest period. Autumn, from September to November, is marked by changing leaf colors. Winter, the coldest and darkest season, is from December to February. Each season in France carries cultural significance and is celebrated through various traditions and festivities.",
+      "pageRange": "Page 1"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Le Printemps (Spring) for Les Saisons en France?",
+      "answer": "Le printemps arrive généralement en mars et dure jusqu'en mai.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Saisons en France",
+      "field": "Le Printemps (Spring)",
+      "sourceText": "Le printemps arrive généralement en mars et dure jusqu'en mai. C'est une saison de renouveau et de renaissance.",
+      "accept": [
+        "Le printemps arrive généralement en mars et dure jusqu'en mai."
+      ]
+    },
+    {
+      "prompt": "What is L'Été (Summer) for L'Été (Summer)?",
+      "answer": "L'été commence en juin et se termine en août.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Été (Summer)",
+      "field": "L'Été (Summer)",
+      "sourceText": "L'été commence en juin et se termine en août. C'est la saison la plus chaude de l'année en France.",
+      "accept": [
+        "L'été commence en juin et se termine en août."
+      ]
+    },
+    {
+      "prompt": "What is L'Automne (Fall/Autumn) for L'Automne (Fall/Autumn)?",
+      "answer": "L'automne s'étend de septembre à novembre.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Automne (Fall/Autumn)",
+      "field": "L'Automne (Fall/Autumn)",
+      "sourceText": "L'automne s'étend de septembre à novembre. Les feuilles changent de couleur et tombent des arbres.",
+      "accept": [
+        "L'automne s'étend de septembre à novembre."
+      ]
+    },
+    {
+      "prompt": "What is L'Hiver (Winter) for L'Hiver (Winter)?",
+      "answer": "L'hiver dure de décembre à février.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Hiver (Winter)",
+      "field": "L'Hiver (Winter)",
+      "sourceText": "L'hiver dure de décembre à février. C'est la saison la plus froide avec des journées courtes.",
+      "accept": [
+        "L'hiver dure de décembre à février."
+      ]
+    },
+    {
+      "prompt": "What is **les fleurs** for Vocabulaire?",
+      "answer": "flowers",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Vocabulaire",
+      "field": "**les fleurs**",
+      "sourceText": "- **les fleurs** - flowers (Les fleurs commencent à fleurir)",
+      "accept": [
+        "flowers"
+      ]
+    },
+    {
+      "prompt": "What is les fleurs for les fleurs?",
+      "answer": "flowers",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "les fleurs",
+      "field": "les fleurs",
+      "sourceText": "- **les fleurs** - flowers (Les fleurs commencent à fleurir)",
+      "accept": [
+        "flowers"
+      ]
+    },
+    {
+      "prompt": "What is Definition for **les fleurs**?",
+      "answer": "flowers",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "**les fleurs**",
+      "field": "Definition",
+      "sourceText": "- **les fleurs** - flowers (Les fleurs commencent à fleurir)",
+      "accept": [
+        "flowers"
+      ]
+    },
+    {
+      "prompt": "What is **Il fait doux** for Il fait doux?",
+      "answer": "It's mild",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Il fait doux",
+      "field": "**Il fait doux**",
+      "sourceText": "**Il fait doux** - It's mild",
+      "accept": [
+        "It's mild"
+      ]
+    },
+    {
+      "prompt": "What is Le printemps arrive généralement en mars et dure jusqu'en mai. for Le Printemps?",
+      "answer": "C'est une saison de renouveau et de renaissance.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Le Printemps",
+      "field": "Le printemps arrive généralement en mars et dure jusqu'en mai.",
+      "sourceText": "Le printemps arrive généralement en mars et dure jusqu'en mai. C'est une saison de renouveau et de renaissance.",
+      "accept": [
+        "C'est une saison de renouveau et de renaissance."
+      ]
+    },
+    {
+      "prompt": "What is L'été commence en juin et se termine en août. for L'Été?",
+      "answer": "C'est la saison la plus chaude de l'année en France.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Été",
+      "field": "L'été commence en juin et se termine en août.",
+      "sourceText": "L'été commence en juin et se termine en août. C'est la saison la plus chaude de l'année en France.",
+      "accept": [
+        "C'est la saison la plus chaude de l'année en France."
+      ]
+    },
+    {
+      "prompt": "What is L'automne s'étend de septembre à novembre. for L'Automne?",
+      "answer": "Les feuilles changent de couleur et tombent des arbres.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Automne",
+      "field": "L'automne s'étend de septembre à novembre.",
+      "sourceText": "L'automne s'étend de septembre à novembre. Les feuilles changent de couleur et tombent des arbres.",
+      "accept": [
+        "Les feuilles changent de couleur et tombent des arbres."
+      ]
+    },
+    {
+      "prompt": "What is L'hiver dure de décembre à février. for L'Hiver?",
+      "answer": "C'est la saison la plus froide avec des journées courtes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "L'Hiver",
+      "field": "L'hiver dure de décembre à février.",
+      "sourceText": "L'hiver dure de décembre à février. C'est la saison la plus froide avec des journées courtes.",
+      "accept": [
+        "C'est la saison la plus froide avec des journées courtes."
+      ]
+    },
+    {
+      "prompt": "What is En France, les saisons ont une grande importance culturelle. for Note Culturelle?",
+      "answer": "Chaque saison apporte ses propres traditions, activités et célébrations.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Note Culturelle",
+      "field": "En France, les saisons ont une grande importance culturelle.",
+      "sourceText": "En France, les saisons ont une grande importance culturelle. Chaque saison apporte ses propres traditions, activités et célébrations.",
+      "accept": [
+        "Chaque saison apporte ses propres traditions, activités et célébrations."
+      ]
+    },
+    {
+      "prompt": "What is **Il fait beau** for Les Bouts?",
+      "answer": "The weather is nice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Bouts",
+      "field": "**Il fait beau**",
+      "sourceText": "**Il fait beau** - The weather is nice",
+      "accept": [
+        "The weather is nice"
+      ]
+    },
+    {
+      "prompt": "What is **Il fait mauvais** for Les Bouts?",
+      "answer": "The weather is bad",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Bouts",
+      "field": "**Il fait mauvais**",
+      "sourceText": "**Il fait mauvais** - The weather is bad",
+      "accept": [
+        "The weather is bad"
+      ]
+    },
+    {
+      "prompt": "What is **Il pleut** for Les Bouts?",
+      "answer": "It's raining",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Bouts",
+      "field": "**Il pleut**",
+      "sourceText": "**Il pleut** - It's raining",
+      "accept": [
+        "It's raining"
+      ]
+    },
+    {
+      "prompt": "What is **Il neige** for Les Bouts?",
+      "answer": "It's snowing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Bouts",
+      "field": "**Il neige**",
+      "sourceText": "**Il neige** - It's snowing",
+      "accept": [
+        "It's snowing"
+      ]
+    },
+    {
+      "prompt": "What is **Il y a du soleil** for Les Bouts?",
+      "answer": "It's sunny",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Les Bouts",
+      "field": "**Il y a du soleil**",
+      "sourceText": "**Il y a du soleil** - It's sunny",
+      "accept": [
+        "It's sunny"
+      ]
+    },
+    {
+      "prompt": "What is **Il gèle** for Il gèle?",
+      "answer": "It's freezing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Il gèle",
+      "field": "**Il gèle**",
+      "sourceText": "**Il gèle** - It's freezing",
+      "accept": [
+        "It's freezing"
+      ]
+    }
+  ]
+}

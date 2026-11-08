@@ -8,7 +8,8 @@ import {
 } from "storybook/test";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
-import Editor, { Workbook } from "./index";
+import Editor from "./index";
+import { Workbook } from "./Workbook";
 import CodeActionMenuPlugin from "./plugins/CodeActionMenuPlugin";
 import {
   clearMockData,
@@ -21,6 +22,7 @@ import {
   seedMockSections,
 } from "../../../.storybook/__mocks__/aws-amplify-data";
 import { AppShellContext } from "../AppShellContext";
+import SettingsContext from "../../context/settingsContext";
 import kitchenSinkEditorState from "./__fixtures__/kitchenSinkEditorState.json";
 const { MOCK_AUDIO_BASE64, MOCK_IMAGE_URL_1, MOCK_IMAGE_URL_2 } =
   await import("../../../.storybook/__mocks__/media");
@@ -81,7 +83,7 @@ function AppShellDecorator({ children }) {
           `calc(100vh - appBarHeight)` assuming the toolbar occupies no flow
           space. `sticky` would double-count the toolbar's height and force
           an extra scrollbar on the outer .storybook-wrapper. The `Box`
-          below reserves that same height via `marginTop` — exactly like
+          below reserves that same height via `paddingTop` — exactly like
           AppShell's own main-content wrapper — otherwise the portaled
           toolbar (title/description editor + formatting row) renders on
           top of the editor's content instead of above it. */}
@@ -91,9 +93,14 @@ function AppShellDecorator({ children }) {
         color="default"
         sx={{ zIndex: 1100 }}
       >
+        {/* Stand-in for MainToolbar's row slot; empty (zero height) until the
+            scrolled editor portals its compact title into it. */}
+        <Box data-testid="main-toolbar-row" sx={{ display: "flex", alignItems: "center", px: 2 }}>
+          <Box ref={toolbarChildrenPortalRef} sx={{ display: "contents" }} />
+        </Box>
         <Box ref={toolbarPortalRef} />
       </AppBar>
-      <Box sx={{ marginTop: `${appBarHeight}px` }}>{children}</Box>
+      <Box sx={{ paddingTop: `${appBarHeight}px` }}>{children}</Box>
     </AppShellContext.Provider>
   );
 }
@@ -218,6 +225,20 @@ export const EmptyEditorTextFormatting = {
       textboxes.find((el) => el.getAttribute("contenteditable") === "true") ||
       textboxes[0];
     expect(editorContent).toBeTruthy();
+    const main = editorContent.closest("main");
+    // The canvas paper carries the surface color; the editable inside it is transparent.
+    const paper = editorContent.closest(".collaboration-cursors-container");
+    const paperBackground = getComputedStyle(paper).backgroundColor;
+    expect(paperBackground).not.toMatch(/rgba\(.*, 0\)$/);
+    expect(paperBackground).not.toBe(getComputedStyle(main).backgroundColor);
+    expect(getComputedStyle(editorContent).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    // An empty document still fills the canvas, inside its outer padding.
+    const frame = editorContent.closest(".editor-container").parentElement;
+    const frameStyle = getComputedStyle(frame);
+    expect(frame.getBoundingClientRect().height).toBeGreaterThanOrEqual(main.clientHeight);
+    expect(editorContent.getBoundingClientRect().height).toBeGreaterThanOrEqual(
+      frame.clientHeight - parseFloat(frameStyle.paddingTop) - parseFloat(frameStyle.paddingBottom),
+    );
   },
 };
 
@@ -488,6 +509,21 @@ export const EditorWithContent = {
   },
 };
 
+export const DarkToolbarSurface = {
+  ...EditorWithContent,
+  globals: { colorScheme: "dark" },
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      const toolbar = canvasElement.querySelector('[data-tour="editor-toolbar"]');
+      expect(toolbar).toBeTruthy();
+      const style = getComputedStyle(toolbar);
+      expect(style.backgroundImage).toBe("none");
+      expect(style.backgroundColor).toBe("rgba(0, 0, 0, 0)");
+      expect(canvasElement.querySelector('[data-tour="unit-title"]')).toBeVisible();
+    });
+  },
+};
+
 const mockFiles = [
   {
     id: "file-1",
@@ -735,6 +771,379 @@ export const KitchenSink = {
     initializeMockData: false, // Story provides its own complete mock data
   },
   tags: ["!test"], // Skip vitest - MUI X DataGrid v8 GridFooter crashes in browser test env
+};
+
+export const LessonReadingFlow = {
+  ...KitchenSink,
+  tags: [],
+  loaders: [
+    async () => {
+      await KitchenSink.loaders[0]();
+      seedMockWords([{
+        id: "word-1",
+        phrase: "Chloroplasts",
+        definition: "Organelles in plant cells where photosynthesis occurs.",
+        owner: "mock-user-sub",
+      }]);
+      seedMockUnit({
+        id: KITCHEN_SINK_ID,
+        name: "Lesson reading flow",
+        data: JSON.stringify({
+          ...kitchenSinkEditorState,
+          root: {
+            ...kitchenSinkEditorState.root,
+            children: [0, 1, 26, 1, 28, 30, 32, 34, 12, 13].map(
+              (index) => kitchenSinkEditorState.root.children[index],
+            ),
+          },
+        }),
+        _version: 1,
+        wordIDs: ["word-1", "word-2", "word-3", "word-4"],
+        questionIDs: ["quiz-question-1", "question-custom-1"],
+        owner: "mock-user-sub",
+      });
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      const content = canvasElement.querySelector("[data-lesson-content]");
+      expect(content).toBeTruthy();
+      const paragraph = content.querySelector(":scope > p");
+      const cards = content.querySelectorAll("[data-block-type]");
+      expect(cards.length).toBe(5);
+      const rootStyle = getComputedStyle(content);
+      const paragraphStyle = getComputedStyle(paragraph);
+      const textStart = paragraph.getBoundingClientRect().left +
+        parseFloat(paragraphStyle.paddingLeft);
+      expect(content.getBoundingClientRect().width).toBeLessThanOrEqual(1024);
+      expect(rootStyle.textAlign).toBe("start");
+      for (const card of cards) {
+        const style = getComputedStyle(card);
+        const bounds = card.getBoundingClientRect();
+        const cardTextStart = bounds.left + parseFloat(style.borderLeftWidth) +
+          parseFloat(style.paddingLeft);
+        expect(Math.abs(textStart - cardTextStart)).toBeLessThanOrEqual(1);
+        expect(style.fontSize).toBe(paragraphStyle.fontSize);
+        expect(style.lineHeight).toBe(paragraphStyle.lineHeight);
+        expect(style.marginLeft).toBe("0px");
+        expect(Math.abs(bounds.width - (
+          content.clientWidth - parseFloat(rootStyle.paddingLeft) -
+            parseFloat(rootStyle.paddingRight)
+        ))).toBeLessThanOrEqual(2);
+      }
+      const paragraphs = content.querySelectorAll(":scope > p");
+      expect(getComputedStyle(paragraphs[paragraphs.length - 2]).textAlign).toBe("center");
+      expect(getComputedStyle(paragraphs[paragraphs.length - 1]).textAlign).toBe("right");
+    }, { timeout: 10000 });
+  },
+};
+
+export const LessonReadingFlowDark = {
+  ...LessonReadingFlow,
+  globals: { colorScheme: "dark" },
+};
+
+async function checkGutterControls({ canvasElement, userEvent }) {
+  const content = canvasElement.querySelector("[data-lesson-content]");
+  const main = content.closest("main");
+  await userEvent.click(content.querySelector(":scope > p"));
+  const insert = await waitFor(() => {
+    const button = main.querySelector(".editor-block-insert");
+    expect(button).toBeTruthy();
+    return button;
+  });
+  const link = within(main).getByRole("link", { name: /^1\.?$/ });
+  await userEvent.hover(content.querySelector(":scope > p"));
+  const handle = await waitFor(() => {
+    const element = main.querySelector(".draggable-block-menu:not([hidden])");
+    expect(element?.getBoundingClientRect().width).toBeGreaterThan(0);
+    return element;
+  });
+  for (const control of [insert, link, handle]) {
+    const bounds = control.getBoundingClientRect();
+    expect(bounds.width).toBeCloseTo(28, 0);
+    expect(bounds.height).toBeCloseTo(28, 0);
+  }
+  const icon = insert.querySelector("svg").getBoundingClientRect();
+  expect(icon.width).toBeGreaterThanOrEqual(22);
+  expect(icon.width).toBeLessThanOrEqual(28);
+  const linkStyle = getComputedStyle(link);
+  expect(getComputedStyle(link, "::after").content).toBe('"."');
+  expect([linkStyle.display, linkStyle.alignItems, linkStyle.justifyContent])
+    .toEqual(["flex", "center", "center"]);
+  expect(getComputedStyle(handle).boxShadow).toBe("none");
+  expect(getComputedStyle(insert).boxShadow).toBe("none");
+  for (const type of ["answer", "meaning-association"]) {
+    await waitFor(() => {
+      const grid = content.querySelector(`[data-block-type="${type}"] .MuiDataGrid-root`);
+      const action = grid?.querySelector('[data-field="actions"] button');
+      expect(action).toBeTruthy();
+      expect(getComputedStyle(action).color).toBe(getComputedStyle(grid).color);
+    });
+  }
+  expect(link.getAttribute("href")).toBe(`#${link.id}`);
+  const pageTop = window.scrollY;
+  await userEvent.click(link);
+  await waitFor(() => {
+    const menuBottom = canvasElement.ownerDocument.querySelector(".MuiAppBar-root")
+      .getBoundingClientRect().bottom;
+    expect(content.firstElementChild.getBoundingClientRect().top)
+      .toBeGreaterThanOrEqual(menuBottom - 1);
+    expect(window.scrollY).toBe(pageTop);
+  });
+  expect(link).toHaveAttribute("aria-current", "location");
+  expect(getComputedStyle(link).boxShadow).toContain("inset");
+  const selectedText = () => canvasElement.ownerDocument.getSelection().toString().trim();
+  await waitFor(() => expect(selectedText()).toBe(content.firstElementChild.textContent.trim()));
+  await userEvent.click(content.querySelector(":scope > p"));
+  const menuButton = await waitFor(() => {
+    const button = main.querySelector(".editor-block-insert");
+    expect(button).toBeTruthy();
+    return button;
+  });
+  await userEvent.click(menuButton);
+  await screen.findByRole("menu");
+  expect(menuButton).toHaveAttribute("aria-expanded", "true");
+  expect(getComputedStyle(menuButton).boxShadow).toContain("inset");
+  await userEvent.keyboard("{Escape}");
+  await waitFor(() => expect(menuButton).toHaveAttribute("aria-expanded", "false"));
+  expect(getComputedStyle(menuButton).boxShadow).toBe("none");
+
+  // Insert follows hover like the handle, and clicking the handle selects that block.
+  const hovered = [...content.querySelectorAll(":scope > p")].at(-1);
+  hovered.scrollIntoView({ block: "center" });
+  // The gutter hit-tests by pointer position, which userEvent.hover does not supply.
+  const hoveredRect = hovered.getBoundingClientRect();
+  hovered.dispatchEvent(new MouseEvent("mousemove", {
+    bubbles: true, clientX: hoveredRect.left + 20, clientY: hoveredRect.top + 8,
+  }));
+  await waitFor(() => {
+    const hoveredInsert = main.querySelector(".editor-block-insert");
+    const blockTop = hovered.getBoundingClientRect().top;
+    expect(hoveredInsert.getBoundingClientRect().top).toBeCloseTo(handle.getBoundingClientRect().top, 0);
+    expect(Math.abs(hoveredInsert.getBoundingClientRect().top - blockTop)).toBeLessThan(20);
+  });
+  await userEvent.click(handle);
+  await waitFor(() => expect(selectedText()).toBe(hovered.textContent.trim()));
+}
+
+export const EditorGutterInteractions = {
+  ...LessonReadingFlow,
+  decorators: [
+    (Story) => {
+      const settings = React.useContext(SettingsContext);
+      return (
+        <SettingsContext.Provider value={{
+          ...settings,
+          isLoading: false,
+          settings: {
+            ...settings?.settings,
+            metadata: JSON.stringify({ aiAutocompleteEnabled: false }),
+          },
+        }}>
+          <Story />
+        </SettingsContext.Provider>
+      );
+    },
+  ],
+  play: async (context) => {
+    const { canvasElement, userEvent } = context;
+    await LessonReadingFlow.play(context);
+    await checkGutterControls(context);
+    const content = canvasElement.querySelector("[data-lesson-content]");
+    const main = content.closest("main");
+    const blocks = () => content.querySelectorAll(":scope > :not([data-lexical-cursor])");
+    const canvas = content.closest(".editor-container");
+    const paper = content.closest(".collaboration-cursors-container");
+    expect(getComputedStyle(paper).backgroundColor).not.toBe(getComputedStyle(main).backgroundColor);
+    expect(getComputedStyle(paper).boxShadow).not.toBe("none");
+    expect(getComputedStyle(canvas).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    expect(getComputedStyle(content).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    const bounds = canvas.getBoundingClientRect();
+    const mainBounds = main.getBoundingClientRect();
+    expect(bounds.left).toBeGreaterThan(mainBounds.left);
+    expect(bounds.right).toBeLessThan(mainBounds.right);
+    expect(Math.abs((bounds.left - mainBounds.left) - (mainBounds.right - bounds.right)))
+      .toBeLessThanOrEqual(2);
+    const paperBounds = paper.getBoundingClientRect();
+    const paragraphBounds = content.querySelector(":scope > p").getBoundingClientRect();
+    const textInset = paragraphBounds.left - paperBounds.left;
+    expect(textInset).toBeGreaterThanOrEqual(16);
+    expect(textInset).toBeLessThanOrEqual(24);
+    expect(paperBounds.right - paragraphBounds.right).toBeLessThanOrEqual(24);
+    const workspace = canvasElement.querySelector('[data-testid="editor-workspace"]');
+    const menuBottom = canvasElement.ownerDocument.querySelector(".MuiAppBar-root")
+      .getBoundingClientRect().bottom;
+    expect(Math.abs(workspace.getBoundingClientRect().top - menuBottom)).toBeLessThanOrEqual(1);
+    expect(Math.abs(workspace.getBoundingClientRect().bottom - window.innerHeight)).toBeLessThanOrEqual(1);
+    expect(Math.abs(mainBounds.bottom - workspace.getBoundingClientRect().bottom)).toBeLessThanOrEqual(1);
+    expect(document.documentElement.scrollHeight).toBeLessThanOrEqual(window.innerHeight + 1);
+    await waitFor(() => {
+      const numbers = [...main.querySelectorAll(".editor-block-number")];
+      expect(numbers.map((number) => number.textContent))
+        .toEqual([...blocks()].map((_, index) => String(index + 1)));
+    });
+    const paragraph = content.querySelector(":scope > p");
+    await userEvent.click(paragraph);
+    const originalText = paragraph.textContent;
+    const originalCount = blocks().length;
+    await waitFor(() => {
+      const handle = main.querySelector(".draggable-block-menu");
+      const insert = main.querySelector(".editor-block-insert");
+      expect(insert).toBeTruthy();
+      const rootRect = content.getBoundingClientRect();
+      const number = main.querySelector(".editor-block-number");
+      expect(Math.abs(insert.getBoundingClientRect().right - rootRect.left))
+        .toBeLessThanOrEqual(1);
+      expect(handle.getBoundingClientRect().right).toBeLessThanOrEqual(number.getBoundingClientRect().left);
+      expect(number.getBoundingClientRect().right).toBeLessThanOrEqual(insert.getBoundingClientRect().left);
+    });
+    await userEvent.click(main.querySelector(".editor-block-insert"));
+    await userEvent.keyboard("{Escape}");
+    expect(blocks().length).toBe(originalCount);
+    await userEvent.click(main.querySelector(".editor-block-insert"));
+    const menu = await screen.findByRole("menu");
+    await userEvent.click(within(menu).getByText(/horizontal rule/i));
+    await waitFor(() => {
+      expect(paragraph.nextElementSibling.tagName).toBe("HR");
+      expect(paragraph.textContent).toBe(originalText);
+      expect(blocks().length).toBe(originalCount + 1);
+      expect(main.querySelectorAll(".editor-block-number")).toHaveLength(originalCount + 1);
+    });
+  },
+};
+
+export const EditorGutterDark = {
+  ...LessonReadingFlowDark,
+  play: async (context) => {
+    const { canvasElement } = context;
+    await LessonReadingFlow.play(context);
+    await checkGutterControls(context);
+    const content = canvasElement.querySelector("[data-lesson-content]");
+    const paper = content.closest(".collaboration-cursors-container");
+    expect(getComputedStyle(paper).backgroundColor)
+      .not.toBe(getComputedStyle(content.closest("main")).backgroundColor);
+    expect(getComputedStyle(content).backgroundColor).toBe("rgba(0, 0, 0, 0)");
+    await waitFor(() => expect(
+      canvasElement.querySelectorAll(".editor-block-number").length,
+    ).toBe(content.children.length));
+  },
+};
+
+export const LessonReadingFlowNarrow = {
+  ...LessonReadingFlow,
+  render: () => (
+    <Box sx={{ width: 360, maxWidth: "100%" }}>
+      <Editor />
+    </Box>
+  ),
+};
+
+export const HeaderCollapsesOnScroll = {
+  ...LessonReadingFlow,
+  play: async (context) => {
+    await LessonReadingFlow.play(context);
+    const content = context.canvasElement.querySelector("[data-lesson-content]");
+    const pane = content.closest(".editor-container").parentElement;
+    const doc = context.canvasElement.ownerDocument;
+    const row = doc.querySelector("[data-testid=main-toolbar-row]");
+    expect(pane.scrollHeight - pane.clientHeight).toBeGreaterThan(60);
+    // The reading-flow play may leave the pane scrolled; start from the top.
+    pane.scrollTop = 0;
+    await waitFor(() => {
+      expect(doc.querySelector("[data-testid=compact-unit-title]")).toBeNull();
+      expect(doc.querySelector("[data-testid=unit-header-collapse]")).toHaveClass("MuiCollapse-entered");
+    }, { timeout: 3000 });
+    const expandedPaneTop = pane.getBoundingClientRect().top;
+
+    pane.scrollTop = 200;
+    let compact;
+    await waitFor(() => {
+      compact = row.querySelector("[data-testid=compact-unit-title]");
+      expect(compact).toBeTruthy();
+      expect(pane.getBoundingClientRect().top).toBeLessThan(expandedPaneTop - 10);
+    }, { timeout: 3000 });
+    const [titleLine, descriptionLine] = [...compact.children];
+    expect(titleLine).toHaveTextContent("Lesson reading flow");
+    // Stacked, not side by side.
+    const titleBox = titleLine.getBoundingClientRect();
+    const descriptionBox = descriptionLine.getBoundingClientRect();
+    expect(descriptionBox.top).toBeGreaterThanOrEqual(titleBox.bottom - 1);
+    expect(Math.abs(descriptionBox.left - titleBox.left)).toBeLessThanOrEqual(1);
+
+    pane.scrollTop = 0;
+    await waitFor(() => {
+      expect(doc.querySelector("[data-testid=compact-unit-title]")).toBeNull();
+      expect(Math.abs(pane.getBoundingClientRect().top - expandedPaneTop)).toBeLessThanOrEqual(1);
+    }, { timeout: 3000 });
+  },
+};
+
+export const ResponsiveWorkspace = {
+  ...EditorWithContent,
+  render: () => (
+    <Box sx={{ width: 720, maxWidth: "100%" }}>
+      <Editor />
+    </Box>
+  ),
+  play: async ({ canvasElement, userEvent }) => {
+    const canvas = within(canvasElement);
+    await waitFor(() => expect(
+      canvasElement.querySelector("[data-lesson-content] > h1"),
+    ).toBeTruthy());
+    const main = canvas.getByTestId("editor-workspace-main");
+    const initialWidth = main.getBoundingClientRect().width;
+    await userEvent.click(canvas.getByRole("tab", { name: "Files", exact: true }));
+    const files = await canvas.findByRole("complementary", { name: "Files", exact: true });
+    await waitFor(() => expect(files).toHaveAttribute("data-open", "true"));
+    await waitFor(() => expect(main.getBoundingClientRect().width).toBe(initialWidth));
+    expect(screen.queryByRole("dialog")).toBeNull();
+    expect(canvasElement.ownerDocument.querySelector(".MuiBackdrop-root")).toBeNull();
+    const panelRight = files.getBoundingClientRect().right;
+    const mainBounds = main.getBoundingClientRect();
+    expect(panelRight).toBeLessThan(mainBounds.right);
+    // The uncovered part of the document is still the topmost element, so drops can land there.
+    const uncovered = canvasElement.ownerDocument.elementFromPoint(
+      (panelRight + mainBounds.right) / 2,
+      mainBounds.top + mainBounds.height / 2,
+    );
+    expect(main.contains(uncovered)).toBe(true);
+    await userEvent.click(within(files).getAllByRole("tab")[0]);
+    await userEvent.keyboard("{Escape}");
+    await waitFor(() => expect(files).toHaveAttribute("data-open", "false"));
+    expect(canvas.getByRole("tab", { name: "Files", exact: true })).toBeVisible();
+    expect(main.scrollWidth).toBeLessThanOrEqual(main.clientWidth);
+    const content = canvasElement.querySelector("[data-lesson-content]");
+    await userEvent.click(content.querySelector("p"));
+    await userEvent.keyboard(" Still editable.");
+    await waitFor(() => expect(content.textContent).toContain("Still editable."));
+    const paper = content.closest(".collaboration-cursors-container");
+    expect(getComputedStyle(paper).boxShadow).toContain("inset");
+    expect(getComputedStyle(content).boxShadow).toBe("none");
+  },
+};
+
+export const LessonReadingFlowWorkbook = {
+  ...LessonReadingFlow,
+  render: () => <Workbook />,
+  play: async ({ canvasElement }) => {
+    await waitFor(() => {
+      const content = canvasElement.querySelector("[data-lesson-content]");
+      const paragraph = content?.querySelector(":scope > p");
+      const wordCard = content?.querySelector('[data-block-type="word-block"]');
+      expect(paragraph).toBeTruthy();
+      expect(wordCard).toBeTruthy();
+      const paragraphStyle = getComputedStyle(paragraph);
+      const cardStyle = getComputedStyle(wordCard);
+      const textStart = paragraph.getBoundingClientRect().left +
+        parseFloat(paragraphStyle.paddingLeft);
+      const cardTextStart = wordCard.getBoundingClientRect().left +
+        parseFloat(cardStyle.borderLeftWidth) + parseFloat(cardStyle.paddingLeft);
+      expect(Math.abs(textStart - cardTextStart)).toBeLessThanOrEqual(1);
+      expect(cardStyle.marginLeft).toBe("0px");
+      expect(cardStyle.fontSize).toBe(paragraphStyle.fontSize);
+    });
+  },
 };
 
 /**

@@ -19,6 +19,16 @@ const text = (value: unknown): string | undefined =>
 const integerList = (value: unknown): number[] | undefined =>
   Array.isArray(value) && value.every(isInteger) ? value : undefined;
 
+/**
+ * Entries persist only `pages`. Extraction output for a single page carries a lone
+ * `page`, which becomes a one-item list; the first page is then `pages[0]`.
+ */
+const pageList = (entry: Entry): number[] | undefined => {
+  const pages = integerList(entry.pages);
+  if (pages && pages.length > 0) return pages;
+  return isInteger(entry.page) ? [entry.page] : pages;
+};
+
 const stringList = (value: unknown): string[] | undefined =>
   Array.isArray(value) && value.every((item) => typeof item === "string")
     ? value
@@ -51,12 +61,33 @@ function vocabularyEntry(value: unknown): Entry | undefined {
   if (!isEntry(value)) return undefined;
   const word = text(value.word) ?? text(value.term);
   if (!word) return undefined;
+  const occurrences = Array.isArray(value.occurrences)
+    ? value.occurrences.flatMap((item) => {
+        if (!isEntry(item)) return [];
+        const occurrence = defined({
+          definition: text(item.definition),
+          contexts: stringList(item.contexts),
+          pages: integerList(item.pages),
+        });
+        return Object.keys(occurrence).length > 0 ? [occurrence] : [];
+      })
+    : [];
+  const editSource = isEntry(value.edited) ? value.edited : undefined;
+  const edited = editSource
+    ? defined({
+        word: text(editSource.word),
+        definition: text(editSource.definition),
+        context: text(editSource.context),
+      })
+    : undefined;
   return defined({
     word,
     definition: text(value.definition),
     context: text(value.context),
-    page: isInteger(value.page) ? value.page : undefined,
-    pages: integerList(value.pages),
+    pages: pageList(value),
+    wordID: text(value.wordID),
+    occurrences: occurrences.length > 0 ? occurrences : undefined,
+    edited: edited && Object.keys(edited).length > 0 ? edited : undefined,
   });
 }
 
@@ -97,8 +128,8 @@ function questionEntry(value: Entry): Entry {
     hint: text(value.hint),
     questionType: text(value.questionType),
     difficulty: text(value.difficulty),
-    page: isInteger(value.page) ? value.page : undefined,
-    pages: integerList(value.pages),
+    pages: pageList(value),
+    questionID: text(value.questionID),
     subject: text(value.subject),
     field: text(value.field),
     sourceText: text(value.sourceText),

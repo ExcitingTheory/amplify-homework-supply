@@ -13,7 +13,7 @@ describe("buildEmbeddingItems", () => {
   it("turns vocabulary and summaries into embeddable text", () => {
     const items = buildEmbeddingItems({
       vocabularyJSON: [
-        { word: "Path", definition: "A Tree-line", context: "Kabbalah", page: 3 },
+        { word: "Path", definition: "A Tree-line", context: "Kabbalah", pages: [3, 7] },
         { word: "Aleph", definition: "Hebrew letter" },
       ],
       summariesJSON: [{ title: "Overview", content: "A summary." }],

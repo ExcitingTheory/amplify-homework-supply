@@ -87,13 +87,22 @@
     "regeneratedAlt": "Régénéré"
   },
   "blockSuggestionMenu": {
+    "accept": "Accepter",
+    "reject": "Refuser",
+    "error": "Impossible de générer ou d'insérer ce bloc. Veuillez réessayer.",
     "aiTitle": "Suggestions alimentées par l'IA",
     "emptyState": "Aucune suggestion disponible pour le moment.",
     "emptyStateHelper": "Commencez à taper dans l'éditeur pour voir les suggestions de blocs alimentées par l'IA.",
     "generateMore": "Générer plus de suggestions",
-    "helper": "Cliquez sur une suggestion pour l'insérer dans votre leçon",
-    "helperAI": "Cliquez sur une suggestion ou appuyez sur Tab/Entrée pour insérer",
+    "helper": "Examinez le bloc, puis acceptez-le ou refusez-le.",
+    "helperAI": "Examinez le bloc, puis acceptez-le ou refusez-le.",
     "suggestionsTitle": "Blocs suggérés"
+  },
+  "autocompletePreference": {
+    "heading": "Saisie automatique par IA",
+    "description": "Suggérer du contenu pendant la rédaction des leçons. Les suggestions de blocs restent disponibles dans leur onglet latéral.",
+    "enabled": "Activer la saisie automatique par IA",
+    "error": "Impossible d'enregistrer votre préférence. Veuillez réessayer."
   },
   "suggestedContent": {
     "identityPlaceholder": "ID d'identité",
@@ -115,5 +124,21 @@
     "newSection": "Nouvelle section",
     "questionCount": "{count, plural, one {# question} other {# questions}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "Quiz",
+      "answer": "Réponse de vocabulaire",
+      "meaning": "Association de sens",
+      "customAnswer": "Réponse personnalisée",
+      "callResponse": "Question-réponse",
+      "word": "Mot",
+      "playlist": "Playlist",
+      "conversationPlaylist": "Playlist de conversation",
+      "pdf": "PDF",
+      "image": "Image",
+      "file": "Fichier",
+      "youtube": "Vidéo YouTube"
+    }
   }
 }

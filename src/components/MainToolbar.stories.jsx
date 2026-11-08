@@ -1,7 +1,9 @@
 import React from "react";
 import { expect, within, waitFor, userEvent } from "storybook/test";
 import { Box, Typography } from "@mui/material";
+import AppShell from "./AppShell";
 import MainToolbar, { SettingsMenu, HelpMenu, UserMenu } from "./MainToolbar";
+import NotificationContext from "../context/notificationContext";
 
 export default {
   title: "✏️ Lesson Editor/Toolbar",
@@ -19,6 +21,7 @@ Application navigation toolbar with user menu, settings, and help.
 - **Settings Menu**: App configuration and preferences
 - **Help Menu**: Documentation and support links
 - **Material UI Integration**: Built with MUI AppBar and IconButtons
+- **Control Spacing**: Consistent 8px gaps between app bar buttons and chips
 
 ## Usage
 Wrap page content with the MainToolbar component to add navigation.
@@ -75,6 +78,120 @@ export const FullToolbar = {
       },
     },
   },
+};
+
+export const PrivacyPolicyNavigation = {
+  render: () => (
+    <AppShell>
+      <Box sx={{ p: 4 }}>
+        <Typography variant="h3">Page Content</Typography>
+      </Box>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const body = within(document.body);
+    await expect(body.queryByRole("link", { name: /privacy policy/i })).toBeNull();
+    await userEvent.click(
+      await within(canvasElement).findByRole("button", { name: /profile/i }),
+    );
+    const privacyItem = await body.findByRole("menuitem", { name: /privacy policy/i });
+    await expect(privacyItem).toHaveAttribute("href", "/privacy");
+    // Privacy sits last, separated from the account actions by a divider.
+    const menuChildren = [...privacyItem.parentElement.children];
+    await expect(menuChildren.at(-1)).toBe(privacyItem);
+    await expect(menuChildren.at(-2)).toHaveClass("MuiDivider-root");
+  },
+};
+
+export const ControlSpacing = {
+  render: () => (
+    <AppShell>
+      <Typography>Page Content</Typography>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const menuButton = await within(canvasElement).findByRole("button", {
+      name: /^menu$/i,
+    });
+    const toolbar = menuButton.closest(".MuiToolbar-root");
+    const layoutChildren = (element) => (
+      [...element.children].flatMap((child) =>
+        getComputedStyle(child).display === "contents" ? layoutChildren(child) : [child],
+      )
+    );
+    await waitFor(() => {
+      const items = layoutChildren(toolbar)
+        .map((element) => element.getBoundingClientRect())
+        .filter((bounds) => bounds.width > 0 && bounds.height > 0);
+      expect(items.length).toBeGreaterThan(4);
+      for (let index = 1; index < items.length; index += 1) {
+        expect(items[index].left - items[index - 1].right).toBeGreaterThanOrEqual(7.5);
+      }
+      expect(items.at(-1).right).toBeLessThanOrEqual(toolbar.getBoundingClientRect().right);
+    });
+  },
+};
+
+export const ShellViewportHeight = {
+  render: () => (
+    <AppShell>
+      <Typography>Page content without a footer</Typography>
+    </AppShell>
+  ),
+  play: async ({ canvasElement }) => {
+    const content = await within(canvasElement).findByText("Page content without a footer");
+    const view = canvasElement.ownerDocument.defaultView;
+    await waitFor(() => {
+      const menu = canvasElement.querySelector("header");
+      expect(content.getBoundingClientRect().top)
+        .toBeGreaterThanOrEqual(menu.getBoundingClientRect().bottom - 1);
+      expect(canvasElement.ownerDocument.documentElement.scrollHeight)
+        .toBeLessThanOrEqual(view.innerHeight + 1);
+    });
+  },
+};
+
+export const ControlSpacingDark = {
+  ...ControlSpacing,
+  globals: { colorScheme: "dark" },
+};
+
+export const NotificationBadgeClipping = {
+  render: ControlSpacing.render,
+  decorators: [
+    (Story) => {
+      const notifications = React.useContext(NotificationContext);
+      return (
+        <NotificationContext.Provider value={{ ...notifications, unseenCount: 150 }}>
+          <Story />
+        </NotificationContext.Provider>
+      );
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    await within(canvasElement).findByRole("button", { name: /^menu$/i });
+    const bell = canvasElement.querySelector('[data-tour="notification-bell"]');
+    const badge = await within(bell).findByText("99+");
+    const bounds = badge.getBoundingClientRect();
+    expect(bounds.width).toBeGreaterThan(20);
+    for (let ancestor = badge.parentElement; ancestor; ancestor = ancestor.parentElement) {
+      const style = getComputedStyle(ancestor);
+      const clip = ancestor.getBoundingClientRect();
+      if (style.overflowX !== "visible") {
+        expect(bounds.left).toBeGreaterThanOrEqual(clip.left);
+        expect(bounds.right).toBeLessThanOrEqual(clip.right);
+      }
+      if (style.overflowY !== "visible") {
+        expect(bounds.top).toBeGreaterThanOrEqual(clip.top);
+        expect(bounds.bottom).toBeLessThanOrEqual(clip.bottom);
+      }
+    }
+  },
+};
+
+export const NotificationBadgeClippingDark = {
+  ...NotificationBadgeClipping,
+  globals: { colorScheme: "dark" },
 };
 
 export const SettingsMenuOnly = {

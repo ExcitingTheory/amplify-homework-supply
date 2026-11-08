@@ -239,7 +239,10 @@
   },
   "pdfViewerComponent": {
     "loadingPdf": "Chargement du PDF : {filename}",
-    "noPdfToDisplay": "Aucun PDF à afficher"
+    "noPdfToDisplay": "Aucun PDF à afficher",
+    "darkPages": "Pages sombres",
+    "enterFullScreen": "Plein écran",
+    "exitFullScreen": "Quitter le plein écran"
   },
   "metadataEditor": {
     "aiGenerationInfo": "Informations de génération IA",

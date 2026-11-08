@@ -6,11 +6,9 @@ import * as React from "react";
 import { useContext, useState, useCallback, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { useSearchParams, usePathname, useRouter } from "next/navigation";
-import { Box } from "@mui/material";
 
 import { LexicalComposer } from "@lexical/react/LexicalComposer";
 import { RichTextPlugin } from "@lexical/react/LexicalRichTextPlugin";
-import { ContentEditable } from "@lexical/react/LexicalContentEditable";
 import { useLexicalComposerContext } from "@lexical/react/LexicalComposerContext";
 import { LexicalErrorBoundary } from "@lexical/react/LexicalErrorBoundary";
 import { AutoFocusPlugin } from "@lexical/react/LexicalAutoFocusPlugin";
@@ -23,13 +21,14 @@ import { ListPlugin } from "@lexical/react/LexicalListPlugin";
 import { TabIndentationPlugin } from "@lexical/react/LexicalTabIndentationPlugin";
 import { TablePlugin } from "@lexical/react/LexicalTablePlugin";
 import { MarkdownShortcutPlugin } from "@lexical/react/LexicalMarkdownShortcutPlugin";
+import { OnChangePlugin } from "@lexical/react/LexicalOnChangePlugin";
 
 import type { EditorState, LexicalEditor, EditorThemeClasses } from "lexical";
-import { HISTORIC_TAG, HISTORY_PUSH_TAG, HISTORY_MERGE_TAG } from "lexical";
 import { DATASTORE_UPDATE_TAG, INITIAL_LOAD_TAG } from "./constants/updateTags";
 
 import TabsVerticalLeft from "./components/TabsVerticalLeft";
 import TabsVerticalRight from "./components/TabsVerticalRight";
+import EditorWorkspace from "./components/EditorWorkspace";
 import { TabProvider } from "../../context/tabContext";
 import { useTabState } from "../../hooks/useTabState";
 import { AudioPlayerProvider } from "./context/AudioPlayerContext";
@@ -68,6 +67,7 @@ import ArmorEditorPlugin from "./plugins/ArmorEditorPlugin";
 import ConversationPlaylistPlugin from "./plugins/ConversationPlaylistPlugin";
 import CallResponsePlugin from "./plugins/CallResponsePlugin";
 import BlockSuggestionPlugin from "./plugins/BlockSuggestionPlugin";
+import BlockNavigationPlugin from "./plugins/BlockNavigationPlugin";
 import AIContentCompletionPlugin from "./plugins/AIContentCompletionPlugin";
 import DraggableBlockPlugin from "./plugins/DraggableBlockPlugin";
 import TableHoverActionsPlugin from "./plugins/TableHoverActionsPlugin";
@@ -80,59 +80,13 @@ import {
   EditorNodes,
   ALL_TRANSFORMERS,
   onError,
-  DRAWER_WIDTH,
   DEBOUNCE_SAVE_DELAY_MS,
   sanitizeEditorStateJSON,
 } from "./editorConfig";
-import { Drawer } from "./styledComponents";
+import { EditorCanvas, LessonContentEditable } from "./styledComponents";
 import { useAppShell } from "../AppShellContext";
 import ComponentErrorBoundary from "../ComponentErrorBoundary";
-
-/**
- * Custom OnChange Plugin following Lexical best practices
- * https://lexical.dev/docs/getting-started/react#saving-lexical-state
- */
-interface MyOnChangePluginProps {
-  onChange: (
-    editorState: EditorState,
-    editor: LexicalEditor,
-    tags: Set<string>,
-  ) => void;
-}
-
-function MyOnChangePlugin({ onChange }: MyOnChangePluginProps): null {
-  const [editor] = useLexicalComposerContext();
-  const throttledOnChange = useRef<
-    ((editorState: EditorState, tags: Set<string>) => void) | null
-  >(null);
-
-  // Create a throttled version of onChange to prevent excessive calls
-  useEffect(() => {
-    let lastCall = 0;
-    const THROTTLE_MS = 100; // Limit to max 10 calls per second
-
-    throttledOnChange.current = (
-      editorState: EditorState,
-      tags: Set<string>,
-    ) => {
-      const now = Date.now();
-      if (now - lastCall >= THROTTLE_MS) {
-        lastCall = now;
-        onChange(editorState, editor, tags);
-      }
-    };
-  }, [editor, onChange]);
-
-  useEffect(() => {
-    return editor.registerUpdateListener(({ editorState, tags }) => {
-      if (throttledOnChange.current) {
-        throttledOnChange.current(editorState, tags);
-      }
-    });
-  }, [editor]);
-
-  return null;
-}
+import { EditorToastProvider } from "./context/EditorToastContext";
 
 /**
  * Plugin to expose editor instance to UnitContext
@@ -155,6 +109,7 @@ function EditorRefPlugin(): null {
  */
 function EditorContent(): React.ReactElement {
   const t = useTranslations("common");
+  const tAuthoring = useTranslations("editor.authoring");
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
@@ -228,7 +183,7 @@ function EditorContent(): React.ReactElement {
   const tabState: any = useTabState({
     defaultLeftTab: 4, // files
     defaultRightTab: 5, // chat (index 5 in TabsVerticalRight)
-    defaultLeftWidth: 350,
+    defaultLeftWidth: 640,
     defaultRightWidth: 350,
     syncToURL: true,
     syncToLocalStorage: false, // Disabled to avoid stale data issues
@@ -288,13 +243,6 @@ function EditorContent(): React.ReactElement {
     [],
   );
 
-  const [actualDrawerWidthLeft, setActualDrawerWidthLeft] =
-    React.useState<number>(DRAWER_WIDTH);
-  const [actualDrawerWidthRight, setActualDrawerWidthRight] =
-    React.useState<number>(DRAWER_WIDTH);
-
-  const drawerRefLeft = React.useRef<HTMLDivElement>(null);
-  const drawerRefRight = React.useRef<HTMLDivElement>(null);
   const toolbarRef = React.useRef<HTMLDivElement>(null);
   const [toolbarHeight, setToolbarHeight] = React.useState<number>(0);
   const [isScrolled, setIsScrolled] = React.useState<boolean>(false);
@@ -326,45 +274,6 @@ function EditorContent(): React.ReactElement {
     }
   }, []);
 
-  // Measure left drawer content width
-  React.useEffect(() => {
-    if (openTabVerticalLeft && drawerRefLeft.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const width = entry.contentRect.width;
-          if (width > 0) {
-            setActualDrawerWidthLeft(width);
-          }
-        }
-      });
-
-      resizeObserver.observe(drawerRefLeft.current);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-  }, [openTabVerticalLeft]);
-
-  // Measure right drawer content width
-  React.useEffect(() => {
-    if (openTabVerticalRight && drawerRefRight.current) {
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (const entry of entries) {
-          const width = entry.contentRect.width;
-          if (width > 0) {
-            setActualDrawerWidthRight(width);
-          }
-        }
-      });
-
-      resizeObserver.observe(drawerRefRight.current);
-
-      return () => {
-        resizeObserver.disconnect();
-      };
-    }
-  }, [openTabVerticalRight]);
 
   // Measure toolbar height dynamically
   React.useEffect(() => {
@@ -425,15 +334,11 @@ function EditorContent(): React.ReactElement {
       editor: LexicalEditor,
       tags: Set<string>,
     ) => {
-      // Skip saves for history operations (undo/redo) and initial load
-      // Note: DATASTORE_UPDATE_TAG deprecated with Yjs integration (CollaborationPlugin handles sync)
+      // History-tagged edits and undo/redo still change persisted content.
       if (
         tags &&
         (tags.has(DATASTORE_UPDATE_TAG) ||
-          tags.has(HISTORY_MERGE_TAG) ||
-          tags.has(INITIAL_LOAD_TAG) ||
-          tags.has(HISTORIC_TAG) ||
-          tags.has(HISTORY_PUSH_TAG))
+          tags.has(INITIAL_LOAD_TAG))
       ) {
         console.log(
           "[Editor onChange] Skipping save due to tags:",
@@ -442,10 +347,10 @@ function EditorContent(): React.ReactElement {
         return;
       }
 
-      // Skip if we haven't loaded initial state yet (editorStateRef not set)
-      if (!editorStateRef.current) {
+      // New units have no saved state; only the loaded unit gates the first save.
+      if (!unit?.id) {
         console.log(
-          "[Editor onChange] Skipping save - no initial state loaded yet",
+          "[Editor onChange] Skipping save - no unit loaded yet",
         );
         return;
       }
@@ -475,7 +380,7 @@ function EditorContent(): React.ReactElement {
       // Debounce the save to DataStore
       debouncedSave();
     },
-    [debouncedSave, editorStateRef],
+    [debouncedSave, editorStateRef, unit?.id],
   );
 
   // Consume ?focusType=&focusId= from the global search bar: open the matching
@@ -540,7 +445,7 @@ function EditorContent(): React.ReactElement {
 
   return (
     <TabProvider value={tabProviderValue}>
-      <SuggestionProvider>
+      <SuggestionProvider useAI active={openTabVerticalRight && tabValueRight === 7}>
         <DndWrapper>
           <AutocompleteProvider>
             <AudioPlayerProvider>
@@ -562,8 +467,6 @@ function EditorContent(): React.ReactElement {
 
                   .editor:focus {
                     outline: none;
-                    box-shadow: inset 0 2px 4px
-                      var(--mui-palette-action-focus, rgba(0, 0, 0, 0.1));
                   }
                 `}</style>
                 <AutoFocusPlugin />
@@ -594,6 +497,7 @@ function EditorContent(): React.ReactElement {
                 <CustomAIPlugin />
                 <ArmorEditorPlugin />
                 <BlockSuggestionPlugin useAI={true} />
+                <BlockNavigationPlugin />
                 <AIContentCompletionPlugin />
                 <LinkPlugin />
                 <AutoLinkPlugin />
@@ -622,15 +526,9 @@ function EditorContent(): React.ReactElement {
                   </>
                 )}
 
-                <Box
-                  sx={{
-                    display: "flex",
-                    overflow: "hidden",
-                    height: `calc(100vh - ${appBarHeight}px)`,
-                    minHeight: 0,
-                  }}
-                >
-                  <ToolBarPlugin
+                <EditorWorkspace
+                  appBarHeight={appBarHeight}
+                  toolbar={<ToolBarPlugin
                     ref={toolbarRef}
                     {...({
                       setOpen: setOpenTabVerticalLeft,
@@ -638,60 +536,57 @@ function EditorContent(): React.ReactElement {
                       setTabValue: setTabValueLeft,
                       isScrolled,
                     } as any)}
-                  />
-                  {/* Left Drawer */}
-                  <Drawer
-                    ref={drawerRefLeft}
-                    drawerwidth={currentDrawerWidthLeft}
-                    anchor="left"
-                    sx={{ height: "100%" }}
-                    variant="permanent"
-                    open={openTabVerticalLeft}
-                  >
-                    <TabsVerticalLeft
+                  />}
+                  left={{
+                    width: currentDrawerWidthLeft,
+                    open: openTabVerticalLeft,
+                    onClose: () => setOpenTabVerticalLeft(false),
+                    label: tAuthoring(`tabsVerticalLeft.tabs.${[
+                      "assignments", "tableOfContents", "dictionary", "questions",
+                      "files", "campaign", "configuration",
+                    ][tabValueLeft]}`),
+                    content: <TabsVerticalLeft
                       setOpen={setOpenTabVerticalLeft}
                       open={openTabVerticalLeft}
                       setDrawerWidth={setCurrentDrawerWidthLeft}
                       value={tabValueLeft}
                       setValue={setTabValueLeft}
-                    />
-                  </Drawer>
-
-                  {/* Main Content */}
-                  <Box
-                    component="main"
-                    sx={{
-                      flexGrow: 1,
-                      minWidth: 0,
-                      padding: 0,
-                      width: `calc(100% - ${openTabVerticalLeft ? actualDrawerWidthLeft : 40}px - ${
-                        openTabVerticalRight ? actualDrawerWidthRight : 40
-                      }px)`,
-                      transition: "width 0.3s ease",
-                      display: "flex",
-                      flexDirection: "column",
-                      height: "calc(100vh - var(--app-bar-height, 11rem))",
-                      boxShadow: "none",
-                    }}
-                  >
+                    />,
+                  }}
+                  right={{
+                    width: currentDrawerWidthRight,
+                    open: openTabVerticalRight,
+                    onClose: () => setOpenTabVerticalRight(false),
+                    label: tAuthoring(`tabsVerticalRight.${({
+                      5: "aiAssistantTab",
+                      7: "aiSuggestionsTab",
+                      8: "gradesTab",
+                      9: "cohortChatTab",
+                    } as Record<number, string>)[tabValueRight]}`),
+                    content: <TabsVerticalRight
+                      setOpen={setOpenTabVerticalRight}
+                      open={openTabVerticalRight}
+                      setDrawerWidth={setCurrentDrawerWidthRight}
+                      value={tabValueRight}
+                      setValue={setTabValueRight}
+                    />,
+                  }}
+                >
                     <div
                       ref={contentRef}
                       style={{
-                        flexGrow: 1,
+                        flex: "1 1 0",
+                        minHeight: 0,
                         overflow: "auto",
                         position: "relative",
                         WebkitOverflowScrolling: "touch",
-                      }}
+                        "--editor-scroll-padding": "clamp(0.5rem, 2vw, 1.5rem)",
+                        padding: "var(--editor-scroll-padding)",
+                      } as React.CSSProperties}
                     >
-                      <div
+                      <EditorCanvas
                         ref={onRef}
                         className="editor-container"
-                        style={{
-                          position: "relative",
-                          minHeight:
-                            "calc(100vh - var(--app-bar-height, 11rem))",
-                          paddingLeft: "1.5rem",
-                        }}
                       >
                         <div
                           ref={cursorsContainerRef}
@@ -700,17 +595,12 @@ function EditorContent(): React.ReactElement {
                         >
                           <RichTextPlugin
                             contentEditable={
-                              <ContentEditable
+                              <LessonContentEditable
                                 className="editor"
                                 data-tour="editor"
+                                data-lesson-content
                                 data-lexical-editor={true}
                                 aria-label={t("actions.edit")}
-                                style={{
-                                  maxWidth: "100%",
-                                  outline: "none",
-                                  minHeight: "100%",
-                                  padding: "1rem 2rem 1rem 0.5rem",
-                                }}
                               />
                             }
                             placeholder={
@@ -721,30 +611,15 @@ function EditorContent(): React.ReactElement {
                             }
                             ErrorBoundary={LexicalErrorBoundary}
                           />
-                          <MyOnChangePlugin onChange={onChange} />
+                          <OnChangePlugin
+                            onChange={onChange}
+                            ignoreSelectionChange
+                            ignoreHistoryMergeTagChange={false}
+                          />
                         </div>
-                      </div>
+                      </EditorCanvas>
                     </div>
-                  </Box>
-
-                  {/* Right Drawer */}
-                  <Drawer
-                    ref={drawerRefRight}
-                    drawerwidth={currentDrawerWidthRight}
-                    anchor="right"
-                    sx={{ height: "100%" }}
-                    variant="permanent"
-                    open={openTabVerticalRight}
-                  >
-                    <TabsVerticalRight
-                      setOpen={setOpenTabVerticalRight}
-                      open={openTabVerticalRight}
-                      setDrawerWidth={setCurrentDrawerWidthRight}
-                      value={tabValueRight}
-                      setValue={setTabValueRight}
-                    />
-                  </Drawer>
-                </Box>
+                </EditorWorkspace>
               </LexicalComposer>
             </AudioPlayerProvider>
           </AutocompleteProvider>
@@ -756,9 +631,11 @@ function EditorContent(): React.ReactElement {
 
 export default function Editor(): React.ReactElement {
   return (
-    <ComponentErrorBoundary name="Editor">
-      <EditorContent />
-    </ComponentErrorBoundary>
+    <EditorToastProvider>
+      <ComponentErrorBoundary name="Editor">
+        <EditorContent />
+      </ComponentErrorBoundary>
+    </EditorToastProvider>
   );
 }
 

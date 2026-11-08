@@ -33,9 +33,14 @@ import Typography from "@mui/material/Typography";
 import { useTranslations } from "next-intl";
 import { useRouter } from "next/navigation";
 import { Hub } from "aws-amplify/utils";
-import { signIn, signOut } from "aws-amplify/auth";
+import {
+  clearLocalAuthData,
+  signInWithAuthRecovery,
+  signOutAndClearLocalAuthData,
+} from "@/utils/authSessionRecovery";
 import AuthContext from "@/context/authContext";
 import { QUICK_LOGIN_USERS } from "@/utils/quickLoginUsers";
+import ScrollHintContainer from "@/components/ScrollHintContainer";
 
 const ROLE_LABEL_KEYS = {
   admin: "devQuickLogin.roleAdmin",
@@ -71,8 +76,11 @@ function DevQuickLogin({ users }) {
       const body = await res.json();
       if (!res.ok)
         throw new Error(body.error || t("devQuickLogin.unavailable"));
-      await signOut().catch(() => {});
-      await signIn({ username: body.username, password: body.password });
+      await signOutAndClearLocalAuthData();
+      await signInWithAuthRecovery(
+        { username: body.username, password: body.password },
+        t("authenticator.recoveryRequired"),
+      );
     } catch (err) {
       setError(err.message);
     } finally {
@@ -107,46 +115,44 @@ function DevQuickLogin({ users }) {
         sx={{ px: 4, pt: 4, pb: 2 }}
       />
       <CardContent sx={{ px: 4, pt: 0, pb: 2 }}>
-        <List
-          dense
-          disablePadding
-          aria-label={t("devQuickLogin.seededUserLabel")}
-          sx={{ maxHeight: 360, overflowY: "auto" }}
-        >
-          {Object.entries(usersByRole).map(([role, roleUsers]) => (
-            <li key={role}>
-              <ul style={{ padding: 0 }}>
-                <ListSubheader disableSticky>
-                  {ROLE_LABEL_KEYS[role] ? t(ROLE_LABEL_KEYS[role]) : role}
-                </ListSubheader>
-                {roleUsers.map((user) => (
-                  <ListItemButton
-                    key={user.username}
-                    selected={user.username === selectedUsername}
-                    onClick={() => setSelectedUsername(user.username)}
-                    aria-pressed={user.username === selectedUsername}
-                    sx={{ borderRadius: 1 }}
-                  >
-                    <ListItemText
-                      primary={user.displayName}
-                      secondary={user.description}
-                    />
-                  </ListItemButton>
-                ))}
-              </ul>
-            </li>
-          ))}
-        </List>
-        {error && (
-          <Typography
-            variant="caption"
-            color="error"
-            // eslint-disable-next-line i18next/no-literal-string -- CSS value
-            display="block"
-            mt={1}
+        <ScrollHintContainer sx={{ flex: "none", maxHeight: 360 }}>
+          <List
+            dense
+            disablePadding
+            aria-label={t("devQuickLogin.seededUserLabel")}
           >
-            {error}
-          </Typography>
+            {Object.entries(usersByRole).map(([role, roleUsers]) => (
+              <li key={role}>
+                <ul style={{ padding: 0 }}>
+                  <ListSubheader disableSticky>
+                    {ROLE_LABEL_KEYS[role] ? t(ROLE_LABEL_KEYS[role]) : role}
+                  </ListSubheader>
+                  {roleUsers.map((user) => (
+                    <ListItemButton
+                      key={user.username}
+                      selected={user.username === selectedUsername}
+                      onClick={() => setSelectedUsername(user.username)}
+                      aria-pressed={user.username === selectedUsername}
+                      sx={{ borderRadius: 1 }}
+                    >
+                      <ListItemText
+                        primary={user.displayName}
+                        secondary={user.description}
+                      />
+                    </ListItemButton>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </List>
+        </ScrollHintContainer>
+        {error && (
+          <Box sx={{ mt: 1 }}>
+            <Typography variant="caption" color="error">
+              {error}
+            </Typography>
+            {error === t("authenticator.recoveryRequired") && <AuthDataResetButton />}
+          </Box>
         )}
       </CardContent>
       <CardActions sx={{ px: 4, pt: 0, pb: 4 }}>
@@ -168,6 +174,54 @@ function DevQuickLogin({ users }) {
     </Card>
   );
 }
+
+export function AuthDataResetButton() {
+  const t = useTranslations("components");
+  const [resetting, setResetting] = React.useState(false);
+  const [error, setError] = React.useState(false);
+
+  const reset = () => {
+    setResetting(true);
+    setError(false);
+    try {
+      clearLocalAuthData();
+      window.location.reload();
+    } catch (error) {
+      console.error("[Auth] Could not clear local authentication data:", error);
+      setError(true);
+      setResetting(false);
+    }
+  };
+
+  return (
+    <Box sx={{ mt: 1 }}>
+      <Button type="button" variant="outlined" disabled={resetting} onClick={reset}>
+        {t(resetting ? "authenticator.resettingAuthData" : "authenticator.resetAuthData")}
+      </Button>
+      <Typography variant="caption" component="p" sx={{ mt: 1 }}>
+        {t("authenticator.resetAuthDataDescription")}
+      </Typography>
+      {error && (
+        <Typography role="alert" color="error" variant="body2">
+          {t("authenticator.resetAuthDataFailed")}
+        </Typography>
+      )}
+    </Box>
+  );
+}
+
+export function SignInFooter() {
+  const t = useTranslations("components");
+  const { error } = useAuthenticator((context) => [context.error]);
+  return (
+    <>
+      {error === t("authenticator.recoveryRequired") && <AuthDataResetButton />}
+      <Authenticator.SignIn.Footer />
+    </>
+  );
+}
+
+const AUTH_COMPONENTS = { SignIn: { Footer: SignInFooter } };
 
 // Amplify UI tokens resolve to the MUI CSS variables, so the widget follows the
 // active theme (cosmetic theme and light/dark scheme) without per-mode overrides.
@@ -286,15 +340,23 @@ function AuthShell({ authenticator }) {
 
   // Once authenticated, render the Authenticator on its own so the app is not
   // nested inside the sign-in layout.
-  if (!IS_QUICK_LOGIN_ENABLED || authStatus === "authenticated") {
+  if (authStatus === "authenticated") {
     return authenticator;
   }
 
+  // The sign-in form is always constrained to a card-width column; the demo
+  // quick-login card sits beside it when enabled.
   return (
     <Box
       sx={{
         display: "grid",
-        gridTemplateColumns: { xs: "1fr", md: "repeat(2, minmax(0, 1fr))" },
+        gridTemplateColumns: {
+          xs: "minmax(0, 1fr)",
+          md: IS_QUICK_LOGIN_ENABLED
+            ? "repeat(2, minmax(0, 1fr))"
+            : "minmax(0, 440px)",
+        },
+        justifyContent: "center",
         gap: 3,
         alignItems: "start",
         justifyItems: "center",
@@ -303,7 +365,7 @@ function AuthShell({ authenticator }) {
         p: { xs: 2, md: 4 },
       }}
     >
-      <DevQuickLogin users={QUICK_LOGIN_USERS} />
+      {IS_QUICK_LOGIN_ENABLED && <DevQuickLogin users={QUICK_LOGIN_USERS} />}
       <Box
         sx={{
           width: "100%",
@@ -326,6 +388,9 @@ export default function MyAuth({ children }) {
   const formFields = getFormFields(t);
   const router = useRouter();
   const { user: authUser } = React.useContext(AuthContext);
+  const services = React.useMemo(() => ({
+    handleSignIn: (input) => signInWithAuthRecovery(input, t("authenticator.recoveryRequired")),
+  }), [t]);
 
   React.useEffect(() => {
     const hubListener = Hub.listen("auth", ({ payload }) => {
@@ -362,12 +427,14 @@ export default function MyAuth({ children }) {
               variant="modal"
               formFields={formFields}
               loginMechanisms={LOGIN_MECHANISMS}
+              components={AUTH_COMPONENTS}
+              services={services}
             >
-              {({ signOut, user }) =>
+              {({ user }) =>
                 React.Children.map(children, (child) =>
                   React.isValidElement(child) &&
                   typeof child.type === "function"
-                    ? React.cloneElement(child, { signOut, user })
+                    ? React.cloneElement(child, { signOut: signOutAndClearLocalAuthData, user })
                     : child,
                 )
               }

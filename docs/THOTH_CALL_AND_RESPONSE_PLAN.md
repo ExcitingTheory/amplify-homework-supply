@@ -398,3 +398,36 @@ Remaining, blocked on OpenAI credits:
 1. Run `THOTH_ANALYSIS_TIMEOUT_MINUTES=60 npm run sandbox:seed` (live mode, with no snapshot file present) to prove the §3.3 gate.
 2. Run `render-call-response-album.mts --execute` with `THOTH_AUDIO_CONFIRM=1`, then listen through three cards.
 
+## 12. Offline mismatch diagnostics (2026-10-30)
+
+Run without network/model calls:
+
+```bash
+npx tsx scripts/thoth/diagnoseExtraction.ts test/fixtures/thoth/runs/<capture-filename>.json
+```
+
+An optional second argument writes a new full JSON diagnostic report
+(existing files are never overwritten). The capture's source SHA must match
+the benchmark. `diagnoseExtraction` preserves `scoreExtraction` and
+`passesGate` unchanged: page + card/subject + field + answer are still required.
+It ranks bounded candidate lists for missing facts and exposes subject, field,
+answer and page agreement independently; an extra-value flag identifies
+answers containing an expected value plus unaccepted extra tokens. This flag
+is diagnostic, not semantic equivalence or recall credit. No benchmark alias
+mapping was added to production or to this report.
+
+Replaying the saved 1,856-question capture still scores **53 / 1,255 required
+facts (4.2231%)** and **73.7864% vocabulary recall**; the strict gate **fails**.
+The scorer's behavior has not improved or relaxed, and this is not a new model
+extraction. Counts for the best-ranked near misses overlap; see the command's
+JSON summary for the current subject/field/answer/page/combined-value breakdown.
+For this capture the best-candidate mismatch counts are: subject **825**,
+field **1,006**, answer **217**, page **96**, combined value **406**, and no
+plausible candidate **0**. Counts overlap and candidate ranking is diagnostic,
+not an attribution of every missing fact to a single cause.
+
+The generalizable claim/evidence scorer and ordinary-textbook expectations are
+separate (`test/support/scoreClaimCoverage.ts`,
+`test/fixtures/biology/README.md`). Controlled mock repair tests verify pipeline
+wiring, not measured recall gains. A fresh paid extraction remains deferred
+pending explicit confirmation.

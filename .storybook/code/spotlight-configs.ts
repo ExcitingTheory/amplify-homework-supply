@@ -331,9 +331,9 @@ export const SPOTLIGHT_CONFIGURATIONS: SpotlightConfig[] = [
       {
         id: "select-quiz",
         title: "Select Multiple Choice Quiz",
-        description: 'Choose "Multiple Choice Quiz" from the dropdown menu.',
-        targetSelector:
-          '[aria-label*="Multiple Choice Quiz"], [title*="Multiple Choice Quiz"]',
+        description:
+          'Choose "Multiple Choice Quiz" from the add-block menu.',
+        targetSelector: 'ul[role="menu"]',
         tooltipPosition: "right",
         actions: [
           'Click "Multiple Choice Quiz" in the menu',

@@ -3,6 +3,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "../_components/adminAccess";
 import WordListClient from "./WordListClient";
 
 const WORD_SELECTION_SET = [
@@ -20,7 +21,7 @@ const WORD_SELECTION_SET = [
 ] as const;
 
 /**
- * Admin word-list maintenance. Authenticates server-side (Admins/Instructors
+ * Admin word-list maintenance. Authenticates server-side (Admins
  * only) and pre-fetches the full vocabulary list, delegating all interactivity
  * (filtering, search, bulk delete, refresh) to the client component.
  */
@@ -38,7 +39,7 @@ export default async function WordListMaintenancePage() {
     // Fall through — treated as no access below
   }
 
-  if (!groups.includes("Admins") && !groups.includes("Instructors")) {
+  if (!canAccessAdminArea(groups)) {
     redirect("/?returnUrl=" + encodeURIComponent("/admin/words"));
   }
 

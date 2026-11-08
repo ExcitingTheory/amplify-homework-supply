@@ -18,7 +18,9 @@ import { trackWorkbookStarted, trackGradeSubmitted } from "../utils/analytics";
 import {
   getAssignmentWindowState,
   resolveLatePolicy,
+  shouldFlagOutsideSectionDateSubmission,
 } from "../utils/assignmentTiming";
+import { resolveRetryEnabled } from "../utils/retrySettings";
 import { getXPForAction } from "../utils/xpCalculation";
 import {
   unitReducer,
@@ -37,6 +39,30 @@ export const gradedBlockTypes = [
   "custom-ai",
   "call-response",
 ];
+
+/**
+ * A graded block's accuracy as a 0..1 fraction.
+ *
+ * Blocks record a fraction (`correct / attempted`), while older grades hold a
+ * 0..100 percentage, so both are accepted. `parseInt` must not be used here:
+ * it reads 0.85 as 0, which silently turns most scores into zero.
+ */
+export function blockAccuracyFraction(value) {
+  const accuracy = Number(value);
+  if (!Number.isFinite(accuracy) || accuracy <= 0) return 0;
+  return accuracy > 1 ? accuracy / 100 : accuracy;
+}
+
+function gradedBlockKeys(nodes = [], parentPath = "root") {
+  return nodes.flatMap((node, index) => {
+    const path = `${parentPath}.${index}`;
+    return [
+      ...(gradedBlockTypes.includes(node.type) ? [node.key ?? path] : []),
+      ...gradedBlockKeys(node.children, path),
+    ];
+  });
+}
+
 const UnitProvider = ({ children, id }) => {
   // Get auth state from centralized context
   const {
@@ -49,6 +75,8 @@ const UnitProvider = ({ children, id }) => {
   const [sectionId, setSectionId] = React.useState(undefined);
   const [assignmentRecord, setAssignmentRecord] = React.useState(undefined);
   const [sectionRecord, setSectionRecord] = React.useState(undefined);
+  const [platformSettingsRecord, setPlatformSettingsRecord] =
+    React.useState(undefined);
   const [assignmentWindowReady, setAssignmentWindowReady] =
     React.useState(false);
   const savingCountRef = useRef(0);
@@ -57,6 +85,9 @@ const UnitProvider = ({ children, id }) => {
   const practiceSessionVersionMapRef = useRef({});
   const gradeVersionMapRef = useRef({});
   const gradeStateRef = useRef(unitInitialState.grade);
+  const gradeCreationRef = useRef(null);
+  const pendingGradeIdRef = useRef(null);
+  const gradeSaveQueueRef = useRef(Promise.resolve());
   const editorStateRef = useRef();
   const editorSelectionRef = useRef();
   const editorRef = useRef(null);
@@ -263,6 +294,7 @@ const UnitProvider = ({ children, id }) => {
       return;
     }
     let cancelled = false;
+    setSectionRecord(undefined);
     const client = getAmplifyClient();
 
     async function lookupSection() {
@@ -286,82 +318,118 @@ const UnitProvider = ({ children, id }) => {
     };
   }, [sectionId]);
 
+  React.useEffect(() => {
+    const client = getAmplifyClient();
+    if (!client?.models?.PlatformSettings) return;
+    const subscription = client.models.PlatformSettings.observeQuery().subscribe({
+      next: ({ items }) => {
+        const valid = (items || []).filter((item) => item != null && item.id);
+        setPlatformSettingsRecord(valid[0] || null);
+      },
+      error: (err) => {
+        console.error(
+          "[UnitContext] PlatformSettings subscription failed:",
+          err,
+        );
+      },
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
   const verifyAccuracy = React.useCallback((data) => {
     let total = 0;
     let accuracy = 0;
     if (data) {
       Object.entries(data).forEach((g) => {
         if (g[1]?.complete === true && g[1]?.accuracy) {
-          let _accuracy = parseInt(g[1]?.accuracy);
-          if (_accuracy > 1) {
-            _accuracy = _accuracy / 100;
+          total++;
+          accuracy += blockAccuracyFraction(g[1]?.accuracy);
+        }
+        ["learn", "easy", "hard"].forEach((mode) => {
+          if (g[1]?.[mode]?.accuracy) {
+            total++;
+            accuracy += blockAccuracyFraction(g[1][mode].accuracy);
           }
-          total++;
-          accuracy += _accuracy;
-        }
-        if (g[1]?.learn?.accuracy) {
-          total++;
-          accuracy += parseInt(g[1]?.learn?.accuracy);
-        }
-        if (g[1]?.easy?.accuracy) {
-          total++;
-          accuracy += parseInt(g[1]?.easy?.accuracy);
-        }
-        if (g[1]?.hard?.accuracy) {
-          total++;
-          accuracy += parseInt(g[1]?.hard?.accuracy);
-        }
+        });
       });
     }
-    accuracy = accuracy / total;
-    return accuracy * 100;
+    if (total === 0) return 0;
+    return (accuracy / total) * 100;
   }, []);
 
   const createGrade = React.useCallback(
-    async (unitAccuracy, unitIsComplete, xpOverrideAmount) => {
-      // Ensure we have authentication before creating grade
-      // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
-      const currentUsername = usernameRef.current || user?.attributes?.sub;
-      if (!currentUsername) {
-        throw new Error("User not authenticated - cannot create grade");
+    async (
+      unitAccuracy,
+      unitIsComplete,
+      xpOverrideAmount,
+      outsideSectionDateRange,
+    ) => {
+      if (gradeCreationRef.current) return gradeCreationRef.current;
+      const create = async () => {
+        // Ensure we have authentication before creating grade
+        // Check both the ref (for production) and direct user (for tests where useEffect may not have run)
+        const currentUsername = usernameRef.current || user?.attributes?.sub;
+        if (!currentUsername) {
+          throw new Error("User not authenticated - cannot create grade");
+        }
+
+        const client = getAmplifyClient();
+        const currentUnit = unitRef.current;
+
+        const { data: _grade, errors } = await client.models.Grade.create({
+          unitID: id,
+          sectionID: sectionId || undefined,
+          // use the unit owner as the instructor
+          instructor: currentUnit?.owner || "",
+          // Owner will be auto-populated by Amplify based on auth
+          unitVersion: currentUnit?._version || 1,
+          complete: unitIsComplete,
+          accuracy: unitAccuracy,
+          timerStarted: currentUnit?.timeLimitSeconds > 0 ? true : null,
+          outsideSectionDateRange,
+        });
+
+        if (errors?.length || !_grade?.id) {
+          console.error("[createGrade] Error creating grade:", errors);
+          throw new Error("Failed to create grade");
+        }
+
+        const newGrade = {
+          ..._grade,
+          data:
+            typeof _grade.data === "string"
+              ? JSON.parse(_grade.data)
+              : _grade.data || {},
+        };
+        gradeStateRef.current = newGrade;
+        pendingGradeIdRef.current = newGrade.id;
+        dispatch({ type: actionTypes.SET_GRADE, payload: newGrade });
+
+        trackWorkbookStarted(id, sectionId || undefined);
+
+        // Award XP for submitting homework (first time only — dedup by gradeId)
+        awardXP(
+          currentUsername,
+          "HOMEWORK_SUBMITTED",
+          _grade.id,
+          sectionId || undefined,
+          id,
+          undefined,
+          xpOverrideAmount,
+        ).catch((error) =>
+          console.error("[UnitContext] Submission XP failed:", error),
+        );
+
+        return newGrade;
+      };
+      const pending = create();
+      gradeCreationRef.current = pending;
+      try {
+        return await pending;
+      } finally {
+        if (gradeCreationRef.current === pending)
+          gradeCreationRef.current = null;
       }
-
-      const client = getAmplifyClient();
-      const currentUnit = unitRef.current;
-
-      const { data: _grade, errors } = await client.models.Grade.create({
-        unitID: id,
-        sectionID: sectionId || undefined,
-        // use the unit owner as the instructor
-        instructor: currentUnit?.owner || "",
-        // Owner will be auto-populated by Amplify based on auth
-        unitVersion: currentUnit?._version || 1,
-        complete: unitIsComplete,
-        accuracy: unitAccuracy,
-        timerStarted: currentUnit?.timeLimitSeconds > 0 ? true : null,
-      });
-
-      if (errors) {
-        console.error("[createGrade] Error creating grade:", errors);
-        throw new Error("Failed to create grade");
-      }
-
-      dispatch({ type: actionTypes.SET_GRADE, payload: _grade });
-
-      trackWorkbookStarted(id, sectionId || undefined);
-
-      // Award XP for submitting homework (first time only — dedup by gradeId)
-      awardXP(
-        currentUsername,
-        "HOMEWORK_SUBMITTED",
-        _grade.id,
-        sectionId || undefined,
-        id,
-        undefined,
-        xpOverrideAmount,
-      );
-
-      return _grade;
     },
     [id, sectionId, user],
   );
@@ -434,9 +502,10 @@ const UnitProvider = ({ children, id }) => {
     [name, description, state.rubric],
   );
 
-  const saveGrade = React.useCallback(
+  const saveGradeData = React.useCallback(
     async (data) => {
       const currentGrade = gradeStateRef.current;
+      data = { ...(currentGrade?.data || {}), ...data };
       const assignment = assignmentRecord || null;
       const assignmentLateWindow = assignment?.availableUntil
         ? new Date(assignment.availableUntil)
@@ -463,7 +532,7 @@ const UnitProvider = ({ children, id }) => {
       }
       let unitIsComplete = false;
       let unitAccuracy = null;
-      if (_finishedQuestions === rubricLength) {
+      if (rubricLength > 0 && _finishedQuestions === rubricLength) {
         unitIsComplete = true;
         unitAccuracy = verifyAccuracy(data);
       }
@@ -476,6 +545,12 @@ const UnitProvider = ({ children, id }) => {
       const latePolicy = shouldRequestLateReview
         ? resolveLatePolicy(sectionRecord, id)
         : null;
+      const outsideSectionDateRange =
+        unitIsComplete &&
+        shouldFlagOutsideSectionDateSubmission(
+          sectionRecord || {},
+          platformSettingsRecord?.defaultAcceptWorkOutsideSectionDates ?? true,
+        );
       let resolvedLateStatus = null;
       let xpOverrideAmount;
       if (unitIsComplete && latePolicy) {
@@ -509,6 +584,7 @@ const UnitProvider = ({ children, id }) => {
           data,
           accuracy: unitAccuracy,
           complete: unitIsComplete,
+          outsideSectionDateRange,
         };
         gradeStateRef.current = optimisticGrade;
         dispatch({ type: actionTypes.SET_GRADE, payload: optimisticGrade });
@@ -539,16 +615,22 @@ const UnitProvider = ({ children, id }) => {
             data,
             accuracy: unitAccuracy,
             complete: unitIsComplete,
+            outsideSectionDateRange,
             version: gradeStateRef.current?._version,
           };
           await saveGradeOfflineAware(gradeParams, async (params) => {
             const client = getAmplifyClient();
-            await client.models.Grade.update({
+            const { errors } = await client.models.Grade.update({
               id: params.gradeId,
               data: JSON.stringify(params.data),
               accuracy: params.accuracy,
               complete: params.complete,
+              outsideSectionDateRange: params.outsideSectionDateRange,
             });
+            if (errors?.length) {
+              console.error("[UnitContext] Grade update failed:", errors);
+              throw new Error("Failed to save grade");
+            }
           });
         };
 
@@ -557,6 +639,7 @@ const UnitProvider = ({ children, id }) => {
             unitAccuracy,
             unitIsComplete,
             xpOverrideAmount,
+            outsideSectionDateRange,
           );
           if (newGrade && newGrade.id) {
             gradeId = newGrade.id;
@@ -565,6 +648,7 @@ const UnitProvider = ({ children, id }) => {
               data,
               accuracy: unitAccuracy,
               complete: unitIsComplete,
+              outsideSectionDateRange,
             };
             dispatch({
               type: actionTypes.SET_GRADE,
@@ -614,13 +698,14 @@ const UnitProvider = ({ children, id }) => {
           });
         }
 
-        if (gradeId && unitIsComplete) {
+        const newlyCompleted = unitIsComplete && !currentGrade?.complete;
+        if (gradeId && newlyCompleted) {
           trackGradeSubmitted(id, gradeId, unitAccuracy ?? 0, {
             sectionId: sectionId || undefined,
           });
         }
 
-        if (unitIsComplete && !timeLimitSeconds) {
+        if (newlyCompleted && !timeLimitSeconds) {
           dispatch({ type: actionTypes.SET_SHOW_UNIT_COMPLETE, payload: true });
           // Award XP + badges + streak + personal best via batched Server Action
           const currentUsername = usernameRef.current || user?.attributes?.sub;
@@ -662,6 +747,7 @@ const UnitProvider = ({ children, id }) => {
             );
 
             // Evaluate skills linked to this unit (fire-and-forget)
+            const client = getAmplifyClient();
             client.mutations
               .evaluateSkillsForUnit({
                 studentId: currentUsername,
@@ -678,7 +764,9 @@ const UnitProvider = ({ children, id }) => {
             if (data) {
               Object.entries(data).forEach(([blockKey, blockData]) => {
                 if (blockData?.complete && blockData?.accuracy != null) {
-                  const acc = parseInt(blockData.accuracy);
+                  // Compared as a percentage, so the fraction blocks record
+                  // has to be converted first.
+                  const acc = blockAccuracyFraction(blockData.accuracy) * 100;
                   const label = blockKey.slice(0, 60);
                   if (acc < 70) weakAreas.push(label);
                   else if (acc >= 90) strongAreas.push(label);
@@ -735,9 +823,21 @@ const UnitProvider = ({ children, id }) => {
       timeLimitSeconds,
       assignmentRecord,
       sectionRecord,
+      platformSettingsRecord,
       verifyAccuracy,
       summarizeGradeFeedback,
     ],
+  );
+
+  const saveGrade = React.useCallback(
+    (data) => {
+      // Serialize block saves so a slower write cannot overwrite newer answers.
+      const save = () => saveGradeData(data);
+      const pending = gradeSaveQueueRef.current.then(save, save);
+      gradeSaveQueueRef.current = pending;
+      return pending;
+    },
+    [saveGradeData],
   );
 
   React.useEffect(() => {
@@ -766,16 +866,37 @@ const UnitProvider = ({ children, id }) => {
 
     function processGrades(validItems) {
       // Filter client-side
-      const incompleteGrades = validItems.filter((grade) => !grade.complete);
+      const byNewest = (a, b) =>
+        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+      const incompleteGrades = validItems
+        .filter((grade) => !grade.complete)
+        .sort(byNewest);
       const completedGrades = validItems.filter((grade) => grade.complete);
 
-      // Handle current grade (most recent incomplete)
-      const currentGrade = incompleteGrades[0];
+      // Keep completed answers mounted. Clearing the grade here makes exercise
+      // effects treat the same feedback as a new submission.
+      const previousGrade = gradeStateRef.current;
+      const observedGrade = validItems.find(
+        (grade) => grade.id === previousGrade?.id,
+      );
+      if (validItems.some((grade) => grade.id === pendingGradeIdRef.current)) {
+        pendingGradeIdRef.current = null;
+      }
+      let currentGrade =
+        (pendingGradeIdRef.current === previousGrade?.id
+          ? previousGrade
+          : null) ||
+        observedGrade ||
+        incompleteGrades[0] ||
+        [...completedGrades].sort(byNewest)[0];
 
       // Parse grade.data from JSON string to object so all consumers get an object
       if (currentGrade?.data && typeof currentGrade.data === "string") {
         try {
-          currentGrade.data = JSON.parse(currentGrade.data);
+          currentGrade = {
+            ...currentGrade,
+            data: JSON.parse(currentGrade.data),
+          };
         } catch (e) {
           console.error("[UnitContext] Failed to parse grade.data:", e);
           currentGrade.data = {};
@@ -783,21 +904,27 @@ const UnitProvider = ({ children, id }) => {
       }
 
       const previousVersion =
-        gradeStateRef.current?.id === currentGrade?.id
-          ? gradeStateRef.current?._version
-          : null;
+        previousGrade?.id === currentGrade?.id ? previousGrade?._version : null;
       const incomingVersion = currentGrade?._version;
       if (
         previousVersion != null &&
         incomingVersion != null &&
         incomingVersion <= previousVersion
       ) {
-        return;
+        currentGrade = previousGrade;
       }
+      if (
+        previousGrade?.id === currentGrade?.id &&
+        previousGrade?.complete &&
+        !currentGrade?.complete
+      ) {
+        currentGrade = previousGrade;
+      }
+      gradeStateRef.current = currentGrade;
 
       // If there are completed grades but no current incomplete grade,
       // show the completion screen (persists across navigation)
-      const showComplete = !currentGrade && completedGrades.length > 0;
+      const showComplete = currentGrade?.complete === true;
 
       // Calculate finished questions from the current grade data
       let _finishedQuestions = 0;
@@ -872,7 +999,12 @@ const UnitProvider = ({ children, id }) => {
           return tracked == null || item._version > tracked;
         });
 
-        if (!hasChanges && Object.keys(gradeVersionMapRef.current).length > 0) {
+        if (
+          !hasChanges &&
+          validItems.length ===
+            Object.keys(gradeVersionMapRef.current).length &&
+          validItems.length > 0
+        ) {
           return;
         }
 
@@ -1067,9 +1199,7 @@ const UnitProvider = ({ children, id }) => {
                 ? JSON.parse(cachedUnit.data)
                 : cachedUnit.data;
             const blocks = unitData?.root?.children || [];
-            const _rubric = blocks
-              .filter((b) => gradedBlockTypes.includes(b.type))
-              .map((b) => b.key);
+            const _rubric = gradedBlockKeys(blocks);
             const cachedWords = await getCachedWordsForUnit(id);
             const cachedQuestions = await getCachedQuestionsForUnit(id);
             const cachedFiles = await getCachedFilesForUnit(id);
@@ -1123,9 +1253,12 @@ const UnitProvider = ({ children, id }) => {
     const client = getAmplifyClient();
     const subscriptions = [];
     let cancelled = false;
+    let loadSequence = 0;
+    let refreshSequence = 0;
 
     // Helper to load a unit record and all its relations
     async function loadUnit(unitRecord) {
+      const sequence = ++loadSequence;
       if (!unitRecord) {
         dispatch({ type: actionTypes.SET_UNIT, payload: {} });
         dispatch({ type: actionTypes.SET_PERMISSION_ERROR, payload: null });
@@ -1143,6 +1276,7 @@ const UnitProvider = ({ children, id }) => {
         return;
       }
 
+      let contentLoaded = unitRecord.data != null;
       // Detect contentVersion change — fetch content from S3
       const prevContentVersion = unitRef.current?.contentVersion || 0;
       if (
@@ -1157,7 +1291,11 @@ const UnitProvider = ({ children, id }) => {
         );
         if (s3Content) {
           unitRecord = { ...unitRecord, data: s3Content };
+          contentLoaded = true;
         }
+      }
+      if (!contentLoaded && unitRef.current?.id === unitRecord.id) {
+        unitRecord = { ...unitRecord, data: unitRef.current.data };
       }
 
       const _files = {};
@@ -1247,17 +1385,9 @@ const UnitProvider = ({ children, id }) => {
           : unitRecord?.data;
 
       const blocks = unitData?.root?.children || [];
-      const _rubric = [];
+      const _rubric = gradedBlockKeys(blocks);
 
-      if (blocks.length > 0) {
-        blocks.forEach((block) => {
-          if (gradedBlockTypes.includes(block["type"])) {
-            _rubric.push(block["key"]);
-          }
-        });
-      }
-
-      if (cancelled) return;
+      if (cancelled || sequence !== loadSequence) return;
 
       // Update all state - _version check ensures data has changed
       unitRef.current = unitRecord;
@@ -1273,7 +1403,7 @@ const UnitProvider = ({ children, id }) => {
         },
       });
 
-      editorStateRef.current = unitData;
+      if (contentLoaded) editorStateRef.current = unitData;
       versionRef.current = unitRecord?._version;
     }
 
@@ -1313,15 +1443,31 @@ const UnitProvider = ({ children, id }) => {
         filter: { id: { eq: id } },
       }).subscribe({
         next: async (response) => {
-          const updatedUnit = response;
-          if (!updatedUnit || !updatedUnit.id) return;
+          if (!response?.id || cancelled) return;
           // Skip if unit was soft-deleted
-          if (updatedUnit.deletedAt != null) return;
+          if (response.deletedAt != null) return;
           console.log(
             "[UnitContext] Unit updated via subscription, _version:",
-            updatedUnit._version,
+            response._version,
           );
-          await loadUnit(updatedUnit);
+          // Backend mutations may select only their changed fields.
+          const refresh = ++refreshSequence;
+          try {
+            const { data: updatedUnit, errors } = await client.models.Unit.get({ id });
+            if (errors?.length) {
+              handleSubscriptionError("Unit refresh", { errors });
+              return;
+            }
+            if (!updatedUnit) {
+              handleSubscriptionError("Unit refresh", new Error(`Unit ${id} was not found during refresh`));
+              return;
+            }
+            if (!cancelled && refresh === refreshSequence && updatedUnit.deletedAt == null) {
+              await loadUnit(updatedUnit);
+            }
+          } catch (error) {
+            handleSubscriptionError("Unit refresh", error);
+          }
         },
         error: (error) => handleSubscriptionError("Unit onUpdate", error),
       });
@@ -1359,7 +1505,7 @@ const UnitProvider = ({ children, id }) => {
 
       let _editorContent = editorContent
         ? editorContent
-        : editorStateRef.current;
+        : editorRef.current?.getEditorState().toJSON() ?? editorStateRef.current;
 
       // Guard: Don't save null/undefined content — prevents storing "null" string in DB
       if (_editorContent == null) {
@@ -1403,9 +1549,12 @@ const UnitProvider = ({ children, id }) => {
           // Confirm with actual version from server
           unitRef.current = {
             ...unitRef.current,
+            data: _editorContent,
             _version: savedUnit._version,
             contentVersion: nextContentVersion,
           };
+          editorStateRef.current = typeof _editorContent === "string"
+            ? JSON.parse(_editorContent) : _editorContent;
           versionRef.current = savedUnit._version;
         }
 
@@ -1473,9 +1622,11 @@ const UnitProvider = ({ children, id }) => {
         } else if (savedUnit) {
           unitRef.current = {
             ...unitRef.current,
+            description,
             _version: savedUnit._version,
           };
           versionRef.current = savedUnit._version;
+          dispatch({ type: actionTypes.SET_UNIT, payload: unitRef.current });
         }
       } catch (errors) {
         console.error(errors);
@@ -1508,9 +1659,11 @@ const UnitProvider = ({ children, id }) => {
         } else if (savedUnit) {
           unitRef.current = {
             ...unitRef.current,
+            name,
             _version: savedUnit._version,
           };
           versionRef.current = savedUnit._version;
+          dispatch({ type: actionTypes.SET_UNIT, payload: unitRef.current });
         }
       } catch (errors) {
         console.error(errors);
@@ -1678,76 +1831,14 @@ const UnitProvider = ({ children, id }) => {
       },
       initialData: state.grade.data,
       wsUrl: process.env.NEXT_PUBLIC_YJS_WS_URL || "ws://localhost:3001",
+      autoSyncToGrade: false,
       onTutorJoin: (tutor) => {
         console.log(`[UnitContext] Tutor ${tutor.displayName} joined to help!`);
-      },
-      onSyncToGrade: async (data, feedback) => {
-        if (!state.grade) return;
-
-        try {
-          const parsed = typeof data === "string" ? JSON.parse(data) : data;
-          const blocks = Object.values(parsed);
-
-          // Calculate metrics from workbook data
-          const completeBlocks = blocks.filter((b) => b.complete);
-          const complete = blocks.length > 0 && blocks.every((b) => b.complete);
-          const percentComplete =
-            blocks.length > 0
-              ? Math.round((completeBlocks.length / blocks.length) * 100)
-              : 0;
-          const accuracy =
-            blocks.length > 0
-              ? Math.round(
-                  blocks.reduce((sum, b) => sum + (b.accuracy || 0), 0) /
-                    blocks.length,
-                )
-              : 0;
-
-          // Save to DataStore
-          const client = getAmplifyClient();
-          await client.models.Grade.update({
-            id: state.grade.id,
-            data: typeof data === "string" ? data : JSON.stringify(data),
-            feedback: feedback
-              ? JSON.stringify(feedback)
-              : state.grade.feedback,
-            complete,
-            percentComplete,
-            accuracy,
-          });
-
-          // Moderate async — backend persists to Grade.moderation
-          moderateContent(data, {
-            modelName: "Grade",
-            recordId: state.grade.id,
-            sectionId,
-            ownerId: user?.attributes?.sub,
-          }).then((result) => {
-            if (result.flagged) {
-              console.warn(
-                "[UnitContext] Workbook data flagged by moderation, saving for instructor review",
-                {
-                  categories: result.categories,
-                  username: user?.attributes?.sub,
-                },
-              );
-            }
-          });
-
-          console.log("[UnitContext] Synced workbook to Grade.data", {
-            complete,
-            percentComplete,
-            accuracy,
-          });
-        } catch (error) {
-          console.error("[UnitContext] Error syncing workbook:", error);
-        }
       },
     };
   }, [
     workbookEnabled,
     state.grade,
-    sectionId,
     user?.attributes,
     authSession?.groups,
   ]);
@@ -1802,9 +1893,18 @@ const UnitProvider = ({ children, id }) => {
     [assignmentRecord],
   );
 
+  const retryEnabled =
+    assignmentWindowReady && (!sectionId || sectionRecord !== undefined)
+      ? resolveRetryEnabled(
+          state.unit?.retryEnabled,
+          sectionRecord?.retryEnabled,
+        )
+      : false;
+
   const contextValue = React.useMemo(
     () => ({
       unit: state.unit,
+      retryEnabled,
       name,
       rubric: state.rubric,
       grade: state.grade,
@@ -1868,6 +1968,7 @@ const UnitProvider = ({ children, id }) => {
       assignmentWindowState,
       assignmentWindowReady,
       assignmentRecord,
+      retryEnabled,
       state.playlistUrls,
       description,
       unitVersion,

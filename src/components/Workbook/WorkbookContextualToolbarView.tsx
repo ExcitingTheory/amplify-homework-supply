@@ -17,7 +17,6 @@ import Chip from "@mui/material/Chip";
 import Stack from "@mui/material/Stack";
 import Typography from "@mui/material/Typography";
 import Tooltip from "@mui/material/Tooltip";
-import IconButton from "@mui/material/IconButton";
 import TimerIcon from "@mui/icons-material/Timer";
 import WifiIcon from "@mui/icons-material/Wifi";
 import SyncIcon from "@mui/icons-material/Sync";
@@ -76,8 +75,6 @@ export interface WorkbookContextualToolbarViewProps {
   timeString?: string;
   /** Realtime collaboration connection state. Omit to hide the chip. */
   connection?: WorkbookConnectionState;
-  /** Join code copied on click in the real ConnectionStatus. */
-  joinCode?: string;
   /** Completed graded blocks. */
   finishedQuestions?: number;
   /** Total graded blocks. */
@@ -105,7 +102,6 @@ export function WorkbookContextualToolbarView({
   search,
   timeString,
   connection,
-  joinCode,
   finishedQuestions = 0,
   totalQuestions = 0,
   compact = false,
@@ -173,19 +169,15 @@ export function WorkbookContextualToolbarView({
         />
 
         {conn && (
-          <Tooltip
-            arrow
-            title={
-              joinCode ? `${conn.label} · Join code ${joinCode}` : conn.label
-            }
-          >
-            <IconButton
-              size="small"
+          <Tooltip arrow title={conn.label}>
+            <Box
+              component="span"
+              role="img"
               aria-label={conn.label}
-              sx={{ color: "text.secondary" }}
+              sx={{ display: "inline-flex", color: "text.secondary" }}
             >
               {conn.icon}
-            </IconButton>
+            </Box>
           </Tooltip>
         )}
       </Stack>

@@ -22,7 +22,7 @@ import IconButton from "@mui/material/IconButton";
 import Popover from "@mui/material/Popover";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
-import { Workbook } from "@/components/Editor3";
+import { Workbook } from "@/components/Editor3/Workbook";
 import { WorkbookSSRSkeleton } from "@/components/Editor3/WorkbookSSRSkeleton";
 import { SecretLinkIcon } from "@/components/Gamification/SecretLinkIcon";
 import { NarrativeContextBanner } from "@/components/Workbook/NarrativeContextBanner";
@@ -160,6 +160,7 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
     assignment,
     assignmentWindowState,
     assignmentWindowReady,
+    retryEnabled: retrySetting,
   } = useContext(UnitContext);
 
   const filesArray = useMemo(() => Object.values(files || {}), [files]);
@@ -179,7 +180,7 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
   const needsTimer = unitTimeLimitSeconds > 0;
   const configuredTime = formatTimerDuration(unitTimeLimitSeconds * 1000);
   const timerStarted = grade?.timerStarted;
-  const retryEnabled = unit?.retryEnabled !== false;
+  const retryEnabled = retrySetting ?? (unit?.retryEnabled !== false);
   const [isStartingGrade, setIsStartingGrade] = useState(false);
   const [isOffline, setIsOffline] = useState(false);
   const localStartPendingRef = useRef(false);

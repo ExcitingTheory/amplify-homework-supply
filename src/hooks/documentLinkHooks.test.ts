@@ -19,8 +19,8 @@ describe("useDocumentLinks", () => {
         Document: {
           get: vi.fn(async () => ({
             data: documentWithLinks([
-              { id: "l1", documentID: "doc-1", questionID: "q1", entryKey: "a?" },
-              { id: "l2", documentID: "doc-1", questionID: "q2", entryKey: "b?" },
+              { id: "l1", documentID: "doc-1", questionID: "q1" },
+              { id: "l2", documentID: "doc-1", questionID: "q2" },
             ]),
           })),
         },
@@ -31,22 +31,22 @@ describe("useDocumentLinks", () => {
   it("is not loaded until the links arrive, then reports the imported keys", async () => {
     const { result } = renderHook(() => useDocumentLinks("doc-1", "question"));
     expect(result.current.loaded).toBe(false);
-    expect(result.current.importedKeys.size).toBe(0);
+    expect(result.current.importedIds.size).toBe(0);
 
     await waitFor(() => expect(result.current.loaded).toBe(true));
-    expect([...result.current.importedKeys].sort()).toEqual(["a?", "b?"]);
+    expect([...result.current.importedIds].sort()).toEqual(["q1", "q2"]);
   });
 
   it("keeps the same set when a refresh finds nothing new", async () => {
     const { result } = renderHook(() => useDocumentLinks("doc-1", "question"));
     await waitFor(() => expect(result.current.loaded).toBe(true));
-    const keys = result.current.importedKeys;
+    const keys = result.current.importedIds;
 
     act(() => result.current.refresh());
     await waitFor(() => expect(mocks.client.models.Document.get).toHaveBeenCalledTimes(2));
     await act(async () => {});
 
-    expect(result.current.importedKeys).toBe(keys);
+    expect(result.current.importedIds).toBe(keys);
   });
 
   it("picks up links created since the last load after a refresh", async () => {
@@ -54,11 +54,11 @@ describe("useDocumentLinks", () => {
     await waitFor(() => expect(result.current.loaded).toBe(true));
 
     mocks.client.models.Document.get.mockResolvedValue({
-      data: documentWithLinks([{ id: "l3", documentID: "doc-1", questionID: "q3", entryKey: "c?" }]),
+      data: documentWithLinks([{ id: "l3", documentID: "doc-1", questionID: "q3" }]),
     });
     act(() => result.current.refresh());
 
-    await waitFor(() => expect([...result.current.importedKeys]).toEqual(["c?"]));
+    await waitFor(() => expect([...result.current.importedIds]).toEqual(["q3"]));
   });
 
   it("offers every entry when the links cannot be loaded", async () => {
@@ -68,7 +68,7 @@ describe("useDocumentLinks", () => {
     const { result } = renderHook(() => useDocumentLinks("doc-1", "question"));
 
     await waitFor(() => expect(result.current.loaded).toBe(true));
-    expect(result.current.importedKeys.size).toBe(0);
+    expect(result.current.importedIds.size).toBe(0);
     spy.mockRestore();
   });
 
@@ -88,13 +88,23 @@ describe("useItemSources", () => {
           get: vi.fn(async () => ({
             data: {
               documentQuestions: vi.fn(async () => ({
-                data: [{ id: "l1", documentID: "doc-1", questionID: "q1", page: 3 }],
+                data: [{ id: "l1", documentID: "doc-1", questionID: "q1" }],
                 nextToken: null,
               })),
             },
           })),
         },
-        Document: { get: vi.fn(async () => ({ data: { filename: "notes.pdf" } })) },
+        Document: {
+          get: vi.fn(async () => ({
+            data: {
+              filename: "notes.pdf",
+              parsedContent: vi.fn(async () => ({
+                data: [{ id: "c", chunkIndex: 0, questionsJSON: [{ prompt: "edited since import?", questionID: "q1", pages: [3] }] }],
+                nextToken: null,
+              })),
+            },
+          })),
+        },
       },
     };
   });

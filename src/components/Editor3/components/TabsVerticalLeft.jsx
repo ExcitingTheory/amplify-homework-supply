@@ -41,7 +41,7 @@ function TabPanel(props) {
       style={{
         width: "100%",
         minWidth: 0,
-        height: "calc(100vh - var(--app-bar-height, 11rem))",
+        height: "100%",
         overflow: overflowY === "hidden" ? "hidden" : "auto",
       }}
       {...other}
@@ -91,7 +91,7 @@ export default function TabsVerticalLeft({
     if (!open) {
       // Opening from closed state
       setOpen(true);
-      startWidthRef.current = 350; // Default width
+      startWidthRef.current = 640;
     } else {
       // Store the current width from the parent's drawer ref
       const drawerElement = e.currentTarget.closest(".MuiDrawer-root");
@@ -119,8 +119,8 @@ export default function TabsVerticalLeft({
         // Close the drawer if dragged below minimum
         setOpen(false);
         setIsResizing(false);
-      } else if (newWidth <= 800 && setDrawerWidth) {
-        setDrawerWidth(newWidth);
+      } else if (setDrawerWidth) {
+        setDrawerWidth(Math.min(newWidth, window.innerWidth - 80));
       }
     },
     [isResizing, setDrawerWidth, setOpen],
@@ -151,6 +151,7 @@ export default function TabsVerticalLeft({
       }}
     >
       <div
+        data-testid="left-sidebar-resize"
         onMouseDown={handleMouseDown}
         style={{
           position: "absolute",
@@ -274,6 +275,7 @@ export default function TabsVerticalLeft({
         <Tab label="Item Six" {...a11yProps(5)} />
         <Tab label="Item Seven" {...a11yProps(6)} /> */}
       </Tabs>
+      <Box sx={{ flex: 1, minWidth: 0, minHeight: 0, display: open ? "block" : "none" }}>
       <TabPanel value={value} index={0}>
         <AssignmentConfiguration />
       </TabPanel>
@@ -295,6 +297,7 @@ export default function TabsVerticalLeft({
       <TabPanel value={value} index={6}>
         <ConfigurationManager />
       </TabPanel>
+      </Box>
       {/*<TabPanel value={value} index={4}>
         Item Five
       </TabPanel>

@@ -50,7 +50,7 @@ const imageCache = new CacheFirst({
 });
 
 const s3MediaCache = new CacheFirst({
-  cacheName: "s3-media-v2",
+  cacheName: "s3-media-v3",
   plugins: [
     new ExpirationPlugin({ maxEntries: 300, maxAgeSeconds: 7 * 24 * 60 * 60 }),
     new CacheableResponsePlugin({ statuses: [0, 200] }),
@@ -93,10 +93,7 @@ function isS3MediaRequest(url: URL): boolean {
     (typeof process !== "undefined" && process.env?.NEXT_PUBLIC_CDN_DOMAIN) ||
     "";
   return (
-    hostname.includes(".s3.") ||
-    hostname.includes("s3.amazonaws.com") ||
-    hostname.includes(".s3-") ||
-    hostname.endsWith(".amazonaws.com") ||
+    /^(?:.+\.)?s3(?:[.-][a-z0-9-]+)*\.amazonaws\.com(?:\.cn)?$/.test(hostname) ||
     (cdnDomain !== "" && hostname === cdnDomain)
   );
 }
@@ -170,6 +167,8 @@ async function processSyncQueue(): Promise<void> {
 // ── Custom fetch handler for S3 presigned URLs ───────────────────────────────
 
 self.addEventListener("fetch", (event: FetchEvent) => {
+  if (event.request.method !== "GET") return;
+
   const url = new URL(event.request.url);
 
   // For workbook navigation requests, try network first then redirect to
@@ -255,7 +254,7 @@ self.addEventListener("fetch", (event: FetchEvent) => {
           .then((response) => {
             if (response.ok) {
               const clone = response.clone();
-              caches.open("s3-media-v2").then((cache) => {
+              caches.open("s3-media-v3").then((cache) => {
                 cache.put(cacheKey, clone);
               });
             }
@@ -271,6 +270,11 @@ self.addEventListener("fetch", (event: FetchEvent) => {
       }),
     );
   }
+});
+
+// The previous cache could contain GraphQL responses keyed without query bodies.
+self.addEventListener("activate", (event: ExtendableEvent) => {
+  event.waitUntil(caches.delete("s3-media-v2"));
 });
 
 // ── Serwist initialization ───────────────────────────────────────────────────

@@ -70,12 +70,15 @@ function emptyLists(): ParsedContentLists {
 }
 
 function pageOf(entry: unknown): number {
-  const page =
+  const pages =
     entry !== null && typeof entry === "object"
-      ? (entry as Record<string, unknown>).page
+      ? (entry as Record<string, unknown>).pages
       : undefined;
+  const integers = Array.isArray(pages)
+    ? pages.filter((page): page is number => Number.isInteger(page))
+    : [];
   // Entries without a page (direct imports) sort before every numbered page.
-  return typeof page === "number" && Number.isInteger(page) ? page : 0;
+  return integers.length > 0 ? Math.min(...integers) : 0;
 }
 
 interface PagedItem {
@@ -508,4 +511,43 @@ export async function updateMergedListEntry(
     }),
     "Could not update ParsedContent",
   );
+}
+
+/**
+ * Sets fields on several entries of a merged list at once, by merged index:
+ * groups them by chunk and writes each affected chunk once, from its latest
+ * version.
+ */
+export async function patchMergedListEntries(
+  client: DataClient,
+  merged: Pick<MergedParsedContent, "chunks">,
+  list: "vocabularyJSON" | "questionsJSON",
+  patches: ReadonlyMap<number, Record<string, unknown>>,
+  pick: (entries: unknown[]) => unknown[],
+): Promise<void> {
+  const byChunk = new Map<string, Array<{ localIndex: number; fields: Record<string, unknown> }>>();
+  for (const [index, fields] of patches) {
+    const where = locateChunkEntry(merged, list, index);
+    if (!where) throw new Error(`Invalid item index: ${index}`);
+    const group = byChunk.get(where.chunk.id) ?? [];
+    group.push({ localIndex: where.localIndex, fields });
+    byChunk.set(where.chunk.id, group);
+  }
+
+  for (const [chunkId, group] of byChunk) {
+    const { data: chunk } = await client.models.ParsedContent.get({ id: chunkId });
+    if (!chunk) throw new Error(`ParsedContent not found: ${chunkId}`);
+    const entries = toEntryList<Record<string, unknown>>(chunk[list]);
+    for (const { localIndex, fields } of group) {
+      entries[localIndex] = { ...entries[localIndex], ...fields };
+    }
+    assertNoErrors(
+      await client.models.ParsedContent.update({
+        id: chunk.id,
+        _version: chunk._version,
+        [list]: pick(entries),
+      }),
+      "Could not update ParsedContent",
+    );
+  }
 }

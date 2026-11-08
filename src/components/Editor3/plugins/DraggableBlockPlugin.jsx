@@ -10,17 +10,27 @@ import {useLexicalComposerContext} from '@lexical/react/LexicalComposerContext';
 import {eventFiles} from '@lexical/rich-text';
 import {mergeRegister} from '@lexical/utils';
 import {
+  $createNodeSelection,
   $getNearestNodeFromDOMNode,
   $getNodeByKey,
   $getRoot,
+  $getSelection,
+  $isElementNode,
+  $isRangeSelection,
+  $setSelection,
   COMMAND_PRIORITY_HIGH,
   COMMAND_PRIORITY_LOW,
   DRAGOVER_COMMAND,
   DROP_COMMAND,
 } from 'lexical';
 import * as React from 'react';
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useId, useRef, useState} from 'react';
 import {createPortal} from 'react-dom';
+import AddIcon from '@mui/icons-material/Add';
+import {useTranslations} from 'next-intl';
+import {OPEN_BLOCK_INSERT_MENU_COMMAND} from '../constants/blockInsertion';
+import {useAppShell} from '../../AppShellContext';
+import {scrollToEditorNode} from '../utils/scrollToEditorNode';
 export function isPoint(x) {
   return x instanceof Point;
 }
@@ -209,6 +219,11 @@ export class Rect {
 // import {Rect} from '../../utils/rect';
 
 const SPACE = 4;
+// Gutter order, left to right: [drag handle] [line number] [insert], equal 28px buttons, 2px gaps.
+const GUTTER_BUTTON_SIZE = 28;
+const GUTTER_HANDLE_OFFSET = 88;
+const GUTTER_NUMBER_OFFSET = 58;
+const GUTTER_INSERT_OFFSET = 28;
 const TARGET_LINE_HALF_HEIGHT = 2;
 const DRAGGABLE_BLOCK_MENU_CLASSNAME = 'draggable-block-menu';
 const DRAG_DATA_FORMAT = 'application/x-lexical-drag-block';
@@ -349,16 +364,35 @@ function getBlockElement(
   return blockElem;
 }
 
+// Selects a whole top-level block: its content for element blocks, the node itself for decorators.
+export function selectEditorBlock(editor, key) {
+  editor.update(() => {
+    const node = $getNodeByKey(key);
+    if (!node) return;
+    if ($isElementNode(node) && !node.isEmpty()) {
+      node.select(0, node.getChildrenSize());
+    } else if ($isElementNode(node)) {
+      node.selectStart();
+    } else {
+      const selection = $createNodeSelection();
+      selection.add(key);
+      $setSelection(selection);
+    }
+  });
+  editor.focus();
+}
+
 function isOnMenu(element) {
   return !!element.closest(`.${DRAGGABLE_BLOCK_MENU_CLASSNAME}`);
 }
 
-function setMenuPosition(
+export function setMenuPosition(
   targetElem,
   floatingElem,
   anchorElem,
+  rootElem,
 ) {
-  if (!targetElem) {
+  if (!targetElem || !rootElem) {
     floatingElem.style.opacity = '0';
     floatingElem.style.transform = 'translate(-10000px, -10000px)';
     return;
@@ -366,40 +400,10 @@ function setMenuPosition(
 
   const targetRect = targetElem.getBoundingClientRect();
   const anchorElementRect = anchorElem.getBoundingClientRect();
-  const floatingElemRect = floatingElem.getBoundingClientRect();
-  const scrollerElem = anchorElem.parentElement;
-
-  // Calculate base position relative to anchor
-  let top = targetRect.top - anchorElementRect.top;
-  const left = 4; // Position in the gutter area (centered in thinner gutter)
-
-  // Get the scroll container to check for toolbar offset
-  if (scrollerElem) {
-    const scrollerRect = scrollerElem.getBoundingClientRect();
-    const scrollTop = scrollerElem.scrollTop;
-    
-    // The minimum top position should account for scrolled content
-    // When content scrolls, we want the handle to stay at the scroll position, not at top: 0
-    const minTop = scrollTop;
-    
-    // If the block's top would be above the scrolled area, clamp to minimum
-    if (top < minTop) {
-      top = minTop;
-    }
-  }
-  
-  // If the block's bottom is above the visible area, hide the handle
-  if (targetRect.bottom < anchorElementRect.top) {
-    floatingElem.style.opacity = '0';
-    floatingElem.style.transform = 'translate(-10000px, -10000px)';
-    return;
-  }
-  
-  // Ensure handle doesn't go below the visible editor area
-  const maxTop = anchorElementRect.height - floatingElemRect.height;
-  if (top > maxTop) {
-    top = maxTop;
-  }
+  const lineHeight = parseFloat(window.getComputedStyle(targetElem).lineHeight) || 24;
+  const top = targetRect.top - anchorElementRect.top +
+    Math.min(targetRect.height, lineHeight) / 2 - GUTTER_BUTTON_SIZE / 2;
+  const left = rootElem.getBoundingClientRect().left - anchorElementRect.left - GUTTER_HANDLE_OFFSET;
 
   floatingElem.style.opacity = '1';
   floatingElem.style.transform = `translate(${left}px, ${top}px)`;
@@ -461,12 +465,110 @@ function useDraggableBlockMenu(
   isEditable,
 ){
   const scrollerElem = anchorElem.parentElement;
+  const t = useTranslations('editor.authoring');
+  const {appBarHeight} = useAppShell();
+  const gutterId = useId();
 
   const menuRef = useRef(null);
   const targetLineRef = useRef(null);
+  const activeKeyRef = useRef(null);
   const isDraggingBlockRef = useRef(false);
   const [draggableBlockElem, setDraggableBlockElem] =
     useState(null);
+  const [gutter, setGutter] = useState({rows: [], activeKey: null});
+  const [targetKey, setTargetKey] = useState(null);
+  const [insertMenuKey, setInsertMenuKey] = useState(null);
+  const [isDraggingBlock, setIsDraggingBlock] = useState(false);
+  const rowFragment = (key) => `${gutterId}-${key}`;
+
+  useEffect(() => {
+    const prefix = `#${gutterId}-`;
+    const syncTarget = () => {
+      const {hash} = window.location;
+      setTargetKey(hash.startsWith(prefix) ? decodeURIComponent(hash.slice(prefix.length)) : null);
+    };
+    syncTarget();
+    window.addEventListener('hashchange', syncTarget);
+    return () => window.removeEventListener('hashchange', syncTarget);
+  }, [gutterId]);
+  const activeBlockElem = gutter.rows.find((row) => row.key === gutter.activeKey)?.element;
+  const handleBlockElem = draggableBlockElem || activeBlockElem;
+  const handleRow = gutter.rows.find((row) => row.element === handleBlockElem);
+  // The insert button follows the hovered block like the handle, but stays put while its menu is open.
+  const insertKey = insertMenuKey ?? handleRow?.key;
+
+  useEffect(() => {
+    let frame = 0;
+    const observer = new ResizeObserver(() => schedule());
+    const observed = new Set();
+    function refresh() {
+      const root = editor.getRootElement();
+      if (!root) {
+        setGutter({rows: [], activeKey: null});
+        return;
+      }
+      const anchorRect = anchorElem.getBoundingClientRect();
+      const left = root.getBoundingClientRect().left - anchorRect.left;
+      editor.getEditorState().read(() => {
+        const selection = $getSelection();
+        const selectedNode = $isRangeSelection(selection)
+          ? selection.focus.getNode()
+          : selection?.getNodes()[0];
+        if (selection !== null) {
+          activeKeyRef.current = selectedNode?.getTopLevelElement()?.getKey() ?? null;
+        }
+        const activeKey = activeKeyRef.current;
+        const rows = $getRoot().getChildrenKeys().flatMap((key, index) => {
+          const element = editor.getElementByKey(key);
+          if (!element) return [];
+          const rect = element.getBoundingClientRect();
+          const lineHeight = parseFloat(window.getComputedStyle(element).lineHeight) || 24;
+          return [{
+            key, element, number: index + 1, left,
+            top: rect.top - anchorRect.top + Math.min(rect.height, lineHeight) / 2 - GUTTER_BUTTON_SIZE / 2,
+          }];
+        });
+        setGutter({rows, activeKey});
+        const elements = new Set([anchorElem, root, ...rows.map(({element}) => element)]);
+        observed.forEach((element) => {
+          if (!elements.has(element)) {
+            observer.unobserve(element);
+            observed.delete(element);
+          }
+        });
+        elements.forEach((element) => {
+          if (!observed.has(element)) {
+            observer.observe(element);
+            observed.add(element);
+          }
+        });
+        if (menuRef.current) {
+          setMenuPosition(
+            draggableBlockElem || rows.find((row) => row.key === activeKey)?.element,
+            menuRef.current, anchorElem, root,
+          );
+        }
+      });
+    }
+    function schedule() {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(refresh);
+    }
+    const unregister = mergeRegister(
+      editor.registerUpdateListener(schedule),
+      editor.registerRootListener(schedule),
+    );
+    window.addEventListener('resize', schedule);
+    scrollerElem?.addEventListener('scroll', schedule, {passive: true});
+    schedule();
+    return () => {
+      unregister();
+      observer.disconnect();
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', schedule);
+      scrollerElem?.removeEventListener('scroll', schedule);
+    };
+  }, [editor, anchorElem, scrollerElem, draggableBlockElem]);
 
   useEffect(() => {
     function onMouseMove(event) {
@@ -503,9 +605,9 @@ function useDraggableBlockMenu(
 
   useEffect(() => {
     if (menuRef.current) {
-      setMenuPosition(draggableBlockElem, menuRef.current, anchorElem);
+      setMenuPosition(handleBlockElem, menuRef.current, anchorElem, editor.getRootElement());
     }
-  }, [anchorElem, draggableBlockElem]);
+  }, [anchorElem, handleBlockElem, editor, gutter]);
 
   useEffect(() => {
     function onDragover(event) {
@@ -623,34 +725,85 @@ function useDraggableBlockMenu(
 
   function onDragStart(event) {
     const dataTransfer = event.dataTransfer;
-    if (!dataTransfer || !draggableBlockElem) {
+    if (!dataTransfer || !handleBlockElem || !isEditable) {
       return;
     }
-    setDragImage(dataTransfer, draggableBlockElem);
+    setDragImage(dataTransfer, handleBlockElem);
     let nodeKey = '';
     editor.update(() => {
-      const node = $getNearestNodeFromDOMNode(draggableBlockElem);
+      const node = $getNearestNodeFromDOMNode(handleBlockElem);
       if (node) {
         nodeKey = node.getKey();
       }
     });
     isDraggingBlockRef.current = true;
+    setIsDraggingBlock(true);
     dataTransfer.setData(DRAG_DATA_FORMAT, nodeKey);
   }
 
   function onDragEnd() {
     isDraggingBlockRef.current = false;
+    setIsDraggingBlock(false);
     hideTargetLine(targetLineRef.current);
   }
 
   return createPortal(
     <>
+      <div className="editor-block-gutter">
+        {gutter.rows.map((row) => (
+          <a
+            key={row.key}
+            id={rowFragment(row.key)}
+            href={`#${rowFragment(row.key)}`}
+            className="editor-gutter-button editor-block-number"
+            aria-current={targetKey === row.key ? 'location' : undefined}
+            style={{top: row.top, left: row.left - GUTTER_NUMBER_OFFSET}}
+            onClick={(event) => {
+              event.preventDefault();
+              // Record the fragment without the browser's default jump, which ignores the app bar.
+              window.history.replaceState(window.history.state, '', `#${rowFragment(row.key)}`);
+              setTargetKey(row.key);
+              scrollToEditorNode(editor, row.key, appBarHeight);
+              if (isEditable) selectEditorBlock(editor, row.key);
+            }}
+          >
+            {row.number}
+          </a>
+        ))}
+      </div>
+      {isEditable && gutter.rows.filter((row) => row.key === insertKey).map((row) => (
+        <button
+          key={row.key}
+          type="button"
+          className="editor-gutter-button editor-block-insert"
+          style={{top: row.top, left: row.left - GUTTER_INSERT_OFFSET}}
+          title={t('toolBarPlugin.insert')}
+          aria-label={t('toolBarPlugin.insert')}
+          aria-haspopup="menu"
+          aria-expanded={insertMenuKey === row.key}
+          onMouseDown={(event) => event.preventDefault()}
+          onClick={(event) => {
+            const opened = editor.dispatchCommand(OPEN_BLOCK_INSERT_MENU_COMMAND, {
+              anchor: event.currentTarget,
+              nodeKey: row.key,
+              onClose: () => setInsertMenuKey(null),
+            });
+            if (opened) setInsertMenuKey(row.key);
+          }}
+        >
+          <AddIcon />
+        </button>
+      ))}
       <div
-        className="icon draggable-block-menu"
+        className={`editor-gutter-button icon draggable-block-menu${isDraggingBlock ? ' is-pressed' : ''}`}
         ref={menuRef}
-        draggable={true}
+        draggable={isEditable}
+        hidden={!isEditable}
         onDragStart={onDragStart}
         onDragEnd={onDragEnd}
+        onClick={() => {
+          if (isEditable && handleRow) selectEditorBlock(editor, handleRow.key);
+        }}
       >
         <div className={isEditable ? 'icon' : ''} />
       </div>
@@ -668,5 +821,7 @@ export default function DraggableBlockPlugin({
   anchorElem = document.body,
 }) {
   const [editor] = useLexicalComposerContext();
-  return useDraggableBlockMenu(editor, anchorElem, editor._editable);
+  const [isEditable, setIsEditable] = useState(editor.isEditable());
+  useEffect(() => editor.registerEditableListener(setIsEditable), [editor]);
+  return useDraggableBlockMenu(editor, anchorElem, isEditable);
 }

@@ -14,6 +14,7 @@ import Avatar from '@mui/material/Avatar'
 import Box from '@mui/material/Box'
 import Tooltip from '@mui/material/Tooltip'
 import { sanitizeSvg } from '../../utils/sanitizeHtml'
+import { getMedallionInitials } from '../../utils/medallionInitials'
 
 export interface SquadMentionPillProps {
   squadId: string
@@ -41,14 +42,6 @@ function hashToColor(str: string): string {
   return `hsl(${hue}, 60%, 45%)`
 }
 
-function getInitials(name: string): string {
-  return name
-    .split(/\s+/)
-    .slice(0, 2)
-    .map((w) => w.charAt(0).toUpperCase())
-    .join('')
-}
-
 export function SquadMentionPill({
   squadId,
   squadName,
@@ -58,7 +51,7 @@ export function SquadMentionPill({
   onClick,
 }: SquadMentionPillProps) {
   const bgColor = useMemo(() => hashToColor(squadId), [squadId])
-  const initials = useMemo(() => getInitials(squadName), [squadName])
+  const initials = useMemo(() => getMedallionInitials(squadName), [squadName])
 
   const avatar = crestSvg ? (
     <Avatar

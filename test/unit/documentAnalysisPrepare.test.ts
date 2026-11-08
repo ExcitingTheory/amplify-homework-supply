@@ -74,6 +74,9 @@ vi.mock("aws-amplify/data", () => ({
       if (query.includes("listPlatformSettings")) {
         return { data: { listPlatformSettings: { items: [] } } };
       }
+      if (query.includes("getFile")) {
+        return { data: { getFile: { id: variables.id, settings: {} } } };
+      }
       if (query.includes("updateDocument")) {
         sim.document = {
           _version: sim.document._version + 1,

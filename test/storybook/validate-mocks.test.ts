@@ -15,16 +15,22 @@ import * as path from "path";
 import {
   chatMessagesSchema,
   chatMessageSchema,
-  lexicalEditorStateSchema,
+} from "../../.github/skills/storybook-audit/schemas/chat.schema";
+import { lexicalEditorStateSchema } from "../../.github/skills/storybook-audit/schemas/lexical.schema";
+import {
   fileSchema,
   filesSchema,
+} from "../../.github/skills/storybook-audit/schemas/file.schema";
+import {
   gradeSchema,
   gradeDataSchema,
+} from "../../.github/skills/storybook-audit/schemas/grade.schema";
+import {
   wordSchema,
   wordsSchema,
   questionSchema,
   questionsSchema,
-} from "../../.github/skills/storybook-audit/schemas";
+} from "../../.github/skills/storybook-audit/schemas/word.schema";
 
 const MOCKS_DIR = path.resolve(process.cwd(), ".storybook/__mocks__");
 const UI_DATA_DIR = path.join(MOCKS_DIR, "ui-data");

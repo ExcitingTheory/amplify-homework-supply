@@ -1,0 +1,89 @@
+{
+  "sourceSha256": "01ad5dd9ae819b9a75f83e36f6d26b4a0a2982f9d4295b7e4f4172eb708cce96",
+  "capturedAt": "2026-11-05T21:12:14.803Z",
+  "sourceFormat": "txt",
+  "pageCount": 1,
+  "vocabularyJSON": [
+    {
+      "word": "Qabalah",
+      "definition": "The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence.",
+      "context": "Qabalah — The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Sephira",
+      "definition": "One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira.",
+      "context": "Sephira — One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira.",
+      "pages": [
+        1
+      ]
+    }
+  ],
+  "summariesJSON": [],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Card?",
+      "answer": "The Fool",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Document",
+      "field": "Card",
+      "sourceText": "Card: The Fool",
+      "accept": []
+    },
+    {
+      "prompt": "What is Number?",
+      "answer": "0",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Document",
+      "field": "Number",
+      "sourceText": "Number: 0",
+      "accept": []
+    },
+    {
+      "prompt": "What is Attribution?",
+      "answer": "Air",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Document",
+      "field": "Attribution",
+      "sourceText": "Attribution: Air",
+      "accept": []
+    },
+    {
+      "prompt": "What does Qabalah mean?",
+      "answer": "The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Qabalah",
+      "field": "definition",
+      "sourceText": "Qabalah — The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence.",
+      "accept": []
+    },
+    {
+      "prompt": "What does Sephira mean?",
+      "answer": "One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Sephira",
+      "field": "definition",
+      "sourceText": "Sephira — One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira.",
+      "accept": []
+    }
+  ]
+}

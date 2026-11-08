@@ -45,14 +45,23 @@ import {
   Info as InfoIcon,
   Mic as MicIcon,
 } from "@mui/icons-material";
+import { normaliseTerm } from "../utils/termNormalisation";
 import {
   importVocabularyToUnit,
+  resolveVocabularyEntry,
   updateVocabularyItem,
 } from "../utils/vocabularyImportUtils";
 import { getParsedContentModeration } from "../utils/parsedContentModeration";
+import WarningAmberIcon from "@mui/icons-material/WarningAmber";
+import DocumentExtractionWarnings from "./DocumentExtractionWarnings";
+import {
+  flaggedFirst,
+  groupReviewWarnings,
+  readReviewWarnings,
+  warningsForWord,
+} from "../utils/reviewWarnings";
 import { useDocumentParsedContent } from "../hooks/useDocumentParsedContent";
 import { useDocumentLinks } from "../hooks/useDocumentLinks";
-import { wordEntryKey } from "../utils/documentLinks";
 import DictionaryContext from "../context/dictionaryContext";
 import AuthContext from "../context/authContext";
 
@@ -77,11 +86,32 @@ import {
 } from "./importReviewReducer";
 import type { ImportReviewAction } from "./importReviewReducer";
 
+/** Fields a reviewer can correct; their values are stored under `edited`. */
+export const EDITABLE_VOCABULARY_FIELDS = ["word", "definition", "context"];
+
+/** A reviewer's corrections, kept apart from the extracted text. */
+export interface VocabularyEdit {
+  word?: string;
+  definition?: string;
+  context?: string;
+}
+
+/** One sense of a term and the passages showing it. */
+export interface VocabularyOccurrence {
+  definition?: string;
+  contexts?: string[];
+  pages?: number[];
+}
+
 export interface VocabularyItem {
   word: string;
   definition: string;
   context?: string;
-  page?: number;
+  occurrences?: VocabularyOccurrence[];
+  edited?: VocabularyEdit;
+  pages?: number[];
+  // The Word this entry was imported as, set by the importer
+  wordID?: string;
   phonetic?: string;
   audio?: string[];
   // Source tracking
@@ -221,8 +251,9 @@ function NestedVocabField({
             fontWeight: field === "word" ? 600 : 400,
             color: value ? "text.primary" : "text.disabled",
             cursor: "text",
-            overflowWrap: "break-word",
-            wordBreak: "break-word",
+            whiteSpace: field === "word" ? "nowrap" : "normal",
+            overflowWrap: field === "word" ? "normal" : "anywhere",
+            wordBreak: "normal",
             "&:hover": {
               backgroundColor: "action.hover",
               border: "1px dashed",
@@ -250,11 +281,19 @@ function NestedVocabField({
         </Typography>
       )}
       <LexicalComposer initialConfig={initialConfig}>
-        <Box sx={{ position: "relative" }}>
+        <Box
+          sx={{
+            position: "relative",
+            "& .vocabulary-term-editor, & .vocabulary-term-editor [data-lexical-text]": {
+              whiteSpace: "nowrap !important",
+            },
+          }}
+        >
           <PlainTextPlugin
             ErrorBoundary={LexicalErrorBoundary}
             contentEditable={
               <ContentEditable
+                className={field === "word" ? "vocabulary-term-editor" : undefined}
                 contentEditable={true}
                 onBlur={handleBlur}
                 style={{
@@ -271,8 +310,9 @@ function NestedVocabField({
                   backgroundColor: "background.paper",
                   cursor: "text",
                   overflow: "hidden",
-                  overflowWrap: "break-word",
-                  wordBreak: "break-word",
+                  whiteSpace: field === "word" ? "nowrap" : "normal",
+                  overflowWrap: field === "word" ? "normal" : "anywhere",
+                  wordBreak: "normal",
                 }}
               />
             }
@@ -309,7 +349,10 @@ function NestedVocabField({
 
 export interface VocabularyCardProps {
   item: VocabularyItem;
+  /** The entry's position in the stored list, used for selection and editing. */
   index: number;
+  /** Why the analysis kept this entry for review, if it did. */
+  reviewWarnings?: string[];
   isSelected: boolean;
   isExpanded: boolean;
   existsInDictionary: boolean;
@@ -323,8 +366,9 @@ export interface VocabularyCardProps {
 }
 
 export function VocabularyCard({
-  item,
+  item: storedItem,
   index,
+  reviewWarnings = [],
   isSelected,
   isExpanded,
   existsInDictionary,
@@ -338,6 +382,8 @@ export function VocabularyCard({
 }: VocabularyCardProps) {
   const t = useTranslations("components");
   const isEvenRow = index % 2 === 0;
+  // Show the reviewer's corrections where there are any, the extracted text otherwise.
+  const item = resolveVocabularyEntry(storedItem) as VocabularyItem;
 
   return (
     <ListItem
@@ -358,6 +404,27 @@ export function VocabularyCard({
         },
       }}
     >
+      {reviewWarnings.length > 0 && (
+        <Tooltip title={reviewWarnings.join(" · ")} arrow>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.5,
+              px: 1,
+              py: 0.25,
+              color: "warning.dark",
+              backgroundColor: "warning.light",
+            }}
+          >
+            <WarningAmberIcon fontSize="inherit" />
+            <Typography variant="caption" noWrap>
+              {reviewWarnings[0]}
+            </Typography>
+          </Box>
+        </Tooltip>
+      )}
+
       {/* Header with controls */}
       <Box
         onClick={(e) => {
@@ -368,9 +435,9 @@ export function VocabularyCard({
         sx={{
           display: "flex",
           alignItems: "center",
-          gap: 1,
+          gap: 0.5,
           justifyContent: "space-between",
-          padding: 1,
+          padding: 0.5,
           borderBottom: isExpanded ? "1px solid" : "none",
           borderColor: "divider",
           cursor: isExpanded ? "default" : "pointer",
@@ -379,7 +446,7 @@ export function VocabularyCard({
         <Box
           sx={{
             display: "flex",
-            gap: 0.5,
+            gap: 0,
             alignItems: "center",
             flex: 1,
             minWidth: 0,
@@ -391,7 +458,7 @@ export function VocabularyCard({
               size="small"
               checked={isSelected}
               onChange={() => onToggleSelect(index)}
-              sx={{ p: 0.5 }}
+              sx={{ p: 0.25 }}
               className="MuiCheckbox-root"
             />
           )}
@@ -401,7 +468,7 @@ export function VocabularyCard({
               e.stopPropagation();
               onToggleExpand(index);
             }}
-            sx={{ p: 0.5 }}
+            sx={{ p: 0.25 }}
           >
             {isExpanded ? (
               <ExpandLessIcon fontSize="small" />
@@ -416,7 +483,7 @@ export function VocabularyCard({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  gap: 1.5,
+                  gap: 0.5,
                   flexWrap: "nowrap",
                   minWidth: 0,
                 }}
@@ -426,10 +493,11 @@ export function VocabularyCard({
                   sx={{
                     fontWeight: 600,
                     fontSize: "0.875rem",
-                    flex: "0 0 40%",
-                    minWidth: "72px",
-                    maxWidth: "45%",
-                    overflow: "hidden",
+                    flex: "0 0 auto",
+                    width: "max-content",
+                    minWidth: 0,
+                    maxWidth: "calc(100% - 4ch)",
+                    overflowX: "auto",
                   }}
                 >
                   <NestedVocabField
@@ -444,7 +512,7 @@ export function VocabularyCard({
                   onClick={(e) => e.stopPropagation()}
                   sx={{
                     fontSize: "0.875rem",
-                    flex: "1 1 60%",
+                    flex: "1 1 10ch",
                     minWidth: 0,
                     overflow: "hidden",
                     pr: 0.5,
@@ -511,9 +579,9 @@ export function VocabularyCard({
               sx={{ fontSize: "0.7rem", height: "20px" }}
             />
           )}
-          {item.page && (
+          {item.pages && item.pages.length > 0 && (
             <Chip
-              label={t("vocabularyReview.pageChip", { page: item.page })}
+              label={t("vocabularyReview.pageChip", { page: Math.min(...item.pages) })}
               size="small"
               variant="outlined"
               sx={{ fontSize: "0.7rem", height: "20px" }}
@@ -707,11 +775,17 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
   const parentRef = useRef<HTMLDivElement>(null);
 
   // Filter vocabulary items by search term
-  const filteredVocabulary = useMemo(() => {
-    if (!searchTerm) return vocabularyItems;
+  const searchedVocabulary = useMemo(() => {
+    // Selection and editing address an entry by its position in the stored
+    // list, so that position travels with the entry through filtering and
+    // reordering.
+    const positioned = vocabularyItems.map((item, position) => ({ item, position }));
+    if (!searchTerm) return positioned;
 
     const lowerSearch = searchTerm.toLowerCase();
-    return vocabularyItems.filter((item) => {
+    // Search what the reviewer sees, which is their correction where there is one.
+    return positioned.filter(({ item: stored }) => {
+      const item = resolveVocabularyEntry(stored) as VocabularyItem;
       return (
         item.word?.toLowerCase().includes(lowerSearch) ||
         item.definition?.toLowerCase().includes(lowerSearch) ||
@@ -720,16 +794,6 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       );
     });
   }, [vocabularyItems, searchTerm]);
-
-  // Virtual scrolling setup
-  // estimateSize returns a stable collapsed-row height;
-  // measureElement's ResizeObserver handles actual sizing on expand/collapse
-  const virtualizer = useVirtualizer({
-    count: filteredVocabulary.length,
-    getScrollElement: () => parentRef.current,
-    estimateSize: () => 60,
-    overscan: 5,
-  });
 
   // The document's chunks, loaded page by page and kept current without
   // reloading: this changes only when a chunk's _version actually changes.
@@ -744,12 +808,40 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
   });
   // Which of those words this document already imported
   const {
-    importedKeys,
+    importedIds,
     loaded: linksLoaded,
     refresh: refreshLinks,
   } = useDocumentLinks(documentId, "word", {
     enabled: !authLoading && hasUser,
   });
+  // Why the analysis kept entries for review, attached to the entries they name.
+  const reviewWarnings = useMemo(
+    () => groupReviewWarnings(readReviewWarnings(doc?.metadata)),
+    [doc?.metadata],
+  );
+
+  // Entries a warning names come first, each carrying its reasons.
+  const filteredVocabulary = useMemo(
+    () =>
+      flaggedFirst(searchedVocabulary, ({ item }) =>
+        warningsForWord(
+          reviewWarnings,
+          (resolveVocabularyEntry(item) as VocabularyItem).word,
+        ),
+      ),
+    [searchedVocabulary, reviewWarnings],
+  );
+
+  // Virtual scrolling setup
+  // estimateSize returns a stable collapsed-row height;
+  // measureElement's ResizeObserver handles actual sizing on expand/collapse
+  const virtualizer = useVirtualizer({
+    count: filteredVocabulary.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 60,
+    overscan: 5,
+  });
+
   const hasLoaded = useRef(false);
 
   useEffect(() => {
@@ -776,7 +868,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         documentID: content.documentID as string,
         fileID: (content.fileID as string | null | undefined) || undefined,
         filename: doc?.filename || undefined,
-        alreadyImported: importedKeys.has(wordEntryKey(v.word)),
+        alreadyImported: !!v.wordID && importedIds.has(v.wordID),
       }),
     );
 
@@ -790,7 +882,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       autoSelectAll: true,
     });
     hasLoaded.current = true;
-  }, [content, doc, loadState, linksLoaded, importedKeys]);
+  }, [content, doc, loadState, linksLoaded, importedIds]);
 
   const pendingCount = useMemo(
     () => vocabularyItems.filter((item) => !item.alreadyImported).length,
@@ -817,17 +909,18 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
     async (index: number, field: string, newValue: string) => {
       if (!parsedContent) return;
 
-      const updates = { [field]: newValue };
-      const success = await updateVocabularyItem(
-        parsedContent.id,
-        index,
-        updates,
-      );
+      const success = await updateVocabularyItem(parsedContent.id, index, {
+        [field]: newValue,
+      });
 
       if (success) {
+        // Corrections live under `edited`; the extracted text stays untouched.
+        const previous = vocabularyItems[index];
         const updated = {
-          ...vocabularyItems[index],
-          ...updates,
+          ...previous,
+          ...(EDITABLE_VOCABULARY_FIELDS.includes(field)
+            ? { edited: { ...(previous.edited || {}), [field]: newValue } }
+            : { [field]: newValue }),
         } as VocabularyItem;
         dispatch({ type: "UPDATE_ITEM", index, item: updated });
       }
@@ -849,7 +942,7 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
 
     dispatch({ type: "IMPORT_START" });
 
-    const selectedIndices = Array.from(selectedItems).map(String);
+    const selectedIndices = Array.from(selectedItems);
 
     const result: any = await importVocabularyToUnit(
       parsedContent.id,
@@ -939,6 +1032,11 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
           </Typography>
         )}
 
+        <DocumentExtractionWarnings
+          metadata={doc?.metadata}
+          flaggedCount={filteredVocabulary.filter(({ warnings }) => warnings.length > 0).length}
+          itemLabel={t("vocabularyReview.reviewItems")}
+        />
         {moderation.blocked && (
           <Alert severity="warning" sx={{ mt: 1 }}>
             {moderation.error
@@ -1062,14 +1160,20 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
       )}
 
       {/* Import Progress */}
-      {importing && importProgress && (
+      {importing && (
         <Box sx={{ px: 2, pb: 1, flexShrink: 0 }}>
           <LinearProgress
-            variant="determinate"
-            value={(importProgress.current / importProgress.total) * 100}
+            // The total is unknown until the document has loaded, so the bar
+            // says that work is happening rather than showing a false 0%.
+            variant={importProgress?.total ? "determinate" : "indeterminate"}
+            value={
+              importProgress?.total
+                ? (importProgress.current / importProgress.total) * 100
+                : undefined
+            }
           />
           <Typography variant="body2" sx={{ mt: 0.5, textAlign: "center" }}>
-            {importProgress.message}
+            {importProgress?.message ?? t("vocabularyReview.loading")}
           </Typography>
         </Box>
       )}
@@ -1097,6 +1201,8 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
         elevation={2}
         sx={{
           flex: 1,
+          // Warnings above can fill the panel; the virtualizer renders no rows in a zero-height scroller.
+          minHeight: 320,
           overflow: "auto",
           mx: 2,
           mb: 2,
@@ -1110,13 +1216,16 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
           }}
         >
           {virtualizer.getVirtualItems().map((virtualItem) => {
-            const item = filteredVocabulary[virtualItem.index];
+            const { entry, warnings } = filteredVocabulary[virtualItem.index];
+            const { item, position } = entry;
+            // The corrected term is what would be imported, so match on it.
+            const term = normaliseTerm(
+              (resolveVocabularyEntry(item) as VocabularyItem).word || "",
+            );
             const existsInDictionary =
               dictionary &&
               Object.values(dictionary).some(
-                (word: any) =>
-                  word.phrase?.toLowerCase().trim() ===
-                  item.word?.toLowerCase().trim(),
+                (word: any) => normaliseTerm(word.phrase || "") === term,
               );
 
             return (
@@ -1134,9 +1243,10 @@ const VocabularyReview2: React.FC<VocabularyReview2Props> = ({
               >
                 <VocabularyCard
                   item={item}
-                  index={virtualItem.index}
-                  isSelected={selectedItems.has(virtualItem.index)}
-                  isExpanded={expandedItems.has(virtualItem.index)}
+                  index={position}
+                  reviewWarnings={warnings}
+                  isSelected={selectedItems.has(position)}
+                  isExpanded={expandedItems.has(position)}
                   existsInDictionary={existsInDictionary}
                   alreadyImported={!!item.alreadyImported}
                   searchTerm={searchTerm}

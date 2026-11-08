@@ -88,6 +88,7 @@ export class YjsDocProvider {
 
       // Handle sync status
       this.wsProvider.on("sync", (isSynced: boolean) => {
+        this.emit("sync", isSynced);
         if (isSynced) {
           console.log(`[YjsProvider] ${this.docName} synced with server`);
         }
@@ -95,6 +96,7 @@ export class YjsDocProvider {
 
       // Handle connection status - only log changes to reduce noise
       this.wsProvider.on("status", ({ status }: { status: string }) => {
+        this.emit("status", status);
         if (status !== this.lastStatusLog) {
           this.lastStatusLog = status;
           console.log(
@@ -123,6 +125,8 @@ export class YjsDocProvider {
       // Limit resets to prevent infinite loops.
       this.wsProvider.on("connection-close", (event: CloseEvent | null) => {
         if (event?.code === 4000) {
+          this.emit("sync", false);
+          this.emit("status", "disconnected");
           this.resetCount++;
           if (this.resetCount > YjsDocProvider.MAX_RESETS) {
             console.warn(
@@ -224,10 +228,11 @@ export class YjsDocProvider {
    * Check if synced with server
    */
   isSynced(): boolean {
-    if (!this.wsProvider) {
-      return false;
-    }
-    return (this.wsProvider as any).synced;
+    return this.wsProvider?.synced ?? false;
+  }
+
+  isConnected(): boolean {
+    return this.wsProvider?.wsconnected ?? false;
   }
 
   /**

@@ -33,6 +33,10 @@ import {
 } from "../../../utils/audioLevelMonitor";
 import ExerciseResponsePanel from "./ExerciseResponsePanel";
 import AudioPromptPanel from "./AudioPromptPanel";
+import {
+  extensionForMimeType,
+  preferredRecordingMimeType,
+} from "../../../utils/audioRecordingFormat";
 import AudioTakePlaylist from "./AudioTakePlaylist";
 import {
   clearTemporaryAudioTakes,
@@ -376,7 +380,9 @@ export default function AudioWaveformPlayer({
             file: submissionBlob,
             gradeId,
             nodeKey,
-            fileType: "mp3",
+            // A name that disagrees with the bytes misleads every later reader;
+            // take it from the recording itself.
+            fileType: extensionForMimeType(mimeType || submissionBlob.type),
             metadata: { ...metadata },
           });
 
@@ -1102,7 +1108,11 @@ export default function AudioWaveformPlayer({
     gain.connect(destination);
     recordingGainRef.current = gain;
 
-    const recorder = new MediaRecorder(destination.stream);
+    const recordingType = preferredRecordingMimeType();
+    const recorder = new MediaRecorder(
+      destination.stream,
+      recordingType ? { mimeType: recordingType } : undefined,
+    );
     setMediaRecorder(recorder);
     recorder.start();
     const audioChunks = [];
@@ -1160,9 +1170,11 @@ export default function AudioWaveformPlayer({
               audioBuffer,
               cleanupFilters,
             );
+            // Re-encoding to WAV here is what made a 17-second answer 3 MB;
+            // keep the compressed container the browser recorded in.
             const processedBlob = await audioBufferToBlob(
               processedBuffer,
-              "audio/wav",
+              preferredRecordingMimeType() || actualMimeType,
             );
             blob = processedBlob;
             console.log("[AudioWaveformPlayer] Pre-submission cleanup applied");

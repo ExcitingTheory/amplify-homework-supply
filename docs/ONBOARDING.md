@@ -131,7 +131,71 @@ amplify pull
 npm run dev
 ```
 
-Navigate to `http://localhost:3000`
+The development server uses Next.js 15 with Turbopack and starts at
+`https://localhost:3000`. Restart the server after changing the dev scripts.
+
+#### Standalone HTTPS demos
+
+`npm run serve:https:build` builds and serves the production bundle locally
+over HTTPS. Stop this server before rebuilding `.next`, then restart it after
+source changes. Standalone tracing must retain ONNX native binaries for the
+build host's platform and architecture; otherwise server actions can fail
+before their handlers run. Linux builds still exclude the macOS and Windows
+runtime binaries.
+
+The three-role Playwright runner in [`test/e2e/demos/`](../test/e2e/demos/)
+records 1920x1080 videos under `test-results/demos/`. A failed instructor
+recording recycles only the unit created by that run; successful recordings
+retain their authored lesson. Cleanup failures are reported, not ignored.
+The browser viewport also uses 1920x1080 CSS pixels at device scale 1, so the
+recorded application fills the video instead of leaving unused borders.
+Service workers remain enabled during setup and recording. The media cache
+handles only GET requests to S3 or the configured CDN, never GraphQL or other
+AWS service endpoints. Worker activation removes the legacy `s3-media-v2`
+cache, which could contain responses cached without their request bodies.
+The instructor walkthrough waits for real AI ghost text, accepts it with Tab,
+and verifies the suggestion became editable lesson text. Content completion
+consumes the route's plain UTF-8 text stream, not the legacy AI SDK data protocol.
+It also imports the cell-biology reading from `test/mocks/biology-cell-structure.md`
+and uploads its matching `biology-cell-structure.pdf`. The PDF is attached through
+the editor's HTML clipboard import with its S3 path and identity, rather than an
+expiring signed URL. The recording waits for the PDF's first page to render.
+Extraction completion alone is not import success: the walkthrough clicks both
+import actions and requires a zero-error import summary for vocabulary and questions.
+For readability, this walkthrough uses the editor's `leftWidth` URL setting for a
+780-pixel width, verifies that width, and closes it while authoring. Application
+defaults are unchanged.
+The instructor flow also names the unit, demonstrates bold and italic text,
+populates definition and meaning-association exercises, verifies the publish
+mutation succeeds, and creates an assignment for the seeded
+`Biology 101 - Period 3` section. Assignment creation is verified against the
+backend response rather than only the success notification.
+The capture chooses an already-open assignment window and verifies that the
+assignment's availability starts before the recording time and ends afterward.
+The instructor run writes `test-results/demos/instructor-lesson.json` only after
+publishing and assigning successfully. The learner run requires that handoff and
+opens its exact unit; it does not fall back to the old seeded AI exercise or the
+`DEMO_AI_UNIT_ID` environment variable. A new instructor unit is checked for an
+empty grade list before authoring.
+Run the instructor capture first and invoke the learner capture only if it
+succeeds; an unsuccessful instructor take must not consume a previous handoff.
+The learner also records a spoken response and draws a separate response.
+For unattended capture, Chromium's microphone input uses the committed
+spoken-answer WAV at `test/mocks/biology-spoken-answer.wav`, which the seed also
+uploads so it survives a sandbox teardown. Regenerate it only when the wording
+should change, with `node scripts/demos/generate-spoken-answer.mjs --force`
+(OpenAI TTS; needs OPENAI_API_KEY). The recording is transcribed before grading,
+so it is graded on what it says. Grading responses are not mocked. Failed captures retain diagnostics and do not replace
+the last successful video.
+Backend processors can emit partial mutation selection sets. Unit updates are
+reloaded before replacing editor state, and blank file notifications are
+hydrated before updating the Files list. The PDF details panel reloads extracted
+content when document processing status changes.
+
+The workbook retains the completed grade and answers until an explicit retry.
+Concurrent block saves are serialized by `UnitProvider` and completion side
+effects run only on the incomplete-to-complete transition. Identical
+timestamps alone are not a safe basis for deleting historical attempts.
 
 ### 2. Key Development Commands
 
@@ -281,6 +345,14 @@ const url = await Storage.get("filename.jpg");
 ```
 
 ### 3. Authentication
+
+Client logout uses `signOutAndClearLocalAuthData()` from
+[`src/utils/authSessionRecovery.ts`](../src/utils/authSessionRecovery.ts).
+It also clears this Cognito client's remembered-device metadata, pending sign-in
+state, and token-cookie chunks. It does not clear application preferences,
+IndexedDB, or Cache Storage. If sign-in reports an unsupported password-verifier
+challenge, use **Clear saved sign-in data** on the sign-in form; this performs the
+same scoped cleanup and reloads the page to reset in-memory authentication state.
 
 User auth with Cognito:
 

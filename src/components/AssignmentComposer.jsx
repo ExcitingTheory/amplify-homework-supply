@@ -90,8 +90,17 @@ export function AssignmentComposer({
     setCreatingSection(true);
     try {
       const client = getAmplifyClient();
+      const { data: platformSettings, errors: settingsErrors } =
+        await client.models.PlatformSettings.list({ limit: 1 });
+      if (settingsErrors?.length)
+        throw new Error(
+          settingsErrors[0]?.message || "Failed to load section defaults",
+        );
+      const defaultLocation = platformSettings?.find((setting) => setting != null)
+        ?.defaultSectionLocation;
       const { data: newSection, errors } = await client.models.Section.create({
         name,
+        location: defaultLocation,
       });
       if (errors?.length)
         throw new Error(errors[0]?.message || "Failed to create section");

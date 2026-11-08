@@ -1,0 +1,15 @@
+**
+!amplify/
+!amplify/functions/
+!amplify/functions/documentAnalysis/
+!amplify/functions/documentAnalysis/vocabularyGlossary.ts
+!amplify/functions/nativeVocabulary/
+!amplify/functions/nativeVocabulary/handler.ts
+!amplify/functions/nativeVocabulary/pythonBridge.ts
+!amplify/functions/nativeVocabulary/protocol.ts
+!amplify/functions/nativeVocabulary/modelAssets.ts
+!amplify/functions/nativeVocabulary/modelReleases.json
+!amplify/functions/nativeVocabulary/requirements.txt
+!amplify/functions/nativeVocabulary/worker.py
+!amplify/functions/nativeVocabulary/package.json
+!amplify/functions/nativeVocabulary/package-lock.json

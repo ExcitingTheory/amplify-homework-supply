@@ -2,7 +2,7 @@
  * @fileoverview SuggestionContext - Share block suggestion state across components
  * 
  * Allows BlockSuggestionPlugin to share its suggestions with sidebar panels
- * so suggestions can be displayed in both the floating menu and the sidebar tab.
+ * so suggestions are displayed only in the open block-suggestions sidebar tab.
  */
 
 import React, { createContext, useContext, useState, useCallback, useRef } from 'react';
@@ -11,29 +11,39 @@ const SuggestionContext = createContext({
   suggestions: [],
   isLoadingAI: false,
   useAI: false,
+  active: false,
+  error: null,
+  setError: () => {},
   setSuggestions: () => {},
   setIsLoadingAI: () => {},
   insertSuggestion: () => {},
   requestMoreSuggestions: () => {},
+  rejectSuggestion: () => {},
+  registerInsertCallback: () => {},
 });
 
-export function SuggestionProvider({ children, useAI = false }) {
+export function SuggestionProvider({ children, useAI = false, active = false }) {
   const [suggestions, setSuggestions] = useState([]);
   const [isLoadingAI, setIsLoadingAI] = useState(false);
+  const [error, setError] = useState(null);
   const insertCallbackRef = useRef(null);
   const requestMoreCallbackRef = useRef(null);
 
   const insertSuggestion = useCallback((suggestion) => {
-    if (insertCallbackRef.current) {
+    if (active && insertCallbackRef.current) {
       insertCallbackRef.current(suggestion);
     }
+  }, [active]);
+
+  const rejectSuggestion = useCallback((suggestion) => {
+    setSuggestions((items) => (items || []).filter((item) => item !== suggestion));
   }, []);
 
   const requestMoreSuggestions = useCallback(() => {
-    if (requestMoreCallbackRef.current) {
+    if (active && requestMoreCallbackRef.current) {
       requestMoreCallbackRef.current();
     }
-  }, []);
+  }, [active]);
 
   const registerInsertCallback = useCallback((insertCallback, requestMoreCallback) => {
     insertCallbackRef.current = insertCallback;
@@ -46,9 +56,13 @@ export function SuggestionProvider({ children, useAI = false }) {
         suggestions,
         isLoadingAI,
         useAI,
+        active,
+        error,
+        setError,
         setSuggestions,
         setIsLoadingAI,
         insertSuggestion,
+        rejectSuggestion,
         requestMoreSuggestions,
         registerInsertCallback,
       }}

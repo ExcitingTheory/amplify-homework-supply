@@ -259,6 +259,24 @@ const CREATE_SECTION = /* GraphQL */ `
   }
 `;
 
+const GET_DEFAULT_SECTION_LOCATION = /* GraphQL */ `
+  query GetDefaultSectionLocation {
+    listPlatformSettings(limit: 1) {
+      items {
+        defaultSectionLocation {
+          school {
+            name
+            address
+          }
+          campus
+          buildingName
+          roomNumber
+        }
+      }
+    }
+  }
+`;
+
 const GET_SECTION = /* GraphQL */ `
   query GetSection($id: ID!) {
     getSection(id: $id) {
@@ -648,6 +666,19 @@ async function handleCreateSectionGroup(
     // Pre-generate section ID for group names (we'll let DynamoDB auto-generate if needed)
     // Actually, we need to use a UUID since we need to know the ID before creation for groups
     const sectionId = crypto.randomUUID();
+    let location = args.location || null;
+    if (!location) {
+      const { data: settingsData, errors: settingsErrors } =
+        await client.graphql({ query: GET_DEFAULT_SECTION_LOCATION });
+      if (settingsErrors?.length) {
+        throw new Error(
+          `Failed to load default section location: ${JSON.stringify(settingsErrors)}`,
+        );
+      }
+      location =
+        settingsData?.listPlatformSettings?.items?.[0]?.defaultSectionLocation ||
+        null;
+    }
 
     // Pre-calculate group names to include in CREATE (avoids need for UPDATE with _version)
     const readableGroups = [
@@ -668,6 +699,7 @@ async function handleCreateSectionGroup(
           code,
           instructor: userId,
           status: "PUBLISHED",
+          location,
           readableGroups,
           writableGroups,
         },

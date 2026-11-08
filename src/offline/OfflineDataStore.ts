@@ -57,6 +57,7 @@ export interface CachedGrade {
   accuracy?: number;
   percentComplete?: number;
   complete: boolean;
+  outsideSectionDateRange?: boolean;
   /** 0 = unsynced, 1 = synced. Numbers (not booleans) because IDB indexes don't support boolean keys. */
   synced: 0 | 1;
   savedAt: number;

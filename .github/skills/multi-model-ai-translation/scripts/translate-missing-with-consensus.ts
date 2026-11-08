@@ -7,7 +7,7 @@
  * - Multi-model consensus (Claude + GPT-4o + Gemini)
  * - Cryptographic proof generation
  *
- * Usage: npx tsx translate-missing-with-consensus.ts <namespace> <source> <target> [mode]
+ * Usage: npx tsx translate-missing-with-consensus.ts <namespace> <source> <target> [mode] [--keys=key1,key2]
  * Example: npx tsx translate-missing-with-consensus.ts editor.ai en ja provable
  *
  * Modes:
@@ -551,10 +551,21 @@ function setNestedValue(obj: any, path: string, value: any): void {
  */
 async function main() {
   const args = process.argv.slice(2);
+  const positionalArgs = args.filter((arg) => !arg.startsWith("--"));
+  const keyAllowListArg = args.find((arg) => arg.startsWith("--keys="));
+  const keyAllowList = keyAllowListArg
+    ? new Set(
+        keyAllowListArg
+          .slice("--keys=".length)
+          .split(",")
+          .map((key) => key.trim())
+          .filter(Boolean),
+      )
+    : null;
 
-  if (args.length < 3) {
+  if (positionalArgs.length < 3) {
     console.error(
-      "Usage: npx tsx translate-missing-with-consensus.ts <namespace> <source> <target> [mode]",
+      "Usage: npx tsx translate-missing-with-consensus.ts <namespace> <source> <target> [mode] [--keys=key1,key2]",
     );
     console.error(
       "Example: npx tsx translate-missing-with-consensus.ts editor.ai en ja provable",
@@ -570,7 +581,7 @@ async function main() {
     process.exit(1);
   }
 
-  const [namespace, sourceLang, targetLang, mode = "fake"] = args;
+  const [namespace, sourceLang, targetLang, mode = "fake"] = positionalArgs;
 
   if (mode !== "fake" && mode !== "provable") {
     console.error(`❌ Invalid mode: ${mode}. Use "fake" or "provable"`);
@@ -618,6 +629,9 @@ async function main() {
     `📚 TRANSLATING MISSING KEYS (${mode.toUpperCase()} MODE): ${namespace}`,
   );
   console.log(`   Source: ${sourceLang} → Target: ${targetLang}`);
+  if (keyAllowList) {
+    console.log(`   Scoped keys: ${[...keyAllowList].join(", ")}`);
+  }
   console.log("=".repeat(80) + "\n");
   console.log(`🔍 Analyzing translation coverage...`);
 
@@ -644,7 +658,9 @@ async function main() {
   }
 
   // Find missing keys
-  const missingKeys = sourceKeys.filter((key) => !existingKeys.includes(key));
+  const missingKeys = sourceKeys
+    .filter((key) => !existingKeys.includes(key))
+    .filter((key) => !keyAllowList || keyAllowList.has(key));
 
   if (missingKeys.length === 0) {
     console.log("\n" + "=".repeat(80));
@@ -803,8 +819,13 @@ async function main() {
       throw new Error("all providers returned empty");
     }
 
-    const targetEntry: any = { value: consensus.translation };
-    if (sourceEntry._meta) targetEntry._meta = { ...sourceEntry._meta };
+    const targetEntry: any =
+      typeof sourceEntry === "string"
+        ? consensus.translation
+        : { value: consensus.translation };
+    if (typeof sourceEntry !== "string" && sourceEntry._meta) {
+      targetEntry._meta = { ...sourceEntry._meta };
+    }
     setNestedValue(targetData, keyPath, targetEntry);
     successCount++;
 

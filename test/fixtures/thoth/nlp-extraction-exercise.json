@@ -1,0 +1,26 @@
+{
+  "filename": "Thoth-NLP-Extraction-Exercise.txt",
+  "lines": [
+    "Card: The Fool",
+    "Number: 0",
+    "Attribution: Air",
+    "",
+    "Qabalah — The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence.",
+    "Sephira — One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira."
+  ],
+  "facts": [
+    { "field": "Card", "value": "The Fool" },
+    { "field": "Number", "value": "0" },
+    { "field": "Attribution", "value": "Air" }
+  ],
+  "vocabulary": [
+    {
+      "term": "Qabalah",
+      "definition": "The Jewish mystical tradition Crowley adapts; its Tree of Life underlies every correspondence."
+    },
+    {
+      "term": "Sephira",
+      "definition": "One of the 10 emanations/stations on the Tree; the numbers 1–10 each are a Sephira."
+    }
+  ]
+}

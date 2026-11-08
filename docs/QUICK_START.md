@@ -105,6 +105,11 @@ npm run dev:collab
 ```
 
 This starts both the Yjs WebSocket server and Next.js together.
+Development uses `wss://localhost:3001` by default. Set
+`NEXT_PUBLIC_YJS_WS_URL` to explicitly use a different WebSocket endpoint.
+The local server listens on localhost and accepts browser connections from
+localhost origins. It is for local development only and does not provide
+workbook access authorization.
 
 ## 🌐 Key URLs
 

@@ -17,6 +17,8 @@ import { getAmplifyClient } from "@/utils/amplifyClient";
 import { serializeBattleStakes } from "@/utils/battleStakes";
 import { generateCampaignNarrative } from "../../../actions/gamification";
 import { useRouter, useParams, usePathname } from "next/navigation";
+import SectionLocationDefaults from "./SectionLocationDefaults";
+import SectionDatePolicyDefault from "./SectionDatePolicyDefault";
 
 // ============================================================================
 // Trigger type mapping (identity — schema now uses new enum directly)
@@ -87,6 +89,8 @@ function GamificationAdmin() {
   const [xpConfig, setXpConfig] = React.useState<any>(null);
   const [platformSettingsRecord, setPlatformSettingsRecord] =
     React.useState<any>(null);
+  const [platformSettingsLoading, setPlatformSettingsLoading] =
+    React.useState(true);
   const [platformSettingsLoadError, setPlatformSettingsLoadError] =
     React.useState<string | null>(null);
   const [linearLockEnabled, setLinearLockEnabled] = React.useState(false);
@@ -161,6 +165,7 @@ function GamificationAdmin() {
         const valid = (items || []).filter((i) => i != null && i.id != null);
         const record = valid[0] || null;
         setPlatformSettingsRecord(record);
+        setPlatformSettingsLoading(false);
         setPlatformSettingsLoadError(null);
         if (record) {
           // Reconstruct XPTunerConfig shape from the flat PlatformSettings fields
@@ -198,6 +203,7 @@ function GamificationAdmin() {
           "[GamificationAdmin] PlatformSettings subscription error:",
           err,
         );
+        setPlatformSettingsLoading(false);
         setPlatformSettingsLoadError(
           "Unable to load platform settings. Reload the page and try again.",
         );
@@ -663,6 +669,57 @@ function GamificationAdmin() {
     [client, platformSettingsRecord],
   );
 
+  const handleSaveDefaultSectionLocation = React.useCallback(
+    async (location: {
+      school?: { name: string; address: string } | null;
+      campus?: string | null;
+      buildingName?: string | null;
+      roomNumber?: string | null;
+    } | null) => {
+      const input = { defaultSectionLocation: location };
+      const result = platformSettingsRecord?.id
+        ? await client.models.PlatformSettings.update({
+            id: platformSettingsRecord.id,
+            _version: platformSettingsRecord._version,
+            ...input,
+          })
+        : await client.models.PlatformSettings.create(input);
+
+      if (result.errors?.length || !result.data) {
+        console.error(
+          "[GamificationAdmin] Failed to save default section location:",
+          result.errors,
+        );
+        throw new Error("Unable to save default section location.");
+      }
+      setPlatformSettingsRecord(result.data);
+    },
+    [client, platformSettingsRecord],
+  );
+
+  const handleSaveDefaultAcceptOutsideDates = React.useCallback(
+    async (value: boolean) => {
+      const input = { defaultAcceptWorkOutsideSectionDates: value };
+      const result = platformSettingsRecord?.id
+        ? await client.models.PlatformSettings.update({
+            id: platformSettingsRecord.id,
+            _version: platformSettingsRecord._version,
+            ...input,
+          })
+        : await client.models.PlatformSettings.create(input);
+
+      if (result.errors?.length || !result.data) {
+        console.error(
+          "[GamificationAdmin] Failed to save outside-date default:",
+          result.errors,
+        );
+        throw new Error("Unable to save the outside-date default.");
+      }
+      setPlatformSettingsRecord(result.data);
+    },
+    [client, platformSettingsRecord],
+  );
+
   const handleToggleLinearLock = React.useCallback(
     async (enabled: boolean) => {
       if (!selectedSectionId) return;
@@ -856,6 +913,36 @@ function GamificationAdmin() {
           client={client}
         />
       </Box>
+      <Box
+        sx={{
+          maxWidth: "80rem",
+          margin: "0 auto 3rem",
+          padding: "1rem",
+        }}
+      >
+        <SectionLocationDefaults
+          defaultLocation={platformSettingsRecord?.defaultSectionLocation}
+          isLoading={platformSettingsLoading}
+          loadError={platformSettingsLoadError}
+          onSave={handleSaveDefaultSectionLocation}
+        />
+      </Box>
+      <Box
+        sx={{
+          maxWidth: "80rem",
+          margin: "0 auto 3rem",
+          padding: "1rem",
+        }}
+      >
+        <SectionDatePolicyDefault
+          defaultValue={
+            platformSettingsRecord?.defaultAcceptWorkOutsideSectionDates
+          }
+          isLoading={platformSettingsLoading}
+          loadError={platformSettingsLoadError}
+          onSave={handleSaveDefaultAcceptOutsideDates}
+        />
+      </Box>
     </>
   );
 }
@@ -882,7 +969,7 @@ function AdminAIConfig({
     if (!platformSettings) return;
     const normalizeTokensPerMinute = (
       configured: number | null | undefined,
-    ) => (configured != null && configured >= 270000 ? configured : 300000);
+    ) => (configured != null && configured >= 270000 ? configured : 1000000);
     setValues({
       defaultAIModel: platformSettings.defaultAIModel || "gpt-4o",
       kaiModel: platformSettings.kaiModel || "",
@@ -932,6 +1019,8 @@ function AdminAIConfig({
       ),
       documentAnalysisAnthropicMaxConcurrentRequests:
         platformSettings.documentAnalysisAnthropicMaxConcurrentRequests ?? 1,
+      documentAnalysisLlmExtractionEnabled:
+        platformSettings.documentAnalysisLlmExtractionEnabled === true,
     });
   }, [platformSettings]);
 
@@ -1013,6 +1102,8 @@ function AdminAIConfig({
         values.documentAnalysisAnthropicTokensPerMinute;
       updatePayload.documentAnalysisAnthropicMaxConcurrentRequests =
         values.documentAnalysisAnthropicMaxConcurrentRequests;
+      updatePayload.documentAnalysisLlmExtractionEnabled =
+        values.documentAnalysisLlmExtractionEnabled === true;
 
       const result = await client.models.PlatformSettings.update(updatePayload);
       if (result.errors?.length) {
@@ -1063,7 +1154,7 @@ function AdminAIConfig({
 
 export default function WrappedPage() {
   return (
-    <AdminRouteGuard>
+    <AdminRouteGuard access="staff">
       <SectionProvider unitId={undefined as any}>
         <GamificationProviderWrapper sectionID={undefined as any}>
           <GamificationAdmin />

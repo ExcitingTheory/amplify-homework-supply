@@ -200,6 +200,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "Taux de réussite sur l'ensemble des tentatives dans les modes d'entraînement activés.",
+    "replay": "Rejouer",
+    "resetting": "Réinitialisation...",
+    "resetFailed": "Impossible de réinitialiser cet exercice. Réessayez.",
     "modes": {
       "easy": "Facile",
       "hard": "Difficile",

@@ -25,7 +25,7 @@ import {
 import CloseIcon from "@mui/icons-material/Close";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
-import { GradedWorkbookViewer } from "@/components/GradedWorkbookViewer";
+import { GradedWorkbookViewer } from "@/components/GradedWorkbookViewer/GradedWorkbookViewer";
 
 interface GradeRecord {
   id: string;
@@ -171,6 +171,7 @@ export function GradeReviewDrawer({
             accuracy: g.accuracy || 0,
             percentComplete: g.percentComplete || 0,
             complete: g.complete || false,
+            outsideSectionDateRange: g.outsideSectionDateRange === true,
             data: parseJson(g.data),
             feedback: parseJson(g.feedback),
             moderationStatus: g.moderationStatus || null,
@@ -393,6 +394,12 @@ export function GradeReviewDrawer({
 
         {/* Content */}
         <Box sx={{ flex: 1, overflow: "auto", p: 2 }}>
+          {grades.find((grade) => grade.id === gradeId)
+            ?.outsideSectionDateRange && (
+            <Alert severity="warning" sx={{ mb: 2 }}>
+              {t("gradeReviewDrawer.outsideSectionDateRangeWarning")}
+            </Alert>
+          )}
           {lateAssignment?.lateStatus === "PENDING" && (
             <Alert
               severity="warning"

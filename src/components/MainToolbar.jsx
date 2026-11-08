@@ -51,7 +51,7 @@ import ExpandMore from "@mui/icons-material/ExpandMore";
 import PublishIcon from "@mui/icons-material/Publish";
 import DraftsIcon from "@mui/icons-material/Drafts";
 import { AppShellContext } from "./AppShellContext";
-import { signOut } from "aws-amplify/auth";
+import { signOutAndClearLocalAuthData as signOut } from "../utils/authSessionRecovery";
 import { getCurrentUser, fetchAuthSession } from "aws-amplify/auth";
 import Switch from "@mui/material/Switch";
 import ToggleButton from "@mui/material/ToggleButton";
@@ -99,9 +99,11 @@ import SpellcheckIcon from "@mui/icons-material/Spellcheck";
 import InsertDriveFileIcon from "@mui/icons-material/InsertDriveFile";
 import QuizIcon from "@mui/icons-material/Quiz";
 import HistoryIcon from "@mui/icons-material/History";
+import PolicyIcon from "@mui/icons-material/Policy";
 import { Link } from "../i18n/navigation";
 import CollaborationDialog from "./CollaborationDialog";
 import NotificationBadge from "./NotificationBadge";
+import ScrollHintContainer from "./ScrollHintContainer";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import GlobalSearchBar from "./GlobalSearchBar";
 
@@ -274,6 +276,7 @@ const ROLE_PRIORITY = [
 export function UserMenu({ onJoinSection }) {
   const tCommon = useTranslations("common");
   const tAuth = useTranslations("auth");
+  const tPages = useTranslations("pages");
   const { level, totalXP } = useXP();
   const { streak } = useProgress();
   const { mySquad } = useSquad();
@@ -496,6 +499,8 @@ export function UserMenu({ onJoinSection }) {
               handleClose();
               try {
                 await signOut();
+              } catch (error) {
+                console.error("[UserMenu] Sign out failed:", error);
               } finally {
                 // The signed-out page re-stores its own path as returnUrl, which
                 // would send the next user (e.g. an instructor after an admin)
@@ -508,6 +513,16 @@ export function UserMenu({ onJoinSection }) {
           >
             <LogoutIcon />
             &nbsp;{tAuth("sign_out")}
+          </MenuItem>,
+          <Divider key="legal-divider" />,
+          <MenuItem
+            key="privacy"
+            component={Link}
+            href="/privacy"
+            onClick={handleClose}
+          >
+            <PolicyIcon />
+            &nbsp;{tPages("privacy.title")}
           </MenuItem>,
         ]}
       </Menu>
@@ -541,6 +556,11 @@ export default function MainToolbar({ children }) {
       ["Admins", "Moderators", "Instructors"].includes(g),
     );
   }, [authSession?.groups]);
+  // Admin tools (everything under /admin except analytics and settings) are Admins-only.
+  const isAdmin = React.useMemo(
+    () => (authSession?.groups || []).includes("Admins"),
+    [authSession?.groups],
+  );
 
   // AppShell integration - when inside AppShell, use its context for drawer state
   const appShell = React.useContext(AppShellContext);
@@ -1333,7 +1353,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1343,7 +1363,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/moderation">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1363,7 +1383,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/words">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1373,7 +1393,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/files">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1383,7 +1403,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/questions">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1393,7 +1413,7 @@ export default function MainToolbar({ children }) {
             </ListItemButton>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <ListItemButton component="a" href="/admin/archives">
               <ListItemIcon sx={{ color: "text.primary" }}>
@@ -1661,7 +1681,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip
               title={t("mainToolbar.nav.adminDashboard")}
@@ -1676,7 +1696,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip
               title={t("mainToolbar.nav.moderation")}
@@ -1714,7 +1734,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip title={t("mainToolbar.nav.words")} placement="right" arrow>
               <ListItemButton component="a" href="/admin/words" sx={railItemSx}>
@@ -1725,7 +1745,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip title={t("mainToolbar.nav.files")} placement="right" arrow>
               <ListItemButton component="a" href="/admin/files" sx={railItemSx}>
@@ -1736,7 +1756,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip
               title={t("mainToolbar.nav.questions")}
@@ -1755,7 +1775,7 @@ export default function MainToolbar({ children }) {
             </Tooltip>
           </ListItem>
         )}
-        {isInstructorOrAdmin && (
+        {isAdmin && (
           <ListItem disablePadding>
             <Tooltip
               title={t("mainToolbar.nav.archives")}
@@ -1840,6 +1860,7 @@ export default function MainToolbar({ children }) {
         variant="dense"
         sx={{
           minHeight: "48px",
+          gap: 1,
           width: "100%",
           maxWidth: "100%",
           overflow: "hidden",
@@ -1881,7 +1902,6 @@ export default function MainToolbar({ children }) {
         <Box
           sx={{
             display: { xs: "none", md: "contents" },
-            "& > .MuiChip-root": { mx: 0.5 },
           }}
         >
           <SyncStatusIndicator />
@@ -1906,7 +1926,10 @@ export default function MainToolbar({ children }) {
           aria-label={t("navigation.notifications")}
           data-tour="notification-bell"
           onClick={() => openPanel()}
-          sx={{ display: { xs: "none", md: "inline-flex" } }}
+          sx={{
+            display: { xs: "none", md: "inline-flex" },
+            overflow: "visible",
+          }}
         >
           <NotificationBadge sx={blackNotificationBadgeSx}>
             <NotificationsIcon />
@@ -1962,9 +1985,9 @@ export default function MainToolbar({ children }) {
                 }}
                 role="presentation"
               >
-                <Box sx={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
+                <ScrollHintContainer>
                   {appShell.collapsed ? railNavContent : drawerNavContent}
-                </Box>
+                </ScrollHintContainer>
                 {!appShell.collapsed && mobileGamificationFooter}
               </Box>,
               document.body,
@@ -2004,7 +2027,7 @@ export default function MainToolbar({ children }) {
                   // Track the *visible* nav width so toggling the drawer (e.g. the
                   // hamburger) moves the handle to the edge instead of stranding it.
                   // Offset by half the hit-area width so the grip stays centered on the edge.
-                  left: `${Math.max(0, (isDrawerOpen ? appShell.drawerWidth : 0) - 12)}px`,
+                  left: `${(isDrawerOpen ? appShell.drawerWidth : 0) - 12}px`,
                   width: 24,
                   height: `calc(100% - ${appShell.appBarHeight || 48}px)`,
                   cursor: "col-resize",
@@ -2130,9 +2153,7 @@ export default function MainToolbar({ children }) {
                     <MenuIcon />
                   </IconButton>
                 </Box>
-                <Box sx={{ flex: 1, overflowY: "auto", overflowX: "hidden" }}>
-                  {drawerNavContent}
-                </Box>
+                <ScrollHintContainer>{drawerNavContent}</ScrollHintContainer>
                 {mobileGamificationFooter}
               </Box>
             </SwipeableDrawer>

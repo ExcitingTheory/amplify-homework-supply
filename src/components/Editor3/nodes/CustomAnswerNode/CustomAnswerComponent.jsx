@@ -29,6 +29,7 @@ import UnitContext from "../../../../context/unitContext";
 import DictionaryContext from "../../../../context/dictionaryContext";
 import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhancements";
 import { useVerifyContext } from "../../../../hooks/useVerifyContext";
+import { getCustomAnswerDirectionPair } from "./direction";
 
 function LinearProgressWithLabel({ value }) {
   return (
@@ -57,6 +58,7 @@ export function CustomAnswerView({
   customPrompt,
   allowedInput = [],
   promptMethod = [],
+  direction = "question-to-answer",
   questionBank = {},
   grade,
   saveGrade,
@@ -262,8 +264,10 @@ export function CustomAnswerView({
               borderStyle = "1px solid red";
             }
 
-            const { prompt, answer, phrase, definition, pronunciation } =
-              question;
+            const isAnswerToQuestion = direction === "answer-to-question";
+            const { prompt: questionPrompt, expected: expectedAnswer } =
+              getCustomAnswerDirectionPair(question, direction);
+            const { phrase, definition, pronunciation } = question;
             console.log("CustomAnswerComponent.question", question);
             console.log("CustomAnswerComponent.prompt", prompt);
             console.log(
@@ -281,12 +285,21 @@ export function CustomAnswerView({
             );
 
             // Determine what to display as the prompt
-            let displayPrompt = prompt;
-            if (!displayPrompt && currentPromptMethod === "phrase") {
+            let displayPrompt = questionPrompt;
+            if (
+              !isAnswerToQuestion &&
+              !displayPrompt &&
+              currentPromptMethod === "phrase"
+            ) {
               displayPrompt = phrase;
-            } else if (!displayPrompt && currentPromptMethod === "definition") {
+            } else if (
+              !isAnswerToQuestion &&
+              !displayPrompt &&
+              currentPromptMethod === "definition"
+            ) {
               displayPrompt = definition;
             } else if (
+              !isAnswerToQuestion &&
               !displayPrompt &&
               currentPromptMethod === "pronunciation"
             ) {
@@ -318,8 +331,15 @@ export function CustomAnswerView({
                       }}
                       color="textPrimary"
                     >
-                      <strong>{t("customAnswerComponent.question")}</strong>
-                      &nbsp;{displayPrompt}
+                      {!isAnswerToQuestion && (
+                        <>
+                          <strong>
+                            {t("customAnswerComponent.question")}
+                          </strong>
+                          &nbsp;
+                        </>
+                      )}
+                      {displayPrompt}
                     </Typography>
                   )}
 
@@ -384,13 +404,20 @@ export function CustomAnswerView({
                   </Box>
                 )}
 
-                {currentPromptMethod === "audio" && question?.audio && (
+                {currentPromptMethod === "audio" &&
+                  (isAnswerToQuestion
+                    ? question?.answerAudio
+                    : question?.audio) && (
                   <AudioWaveformPlayer
-                    audioUrl={question.audio[0]}
+                    audioUrl={
+                      (isAnswerToQuestion
+                        ? question.answerAudio
+                        : question.audio)[0]
+                    }
                     width={400}
                     height={60}
                     title={
-                      question.prompt ||
+                      questionPrompt ||
                       t("customAnswerComponent.audioQuestion")
                     }
                   />
@@ -419,8 +446,8 @@ export function CustomAnswerView({
                           const response =
                             await client.queries.verifyShortAnswer({
                               answer: text,
-                              prompt: prompt,
-                              expected: answer,
+                              prompt: questionPrompt,
+                              expected: expectedAnswer,
                               // eslint-disable-next-line i18next/no-literal-string -- model identifier
                               model: "gpt-3.5-turbo",
                               studentMemory,
@@ -482,7 +509,7 @@ export function CustomAnswerView({
                           enableRecording={true}
                           gradeId={grade?.id}
                           nodeKey={`custom-answer-${questionID}`}
-                          title={prompt || question?.prompt}
+                          title={questionPrompt}
                           onRecordingComplete={wrapOnRecordingComplete(
                             async (audioFile, uploadResult) => {
                               const currentGradeData = grade?.data || {};
@@ -508,8 +535,8 @@ export function CustomAnswerView({
                                   const { data, errors } =
                                     await client.queries.verifyShortAnswer({
                                       answer: audioUrl,
-                                      prompt: prompt,
-                                      expected: answer,
+                                      prompt: questionPrompt,
+                                      expected: expectedAnswer,
                                       // eslint-disable-next-line i18next/no-literal-string -- model identifier
                                       model: "gpt-3.5-turbo",
                                       studentMemory,
@@ -590,6 +617,7 @@ export default function CustomAnswerComponent({
   customPrompt,
   allowedInput = [],
   promptMethod = [],
+  direction = "question-to-answer",
 }) {
   const { grade, saveGrade } = React.useContext(UnitContext);
   // Keep verify-context hook for parity (memory/personalization side effects).
@@ -606,6 +634,7 @@ export default function CustomAnswerComponent({
         customPrompt={customPrompt}
         allowedInput={allowedInput}
         promptMethod={promptMethod}
+        direction={direction}
         questionBank={questionBank}
         grade={grade}
         saveGrade={saveGrade}

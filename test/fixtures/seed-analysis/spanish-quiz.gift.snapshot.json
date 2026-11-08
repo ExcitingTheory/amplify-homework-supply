@@ -1,0 +1,790 @@
+{
+  "sourceSha256": "7699972e82cdf9c87784d450da8bdf064468c8a2ff99ce0f49e37a2b8019c368",
+  "capturedAt": "2026-10-28T12:55:27.620Z",
+  "sourceFormat": "gift",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'hablar' para 'yo'??",
+      "answer": "hablo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'yo'?",
+      "field": "A",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"yo\"?\nA: hablo\nType: multiple-choice\nOptions: hablo, hablas, habla, hablamos",
+      "accept": [
+        "hablo"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'hablar' para 'yo'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'yo'?",
+      "field": "Type",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"yo\"?\nA: hablo\nType: multiple-choice\nOptions: hablo, hablas, habla, hablamos",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'hablar' para 'yo'??",
+      "answer": "hablo, hablas, habla, hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'yo'?",
+      "field": "Options",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"yo\"?\nA: hablo\nType: multiple-choice\nOptions: hablo, hablas, habla, hablamos",
+      "accept": [
+        "hablo, hablas, habla, hablamos"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'hablar' para 'tú'??",
+      "answer": "hablas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'tú'?",
+      "field": "A",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"tú\"?\nA: hablas\nType: multiple-choice\nOptions: hablas, hablo, habla, hablan",
+      "accept": [
+        "hablas"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'hablar' para 'tú'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'tú'?",
+      "field": "Type",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"tú\"?\nA: hablas\nType: multiple-choice\nOptions: hablas, hablo, habla, hablan",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'hablar' para 'tú'??",
+      "answer": "hablas, hablo, habla, hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'tú'?",
+      "field": "Options",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"tú\"?\nA: hablas\nType: multiple-choice\nOptions: hablas, hablo, habla, hablan",
+      "accept": [
+        "hablas, hablo, habla, hablan"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'??",
+      "answer": "habla",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'?",
+      "field": "A",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"él/ella/usted\"?\nA: habla\nType: multiple-choice\nOptions: habla, hablo, hablas, hablan",
+      "accept": [
+        "habla"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'?",
+      "field": "Type",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"él/ella/usted\"?\nA: habla\nType: multiple-choice\nOptions: habla, hablo, hablas, hablan",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'??",
+      "answer": "habla, hablo, hablas, hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'él/ella/usted'?",
+      "field": "Options",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"él/ella/usted\"?\nA: habla\nType: multiple-choice\nOptions: habla, hablo, hablas, hablan",
+      "accept": [
+        "habla, hablo, hablas, hablan"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'hablar' para 'nosotros'??",
+      "answer": "hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'nosotros'?",
+      "field": "A",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"nosotros\"?\nA: hablamos\nType: multiple-choice\nOptions: hablamos, hablo, hablan, habláis",
+      "accept": [
+        "hablamos"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'hablar' para 'nosotros'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'nosotros'?",
+      "field": "Type",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"nosotros\"?\nA: hablamos\nType: multiple-choice\nOptions: hablamos, hablo, hablan, habláis",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'hablar' para 'nosotros'??",
+      "answer": "hablamos, hablo, hablan, habláis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'nosotros'?",
+      "field": "Options",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"nosotros\"?\nA: hablamos\nType: multiple-choice\nOptions: hablamos, hablo, hablan, habláis",
+      "accept": [
+        "hablamos, hablo, hablan, habláis"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'??",
+      "answer": "hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'?",
+      "field": "A",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"ellos/ellas/ustedes\"?\nA: hablan\nType: multiple-choice\nOptions: hablan, hablo, habla, hablamos",
+      "accept": [
+        "hablan"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'?",
+      "field": "Type",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"ellos/ellas/ustedes\"?\nA: hablan\nType: multiple-choice\nOptions: hablan, hablo, habla, hablamos",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'??",
+      "answer": "hablan, hablo, habla, hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'hablar' para 'ellos/ellas/ustedes'?",
+      "field": "Options",
+      "sourceText": "Q: ¿Cuál es la conjugación de \"hablar\" para \"ellos/ellas/ustedes\"?\nA: hablan\nType: multiple-choice\nOptions: hablan, hablo, habla, hablamos",
+      "accept": [
+        "hablan, hablo, habla, hablamos"
+      ]
+    },
+    {
+      "prompt": "What is A for What does \"cantar\" mean in English??",
+      "answer": "to sing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "What does \"cantar\" mean in English?",
+      "field": "A",
+      "sourceText": "What does \"cantar\" mean in English?\nA: to sing\nType: multiple-choice\nOptions: to sing, to dance, to talk, to walk",
+      "accept": [
+        "to sing"
+      ]
+    },
+    {
+      "prompt": "What is Type for What does \"cantar\" mean in English??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "What does \"cantar\" mean in English?",
+      "field": "Type",
+      "sourceText": "What does \"cantar\" mean in English?\nA: to sing\nType: multiple-choice\nOptions: to sing, to dance, to talk, to walk",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for What does \"cantar\" mean in English??",
+      "answer": "to sing, to dance, to talk, to walk",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "What does \"cantar\" mean in English?",
+      "field": "Options",
+      "sourceText": "What does \"cantar\" mean in English?\nA: to sing\nType: multiple-choice\nOptions: to sing, to dance, to talk, to walk",
+      "accept": [
+        "to sing, to dance, to talk, to walk"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'bailar' para 'yo'??",
+      "answer": "bailo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'bailar' para 'yo'?",
+      "field": "A",
+      "sourceText": "¿Cuál es la conjugación de \"bailar\" para \"yo\"?\nA: bailo\nType: multiple-choice\nOptions: bailo, bailas, baila, bailamos",
+      "accept": [
+        "bailo"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'bailar' para 'yo'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'bailar' para 'yo'?",
+      "field": "Type",
+      "sourceText": "¿Cuál es la conjugación de \"bailar\" para \"yo\"?\nA: bailo\nType: multiple-choice\nOptions: bailo, bailas, baila, bailamos",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'bailar' para 'yo'??",
+      "answer": "bailo, bailas, baila, bailamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'bailar' para 'yo'?",
+      "field": "Options",
+      "sourceText": "¿Cuál es la conjugación de \"bailar\" para \"yo\"?\nA: bailo\nType: multiple-choice\nOptions: bailo, bailas, baila, bailamos",
+      "accept": [
+        "bailo, bailas, baila, bailamos"
+      ]
+    },
+    {
+      "prompt": "What is A for ¿Cuál es la conjugación de 'caminar' para 'nosotros'??",
+      "answer": "caminamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'caminar' para 'nosotros'?",
+      "field": "A",
+      "sourceText": "¿Cuál es la conjugación de \"caminar\" para \"nosotros\"?\nA: caminamos\nType: multiple-choice\nOptions: caminamos, camino, caminan, camináis",
+      "accept": [
+        "caminamos"
+      ]
+    },
+    {
+      "prompt": "What is Type for ¿Cuál es la conjugación de 'caminar' para 'nosotros'??",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'caminar' para 'nosotros'?",
+      "field": "Type",
+      "sourceText": "¿Cuál es la conjugación de \"caminar\" para \"nosotros\"?\nA: caminamos\nType: multiple-choice\nOptions: caminamos, camino, caminan, camináis",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for ¿Cuál es la conjugación de 'caminar' para 'nosotros'??",
+      "answer": "caminamos, camino, caminan, camináis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "¿Cuál es la conjugación de 'caminar' para 'nosotros'?",
+      "field": "Options",
+      "sourceText": "¿Cuál es la conjugación de \"caminar\" para \"nosotros\"?\nA: caminamos\nType: multiple-choice\nOptions: caminamos, camino, caminan, camináis",
+      "accept": [
+        "caminamos, camino, caminan, camináis"
+      ]
+    },
+    {
+      "prompt": "What is A for What are the three types of Spanish verb infinitive endings??",
+      "answer": "ar, er, ir",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "What are the three types of Spanish verb infinitive endings?",
+      "field": "A",
+      "sourceText": "What are the three types of Spanish verb infinitive endings?\nA: ar, er, ir\nType: short-answer",
+      "accept": [
+        "ar, er, ir"
+      ]
+    },
+    {
+      "prompt": "What is Q for cantar?",
+      "answer": "What does \"cantar\" mean in English?",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Q",
+      "sourceText": "Q: What does \"cantar\" mean in English?",
+      "accept": [
+        "What does \"cantar\" mean in English?"
+      ]
+    },
+    {
+      "prompt": "What is A for hablar (1st person singular)?",
+      "answer": "hablo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person singular)",
+      "field": "A",
+      "sourceText": "A: hablo",
+      "accept": [
+        "hablo"
+      ]
+    },
+    {
+      "prompt": "What is Type for hablar (1st person singular)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person singular)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for hablar (1st person singular)?",
+      "answer": "hablo, hablas, habla, hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person singular)",
+      "field": "Options",
+      "sourceText": "Options: hablo, hablas, habla, hablamos",
+      "accept": [
+        "hablo, hablas, habla, hablamos"
+      ]
+    },
+    {
+      "prompt": "What is A for hablar (2nd person singular)?",
+      "answer": "hablas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (2nd person singular)",
+      "field": "A",
+      "sourceText": "A: hablas",
+      "accept": [
+        "hablas"
+      ]
+    },
+    {
+      "prompt": "What is Type for hablar (2nd person singular)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (2nd person singular)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for hablar (2nd person singular)?",
+      "answer": "hablas, hablo, habla, hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (2nd person singular)",
+      "field": "Options",
+      "sourceText": "Options: hablas, hablo, habla, hablan",
+      "accept": [
+        "hablas, hablo, habla, hablan"
+      ]
+    },
+    {
+      "prompt": "What is A for hablar (3rd person singular)?",
+      "answer": "habla",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person singular)",
+      "field": "A",
+      "sourceText": "A: habla",
+      "accept": [
+        "habla"
+      ]
+    },
+    {
+      "prompt": "What is Type for hablar (3rd person singular)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person singular)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for hablar (3rd person singular)?",
+      "answer": "habla, hablo, hablas, hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person singular)",
+      "field": "Options",
+      "sourceText": "Options: habla, hablo, hablas, hablan",
+      "accept": [
+        "habla, hablo, hablas, hablan"
+      ]
+    },
+    {
+      "prompt": "What is A for hablar (1st person plural)?",
+      "answer": "hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person plural)",
+      "field": "A",
+      "sourceText": "A: hablamos",
+      "accept": [
+        "hablamos"
+      ]
+    },
+    {
+      "prompt": "What is Type for hablar (1st person plural)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person plural)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for hablar (1st person plural)?",
+      "answer": "hablamos, hablo, hablan, habláis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (1st person plural)",
+      "field": "Options",
+      "sourceText": "Options: hablamos, hablo, hablan, habláis",
+      "accept": [
+        "hablamos, hablo, hablan, habláis"
+      ]
+    },
+    {
+      "prompt": "What is A for hablar (3rd person plural)?",
+      "answer": "hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person plural)",
+      "field": "A",
+      "sourceText": "A: hablan",
+      "accept": [
+        "hablan"
+      ]
+    },
+    {
+      "prompt": "What is Type for hablar (3rd person plural)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person plural)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for hablar (3rd person plural)?",
+      "answer": "hablan, hablo, habla, hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "hablar (3rd person plural)",
+      "field": "Options",
+      "sourceText": "Options: hablan, hablo, habla, hablamos",
+      "accept": [
+        "hablan, hablo, habla, hablamos"
+      ]
+    },
+    {
+      "prompt": "What is A for cantar?",
+      "answer": "to sing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "A",
+      "sourceText": "A: to sing",
+      "accept": [
+        "to sing"
+      ]
+    },
+    {
+      "prompt": "What is Type for cantar?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for cantar?",
+      "answer": "to sing, to dance, to talk, to walk",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "cantar",
+      "field": "Options",
+      "sourceText": "Options: to sing, to dance, to talk, to walk",
+      "accept": [
+        "to sing, to dance, to talk, to walk"
+      ]
+    },
+    {
+      "prompt": "What is A for bailar (1st person singular)?",
+      "answer": "bailo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar (1st person singular)",
+      "field": "A",
+      "sourceText": "A: bailo",
+      "accept": [
+        "bailo"
+      ]
+    },
+    {
+      "prompt": "What is Type for bailar (1st person singular)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar (1st person singular)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for bailar (1st person singular)?",
+      "answer": "bailo, bailas, baila, bailamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "bailar (1st person singular)",
+      "field": "Options",
+      "sourceText": "Options: bailo, bailas, baila, bailamos",
+      "accept": [
+        "bailo, bailas, baila, bailamos"
+      ]
+    },
+    {
+      "prompt": "What is A for caminar (1st person plural)?",
+      "answer": "caminamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar (1st person plural)",
+      "field": "A",
+      "sourceText": "A: caminamos",
+      "accept": [
+        "caminamos"
+      ]
+    },
+    {
+      "prompt": "What is Type for caminar (1st person plural)?",
+      "answer": "multiple-choice",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar (1st person plural)",
+      "field": "Type",
+      "sourceText": "Type: multiple-choice",
+      "accept": [
+        "multiple-choice"
+      ]
+    },
+    {
+      "prompt": "What is Options for caminar (1st person plural)?",
+      "answer": "caminamos, camino, caminan, camináis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "caminar (1st person plural)",
+      "field": "Options",
+      "sourceText": "Options: caminamos, camino, caminan, camináis",
+      "accept": [
+        "caminamos, camino, caminan, camináis"
+      ]
+    },
+    {
+      "prompt": "What is Pattern for AR verbs?",
+      "answer": "-o, -as, -a, -amos, -áis, -an",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "AR verbs",
+      "field": "Pattern",
+      "sourceText": "Los verbos AR siguen el patrón: -o, -as, -a, -amos, -áis, -an",
+      "accept": [
+        "-o, -as, -a, -amos, -áis, -an"
+      ]
+    },
+    {
+      "prompt": "What is True/False for Spanish verbs?",
+      "answer": "True",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Spanish verbs",
+      "field": "True/False",
+      "sourceText": "True",
+      "accept": [
+        "True"
+      ]
+    },
+    {
+      "prompt": "What is A for Spanish verb infinitive endings?",
+      "answer": "ar, er, ir",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Spanish verb infinitive endings",
+      "field": "A",
+      "sourceText": "A: ar, er, ir",
+      "accept": [
+        "ar, er, ir"
+      ]
+    },
+    {
+      "prompt": "What is A for Answer A?",
+      "answer": "True",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Answer A",
+      "field": "A",
+      "sourceText": "A: True",
+      "accept": []
+    },
+    {
+      "prompt": "What is Type for Question type?",
+      "answer": "true-false",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Question type",
+      "field": "Type",
+      "sourceText": "Type: true-false",
+      "accept": []
+    },
+    {
+      "prompt": "What is Options for Answer options?",
+      "answer": "True, False",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Answer options",
+      "field": "Options",
+      "sourceText": "Options: True, False",
+      "accept": []
+    }
+  ]
+}

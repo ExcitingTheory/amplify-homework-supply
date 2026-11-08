@@ -3,6 +3,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "../_components/adminAccess";
 import FileListClient from "./FileListClient";
 
 const FILE_SELECTION_SET = [
@@ -26,7 +27,7 @@ const FILE_SELECTION_SET = [
 const JOIN_SELECTION_SET = ["fileID"] as const;
 
 /**
- * Admin file-list maintenance. Authenticates server-side (Admins/Instructors
+ * Admin file-list maintenance. Authenticates server-side (Admins
  * only), pre-fetches the full file list plus every File join table so
  * "orphaned" (unreferenced) files can be flagged without a client-side waterfall.
  */
@@ -44,7 +45,7 @@ export default async function FileListMaintenancePage() {
     // Fall through — treated as no access below
   }
 
-  if (!groups.includes("Admins") && !groups.includes("Instructors")) {
+  if (!canAccessAdminArea(groups)) {
     redirect("/?returnUrl=" + encodeURIComponent("/admin/files"));
   }
 

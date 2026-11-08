@@ -157,9 +157,7 @@ function notificationReducer(
       return {
         ...state,
         notifications: state.notifications.map((n) =>
-          n.id === action.payload
-            ? { ...n, seen: true, interacted: true }
-            : n,
+          n.id === action.payload ? { ...n, seen: true, interacted: true } : n,
         ),
       };
     case actionTypes.MARK_ALL_SEEN:
@@ -255,10 +253,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
           return tracked == null || incomingVersion > tracked;
         });
 
-        if (
-          !hasChanges &&
-          Object.keys(versionMapRef.current).length > 0
-        ) {
+        if (!hasChanges && Object.keys(versionMapRef.current).length > 0) {
           return;
         }
 
@@ -278,9 +273,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
       },
       error: (err: any) => {
         const msg =
-          err?.message ||
-          err?.errors?.[0]?.message ||
-          JSON.stringify(err);
+          err?.message || err?.errors?.[0]?.message || JSON.stringify(err);
         if (msg.includes("DuplicatedOperationError")) {
           console.warn(
             "[NotificationContext] DuplicatedOperationError (safe to ignore)",
@@ -309,8 +302,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
   // Compute unseen counts — hidden (recycle-binned) notifications never count,
   // since they're excluded from the inbox/search view.
   const unseenCount = useMemo(
-    () =>
-      state.notifications.filter((n) => !n.seen && !n.hiddenAt).length,
+    () => state.notifications.filter((n) => !n.seen && !n.hiddenAt).length,
     [state.notifications],
   );
 
@@ -380,9 +372,11 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
           }),
         ),
       );
-      const failures = results.filter((r) => r.status === 'rejected');
+      const failures = results.filter((r) => r.status === "rejected");
       if (failures.length > 0) {
-        console.warn(`[NotificationContext] ${failures.length} notification(s) failed to mark seen`);
+        console.warn(
+          `[NotificationContext] ${failures.length} notification(s) failed to mark seen`,
+        );
       }
     } catch (err) {
       console.error("[NotificationContext] Error marking all seen:", err);
@@ -451,7 +445,10 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
           _version: item?._version ?? 0,
         });
       } catch (err) {
-        console.error("[NotificationContext] Error restoring notification:", err);
+        console.error(
+          "[NotificationContext] Error restoring notification:",
+          err,
+        );
       }
     },
     [state.notifications],
@@ -480,7 +477,10 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
           );
         }
       } catch (err) {
-        console.error("[NotificationContext] Error restoring notifications:", err);
+        console.error(
+          "[NotificationContext] Error restoring notifications:",
+          err,
+        );
       }
     },
     [state.notifications],
@@ -490,7 +490,10 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
     async (notificationId: string) => {
       try {
         const client = getAmplifyClient();
-        await client.models.Notification.delete({ id: notificationId });
+        const item = state.notifications.find((n) => n.id === notificationId);
+        await client.models.Notification.delete({
+          id: notificationId,
+        });
       } catch (err) {
         console.error(
           "[NotificationContext] Error permanently deleting notification:",
@@ -498,7 +501,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [],
+    [state.notifications],
   );
 
   const deleteNotificationsForever = useCallback(
@@ -507,7 +510,10 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
       try {
         const client = getAmplifyClient();
         const results = await Promise.allSettled(
-          notificationIds.map((id) => client.models.Notification.delete({ id })),
+          notificationIds.map((id) => {
+            const item = state.notifications.find((n) => n.id === id);
+            return client.models.Notification.delete({ id });
+          }),
         );
         const failures = results.filter((r) => r.status === "rejected");
         if (failures.length > 0) {
@@ -522,7 +528,7 @@ function NotificationProvider({ children }: { children: React.ReactNode }) {
         );
       }
     },
-    [],
+    [state.notifications],
   );
 
   const contextValue = useMemo(

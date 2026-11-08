@@ -9,7 +9,8 @@ const baseContext = {
   workbookEnabled: true,
   workbook: {
     provider: { awareness: { getStates: () => new Map() } },
-    joinCode: "ABC-123",
+    isConnected: true,
+    isSynced: true,
   },
 };
 
@@ -52,6 +53,29 @@ export const NoLabel = {
   decorators: [withUnitContext()],
   play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
     expect(canvasElement.querySelector(".MuiChip-root")).toBeTruthy();
+  },
+};
+
+export const Offline = {
+  args: { showLabel: false },
+  decorators: [
+    withUnitContext({
+      workbook: { ...baseContext.workbook, isConnected: false, isSynced: false },
+    }),
+  ],
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(within(canvasElement).getByLabelText("Offline")).toBeTruthy();
+  },
+};
+
+export const Syncing = {
+  decorators: [
+    withUnitContext({
+      workbook: { ...baseContext.workbook, isSynced: false },
+    }),
+  ],
+  play: async ({ canvasElement }: { canvasElement: HTMLElement }) => {
+    expect(within(canvasElement).getByLabelText("Syncing...")).toBeTruthy();
   },
 };
 

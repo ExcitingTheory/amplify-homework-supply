@@ -3,6 +3,7 @@ import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "../_components/adminAccess";
 import QuestionListClient from "./QuestionListClient";
 
 const QUESTION_SELECTION_SET = [
@@ -24,7 +25,7 @@ const QUESTION_SELECTION_SET = [
 ] as const;
 
 /**
- * Admin question-list maintenance. Authenticates server-side (Admins/Instructors
+ * Admin question-list maintenance. Authenticates server-side (Admins
  * only) and pre-fetches the full question bank, delegating all interactivity
  * (filtering, search, bulk delete, refresh) to the client component.
  */
@@ -42,7 +43,7 @@ export default async function QuestionListMaintenancePage() {
     // Fall through — treated as no access below
   }
 
-  if (!groups.includes("Admins") && !groups.includes("Instructors")) {
+  if (!canAccessAdminArea(groups)) {
     redirect("/?returnUrl=" + encodeURIComponent("/admin/questions"));
   }
 

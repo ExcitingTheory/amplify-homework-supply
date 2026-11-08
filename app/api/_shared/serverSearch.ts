@@ -112,6 +112,39 @@ export async function loadBundleFromS3(
   }
 }
 
+export type BundleObject =
+  | { status: 200; body: string; etag?: string }
+  | { status: 304; etag?: string };
+
+/**
+ * Reads a bundle's raw JSON, honoring an If-None-Match ETag so unchanged
+ * bundles are not downloaded again. Returns null when the object is missing.
+ */
+export async function loadBundleObject(
+  path: string,
+  ifNoneMatch?: string | null,
+): Promise<BundleObject | null> {
+  try {
+    const response = await getS3().send(
+      new GetObjectCommand({
+        Bucket: getBucketName(),
+        Key: path,
+        ...(ifNoneMatch ? { IfNoneMatch: ifNoneMatch } : {}),
+      }),
+    );
+    const body = await response.Body?.transformToString();
+    if (!body) return null;
+    return { status: 200, body, etag: response.ETag };
+  } catch (error: any) {
+    const status = error?.$metadata?.httpStatusCode;
+    if (status === 304 || error?.name === "NotModified") {
+      return { status: 304, etag: ifNoneMatch ?? undefined };
+    }
+    if (error?.name === "NoSuchKey" || status === 404) return null;
+    throw error;
+  }
+}
+
 // --- Search Math ---
 
 function dotProduct(a: number[], b: number[]): number {

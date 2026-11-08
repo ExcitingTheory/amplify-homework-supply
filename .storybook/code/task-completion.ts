@@ -245,8 +245,26 @@ function initializeDomActionListeners(): () => void {
     const target = e.target as HTMLElement;
     if (!target) return;
 
-    // Walk up the DOM to find a data-tour element
-    const tourEl = target.closest("[data-tour]");
+    // MUI renders select options in a portal, outside the data-tour field.
+    // Use the open combobox's aria-controls relationship to find that field.
+    const listbox = target
+      .closest('[role="option"]')
+      ?.closest('[role="listbox"]');
+    const listboxId = listbox?.id;
+    const openCombobox = listboxId
+      ? Array.from(
+          document.querySelectorAll<HTMLElement>(
+            '[role="combobox"][aria-expanded="true"]',
+          ),
+        ).find((combobox) =>
+          combobox
+            .getAttribute("aria-controls")
+            ?.split(/\s+/)
+            .includes(listboxId),
+        )
+      : undefined;
+    const tourEl =
+      target.closest("[data-tour]") ?? openCombobox?.closest("[data-tour]");
     if (!tourEl) return;
 
     const persona = emitter.getPersona();

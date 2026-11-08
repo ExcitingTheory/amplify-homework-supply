@@ -3,6 +3,7 @@ import AssignmentConfiguration from "./AssignmentConfiguration";
 import UnitContext from "../../../context/unitContext";
 import SectionContext from "../../../context/sectionContext";
 import { expect, within } from "storybook/test";
+import { EditorToastProvider } from "../context/EditorToastContext";
 
 const mockUnit = {
   id: "unit-1",
@@ -39,18 +40,20 @@ const mockAssignments = [
 
 function withContexts(unitOverrides = {}, sectionOverrides = {}) {
   return (Story) => (
-    <UnitContext.Provider value={{ unit: mockUnit, ...unitOverrides }}>
-      <SectionContext.Provider
-        value={{
-          sections: mockSections,
-          sectionMap: Object.fromEntries(mockSections.map((s) => [s.id, s])),
-          assignments: mockAssignments,
-          ...sectionOverrides,
-        }}
-      >
-        <Story />
-      </SectionContext.Provider>
-    </UnitContext.Provider>
+    <EditorToastProvider>
+      <UnitContext.Provider value={{ unit: mockUnit, ...unitOverrides }}>
+        <SectionContext.Provider
+          value={{
+            sections: mockSections,
+            sectionMap: Object.fromEntries(mockSections.map((s) => [s.id, s])),
+            assignments: mockAssignments,
+            ...sectionOverrides,
+          }}
+        >
+          <Story />
+        </SectionContext.Provider>
+      </UnitContext.Provider>
+    </EditorToastProvider>
   );
 }
 

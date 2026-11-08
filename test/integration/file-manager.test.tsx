@@ -15,6 +15,7 @@ import FileManager2 from '../../src/components/Editor3/components/FileManager2';
 import FilesContext from '../../src/context/fileContext';
 import SettingsContext from '../../src/context/settingsContext';
 import UnitContext from '../../src/context/unitContext';
+import { EditorToastProvider } from '../../src/components/Editor3/context/EditorToastContext';
 
 vi.mock('aws-amplify/datastore', () => ({
   DataStore: { observeQuery: vi.fn(), save: vi.fn(), delete: vi.fn() },
@@ -122,22 +123,24 @@ describe('FileManager2 Integration Tests', () => {
     };
 
     return render(
-      <UnitContext.Provider value={unitValue as any}>
-        <SettingsContext.Provider value={settingsValue as any}>
-          <FilesContext.Provider value={filesValue as any}>
-            <LexicalComposer
-              initialConfig={{
-                namespace: 'FileManagerTest',
-                theme: {},
-                nodes: [],
-                onError: (error: Error) => console.error(error),
-              }}
-            >
-              <FileManager2 />
-            </LexicalComposer>
-          </FilesContext.Provider>
-        </SettingsContext.Provider>
-      </UnitContext.Provider>
+      <EditorToastProvider>
+        <UnitContext.Provider value={unitValue as any}>
+          <SettingsContext.Provider value={settingsValue as any}>
+            <FilesContext.Provider value={filesValue as any}>
+              <LexicalComposer
+                initialConfig={{
+                  namespace: 'FileManagerTest',
+                  theme: {},
+                  nodes: [],
+                  onError: (error: Error) => console.error(error),
+                }}
+              >
+                <FileManager2 />
+              </LexicalComposer>
+            </FilesContext.Provider>
+          </SettingsContext.Provider>
+        </UnitContext.Provider>
+      </EditorToastProvider>
     );
   };
 

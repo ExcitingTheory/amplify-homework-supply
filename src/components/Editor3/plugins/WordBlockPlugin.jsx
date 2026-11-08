@@ -50,6 +50,9 @@ import RecordVoiceOverIcon from "@mui/icons-material/RecordVoiceOver";
 import AudioWaveformPlayer from "../components/AudioWaveformPlayer";
 import getCachedUrl from "../../../utils/getCachedUrl";
 import { sanitizeInlineHtml } from "../../../utils/sanitizeHtml";
+import { ExerciseBlockCard } from "../components/ExerciseBlockCard";
+
+const WORD_BLOCK_TYPE = "word-block";
 
 /**
  * WordBlockComponent - Displays word information in a block.
@@ -129,15 +132,9 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
       format={format}
       nodeKey={nodeKey}
     >
-      <Card
-        variant="outlined"
+      <ExerciseBlockCard
+        blockType={WORD_BLOCK_TYPE}
         sx={{
-          my: 2,
-          bgcolor: "action.hover",
-          border: "none",
-          borderRadius: 2,
-          boxShadow: 1,
-          transition: "all 0.2s ease",
           userSelect: "none",
           cursor: "default",
           "& *": {
@@ -145,7 +142,7 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
           },
         }}
       >
-        <CardContent>
+        <CardContent sx={{ p: 0, "&:last-child": { pb: 0 } }}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2 }}>
             <Box sx={{ flex: 1 }}>
               {/* Phrase with Ruby Tags */}
@@ -154,7 +151,7 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
               >
                 {word.rubyTags ? (
                   <Typography
-                    variant="h4"
+                    variant="h6"
                     component="ruby"
                     sx={{
                       fontWeight: 700,
@@ -176,7 +173,7 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
                   />
                 ) : (
                   <Typography
-                    variant="h4"
+                    variant="h6"
                     component="div"
                     sx={{
                       fontWeight: 700,
@@ -280,7 +277,7 @@ const WordBlockComponent = React.memo(function WordBlockComponent({
             </Box>
           </Box>
         </CardContent>
-      </Card>
+      </ExerciseBlockCard>
     </BlockWithAlignableContents>
   );
 });

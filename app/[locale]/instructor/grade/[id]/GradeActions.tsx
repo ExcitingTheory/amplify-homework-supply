@@ -25,7 +25,7 @@ import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 import NavigateNextIcon from '@mui/icons-material/NavigateNext';
 import MainToolbar from '@/components/MainToolbar';
-import { GradedWorkbookViewer } from '@/components/GradedWorkbookViewer';
+import { GradedWorkbookViewer } from '@/components/GradedWorkbookViewer/GradedWorkbookViewer';
 
 interface GradeData {
   id: string;

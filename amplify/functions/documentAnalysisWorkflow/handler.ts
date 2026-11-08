@@ -17,8 +17,18 @@ import OpenAI from "openai";
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { type Schema } from "../../data/resource";
 import { describeGraphQLError } from "./graphqlError.js";
+import {
+  MAX_RETRY_ATTEMPTS,
+  backoffMs,
+  isConditionalCheckFailure,
+  sleep,
+  versionGuard,
+} from "../shared/concurrency.js";
 import { parseJsonCompletion } from "./jsonCompletion.js";
-import { buildPageSummaryItems } from "./hierarchicalSummary.js";
+import {
+  buildSynthesisItems,
+  splitReductionForBatching,
+} from "./hierarchicalSummary.js";
 import {
   ANTHROPIC_VERIFIER_MAX_OUTPUT_TOKENS,
   OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
@@ -26,6 +36,22 @@ import {
   OPENAI_VERIFIER_MAX_OUTPUT_TOKENS,
 } from "../documentAnalysis/modelLimits.js";
 import { toParsedContentInput } from "../documentAnalysis/parsedContentInput.js";
+import {
+  linkExistingQuestions,
+  linkExistingWords,
+  type ExistingQuestion,
+  type ExistingWord,
+} from "../documentAnalysis/existingContent.js";
+import {
+  resolveVocabularySelection,
+  isHybridVocabulary,
+  type VocabularySelection,
+  selectVocabulary,
+  VOCABULARY_SELECTOR_VERSION,
+  type VocabularyCandidate,
+} from "../documentAnalysis/vocabularySelection.js";
+import { resolveVocabularyLanguage, selectNativeVocabulary } from "../documentAnalysis/nativeVocabulary.js";
+import { NATIVE_SELECTOR_VERSION } from "../nativeVocabulary/protocol.js";
 import { saveParsedContentChunks } from "../shared/parsedContentChunks";
 import { createGraphqlParsedContentStore } from "../shared/parsedContentGraphql";
 import {
@@ -51,22 +77,29 @@ import {
 } from "./visionSelection.js";
 import {
   analyzePages,
+  analyzePageWithoutLLM,
   buildVerifierCandidates,
   checkPageFacts,
+  completeVerificationVerdicts,
   chunkItemsByJsonSize,
   filterVerifiedEntries,
   mergeDuplicateQuestions,
+  mergeDuplicateQuestionsByMeaning,
   mergeDuplicateVocabulary,
+  mergeDuplicateVocabularyByMeaning,
   normaliseQuestionEntries,
   retainDirectQuestionsWithVerifiedMatches,
   retainDirectVocabularyWithVerifiedMatches,
+  resolveLlmExtractionEnabled,
   segmentTextIntoPages,
+  toQuestion,
   VERIFIER_SYSTEM_PROMPT,
   type AnalysisPage,
   type ExhaustiveFact,
   type FactVerificationVerdict,
   type TokenUsage,
 } from "../documentAnalysis/analysis.js";
+import { locateEvidence, sourceEvidenceUnits, uncoveredEvidenceUnits } from "../documentAnalysis/evidence.js";
 import {
   DynamoProviderRateLimitStore,
   ProviderLimitError,
@@ -124,7 +157,15 @@ const LIST_PLATFORM_SETTINGS = /* GraphQL */ `
         documentAnalysisAnthropicRequestsPerMinute
         documentAnalysisAnthropicTokensPerMinute
         documentAnalysisAnthropicMaxConcurrentRequests
+        documentAnalysisLlmExtractionEnabled
       }
+    }
+  }
+`;
+const LIST_USER_DOCUMENT_ANALYSIS_SETTINGS = /* GraphQL */ `
+  query ListUserDocumentAnalysisSettings($owner: String!) {
+    listSettings(filter: { owner: { eq: $owner } }, limit: 10) {
+      items { _deleted documentAnalysisLlmExtractionOverride }
     }
   }
 `;
@@ -134,14 +175,36 @@ const GET_DOCUMENT = /* GraphQL */ `
     getDocument(id: $id) {
       id
       _version
+      owner
       metadata
     }
   }
 `;
+const LIST_OWNER_WORDS = /* GraphQL */ `
+  query ListOwnerWords($filter: ModelWordFilterInput, $nextToken: String) {
+    listWords(filter: $filter, limit: 1000, nextToken: $nextToken) {
+      items { id phrase definition deletedAt }
+      nextToken
+    }
+  }
+`;
+const LIST_OWNER_QUESTIONS = /* GraphQL */ `
+  query ListOwnerQuestions($filter: ModelQuestionFilterInput, $nextToken: String) {
+    listQuestions(filter: $filter, limit: 1000, nextToken: $nextToken) {
+      items { id prompt answer deletedAt }
+      nextToken
+    }
+  }
+`;
+const GET_VOCABULARY_SETTINGS = /* GraphQL */ `
+  query GetVocabularySettings($id: ID!) {
+    getFile(id: $id) { id owner settings }
+  }
+`;
 
 const UPDATE_DOCUMENT = /* GraphQL */ `
-  mutation UpdateDocument($input: UpdateDocumentInput!) {
-    updateDocument(input: $input) {
+  mutation UpdateDocument($input: UpdateDocumentInput!, $condition: ModelDocumentConditionInput) {
+    updateDocument(input: $input, condition: $condition) {
       id
       _version
       status
@@ -218,6 +281,11 @@ type WorkflowEvent = {
 };
 
 type PageInput = AnalysisPage & {
+  vocabularySelection?: VocabularySelection;
+  llmExtractionEnabled?: boolean;
+  vocabularyLanguage?: string;
+  vocabularyReviewWarnings?: string[];
+  vocabularyCandidates?: VocabularyCandidate[];
   /** Content images on the page, when the extractor can tell. */
   imageCount?: number;
   /** True when this page is sent through the vision pass. */
@@ -229,6 +297,8 @@ type PageInput = AnalysisPage & {
 };
 
 type PageResult = {
+  vocabularySelection?: VocabularySelection;
+  llmExtractionEnabled?: boolean;
   page: number;
   completed?: boolean;
   questionsJSON: Array<Record<string, unknown>>;
@@ -250,6 +320,14 @@ type PageResult = {
   /** Read by the state machine to route the page through render + vision. */
   needsVision?: boolean;
   uncoveredLines?: string[];
+  evidenceCoverage?: {
+    totalUnits: number;
+    coveredUnits: number;
+    missingUnitIds: string[];
+    units: Array<{ id: string; start: number; end: number; headingPath: string[] }>;
+  };
+  reviewWarnings?: string[];
+  verifiedCandidateIndices?: number[];
   usageByModel?: Record<string, TokenUsage>;
 };
 
@@ -276,8 +354,14 @@ function getOpenAI() {
   return openaiInstance;
 }
 
-async function getProviderSettings(): Promise<Record<string, unknown>> {
-  if (cachedProviderSettings && cachedProviderSettings.expiresAt > Date.now()) {
+async function getProviderSettings(
+  forceRefresh = false,
+): Promise<Record<string, unknown>> {
+  if (
+    !forceRefresh &&
+    cachedProviderSettings &&
+    cachedProviderSettings.expiresAt > Date.now()
+  ) {
     return cachedProviderSettings.settings;
   }
 
@@ -312,12 +396,45 @@ async function getProviderSettings(): Promise<Record<string, unknown>> {
       settings?.documentAnalysisAnthropicTokensPerMinute,
     documentAnalysisAnthropicMaxConcurrentRequests:
       settings?.documentAnalysisAnthropicMaxConcurrentRequests,
+    documentAnalysisLlmExtractionEnabled:
+      settings?.documentAnalysisLlmExtractionEnabled,
   };
   cachedProviderSettings = {
     settings: limits,
     expiresAt: Date.now() + 30_000,
   };
   return limits;
+}
+
+async function getUserLlmExtractionOverride(owner: unknown): Promise<boolean | null> {
+  if (owner == null || owner === "") return null;
+  if (typeof owner !== "string") {
+    throw new Error("Cannot resolve document-analysis preference without the file owner");
+  }
+  if (!owner.trim()) return null;
+  const response = (await getDataClient().graphql({
+    query: LIST_USER_DOCUMENT_ANALYSIS_SETTINGS,
+    variables: { owner },
+  })) as {
+    data?: { listSettings?: { items?: Array<Record<string, unknown> | null> } };
+    errors?: Array<{ message: string }>;
+  };
+  if (response.errors?.length) {
+    throw new Error(
+      `Unable to load the user's document-analysis preference: ${response.errors
+        .map((error) => error.message)
+        .join("; ")}`,
+    );
+  }
+  const record = response.data?.listSettings?.items?.find(
+    (item) => item != null && item._deleted !== true,
+  );
+  const override = record?.documentAnalysisLlmExtractionOverride;
+  if (override == null) return null;
+  if (typeof override !== "boolean") {
+    throw new Error("User LLM extraction override is not a boolean");
+  }
+  return override;
 }
 
 async function getProviderLimits(
@@ -487,8 +604,8 @@ async function verifySynthesisOutput(
     verdicts?: Array<{ index?: number; supported?: boolean }>;
   }>(completion, "Synthesis verification");
   if (
-    !Array.isArray(parsed.verdicts) ||
-    !parsed.verdicts.every(
+    (parsed.verdicts !== undefined && !Array.isArray(parsed.verdicts)) ||
+    !(parsed.verdicts ?? []).every(
       (verdict) =>
         Number.isInteger(verdict.index) &&
         typeof verdict.supported === "boolean",
@@ -498,10 +615,10 @@ async function verifySynthesisOutput(
   }
   const verified = filterVerifiedEntries(
     candidates,
-    parsed.verdicts.map((verdict) => ({
+    completeVerificationVerdicts(candidates, (parsed.verdicts ?? []).map((verdict) => ({
       index: verdict.index as number,
       supported: verdict.supported as boolean,
-    })),
+    }))),
   );
   return {
     output: Object.fromEntries(
@@ -588,23 +705,29 @@ async function getDocument(documentId: string): Promise<any> {
 
 async function updateDocument(
   documentId: string,
-  update: Record<string, unknown>,
-): Promise<any> {
-  const current = await getDocument(documentId);
-  const { data, errors } = (await getDataClient().graphql({
-    query: UPDATE_DOCUMENT,
-    variables: {
-      input: {
-        id: documentId,
-        _version: current._version,
-        ...update,
-      },
-    },
-  })) as any;
-  if (errors?.length || !data?.updateDocument) {
-    throw new Error(`Unable to update Document ${documentId}`);
+  buildUpdate: (current: { _version?: number | null; metadata?: unknown }) => Record<string, unknown> | null,
+): Promise<void> {
+  for (let attempt = 0; attempt < MAX_RETRY_ATTEMPTS; attempt += 1) {
+    const current = await getDocument(documentId);
+    const update = buildUpdate(current);
+    if (!update) return;
+    const guard = versionGuard(current._version);
+    try {
+      const { data, errors } = await getDataClient().graphql({
+        query: UPDATE_DOCUMENT,
+        variables: {
+          input: { ...update, id: documentId, _version: guard.nextVersion },
+          condition: guard.condition,
+        },
+      });
+      if (errors?.length) throw describeGraphQLError({ errors });
+      if (!data?.updateDocument) throw new Error(`Unable to update Document ${documentId}`);
+      return;
+    } catch (error) {
+      if (!isConditionalCheckFailure(error) || attempt + 1 >= MAX_RETRY_ATTEMPTS) throw error;
+      await sleep(backoffMs(attempt));
+    }
   }
-  return data.updateDocument;
 }
 
 async function assertRunActive(event: WorkflowEvent): Promise<void> {
@@ -646,20 +769,6 @@ function toFact(question: Record<string, unknown>, pageNumber: number): Exhausti
   };
 }
 
-function toQuestion(fact: ExhaustiveFact): Record<string, unknown> {
-  const prompt = `What is ${fact.field} for ${fact.subject}?`;
-  return {
-    prompt,
-    answer: fact.answer,
-    questionType: "recall",
-    page: fact.page,
-    subject: fact.subject,
-    field: fact.field,
-    sourceText: fact.sourceText,
-    accept: fact.accept,
-  };
-}
-
 function toVocabularyFact(
   entry: Record<string, unknown>,
   pageNumber: number,
@@ -678,6 +787,23 @@ function toVocabularyFact(
     page: typeof entry.page === "number" ? entry.page : pageNumber,
     sourceText: typeof entry.context === "string" ? entry.context : "",
   };
+}
+
+function preserveExistingVocabularyDefinitions(
+  current: unknown[],
+  previous: unknown[],
+): unknown[] {
+  return current.map((entry) => {
+    if (!entry || typeof entry !== "object" || !("word" in entry) ||
+        ("definition" in entry && typeof entry.definition === "string" && entry.definition.trim())) return entry;
+    const existing = previous.find((item) =>
+      item !== null && typeof item === "object" && "word" in item &&
+      item.word === entry.word && "definition" in item &&
+      typeof item.definition === "string" && item.definition.trim(),
+    );
+    return existing && typeof existing === "object" && "definition" in existing
+      ? { ...entry, definition: existing.definition } : entry;
+  });
 }
 
 function getPageCandidates(
@@ -832,6 +958,9 @@ function readPositiveInt(name: string, fallback: number): number {
 // Page images are sent to the vision pass only for these formats: their pages
 // map one-to-one onto pages of the rendered PDF.
 const PAGE_RENDER_FORMATS = new Set(["pdf", "pptx"]);
+
+// Serialized-JSON budget for one synthesis batch; no single item may exceed it.
+const SYNTHESIS_BATCH_MAX_CHARACTERS = 16_000;
 
 /**
  * Describes images embedded in documents whose pages are not rendered (DOCX,
@@ -1012,9 +1141,36 @@ async function prepare(event: WorkflowEvent) {
       (visuals.length > 0 ? `\n\n[Charts and diagrams]\n${visuals.join("\n")}` : "");
     pages = segmentTextIntoPages(analysisText);
   }
-  const visionPages = rendersPages
+  const { data: fileData, errors: fileErrors } = await getDataClient().graphql({
+    query: GET_VOCABULARY_SETTINGS, variables: { id: event.fileId },
+  });
+  if (fileErrors?.length || !fileData?.getFile) throw new Error(`Unable to load vocabulary settings for File ${event.fileId}`);
+  const [platformSettings, userOverride] = await Promise.all([
+    getProviderSettings(true),
+    getUserLlmExtractionOverride(fileData.getFile.owner),
+  ]);
+  const llmExtractionEnabled = resolveLlmExtractionEnabled(
+    platformSettings.documentAnalysisLlmExtractionEnabled,
+    userOverride,
+  );
+  const configuredVocabularySelection = resolveVocabularySelection(fileData.getFile.settings);
+  const vocabularySelection = !llmExtractionEnabled && configuredVocabularySelection === "llm"
+    ? "hybrid-en"
+    : configuredVocabularySelection;
+  const vocabularyLanguage = vocabularySelection === "hybrid-native"
+    ? resolveVocabularyLanguage(fileData.getFile.settings) : undefined;
+  const visionPages = rendersPages && llmExtractionEnabled
     ? selectVisionPages(pages, readPositiveInt("DOCUMENT_VISION_MAX_PAGES", 30))
     : new Set<number>();
+  const nativeSelection = vocabularyLanguage ? await selectNativeVocabulary(pages, vocabularyLanguage, baseKey) : undefined;
+  const vocabularyCandidates = nativeSelection?.candidates ??
+    (vocabularySelection === "hybrid-en" ? selectVocabulary(pages) : undefined);
+  if (vocabularyCandidates) {
+    await putJson(`${baseKey}/vocabulary-selection.json`, {
+      version: nativeSelection ? NATIVE_SELECTOR_VERSION : VOCABULARY_SELECTOR_VERSION,
+      language: vocabularyLanguage ?? "en", candidates: vocabularyCandidates,
+    });
+  }
   const pageManifest = pages.map((page) => {
     const pageKey = String(page.pageNumber).padStart(4, "0");
     return {
@@ -1037,6 +1193,12 @@ async function prepare(event: WorkflowEvent) {
       nextHead: next.slice(0, 1500),
       sourceFormat: extraction.sourceFormat,
       profile: event.profile,
+      vocabularySelection,
+      llmExtractionEnabled,
+      ...(vocabularyLanguage ? { vocabularyLanguage, vocabularyReviewWarnings: nativeSelection?.reviewWarnings } : {}),
+      ...(vocabularyCandidates ? {
+        vocabularyCandidates: vocabularyCandidates.filter((candidate) => candidate.page === page.pageNumber),
+      } : {}),
     } satisfies PageInput);
   }
 
@@ -1087,29 +1249,30 @@ async function prepare(event: WorkflowEvent) {
     }),
   );
 
-  const document = await getDocument(event.documentId);
-  const metadata =
-    typeof document.metadata === "string"
-      ? JSON.parse(document.metadata || "{}")
-      : document.metadata ?? {};
-  await updateDocument(event.documentId, {
-    status: "analyzing",
-    sourceFormat: extraction.sourceFormat,
-    pageCount: pages.length,
-    textExtractedAt: Date.now(),
-    metadata: JSON.stringify({
-      ...metadata,
-      analysis: {
-        runId: event.runId,
-        executionArn: event.executionArn,
-        mode: "workflow",
-        state: "analyzing",
-        totalPages: pages.length,
-        done: 0,
-        failed: 0,
-        updatedAt: new Date().toISOString(),
-      },
-    }),
+  await updateDocument(event.documentId, (document) => {
+    const metadata = parseJsonObject(document.metadata);
+    const analysis = parseJsonObject(metadata.analysis);
+    if (analysis.runId !== event.runId || analysis.state === "cancelled") return null;
+    return {
+      status: "analyzing",
+      sourceFormat: extraction.sourceFormat,
+      pageCount: pages.length,
+      textExtractedAt: Date.now(),
+      metadata: JSON.stringify({
+        ...metadata,
+        analysis: {
+          ...analysis,
+          runId: event.runId,
+          executionArn: event.executionArn,
+          mode: "workflow",
+          state: "analyzing",
+          totalPages: pages.length,
+          done: 0,
+          failed: 0,
+          updatedAt: new Date().toISOString(),
+        },
+      }),
+    };
   });
 
   return {
@@ -1129,11 +1292,13 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
   }
   const page = await readJson<PageInput>(event.inputKey);
   const needsVision = page.needsVision === true;
+  const llmExtractionEnabled = page.llmExtractionEnabled !== false;
   if (!page.text.trim()) {
     // A page with no text layer (a scan, or a slide that is only a picture)
     // has nothing for the text model; the vision pass reads it instead.
     const empty: PageResult = {
       page: page.pageNumber,
+      llmExtractionEnabled,
       questionsJSON: [],
       vocabularyJSON: [],
       summariesJSON: [],
@@ -1144,16 +1309,57 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
       repaired: false,
       sparseText: true,
       needsVision,
+      vocabularySelection: page.vocabularySelection,
+      ...(llmExtractionEnabled || !page.imageCount
+        ? {}
+        : { reviewWarnings: ["Image-based fact and vocabulary extraction is disabled in NLP-only mode."] }),
     };
     await putJson(event.resultKey, empty);
     return { ...event, ...empty };
+  }
+  if (!llmExtractionEnabled) {
+    const extracted = analyzePageWithoutLLM(
+      page,
+      page.vocabularyCandidates ?? [],
+    );
+    const questions = normaliseQuestionEntries(extracted.questionsJSON);
+    const facts = questions.map((question) =>
+      toFact(question as Record<string, unknown>, page.pageNumber),
+    );
+    const checked = checkPageFacts(page, facts);
+    const result: PageResult = {
+      page: page.pageNumber,
+      vocabularySelection: page.vocabularySelection,
+      llmExtractionEnabled: false,
+      questionsJSON: questions,
+      vocabularyJSON: extracted.vocabularyJSON,
+      summariesJSON: [],
+      objectivesJSON: [],
+      conceptsJSON: [],
+      suspect: checked.suspect,
+      needsRepair: false,
+      repaired: false,
+      sparseText: isSparsePage(page),
+      needsVision,
+      reviewWarnings: [
+        ...(page.vocabularyReviewWarnings ?? []),
+        ...(extracted.reviewWarnings?.map(({ message }) => message) ?? []),
+        ...(page.imageCount
+          ? ["Image-based fact and vocabulary extraction is disabled in NLP-only mode."]
+          : []),
+      ],
+      usageByModel: {},
+    };
+    await putJson(event.resultKey, result);
+    return { ...event, ...result };
   }
   const extracted = await analyzePages(
     getOpenAIForRun(event),
     [page],
     event.fileId,
     event.documentId,
-    { profile: event.profile },
+    { profile: event.profile, vocabularySelection: page.vocabularySelection, vocabularyLanguage: page.vocabularyLanguage,
+      vocabularyCandidates: page.vocabularyCandidates },
   );
   const questions = normaliseQuestionEntries(extracted.questionsJSON);
   const facts = questions.map((question) =>
@@ -1162,6 +1368,8 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
   const checked = checkPageFacts(page, facts);
   const result: PageResult = {
     page: page.pageNumber,
+    vocabularySelection: page.vocabularySelection,
+    llmExtractionEnabled: true,
     questionsJSON: questions,
     vocabularyJSON: extracted.vocabularyJSON,
     summariesJSON: extracted.summariesJSON,
@@ -1172,6 +1380,7 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
     repaired: false,
     sparseText: isSparsePage(page),
     needsVision,
+    reviewWarnings: [...(page.vocabularyReviewWarnings ?? []), ...(extracted.reviewWarnings?.map(({ message }) => message) ?? [])],
     ...(extracted.uncoveredLines?.length
       ? { uncoveredLines: extracted.uncoveredLines.map(({ line }) => line) }
       : {}),
@@ -1179,6 +1388,37 @@ async function extractPage(event: WorkflowEvent): Promise<WorkflowEvent & PageRe
   };
   await putJson(event.resultKey, result);
   return { ...event, ...result };
+}
+
+function addDeterministicVerification(
+  result: PageResult,
+  page: PageInput,
+): PageResult {
+  const candidates = getPageCandidates(result, page.pageNumber);
+  const verdicts = candidates.map(({ fact }, index) => {
+    const reasons = checkPageFacts(page, [fact]).suspect.flatMap(
+      (item) => item.reasons,
+    );
+    const supported =
+      reasons.length === 0 && Boolean(locateEvidence(page, fact.sourceText));
+    return {
+      index,
+      supported,
+      ...(!supported
+        ? { reason: reasons.join(", ") || "Source quote could not be anchored" }
+        : {}),
+    };
+  });
+  return {
+    ...result,
+    verification: {
+      supported: verdicts.filter(({ supported }) => supported).length,
+      unsupported: verdicts.filter(({ supported }) => !supported).length,
+      omissions: [],
+      verifierModel: "deterministic-source-check",
+      verdicts,
+    },
+  };
 }
 
 async function verifyPage(
@@ -1190,6 +1430,11 @@ async function verifyPage(
   }
   const result = await readJson<PageResult>(event.resultKey);
   const page = await readJson<PageInput>(event.inputKey);
+  if (page.llmExtractionEnabled === false) {
+    const verified = addDeterministicVerification(result, page);
+    await putJson(event.resultKey, verified);
+    return { ...event, ...verified, available: true };
+  }
   const candidates = getPageCandidates(result, page.pageNumber);
   const anthropicKey = await getAnthropicKey();
   if (!anthropicKey) return { ...event, ...result, available: false };
@@ -1270,6 +1515,11 @@ async function verifyWithOpenAI(
   }
   const result = await readJson<PageResult>(event.resultKey);
   const page = await readJson<PageInput>(event.inputKey);
+  if (page.llmExtractionEnabled === false) {
+    const verified = addDeterministicVerification(result, page);
+    await putJson(event.resultKey, verified);
+    return { ...event, ...verified };
+  }
   const candidates = getPageCandidates(result, page.pageNumber);
   const response = await withRateLimitTelemetry(
     "openai",
@@ -1352,8 +1602,8 @@ async function applyVerification(
     throw new VerifierResponseError("Verifier returned invalid JSON", { cause });
   }
   if (
-    !Array.isArray(parsed.verdicts) ||
-    !parsed.verdicts.every(
+    (parsed.verdicts !== undefined && !Array.isArray(parsed.verdicts)) ||
+    !(parsed.verdicts ?? []).every(
       (verdict) =>
         Number.isInteger(verdict.index) &&
         typeof verdict.supported === "boolean",
@@ -1364,13 +1614,13 @@ async function applyVerification(
     throw new VerifierResponseError("Verifier returned an invalid verdict payload");
   }
   const candidates = getPageCandidates(result, result.page);
-  const verdicts: FactVerificationVerdict[] = parsed.verdicts.map((item) => ({
+  let verdicts: FactVerificationVerdict[] = (parsed.verdicts ?? []).map((item) => ({
     index: item.index as number,
     supported: item.supported as boolean,
     ...(item.reason ? { reason: item.reason } : {}),
   }));
   try {
-    filterVerifiedEntries(candidates, verdicts);
+    verdicts = completeVerificationVerdicts(candidates, verdicts);
   } catch (cause) {
     throw new VerifierResponseError(
       cause instanceof Error ? cause.message : "Verifier verdicts were invalid",
@@ -1442,12 +1692,16 @@ async function repairPage(
   }
   const previous = await readJson<PageResult>(event.resultKey);
   const page = await readJson<PageInput>(event.inputKey);
+  if (page.llmExtractionEnabled === false) {
+    return { ...event, ...previous };
+  }
   const repaired = await analyzePages(
     getOpenAIForRun(event),
     [page],
     event.fileId,
     event.documentId,
-    { profile: "exhaustive" },
+    { profile: "exhaustive", vocabularySelection: page.vocabularySelection, vocabularyLanguage: page.vocabularyLanguage,
+      vocabularyCandidates: page.vocabularyCandidates },
   );
   const mergedQuestions = [
     ...previous.questionsJSON,
@@ -1474,9 +1728,18 @@ async function repairPage(
   const next: PageResult = {
     ...previous,
     questionsJSON,
-    vocabularyJSON: [
+    vocabularyJSON: isHybridVocabulary(page.vocabularySelection)
+      ? preserveExistingVocabularyDefinitions(repaired.vocabularyJSON, previous.vocabularyJSON) : [
       ...previous.vocabularyJSON,
       ...repaired.vocabularyJSON,
+    ],
+    reviewWarnings: [
+      ...(previous.reviewWarnings ?? []),
+      ...(repaired.reviewWarnings?.map(({ message }) => message) ?? []),
+    ],
+    uncoveredLines: [
+      ...(previous.uncoveredLines ?? []),
+      ...(repaired.uncoveredLines?.map(({ line }) => line) ?? []),
     ],
     suspect: checked.suspect,
     repaired: true,
@@ -1514,8 +1777,8 @@ async function analyzeVisionPage(
           role: "system",
           content:
             "Extract discrete educational facts visible on this page. Return JSON with: " +
-            "pageText, a transcription of every legible piece of text on the page plus a factual description of each figure, chart, diagram, or table (labels, values, and what it shows); " +
-            "facts, each containing subject, field, answer, accept, page, and sourceText, where sourceText is quoted from pageText; " +
+            "pageText, a transcription preserving headings, paragraphs, lists and table rows, plus a factual description of each visible figure (labels, values, and what it shows); " +
+            "facts, atomic subject/relationship/value claims extracted BEFORE rendering questions, each containing subject, field (relationship), answer (one value), accept, page, and sourceText, a unique exact contiguous quote from pageText. Split independent list members, relationships, quantities and contrasts; retain qualifications and negation. " +
             "and vocabulary, each containing term, definition, context, and page. Use only visible page content.",
         },
         {
@@ -1541,21 +1804,34 @@ async function analyzeVisionPage(
   }
   // Later steps accept a fact only when its quoted source appears in the page
   // text, so the transcription is merged into the page the whole run reads.
-  const visualContent =
-    typeof parsed.pageText === "string" && parsed.pageText.trim()
-      ? parsed.pageText
-      : parsed.facts
-          .map((fact) =>
-            fact !== null && typeof fact === "object"
-              ? (fact as Record<string, unknown>).sourceText
-              : undefined,
-          )
-          .filter((text): text is string => typeof text === "string")
-          .join("\n");
+  if (typeof parsed.pageText !== "string" || !parsed.pageText.trim()) {
+    throw new Error("Vision extraction requires a page transcription; claim quotations cannot be their own source");
+  }
+  const visualContent = parsed.pageText;
   const page: PageInput = {
     ...inputPage,
     text: mergeVisualContent(inputPage.text, visualContent),
   };
+  let hybridVocabulary;
+  if (isHybridVocabulary(page.vocabularySelection)) {
+    const candidates = new Map((page.vocabularyCandidates ?? []).map((candidate) => [candidate.term.toLowerCase(), candidate]));
+    const visualPages = [{ pageNumber: page.pageNumber, text: visualContent }];
+    let nativeSelection;
+    if (page.vocabularySelection === "hybrid-native") {
+      if (!event.baseKey) throw new Error("Native vision vocabulary is missing its analysis artifact prefix");
+      nativeSelection = await selectNativeVocabulary(visualPages, page.vocabularyLanguage ?? "", event.baseKey);
+    }
+    for (const candidate of nativeSelection?.candidates ?? selectVocabulary(visualPages)) {
+      if (inputPage.text.toLowerCase().includes(candidate.term.toLowerCase())) continue;
+      if (!candidates.has(candidate.term.toLowerCase())) candidates.set(candidate.term.toLowerCase(), candidate);
+    }
+    page.vocabularyCandidates = [...candidates.values()];
+    page.vocabularyReviewWarnings = [...(page.vocabularyReviewWarnings ?? []), ...(nativeSelection?.reviewWarnings ?? [])];
+    hybridVocabulary = await analyzePages(getOpenAIForRun(event), [page], event.fileId, event.documentId, {
+      profile: "standard", vocabularySelection: page.vocabularySelection, vocabularyLanguage: page.vocabularyLanguage,
+      vocabularyCandidates: page.vocabularyCandidates,
+    });
+  }
   await putJson(event.inputKey, page);
   const visualFacts = parsed.facts.map((fact) =>
     toFact(
@@ -1565,7 +1841,9 @@ async function analyzeVisionPage(
       page.pageNumber,
     ),
   );
-  const visualQuestions = visualFacts.map(toQuestion);
+  const visualQuestions = visualFacts.map((fact) => toQuestion({
+    ...fact, ...locateEvidence(page, fact.sourceText),
+  }));
   const questionsJSON = [...previous.questionsJSON, ...visualQuestions];
   const checked = checkPageFacts(
     page,
@@ -1574,16 +1852,20 @@ async function analyzeVisionPage(
   const next: PageResult = {
     ...previous,
     questionsJSON,
-    vocabularyJSON: [...previous.vocabularyJSON, ...parsed.vocabulary],
+    vocabularyJSON: hybridVocabulary
+      ? preserveExistingVocabularyDefinitions(hybridVocabulary.vocabularyJSON, previous.vocabularyJSON)
+      : [...previous.vocabularyJSON, ...parsed.vocabulary],
+    reviewWarnings: [...(previous.reviewWarnings ?? []), ...(page.vocabularyReviewWarnings ?? []),
+      ...(hybridVocabulary?.reviewWarnings?.map(({ message }) => message) ?? [])],
     suspect: checked.suspect,
     needsRepair: checked.suspect.length > 0,
     usageByModel: addModelUsage(
       previous.usageByModel,
       "gpt-4o",
       {
-        promptTokens: completion.usage?.prompt_tokens ?? 0,
-        completionTokens: completion.usage?.completion_tokens ?? 0,
-        totalTokens: completion.usage?.total_tokens ?? 0,
+        promptTokens: (completion.usage?.prompt_tokens ?? 0) + (hybridVocabulary?.usage.promptTokens ?? 0),
+        completionTokens: (completion.usage?.completion_tokens ?? 0) + (hybridVocabulary?.usage.completionTokens ?? 0),
+        totalTokens: (completion.usage?.total_tokens ?? 0) + (hybridVocabulary?.usage.totalTokens ?? 0),
       },
     ),
   };
@@ -1601,22 +1883,64 @@ async function writeResult(
   }
   const page = await readJson<PageInput>(event.inputKey);
   const candidates = getPageCandidates(result, page.pageNumber);
-  const verified = filterVerifiedEntries(
+  const verdicts = completeVerificationVerdicts(
     candidates,
     result.verification.verdicts,
-  ).filter(
-    ({ fact }) => checkPageFacts(page, [fact]).facts.length === 1,
   );
+  const reviewWarnings = new Set(result.reviewWarnings ?? []);
+  const verifiedCandidateIndices: number[] = [];
+  for (const [index, candidate] of candidates.entries()) {
+    const verdict = verdicts.find((item) => item.index === index);
+    const reasons: string[] = checkPageFacts(page, [candidate.fact]).suspect.flatMap((item) => item.reasons)
+      .filter((reason) => !(isHybridVocabulary(result.vocabularySelection) && candidate.kind === "vocabulary" &&
+        candidate.fact.answer.trim() && reason === "answer_not_in_source"));
+    if (candidate.kind === "question" && (!candidate.fact.subject.trim() ||
+        !candidate.fact.field.trim() || !locateEvidence(page, candidate.fact.sourceText))) {
+      reasons.push("Claim requires subject, relationship and a unique exact source anchor");
+    }
+    if (verdict?.supported === false) reasons.push(verdict.reason || "Not supported by the source according to the verifier");
+    if (reasons.length) {
+      reviewWarnings.add(`${candidate.kind} "${candidate.fact.subject}" (${candidate.fact.field}): ${reasons.join("; ")}`);
+    } else {
+      verifiedCandidateIndices.push(index);
+    }
+  }
+  for (const line of [...(result.uncoveredLines ?? []), ...result.verification.omissions]) {
+    reviewWarnings.add(`Review missing source coverage: ${line}`);
+  }
+  const trustedQuestionFacts = verifiedCandidateIndices.flatMap((index) =>
+    candidates[index].kind === "question" ? [candidates[index].fact] : []);
+  const units = sourceEvidenceUnits(page);
+  const missingUnits = uncoveredEvidenceUnits(page, trustedQuestionFacts);
+  if (missingUnits.length) {
+    reviewWarnings.add(`${missingUnits.length} source evidence units have no independently verified anchored claim; this is evidence coverage, not complete fact recall.`);
+  }
   const completed = {
     ...result,
-    questionsJSON: verified
-      .filter((candidate) => candidate.kind === "question")
-      .map((candidate) => candidate.entry),
-    vocabularyJSON: verified
-      .filter((candidate) => candidate.kind === "vocabulary")
-      .map((candidate) => candidate.entry),
+    questionsJSON: result.questionsJSON.map((question) => {
+      const entry = { ...question };
+      for (const key of ["evidenceUnitId", "sourceStart", "sourceEnd"]) delete entry[key];
+      const fact = toFact(question, page.pageNumber);
+      return { ...entry, ...(fact.page === page.pageNumber ? locateEvidence(page, fact.sourceText) : undefined) };
+    }),
+    evidenceCoverage: {
+      totalUnits: units.length, coveredUnits: units.length - missingUnits.length,
+      missingUnitIds: missingUnits.map(({ id }) => id),
+      units: units.map(({ id, start, end, headingPath }) => ({ id, start, end, headingPath })),
+    },
+    verification: {
+      ...result.verification,
+      verdicts,
+      supported: verdicts.filter((item) => item.supported).length,
+      unsupported: verdicts.filter((item) => !item.supported).length,
+    },
+    reviewWarnings: [...reviewWarnings],
+    verifiedCandidateIndices,
     completed: true,
   };
+  if (reviewWarnings.size) {
+    console.warn(`[writeResult] Page ${page.pageNumber} retained for human review with ${reviewWarnings.size} warning(s)`);
+  }
   await putJson(event.resultKey, completed);
   return { ...event, ...completed };
 }
@@ -1626,29 +1950,224 @@ async function updateAnalysisMetadata(
   analysisUpdate: Record<string, unknown>,
   documentStatus?: string,
 ) {
-  const document = await getDocument(event.documentId);
-  const metadata =
-    typeof document.metadata === "string"
-      ? JSON.parse(document.metadata || "{}")
-      : document.metadata ?? {};
-  const currentAnalysis = metadata.analysis ?? {};
-  if (
-    currentAnalysis.runId !== event.runId ||
-    currentAnalysis.state === "cancelled"
-  ) {
-    return;
-  }
-  await updateDocument(event.documentId, {
-    ...(documentStatus ? { status: documentStatus } : {}),
-    metadata: JSON.stringify({
-      ...metadata,
-      analysis: {
-        ...currentAnalysis,
-        ...analysisUpdate,
-        updatedAt: new Date().toISOString(),
-      },
-    }),
+  await updateDocument(event.documentId, (document) => {
+    const metadata = parseJsonObject(document.metadata);
+    const currentAnalysis = parseJsonObject(metadata.analysis);
+    if (
+      currentAnalysis.runId !== event.runId ||
+      currentAnalysis.state === "cancelled"
+    ) return null;
+    return {
+      ...(documentStatus ? { status: documentStatus } : {}),
+      metadata: JSON.stringify({
+        ...metadata,
+        analysis: {
+          ...currentAnalysis,
+          ...analysisUpdate,
+          updatedAt: new Date().toISOString(),
+        },
+      }),
+    };
   });
+}
+
+/**
+ * Questions and vocabulary of the given pages, merged with the entries a
+ * structured source supplied directly. `aggregate` and the in-flight preview
+ * share this so the preview converges on the final content.
+ */
+function mergePageContent(
+  pages: Array<Pick<PageResult, "questionsJSON" | "vocabularyJSON" | "llmExtractionEnabled">>,
+  directContent: Record<string, unknown>,
+) {
+  const pageQuestions = pages.flatMap((page) => page.questionsJSON);
+  const pageVocabulary = pages.flatMap((page) => page.vocabularyJSON);
+  const nlpOnly = pages.length > 0 && pages.every((page) => page.llmExtractionEnabled === false);
+  const directQuestions = Array.isArray(directContent.questionsJSON)
+    ? nlpOnly
+      ? directContent.questionsJSON as Record<string, unknown>[]
+      : retainDirectQuestionsWithVerifiedMatches(
+        directContent.questionsJSON,
+        pageQuestions,
+      )
+    : [];
+  const directVocabulary = Array.isArray(directContent.vocabularyJSON)
+    ? nlpOnly
+      ? directContent.vocabularyJSON as Record<string, unknown>[]
+      : retainDirectVocabularyWithVerifiedMatches(
+        directContent.vocabularyJSON,
+        pageVocabulary,
+      )
+    : [];
+  return {
+    questions: [...directQuestions, ...pageQuestions],
+    vocabulary: [...directVocabulary, ...pageVocabulary],
+  };
+}
+
+/** The in-flight preview merges on wording only; embedding on every poll would cost more than it shows. */
+function mergePageContentByWording(
+  pages: Array<Pick<PageResult, "questionsJSON" | "vocabularyJSON" | "llmExtractionEnabled">>,
+  directContent: Record<string, unknown>,
+) {
+  const { questions, vocabulary } = mergePageContent(pages, directContent);
+  return {
+    questionsJSON: mergeDuplicateQuestions(questions),
+    vocabularyJSON: mergeDuplicateVocabulary(vocabulary),
+  };
+}
+
+/**
+ * Embeds answers with the embeddings Lambda's local MiniLM model, the same one
+ * behind semantic search, so comparing answers needs no external API.
+ */
+async function embedAnswersLocally(texts: string[]): Promise<number[][]> {
+  const functionName = process.env.EMBEDDINGS_FUNCTION_NAME;
+  if (!functionName) throw new Error("EMBEDDINGS_FUNCTION_NAME is not configured");
+  const response = await lambdaClient.send(
+    new InvokeCommand({
+      FunctionName: functionName,
+      Payload: Buffer.from(JSON.stringify({ workflowMode: "embedTexts", texts })),
+    }),
+  );
+  const payload = Buffer.from(response.Payload ?? []).toString("utf8");
+  if (response.FunctionError) throw new Error(payload);
+  const { vectors } = JSON.parse(payload) as { vectors?: number[][] };
+  if (!Array.isArray(vectors)) throw new Error("Embeddings function returned no vectors");
+  return vectors;
+}
+
+/**
+ * Merges the final questions and vocabulary, treating paraphrased answers to
+ * one question, and paraphrased definitions of one term, as the same.
+ * Embeddings only improve the merge, so when they are not configured or cannot
+ * be obtained everything is merged on wording alone and the run continues.
+ */
+async function mergeFinalContentByMeaning(
+  event: WorkflowEvent,
+  questions: Array<Record<string, unknown>>,
+  vocabulary: unknown[],
+): Promise<{ questionsJSON: Array<Record<string, unknown>>; vocabularyJSON: unknown[] }> {
+  const byWording = () => ({
+    questionsJSON: mergeDuplicateQuestions(questions),
+    vocabularyJSON: mergeDuplicateVocabulary(vocabulary),
+  });
+  if (!process.env.EMBEDDINGS_FUNCTION_NAME) return byWording();
+  try {
+    return {
+      questionsJSON: await mergeDuplicateQuestionsByMeaning(questions, embedAnswersLocally),
+      vocabularyJSON: await mergeDuplicateVocabularyByMeaning(vocabulary, embedAnswersLocally),
+    };
+  } catch (error) {
+    console.error(
+      `[aggregate] Could not compare content by meaning for ${event.documentId}; merging on wording only:`,
+      error,
+    );
+    return byWording();
+  }
+}
+
+/** Finished pages' extracted content, cached so each poll reads only new pages. */
+type PagePreviewState = {
+  pages: Record<
+    string,
+    Pick<PageResult, "page" | "questionsJSON" | "vocabularyJSON" | "llmExtractionEnabled">
+  >;
+  /** Pages already reflected in the saved ParsedContent chunks. */
+  savedPageCount: number;
+};
+
+const PREVIEW_READ_CONCURRENCY = 8;
+
+/**
+ * Saves the content of every finished page as ParsedContent, so a client
+ * watching the document sees entries arrive while later pages are still being
+ * analyzed. This is the only writer until `finalize`, which replaces the
+ * preview with the aggregated, synthesized content.
+ */
+async function publishPagePreview(event: WorkflowEvent) {
+  if (!event.manifestKey || !event.baseKey) {
+    throw new Error("Progress events must carry the page manifest and base key");
+  }
+  await assertRunActive(event);
+  const manifest = await readJson<Array<{ page: number; resultKey: string }>>(
+    event.manifestKey,
+  );
+  const stateKey = `${event.baseKey}/page-preview.json`;
+  let state: PagePreviewState = { pages: {}, savedPageCount: 0 };
+  try {
+    state = await readJson<PagePreviewState>(stateKey);
+  } catch (error) {
+    if (!isNotFound(error)) throw error;
+  }
+
+  const unseen = manifest.filter((item) => !state.pages[String(item.page)]);
+  for (let start = 0; start < unseen.length; start += PREVIEW_READ_CONCURRENCY) {
+    const batch = unseen.slice(start, start + PREVIEW_READ_CONCURRENCY);
+    const results = await Promise.all(
+      batch.map(async (item) => {
+        try {
+          return await readJson<PageResult>(item.resultKey);
+        } catch (error) {
+          // The page has not produced a result yet.
+          if (!isNotFound(error)) throw error;
+          return null;
+        }
+      }),
+    );
+    results.forEach((result, index) => {
+      if (!result?.completed) return;
+      state.pages[String(batch[index].page)] = {
+        page: batch[index].page,
+        questionsJSON: result.questionsJSON,
+        vocabularyJSON: result.vocabularyJSON,
+        llmExtractionEnabled: result.llmExtractionEnabled,
+      };
+    });
+  }
+
+  const finished = Object.values(state.pages).sort((a, b) => a.page - b.page);
+  if (finished.length === state.savedPageCount) {
+    return { completedPages: finished.map(({ page }) => page), counts: undefined };
+  }
+
+  const directContent = event.directContentKey
+    ? await readJson<Record<string, unknown>>(event.directContentKey)
+    : {};
+  const { questionsJSON, vocabularyJSON } = mergePageContentByWording(
+    finished,
+    directContent,
+  );
+  const content = toParsedContentInput({
+    vocabularyJSON,
+    summariesJSON: [],
+    objectivesJSON: [],
+    conceptsJSON: [],
+    questionsJSON,
+    pendingMedia: [],
+  });
+  await saveParsedContentChunks(
+    createGraphqlParsedContentStore(
+      (request) => getDataClient().graphql(request),
+      event.documentId,
+    ),
+    {
+      documentID: event.documentId,
+      fileID: event.fileId,
+      content,
+      fields: { modelUsed: "gpt-4o" },
+      skipUnchanged: true,
+    },
+  );
+  state.savedPageCount = finished.length;
+  await putJson(stateKey, state);
+  return {
+    completedPages: finished.map(({ page }) => page),
+    counts: {
+      questions: content.questionsJSON.length,
+      vocabulary: content.vocabularyJSON.length,
+    },
+  };
 }
 
 async function reportProgress(event: WorkflowEvent) {
@@ -1672,11 +2191,24 @@ async function reportProgress(event: WorkflowEvent) {
     (counts?.timedOut ?? 0) +
     (counts?.aborted ?? 0);
   const mapDone = (counts?.running ?? 0) === 0 && (counts?.pending ?? 0) === 0;
+  // The preview is best-effort: a failure must not abort a long analysis,
+  // and the next poll (or `finalize`) saves the content again.
+  let preview: Awaited<ReturnType<typeof publishPagePreview>> | undefined;
+  try {
+    preview = await publishPagePreview(event);
+  } catch (error) {
+    console.error(
+      `[progress] Could not publish page preview for ${event.documentId}:`,
+      error,
+    );
+  }
   await updateAnalysisMetadata(event, {
     state: mapDone ? "aggregating" : "analyzing",
     totalPages,
     done,
     failed: counts?.failed ?? 0,
+    ...(preview && { completedPages: preview.completedPages }),
+    ...(preview?.counts && { partialCounts: preview.counts }),
   });
   return { ...event, mapDone };
 }
@@ -1703,25 +2235,9 @@ async function aggregate(event: WorkflowEvent) {
   const directContent = event.directContentKey
     ? await readJson<Record<string, unknown>>(event.directContentKey)
     : {};
-  const verifiedQuestions = pageResults.flatMap((page) => page.questionsJSON);
-  const verifiedVocabulary = pageResults.flatMap((page) => page.vocabularyJSON);
-  const directQuestions = Array.isArray(directContent.questionsJSON)
-    ? retainDirectQuestionsWithVerifiedMatches(
-        directContent.questionsJSON,
-        verifiedQuestions,
-      )
-    : [];
-  const directVocabulary = Array.isArray(directContent.vocabularyJSON)
-    ? retainDirectVocabularyWithVerifiedMatches(
-        directContent.vocabularyJSON,
-        verifiedVocabulary,
-      )
-    : [];
-  const questionsJSON = mergeDuplicateQuestions(
-    directQuestions.length > 0 ? directQuestions : verifiedQuestions,
-  );
-  const vocabularyJSON = mergeDuplicateVocabulary(
-    directVocabulary.length > 0 ? directVocabulary : verifiedVocabulary,
+  const { questions: unmergedQuestions, vocabulary: unmergedVocabulary } = mergePageContent(
+    pageResults,
+    directContent,
   );
   // Image descriptions are produced by `prepare`, outside any page result.
   let prepareUsage: Record<string, TokenUsage> = {};
@@ -1745,33 +2261,30 @@ async function aggregate(event: WorkflowEvent) {
     },
     { ...prepareUsage },
   );
-  const pageSummaryItems = buildPageSummaryItems(pageResults);
-  const synthesisItems = [
-    ...pageSummaryItems,
-    ...questionsJSON.map((question) => {
-      if (question === null || typeof question !== "object") return question;
-      const entry = question as Record<string, unknown>;
-      return {
-        type: "question",
-        prompt: entry.prompt,
-        answer: entry.answer,
-        subject: entry.subject,
-        field: entry.field,
-        page: entry.page,
-      };
-    }),
-    ...vocabularyJSON.map((value) => {
-      if (value === null || typeof value !== "object") return value;
-      const entry = value as Record<string, unknown>;
-      return {
-        type: "vocabulary",
-        word: entry.word ?? entry.term,
-        definition: entry.definition,
-        page: entry.page,
-      };
-    }),
-  ];
-  let reductionBatches = chunkItemsByJsonSize(synthesisItems, 16_000);
+  const { questionsJSON, vocabularyJSON } = await mergeFinalContentByMeaning(
+    event,
+    unmergedQuestions,
+    unmergedVocabulary,
+  );
+  const verifiedPages = pageResults.map((result) => {
+    const indices = new Set(result.verifiedCandidateIndices ?? []);
+    const verified = getPageCandidates(result, result.page).filter((_, index) => indices.has(index));
+    return {
+      ...result,
+      questionsJSON: verified.filter((candidate) => candidate.kind === "question").map((candidate) => candidate.entry),
+      vocabularyJSON: verified.filter((candidate) => candidate.kind === "vocabulary").map((candidate) => candidate.entry),
+    };
+  });
+  const synthesisItems = buildSynthesisItems({
+    pages: verifiedPages,
+    questions: verifiedPages.flatMap((page) => page.questionsJSON),
+    vocabulary: verifiedPages.flatMap((page) => page.vocabularyJSON),
+    maxItemCharacters: SYNTHESIS_BATCH_MAX_CHARACTERS,
+  });
+  let reductionBatches = chunkItemsByJsonSize(
+    synthesisItems,
+    SYNTHESIS_BATCH_MAX_CHARACTERS,
+  );
   if (reductionBatches.length === 0) reductionBatches = [[]];
   let synthesized: Record<string, unknown> = {};
   const sectionSummaries: unknown[] = [];
@@ -1854,7 +2367,15 @@ async function aggregate(event: WorkflowEvent) {
     reductionBatches =
       reductions.length === 1
         ? [[reductions[0]]]
-        : chunkItemsByJsonSize(reductions, 16_000);
+        : chunkItemsByJsonSize(
+            reductions.flatMap((reduction) =>
+              splitReductionForBatching(
+                reduction,
+                SYNTHESIS_BATCH_MAX_CHARACTERS,
+              ),
+            ),
+            SYNTHESIS_BATCH_MAX_CHARACTERS,
+          );
     synthesisPass += 1;
   }
   const result = {
@@ -1875,6 +2396,9 @@ async function aggregate(event: WorkflowEvent) {
     tokenUsageByModel,
     failedPages,
     totalPages: manifest.length,
+    reviewWarnings: pageResults.flatMap((page) =>
+      (page.reviewWarnings ?? []).map((message) => `Page ${page.page}: ${message}`),
+    ),
     done: pageResults.length + failedPages.length,
     quality: pageResults.reduce(
       (summary, page) => ({
@@ -1885,8 +2409,11 @@ async function aggregate(event: WorkflowEvent) {
         omissionsFound:
           summary.omissionsFound + (page.verification?.omissions.length ?? 0),
         repaired: summary.repaired + (page.repaired ? 1 : 0),
+        sourceEvidenceUnits: summary.sourceEvidenceUnits + (page.evidenceCoverage?.totalUnits ?? 0),
+        coveredEvidenceUnits: summary.coveredEvidenceUnits + (page.evidenceCoverage?.coveredUnits ?? 0),
       }),
-      { supported: 0, unsupported: 0, omissionsFound: 0, repaired: 0 },
+      { supported: 0, unsupported: 0, omissionsFound: 0, repaired: 0,
+        sourceEvidenceUnits: 0, coveredEvidenceUnits: 0 },
     ),
   };
   const resultKey = `${event.baseKey}/aggregate.json`;
@@ -1948,6 +2475,75 @@ async function moderate(event: WorkflowEvent) {
   return { ...event, moderation };
 }
 
+/** Most existing records loaded for matching; beyond this the newest are used. */
+const MAX_EXISTING_RECORDS = 5000;
+
+async function listOwnedRecords<T>(
+  query: string,
+  owner: string,
+  read: (data: any) => { items?: Array<T | null>; nextToken?: string | null } | undefined,
+): Promise<T[]> {
+  const records: T[] = [];
+  let nextToken: string | undefined;
+  do {
+    const response = (await getDataClient().graphql({
+      query,
+      variables: { filter: { owner: { eq: owner } }, nextToken },
+    })) as any;
+    if (response.errors?.length) {
+      throw new Error(response.errors.map((error: { message?: string }) => error.message).join("; "));
+    }
+    const page = read(response.data);
+    for (const item of page?.items ?? []) if (item != null) records.push(item);
+    nextToken = page?.nextToken ?? undefined;
+  } while (nextToken && records.length < MAX_EXISTING_RECORDS);
+  return records;
+}
+
+/**
+ * Records on each entry the Word or Question the owner already has for it, so
+ * importing links to that record instead of adding a second copy. Matching is
+ * best-effort: a failure leaves the entries unmatched, which only means the
+ * reviewer sees the duplicates they would have seen before.
+ */
+async function linkToExistingContent(
+  event: WorkflowEvent,
+  content: { vocabularyJSON: unknown[]; questionsJSON: Array<Record<string, unknown>> },
+): Promise<{ vocabularyJSON: unknown[]; questionsJSON: Array<Record<string, unknown>> }> {
+  try {
+    const owner = (await getDocument(event.documentId))?.owner;
+    if (typeof owner !== "string" || !owner) return content;
+
+    const [words, questions] = await Promise.all([
+      listOwnedRecords<ExistingWord & { deletedAt?: string | null }>(
+        LIST_OWNER_WORDS,
+        owner,
+        (data) => data?.listWords,
+      ),
+      listOwnedRecords<ExistingQuestion & { deletedAt?: string | null }>(
+        LIST_OWNER_QUESTIONS,
+        owner,
+        (data) => data?.listQuestions,
+      ),
+    ]);
+    const live = <T extends { deletedAt?: string | null }>(records: T[]) =>
+      records.filter((record) => record.deletedAt == null);
+
+    const vocabulary = linkExistingWords(content.vocabularyJSON, live(words));
+    const linkedQuestions = linkExistingQuestions(content.questionsJSON, live(questions));
+    console.log(
+      `[finalize] Matched ${vocabulary.linked} vocabulary and ${linkedQuestions.linked} question entries to existing records for ${event.documentId}`,
+    );
+    return { vocabularyJSON: vocabulary.entries, questionsJSON: linkedQuestions.entries };
+  } catch (error) {
+    console.error(
+      `[finalize] Could not match ${event.documentId} against existing content; importing may create duplicates:`,
+      error,
+    );
+    return content;
+  }
+}
+
 async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
   await assertRunActive(event);
   const result = await readJson<{
@@ -1960,11 +2556,16 @@ async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
     totalPages: number;
     done: number;
     quality: Record<string, number>;
+    reviewWarnings?: string[];
     tokenUsageByModel: Record<string, TokenUsage>;
   }>(event.aggregateKey);
   const pendingMedia = event.pendingMediaKey
     ? await readJson<unknown[]>(event.pendingMediaKey)
     : [];
+  const matched = await linkToExistingContent(event, {
+    vocabularyJSON: result.vocabularyJSON,
+    questionsJSON: result.questionsJSON as Array<Record<string, unknown>>,
+  });
   // Long documents are stored as several records split by page; ParsedContent
   // inputs are typed lists, and createdAt is generated by Amplify.
   const saved = await saveParsedContentChunks(
@@ -1976,11 +2577,11 @@ async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
       documentID: event.documentId,
       fileID: event.fileId,
       content: toParsedContentInput({
-        vocabularyJSON: result.vocabularyJSON,
+        vocabularyJSON: matched.vocabularyJSON,
         summariesJSON: result.summariesJSON,
         objectivesJSON: result.objectivesJSON,
         conceptsJSON: result.conceptsJSON,
-        questionsJSON: result.questionsJSON,
+        questionsJSON: matched.questionsJSON,
         pendingMedia,
       }),
       fields: { modelUsed: "gpt-4o" },
@@ -1997,6 +2598,8 @@ async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
       totalPages: result.totalPages,
       failedPages: result.failedPages,
       quality: result.quality,
+      reviewWarnings: (result.reviewWarnings ?? []).slice(0, 50).map((message) => message.slice(0, 600)),
+      reviewWarningCount: result.reviewWarnings?.length ?? 0,
     },
   );
   await updateAnalysisMetadata(
@@ -2008,6 +2611,8 @@ async function finalize(event: WorkflowEvent & { aggregateKey: string }) {
       failed: result.failedPages.length,
       failedPages: result.failedPages,
       quality: result.quality,
+      reviewWarnings: (result.reviewWarnings ?? []).slice(0, 50).map((message) => message.slice(0, 600)),
+      reviewWarningCount: result.reviewWarnings?.length ?? 0,
     },
   );
   return { ...event, status: "embedding" };

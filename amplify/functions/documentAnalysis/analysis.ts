@@ -4,6 +4,13 @@
 import {
   OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
 } from "./modelLimits.js";
+import { locateEvidence, normalizeEvidence, sourceEvidenceUnits, uncoveredEvidenceUnits, type EvidenceAnchor } from "./evidence.js";
+import {
+  selectVocabulary,
+  isHybridVocabulary,
+  type VocabularySelection,
+  type VocabularyCandidate,
+} from "./vocabularySelection.js";
 
 export type AnalysisProfile = "standard" | "exhaustive";
 
@@ -21,6 +28,7 @@ interface AnalysisResult {
   usage: TokenUsage;
   /** Exhaustive mode: labelled lines no fact covered, by page. */
   uncoveredLines?: Array<{ page: number; line: string }>;
+  reviewWarnings?: Array<{ page: number; message: string }>;
 }
 
 export interface TokenUsage {
@@ -154,7 +162,7 @@ export function chunkItemsByJsonSize<T>(
   return batches;
 }
 
-export interface ExhaustiveFact {
+export interface ExhaustiveFact extends Partial<EvidenceAnchor> {
   subject: string;
   field: string;
   answer: string;
@@ -203,6 +211,26 @@ export function filterVerifiedEntries<T>(
   return entries.filter((_entry, index) => supported.has(index));
 }
 
+export function completeVerificationVerdicts<T>(
+  entries: T[],
+  verdicts: FactVerificationVerdict[],
+): FactVerificationVerdict[] {
+  const reported = new Set(verdicts.map(({ index }) => index));
+  const missing = entries.flatMap((_, index) =>
+    reported.has(index) ? [] : [{
+      index,
+      supported: false,
+      reason: "Verifier omitted this candidate; human review required",
+    }],
+  );
+  const completed = [...verdicts, ...missing];
+  filterVerifiedEntries(entries, completed);
+  if (missing.length) {
+    console.warn(`[verification] ${missing.length} candidate(s) missing verdicts; treating them as unverified`);
+  }
+  return completed;
+}
+
 interface ExhaustiveVocabulary {
   term: string;
   definition: string;
@@ -216,6 +244,7 @@ interface ExhaustivePageResult {
   usage: TokenUsage;
   /** Labelled/glossary lines the model never produced a covering fact for. */
   uncoveredLines?: string[];
+  reviewWarnings?: string[];
 }
 
 interface CoverageCandidate {
@@ -227,6 +256,21 @@ interface CoverageCandidate {
 interface AnalysisOptions {
   profile?: AnalysisProfile;
   sleep?: (milliseconds: number) => Promise<void>;
+  vocabularySelection?: VocabularySelection;
+  vocabularyLanguage?: string;
+  vocabularyCandidates?: VocabularyCandidate[];
+}
+
+function vocabularyInstructions(options: AnalysisOptions, page?: number): string {
+  if (!isHybridVocabulary(options.vocabularySelection)) return "";
+  const shortlist = (options.vocabularyCandidates ?? []).filter((entry) => page === undefined || entry.page === page);
+  return "\nVocabulary selection is already complete in deterministic code. This overrides earlier vocabulary-selection instructions. " +
+    "Return vocabulary ONLY for the supplied shortlist; do not choose additional terms. " +
+    "Keep each supplied term and page exactly. For source-defined terms copy sourceDefinition unchanged. " +
+    `For other terms write a concise learner definition in ${options.vocabularyLanguage ?? "English"}, grounded in sourceText. ` +
+    "A generated definition may paraphrase; context must copy the supplied sourceText verbatim. " +
+    "Do not invent examples or definitions unsupported by the passage. Facts extraction remains exhaustive and independent of this vocabulary list.\n" +
+    JSON.stringify(shortlist.map(({ term, page, sourceText, sourceDefinition }) => ({ term, page, sourceText, sourceDefinition })));
 }
 
 const MAX_PARALLEL_BATCHES = 5;
@@ -306,6 +350,21 @@ export function resolveSkipAutoAnalysis(settings: unknown): {
   if (skip === undefined) return { skip: false };
   if (typeof skip === "boolean") return { skip };
   return { skip: false, invalidValue: skip };
+}
+
+export function resolveLlmExtractionEnabled(
+  platformDefault: unknown,
+  userOverride: unknown,
+): boolean {
+  if (platformDefault != null && typeof platformDefault !== "boolean") {
+    throw new Error("Platform LLM extraction setting must be a boolean");
+  }
+  if (userOverride != null && typeof userOverride !== "boolean") {
+    throw new Error("User LLM extraction override must be a boolean");
+  }
+  return typeof userOverride === "boolean"
+    ? userOverride
+    : platformDefault === true;
 }
 
 export function createPageBatches<T>(
@@ -463,6 +522,56 @@ export function extractCoverageCandidates(
     .map(({ candidate }) => candidate);
 }
 
+export function analyzePageWithoutLLM(
+  page: AnalysisPage,
+  vocabularyCandidates: VocabularyCandidate[] = [],
+): AnalysisResult {
+  const questionsJSON = extractCoverageCandidates(page).map((candidate) => {
+    const isLabel = /^([^:\n]{1,100}):\s*(\S.*)$/.test(candidate.sourceText);
+    const subject = isLabel ? "Document" : candidate.field;
+    const field = isLabel ? candidate.field : "definition";
+    return {
+      prompt: isLabel
+        ? `What is ${candidate.field}?`
+        : `What does ${candidate.field} mean?`,
+      answer: candidate.answer,
+      questionType: "recall",
+      page: page.pageNumber,
+      subject,
+      field,
+      sourceText: candidate.sourceText,
+      accept: [],
+    };
+  });
+  const reviewWarnings: Array<{ page: number; message: string }> = [];
+  const vocabularyJSON = vocabularyCandidates
+    .filter((candidate) => candidate.page === page.pageNumber)
+    .map((candidate) => {
+      if (!candidate.sourceDefinition?.trim()) {
+        reviewWarnings.push({
+          page: page.pageNumber,
+          message: `Vocabulary "${candidate.term}" needs a human-written definition.`,
+        });
+      }
+      return {
+        word: candidate.term,
+        definition: candidate.sourceDefinition ?? "",
+        context: candidate.sourceText,
+        page: candidate.page,
+      };
+    });
+
+  return {
+    questionsJSON,
+    vocabularyJSON,
+    summariesJSON: [],
+    objectivesJSON: [],
+    conceptsJSON: [],
+    usage: EMPTY_TOKEN_USAGE,
+    ...(reviewWarnings.length ? { reviewWarnings } : {}),
+  };
+}
+
 /**
  * Hint for decks and card-style documents. Only a standalone `Front` / `Back`
  * marker line (optionally `Front: title` or `Front — title`) counts, so
@@ -494,6 +603,22 @@ function toStrictRecallFormat(): Record<string, unknown> {
         type: "object",
         additionalProperties: false,
         properties: {
+          checklist: {
+            type: "object",
+            additionalProperties: false,
+            properties: {
+              sourcePage: { type: "integer" },
+              factsReviewed: { type: "integer" },
+              vocabularyReviewed: { type: "integer" },
+              vocabularyEvidenceChecked: { type: "boolean" },
+              coverageReviewed: { type: "boolean" },
+              missingSourceLines: stringArray,
+            },
+            required: [
+              "sourcePage", "factsReviewed", "vocabularyReviewed",
+              "vocabularyEvidenceChecked", "coverageReviewed", "missingSourceLines",
+            ],
+          },
           facts: {
             type: "array",
             items: {
@@ -525,24 +650,69 @@ function toStrictRecallFormat(): Record<string, unknown> {
               properties: {
                 term: { type: "string" },
                 definition: { type: "string" },
-                context: { type: "string" },
+                context: {
+                  type: "string",
+                  description: "An exact quotation from the page containing the term's definition, not a page reference or paraphrase.",
+                },
                 page: { type: "integer" },
               },
               required: ["term", "definition", "context", "page"],
             },
           },
         },
-        required: ["facts", "vocabulary"],
+        required: ["facts", "vocabulary", "checklist"],
       },
     },
   };
 }
 
+/**
+ * A review warning in the shape the review UI parses: `kind "subject" (field):
+ * reason`. Warnings written this way are shown on the entry they name and
+ * counted in the review total; anything else is treated as being about the
+ * document as a whole, so the shape matters.
+ */
+export function entryReviewWarning(
+  kind: "question" | "vocabulary",
+  subject: string,
+  field: string,
+  reasons: string[],
+): string {
+  // A quote inside the subject would close the quoted group early and make the
+  // warning unparseable. Normalisation drops quotes on both sides, so removing
+  // them here still matches the entry.
+  const named = subject.replace(/"/g, "").trim();
+  const detail = reasons.join("; ");
+  return named
+    ? `${kind} "${named}" (${field.replace(/"/g, "").trim()}): ${detail}`
+    : `A ${kind} was dropped because it names no subject: ${detail}`;
+}
+
+/** Why a claim cannot be trusted, in wording an instructor can act on. */
+function claimFailureReasons(
+  fact: { subject: string; field: string; answer: string; page: number },
+  pageNumber: number,
+  anchored: boolean,
+  suspectReasons: string[],
+): string[] {
+  const reasons: string[] = [];
+  if (!fact.subject.trim()) reasons.push("it names no subject");
+  if (!fact.field.trim()) reasons.push("it states no relationship");
+  if (!fact.answer.trim()) reasons.push("it has no value");
+  if (fact.page !== pageNumber) {
+    reasons.push(`it claims page ${fact.page} but was extracted from page ${pageNumber}`);
+  }
+  if (!anchored) reasons.push("its quotation is not found exactly once in the page text");
+  reasons.push(...suspectReasons);
+  return reasons.length ? reasons : ["it did not pass source verification"];
+}
+
 function parseExhaustiveResult(
   content: string | null | undefined,
   pageNumber: number,
-): ExhaustivePageResult {
-  if (!content) throw new IncompletePageAnalysisError("Empty model response");
+  pageText: string,
+  generatedDefinitions = false,
+): ExhaustivePageResult {  if (!content) throw new IncompletePageAnalysisError("Empty model response");
 
   let parsed: unknown;
   try {
@@ -571,6 +741,8 @@ function parseExhaustiveResult(
       typeof fact.subject !== "string" ||
       typeof fact.field !== "string" ||
       typeof fact.answer !== "string" ||
+      typeof fact.page !== "number" ||
+      !Number.isInteger(fact.page) || fact.page < 1 ||
       !Array.isArray(fact.accept) ||
       !fact.accept.every((answer) => typeof answer === "string") ||
       typeof fact.sourceText !== "string"
@@ -582,11 +754,39 @@ function parseExhaustiveResult(
       field: fact.field,
       answer: fact.answer,
       accept: fact.accept as string[],
-      page: pageNumber,
+      page: typeof fact.page === "number" ? fact.page : pageNumber,
       sourceText: fact.sourceText,
     };
   });
 
+  const failures: string[] = [];
+  const evidencePage = { pageNumber, text: pageText };
+  const units = sourceEvidenceUnits(evidencePage);
+  for (const fact of facts) {
+    const anchor = locateEvidence(evidencePage, fact.sourceText, units);
+    const suspect = checkPageFacts(evidencePage, [fact]).suspect;
+    if (!anchor || fact.page !== pageNumber || !fact.subject.trim() ||
+        !fact.field.trim() || !fact.answer.trim() || suspect.length) {
+      // The whole fact is kept in the log for debugging; the warning itself is
+      // read by instructors, so it names the claim instead of dumping JSON.
+      console.warn(
+        `[parseExhaustiveResult] Page ${pageNumber} dropped claim: ${JSON.stringify(fact)}`,
+      );
+      failures.push(entryReviewWarning(
+        "question",
+        fact.subject,
+        fact.field,
+        claimFailureReasons(
+          fact,
+          pageNumber,
+          Boolean(anchor),
+          suspect.flatMap((item) => item.reasons),
+        ),
+      ));
+    } else {
+      Object.assign(fact, anchor);
+    }
+  }
   const vocabulary = (parsed as { vocabulary: unknown[] }).vocabulary.map(
     (item) => {
       if (item === null || typeof item !== "object") {
@@ -602,6 +802,24 @@ function parseExhaustiveResult(
           "Invalid extracted vocabulary fields",
         );
       }
+      const evidence = checkPageFacts({ pageNumber, text: pageText }, [{
+        subject: word.term,
+        field: "definition",
+        answer: word.definition,
+        sourceText: word.context,
+        accept: [],
+        page: pageNumber,
+      }]);
+      const evidenceFailures = evidence.suspect.flatMap(({ reasons }) =>
+        reasons.filter((reason) => !generatedDefinitions || reason !== "answer_not_in_source"),
+      );
+      if (evidenceFailures.length > 0) {
+        failures.push(
+          `Vocabulary evidence for "${word.term}" must quote the source passage containing its definition; ` +
+          `reasons: ${evidenceFailures.join(", ")}; ` +
+          `definition: ${JSON.stringify(word.definition)}; context: ${JSON.stringify(word.context)}`,
+        );
+      }
       return {
         term: word.term,
         definition: word.definition,
@@ -611,7 +829,27 @@ function parseExhaustiveResult(
     },
   );
 
-  return { facts, vocabulary, usage: EMPTY_TOKEN_USAGE };
+  const checklist = (parsed as { checklist?: unknown }).checklist;
+  if (!checklist || typeof checklist !== "object") {
+    failures.push("Missing procedural checklist");
+  } else {
+    const report = checklist as Record<string, unknown>;
+    if (report.sourcePage !== pageNumber) failures.push(`sourcePage must be ${pageNumber}`);
+    if (report.factsReviewed !== facts.length) failures.push(`factsReviewed must be ${facts.length}`);
+    if (report.vocabularyReviewed !== vocabulary.length) failures.push(`vocabularyReviewed must be ${vocabulary.length}`);
+    if (report.vocabularyEvidenceChecked !== true) failures.push("Check every vocabulary definition against its quoted context");
+    if (report.coverageReviewed !== true) failures.push("Review source coverage before returning the extraction");
+    if (!Array.isArray(report.missingSourceLines) ||
+        !report.missingSourceLines.every(line => typeof line === "string")) {
+      failures.push("missingSourceLines must be an array of quoted source lines");
+    } else if (report.missingSourceLines.length > 0) {
+      failures.push(`Extract the reported missing source lines: ${JSON.stringify(report.missingSourceLines)}`);
+    }
+  }
+  return {
+    facts, vocabulary, usage: EMPTY_TOKEN_USAGE,
+    ...(failures.length ? { reviewWarnings: failures } : {}),
+  };
 }
 
 const COVERAGE_ANSWER_SUPPORT = 0.8;
@@ -627,8 +865,8 @@ function tokenSet(value: string): Set<string> {
  * holding several statements are quoted differently by the model than they
  * appear on the page, so exact line equality is too strict. A fact with a
  * wrong answer is not related to the line and never counts as coverage. The
- * fact's subject and field count too, because facts split from one line
- * usually quote only their value and carry the label as subject/field.
+ * fact's subject, field and leading source label count too. The full quotation
+ * does not count: quoting a list is not extracting every member of that list.
  */
 export function candidateIsCovered(
   candidate: CoverageCandidate,
@@ -644,8 +882,9 @@ export function candidateIsCovered(
       .replace(/\s+/g, " ")
       .trim();
     return (
-      sourceText === candidateText &&
-      normaliseTerm(fact.answer) === normaliseTerm(candidate.answer)
+      sourceText.includes(candidateText) &&
+      (normaliseTerm(fact.answer) === normaliseTerm(candidate.answer) ||
+        (candidate.answer.length >= 3 && normaliseTerm(fact.answer).includes(normaliseTerm(candidate.answer))))
     );
   });
   if (exact) return true;
@@ -660,7 +899,7 @@ export function candidateIsCovered(
     for (const token of answerTokens) if (lineTokens.has(token)) supported += 1;
     if (supported / answerTokens.size < COVERAGE_ANSWER_SUPPORT) continue;
     for (const token of tokenSet(
-      `${fact.subject} ${fact.field} ${fact.sourceText} ${fact.answer}`,
+      `${fact.subject} ${fact.field} ${fact.answer} ${fact.sourceText.includes(":") ? fact.sourceText.split(":")[0] : ""}`,
     )) {
       if (lineTokens.has(token)) covered.add(token);
     }
@@ -676,10 +915,6 @@ export interface SuspectFact {
 export interface PageFactCheckResult {
   facts: ExhaustiveFact[];
   suspect: SuspectFact[];
-}
-
-function normalizeEvidence(value: string): string {
-  return value.normalize("NFKC").replace(/\s+/gu, " ").trim().toLowerCase();
 }
 
 export function checkPageFacts(
@@ -770,7 +1005,7 @@ function describeFacts(result: ExhaustivePageResult): string {
 }
 
 function exhaustivePrompt(pageRole: string, gapCandidates?: CoverageCandidate[]) {
-  const extractionInstructions = `Extract every discrete fact and every defined vocabulary term from the supplied page. Every labelled line (Label: value), every glossary entry (term — definition) and every enumerated statement must become one fact. Do not summarise or omit repeated boilerplate the first time it appears. Each fact must retain its exact sourceText and have a concise field (the label or attribute), a subject (the card, topic, term or section the fact is about), a short answer, and any acceptable answer alternatives. Include every defined term, including glossary entries and lines that list several terms. Keep the source page number. Do not infer information that is absent from the source.`;
+  const extractionInstructions = `Extract atomic claims BEFORE writing any questions: facts are subject / predicate / value triples, represented by subject / field / answer. Read ordinary prose, lists, definitions, tables, every labelled line (Label: value) and every glossary entry (term — definition). Split independent relationships, list members, contrasts, dates, quantities and locations into separate claims; never combine unrelated values into one answer. Resolve each subject from the local heading and sentence, not the document title. Use field as the specific relationship or source label, not a generic "fact" or "description". Preserve qualifications and negation. Each claim needs a unique exact contiguous sourceText quotation (include enough context to disambiguate repeated values) and the correct page. A compact legend, key or table row where short codes or column labels each precede a value on one line (for example \"COLOUR K Yellow Q Purple P Grey\") holds one independent claim per code: return a separate fact for every code and value pair, using the legend's heading with the code as the field, and never stop after the first pair. When a line inside an entity's block links that entity to another named entity (for example \"Kether: Crown — the root\" under a card), the block's entity stays the subject, the relationship is the field, and the answer names the linked entity with its description. Headings provide context, not claims. Do not infer information absent from the source. Also extract every defined vocabulary term. For vocabulary quote its definition verbatim and set context to the exact source passage, not a page reference.`;
 
   if (gapCandidates?.length) {
     return `${extractionInstructions}
@@ -790,6 +1025,7 @@ async function analyzeExhaustivePage(
   fileID: string,
   documentID: string,
   pause: (milliseconds: number) => Promise<void>,
+  options: AnalysisOptions,
 ): Promise<ExhaustivePageResult> {
   const pageRole = inferPageRole(page.text);
 
@@ -812,10 +1048,20 @@ async function analyzeExhaustivePage(
     model: "gpt-4o",
     max_tokens: OPENAI_DOCUMENT_ANALYSIS_MAX_OUTPUT_TOKENS,
     messages: [
-      { role: "system", content: systemPrompt },
+      {
+        role: "system",
+        content: systemPrompt + vocabularyInstructions(options, page.pageNumber) + "\nBefore returning, complete the procedural checklist: " +
+          "identify sourcePage; count factsReviewed and vocabularyReviewed from the returned arrays; " +
+          (isHybridVocabulary(options.vocabularySelection)
+            ? "check every vocabulary definition is supported by its context and that context is quoted from Page text; "
+            : "check every vocabulary definition is contained verbatim in its context and that context is quoted from Page text; ") +
+          "set vocabularyEvidenceChecked only after checking all entries. Review all source lines for coverage, " +
+          "set coverageReviewed, and list any still-unextracted source lines in missingSourceLines. " +
+          "Complete missing extractions before submitting. The checklist and evidence will be verified by code.",
+      },
       {
         role: "user",
-        content: `[Page ${page.pageNumber}]\nPage header context:\n${context}\nPage text:\n${text}`,
+        content: `[Page ${page.pageNumber}]\nPage header context (topic hints only; do not extract from here):\n${context}\nSource block inventory (context only; offsets are page-local UTF-16):\n${JSON.stringify(sourceEvidenceUnits(page).map(({ id, headingPath, start, end }) => ({ id, headingPath, start, end })))}\nPage text (the only source of evidence):\n${text}`,
       },
     ],
     response_format: toStrictRecallFormat(),
@@ -827,29 +1073,56 @@ async function analyzeExhaustivePage(
     },
   });
 
+  const extractWithEvidenceRepair = async (
+    request: ReturnType<typeof requestForText>,
+    sourceText: string,
+  ): Promise<ExhaustivePageResult> => {
+    let usage = EMPTY_TOKEN_USAGE;
+    for (let attempt = 0; ; attempt += 1) {
+      const completion = await createStructuredCompletion(openai, request, pause);
+      usage = addTokenUsage(usage, readTokenUsage(completion));
+      const choice = completion.choices?.[0];
+      if (choice?.finish_reason === "length") {
+        throw new IncompletePageAnalysisError("Model response was truncated by the token limit");
+      }
+      const result = parseExhaustiveResult(choice?.message?.content, page.pageNumber, sourceText,
+        isHybridVocabulary(options.vocabularySelection));
+      if (!result.reviewWarnings?.length) return { ...result, usage };
+      const reasons = result.reviewWarnings.join("; ");
+      if (attempt >= 2) {
+        console.warn(
+          `[analyzePages] Page ${page.pageNumber} requires human review after checklist repairs: ${reasons}`,
+        );
+        return { ...result, usage };
+      }
+      console.warn(
+        `[analyzePages] Repairing extraction checklist on page ${page.pageNumber} (attempt ${attempt + 1}): ${reasons}`,
+      );
+      request.messages.push(
+        { role: "assistant", content: choice.message.content },
+        {
+          role: "user",
+          content: `Checklist verification failed. Correct the extraction using only the Page text, not header context. ${reasons}. ` +
+            "Return the complete extraction and a newly completed checklist. " +
+            (isHybridVocabulary(options.vocabularySelection)
+              ? "Preserve the deterministic vocabulary shortlist and quote context verbatim; source-defined terms retain sourceDefinition, other definitions may paraphrase. "
+              : "Copy each definition and its containing context verbatim from Page text, preserving punctuation and words. ") +
+            "Do not invent evidence or omit supported vocabulary to avoid validation. " +
+            "Remove only entries not present in the supplied Page text.",
+        },
+      );
+    }
+  };
+
   const extractTextWithSplitting = async (
     text: string,
     depth: number,
   ): Promise<ExhaustivePageResult> => {
-    const completion = await createStructuredCompletion(
-      openai,
-      requestForText(text, exhaustivePrompt(pageRole)),
-      pause,
-    );
-    const choice = completion.choices?.[0];
     try {
-      if (choice?.finish_reason === "length") {
-        throw new IncompletePageAnalysisError(
-          "Model response was truncated by the token limit",
-        );
-      }
-      return {
-        ...parseExhaustiveResult(
-        choice?.message?.content,
-        page.pageNumber,
-        ),
-        usage: readTokenUsage(completion),
-      };
+      return await extractWithEvidenceRepair(
+        requestForText(text, exhaustivePrompt(pageRole), ""),
+        text,
+      );
     } catch (error) {
       if (
         !(error instanceof IncompletePageAnalysisError) ||
@@ -870,6 +1143,7 @@ async function analyzeExhaustivePage(
         facts: [...left.facts, ...right.facts],
         vocabulary: [...left.vocabulary, ...right.vocabulary],
         usage: addTokenUsage(left.usage, right.usage),
+        reviewWarnings: [...(left.reviewWarnings ?? []), ...(right.reviewWarnings ?? [])],
       };
     }
   };
@@ -878,34 +1152,41 @@ async function analyzeExhaustivePage(
   const missingCandidates = extractCoverageCandidates(page).filter(
     (candidate) => !candidateIsCovered(candidate, initial.facts),
   );
+  for (const unit of uncoveredEvidenceUnits(page, initial.facts)) {
+    if (!missingCandidates.some((candidate) => unit.text.includes(candidate.sourceText))) {
+      missingCandidates.push({ field: unit.headingPath.join(" > "), answer: "", sourceText: unit.text });
+    }
+    if (initial.reviewWarnings?.length) {
+      return { ...initial, uncoveredLines: missingCandidates.map(({ sourceText }) => sourceText) };
+    }
+  }
   if (missingCandidates.length === 0) return initial;
 
+  let gapCalls = 0;
+  const isCovered = (candidate: CoverageCandidate, facts: ExhaustiveFact[]) =>
+    candidate.answer ? candidateIsCovered(candidate, facts) :
+      !uncoveredEvidenceUnits(page, facts).some((unit) => unit.text === candidate.sourceText);
   const fillGaps = async (
     candidates: CoverageCandidate[],
     depth: number,
     stalled: number,
   ): Promise<ExhaustivePageResult> => {
+    if (gapCalls >= 8) return {
+      facts: [], vocabulary: [], usage: EMPTY_TOKEN_USAGE,
+      uncoveredLines: candidates.map(({ sourceText }) => sourceText),
+      reviewWarnings: ["Evidence-unit repair budget exhausted; coverage is not a guarantee of complete fact recall."],
+    };
+    gapCalls += 1;
     let gapFill: ExhaustivePageResult;
     try {
-      const completion = await createStructuredCompletion(
-        openai,
+      gapFill = await extractWithEvidenceRepair(
         requestForText(
           candidates.map((candidate) => candidate.sourceText).join("\n"),
           exhaustivePrompt(pageRole, candidates),
           gapFillContext,
         ),
-        pause,
+        page.text,
       );
-      if (completion.choices?.[0]?.finish_reason === "length") {
-        throw new IncompletePageAnalysisError("Gap-fill response was truncated");
-      }
-      gapFill = {
-        ...parseExhaustiveResult(
-          completion.choices?.[0]?.message?.content,
-          page.pageNumber,
-        ),
-        usage: readTokenUsage(completion),
-      };
     } catch (error) {
       if (
         !(error instanceof IncompletePageAnalysisError) ||
@@ -921,6 +1202,7 @@ async function analyzeExhaustivePage(
         facts: [...left.facts, ...right.facts],
         vocabulary: [...left.vocabulary, ...right.vocabulary],
         usage: addTokenUsage(left.usage, right.usage),
+        reviewWarnings: [...(left.reviewWarnings ?? []), ...(right.reviewWarnings ?? [])],
         uncoveredLines: [
           ...(left.uncoveredLines ?? []),
           ...(right.uncoveredLines ?? []),
@@ -929,7 +1211,7 @@ async function analyzeExhaustivePage(
     }
 
     const remaining = candidates.filter(
-      (candidate) => !candidateIsCovered(candidate, gapFill.facts),
+      (candidate) => !isCovered(candidate, gapFill.facts),
     );
     if (remaining.length > 0) {
       const progressed = remaining.length < candidates.length;
@@ -962,14 +1244,16 @@ async function analyzeExhaustivePage(
       let vocabulary = gapFill.vocabulary;
       let usage = gapFill.usage;
       let uncoveredLines: string[] = [];
+      let reviewWarnings = gapFill.reviewWarnings ?? [];
       for (const batch of retryBatches) {
         const retried = await fillGaps(batch, depth + 1, nextStalled);
         facts = [...facts, ...retried.facts];
         vocabulary = [...vocabulary, ...retried.vocabulary];
         usage = addTokenUsage(usage, retried.usage);
         uncoveredLines = [...uncoveredLines, ...(retried.uncoveredLines ?? [])];
+        reviewWarnings = [...reviewWarnings, ...(retried.reviewWarnings ?? [])];
       }
-      return { facts, vocabulary, usage, uncoveredLines };
+      return { facts, vocabulary, usage, uncoveredLines, reviewWarnings };
     }
     return gapFill;
   };
@@ -980,6 +1264,7 @@ async function analyzeExhaustivePage(
     vocabulary: [...initial.vocabulary, ...gapFill.vocabulary],
     usage: addTokenUsage(initial.usage, gapFill.usage),
     uncoveredLines: gapFill.uncoveredLines ?? [],
+    reviewWarnings: [...(initial.reviewWarnings ?? []), ...(gapFill.reviewWarnings ?? [])],
   };
 }
 
@@ -988,7 +1273,6 @@ async function analyzeExhaustivePage(
  * English plurals are handled by suffix rules in normaliseTerm.
  */
 export const IRREGULAR_PLURALS: Readonly<Record<string, string>> = {
-  sephiroth: "sephira",
   children: "child",
   people: "person",
   men: "man",
@@ -1004,7 +1288,12 @@ export const IRREGULAR_PLURALS: Readonly<Record<string, string>> = {
   theses: "thesis",
 };
 
-function normaliseTerm(term: string): string {
+/**
+ * Mirrored in src/utils/termNormalisation.ts (no cross-boundary imports
+ * between amplify/ and src/); test/unit/termNormalisation.test.ts runs the
+ * same cases against both.
+ */
+export function normaliseTerm(term: string): string {
   // Only Latin diacritics are folded away; combining marks in other scripts
   // (e.g. Japanese dakuten) are part of the letters and must survive.
   const normalized = term
@@ -1045,7 +1334,7 @@ function dedupeVocabulary(
   });
 }
 
-function toQuestion(fact: ExhaustiveFact) {
+export function toQuestion(fact: ExhaustiveFact) {
   const prompt = `What is ${fact.field} for ${fact.subject}?`;
   return {
     prompt,
@@ -1056,6 +1345,9 @@ function toQuestion(fact: ExhaustiveFact) {
     field: fact.field,
     sourceText: fact.sourceText,
     accept: fact.accept,
+    ...(fact.evidenceUnitId ? {
+      evidenceUnitId: fact.evidenceUnitId, sourceStart: fact.sourceStart, sourceEnd: fact.sourceEnd,
+    } : {}),
   };
 }
 
@@ -1128,6 +1420,23 @@ export function normaliseQuestionEntries(input: unknown): Array<
     ) {
       throw new Error(`Extracted question ${index} has invalid pages`);
     }
+    const sourceText = optionalString("sourceText");
+    const evidenceUnitId = optionalString("evidenceUnitId");
+    const offsets: Partial<Pick<EvidenceAnchor, "sourceStart" | "sourceEnd">> = {};
+    for (const key of ["sourceStart", "sourceEnd"] as const) {
+      const value = question[key];
+      if (value === undefined) continue;
+      if (typeof value !== "number" || !Number.isInteger(value) || value < 0) {
+        throw new Error(`Extracted question ${index} has an invalid ${key}`);
+      }
+      offsets[key] = value;
+    }
+    if ((evidenceUnitId !== undefined || Object.keys(offsets).length > 0) &&
+        (!evidenceUnitId?.trim() || offsets.sourceStart === undefined ||
+          offsets.sourceEnd === undefined || offsets.sourceEnd <= offsets.sourceStart ||
+          sourceText?.length !== offsets.sourceEnd - offsets.sourceStart)) {
+      throw new Error(`Extracted question ${index} has an incomplete or inconsistent evidence anchor`);
+    }
 
     return {
       prompt,
@@ -1137,9 +1446,12 @@ export function normaliseQuestionEntries(input: unknown): Array<
       questionType,
       page,
       ...(pages !== undefined ? { pages } : {}),
+      questionID: optionalString("questionID"),
       subject: optionalString("subject"),
       field: optionalString("field"),
-      sourceText: optionalString("sourceText"),
+      sourceText,
+      evidenceUnitId,
+      ...offsets,
       accept: acceptValues,
     };
   });
@@ -1152,11 +1464,21 @@ function pagesOf(entry: Record<string, unknown>): number[] {
   );
 }
 
+interface MergeOptions {
+  /** Whether `entry` restates `first`, among entries that share a key. Default: always. */
+  matches?: (first: Record<string, unknown>, entry: Record<string, unknown>) => boolean;
+  /** Prepares the entry that survives for a key, before anything is merged into it. */
+  seed?: (first: Record<string, unknown>) => void;
+  /** Carries anything else worth keeping from `entry` onto the surviving `first`. */
+  absorb?: (first: Record<string, unknown>, entry: Record<string, unknown>) => void;
+}
+
 function mergeDuplicates<T>(
   items: T[],
   keyOf: (entry: Record<string, unknown>) => string | undefined,
+  { matches, seed, absorb }: MergeOptions = {},
 ): T[] {
-  const merged = new Map<string, Record<string, unknown>>();
+  const merged = new Map<string, Array<Record<string, unknown>>>();
   const result: unknown[] = [];
   for (const item of items) {
     const entry =
@@ -1169,12 +1491,14 @@ function mergeDuplicates<T>(
       result.push(pages.length > 0 ? { ...entry, pages } : item);
       continue;
     }
-    const first = merged.get(key);
+    const candidates = merged.get(key) ?? [];
+    const first = candidates.find((candidate) => !matches || matches(candidate, entry));
     if (!first) {
       const copy = { ...entry };
       const pages = pagesOf(copy);
       if (pages.length > 0) copy.pages = pages;
-      merged.set(key, copy);
+      seed?.(copy);
+      merged.set(key, [...candidates, copy]);
       result.push(copy);
       continue;
     }
@@ -1182,6 +1506,13 @@ function mergeDuplicates<T>(
       (a, b) => a - b,
     );
     if (pages.length > 0) {
+      if (typeof entry.page === "number" && entry.page === pages[0] &&
+          first.page !== pages[0]) {
+        for (const key of ["sourceText", "evidenceUnitId", "sourceStart", "sourceEnd"]) {
+          if (entry[key] === undefined) delete first[key];
+          else first[key] = entry[key];
+        }
+      }
       first.page = pages[0];
       first.pages = pages;
     }
@@ -1193,36 +1524,367 @@ function mergeDuplicates<T>(
         ]),
       ];
     }
+    absorb?.(first, entry);
   }
   return result as T[];
 }
 
+function hasNegation(text: string): boolean {
+  return /\b(?:not|no|never|none|neither|nor|without|cannot)\b|n't/i.test(text);
+}
+
+function editDistance(a: string, b: string): number {
+  let previous = Array.from({ length: b.length + 1 }, (_, index) => index);
+  for (let i = 1; i <= a.length; i += 1) {
+    const current = [i];
+    for (let j = 1; j <= b.length; j += 1) {
+      current[j] = Math.min(
+        previous[j] + 1,
+        current[j - 1] + 1,
+        previous[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      );
+    }
+    previous = current;
+  }
+  return previous[b.length];
+}
+
+/** Shortest answer text compared by wording; below this only an exact match counts. */
+const ANSWER_MIN_FUZZY_LENGTH = 3;
+/** Share of the longer answer's text that must be unchanged for two answers to match. */
+const ANSWER_SIMILARITY = 0.85;
+/** Fewest words an answer needs before its meaning, rather than its wording, is compared. */
+const PARAPHRASE_MIN_TOKENS = 3;
+
+/** Answers that differ on a number or on negation state different facts, however close their wording. */
+export function answersConflict(left: string, right: string): boolean {
+  const numbers = (text: string) =>
+    normaliseTerm(text).split(" ").filter((token) => /\d/.test(token)).join(" ");
+  return numbers(left) !== numbers(right) || hasNegation(left) !== hasNegation(right);
+}
+
+function isOrderedSubsequence(shorter: string[], longer: string[]): boolean {
+  let next = 0;
+  for (const token of longer) {
+    if (token === shorter[next]) next += 1;
+  }
+  return next === shorter.length;
+}
+
 /**
- * Merges questions that state the same fact (same subject, field and answer)
- * so a fact repeated on several pages is kept once. The merged question keeps
- * the lowest `page` and always lists every source page in `pages`, so page
- * references survive the merge.
+ * Whether two answers to the same question say the same thing, judged on their
+ * words rather than their exact text: case, punctuation and plurals are
+ * ignored, one answer may be a fuller version of the other, and small wording
+ * differences are tolerated. Word order matters, since reordering a statement
+ * can reverse it. Answers that disagree on a number or on negation never
+ * match, however close their wording.
  */
-export function mergeDuplicateQuestions<T>(questions: T[]): T[] {
-  return mergeDuplicates(questions, (entry) => {
-    const answer = firstString(entry, ["answer"]);
-    const subject = firstString(entry, ["subject"]);
-    const field = firstString(entry, ["field"]);
-    const identity =
-      subject && field ? [subject, field] : [firstString(entry, ["prompt"])];
-    if (!answer || identity.some((part) => !part)) return undefined;
-    return [...identity, answer].map((part) => normaliseTerm(part!)).join("\u0000");
+export function answersAreSimilar(left: string, right: string): boolean {
+  const leftTokens = normaliseTerm(left).split(" ").filter(Boolean);
+  const rightTokens = normaliseTerm(right).split(" ").filter(Boolean);
+  if (leftTokens.length === 0 || rightTokens.length === 0) return false;
+  const leftText = leftTokens.join(" ");
+  const rightText = rightTokens.join(" ");
+  if (leftText === rightText) return true;
+
+  if (answersConflict(left, right)) return false;
+  // A short answer has too little text for a small difference to be wording.
+  if (Math.min(leftText.length, rightText.length) < ANSWER_MIN_FUZZY_LENGTH) return false;
+
+  const [shorter, longer] =
+    leftTokens.length <= rightTokens.length ? [leftTokens, rightTokens] : [rightTokens, leftTokens];
+  if (isOrderedSubsequence(shorter, longer)) return true;
+
+  const distance = editDistance(leftText, rightText);
+  return 1 - distance / Math.max(leftText.length, rightText.length) >= ANSWER_SIMILARITY;
+}
+
+function questionIdentity(entry: Record<string, unknown>): string | undefined {
+  if (!firstString(entry, ["answer"])) return undefined;
+  const subject = firstString(entry, ["subject"]);
+  const field = firstString(entry, ["field"]);
+  const identity =
+    subject && field ? [subject, field] : [firstString(entry, ["prompt"])];
+  if (identity.some((part) => !part)) return undefined;
+  return identity.map(normaliseTerm).join("\u0000");
+}
+
+export interface QuestionMergeOptions {
+  /** Whether two answers to one question mean the same although worded differently. */
+  sameMeaning?: (left: string, right: string) => boolean;
+}
+
+/**
+ * Merges questions that state the same fact: the same subject and field with
+ * answers that are similar in wording (see `answersAreSimilar`) or, when
+ * `sameMeaning` is given, in meaning. A fact repeated on several pages is kept
+ * once. The merged question keeps the lowest `page` and always lists every
+ * source page in `pages`; a differently worded answer is kept as an accepted
+ * answer rather than dropped.
+ */
+export function mergeDuplicateQuestions<T>(
+  questions: T[],
+  { sameMeaning }: QuestionMergeOptions = {},
+): T[] {
+  return mergeDuplicates(questions, questionIdentity, {
+    matches: (first, entry) => {
+      const left = firstString(first, ["answer"]);
+      const right = firstString(entry, ["answer"]);
+      return answersAreSimilar(left, right) || (sameMeaning?.(left, right) ?? false);
+    },
+    absorb: (first, entry) => {
+      const variant = firstString(entry, ["answer"]);
+      const known = [firstString(first, ["answer"]), ...(Array.isArray(first.accept) ? first.accept : [])];
+      if (known.some((answer) => typeof answer === "string" && normaliseTerm(answer) === normaliseTerm(variant))) {
+        return;
+      }
+      first.accept = [...(Array.isArray(first.accept) ? first.accept : []), variant];
+    },
   });
 }
 
-/** Merges vocabulary entries with the same term and definition across pages. */
-export function mergeDuplicateVocabulary<T>(entries: T[]): T[] {
-  return mergeDuplicates(entries, (entry) => {
-    const term = firstString(entry, ["word", "term"]);
-    if (!term) return undefined;
-    return [term, firstString(entry, ["definition"]) ?? ""]
-      .map(normaliseTerm)
-      .join("\u0000");
+export type EmbedTexts = (texts: string[]) => Promise<number[][]>;
+
+/**
+ * Cosine similarity at which two answers count as a paraphrase of each other,
+ * for the 384-dimension MiniLM vectors the embeddings Lambda produces. Measured
+ * on that model: genuine paraphrases score about 0.68 to 0.80, answers that
+ * differ only in a number or in negation score 0.9 and above (and are kept apart
+ * by `answersConflict`), and unrelated answers score below 0.5. 0.75 merges the
+ * paraphrases in a real 1,800-question extraction without merging any distinct
+ * fact. Re-measure before changing the embedding model.
+ */
+export const PARAPHRASE_SIMILARITY = 0.75;
+/**
+ * Cosine similarity at which two definitions of one term describe the same
+ * sense. Deliberately stricter than `PARAPHRASE_SIMILARITY`: this comparison
+ * exists to avoid overwriting a distinct sense, not to join entries, so a
+ * borderline pair should stay as two occurrences rather than collapse into
+ * one. Measured on MiniLM definitions: genuine restatements score 0.865 and
+ * above (Golgi apparatus/Golgi complex 0.958, plasma membrane/cell membrane
+ * 0.865), while terms that must stay apart peak at 0.823 (prokaryotic/
+ * eukaryotic cell, endocytosis/exocytosis).
+ */
+export const DEFINITION_SIMILARITY = 0.85;
+/** Embedding batch size; answers are short, so this keeps each Lambda response small. */
+const EMBED_BATCH_SIZE = 64;
+
+export function cosineSimilarity(left: number[], right: number[]): number {
+  let dot = 0;
+  let leftNorm = 0;
+  let rightNorm = 0;
+  for (let index = 0; index < left.length; index += 1) {
+    dot += left[index] * right[index];
+    leftNorm += left[index] ** 2;
+    rightNorm += right[index] ** 2;
+  }
+  return leftNorm === 0 || rightNorm === 0 ? 0 : dot / Math.sqrt(leftNorm * rightNorm);
+}
+
+/**
+ * `mergeDuplicateQuestions` that also merges paraphrased answers: within each
+ * subject and field whose answers differ, the answers are embedded and those
+ * whose vectors are close enough are treated as one fact. Only answers that can
+ * be confused with another answer to the same question are embedded.
+ *
+ * Short answers (names, numbers, single values) are compared on their wording
+ * only, and answers that disagree on a number or on negation never merge.
+ */
+async function embedAll(texts: string[], embed: EmbedTexts): Promise<Map<string, number[]>> {
+  const vectors = new Map<string, number[]>();
+  for (let start = 0; start < texts.length; start += EMBED_BATCH_SIZE) {
+    const batch = texts.slice(start, start + EMBED_BATCH_SIZE);
+    const embedded = await embed(batch);
+    if (embedded.length !== batch.length) {
+      throw new Error(`Embedding returned ${embedded.length} vectors for ${batch.length} answers`);
+    }
+    batch.forEach((text, index) => vectors.set(text, embedded[index]));
+  }
+  return vectors;
+}
+
+function isCloseEnough(
+  vectors: Map<string, number[]>,
+  left: string,
+  right: string,
+  threshold: number,
+): boolean {
+  const leftVector = vectors.get(left);
+  const rightVector = vectors.get(right);
+  return (
+    leftVector !== undefined &&
+    rightVector !== undefined &&
+    !answersConflict(left, right) &&
+    cosineSimilarity(leftVector, rightVector) >= threshold
+  );
+}
+
+export async function mergeDuplicateQuestionsByMeaning<T>(
+  questions: T[],
+  embed: EmbedTexts,
+  threshold: number = PARAPHRASE_SIMILARITY,
+): Promise<T[]> {
+  const answersByQuestion = new Map<string, Map<string, string>>();
+  for (const question of questions) {
+    const entry = asRecord(question);
+    const key = entry && questionIdentity(entry);
+    if (!entry || !key) continue;
+    const answer = firstString(entry, ["answer"]);
+    const answers = answersByQuestion.get(key) ?? new Map<string, string>();
+    answers.set(normaliseTerm(answer), answer);
+    answersByQuestion.set(key, answers);
+  }
+  const needed = [
+    ...new Set(
+      [...answersByQuestion.values()]
+        .filter((answers) => answers.size > 1)
+        .flatMap((answers) => [...answers.values()])
+        .filter((answer) => normaliseTerm(answer).split(" ").length >= PARAPHRASE_MIN_TOKENS),
+    ),
+  ];
+  if (needed.length < 2) return mergeDuplicateQuestions(questions);
+
+  const vectors = await embedAll(needed, embed);
+  return mergeDuplicateQuestions(questions, {
+    sameMeaning: (left, right) => isCloseEnough(vectors, left, right, threshold),
+  });
+}
+
+function textList(value: unknown): string[] {
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+/** One sense of a term: its definition and every passage and page showing it. */
+function occurrenceOf(entry: Record<string, unknown>): Record<string, unknown> {
+  const definition = firstString(entry, ["definition"]);
+  const context = firstString(entry, ["context"]);
+  const pages = pagesOf(entry);
+  return {
+    ...(definition ? { definition } : {}),
+    ...(context ? { contexts: [context] } : {}),
+    ...(pages.length > 0 ? { pages } : {}),
+  };
+}
+
+export interface VocabularyMergeOptions {
+  /** Whether two definitions of one term describe the same sense although worded differently. */
+  sameMeaning?: (left: string, right: string) => boolean;
+}
+
+/**
+ * Merges vocabulary entries for the same term. The term is the only thing that
+ * joins two entries: a term has one entry listing every page it appears on,
+ * however its definitions are worded.
+ *
+ * Definitions are compared only to decide whether a definition restates one
+ * already recorded or describes a different sense, so that a distinct sense is
+ * never overwritten by a synonym of another. They are never compared as exact
+ * text, never join entries, and never split a term into two.
+ *
+ * Each sense is kept in `occurrences` with every passage showing it, so the
+ * term can be shown in context wherever it appears. The entry's own
+ * `definition` and `context` repeat its first sense.
+ */
+export function mergeDuplicateVocabulary<T>(
+  entries: T[],
+  { sameMeaning }: VocabularyMergeOptions = {},
+): T[] {
+  const alike = (left: string, right: string) =>
+    answersAreSimilar(left, right) || (sameMeaning?.(left, right) ?? false);
+
+  const merged = mergeDuplicates(
+    entries,
+    (entry) => {
+      const term = firstString(entry, ["word", "term"]);
+      return term ? normaliseTerm(term) : undefined;
+    },
+    {
+      seed: (first) => {
+        const occurrence = occurrenceOf(first);
+        if (Object.keys(occurrence).length > 0) first.occurrences = [occurrence];
+      },
+      absorb: (first, entry) => {
+        const definition = firstString(entry, ["definition"]);
+        const context = firstString(entry, ["context"]);
+        if (!definition && !context) return;
+
+        // The entry's own fields show its first sense, so fill them from the
+        // first appearance that actually defines the term.
+        if (!firstString(first, ["definition"]) && definition) {
+          first.definition = definition;
+          if (context) first.context = context;
+        }
+
+        const occurrences = Array.isArray(first.occurrences)
+          ? (first.occurrences as Array<Record<string, unknown>>)
+          : [];
+        const sense = occurrences.find((occurrence) =>
+          alike(firstString(occurrence, ["definition"]), definition),
+        );
+        if (!sense) {
+          first.occurrences = [...occurrences, occurrenceOf(entry)];
+          return;
+        }
+        const pages = [...new Set([...pagesOf(sense), ...pagesOf(entry)])].sort((a, b) => a - b);
+        if (pages.length > 0) sense.pages = pages;
+        const contexts = textList(sense.contexts);
+        if (context && !contexts.some((shown) => answersAreSimilar(shown, context))) {
+          sense.contexts = [...contexts, context];
+        }
+        if (!firstString(sense, ["definition"]) && definition) sense.definition = definition;
+      },
+    },
+  );
+
+  // A term with one sense shown in one passage is fully described by the
+  // entry's own fields, so listing that sense again would only repeat it.
+  for (const value of merged) {
+    const entry = asRecord(value);
+    const occurrences = entry && Array.isArray(entry.occurrences)
+      ? (entry.occurrences as Array<Record<string, unknown>>)
+      : undefined;
+    if (entry && occurrences?.length === 1 && textList(occurrences[0].contexts).length <= 1) {
+      delete entry.occurrences;
+    }
+  }
+  return merged;
+}
+
+/**
+ * `mergeDuplicateVocabulary` that also recognises definitions which mean the
+ * same although worded differently, so one is not kept as a separate sense of
+ * the term. Only terms defined more than once are embedded, and only their
+ * definitions are compared, so a term is never joined to a different term.
+ */
+export async function mergeDuplicateVocabularyByMeaning<T>(
+  entries: T[],
+  embed: EmbedTexts,
+  threshold: number = DEFINITION_SIMILARITY,
+): Promise<T[]> {
+  const definitionsByTerm = new Map<string, Map<string, string>>();
+  for (const value of entries) {
+    const entry = asRecord(value);
+    const term = entry && firstString(entry, ["word", "term"]);
+    const definition = entry ? firstString(entry, ["definition"]) : "";
+    if (!entry || !term || !definition) continue;
+    const key = normaliseTerm(term);
+    const definitions = definitionsByTerm.get(key) ?? new Map<string, string>();
+    definitions.set(normaliseTerm(definition), definition);
+    definitionsByTerm.set(key, definitions);
+  }
+  const needed = [
+    ...new Set(
+      [...definitionsByTerm.values()]
+        .filter((definitions) => definitions.size > 1)
+        .flatMap((definitions) => [...definitions.values()])
+        .filter((definition) => normaliseTerm(definition).split(" ").length >= PARAPHRASE_MIN_TOKENS),
+    ),
+  ];
+  if (needed.length < 2) return mergeDuplicateVocabulary(entries);
+
+  const vectors = await embedAll(needed, embed);
+  return mergeDuplicateVocabulary(entries, {
+    sameMeaning: (left, right) => isCloseEnough(vectors, left, right, threshold),
   });
 }
 
@@ -1259,6 +1921,7 @@ async function analyzePagesExhaustively(
           fileID,
           documentID,
           options.sleep ?? sleep,
+          options,
         );
       } catch (error) {
         failedPages.push({ page: page.pageNumber, error });
@@ -1297,7 +1960,23 @@ async function analyzePagesExhaustively(
   const extractedPages = results.filter(
     (result): result is ExhaustivePageResult => result !== undefined,
   );
-  const facts = extractedPages.flatMap((result) => result.facts);
+  const facts = results.flatMap((result, index) => (result?.facts ?? []).flatMap((fact) => {
+    const anchor = fact.page === pages[index].pageNumber ? locateEvidence(pages[index], fact.sourceText) : undefined;
+    if (!anchor) {
+      (result!.reviewWarnings ??= []).push(entryReviewWarning(
+        "question",
+        fact.subject,
+        fact.field,
+        ["its quotation is not found exactly once on the page it names"],
+      ));
+      const unanchored = { ...fact };
+      delete unanchored.evidenceUnitId;
+      delete unanchored.sourceStart;
+      delete unanchored.sourceEnd;
+      return [unanchored];
+    }
+    return [{ ...fact, ...anchor }];
+  }));
   const vocabulary = dedupeVocabulary(
     extractedPages.flatMap((result) => result.vocabulary),
   );
@@ -1306,6 +1985,12 @@ async function analyzePagesExhaustively(
     (result?.uncoveredLines ?? []).map((line) => ({
       page: pages[index].pageNumber,
       line,
+    })),
+  );
+  const reviewWarnings = results.flatMap((result, index) =>
+    (result?.reviewWarnings ?? []).map((message) => ({
+      page: pages[index].pageNumber,
+      message,
     })),
   );
 
@@ -1325,6 +2010,7 @@ async function analyzePagesExhaustively(
       EMPTY_TOKEN_USAGE,
     ),
     ...(uncoveredLines.length > 0 ? { uncoveredLines } : {}),
+    ...(reviewWarnings.length > 0 ? { reviewWarnings } : {}),
   };
 }
 
@@ -1333,6 +2019,47 @@ async function analyzePagesExhaustively(
  * prompt; exhaustive mode uses page-sized structured extraction and coverage.
  */
 export async function analyzePages(
+  openai: any,
+  pages: AnalysisPage[],
+  fileID: string,
+  documentID: string,
+  options: AnalysisOptions = {},
+): Promise<AnalysisResult> {
+  if (!isHybridVocabulary(options.vocabularySelection)) {
+    return analyzePagesCore(openai, pages, fileID, documentID, options);
+  }
+  if (options.vocabularySelection === "hybrid-native" && !options.vocabularyCandidates) {
+    throw new Error("Native vocabulary requires a precomputed document-wide shortlist");
+  }
+  const candidates = options.vocabularyCandidates ?? selectVocabulary(pages);
+  const result = await analyzePagesCore(openai, pages, fileID, documentID, {
+    ...options, vocabularyCandidates: candidates,
+  });
+  const reviewWarnings = [...(result.reviewWarnings ?? [])];
+  const vocabularyJSON = candidates.map((candidate) => {
+    const generated = result.vocabularyJSON.find((entry) =>
+      typeof entry.word === "string" && entry.word.normalize("NFKC").toLowerCase() === candidate.term.normalize("NFKC").toLowerCase() &&
+      entry.page === candidate.page,
+    );
+    const definition = candidate.sourceDefinition ??
+      (typeof generated?.definition === "string" ? generated.definition : "");
+    if (!definition.trim()) {
+      reviewWarnings.push({ page: candidate.page,
+        message: `Vocabulary "${candidate.term}" needs a human-written definition; the model did not provide one` });
+    }
+    return { word: candidate.term, definition, context: candidate.sourceText, page: candidate.page };
+  });
+  const unselected = result.vocabularyJSON.filter((entry) => !candidates.some((candidate) =>
+    typeof entry.word === "string" && entry.word.normalize("NFKC").toLowerCase() === candidate.term.normalize("NFKC").toLowerCase() &&
+    entry.page === candidate.page));
+  if (unselected.length) console.warn(`[analyzePages] Dropped ${unselected.length} vocabulary entries outside the deterministic shortlist`);
+  if (reviewWarnings.length > (result.reviewWarnings?.length ?? 0)) {
+    console.warn("[analyzePages] Deterministically selected vocabulary includes missing definitions requiring human review");
+  }
+  return { ...result, vocabularyJSON, ...(reviewWarnings.length ? { reviewWarnings } : {}) };
+}
+
+async function analyzePagesCore(
   openai: any,
   pages: AnalysisPage[],
   fileID: string,
@@ -1358,6 +2085,7 @@ export async function analyzePages(
   const allObjectives: any[] = [];
   const allConcepts: any[] = [];
   const allQuestions: any[] = [];
+  const reviewWarnings: Array<{ page: number; message: string }> = [];
   const failedBatches: string[] = [];
   let usage = EMPTY_TOKEN_USAGE;
 
@@ -1385,26 +2113,21 @@ export async function analyzePages(
               messages: [
                 {
                   role: "system",
-                  content: `Extract vocabulary, summaries, objectives, concepts, and generate questions from educational text. Return JSON: {
+                  content: `Extract vocabulary, summaries, objectives, concepts, and atomic claims from educational text. Return JSON: {
   vocabularyJSON: [{word, definition, context, page}],
   summariesJSON: [{title, content, page_range}],
   objectivesJSON: [{objective, bloom_level}],
   conceptsJSON: [{concept, description, related_vocabulary}],
-  questionsJSON: [{prompt, answer, hint, difficulty, questionType, page, subject, field, sourceText}]
+  factsJSON: [{subject, field, answer, accept: [], page, sourceText}]
 }
 
-For questionsJSON, generate 2-3 custom answer questions per batch that test comprehension. Questions should be open-ended, requiring thoughtful responses. Include:
-- prompt: The question text
-- answer: A sample correct answer (200-300 words)
-- hint: A helpful hint for students (optional)
-- difficulty: "easy", "medium", or "hard"
-- questionType: "short_answer", "essay", or "comprehension"
-- page: the page number containing the evidence
-- subject: the card, topic, or section the question is about
-- field: the specific fact or concept being tested
-- sourceText: the source passage supporting the answer
+${exhaustivePrompt("content")}
+Do not render questions: code renders one recall question per atomic claim.
 
-Include the page number in all extracted items.`,
+Include the page number in all extracted items.${vocabularyInstructions({
+  ...options, vocabularyCandidates: options.vocabularyCandidates?.filter((candidate) =>
+    batch.some((page) => page.pageNumber === candidate.page)),
+})}`,
                 },
                 { role: "user", content: `Extract from:\n\n${batchText}` },
               ],
@@ -1430,6 +2153,41 @@ Include the page number in all extracted items.`,
             );
           }
           const batchContent = JSON.parse(content);
+          if (!Array.isArray(batchContent.factsJSON)) {
+            throw new Error("Standard extraction must return atomic factsJSON");
+          }
+          const questions: ReturnType<typeof toQuestion>[] = [];
+          for (const raw of batchContent.factsJSON as unknown[]) {
+            const fact = asRecord(raw);
+            if (!fact || typeof fact.subject !== "string" || !fact.subject.trim() ||
+                typeof fact.field !== "string" || !fact.field.trim() ||
+                typeof fact.answer !== "string" || !fact.answer.trim() ||
+                typeof fact.sourceText !== "string" || typeof fact.page !== "number" ||
+                !Array.isArray(fact.accept) || !fact.accept.every((item) => typeof item === "string")) {
+              throw new Error("Invalid atomic claim in standard extraction");
+            }
+            const page = batch.find((item) => item.pageNumber === fact.page);
+            const anchor = page ? locateEvidence(page, fact.sourceText) : undefined;
+            if (!anchor || (page && checkPageFacts(page, [{
+              subject: fact.subject, field: fact.field, answer: fact.answer,
+              sourceText: fact.sourceText, page: fact.page, accept: [],
+            }]).suspect.length)) {
+              reviewWarnings.push({ page: page?.pageNumber ?? batch[0].pageNumber,
+                message: "An atomic claim lacks exact source support and requires human review." });
+            }
+            questions.push(toQuestion({
+              subject: fact.subject, field: fact.field, answer: fact.answer,
+              sourceText: fact.sourceText, page: fact.page, accept: fact.accept as string[], ...anchor,
+            }));
+          }
+          batchContent.questionsJSON = questions;
+          for (const page of batch) {
+            const missing = uncoveredEvidenceUnits(page, questions.map((question) => ({
+              ...question, accept: question.accept ?? [],
+            })));
+            if (missing.length) reviewWarnings.push({ page: page.pageNumber,
+              message: `${missing.length} source evidence units have no anchored claim; standard mode does not repair coverage. This is not a measure of complete fact recall.` });
+          }
 
           console.log(`[analyzePages] Batch ${pageNumbers} complete:`, {
             vocabulary: batchContent.vocabularyJSON?.length || 0,
@@ -1529,5 +2287,6 @@ Include the page number in all extracted items.`,
     conceptsJSON: allConcepts,
     questionsJSON: allQuestions,
     usage,
+    ...(reviewWarnings.length ? { reviewWarnings } : {}),
   };
 }

@@ -30,6 +30,7 @@ export const Learn = ({
   promptFor = "definition",
   showAudio = true,
   showPronunciation = true,
+  readOnly = false,
 }) => {
   const t = useTranslations("components");
   const resolvedNextModeLabel =
@@ -157,6 +158,7 @@ export const Learn = ({
   }, [inProgress?.learn?.attemptedAnswers]);
 
   async function progressAssignment(draggedWordID, targetWordID) {
+    if (readOnly) return;
     // Verify the match is correct
     if (draggedWordID !== targetWordID) {
       console.error(
@@ -255,6 +257,7 @@ export const Learn = ({
   }
 
   async function sendFail(draggedWordID, targetWordID) {
+    if (readOnly) return;
     let _attemptedAnswers = JSON.parse(
       JSON.stringify(attemptedAnswersRef.current),
     );
@@ -353,7 +356,7 @@ export const Learn = ({
         maxWidth: "100vw",
       }}
     >
-      {showCompletion ? (
+      {showCompletion || readOnly ? (
         /* Completed state: show all drop targets as a full list with pass/fail marks */
         <Box
           sx={{
@@ -383,13 +386,15 @@ export const Learn = ({
               })}
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleDismissCompletion}
-              >
-                {t("meaningAssociationExercise.back")}
-              </Button>
+              {!readOnly && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleDismissCompletion}
+                >
+                  {t("meaningAssociationExercise.back")}
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color={nextMode ? "primary" : "success"}

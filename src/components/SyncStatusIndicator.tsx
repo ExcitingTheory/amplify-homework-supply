@@ -77,12 +77,16 @@ export default function SyncStatusIndicator() {
       let gradeId = "unknown";
       let localData = {};
       let localVersion: number | undefined;
+      let outsideSectionDateRange: boolean | undefined;
 
       if (op.payload) {
         const parsed = JSON.parse(op.payload);
         gradeId = parsed.id || "grade-sync";
         localData = parsed.data ? JSON.parse(parsed.data) : {};
         localVersion = parsed._version;
+        if (typeof parsed.outsideSectionDateRange === "boolean") {
+          outsideSectionDateRange = parsed.outsideSectionDateRange;
+        }
       }
 
       // Try fetching server grade for comparison
@@ -109,6 +113,7 @@ export default function SyncStatusIndicator() {
         gradeId,
         localVersion,
         serverVersion,
+        outsideSectionDateRange,
         localData,
         serverData,
         requiresInstructorReview:
@@ -133,6 +138,9 @@ export default function SyncStatusIndicator() {
       await client.models.Grade.update({
         id: activeConflict.gradeId,
         data: JSON.stringify(result.mergedData),
+        ...(activeConflict.outsideSectionDateRange !== undefined && {
+          outsideSectionDateRange: activeConflict.outsideSectionDateRange,
+        }),
         _version: activeConflict.serverVersion,
       });
 

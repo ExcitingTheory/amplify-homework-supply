@@ -101,7 +101,6 @@ describe("importQuestionsToUnit", () => {
       questionID: "q-A?",
       documentID: "doc-1",
       owner: "owner",
-      entryKey: "a?",
     });
     expect(models.ParsedContent.update.mock.calls[0][0]).toMatchObject({
       id: "doc-1-chunk-0",
@@ -110,16 +109,18 @@ describe("importQuestionsToUnit", () => {
     });
   });
 
-  it("records the page and source text on the document link", async () => {
+  it("links the question to its document without copying where the entry came from", async () => {
     givenChunks(
-      chunk(0, 1, [{ prompt: "Where?", answer: "Here", page: 4, sourceText: "  It is here.  " }]),
+      chunk(0, 1, [{ prompt: "Where?", answer: "Here", pages: [4], sourceText: "  It is here.  " }]),
     );
 
     await importQuestionsToUnit("doc-1-chunk-0", "unit-1", null, "owner", "identity");
 
-    expect(models.DocumentQuestion.create).toHaveBeenCalledWith(
-      expect.objectContaining({ page: 4, sourceText: "It is here.", entryKey: "where?" }),
-    );
+    expect(models.DocumentQuestion.create).toHaveBeenCalledWith({
+      questionID: "q-Where?",
+      documentID: "doc-1",
+      owner: "owner",
+    });
   });
 
   it("loads the document's links once and does not link a question twice", async () => {
@@ -130,7 +131,7 @@ describe("importQuestionsToUnit", () => {
       ]),
     );
     models.DocumentQuestion.list.mockResolvedValue({
-      data: [{ id: "dq-1", documentID: "doc-1", questionID: "q-A?", entryKey: "a?" }],
+      data: [{ id: "dq-1", documentID: "doc-1", questionID: "q-A?" }],
     });
 
     await importQuestionsToUnit("doc-1-chunk-0", "unit-1", null, "owner", "identity");
@@ -150,7 +151,6 @@ describe("importQuestionsToUnit", () => {
           id: "dq-1",
           documentID: "doc-1",
           questionID: "q-A?",
-          entryKey: "a?",
           deletedAt: "2026-10-01T00:00:00.000Z",
         },
       ],
@@ -176,8 +176,55 @@ describe("importQuestionsToUnit", () => {
       "B?",
       "C?",
     ]);
-    expect(models.ParsedContent.update).toHaveBeenCalledTimes(1);
-    expect(models.ParsedContent.update.mock.calls[0][0]).toMatchObject({ id: "doc-1-chunk-0" });
+    // Only the primary record is marked imported; then each chunk is written once to record the ids
+    const updates = models.ParsedContent.update.mock.calls.map(([input]) => input);
+    expect(updates.filter((input) => "importedAt" in input).map((input) => input.id)).toEqual(["doc-1-chunk-0"]);
+    expect(updates.filter((input) => "questionsJSON" in input).map((input) => input.id).sort()).toEqual([
+      "doc-1-chunk-0",
+      "doc-1-chunk-1",
+    ]);
+  });
+
+  it("records on each entry the Question it became, so it can be found later without matching text", async () => {
+    givenChunks(
+      chunk(0, 2, [{ prompt: "A?", answer: "a", pages: [1] }, { prompt: "B?", answer: "b" }]),
+      chunk(1, 2, [{ prompt: "C?", answer: "c" }]),
+    );
+    // "B?" already exists in the bank, so its entry points at that existing Question
+    const bank = [{ id: "existing-b", prompt: "B?" }];
+    // Existing questions are now looked up for the whole batch in one query.
+    models.Question.list.mockImplementation(async ({ filter }: Row) => ({
+      data: bank.filter((entry) =>
+        filter.or.some(({ prompt }: Row) => prompt.eq === entry.prompt),
+      ),
+    }));
+
+    const result = await importQuestionsToUnit("doc-1-chunk-0", "unit-1", [0, 1, 2], "o", "i");
+
+    expect(result).toMatchObject({ success: true });
+    const written = Object.fromEntries(
+      models.ParsedContent.update.mock.calls
+        .map(([input]) => input)
+        .filter((input) => "questionsJSON" in input)
+        .map((input) => [input.id, input.questionsJSON]),
+    );
+    expect(written["doc-1-chunk-0"]).toEqual([
+      { prompt: "A?", answer: "a", pages: [1], questionID: "q-A?" },
+      { prompt: "B?", answer: "b", questionID: "existing-b" },
+    ]);
+    expect(written["doc-1-chunk-1"]).toEqual([{ prompt: "C?", answer: "c", questionID: "q-C?" }]);
+  });
+
+  it("only records the entries that were imported and keeps going when recording fails", async () => {
+    givenChunks(chunk(0, 1, [{ prompt: "A?", answer: "a" }, { prompt: "B?", answer: "b" }]));
+    models.ParsedContent.update.mockImplementation(async (input: Row) =>
+      "questionsJSON" in input ? { data: null, errors: [{ message: "conflict" }] } : { data: {} },
+    );
+
+    const result = await importQuestionsToUnit("doc-1-chunk-0", "unit-1", [1], "o", "i");
+
+    expect(result).toMatchObject({ success: true, imported: 1 });
+    expect(result.warning).toContain("conflict");
   });
 
   it("selects questions by their position in the merged list", async () => {
@@ -221,7 +268,7 @@ describe("updateQuestionItem", () => {
   it("writes typed entries with only declared fields and the record version", async () => {
     givenChunks(
       chunk(0, 1, [
-        { prompt: "A?", answer: "a", hint: null, page: 1 },
+        { prompt: "A?", answer: "a", hint: null, pages: [1] },
         { prompt: "B?", answer: "b" },
       ]),
     );
@@ -233,7 +280,7 @@ describe("updateQuestionItem", () => {
       id: "doc-1-chunk-0",
       _version: 3,
       questionsJSON: [
-        { prompt: "A?", answer: "edited", page: 1 },
+        { prompt: "A?", answer: "edited", pages: [1] },
         { prompt: "B?", answer: "b" },
       ],
     });

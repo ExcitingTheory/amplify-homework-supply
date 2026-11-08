@@ -438,7 +438,6 @@ export const Welcome: Story = {
             id="platform-features"
             variant="h4"
             component="h2"
-            component="h2"
             sx={{ color: "text.primary", mb: 1, fontWeight: 700 }}
           >
             Platform Features

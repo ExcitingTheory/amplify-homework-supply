@@ -1,360 +1,86 @@
-import type { Handler } from "aws-lambda";
+import type { Handler, SQSEvent } from "aws-lambda";
 import {
   S3Client,
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
   ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
-import { pipeline, env } from "@huggingface/transformers";
+import {
+  EMBEDDING_DIMENSIONS,
+  IVF_THRESHOLD,
+  l2Normalize,
+  buildIndex,
+  applyItemDelta,
+  type BundleItem,
+  type DeltaResult,
+  type ItemDelta,
+  type SearchBundle,
+} from "./searchIndex";
 
 const s3 = new S3Client({});
 const BUCKET = process.env.AMPLIFY_STORAGE_BUCKET_NAME || "";
 
-const EMBEDDING_DIMENSIONS = 384;
 const EMBEDDING_MODEL = "Xenova/all-MiniLM-L6-v2";
-const IVF_THRESHOLD = 200;
-const HNSW_THRESHOLD = 5000;
 
 // Singleton embedding pipeline
 let embeddingPipeline: any = null;
 
-// --- Types ---
-
-interface BundleItem {
-  id: string;
-  type: "unit" | "file" | "word" | "question" | "section";
-  title: string;
-  embedding: number[];
-  meta: {
-    page?: number;
-    unitId?: string;
-    preview?: string;
-  };
+/** Records a unit uses, taken from its UnitWord / QuestionUnit / UnitFile joins. */
+export interface UnitMembers {
+  word?: string[];
+  question?: string[];
+  file?: string[];
 }
 
-interface IVFIndex {
-  strategy: "ivf";
-  k: number;
-  nProbe: number;
-  centroids: number[][];
-  assignments: number[];
-}
-
-interface LinearIndex {
-  strategy: "linear";
-}
-
-interface HNSWIndex {
-  strategy: "hnsw";
-  M: number;
-  efSearch: number;
-  layers: number[][][];
-  entryPoint: number;
-  nodeLevels: number[];
-}
-
-interface SearchBundle {
-  version: number;
-  dimensions: number;
-  model: string;
-  index: IVFIndex | LinearIndex | HNSWIndex;
-  items: BundleItem[];
+/** A section that assigns the published unit, with every unit it assigns. */
+export interface SectionUnits {
+  sectionId: string;
+  unitIds: string[];
 }
 
 interface LambdaEvent {
-  source: "unit-publish" | "content-update" | "admin-reindex";
-  identityId: string;
+  /**
+   * "unit-publish" builds the unit's bundle (and its sections' bundles) from
+   * `members`. "platform-reindex" rebuilds every instructor bundle plus the
+   * platform bundle and needs no identityId (identities come from S3).
+   */
+  source:
+    | "unit-publish"
+    | "content-update"
+    | "admin-reindex"
+    | "platform-reindex";
+  identityId?: string;
   unitId?: string;
+  unitName?: string;
+  members?: UnitMembers;
+  sections?: SectionUnits[];
   force?: boolean;
 }
 
-// --- K-Means IVF Implementation ---
-
-function dotProduct(a: number[], b: number[]): number {
-  let sum = 0;
-  for (let i = 0; i < a.length; i++) {
-    sum += a[i] * b[i];
-  }
-  return sum;
-}
-
-function l2Normalize(v: number[]): number[] {
-  let norm = 0;
-  for (let i = 0; i < v.length; i++) norm += v[i] * v[i];
-  norm = Math.sqrt(norm);
-  if (norm === 0) return v;
-  return v.map((x) => x / norm);
-}
-
-function initCentroidsKMeansPlusPlus(
-  vectors: number[][],
-  k: number,
-): number[][] {
-  const centroids: number[][] = [];
-  // Pick first centroid uniformly at random
-  centroids.push([...vectors[Math.floor(Math.random() * vectors.length)]]);
-
-  for (let c = 1; c < k; c++) {
-    // Compute distances to nearest centroid
-    const distances = vectors.map((v) => {
-      let minDist = Infinity;
-      for (const centroid of centroids) {
-        const dist = 1 - dotProduct(v, centroid); // cosine distance for L2-normalized vectors
-        if (dist < minDist) minDist = dist;
-      }
-      return minDist;
-    });
-
-    // Weighted random selection
-    const totalDist = distances.reduce((a, b) => a + b, 0);
-    let r = Math.random() * totalDist;
-    let idx = 0;
-    for (let i = 0; i < distances.length; i++) {
-      r -= distances[i];
-      if (r <= 0) {
-        idx = i;
-        break;
-      }
-    }
-    centroids.push([...vectors[idx]]);
-  }
-  return centroids;
-}
-
-function runKMeans(
-  vectors: number[][],
-  k: number,
-  iterations = 20,
-): { centroids: number[][]; assignments: number[] } {
-  const centroids = initCentroidsKMeansPlusPlus(vectors, k);
-  const assignments = new Array(vectors.length).fill(0);
-
-  for (let iter = 0; iter < iterations; iter++) {
-    // Assign each vector to nearest centroid
-    for (let i = 0; i < vectors.length; i++) {
-      let bestDist = -Infinity;
-      let bestCluster = 0;
-      for (let c = 0; c < k; c++) {
-        const sim = dotProduct(vectors[i], centroids[c]);
-        if (sim > bestDist) {
-          bestDist = sim;
-          bestCluster = c;
-        }
-      }
-      assignments[i] = bestCluster;
-    }
-
-    // Recompute centroids
-    for (let c = 0; c < k; c++) {
-      const members = vectors.filter((_, i) => assignments[i] === c);
-      if (members.length === 0) continue;
-      const dim = vectors[0].length;
-      const newCentroid = new Array(dim).fill(0);
-      for (const m of members) {
-        for (let d = 0; d < dim; d++) newCentroid[d] += m[d];
-      }
-      for (let d = 0; d < dim; d++) newCentroid[d] /= members.length;
-      centroids[c] = l2Normalize(newCentroid);
-    }
-  }
-
-  return { centroids, assignments: Array.from(assignments) };
-}
-
-function buildIndex(vectors: number[][]): SearchBundle["index"] {
-  if (vectors.length <= IVF_THRESHOLD) {
-    return { strategy: "linear" };
-  }
-  if (vectors.length >= HNSW_THRESHOLD) {
-    return buildHnswIndex(vectors);
-  }
-  const k = Math.ceil(Math.sqrt(vectors.length));
-  const nProbe = Math.max(2, Math.ceil(k * 0.1));
-  const normalized = vectors.map(l2Normalize);
-  const { centroids, assignments } = runKMeans(normalized, k);
-  return { strategy: "ivf", k, nProbe, centroids, assignments };
-}
-
-// ─── HNSW Graph Builder ───────────────────────────────────────────────────────
+export const PLATFORM_BUNDLE_KEY = "admin/search-index/platform.json";
 
 /**
- * Build an HNSW (Hierarchical Navigable Small World) graph for ANN search.
- * Used for platform-wide bundles with >5000 items.
- *
- * Parameters:
- *   M = 16 (max connections per node per layer)
- *   efConstruction = 200 (beam width during build)
- *   mL = 1/ln(M) (level generation factor)
+ * Unit and section bundles are keyed by their own id, outside every
+ * client-readable storage prefix. Reads go through /api/search-bundle, which
+ * checks that the caller is enrolled in (or owns) the unit or section.
  */
-function buildHnswIndex(
-  vectors: number[][],
-  M = 16,
-  efConstruction = 200,
-): HNSWIndex {
-  const n = vectors.length;
-  const mL = 1.0 / Math.log(M);
-  const efSearch = 50;
-
-  // Normalize all vectors
-  const normalized = vectors.map(l2Normalize);
-
-  // Assign random levels to each node
-  const nodeLevels: number[] = [];
-  let maxLevel = 0;
-  for (let i = 0; i < n; i++) {
-    const level = Math.floor(-Math.log(Math.random()) * mL);
-    nodeLevels.push(level);
-    if (level > maxLevel) maxLevel = level;
-  }
-
-  // Initialize layers: layers[level][nodeIndex] = neighbors
-  const layers: number[][][] = [];
-  for (let l = 0; l <= maxLevel; l++) {
-    layers.push(Array.from({ length: n }, () => []));
-  }
-
-  let entryPoint = 0;
-  let entryLevel = nodeLevels[0];
-
-  // Insert nodes one by one
-  for (let i = 1; i < n; i++) {
-    const nodeLevel = nodeLevels[i];
-    let currEntry = entryPoint;
-
-    // Greedy descent from top to nodeLevel+1
-    for (let level = entryLevel; level > nodeLevel; level--) {
-      currEntry = greedyClosest(
-        normalized[i],
-        normalized,
-        layers[level],
-        currEntry,
-      );
-    }
-
-    // Insert at each level from min(nodeLevel, entryLevel) down to 0
-    const startLevel = Math.min(nodeLevel, entryLevel);
-    let entryPoints = [currEntry];
-
-    for (let level = startLevel; level >= 0; level--) {
-      // Find efConstruction nearest neighbors at this level
-      const nearest = searchLayerBuild(
-        normalized[i],
-        normalized,
-        layers[level],
-        entryPoints,
-        efConstruction,
-      );
-
-      // Select M best neighbors
-      const neighbors = nearest.slice(0, M).map((n) => n.idx);
-
-      // Add bidirectional edges
-      layers[level][i] = neighbors;
-      for (const neighborIdx of neighbors) {
-        const nNeighbors = layers[level][neighborIdx];
-        nNeighbors.push(i);
-        // Prune if exceeding M connections
-        if (nNeighbors.length > M) {
-          // Keep only M closest
-          const scored = nNeighbors.map((idx) => ({
-            idx,
-            score: dotProduct(normalized[neighborIdx], normalized[idx]),
-          }));
-          scored.sort((a, b) => b.score - a.score);
-          layers[level][neighborIdx] = scored.slice(0, M).map((s) => s.idx);
-        }
-      }
-
-      // Entry points for next level down
-      entryPoints = nearest.map((n) => n.idx);
-    }
-
-    // Update entry point if new node has higher level
-    if (nodeLevel > entryLevel) {
-      entryPoint = i;
-      entryLevel = nodeLevel;
-    }
-  }
-
-  return {
-    strategy: "hnsw",
-    M,
-    efSearch,
-    layers,
-    entryPoint,
-    nodeLevels,
-  };
-}
-
-function greedyClosest(
-  query: number[],
-  allVectors: number[][],
-  layerNeighbors: number[][],
-  start: number,
-): number {
-  let current = start;
-  let bestScore = dotProduct(query, allVectors[current]);
-
-  let improved = true;
-  while (improved) {
-    improved = false;
-    for (const neighbor of layerNeighbors[current] || []) {
-      const score = dotProduct(query, allVectors[neighbor]);
-      if (score > bestScore) {
-        bestScore = score;
-        current = neighbor;
-        improved = true;
-      }
-    }
-  }
-  return current;
-}
-
-function searchLayerBuild(
-  query: number[],
-  allVectors: number[][],
-  layerNeighbors: number[][],
-  entryPoints: number[],
-  ef: number,
-): Array<{ idx: number; score: number }> {
-  const visited = new Set<number>(entryPoints);
-  const candidates: Array<{ idx: number; score: number }> = [];
-  const results: Array<{ idx: number; score: number }> = [];
-
-  for (const ep of entryPoints) {
-    const score = dotProduct(query, allVectors[ep]);
-    candidates.push({ idx: ep, score });
-    results.push({ idx: ep, score });
-  }
-
-  candidates.sort((a, b) => b.score - a.score);
-  results.sort((a, b) => b.score - a.score);
-
-  while (candidates.length > 0) {
-    const current = candidates.shift()!;
-    if (
-      results.length >= ef &&
-      current.score < results[results.length - 1].score
-    )
-      break;
-
-    for (const neighborIdx of layerNeighbors[current.idx] || []) {
-      if (visited.has(neighborIdx)) continue;
-      visited.add(neighborIdx);
-
-      const score = dotProduct(query, allVectors[neighborIdx]);
-      if (results.length < ef || score > results[results.length - 1].score) {
-        candidates.push({ idx: neighborIdx, score });
-        results.push({ idx: neighborIdx, score });
-        results.sort((a, b) => b.score - a.score);
-        if (results.length > ef) results.pop();
-        candidates.sort((a, b) => b.score - a.score);
-      }
-    }
-  }
-
-  return results;
-}
+export const unitBundleKey = (unitId: string) =>
+  `search-index/unit/${unitId}.json`;
+export const sectionBundleKey = (sectionId: string) =>
+  `search-index/section/${sectionId}.json`;
+/**
+ * An instructor's bundle covers all of their content and must stay private to
+ * them (admins read the platform bundle). It is keyed by identity outside
+ * every client-readable prefix and served only to its owner by /api/search-bundle.
+ */
+export const instructorBundleKey = (identityId: string) =>
+  `search-index/instructor/${identityId}.json`;
+const REBUILD_LOCK_KEY = "admin/search-index/.rebuild-lock";
+// A full rebuild is capped by the Lambda timeout (15 min); a lock older than
+// this belongs to a crashed run and may be taken over.
+const REBUILD_LOCK_TTL_MS = 20 * 60 * 1000;
+const MAX_DELTA_ATTEMPTS = 5;
 
 // --- S3 Helpers ---
 
@@ -381,6 +107,59 @@ async function writeS3JSON(key: string, data: any): Promise<void> {
   );
 }
 
+const statusOf = (err: any): number | undefined =>
+  err?.$metadata?.httpStatusCode;
+
+const isNotFound = (err: any): boolean =>
+  err?.name === "NoSuchKey" || err?.name === "NotFound" || statusOf(err) === 404;
+
+/** A conditional write lost to a concurrent writer (412) or in-flight write (409). */
+const isWriteConflict = (err: any): boolean =>
+  err?.name === "PreconditionFailed" ||
+  err?.name === "ConditionalRequestConflict" ||
+  statusOf(err) === 412 ||
+  statusOf(err) === 409;
+
+/**
+ * Reads JSON plus its ETag. Returns null only when the object does not exist;
+ * any other failure throws so a transient error is never mistaken for a delete.
+ */
+async function readS3JSONStrict(
+  key: string,
+): Promise<{ data: any; etag?: string } | null> {
+  try {
+    const resp = await s3.send(
+      new GetObjectCommand({ Bucket: BUCKET, Key: key }),
+    );
+    const body = await resp.Body?.transformToString();
+    return body ? { data: JSON.parse(body), etag: resp.ETag } : null;
+  } catch (err) {
+    if (isNotFound(err)) return null;
+    throw err;
+  }
+}
+
+/** Immediate "folders" under a prefix, e.g. `private/{identityId}/`. */
+async function listS3Prefixes(prefix: string): Promise<string[]> {
+  const prefixes: string[] = [];
+  let continuationToken: string | undefined;
+  do {
+    const resp = await s3.send(
+      new ListObjectsV2Command({
+        Bucket: BUCKET,
+        Prefix: prefix,
+        Delimiter: "/",
+        ContinuationToken: continuationToken,
+      }),
+    );
+    for (const common of resp.CommonPrefixes || []) {
+      if (common.Prefix) prefixes.push(common.Prefix);
+    }
+    continuationToken = resp.NextContinuationToken;
+  } while (continuationToken);
+  return prefixes;
+}
+
 async function listS3Prefix(prefix: string): Promise<string[]> {
   const keys: string[] = [];
   let continuationToken: string | undefined;
@@ -404,8 +183,12 @@ async function listS3Prefix(prefix: string): Promise<string[]> {
 
 async function getEmbeddingPipeline() {
   if (embeddingPipeline) return embeddingPipeline;
+  // Loaded lazily: most rebuilds only read stored vectors and never need the model.
+  const { pipeline, env } = await import("@huggingface/transformers");
   // Disable local model loading — always fetch from HuggingFace Hub
   env.allowLocalModels = false;
+  // /var/task is read-only on Lambda; /tmp is the only writable location.
+  env.cacheDir = "/tmp/transformers-cache";
   embeddingPipeline = await pipeline("feature-extraction", EMBEDDING_MODEL, {
     dtype: "q8",
   });
@@ -420,6 +203,58 @@ async function generateEmbedding(text: string): Promise<number[]> {
 
 // --- Bundle Assembly ---
 
+const EMBEDDING_ITEM_TYPES = [
+  "unit",
+  "file",
+  "word",
+  "question",
+  "section",
+] as const;
+
+const EMBEDDING_KEY_PATTERN = new RegExp(
+  `^private/([^/]+)/embeddings/(${EMBEDDING_ITEM_TYPES.join("|")})/([^/]+)\\.json$`,
+);
+
+/**
+ * Turns one stored embedding file into bundle items (one per page). Items that
+ * only have text (needsEmbedding) get their vector generated and persisted.
+ */
+async function itemsFromEmbeddingFile(
+  key: string,
+  embeddingData: any,
+  identityId: string,
+  type: BundleItem["type"],
+  modelId: string,
+  unitId?: string,
+): Promise<BundleItem[]> {
+  const items: BundleItem[] = [];
+  for (const page of embeddingData?.pages || []) {
+    // Generate embedding on the fly if item only has text (needsEmbedding flag)
+    let embedding = page.embedding;
+    if (!embedding && page.text && embeddingData.needsEmbedding) {
+      embedding = await generateEmbedding(page.text);
+      // Update the stored file with the generated embedding
+      page.embedding = embedding;
+      await writeS3JSON(key, embeddingData);
+    }
+    if (!embedding) continue; // Skip items with no text or embedding
+
+    items.push({
+      id: page.page > 0 ? `${modelId}-p${page.page}` : modelId,
+      type,
+      title: embeddingData.title || modelId,
+      embedding,
+      meta: {
+        page: page.page > 0 ? page.page : undefined,
+        unitId,
+        preview: page.text?.substring(0, 100),
+        identityId,
+      },
+    });
+  }
+  return items;
+}
+
 async function loadPerItemEmbeddings(
   identityId: string,
   unitId?: string,
@@ -430,118 +265,180 @@ async function loadPerItemEmbeddings(
   // If unit-scoped, only load embeddings relevant to that unit
   const embeddingKeys = await listS3Prefix(prefix);
 
-  for (const key of embeddingKeys) {
-    const embeddingData = await readS3JSON(key);
-    if (!embeddingData?.pages?.length) continue;
+  // Read in parallel batches (a platform rebuild reads one S3 object per item)
+  // and process each batch before fetching the next to bound memory.
+  const readBatchSize = 25;
+  for (let i = 0; i < embeddingKeys.length; i += readBatchSize) {
+    const batch = embeddingKeys.slice(i, i + readBatchSize);
+    const contents = await Promise.all(batch.map((key) => readS3JSON(key)));
 
-    // Parse type and ID from key: private/{id}/embeddings/{type}/{modelId}.json
-    const parts = key.replace(prefix, "").split("/");
-    if (parts.length < 2) continue;
-    const type = parts[0] as BundleItem["type"];
-    const modelId = parts[1].replace(".json", "");
+    for (let j = 0; j < batch.length; j++) {
+      const key = batch[j];
+      const embeddingData = contents[j];
+      if (!embeddingData?.pages?.length) continue;
 
-    for (const page of embeddingData.pages) {
-      // Generate embedding on the fly if item only has text (needsEmbedding flag)
-      let embedding = page.embedding;
-      if (!embedding && page.text && embeddingData.needsEmbedding) {
-        embedding = await generateEmbedding(page.text);
-        // Update the stored file with the generated embedding
-        page.embedding = embedding;
-        await writeS3JSON(key, embeddingData);
-      }
-      if (!embedding) continue; // Skip items with no text or embedding
-
-      items.push({
-        id: page.page > 0 ? `${modelId}-p${page.page}` : modelId,
-        type,
-        title: embeddingData.title || modelId,
-        embedding,
-        meta: {
-          page: page.page > 0 ? page.page : undefined,
+      // Parse type and ID from key: private/{id}/embeddings/{type}/{modelId}.json
+      const parts = key.replace(prefix, "").split("/");
+      if (parts.length < 2) continue;
+      items.push(
+        ...(await itemsFromEmbeddingFile(
+          key,
+          embeddingData,
+          identityId,
+          parts[0] as BundleItem["type"],
+          parts[1].replace(".json", ""),
           unitId,
-          preview: page.text?.substring(0, 100),
-        },
-      });
+        )),
+      );
     }
   }
 
   return items;
 }
 
-async function buildUnitBundle(
-  identityId: string,
-  unitId: string,
-): Promise<SearchBundle> {
-  // Read unit plain text and generate embedding if needed
-  const plainTextKey = `protected/${identityId}/units/${unitId}/plain.txt`;
-  const plainText = await readS3Text(plainTextKey);
+const VECTOR_DECIMALS = 1e5;
 
-  const items = await loadPerItemEmbeddings(identityId, unitId);
+const roundVector = (vector: number[]) =>
+  vector.map((x) => Math.round(x * VECTOR_DECIMALS) / VECTOR_DECIMALS);
 
-  // Add unit's own embedding if plain text exists
-  if (plainText) {
-    const unitEmbeddingKey = `private/${identityId}/embeddings/unit/${unitId}.json`;
-    let unitEmbeddingData = await readS3JSON(unitEmbeddingKey);
-
-    if (!unitEmbeddingData) {
-      // Generate embedding for the unit
-      const embedding = await generateEmbedding(plainText);
-      unitEmbeddingData = {
-        model: EMBEDDING_MODEL,
-        dimensions: EMBEDDING_DIMENSIONS,
-        generatedAt: Date.now(),
-        wordCount: plainText.split(/\s+/).length,
-        pages: [{ page: 0, embedding, text: plainText.substring(0, 200) }],
-      };
-      await writeS3JSON(unitEmbeddingKey, unitEmbeddingData);
-    }
-
-    items.push({
-      id: unitId,
-      type: "unit",
-      title: `Unit ${unitId}`,
-      embedding: unitEmbeddingData.pages[0].embedding,
-      meta: { preview: plainText.substring(0, 100) },
-    });
-  }
-
-  // Normalize all vectors before indexing
-  const vectors = items.map((item) => l2Normalize(item.embedding));
-  items.forEach((item, i) => {
-    item.embedding = vectors[i];
-  });
-
-  const index = buildIndex(vectors);
-
+/**
+ * Normalizes, rounds and indexes items into a bundle. Unit, section,
+ * instructor and platform bundles all go through here, so they differ only in
+ * which items they hold. Vectors are rounded to 5 decimals (well below cosine
+ * ranking noise) because browsers download whole bundles.
+ */
+function assembleBundle(items: BundleItem[]): SearchBundle {
+  const prepared = items.map((item) => ({
+    ...item,
+    embedding: roundVector(l2Normalize(item.embedding)),
+  }));
   return {
     version: Date.now(),
     dimensions: EMBEDDING_DIMENSIONS,
     model: EMBEDDING_MODEL,
-    index,
-    items,
+    index: buildIndex(prepared.map((item) => item.embedding)),
+    items: prepared,
   };
+}
+
+/** Concatenated text nodes of a Lexical editor state. */
+function lexicalText(node: any): string {
+  if (!node) return "";
+  if (typeof node.text === "string") return node.text;
+  const children: any[] = node.children ?? node.root?.children ?? [];
+  return children.map(lexicalText).filter(Boolean).join(" ");
+}
+
+async function readUnitPlainText(
+  identityId: string,
+  unitId: string,
+): Promise<string> {
+  const plain = await readS3Text(
+    `protected/${identityId}/units/${unitId}/plain.txt`,
+  );
+  if (plain?.trim()) return plain;
+  // plain.txt is written by the editor client; fall back to the published content.
+  const published = await readS3JSON(`protected/units/${unitId}/published.json`);
+  return lexicalText(published);
+}
+
+const MEMBER_TYPES = ["word", "question", "file"] as const;
+
+/**
+ * The published snapshot of one unit: its own text plus only the words,
+ * questions and files it uses. Readable by everyone who can use the unit
+ * (protected/ is readable by any signed-in user), so it must never hold
+ * content from outside the unit.
+ */
+async function buildUnitBundle({
+  identityId,
+  unitId,
+  unitName,
+  members,
+}: {
+  identityId: string;
+  unitId: string;
+  unitName?: string;
+  members?: UnitMembers;
+}): Promise<SearchBundle> {
+  const items: BundleItem[] = [];
+
+  const plainText = await readUnitPlainText(identityId, unitId);
+  if (plainText.trim()) {
+    // Regenerated on every publish so the unit's vector tracks its content.
+    const embedding = await generateEmbedding(plainText);
+    await writeS3JSON(`private/${identityId}/embeddings/unit/${unitId}.json`, {
+      model: EMBEDDING_MODEL,
+      dimensions: EMBEDDING_DIMENSIONS,
+      generatedAt: Date.now(),
+      title: unitName,
+      wordCount: plainText.split(/\s+/).length,
+      pages: [{ page: 0, embedding, text: plainText.substring(0, 200) }],
+    });
+    items.push({
+      id: unitId,
+      type: "unit",
+      title: unitName || `Unit ${unitId}`,
+      embedding,
+      meta: { preview: plainText.substring(0, 100), unitId, identityId },
+    });
+  }
+
+  const readBatchSize = 25;
+  for (const type of MEMBER_TYPES) {
+    const ids = [...new Set(members?.[type] ?? [])];
+    for (let i = 0; i < ids.length; i += readBatchSize) {
+      const batch = ids.slice(i, i + readBatchSize);
+      const keys = batch.map(
+        (id) => `private/${identityId}/embeddings/${type}/${id}.json`,
+      );
+      const contents = await Promise.all(keys.map((key) => readS3JSON(key)));
+      for (let j = 0; j < batch.length; j++) {
+        if (!contents[j]?.pages?.length) continue;
+        items.push(
+          ...(await itemsFromEmbeddingFile(
+            keys[j],
+            contents[j],
+            identityId,
+            type,
+            batch[j],
+            unitId,
+          )),
+        );
+      }
+    }
+  }
+
+  return assembleBundle(items);
+}
+
+/** Merges already-built unit bundles into one searchable bundle per section. */
+async function writeSectionBundles(sections: SectionUnits[]): Promise<void> {
+  for (const { sectionId, unitIds } of sections) {
+    const seen = new Set<string>();
+    const items: BundleItem[] = [];
+    for (const unitId of new Set(unitIds)) {
+      const bundle = await readS3JSON(unitBundleKey(unitId));
+      for (const item of bundle?.items ?? []) {
+        if (item?.id && !seen.has(item.id)) {
+          seen.add(item.id);
+          items.push(item);
+        }
+      }
+    }
+    if (items.length === 0) continue;
+
+    await writeS3JSON(sectionBundleKey(sectionId), assembleBundle(items));
+    console.log(
+      `[rebuildSearchBundle] Section bundle: ${sectionId} (${items.length} items from ${unitIds.length} units)`,
+    );
+  }
 }
 
 async function buildInstructorBundle(
   identityId: string,
 ): Promise<SearchBundle> {
-  const items = await loadPerItemEmbeddings(identityId);
-
-  // Normalize all vectors before indexing
-  const vectors = items.map((item) => l2Normalize(item.embedding));
-  items.forEach((item, i) => {
-    item.embedding = vectors[i];
-  });
-
-  const index = buildIndex(vectors);
-
-  return {
-    version: Date.now(),
-    dimensions: EMBEDDING_DIMENSIONS,
-    model: EMBEDDING_MODEL,
-    index,
-    items,
-  };
+  return assembleBundle(await loadPerItemEmbeddings(identityId));
 }
 
 async function readS3Text(key: string): Promise<string | null> {
@@ -555,105 +452,402 @@ async function readS3Text(key: string): Promise<string | null> {
   }
 }
 
+// --- Instructor + Platform Bundles ---
+
+/** Identity folders directly under private/ (legacy folders simply yield no items). */
+async function listIdentityIds(): Promise<string[]> {
+  const prefixes = await listS3Prefixes("private/");
+  return prefixes
+    .map((prefix) => prefix.slice("private/".length).replace(/\/$/, ""))
+    .filter(Boolean);
+}
+
+async function writeInstructorBundle(
+  identityId: string,
+): Promise<SearchBundle> {
+  const bundle = await buildInstructorBundle(identityId);
+  await writeS3JSON(
+    instructorBundleKey(identityId),
+    bundle,
+  );
+  return bundle;
+}
+
+/**
+ * The admin-only platform bundle: the same structure as an instructor bundle,
+ * covering every instructor.
+ */
+async function writePlatformBundle(
+  instructorItems: BundleItem[],
+): Promise<SearchBundle | null> {
+  if (instructorItems.length === 0) return null;
+  const bundle = assembleBundle(instructorItems);
+  await writeS3JSON(PLATFORM_BUNDLE_KEY, bundle);
+  return bundle;
+}
+
+/**
+ * Earlier builds wrote bundles under protected/{identityId}/ (readable by any
+ * signed-in user, and filled with all of the instructor's content) and the
+ * instructor bundle under private/{identityId}/. Remove them so nothing
+ * stays reachable outside /api/search-bundle.
+ */
+async function purgeLegacyBundles(identityId: string): Promise<void> {
+  try {
+    const keys = [
+      ...(await listS3Prefix(`protected/${identityId}/search-index/`)),
+      ...(await listS3Prefix(`private/${identityId}/search-index/`)),
+    ];
+    for (const key of keys) {
+      await s3.send(new DeleteObjectCommand({ Bucket: BUCKET, Key: key }));
+    }
+    if (keys.length > 0) {
+      console.log(
+        `[rebuildSearchBundle] Removed ${keys.length} legacy bundle(s) for ${identityId}`,
+      );
+    }
+  } catch (err) {
+    console.warn(
+      `[rebuildSearchBundle] Legacy bundle cleanup failed for ${identityId}:`,
+      err,
+    );
+  }
+}
+
+interface PlatformReindexResult {
+  instructors: number;
+  failedInstructors: string[];
+  items: number;
+  bundleSize: number;
+  strategy?: string;
+}
+
+/**
+ * Rebuilds every instructor bundle, then the platform bundle from the freshly
+ * built items. One failing identity is logged and skipped so it cannot block
+ * the rest of the platform.
+ */
+export async function rebuildPlatform(): Promise<PlatformReindexResult> {
+  const identityIds = await listIdentityIds();
+  const allItems: BundleItem[] = [];
+  const failedInstructors: string[] = [];
+  let instructors = 0;
+
+  for (const identityId of identityIds) {
+    await purgeLegacyBundles(identityId);
+    try {
+      const bundle = await buildInstructorBundle(identityId);
+      if (bundle.items.length === 0) continue;
+      await writeS3JSON(
+        instructorBundleKey(identityId),
+        bundle,
+      );
+      allItems.push(...bundle.items);
+      instructors++;
+    } catch (err) {
+      console.error(
+        `[rebuildSearchBundle] Instructor bundle failed for ${identityId}:`,
+        err,
+      );
+      failedInstructors.push(identityId);
+    }
+  }
+
+  const platform = await writePlatformBundle(allItems);
+  console.log(
+    `[rebuildSearchBundle] Platform bundle: ${allItems.length} items from ${instructors} instructors (${platform?.index.strategy ?? "none written"})`,
+  );
+
+  return {
+    instructors,
+    failedInstructors,
+    items: allItems.length,
+    bundleSize: platform ? JSON.stringify(platform).length : 0,
+    strategy: platform?.index.strategy,
+  };
+}
+
+// --- Rebuild lock ---
+
+/**
+ * Full rebuilds overwrite bundles wholesale, which would silently discard
+ * incremental updates applied while they run. Incremental updates therefore
+ * wait (SQS redelivers them) while this lock is held.
+ */
+async function isRebuildLocked(): Promise<boolean> {
+  const lock = await readS3JSONStrict(REBUILD_LOCK_KEY);
+  return !!lock && Date.now() - (lock.data?.startedAt ?? 0) < REBUILD_LOCK_TTL_MS;
+}
+
+async function acquireRebuildLock(): Promise<void> {
+  try {
+    await s3.send(
+      new PutObjectCommand({
+        Bucket: BUCKET,
+        Key: REBUILD_LOCK_KEY,
+        Body: JSON.stringify({ startedAt: Date.now() }),
+        ContentType: "application/json",
+        IfNoneMatch: "*",
+      }),
+    );
+    return;
+  } catch (err) {
+    if (!isWriteConflict(err)) throw err;
+  }
+  if (await isRebuildLocked()) {
+    throw new Error("Another search bundle rebuild is already running");
+  }
+  await writeS3JSON(REBUILD_LOCK_KEY, { startedAt: Date.now() });
+}
+
+async function releaseRebuildLock(): Promise<void> {
+  try {
+    await s3.send(
+      new DeleteObjectCommand({ Bucket: BUCKET, Key: REBUILD_LOCK_KEY }),
+    );
+  } catch (err) {
+    console.warn("[rebuildSearchBundle] Failed to release rebuild lock:", err);
+  }
+}
+
+async function withRebuildLock<T>(work: () => Promise<T>): Promise<T> {
+  await acquireRebuildLock();
+  try {
+    return await work();
+  } finally {
+    await releaseRebuildLock();
+  }
+}
+
+// --- Incremental updates ---
+
+export interface EmbeddingChange {
+  identityId: string;
+  type: BundleItem["type"];
+  itemId: string;
+}
+
+const baseItemId = (id: string) => id.replace(/-p\d+$/, "");
+
+/** Distinct embedding-file changes carried by an SQS batch of S3 events. */
+export function parseEmbeddingChanges(event: SQSEvent): EmbeddingChange[] {
+  const unique = new Map<string, EmbeddingChange>();
+  for (const record of event.Records || []) {
+    let key: string | undefined;
+    try {
+      key = JSON.parse(record.body)?.detail?.object?.key;
+    } catch {
+      continue;
+    }
+    const match = key?.match(EMBEDDING_KEY_PATTERN);
+    if (!match) continue;
+    const [, identityId, type, itemId] = match;
+    unique.set(`${identityId}/${type}/${itemId}`, {
+      identityId,
+      type: type as BundleItem["type"],
+      itemId,
+    });
+  }
+  return [...unique.values()];
+}
+
+/**
+ * Reads a bundle, applies `delta`, and writes it back only if nobody else
+ * changed it in between (ETag precondition); on a lost race it re-reads and
+ * re-applies. A bundle that was never built is skipped: a partial one would be
+ * mistaken for the full index.
+ */
+async function updateBundle(
+  key: string,
+  buildDelta: () => ItemDelta,
+): Promise<DeltaResult | null> {
+  for (let attempt = 1; attempt <= MAX_DELTA_ATTEMPTS; attempt++) {
+    const existing = await readS3JSONStrict(key);
+    if (!existing) return null;
+
+    const result = applyItemDelta(existing.data as SearchBundle, buildDelta());
+    if (result.indexAction === "unchanged") return result;
+
+    try {
+      await s3.send(
+        new PutObjectCommand({
+          Bucket: BUCKET,
+          Key: key,
+          Body: JSON.stringify(result.bundle),
+          ContentType: "application/json",
+          ...(existing.etag ? { IfMatch: existing.etag } : {}),
+        }),
+      );
+      return result;
+    } catch (err) {
+      if (!isWriteConflict(err) || attempt === MAX_DELTA_ATTEMPTS) throw err;
+    }
+  }
+  return null;
+}
+
+export interface DeltaSummary {
+  changes: number;
+  instructorBundlesUpdated: number;
+  platformUpdated: boolean;
+}
+
+/**
+ * Brings the instructor bundle(s) and the platform bundle in line with a set of
+ * changed embedding files. The files' current state decides the outcome: a
+ * present file replaces that item's entries, a missing one removes them. This
+ * makes the result independent of event order and safe to replay.
+ */
+export async function applyEmbeddingChanges(
+  changes: EmbeddingChange[],
+): Promise<DeltaSummary> {
+  const summary: DeltaSummary = {
+    changes: changes.length,
+    instructorBundlesUpdated: 0,
+    platformUpdated: false,
+  };
+  if (changes.length === 0) return summary;
+
+  const byIdentity = new Map<string, EmbeddingChange[]>();
+  for (const change of changes) {
+    byIdentity.set(change.identityId, [
+      ...(byIdentity.get(change.identityId) || []),
+      change,
+    ]);
+  }
+
+  const touches = (item: BundleItem, list: EmbeddingChange[]) =>
+    list.some(
+      (c) => c.type === item.type && c.itemId === baseItemId(item.id),
+    );
+
+  const upsertsByIdentity = new Map<string, BundleItem[]>();
+  for (const [identityId, list] of byIdentity) {
+    const upserts: BundleItem[] = [];
+    for (const change of list) {
+      const key = `private/${identityId}/embeddings/${change.type}/${change.itemId}.json`;
+      const file = await readS3JSONStrict(key);
+      if (!file) continue;
+      const items = await itemsFromEmbeddingFile(
+        key,
+        file.data,
+        identityId,
+        change.type,
+        change.itemId,
+      );
+      upserts.push(
+        ...items.map((item) => ({
+          ...item,
+          embedding: roundVector(l2Normalize(item.embedding)),
+        })),
+      );
+    }
+    upsertsByIdentity.set(identityId, upserts);
+
+    const result = await updateBundle(
+      instructorBundleKey(identityId),
+      () => ({ isRemoved: (item) => touches(item, list), upserts }),
+    );
+    if (result) summary.instructorBundlesUpdated++;
+  }
+
+  const platformUpserts = [...upsertsByIdentity.values()].flat();
+  const platform = await updateBundle(PLATFORM_BUNDLE_KEY, () => ({
+    // Bundles built before ownership was recorded fall back to id-only matching.
+    isRemoved: (item) =>
+      [...byIdentity].some(
+        ([identityId, list]) =>
+          (item.meta?.identityId ?? identityId) === identityId &&
+          touches(item, list),
+      ),
+    upserts: platformUpserts,
+  }));
+  summary.platformUpdated = platform !== null;
+
+  console.log(
+    `[rebuildSearchBundle] Applied ${changes.length} embedding change(s): ${summary.instructorBundlesUpdated} instructor bundle(s), platform ${platform ? platform.indexAction : "skipped"}`,
+  );
+  return summary;
+}
+
 // --- Handler ---
 
-export const handler: Handler<LambdaEvent> = async (event) => {
+const isSqsEvent = (event: LambdaEvent | SQSEvent): event is SQSEvent =>
+  Array.isArray((event as SQSEvent).Records);
+
+export const handler: Handler<LambdaEvent | SQSEvent> = async (event) => {
+  if (!BUCKET) throw new Error("AMPLIFY_STORAGE_BUCKET_NAME not set");
+
+  if (isSqsEvent(event)) {
+    // Throwing returns the whole batch to the queue, so changes are retried
+    // after the lock clears or the transient failure passes.
+    if (await isRebuildLocked()) {
+      throw new Error("Full rebuild in progress; retrying embedding changes later");
+    }
+    await applyEmbeddingChanges(parseEmbeddingChanges(event));
+    return { statusCode: 200 };
+  }
+
   const { source, identityId, unitId, force } = event;
 
   console.log(
     `[rebuildSearchBundle] source=${source} identityId=${identityId} unitId=${unitId || "all"} force=${force}`,
   );
 
-  if (!BUCKET) throw new Error("AMPLIFY_STORAGE_BUCKET_NAME not set");
+  if (source === "platform-reindex") {
+    const result = await withRebuildLock(rebuildPlatform);
+    return {
+      statusCode: result.failedInstructors.length > 0 ? 207 : 200,
+      body: {
+        source,
+        itemsProcessed: result.items,
+        bundleSize: result.bundleSize,
+        strategy: result.strategy,
+        instructors: result.instructors,
+        failedInstructors: result.failedInstructors,
+      },
+    };
+  }
+
+  if (!identityId) {
+    throw new Error(`identityId is required for source "${source}"`);
+  }
 
   let itemsProcessed = 0;
   let bundleSize = 0;
+  let strategy: string | undefined;
 
-  if (source === "unit-publish" && unitId) {
-    // Rebuild single unit bundle
-    const bundle = await buildUnitBundle(identityId, unitId);
-    const bundleKey = `protected/${identityId}/search-index/unit/${unitId}.json`;
+  if (source === "unit-publish") {
+    if (!unitId) throw new Error('unitId is required for source "unit-publish"');
+
+    const bundle = await buildUnitBundle({
+      identityId,
+      unitId,
+      unitName: event.unitName,
+      members: event.members,
+    });
+    const bundleKey = unitBundleKey(unitId);
     await writeS3JSON(bundleKey, bundle);
     itemsProcessed = bundle.items.length;
     bundleSize = JSON.stringify(bundle).length;
+    strategy = bundle.index.strategy;
     console.log(
       `[rebuildSearchBundle] Unit bundle written: ${bundleKey} (${bundle.items.length} items, ${bundle.index.strategy})`,
     );
+
+    // Sections merge unit bundles, so they are built after this one exists.
+    await writeSectionBundles(event.sections ?? []);
   } else if (source === "admin-reindex" || source === "content-update") {
-    // Rebuild instructor-wide bundle
-    const bundle = await buildInstructorBundle(identityId);
-    const bundleKey = `private/${identityId}/search-index/instructor.json`;
-    await writeS3JSON(bundleKey, bundle);
-    itemsProcessed = bundle.items.length;
-    bundleSize = JSON.stringify(bundle).length;
-    console.log(
-      `[rebuildSearchBundle] Instructor bundle written: ${bundleKey} (${bundle.items.length} items, ${bundle.index.strategy})`,
-    );
-
-    // Also rebuild per-unit bundles if admin-reindex
-    if (source === "admin-reindex") {
-      const unitKeys = await listS3Prefix(
-        `private/${identityId}/embeddings/unit/`,
+    // Held so incremental updates cannot be overwritten mid-rebuild.
+    await withRebuildLock(async () => {
+      const bundle = await writeInstructorBundle(identityId);
+      itemsProcessed = bundle.items.length;
+      bundleSize = JSON.stringify(bundle).length;
+      strategy = bundle.index.strategy;
+      console.log(
+        `[rebuildSearchBundle] Instructor bundle written for ${identityId} (${bundle.items.length} items, ${bundle.index.strategy})`,
       );
-      for (const key of unitKeys) {
-        const uid = key.split("/").pop()?.replace(".json", "");
-        if (!uid) continue;
-        const unitBundle = await buildUnitBundle(identityId, uid);
-        const unitBundleKey = `protected/${identityId}/search-index/unit/${uid}.json`;
-        await writeS3JSON(unitBundleKey, unitBundle);
-        console.log(
-          `[rebuildSearchBundle] Unit bundle: ${uid} (${unitBundle.items.length} items)`,
-        );
-      }
-
-      // Build platform-wide admin search bundle (all instructors' content)
-      try {
-        const allInstructorPrefixes = await listS3Prefix(`private/`);
-        const allItems: BundleItem[] = [...bundle.items]; // Start with current instructor's items
-
-        // Collect embeddings from other instructors' bundles
-        for (const prefix of allInstructorPrefixes) {
-          const otherIdentityId = prefix
-            .replace("private/", "")
-            .replace("/", "");
-          if (!otherIdentityId || otherIdentityId === identityId) continue;
-          try {
-            const otherBundleKey = `private/${otherIdentityId}/search-index/instructor.json`;
-            const otherBundle = await readS3JSON(otherBundleKey);
-            if (otherBundle?.items) {
-              allItems.push(...otherBundle.items);
-            }
-          } catch {
-            // Other instructor bundle may not exist — skip
-          }
-        }
-
-        if (allItems.length > 0) {
-          const vectors = allItems.map((item) => l2Normalize(item.embedding));
-          allItems.forEach((item, i) => {
-            item.embedding = vectors[i];
-          });
-          const platformIndex = buildIndex(vectors);
-          const platformBundle: SearchBundle = {
-            version: Date.now(),
-            dimensions: EMBEDDING_DIMENSIONS,
-            model: EMBEDDING_MODEL,
-            index: platformIndex,
-            items: allItems,
-          };
-          const platformBundleKey = `private/unit/search-index/platform.json`;
-          await writeS3JSON(platformBundleKey, platformBundle);
-          console.log(
-            `[rebuildSearchBundle] Platform-wide admin bundle written: ${platformBundleKey} (${allItems.length} items, ${platformBundle.index.strategy})`,
-          );
-        }
-      } catch (platformErr) {
-        console.error(
-          "[rebuildSearchBundle] Platform bundle generation failed:",
-          platformErr,
-        );
-      }
-    }
+    });
   }
 
   return {
@@ -663,7 +857,7 @@ export const handler: Handler<LambdaEvent> = async (event) => {
       identityId,
       itemsProcessed,
       bundleSize,
-      strategy: itemsProcessed > IVF_THRESHOLD ? "ivf" : "linear",
+      strategy,
     },
   };
 };

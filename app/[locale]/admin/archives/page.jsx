@@ -12,15 +12,11 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
-import FormControl from "@mui/material/FormControl";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemIcon from "@mui/material/ListItemIcon";
 import ListItemText from "@mui/material/ListItemText";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Typography from "@mui/material/Typography";
 import ArchiveIcon from "@mui/icons-material/Archive";
@@ -28,7 +24,21 @@ import FolderIcon from "@mui/icons-material/Folder";
 import RestoreIcon from "@mui/icons-material/Restore";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
 import { useRecycleBinAdmin } from "@/hooks/useRecycleBin";
+
+const MODEL_FILTER_OPTIONS = [
+  { value: "", label: "All Models" },
+  ...[
+    "Unit",
+    "Section",
+    "Question",
+    "Word",
+    "File",
+    "Document",
+    "AssistantChat",
+  ].map((m) => ({ value: m, label: m })),
+];
 
 function AdminArchivesContent() {
   const { listArchives, getArchive, unarchiveRecord, loading } =
@@ -96,16 +106,6 @@ function AdminArchivesContent() {
     }
   };
 
-  const modelOptions = [
-    "Unit",
-    "Section",
-    "Question",
-    "Word",
-    "File",
-    "Document",
-    "AssistantChat",
-  ];
-
   if (pageLoading && archives.length === 0) {
     return (
       <Box sx={{ p: 3 }}>
@@ -128,21 +128,13 @@ function AdminArchivesContent() {
         <Typography variant="h5" sx={{ flexGrow: 1 }}>
           Archives (Admin)
         </Typography>
-        <FormControl size="small" sx={{ minWidth: 160 }}>
-          <InputLabel>Model</InputLabel>
-          <Select
-            value={modelFilter}
-            label="Model"
-            onChange={(e) => setModelFilter(e.target.value)}
-          >
-            <MenuItem value="">All Models</MenuItem>
-            {modelOptions.map((m) => (
-              <MenuItem key={m} value={m}>
-                {m}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <AdminSelect
+          label="Model"
+          value={modelFilter}
+          options={MODEL_FILTER_OPTIONS}
+          onChange={setModelFilter}
+          minWidth={160}
+        />
       </Box>
 
       {archives.length === 0 ? (

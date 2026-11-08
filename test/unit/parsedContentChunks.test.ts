@@ -12,15 +12,15 @@ const chunkBytes = (chunk: amplifyChunks.ParsedContentChunk) =>
 const question = (page: number | undefined, n: number, pad = 0) => ({
   prompt: `q${page ?? "x"}-${n}`,
   answer: "a".repeat(pad),
-  ...(page === undefined ? {} : { page }),
+  ...(page === undefined ? {} : { pages: [page] }),
 });
 const word = (page: number | undefined, n: number) => ({
   word: `w${page ?? "x"}-${n}`,
-  ...(page === undefined ? {} : { page }),
+  ...(page === undefined ? {} : { pages: [page] }),
 });
 const pagesOf = (chunk: amplifyChunks.ParsedContentChunk) => [
   ...new Set(
-    [...chunk.vocabularyJSON, ...chunk.questionsJSON].map((entry: any) => entry.page ?? 0),
+    [...chunk.vocabularyJSON, ...chunk.questionsJSON].map((entry: any) => entry.pages?.[0] ?? 0),
   ),
 ];
 
@@ -115,7 +115,7 @@ describe.each([
         prompt: `What is field ${n} for card ${n % 80}?`,
         answer: "An answer of ordinary length for a card field",
         questionType: "recall",
-        page: 1 + Math.floor(n / 31),
+        pages: [1 + Math.floor(n / 31)],
         subject: `Card ${n % 80}`,
         field: `field ${n}`,
         sourceText: "Source text from the page that supports the answer, around one line long.",
@@ -192,7 +192,7 @@ describe.each([
         [...questions].sort((a, b) => a.prompt.localeCompare(b.prompt)),
       );
       expect(merged.vocabularyJSON).toHaveLength(2);
-      const pages = merged.questionsJSON.map((q: any) => q.page);
+      const pages = merged.questionsJSON.map((q: any) => q.pages?.[0]);
       expect(pages).toEqual([...pages].sort((a, b) => a - b));
     });
   });

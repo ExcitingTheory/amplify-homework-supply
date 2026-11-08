@@ -87,13 +87,22 @@
     "regeneratedAlt": "Regenerado"
   },
   "blockSuggestionMenu": {
+    "accept": "Aceptar",
+    "reject": "Rechazar",
+    "error": "No se pudo generar o insertar el bloque. Inténtalo de nuevo.",
     "aiTitle": "Sugerencias impulsadas por IA",
     "emptyState": "Aún no hay sugerencias disponibles.",
     "emptyStateHelper": "Comienza a escribir en el editor para ver sugerencias de bloques impulsadas por IA.",
     "generateMore": "Generar más sugerencias",
-    "helper": "Haz clic en una sugerencia para insertarla en tu lección",
-    "helperAI": "Haz clic en una sugerencia o presiona Tab/Enter para insertar",
+    "helper": "Revisa el bloque y acéptalo o recházalo.",
+    "helperAI": "Revisa el bloque y acéptalo o recházalo.",
     "suggestionsTitle": "💡 Bloques Sugeridos"
+  },
+  "autocompletePreference": {
+    "heading": "Autocompletado con IA",
+    "description": "Sugiere contenido mientras escribes en el editor de lecciones. Las sugerencias de bloques siguen disponibles en su pestaña lateral.",
+    "enabled": "Activar autocompletado con IA",
+    "error": "No se pudo guardar tu preferencia. Inténtalo de nuevo."
   },
   "suggestedContent": {
     "identityPlaceholder": "ID de identidad",
@@ -115,5 +124,21 @@
     "newSection": "Nueva sección",
     "questionCount": "{count, plural, one {# pregunta} other {# preguntas}}",
     "tabKey": "Tab"
+  },
+  "suggestionMarkdown": {
+    "blocks": {
+      "quiz": "Cuestionario",
+      "answer": "Respuesta de vocabulario",
+      "meaning": "Asociación de significados",
+      "customAnswer": "Respuesta personalizada",
+      "callResponse": "Llamada y respuesta",
+      "word": "Palabra",
+      "playlist": "Lista de reproducción",
+      "conversationPlaylist": "Lista de conversación",
+      "pdf": "PDF",
+      "image": "Imagen",
+      "file": "Archivo",
+      "youtube": "Video de YouTube"
+    }
   }
 }

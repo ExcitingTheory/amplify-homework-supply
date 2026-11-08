@@ -10,7 +10,8 @@
  * Encode an AudioBuffer as a WAV or WebM Blob.
  *
  * For 'audio/wav': Writes raw PCM into a WAV container (lossless, no deps).
- * For 'audio/webm': Uses MediaRecorder on an AudioContext to encode (lossy).
+ * For any other type (WebM/Opus, MP4/AAC): encodes with MediaRecorder, which
+ * compresses it. Browsers cannot encode MP3 without a separate encoder.
  *
  * @param buffer - The AudioBuffer to encode
  * @param mimeType - Target MIME type
@@ -18,7 +19,7 @@
  */
 export async function audioBufferToBlob(
   buffer: AudioBuffer,
-  mimeType: 'audio/wav' | 'audio/webm' = 'audio/wav',
+  mimeType: string = 'audio/wav',
 ): Promise<Blob> {
   if (mimeType === 'audio/wav') {
     return encodeWav(buffer);

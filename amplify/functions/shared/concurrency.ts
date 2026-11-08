@@ -40,3 +40,47 @@ export function isConditionalCheckFailure(err: any): boolean {
   const message = err?.message || JSON.stringify(err || "");
   return /ConditionalCheckFailed|conditional request failed/i.test(message);
 }
+
+export interface VersionGuard {
+  /** Value to write into `_version` alongside the update. */
+  nextVersion: number;
+  /** AppSync `condition` argument that only matches the row state we read. */
+  condition: Record<string, unknown>;
+}
+
+/**
+ * Builds the optimistic-lock guard for a row we just read. Rows created
+ * without `_version` have no such attribute in DynamoDB, so an `eq` condition
+ * can never match them — guard those with `attributeExists: false` instead.
+ */
+export function versionGuard(
+  currentVersion: number | null | undefined,
+): VersionGuard {
+  if (currentVersion == null) {
+    return {
+      nextVersion: 1,
+      condition: { _version: { attributeExists: false } },
+    };
+  }
+  return {
+    nextVersion: currentVersion + 1,
+    condition: { _version: { eq: currentVersion } },
+  };
+}
+
+/**
+ * Lambda's runtime logs non-Error throwables as "[object Object]". Wrap AppSync
+ * error payloads in a real Error so the failure reason survives in CloudWatch.
+ */
+export function toReadableError(err: unknown, context: string): Error {
+  if (err instanceof Error) return err;
+  let detail: string;
+  try {
+    detail = JSON.stringify(err);
+  } catch {
+    detail = String(err);
+  }
+  const wrapped = new Error(`${context}: ${detail}`);
+  (wrapped as Error & { cause?: unknown }).cause = err;
+  return wrapped;
+}

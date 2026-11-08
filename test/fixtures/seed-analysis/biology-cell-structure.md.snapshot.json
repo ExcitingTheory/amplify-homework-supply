@@ -1,0 +1,767 @@
+{
+  "sourceSha256": "eaeb44fdbb30a173792d3680606c4d01f7b0a6444ddbdf7a00b9f21a51806d57",
+  "capturedAt": "2026-10-28T12:55:18.027Z",
+  "sourceFormat": "md",
+  "pageCount": 2,
+  "vocabularyJSON": [
+    {
+      "word": "Cell Biology",
+      "definition": "The Structure and Function of Cells",
+      "context": "Cell Biology: The Structure and Function of Cells",
+      "pages": [
+        1
+      ]
+    }
+  ],
+  "summariesJSON": [
+    {
+      "title": "Document summary",
+      "content": "The document is likely a placeholder or draft that does not contain any substantial information or summaries. As such, no meaningful content or intellectual concepts can be extracted or summarized from the provided input.",
+      "pageRange": "N/A"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Chapter for Cell Biology: The Structure and Function of Cells?",
+      "answer": "Introduction to Cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Biology: The Structure and Function of Cells",
+      "field": "Chapter",
+      "sourceText": "Chapter 1: Introduction to Cells",
+      "accept": [
+        "Introduction to Cells"
+      ]
+    },
+    {
+      "prompt": "What is Section for Cell Biology: The Structure and Function of Cells?",
+      "answer": "The Discovery of Cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Biology: The Structure and Function of Cells",
+      "field": "Section",
+      "sourceText": "The Discovery of Cells",
+      "accept": [
+        "The Discovery of Cells"
+      ]
+    },
+    {
+      "prompt": "What is basic unit of life for The Discovery of Cells?",
+      "answer": "The cell",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "basic unit of life",
+      "sourceText": "The cell is the basic unit of life.",
+      "accept": [
+        "The cell"
+      ]
+    },
+    {
+      "prompt": "What is composition of living organisms for The Discovery of Cells?",
+      "answer": "One or more cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "composition of living organisms",
+      "sourceText": "All living organisms are composed of one or more cells.",
+      "accept": [
+        "One or more cells"
+      ]
+    },
+    {
+      "prompt": "What is importance of cell discovery for The Discovery of Cells?",
+      "answer": "Fundamental to understanding biology",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "importance of cell discovery",
+      "sourceText": "The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "Fundamental to understanding biology"
+      ]
+    },
+    {
+      "prompt": "What is statement 1 for Cell Theory?",
+      "answer": "All living organisms are composed of one or more cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "statement 1",
+      "sourceText": "All living organisms are composed of one or more cells",
+      "accept": [
+        "All living organisms are composed of one or more cells"
+      ]
+    },
+    {
+      "prompt": "What is statement 2 for Cell Theory?",
+      "answer": "The cell is the basic unit of structure and organization",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "statement 2",
+      "sourceText": "The cell is the basic unit of structure and organization",
+      "accept": [
+        "The cell is the basic unit of structure and organization"
+      ]
+    },
+    {
+      "prompt": "What is statement 3 for Cell Theory?",
+      "answer": "All cells arise from pre-existing cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "statement 3",
+      "sourceText": "All cells arise from pre-existing cells",
+      "accept": [
+        "All cells arise from pre-existing cells"
+      ]
+    },
+    {
+      "prompt": "What is historical fact for Microscope?",
+      "answer": "Robert Hooke first observed cells using a simple microscope in 1665",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Microscope",
+      "field": "historical fact",
+      "sourceText": "Robert Hooke first observed cells using a simple microscope in 1665.",
+      "accept": [
+        "Robert Hooke first observed cells using a simple microscope in 1665"
+      ]
+    },
+    {
+      "prompt": "What is comparison for Resolution?",
+      "answer": "Modern electron microscopes have much greater resolution than light microscopes",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Resolution",
+      "field": "comparison",
+      "sourceText": "Modern electron microscopes have much greater resolution than light microscopes.",
+      "accept": [
+        "Modern electron microscopes have much greater resolution than light microscopes"
+      ]
+    },
+    {
+      "prompt": "What is Prokaryotes for Types of Cells?",
+      "answer": "Bacteria and archaea",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Types of Cells",
+      "field": "Prokaryotes",
+      "sourceText": "Bacteria and archaea are prokaryotes.",
+      "accept": [
+        "Bacteria and archaea"
+      ]
+    },
+    {
+      "prompt": "What is Eukaryotes for Types of Cells?",
+      "answer": "Animals, plants, fungi, and protists",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Types of Cells",
+      "field": "Eukaryotes",
+      "sourceText": "Animals, plants, fungi, and protists are eukaryotes.",
+      "accept": [
+        "Animals, plants, fungi, and protists"
+      ]
+    },
+    {
+      "prompt": "What is size of Prokaryotic cells for Types of Cells?",
+      "answer": "1-10 μm",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Types of Cells",
+      "field": "size of Prokaryotic cells",
+      "sourceText": "These cells are typically smaller (1-10 μm) and have their genetic material in a nucleoid region.",
+      "accept": [
+        "1-10 μm"
+      ]
+    },
+    {
+      "prompt": "What is size of Eukaryotic cells for Types of Cells?",
+      "answer": "10-100 μm",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Types of Cells",
+      "field": "size of Eukaryotic cells",
+      "sourceText": "These cells are larger (10-100 μm) and more structurally complex.",
+      "accept": [
+        "10-100 μm"
+      ]
+    },
+    {
+      "prompt": "What is structure for Plasma Membrane?",
+      "answer": "Consists of a phospholipid bilayer with embedded proteins",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Plasma Membrane",
+      "field": "structure",
+      "sourceText": "It consists of a phospholipid bilayer with embedded proteins.",
+      "accept": [
+        "Consists of a phospholipid bilayer with embedded proteins"
+      ]
+    },
+    {
+      "prompt": "What is orientation for Phospholipid bilayer?",
+      "answer": "The hydrophobic tails face inward, while hydrophilic heads face outward",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Phospholipid bilayer",
+      "field": "orientation",
+      "sourceText": "The hydrophobic tails face inward, while hydrophilic heads face outward.",
+      "accept": [
+        "The hydrophobic tails face inward, while hydrophilic heads face outward"
+      ]
+    },
+    {
+      "prompt": "What is importance for Selective permeability?",
+      "answer": "Crucial for maintaining cellular homeostasis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Selective permeability",
+      "field": "importance",
+      "sourceText": "This is crucial for maintaining cellular homeostasis.",
+      "accept": [
+        "Crucial for maintaining cellular homeostasis"
+      ]
+    },
+    {
+      "prompt": "What is structure for Nucleus?",
+      "answer": "Surrounded by a double membrane called the nuclear envelope",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleus",
+      "field": "structure",
+      "sourceText": "It is surrounded by a double membrane called the nuclear envelope.",
+      "accept": [
+        "Surrounded by a double membrane called the nuclear envelope"
+      ]
+    },
+    {
+      "prompt": "What is behavior during cell division for Chromatin?",
+      "answer": "Condenses into visible chromosomes",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromatin",
+      "field": "behavior during cell division",
+      "sourceText": "During cell division, chromatin condenses into visible chromosomes.",
+      "accept": [
+        "Condenses into visible chromosomes"
+      ]
+    },
+    {
+      "prompt": "What is components for Cytoplasm?",
+      "answer": "Contains organelles, cytosol, and the cytoskeleton",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoplasm",
+      "field": "components",
+      "sourceText": "It contains organelles, cytosol, and the cytoskeleton.",
+      "accept": [
+        "Contains organelles, cytosol, and the cytoskeleton"
+      ]
+    },
+    {
+      "prompt": "What is features for Mitochondria?",
+      "answer": "Have their own DNA and double membrane",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Mitochondria",
+      "field": "features",
+      "sourceText": "They have their own DNA and double membrane.",
+      "accept": [
+        "Have their own DNA and double membrane"
+      ]
+    },
+    {
+      "prompt": "What is The Discovery of Cells for Chapter 1 Introduction to Cells?",
+      "answer": "The cell is the basic unit of life.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1 Introduction to Cells",
+      "field": "The Discovery of Cells",
+      "sourceText": "The cell is the basic unit of life.",
+      "accept": [
+        "The cell is the basic unit of life."
+      ]
+    },
+    {
+      "prompt": "What is The Discovery of Cells for Chapter 1 Introduction to Cells?",
+      "answer": "All living organisms are composed of one or more cells.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1 Introduction to Cells",
+      "field": "The Discovery of Cells",
+      "sourceText": "All living organisms are composed of one or more cells.",
+      "accept": [
+        "All living organisms are composed of one or more cells."
+      ]
+    },
+    {
+      "prompt": "What is The Discovery of Cells for Chapter 1 Introduction to Cells?",
+      "answer": "The discovery and study of cells has been fundamental to understanding biology.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chapter 1 Introduction to Cells",
+      "field": "The Discovery of Cells",
+      "sourceText": "The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "The discovery and study of cells has been fundamental to understanding biology."
+      ]
+    },
+    {
+      "prompt": "What is Cell Theory for Cell Theory?",
+      "answer": "A fundamental principle in biology stating that:",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "Cell Theory",
+      "sourceText": "**Cell Theory** - A fundamental principle in biology stating that:",
+      "accept": []
+    },
+    {
+      "prompt": "What is basic unit of life for Cell?",
+      "answer": "All living organisms are composed of one or more cells.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell",
+      "field": "basic unit of life",
+      "sourceText": "The cell is the basic unit of life. All living organisms are composed of one or more cells.",
+      "accept": [
+        "All living organisms are composed of one or more cells."
+      ]
+    },
+    {
+      "prompt": "What is discovery and study for Cell?",
+      "answer": "Fundamental to understanding biology.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell",
+      "field": "discovery and study",
+      "sourceText": "The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "Fundamental to understanding biology."
+      ]
+    },
+    {
+      "prompt": "What is description for Microscope?",
+      "answer": "An instrument that uses lenses to magnify small objects.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Microscope",
+      "field": "description",
+      "sourceText": "**Microscope** - An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665.",
+      "accept": [
+        "An instrument that uses lenses to magnify small objects."
+      ]
+    },
+    {
+      "prompt": "What is historical use for Microscope?",
+      "answer": "Robert Hooke first observed cells using a simple microscope in 1665.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Microscope",
+      "field": "historical use",
+      "sourceText": "**Microscope** - An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665.",
+      "accept": [
+        "Robert Hooke first observed cells using a simple microscope in 1665."
+      ]
+    },
+    {
+      "prompt": "What is definition for Resolution?",
+      "answer": "The ability to distinguish between two closely spaced objects.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Resolution",
+      "field": "definition",
+      "sourceText": "**Resolution** - The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes.",
+      "accept": [
+        "The ability to distinguish between two closely spaced objects."
+      ]
+    },
+    {
+      "prompt": "What is definition for Unicellular?",
+      "answer": "Organisms consisting of a single cell, such as bacteria or amoeba.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Unicellular",
+      "field": "definition",
+      "sourceText": "**Unicellular** - Organisms consisting of a single cell, such as bacteria or amoeba.",
+      "accept": [
+        "Organisms consisting of a single cell, such as bacteria or amoeba."
+      ]
+    },
+    {
+      "prompt": "What is definition for Multicellular?",
+      "answer": "Organisms composed of many cells that work together, such as humans or trees.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Multicellular",
+      "field": "definition",
+      "sourceText": "**Multicellular** - Organisms composed of many cells that work together, such as humans or trees.",
+      "accept": [
+        "Organisms composed of many cells that work together, such as humans or trees."
+      ]
+    },
+    {
+      "prompt": "What is definition for Phospholipid bilayer?",
+      "answer": "A double layer of phospholipid molecules that forms the basic structure of cell membranes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Phospholipid bilayer",
+      "field": "definition",
+      "sourceText": "**Phospholipid bilayer** - A double layer of phospholipid molecules that forms the basic structure of cell membranes. The hydrophobic tails face inward, while hydrophilic heads face outward.",
+      "accept": [
+        "A double layer of phospholipid molecules that forms the basic structure of cell membranes."
+      ]
+    },
+    {
+      "prompt": "What is definition for Selective permeability?",
+      "answer": "The property of membranes that allows some substances to pass while blocking others.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Selective permeability",
+      "field": "definition",
+      "sourceText": "**Selective permeability** - The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "accept": [
+        "The property of membranes that allows some substances to pass while blocking others."
+      ]
+    },
+    {
+      "prompt": "What is definition for Nucleus?",
+      "answer": "The control center of eukaryotic cells, containing the cell's genetic material (DNA).",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleus",
+      "field": "definition",
+      "sourceText": "**Nucleus** - The control center of eukaryotic cells, containing the cell's genetic material (DNA). It is surrounded by a double membrane called the nuclear envelope.",
+      "accept": [
+        "The control center of eukaryotic cells, containing the cell's genetic material (DNA)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Nuclear envelope?",
+      "answer": "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nuclear envelope",
+      "field": "definition",
+      "sourceText": "**Nuclear envelope** - A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm.",
+      "accept": [
+        "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm."
+      ]
+    },
+    {
+      "prompt": "What is definition for Chromatin?",
+      "answer": "The complex of DNA and proteins found in the nucleus.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromatin",
+      "field": "definition",
+      "sourceText": "**Chromatin** - The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "accept": [
+        "The complex of DNA and proteins found in the nucleus."
+      ]
+    },
+    {
+      "prompt": "What is definition for Nucleolus?",
+      "answer": "A dense region within the nucleus where ribosomal RNA is produced.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleolus",
+      "field": "definition",
+      "sourceText": "**Nucleolus** - A dense region within the nucleus where ribosomal RNA is produced.",
+      "accept": [
+        "A dense region within the nucleus where ribosomal RNA is produced."
+      ]
+    },
+    {
+      "prompt": "What is definition for Chromosomes?",
+      "answer": "Structures made of condensed chromatin that carry genetic information in the form of genes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromosomes",
+      "field": "definition",
+      "sourceText": "**Chromosomes** - Structures made of condensed chromatin that carry genetic information in the form of genes.",
+      "accept": [
+        "Structures made of condensed chromatin that carry genetic information in the form of genes."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cytosol?",
+      "answer": "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytosol",
+      "field": "definition",
+      "sourceText": "**Cytosol** - The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins.",
+      "accept": [
+        "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cytoskeleton?",
+      "answer": "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoskeleton",
+      "field": "definition",
+      "sourceText": "**Cytoskeleton** - A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "accept": [
+        "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell."
+      ]
+    },
+    {
+      "prompt": "What is function for Mitochondria?",
+      "answer": "Responsible for cellular respiration, converting nutrients into ATP (energy).",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Mitochondria",
+      "field": "function",
+      "sourceText": "**Mitochondria** (singular: mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the \"powerhouse of the cell.\" They have their own DNA and double membrane.",
+      "accept": [
+        "Responsible for cellular respiration, converting nutrients into ATP (energy)."
+      ]
+    },
+    {
+      "prompt": "What is basic unit of life for The cell?",
+      "answer": "The cell is the basic unit of life.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The cell",
+      "field": "basic unit of life",
+      "sourceText": "The cell is the basic unit of life.",
+      "accept": [
+        "The basic unit of life is the cell."
+      ]
+    },
+    {
+      "prompt": "What is composed for All living organisms?",
+      "answer": "All living organisms are composed of one or more cells.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "All living organisms",
+      "field": "composed",
+      "sourceText": "All living organisms are composed of one or more cells. The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "Living organisms are composed of one or more cells."
+      ]
+    },
+    {
+      "prompt": "What is Cell Biology for Cell Biology?",
+      "answer": "The Structure and Function of Cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Biology",
+      "field": "Cell Biology",
+      "sourceText": "Cell Biology: The Structure and Function of Cells",
+      "accept": [
+        "The Structure and Function of Cells"
+      ]
+    },
+    {
+      "prompt": "What is Cytology for Cytology?",
+      "answer": "The branch of biology concerned with the study of cells, their structure, function, and chemistry.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytology",
+      "field": "Cytology",
+      "sourceText": "**Cytology** - The branch of biology concerned with the study of cells, their structure, function, and chemistry.",
+      "accept": [
+        "The branch of biology concerned with the study of cells, their structure, function, and chemistry."
+      ]
+    },
+    {
+      "prompt": "What is function for ATP (Adenosine Triphosphate)?",
+      "answer": "Energy released from breaking ATP bonds powers most cellular processes.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "ATP (Adenosine Triphosphate)",
+      "field": "function",
+      "sourceText": "Energy released from breaking ATP bonds powers most cellular processes.",
+      "accept": [
+        "Energy released from breaking ATP bonds powers most cellular processes."
+      ]
+    },
+    {
+      "prompt": "What is function for Chloroplasts?",
+      "answer": "They contain chlorophyll and convert light energy into chemical energy (glucose).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Chloroplasts",
+      "field": "function",
+      "sourceText": "They contain chlorophyll and convert light energy into chemical energy (glucose).",
+      "accept": [
+        "They contain chlorophyll and convert light energy into chemical energy (glucose)."
+      ]
+    },
+    {
+      "prompt": "What is location for Ribosomes?",
+      "answer": "They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Ribosomes",
+      "field": "location",
+      "sourceText": "They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum.",
+      "accept": [
+        "They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum."
+      ]
+    },
+    {
+      "prompt": "What is function for Vacuoles?",
+      "answer": "Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Vacuoles",
+      "field": "function",
+      "sourceText": "Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure.",
+      "accept": [
+        "Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure."
+      ]
+    },
+    {
+      "prompt": "What is nickname for Lysosomes?",
+      "answer": "Sometimes called the \"recycling centers\" of the cell.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Lysosomes",
+      "field": "nickname",
+      "sourceText": "Sometimes called the \"recycling centers\" of the cell.",
+      "accept": [
+        "Sometimes called the \"recycling centers\" of the cell."
+      ]
+    },
+    {
+      "prompt": "What is composition for Cell wall?",
+      "answer": "In plants, it's primarily made of cellulose and provides structural support.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Cell wall",
+      "field": "composition",
+      "sourceText": "In plants, it's primarily made of cellulose and provides structural support.",
+      "accept": [
+        "In plants, it's primarily made of cellulose and provides structural support."
+      ]
+    },
+    {
+      "prompt": "What is example for Flagella?",
+      "answer": "Sperm cells use flagella for movement.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Flagella",
+      "field": "example",
+      "sourceText": "Sperm cells use flagella for movement.",
+      "accept": [
+        "Sperm cells use flagella for movement."
+      ]
+    }
+  ]
+}

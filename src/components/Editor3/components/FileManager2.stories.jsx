@@ -5,9 +5,19 @@ import { Box, Paper, Typography } from "@mui/material";
 import FilesContext, { FilesProvider } from "../../../context/fileContext";
 import UnitContext from "../../../context/unitContext";
 import SettingsContext from "../../../context/settingsContext";
+import { EditorToastProvider } from "../context/EditorToastContext";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+import { MOCK_JAPANESE_GRAMMAR_PDF, MOCK_VOCABULARY_LIST_PDF } from "../../../../.storybook/__mocks__/mockDocuments";
 export default {
   title: "📁 Content Management/File Manager",
   component: FileManager2,
+  decorators: [
+    (Story) => (
+      <EditorToastProvider>
+        <Story />
+      </EditorToastProvider>
+    ),
+  ],
   parameters: {
     layout: "padded",
     // Ensure AudioPlayerProvider is available (needed for audio file waveforms)
@@ -39,6 +49,9 @@ Advanced file manager with virtualized list, semantic search, and document analy
 Click the expand icon (▼) next to any file to view:
 - File metadata (name, description, prompt, model, variant)
 - For PDFs: Parsed content in tabs (Vocabulary, Questions, Summaries, Objectives, Concepts)
+- Preview, metadata, and extracted content can collapse independently.
+- Long sections and review panels scroll within bounded heights.
+- Images, audio, video, PDFs, and text files support previews; unsupported files retain download access.
         `,
       },
     },
@@ -258,7 +271,7 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_PDF_1,
       name: "japanese-lesson-photosynthesis.pdf",
-      path: "/story-mocks/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
+      path: MOCK_JAPANESE_GRAMMAR_PDF,
       mimeType: "application/pdf",
       level: "PROTECTED",
       size: 1234567,
@@ -271,7 +284,7 @@ const seedMockData = async () => {
     {
       id: MOCK_FILE_ID_PDF_2,
       name: "french-seasons-vocabulary.pdf",
-      path: "/story-mocks/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
+      path: MOCK_VOCABULARY_LIST_PDF,
       mimeType: "application/pdf",
       level: "PROTECTED",
       size: 456789,
@@ -601,6 +614,34 @@ export const WithExpandedContent = {
   ),
 };
 
+export const AdaptiveFileDetails = {
+  ...Default,
+  render: () => (
+    <FileManagerWrapper>
+      <Box sx={{ width: 420, maxWidth: "100%", height: "100%", minHeight: 0 }}>
+        <FileManager2 />
+      </Box>
+    </FileManagerWrapper>
+  ),
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const file = await canvas.findByText("cell-diagram.jpg");
+    const list = canvas.getByTestId("file-browser-list");
+    expect(canvas.queryByTestId("file-browser-details")).toBeNull();
+    expect(list.getBoundingClientRect().width).toBeGreaterThanOrEqual(418);
+    await userEvent.click(file.closest("[draggable]"));
+    const details = await canvas.findByTestId("file-browser-details");
+    await waitFor(() => {
+      expect(details.getBoundingClientRect().top)
+        .toBeGreaterThanOrEqual(list.getBoundingClientRect().bottom - 1);
+      expect(details.getBoundingClientRect().width).toBeGreaterThanOrEqual(418);
+    });
+    const selected = canvas.getAllByRole("checkbox").find((checkbox) => checkbox.checked);
+    await userEvent.click(selected);
+    await waitFor(() => expect(canvas.queryByTestId("file-browser-details")).toBeNull());
+  },
+};
+
 export const EmptyState = {
   parameters: {
     layout: "fullscreen",
@@ -664,4 +705,167 @@ export const ExpandedPDFContent = {
       </Paper>
     </FileManagerWrapper>
   ),
+};
+
+export const CollapsibleScrollableDetails = {
+  ...ExpandedPDFContent,
+  loaders: [
+    async () => {
+      await seedMockData();
+      const { seedMockParsedContent } = await import("../../../../.storybook/__mocks__/aws-amplify-data");
+      seedMockParsedContent([{
+        id: "mock-parsed-content-1",
+        documentID: MOCK_DOCUMENT_ID_1,
+        fileID: MOCK_FILE_ID_PDF_1,
+        vocabularyJSON: JSON.stringify(Array.from({ length: 60 }, (_, index) => ({
+          word: `Biology term ${index + 1}`,
+          definition: "A definition describing this structure and its role in the cell.",
+        }))),
+        summariesJSON: JSON.stringify(Array.from({ length: 30 }, (_, index) => ({
+          title: `Chapter summary ${index + 1}`,
+          content: "Plants convert light energy into chemical energy through photosynthesis. ".repeat(8),
+        }))),
+        objectivesJSON: JSON.stringify(mockParsedContentJapanese.objectivesJSON),
+        conceptsJSON: JSON.stringify(mockParsedContentJapanese.conceptsJSON),
+        questionsJSON: JSON.stringify(mockParsedContentJapanese.questionsJSON),
+      }]);
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const file = await canvas.findByText("japanese-lesson-photosynthesis.pdf");
+    await userEvent.click(file.closest("[draggable]"));
+    const preview = await canvas.findByRole("button", { name: "File preview" });
+    const metadata = canvas.getByRole("button", { name: "File Metadata" });
+    const extracted = canvas.getByRole("button", { name: "Extracted Content" });
+    await waitFor(() => {
+      const pdf = canvasElement.querySelector('.react-pdf__Page canvas');
+      expect(pdf).toBeTruthy();
+      expect(pdf.width).toBeGreaterThan(0);
+      expect(pdf.height).toBeGreaterThan(0);
+    });
+    expect(canvas.getByRole("link", { name: "Download" }))
+      .toHaveAttribute("href", expect.stringContaining("japanese-grammar-guide.pdf"));
+    for (const section of [preview, metadata, extracted]) {
+      expect(section).toHaveAttribute("aria-expanded", "true");
+      await userEvent.click(section);
+      expect(section).toHaveAttribute("aria-expanded", "false");
+      await userEvent.click(section);
+      expect(section).toHaveAttribute("aria-expanded", "true");
+    }
+    await userEvent.click(canvas.getByRole("button", { name: "Edit file metadata" }));
+    const name = canvas.getByRole("textbox", { name: "Name" });
+    await userEvent.clear(name);
+    await userEvent.type(name, "A revised biology file");
+    await userEvent.click(metadata);
+    await userEvent.click(metadata);
+    expect(name).toHaveValue("A revised biology file");
+
+    await userEvent.click(await canvas.findByRole("tab", { name: "Summaries" }));
+    const panel = await canvas.findByRole("tabpanel");
+    await waitFor(() => expect(panel.scrollHeight).toBeGreaterThan(panel.clientHeight));
+    panel.scrollTop = panel.scrollHeight;
+    expect(panel.scrollTop).toBeGreaterThan(0);
+    expect(within(panel).getByText("Chapter summary 30")).toBeVisible();
+    expect(getComputedStyle(panel).overflowY).toBe("auto");
+
+    await userEvent.click(canvas.getByRole("tab", { name: "Vocabulary" }));
+    const term = await canvas.findByText("Biology term 1");
+    const scrollArea = term.closest("li").parentElement.parentElement.parentElement;
+    await waitFor(() => expect(scrollArea.scrollHeight).toBeGreaterThan(scrollArea.clientHeight));
+    scrollArea.scrollTop = scrollArea.scrollHeight;
+    await waitFor(() => expect(canvas.getByText("Biology term 60")).toBeInTheDocument());
+  },
+};
+
+export const FilePreviews = {
+  ...ExpandedPDFContent,
+  loaders: [
+    async () => {
+      await seedMockData();
+      const { seedMockFiles } = await import("../../../../.storybook/__mocks__/aws-amplify-data");
+      seedMockFiles([
+        {
+          id: "preview-text",
+          name: "preview-notes.txt",
+          path: "/story-mocks/japanese-lesson-photosynthesis.txt",
+          mimeType: "text/plain",
+          size: 1024,
+          level: "PROTECTED",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:mock-identity-123",
+        },
+        {
+          id: "preview-video",
+          name: "preview-video.mp4",
+          path: "/story-mocks/326739_medium.mp4",
+          mimeType: "video/mp4",
+          size: 1024,
+          level: "PROTECTED",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:mock-identity-123",
+        },
+        {
+          id: "preview-unsupported",
+          name: "preview-archive.zip",
+          path: "/story-mocks/archive.zip",
+          mimeType: "application/zip",
+          size: 1024,
+          level: "PROTECTED",
+          owner: "mock-user-sub",
+          identityId: "us-east-1:mock-identity-123",
+        },
+      ]);
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const selectFile = async (name) => {
+      const file = await canvas.findByText(name);
+      await userEvent.click(file.closest("[draggable]"));
+    };
+
+    await selectFile("cell-diagram.jpg");
+    await waitFor(() => {
+      const image = canvas.getByRole("img", { name: "cell-diagram.jpg" });
+      expect(image.naturalWidth).toBeGreaterThan(0);
+    });
+    await selectFile("preview-notes.txt");
+    const textPreview = await canvas.findByTitle("preview-notes.txt");
+    expect(textPreview).toHaveAttribute("sandbox", "");
+    expect(textPreview.getAttribute("src")).toContain("japanese-lesson-photosynthesis.txt");
+    await selectFile("preview-video.mp4");
+    await waitFor(() => expect(canvasElement.querySelector("video")?.readyState).toBeGreaterThan(0));
+    await selectFile("preview-archive.zip");
+    await canvas.findByText("Preview is not available for this file type. Download the file to view it.");
+    expect(canvas.getByRole("link", { name: "Download" })).toBeVisible();
+    expect(canvasElement.querySelector("iframe, object, video")).toBeNull();
+  },
+};
+
+export const PdfThumbnailPreview = {
+  ...ExpandedPDFContent,
+  loaders: [
+    async () => {
+      await seedMockData();
+      const { getMockData, seedMockFiles } = await import("../../../../.storybook/__mocks__/aws-amplify-data");
+      const { MOCK_IMAGE_URL_1 } = await import("../../../../.storybook/__mocks__/media");
+      const file = getMockData("File").find((file) => file.id === MOCK_FILE_ID_PDF_1);
+      seedMockFiles([{ ...file, thumbnail: MOCK_IMAGE_URL_1 }]);
+    },
+  ],
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    const file = await canvas.findByText("japanese-lesson-photosynthesis.pdf");
+    await userEvent.click(file.closest("[draggable]"));
+    const previewButton = canvas.getByRole("button", { name: "File preview" });
+    const preview = within(previewButton.closest(".MuiAccordion-root"));
+    await waitFor(() => {
+      const image = preview.getByRole("img", { name: "japanese-lesson-photosynthesis.pdf" });
+      expect(image.naturalWidth).toBeGreaterThan(0);
+    });
+    expect(canvasElement.querySelector(".react-pdf__Page")).toBeNull();
+    expect(canvas.getByRole("link", { name: "Download" }))
+      .toHaveAttribute("href", expect.stringContaining("japanese-grammar-guide.pdf"));
+  },
 };

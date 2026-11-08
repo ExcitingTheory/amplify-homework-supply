@@ -34,7 +34,7 @@ describe("modelSelection", () => {
   });
 
   it("selects the fields of a list of custom types", async () => {
-    expect(await modelSelection(run, "ParsedContent")).toContain("questionsJSON { prompt answer page }");
+    expect(await modelSelection(run, "ParsedContent")).toContain("questionsJSON { prompt answer hint }");
     expect(await modelSelection(run, "ParsedContent")).not.toMatch(/\bdocument\b \{/);
   });
 

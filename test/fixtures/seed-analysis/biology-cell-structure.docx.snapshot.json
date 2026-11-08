@@ -1,0 +1,1232 @@
+{
+  "sourceSha256": "1ba265dd051ba061f57f043d988e61368dc138619b3c4be2adf4368f5b8bcc21",
+  "capturedAt": "2026-10-28T12:55:29.221Z",
+  "sourceFormat": "docx",
+  "pageCount": 2,
+  "vocabularyJSON": [
+    {
+      "word": "Mitochondria (singular",
+      "definition": "mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "context": "Mitochondria (singular: mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Plasma membrane",
+      "definition": "Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment.",
+      "context": "Plasma membrane - Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment. It consists of a phospholipid bilayer with embedded proteins.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Phospholipid bilayer",
+      "definition": "A double layer of phospholipid molecules that forms the basic structure of cell membranes.",
+      "context": "Phospholipid bilayer - A double layer of phospholipid molecules that forms the basic structure of cell membranes. The hydrophobic tails face inward, while hydrophilic heads face outward.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Selective permeability",
+      "definition": "The property of membranes that allows some substances to pass while blocking others.",
+      "context": "Selective permeability - The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Nucleus",
+      "definition": "The control center of eukaryotic cells, containing the cell’s genetic material (DNA).",
+      "context": "Nucleus - The control center of eukaryotic cells, containing the cell’s genetic material (DNA). It is surrounded by a double membrane called the nuclear envelope.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Nuclear envelope",
+      "definition": "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm.",
+      "context": "Nuclear envelope - A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Chromatin",
+      "definition": "The complex of DNA and proteins found in the nucleus.",
+      "context": "Chromatin - The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Nucleolus",
+      "definition": "A dense region within the nucleus where ribosomal RNA is produced.",
+      "context": "Nucleolus - A dense region within the nucleus where ribosomal RNA is produced.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Chromosomes",
+      "definition": "Structures made of condensed chromatin that carry genetic information in the form of genes.",
+      "context": "Chromosomes - Structures made of condensed chromatin that carry genetic information in the form of genes.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Cytoplasm",
+      "definition": "The gel-like substance filling the cell between the plasma membrane and nucleus.",
+      "context": "Cytoplasm - The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Cytosol",
+      "definition": "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins.",
+      "context": "Cytosol - The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins.",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Cytoskeleton",
+      "definition": "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "context": "Cytoskeleton - A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "pages": [
+        1
+      ]
+    }
+  ],
+  "summariesJSON": [
+    {
+      "title": "Page 2",
+      "content": "Page 2 provides definitions for key cell biology concepts including ATP, cellular respiration, and various organelles such as chloroplasts, ribosomes, ER, Golgi apparatus, vesicles, vacuoles, lysosomes, and peroxisomes. It also explains cellular structures such as the cell wall, cellulose, plasmodesmata, cilia, and flagella. Furthermore, it distinguishes between different types of diffusion and transport processes, including diffusion, osmosis, facilitated diffusion, active transport, endocytosis, exocytosis, phagocytosis, and pinocytosis.",
+      "pageRange": "Page 2"
+    },
+    {
+      "title": "Document summary",
+      "content": "The document provides definitions and explanations of fundamental cell biology concepts and structures. It covers key terminologies such as ATP and cellular respiration, elucidates various organelles including chloroplasts, ribosomes, endoplasmic reticulum (ER), Golgi apparatus, vesicles, vacuoles, lysosomes, and peroxisomes. It also describes cellular structures like cell walls, cellulose, plasmodesmata, cilia, and flagella. Additionally, the document details different types of cellular transport and diffusion processes, including simple diffusion, osmosis, facilitated diffusion, active transport, and methods of cellular intake and release such as endocytosis, exocytosis, phagocytosis, and pinocytosis.",
+      "pageRange": "Page 2"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is cell for The Discovery of Cells?",
+      "answer": "The basic unit of life",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "cell",
+      "sourceText": "The cell is the basic unit of life.",
+      "accept": [
+        "The basic unit of life"
+      ]
+    },
+    {
+      "prompt": "What is living organisms for The Discovery of Cells?",
+      "answer": "Composed of one or more cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "living organisms",
+      "sourceText": "All living organisms are composed of one or more cells.",
+      "accept": [
+        "Composed of one or more cells"
+      ]
+    },
+    {
+      "prompt": "What is importance for The Discovery of Cells?",
+      "answer": "Fundamental to understanding biology",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "importance",
+      "sourceText": "The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "Fundamental to understanding biology"
+      ]
+    },
+    {
+      "prompt": "What is definition for Resolution?",
+      "answer": "The ability to distinguish between two closely spaced objects",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Resolution",
+      "field": "definition",
+      "sourceText": "Resolution - The ability to distinguish between two closely spaced objects.",
+      "accept": [
+        "The ability to distinguish between two closely spaced objects"
+      ]
+    },
+    {
+      "prompt": "What is definition for Prokaryotic cells?",
+      "answer": "Simple cells without a membrane-bound nucleus",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Prokaryotic cells",
+      "field": "definition",
+      "sourceText": "Prokaryotic cells - Simple cells without a membrane-bound nucleus.",
+      "accept": [
+        "Simple cells without a membrane-bound nucleus"
+      ]
+    },
+    {
+      "prompt": "What is definition for Eukaryotic cells?",
+      "answer": "Complex cells with a membrane-bound nucleus and specialized organelles",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Eukaryotic cells",
+      "field": "definition",
+      "sourceText": "Eukaryotic cells - Complex cells with a membrane-bound nucleus and specialized organelles.",
+      "accept": [
+        "Complex cells with a membrane-bound nucleus and specialized organelles"
+      ]
+    },
+    {
+      "prompt": "What is definition for Unicellular?",
+      "answer": "Organisms consisting of a single cell",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Unicellular",
+      "field": "definition",
+      "sourceText": "Unicellular - Organisms consisting of a single cell, such as bacteria or amoeba.",
+      "accept": [
+        "Organisms consisting of a single cell"
+      ]
+    },
+    {
+      "prompt": "What is definition for Multicellular?",
+      "answer": "Organisms composed of many cells that work together",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Multicellular",
+      "field": "definition",
+      "sourceText": "Multicellular - Organisms composed of many cells that work together, such as humans or trees.",
+      "accept": [
+        "Organisms composed of many cells that work together"
+      ]
+    },
+    {
+      "prompt": "What is definition for Plasma membrane?",
+      "answer": "A selectively permeable barrier that separates the cell’s interior from its external environment",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Plasma membrane",
+      "field": "definition",
+      "sourceText": "Plasma membrane - Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment.",
+      "accept": [
+        "A selectively permeable barrier that separates the cell’s interior from its external environment"
+      ]
+    },
+    {
+      "prompt": "What is definition for Phospholipid bilayer?",
+      "answer": "A double layer of phospholipid molecules that forms the basic structure of cell membranes",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Phospholipid bilayer",
+      "field": "definition",
+      "sourceText": "Phospholipid bilayer - A double layer of phospholipid molecules that forms the basic structure of cell membranes.",
+      "accept": [
+        "A double layer of phospholipid molecules that forms the basic structure of cell membranes",
+        "A double layer of phospholipid molecules that forms the basic structure of cell membranes."
+      ]
+    },
+    {
+      "prompt": "What is definition for Selective permeability?",
+      "answer": "The property of membranes that allows some substances to pass while blocking others",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Selective permeability",
+      "field": "definition",
+      "sourceText": "Selective permeability - The property of membranes that allows some substances to pass while blocking others.",
+      "accept": [
+        "The property of membranes that allows some substances to pass while blocking others"
+      ]
+    },
+    {
+      "prompt": "What is definition for Nucleus?",
+      "answer": "The control center of eukaryotic cells, containing the cell’s genetic material (DNA)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleus",
+      "field": "definition",
+      "sourceText": "Nucleus - The control center of eukaryotic cells, containing the cell’s genetic material (DNA).",
+      "accept": [
+        "The control center of eukaryotic cells, containing the cell’s genetic material (DNA)",
+        "The control center of eukaryotic cells, containing the cell’s genetic material (DNA)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Nuclear envelope?",
+      "answer": "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nuclear envelope",
+      "field": "definition",
+      "sourceText": "Nuclear envelope - A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm.",
+      "accept": [
+        "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm",
+        "A double membrane with pores that regulates the passage of materials between the nucleus and cytoplasm."
+      ]
+    },
+    {
+      "prompt": "What is definition for Chromatin?",
+      "answer": "The complex of DNA and proteins found in the nucleus",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromatin",
+      "field": "definition",
+      "sourceText": "Chromatin - The complex of DNA and proteins found in the nucleus.",
+      "accept": [
+        "The complex of DNA and proteins found in the nucleus"
+      ]
+    },
+    {
+      "prompt": "What is definition for Nucleolus?",
+      "answer": "A dense region within the nucleus where ribosomal RNA is produced",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleolus",
+      "field": "definition",
+      "sourceText": "Nucleolus - A dense region within the nucleus where ribosomal RNA is produced.",
+      "accept": [
+        "A dense region within the nucleus where ribosomal RNA is produced",
+        "A dense region within the nucleus where ribosomal RNA is produced."
+      ]
+    },
+    {
+      "prompt": "What is definition for Chromosomes?",
+      "answer": "Structures made of condensed chromatin that carry genetic information in the form of genes",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromosomes",
+      "field": "definition",
+      "sourceText": "Chromosomes - Structures made of condensed chromatin that carry genetic information in the form of genes.",
+      "accept": [
+        "Structures made of condensed chromatin that carry genetic information in the form of genes",
+        "Structures made of condensed chromatin that carry genetic information in the form of genes."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cytoplasm?",
+      "answer": "The gel-like substance filling the cell between the plasma membrane and nucleus",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoplasm",
+      "field": "definition",
+      "sourceText": "Cytoplasm - The gel-like substance filling the cell between the plasma membrane and nucleus.",
+      "accept": [
+        "The gel-like substance filling the cell between the plasma membrane and nucleus"
+      ]
+    },
+    {
+      "prompt": "What is definition for Cytosol?",
+      "answer": "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytosol",
+      "field": "definition",
+      "sourceText": "Cytosol - The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins.",
+      "accept": [
+        "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins",
+        "The liquid portion of the cytoplasm, composed mainly of water with dissolved ions, molecules, and proteins."
+      ]
+    },
+    {
+      "prompt": "What is definition for Mitochondria?",
+      "answer": "Organelles responsible for cellular respiration, converting nutrients into ATP (energy)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Mitochondria",
+      "field": "definition",
+      "sourceText": "Mitochondria (singular: mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy).",
+      "accept": [
+        "Organelles responsible for cellular respiration, converting nutrients into ATP (energy)"
+      ]
+    },
+    {
+      "prompt": "What is Cell Biology for Cell Biology?",
+      "answer": "The Structure and Function of Cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Biology",
+      "field": "Cell Biology",
+      "sourceText": "Cell Biology: The Structure and Function of Cells",
+      "accept": [
+        "The Structure and Function of Cells"
+      ]
+    },
+    {
+      "prompt": "What is Cytology for Cytology?",
+      "answer": "The branch of biology concerned with the study of cells, their structure, function, and chemistry.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytology",
+      "field": "Cytology",
+      "sourceText": "Cytology - The branch of biology concerned with the study of cells, their structure, function, and chemistry.",
+      "accept": [
+        "The branch of biology concerned with the study of cells, their structure, function, and chemistry."
+      ]
+    },
+    {
+      "prompt": "What is Microscope for Microscope?",
+      "answer": "An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Microscope",
+      "field": "Microscope",
+      "sourceText": "Microscope - An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665.",
+      "accept": [
+        "An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665."
+      ]
+    },
+    {
+      "prompt": "What is Resolution for Resolution?",
+      "answer": "The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Resolution",
+      "field": "Resolution",
+      "sourceText": "Resolution - The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes.",
+      "accept": [
+        "The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes."
+      ]
+    },
+    {
+      "prompt": "What is Prokaryotic cells for Prokaryotic cells?",
+      "answer": "Simple cells without a membrane-bound nucleus. Bacteria and archaea are prokaryotes. These cells are typically smaller (1-10 μm) and have their genetic material in a nucleoid region.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Prokaryotic cells",
+      "field": "Prokaryotic cells",
+      "sourceText": "Prokaryotic cells - Simple cells without a membrane-bound nucleus. Bacteria and archaea are prokaryotes. These cells are typically smaller (1-10 μm) and have their genetic material in a nucleoid region.",
+      "accept": [
+        "Simple cells without a membrane-bound nucleus. Bacteria and archaea are prokaryotes. These cells are typically smaller (1-10 μm) and have their genetic material in a nucleoid region."
+      ]
+    },
+    {
+      "prompt": "What is Eukaryotic cells for Eukaryotic cells?",
+      "answer": "Complex cells with a membrane-bound nucleus and specialized organelles. Animals, plants, fungi, and protists are eukaryotes. These cells are larger (10-100 μm) and more structurally complex.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Eukaryotic cells",
+      "field": "Eukaryotic cells",
+      "sourceText": "Eukaryotic cells - Complex cells with a membrane-bound nucleus and specialized organelles. Animals, plants, fungi, and protists are eukaryotes. These cells are larger (10-100 μm) and more structurally complex.",
+      "accept": [
+        "Complex cells with a membrane-bound nucleus and specialized organelles. Animals, plants, fungi, and protists are eukaryotes. These cells are larger (10-100 μm) and more structurally complex."
+      ]
+    },
+    {
+      "prompt": "What is Plasma membrane for Plasma membrane?",
+      "answer": "Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment. It consists of a phospholipid bilayer with embedded proteins.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Plasma membrane",
+      "field": "Plasma membrane",
+      "sourceText": "Plasma membrane - Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment. It consists of a phospholipid bilayer with embedded proteins.",
+      "accept": [
+        "Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment. It consists of a phospholipid bilayer with embedded proteins."
+      ]
+    },
+    {
+      "prompt": "What is Phospholipid bilayer for Phospholipid bilayer?",
+      "answer": "A double layer of phospholipid molecules that forms the basic structure of cell membranes. The hydrophobic tails face inward, while hydrophilic heads face outward.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Phospholipid bilayer",
+      "field": "Phospholipid bilayer",
+      "sourceText": "Phospholipid bilayer - A double layer of phospholipid molecules that forms the basic structure of cell membranes. The hydrophobic tails face inward, while hydrophilic heads face outward.",
+      "accept": [
+        "A double layer of phospholipid molecules that forms the basic structure of cell membranes. The hydrophobic tails face inward, while hydrophilic heads face outward."
+      ]
+    },
+    {
+      "prompt": "What is Selective permeability for Selective permeability?",
+      "answer": "The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Selective permeability",
+      "field": "Selective permeability",
+      "sourceText": "Selective permeability - The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "accept": [
+        "The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis."
+      ]
+    },
+    {
+      "prompt": "What is Nucleus for Nucleus?",
+      "answer": "The control center of eukaryotic cells, containing the cell’s genetic material (DNA). It is surrounded by a double membrane called the nuclear envelope.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nucleus",
+      "field": "Nucleus",
+      "sourceText": "Nucleus - The control center of eukaryotic cells, containing the cell’s genetic material (DNA). It is surrounded by a double membrane called the nuclear envelope.",
+      "accept": [
+        "The control center of eukaryotic cells, containing the cell’s genetic material (DNA). It is surrounded by a double membrane called the nuclear envelope."
+      ]
+    },
+    {
+      "prompt": "What is Chromatin for Chromatin?",
+      "answer": "The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromatin",
+      "field": "Chromatin",
+      "sourceText": "Chromatin - The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "accept": [
+        "The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes."
+      ]
+    },
+    {
+      "prompt": "What is Cytoplasm for Cytoplasm?",
+      "answer": "The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoplasm",
+      "field": "Cytoplasm",
+      "sourceText": "Cytoplasm - The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton.",
+      "accept": [
+        "The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton."
+      ]
+    },
+    {
+      "prompt": "What is Cytoskeleton for Cytoskeleton?",
+      "answer": "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoskeleton",
+      "field": "Cytoskeleton",
+      "sourceText": "Cytoskeleton - A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "accept": [
+        "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell."
+      ]
+    },
+    {
+      "prompt": "What is Mitochondria (singular for Mitochondria (singular?",
+      "answer": "mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Mitochondria (singular",
+      "field": "Mitochondria (singular",
+      "sourceText": "Mitochondria (singular: mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "accept": [
+        "mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane."
+      ]
+    },
+    {
+      "prompt": "What is Chapter for Cell Biology: The Structure and Function of Cells?",
+      "answer": "Introduction to Cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Biology: The Structure and Function of Cells",
+      "field": "Chapter",
+      "sourceText": "Chapter 1: Introduction to Cells",
+      "accept": [
+        "Introduction to Cells"
+      ]
+    },
+    {
+      "prompt": "What is Statement for The Discovery of Cells?",
+      "answer": "The cell is the basic unit of life.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "Statement",
+      "sourceText": "The cell is the basic unit of life. All living organisms are composed of one or more cells. The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "The cell is the basic unit of life."
+      ]
+    },
+    {
+      "prompt": "What is Statement for The Discovery of Cells?",
+      "answer": "All living organisms are composed of one or more cells.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "Statement",
+      "sourceText": "The cell is the basic unit of life. All living organisms are composed of one or more cells. The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "All living organisms are composed of one or more cells."
+      ]
+    },
+    {
+      "prompt": "What is Statement for The Discovery of Cells?",
+      "answer": "The discovery and study of cells has been fundamental to understanding biology.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The Discovery of Cells",
+      "field": "Statement",
+      "sourceText": "The cell is the basic unit of life. All living organisms are composed of one or more cells. The discovery and study of cells has been fundamental to understanding biology.",
+      "accept": [
+        "The discovery and study of cells has been fundamental to understanding biology."
+      ]
+    },
+    {
+      "prompt": "What is Statement 1 for Cell Theory?",
+      "answer": "All living organisms are composed of one or more cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "Statement 1",
+      "sourceText": "Cell Theory - A fundamental principle in biology stating that: 1. All living organisms are composed of one or more cells 2. The cell is the basic unit of structure and organization 3. All cells arise from pre-existing cells",
+      "accept": [
+        "All living organisms are composed of one or more cells"
+      ]
+    },
+    {
+      "prompt": "What is Statement 2 for Cell Theory?",
+      "answer": "The cell is the basic unit of structure and organization",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "Statement 2",
+      "sourceText": "Cell Theory - A fundamental principle in biology stating that: 1. All living organisms are composed of one or more cells 2. The cell is the basic unit of structure and organization 3. All cells arise from pre-existing cells",
+      "accept": [
+        "The cell is the basic unit of structure and organization"
+      ]
+    },
+    {
+      "prompt": "What is Statement 3 for Cell Theory?",
+      "answer": "All cells arise from pre-existing cells",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cell Theory",
+      "field": "Statement 3",
+      "sourceText": "Cell Theory - A fundamental principle in biology stating that: 1. All living organisms are composed of one or more cells 2. The cell is the basic unit of structure and organization 3. All cells arise from pre-existing cells",
+      "accept": [
+        "All cells arise from pre-existing cells"
+      ]
+    },
+    {
+      "prompt": "What is Year of first observation of cells for Microscope?",
+      "answer": "1665",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Microscope",
+      "field": "Year of first observation of cells",
+      "sourceText": "Microscope - An instrument that uses lenses to magnify small objects. Robert Hooke first observed cells using a simple microscope in 1665.",
+      "accept": [
+        "1665"
+      ]
+    },
+    {
+      "prompt": "What is Mitochondria (singular for Mitochondria (singular: mitochondrion)?",
+      "answer": "mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Mitochondria (singular: mitochondrion)",
+      "field": "Mitochondria (singular",
+      "sourceText": "Mitochondria (singular: mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane.",
+      "accept": [
+        "mitochondrion) - Organelles responsible for cellular respiration, converting nutrients into ATP (energy). Often called the “powerhouse of the cell.” They have their own DNA and double membrane."
+      ]
+    },
+    {
+      "prompt": "What is The cell is the basic unit of life for Introduction to Cells?",
+      "answer": "All living organisms are composed of one or more cells.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Introduction to Cells",
+      "field": "The cell is the basic unit of life",
+      "sourceText": "The cell is the basic unit of life. All living organisms are composed of one or more cells.",
+      "accept": [
+        "The cell is the basic unit of life"
+      ]
+    },
+    {
+      "prompt": "What is Definition for Resolution?",
+      "answer": "The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Resolution",
+      "field": "Definition",
+      "sourceText": "Resolution - The ability to distinguish between two closely spaced objects. Modern electron microscopes have much greater resolution than light microscopes.",
+      "accept": [
+        "The ability to distinguish between two closely spaced objects."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Prokaryotic cells?",
+      "answer": "Simple cells without a membrane-bound nucleus. Bacteria and archaea are prokaryotes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Prokaryotic cells",
+      "field": "Definition",
+      "sourceText": "Prokaryotic cells - Simple cells without a membrane-bound nucleus. Bacteria and archaea are prokaryotes. These cells are typically smaller (1-10 μm) and have their genetic material in a nucleoid region.",
+      "accept": [
+        "Simple cells without a membrane-bound nucleus."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Eukaryotic cells?",
+      "answer": "Complex cells with a membrane-bound nucleus and specialized organelles. Animals, plants, fungi, and protists are eukaryotes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Eukaryotic cells",
+      "field": "Definition",
+      "sourceText": "Eukaryotic cells - Complex cells with a membrane-bound nucleus and specialized organelles. Animals, plants, fungi, and protists are eukaryotes. These cells are larger (10-100 μm) and more structurally complex.",
+      "accept": [
+        "Complex cells with a membrane-bound nucleus and specialized organelles."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Unicellular?",
+      "answer": "Organisms consisting of a single cell, such as bacteria or amoeba.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Unicellular",
+      "field": "Definition",
+      "sourceText": "Unicellular - Organisms consisting of a single cell, such as bacteria or amoeba.",
+      "accept": [
+        "Organisms consisting of a single cell."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Multicellular?",
+      "answer": "Organisms composed of many cells that work together, such as humans or trees.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Multicellular",
+      "field": "Definition",
+      "sourceText": "Multicellular - Organisms composed of many cells that work together, such as humans or trees.",
+      "accept": [
+        "Organisms composed of many cells that work together."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Plasma membrane?",
+      "answer": "Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Plasma membrane",
+      "field": "Definition",
+      "sourceText": "Plasma membrane - Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment. It consists of a phospholipid bilayer with embedded proteins.",
+      "accept": [
+        "Also called the cell membrane, this is a selectively permeable barrier that separates the cell’s interior from its external environment."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Selective permeability?",
+      "answer": "The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Selective permeability",
+      "field": "Definition",
+      "sourceText": "Selective permeability - The property of membranes that allows some substances to pass while blocking others. This is crucial for maintaining cellular homeostasis.",
+      "accept": [
+        "The property of membranes that allows some substances to pass while blocking others."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Chromatin?",
+      "answer": "The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Chromatin",
+      "field": "Definition",
+      "sourceText": "Chromatin - The complex of DNA and proteins found in the nucleus. During cell division, chromatin condenses into visible chromosomes.",
+      "accept": [
+        "The complex of DNA and proteins found in the nucleus."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Cytoplasm?",
+      "answer": "The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoplasm",
+      "field": "Definition",
+      "sourceText": "Cytoplasm - The gel-like substance filling the cell between the plasma membrane and nucleus. It contains organelles, cytosol, and the cytoskeleton.",
+      "accept": [
+        "The gel-like substance filling the cell between the plasma membrane and nucleus."
+      ]
+    },
+    {
+      "prompt": "What is Definition for Cytoskeleton?",
+      "answer": "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Cytoskeleton",
+      "field": "Definition",
+      "sourceText": "Cytoskeleton - A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell.",
+      "accept": [
+        "A network of protein filaments providing structural support, enabling cell movement, and helping transport materials within the cell."
+      ]
+    },
+    {
+      "prompt": "What is definition for ATP?",
+      "answer": "The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "ATP",
+      "field": "definition",
+      "sourceText": "ATP (Adenosine Triphosphate) - The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes.",
+      "accept": [
+        "The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cellular respiration?",
+      "answer": "The process by which cells break down glucose and other organic molecules to produce ATP, consuming oxygen and producing carbon dioxide.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Cellular respiration",
+      "field": "definition",
+      "sourceText": "Cellular respiration - The process by which cells break down glucose and other organic molecules to produce ATP, consuming oxygen and producing carbon dioxide.",
+      "accept": [
+        "The process by which cells break down glucose and other organic molecules to produce ATP, consuming oxygen and producing carbon dioxide."
+      ]
+    },
+    {
+      "prompt": "What is definition for Chloroplasts?",
+      "answer": "Organelles in plant cells and some protists where photosynthesis occurs. They contain chlorophyll and convert light energy into chemical energy (glucose).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Chloroplasts",
+      "field": "definition",
+      "sourceText": "Chloroplasts - Organelles in plant cells and some protists where photosynthesis occurs. They contain chlorophyll and convert light energy into chemical energy (glucose).",
+      "accept": [
+        "Organelles in plant cells and some protists where photosynthesis occurs. They contain chlorophyll and convert light energy into chemical energy (glucose)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Ribosomes?",
+      "answer": "Small structures composed of RNA and proteins where protein synthesis occurs. They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Ribosomes",
+      "field": "definition",
+      "sourceText": "Ribosomes - Small structures composed of RNA and proteins where protein synthesis occurs. They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum.",
+      "accept": [
+        "Small structures composed of RNA and proteins where protein synthesis occurs. They can be free-floating in the cytoplasm or attached to the endoplasmic reticulum."
+      ]
+    },
+    {
+      "prompt": "What is definition for Endoplasmic Reticulum (ER)?",
+      "answer": "A network of membranous tubules and sacs involved in protein and lipid synthesis.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Endoplasmic Reticulum (ER)",
+      "field": "definition",
+      "sourceText": "Endoplasmic Reticulum (ER) - A network of membranous tubules and sacs involved in protein and lipid synthesis.",
+      "accept": [
+        "A network of membranous tubules and sacs involved in protein and lipid synthesis."
+      ]
+    },
+    {
+      "prompt": "What is definition for Rough ER?",
+      "answer": "ER studded with ribosomes; primarily involved in protein synthesis and modification.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Rough ER",
+      "field": "definition",
+      "sourceText": "Rough ER - ER studded with ribosomes; primarily involved in protein synthesis and modification.",
+      "accept": [
+        "ER studded with ribosomes; primarily involved in protein synthesis and modification."
+      ]
+    },
+    {
+      "prompt": "What is definition for Smooth ER?",
+      "answer": "ER without ribosomes; involved in lipid synthesis, carbohydrate metabolism, and detoxification.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Smooth ER",
+      "field": "definition",
+      "sourceText": "Smooth ER - ER without ribosomes; involved in lipid synthesis, carbohydrate metabolism, and detoxification.",
+      "accept": [
+        "ER without ribosomes; involved in lipid synthesis, carbohydrate metabolism, and detoxification."
+      ]
+    },
+    {
+      "prompt": "What is definition for Golgi apparatus?",
+      "answer": "Also called Golgi complex or Golgi body, this organelle modifies, packages, and sorts proteins and lipids for transport to their final destinations.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Golgi apparatus",
+      "field": "definition",
+      "sourceText": "Golgi apparatus - Also called Golgi complex or Golgi body, this organelle modifies, packages, and sorts proteins and lipids for transport to their final destinations.",
+      "accept": [
+        "Also called Golgi complex or Golgi body, this organelle modifies, packages, and sorts proteins and lipids for transport to their final destinations."
+      ]
+    },
+    {
+      "prompt": "What is definition for Vesicles?",
+      "answer": "Small membrane-bound sacs that transport materials within cells or to the cell membrane for secretion.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Vesicles",
+      "field": "definition",
+      "sourceText": "Vesicles - Small membrane-bound sacs that transport materials within cells or to the cell membrane for secretion.",
+      "accept": [
+        "Small membrane-bound sacs that transport materials within cells or to the cell membrane for secretion."
+      ]
+    },
+    {
+      "prompt": "What is definition for Vacuoles?",
+      "answer": "Membrane-bound sacs used for storage. Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Vacuoles",
+      "field": "definition",
+      "sourceText": "Vacuoles - Membrane-bound sacs used for storage. Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure.",
+      "accept": [
+        "Membrane-bound sacs used for storage. Plant cells typically have one large central vacuole that stores water, nutrients, and waste products, helping maintain turgor pressure."
+      ]
+    },
+    {
+      "prompt": "What is definition for Lysosomes?",
+      "answer": "Organelles containing digestive enzymes that break down waste materials, cellular debris, and foreign substances. Sometimes called the “recycling centers” of the cell.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Lysosomes",
+      "field": "definition",
+      "sourceText": "Lysosomes - Organelles containing digestive enzymes that break down waste materials, cellular debris, and foreign substances. Sometimes called the “recycling centers” of the cell.",
+      "accept": [
+        "Organelles containing digestive enzymes that break down waste materials, cellular debris, and foreign substances. Sometimes called the “recycling centers” of the cell."
+      ]
+    },
+    {
+      "prompt": "What is definition for Peroxisomes?",
+      "answer": "Organelles that break down fatty acids and detoxify harmful substances, producing hydrogen peroxide as a byproduct (which they then break down).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Peroxisomes",
+      "field": "definition",
+      "sourceText": "Peroxisomes - Organelles that break down fatty acids and detoxify harmful substances, producing hydrogen peroxide as a byproduct (which they then break down).",
+      "accept": [
+        "Organelles that break down fatty acids and detoxify harmful substances, producing hydrogen peroxide as a byproduct (which they then break down)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cell wall?",
+      "answer": "A rigid structure outside the plasma membrane in plant cells, fungi, and some protists. In plants, it’s primarily made of cellulose and provides structural support.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Cell wall",
+      "field": "definition",
+      "sourceText": "Cell wall - A rigid structure outside the plasma membrane in plant cells, fungi, and some protists. In plants, it’s primarily made of cellulose and provides structural support.",
+      "accept": [
+        "A rigid structure outside the plasma membrane in plant cells, fungi, and some protists. In plants, it’s primarily made of cellulose and provides structural support."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cellulose?",
+      "answer": "A complex carbohydrate that forms the primary component of plant cell walls.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Cellulose",
+      "field": "definition",
+      "sourceText": "Cellulose - A complex carbohydrate that forms the primary component of plant cell walls.",
+      "accept": [
+        "A complex carbohydrate that forms the primary component of plant cell walls."
+      ]
+    },
+    {
+      "prompt": "What is definition for Plasmodesmata?",
+      "answer": "Channels through plant cell walls that allow direct cell-to-cell communication and transport.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Plasmodesmata",
+      "field": "definition",
+      "sourceText": "Plasmodesmata - Channels through plant cell walls that allow direct cell-to-cell communication and transport.",
+      "accept": [
+        "Channels through plant cell walls that allow direct cell-to-cell communication and transport."
+      ]
+    },
+    {
+      "prompt": "What is definition for Cilia?",
+      "answer": "Short, numerous hair-like projections that move in coordinated waves to propel cells or move substances across cell surfaces.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Cilia",
+      "field": "definition",
+      "sourceText": "Cilia (singular: cilium) - Short, numerous hair-like projections that move in coordinated waves to propel cells or move substances across cell surfaces.",
+      "accept": [
+        "Short, numerous hair-like projections that move in coordinated waves to propel cells or move substances across cell surfaces."
+      ]
+    },
+    {
+      "prompt": "What is definition for Flagella?",
+      "answer": "Long, whip-like appendages that propel cells through fluid environments. Sperm cells use flagella for movement.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Flagella",
+      "field": "definition",
+      "sourceText": "Flagella (singular: flagellum) - Long, whip-like appendages that propel cells through fluid environments. Sperm cells use flagella for movement.",
+      "accept": [
+        "Long, whip-like appendages that propel cells through fluid environments. Sperm cells use flagella for movement."
+      ]
+    },
+    {
+      "prompt": "What is definition for Diffusion?",
+      "answer": "The movement of molecules from areas of high concentration to low concentration, requiring no energy input.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Diffusion",
+      "field": "definition",
+      "sourceText": "Diffusion - The movement of molecules from areas of high concentration to low concentration, requiring no energy input.",
+      "accept": [
+        "The movement of molecules from areas of high concentration to low concentration, requiring no energy input."
+      ]
+    },
+    {
+      "prompt": "What is definition for Osmosis?",
+      "answer": "The diffusion of water across a selectively permeable membrane from areas of low solute concentration to high solute concentration.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Osmosis",
+      "field": "definition",
+      "sourceText": "Osmosis - The diffusion of water across a selectively permeable membrane from areas of low solute concentration to high solute concentration.",
+      "accept": [
+        "The diffusion of water across a selectively permeable membrane from areas of low solute concentration to high solute concentration."
+      ]
+    },
+    {
+      "prompt": "What is definition for Facilitated diffusion?",
+      "answer": "The passive movement of molecules across membranes with the help of transport proteins.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Facilitated diffusion",
+      "field": "definition",
+      "sourceText": "Facilitated diffusion - The passive movement of molecules across membranes with the help of transport proteins.",
+      "accept": [
+        "The passive movement of molecules across membranes with the help of transport proteins."
+      ]
+    },
+    {
+      "prompt": "What is definition for Active transport?",
+      "answer": "The movement of molecules against their concentration gradient (from low to high concentration), requiring energy (ATP).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Active transport",
+      "field": "definition",
+      "sourceText": "Active transport - The movement of molecules against their concentration gradient (from low to high concentration), requiring energy (ATP).",
+      "accept": [
+        "The movement of molecules against their concentration gradient (from low to high concentration), requiring energy (ATP)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Endocytosis?",
+      "answer": "The process by which cells engulf external materials by forming vesicles from the plasma membrane.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Endocytosis",
+      "field": "definition",
+      "sourceText": "Endocytosis - The process by which cells engulf external materials by forming vesicles from the plasma membrane.",
+      "accept": [
+        "The process by which cells engulf external materials by forming vesicles from the plasma membrane."
+      ]
+    },
+    {
+      "prompt": "What is definition for Exocytosis?",
+      "answer": "The process by which cells expel materials in vesicles that fuse with the plasma membrane.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Exocytosis",
+      "field": "definition",
+      "sourceText": "Exocytosis - The process by which cells expel materials in vesicles that fuse with the plasma membrane.",
+      "accept": [
+        "The process by which cells expel materials in vesicles that fuse with the plasma membrane."
+      ]
+    },
+    {
+      "prompt": "What is definition for Phagocytosis?",
+      "answer": "A type of endocytosis where cells engulf large particles or other cells (“cell eating”).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Phagocytosis",
+      "field": "definition",
+      "sourceText": "Phagocytosis - A type of endocytosis where cells engulf large particles or other cells (“cell eating”).",
+      "accept": [
+        "A type of endocytosis where cells engulf large particles or other cells (“cell eating”)."
+      ]
+    },
+    {
+      "prompt": "What is definition for Pinocytosis?",
+      "answer": "A type of endocytosis where cells take in liquid and small dissolved molecules (“cell drinking”).",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "Pinocytosis",
+      "field": "definition",
+      "sourceText": "Pinocytosis - A type of endocytosis where cells take in liquid and small dissolved molecules (“cell drinking”).",
+      "accept": [
+        "A type of endocytosis where cells take in liquid and small dissolved molecules (“cell drinking”)."
+      ]
+    },
+    {
+      "prompt": "What is definition for ATP (Adenosine Triphosphate)?",
+      "answer": "The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes.",
+      "questionType": "recall",
+      "pages": [
+        2
+      ],
+      "subject": "ATP (Adenosine Triphosphate)",
+      "field": "definition",
+      "sourceText": "ATP (Adenosine Triphosphate) - The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes.",
+      "accept": [
+        "The primary energy currency of cells. Energy released from breaking ATP bonds powers most cellular processes."
+      ]
+    }
+  ]
+}

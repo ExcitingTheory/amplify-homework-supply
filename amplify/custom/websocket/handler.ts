@@ -7,6 +7,7 @@ import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import {
   DynamoDBDocumentClient,
   PutCommand,
+  GetCommand,
   QueryCommand,
   DeleteCommand,
   UpdateCommand,
@@ -18,15 +19,6 @@ const ddb = DynamoDBDocumentClient.from(ddbClient);
 
 // API Gateway Management API client for sending messages to WebSocket clients
 let apiGatewayClient: ApiGatewayManagementApiClient | null = null;
-
-/**
- * In-memory authorization cache keyed by connectionId.
- *
- * Avoids a DB round-trip on every Yjs sync message for already-authorized
- * connections. Scoped to the Lambda execution context — warm instances
- * benefit on all subsequent messages; cold starts re-verify once per connection.
- */
-const connectionAuthCache = new Set<string>();
 
 interface WebSocketMessage {
   action: string;
@@ -108,9 +100,6 @@ export const handler: APIGatewayProxyWebsocketHandlerV2 = async (
         return { statusCode: 200, body: "Connected" };
 
       case "$disconnect":
-        // Evict from auth cache so stale entries don't accumulate in long-lived
-        // Lambda instances.
-        connectionAuthCache.delete(connectionId);
         return handleDisconnect(connectionId);
 
       case "$default":
@@ -169,7 +158,34 @@ async function getConnectionIds(unitId: string): Promise<string[]> {
     }),
   );
 
-  return (result.Items || []).map((item) => item.connectionId);
+  const items = result.Items || [];
+  if (!isReviewRoom(unitId)) {
+    return items.map((item) => item.connectionId);
+  }
+
+  const permitted = await Promise.all(
+    items.map(async (item) => {
+      const current = await ddb.send(
+        new GetCommand({
+          TableName: process.env.CONNECTIONS_TABLE_NAME!,
+          Key: { connectionId: item.connectionId },
+          ConsistentRead: true,
+        }),
+      );
+      const connection = current.Item;
+      if (
+        !connection ||
+        connection.unitId !== unitId ||
+        typeof connection.userId !== "string"
+      ) {
+        return null;
+      }
+      return (await authorizeReviewAccess(unitId, connection.userId))
+        ? connection.connectionId
+        : null;
+    }),
+  );
+  return permitted.filter((id): id is string => typeof id === "string");
 }
 
 async function handleDisconnect(connectionId: string) {
@@ -202,9 +218,7 @@ async function handleMessage(
   // Determine document type
   const isReview = isReviewRoom(unitId);
 
-  // Authorize access to this room. The result is cached in-memory after the
-  // first check so subsequent Yjs sync messages don't incur a DB round-trip.
-  if (!(await authorizeRoomAccess(connectionId, unitId, userId, userGroups))) {
+  if (!(await authorizeRoomAccess(unitId, userId, userGroups))) {
     return { statusCode: 403, body: "Not authorized for this room" };
   }
 
@@ -376,7 +390,6 @@ async function handleMessage(
           unitId,
           userId,
           messageId,
-          allChatConnections,
         ).catch((err) =>
           console.warn(
             "[Moderation] Chat moderation failed (non-blocking):",
@@ -493,11 +506,10 @@ async function sendToConnection(
  *   an Admin/Instructor with write access, or a Learner enrolled in a section
  *   that has the unit assigned (via readableGroups intersection).
  *
- * The result is stored in `connectionAuthCache` so the DynamoDB call only
- * happens once per connection per Lambda execution context.
+ * Authorization is checked on each incoming room message so permission
+ * changes apply to subsequent messages from an existing connection.
  */
 async function authorizeRoomAccess(
-  connectionId: string,
   unitId: string,
   userId: string,
   userGroups: string[] = [],
@@ -508,16 +520,11 @@ async function authorizeRoomAccess(
     return false;
   }
 
-  // Already verified in this Lambda execution — skip DB
-  if (connectionAuthCache.has(connectionId)) return true;
-
   const authorized = isReviewRoom(unitId)
     ? await authorizeReviewAccess(unitId, userId)
     : await authorizeUnitRoomAccess(unitId, userId, userGroups);
 
-  if (authorized) {
-    connectionAuthCache.add(connectionId);
-  } else {
+  if (!authorized) {
     console.warn(`[Auth] Denied room access for user ${userId} to ${unitId}`);
   }
 
@@ -609,6 +616,7 @@ async function authorizeReviewAccess(
     const result = await ddb.send(
       new QueryCommand({
         TableName: process.env.HOMEWORK_ROOM_TABLE_NAME!,
+        ConsistentRead: true,
         KeyConditionExpression: "id = :id",
         ExpressionAttributeValues: {
           ":id": roomId,
@@ -659,7 +667,6 @@ async function moderateChatMessage(
   docName: string,
   userId: string,
   messageId: string,
-  connectionIds: string[],
 ): Promise<void> {
   const apiKey = process.env.OPENAI_API_KEY;
   if (!apiKey) {
@@ -711,6 +718,7 @@ async function moderateChatMessage(
     timestamp: Date.now(),
   };
 
+  const connectionIds = await getConnectionIds(docName);
   for (const connId of connectionIds) {
     try {
       await sendToConnection(connId, retractMessage);

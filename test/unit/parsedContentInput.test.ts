@@ -17,6 +17,18 @@ function declaredFields(typeName: string): string[] {
 }
 
 describe("toParsedContentInput", () => {
+  it("persists the existing claim fields while keeping internal evidence anchors out of the GraphQL input", () => {
+    const input = toParsedContentInput({ questionsJSON: [{
+      prompt: "What do cells contain?", subject: "Cells", field: "contain", answer: "DNA",
+      sourceText: "Cells contain DNA.", page: 1, accept: [],
+      evidenceUnitId: "evidence-123", sourceStart: 0, sourceEnd: 18,
+    }] });
+    expect(input.questionsJSON).toEqual([{
+      prompt: "What do cells contain?", subject: "Cells", field: "contain", answer: "DNA",
+      sourceText: "Cells contain DNA.", pages: [1], accept: [],
+    }]);
+  });
+
   it("sends typed lists, not JSON strings", () => {
     const input = toParsedContentInput({
       vocabularyJSON: [{ word: "Path", definition: "A line", page: 2 }],
@@ -26,15 +38,17 @@ describe("toParsedContentInput", () => {
     });
     expect(Array.isArray(input.vocabularyJSON)).toBe(true);
     expect(Array.isArray(input.questionsJSON)).toBe(true);
+    // A lone `page` from single-page extraction output becomes a one-item `pages`.
     expect(input.vocabularyJSON).toEqual([
-      { word: "Path", definition: "A line", page: 2 },
+      { word: "Path", definition: "A line", pages: [2] },
     ]);
     expect(input.questionsJSON[0]).toEqual({
       prompt: "What is path?",
       answer: "12",
-      page: 3,
       pages: [3, 5],
     });
+    expect(input.vocabularyJSON[0]).not.toHaveProperty("page");
+    expect(input.questionsJSON[0]).not.toHaveProperty("page");
     expect(input).not.toHaveProperty("pendingMediaJSON");
   });
 
@@ -45,6 +59,15 @@ describe("toParsedContentInput", () => {
     });
     expect(input.vocabularyJSON[0].pages).toEqual([2, 9]);
     expect(input.questionsJSON[0].pages).toEqual([1, 4]);
+  });
+
+  it("keeps the id of the Question or Word an entry was imported as", () => {
+    const input = toParsedContentInput({
+      vocabularyJSON: [{ word: "Path", wordID: "w1", pages: [2] }],
+      questionsJSON: [{ prompt: "p", answer: "a", questionID: "q1", pages: [1] }],
+    });
+    expect(input.vocabularyJSON[0].wordID).toBe("w1");
+    expect(input.questionsJSON[0].questionID).toBe("q1");
   });
 
   it("drops fields the schema does not declare and maps legacy term to word", () => {
@@ -94,7 +117,7 @@ describe("toParsedContentInput", () => {
   it("only emits fields declared by the schema's entry types", () => {
     const input = toParsedContentInput({
       vocabularyJSON: [
-        { word: "w", definition: "d", context: "c", page: 1, pages: [1, 2] },
+        { word: "w", definition: "d", context: "c", pages: [1, 2] },
       ],
       summariesJSON: [{ title: "t", content: "c", pageRange: "1-2" }],
       objectivesJSON: [{ objective: "o", bloomLevel: "b" }],
@@ -108,7 +131,6 @@ describe("toParsedContentInput", () => {
           hint: "h",
           difficulty: "easy",
           questionType: "recall",
-          page: 1,
           pages: [1, 2],
           subject: "s",
           field: "f",

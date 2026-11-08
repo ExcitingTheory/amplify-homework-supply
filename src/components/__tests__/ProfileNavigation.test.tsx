@@ -5,7 +5,6 @@ import { Avatar } from "@mui/material";
 import { NextIntlClientProvider } from "next-intl";
 import { ProfileAvatarLink } from "../ProfileAvatarLink";
 import { SectionSettingsNavigation } from "../SectionSettingsNavigation";
-import { AppFooter } from "../AppFooter";
 import { AvatarDisplay } from "../Gamification/AvatarDisplay";
 import { LeaderboardTable, type LeaderboardEntry } from "../Leaderboard/LeaderboardTable";
 import { applyLeaderboardPrivacy } from "../../utils/leaderboardPrivacy";
@@ -62,7 +61,6 @@ describe("ProfileAvatarLink", () => {
       expect(screen.getByRole("link")).toHaveAttribute("href", "/profile/alice");
     });
   });
-
   describe("squad navigation", () => {
     it("keeps squad and member links separate instead of nesting anchors", () => {
       const { container } = renderNavigation(
@@ -131,14 +129,5 @@ describe("section settings navigation", () => {
     expect(screen.getByRole("link", { name: "Back to section" }))
       .toHaveAttribute("href", "/section/section-123");
     expect(screen.getAllByRole("link")).toHaveLength(1);
-  });
-});
-
-describe("AppFooter", () => {
-  it("exposes the privacy policy as a footer link", () => {
-    renderNavigation(<AppFooter />, "fr");
-    expect(screen.getByRole("contentinfo")).toContainElement(screen.getByRole("link"));
-    expect(screen.getByRole("link", { name: pages.privacy.title }))
-      .toHaveAttribute("href", "/privacy");
   });
 });

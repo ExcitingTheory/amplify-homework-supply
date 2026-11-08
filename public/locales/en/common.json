@@ -434,6 +434,9 @@
   },
   "meaningAssociationExercise": {
     "accuracyDescription": "Accuracy across attempts in enabled practice modes.",
+    "replay": "Replay",
+    "resetting": "Resetting...",
+    "resetFailed": "Could not reset this exercise. Try again.",
     "modes": {
       "easy": "Easy",
       "hard": "Hard",

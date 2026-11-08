@@ -26,6 +26,8 @@ import {
 } from "@mui/material";
 
 import BlockSuggestionPlugin from "./BlockSuggestionPlugin";
+import { SuggestionProvider, useSuggestions } from "../context/SuggestionContext";
+import BlockSuggestionMenu from "../components/BlockSuggestionMenu";
 import QuizPlugin, { QuizNode } from "./QuizPlugin";
 import AnswerPlugin, { AnswerNode } from "./AnswerPlugin";
 import CustomAnswerPlugin, { CustomAnswerNode } from "./CustomAnswerPlugin";
@@ -91,6 +93,7 @@ const Template = ({ editorState, instructions, title, useAI = true }) => {
   };
 
   return (
+    <SuggestionProvider active useAI={aiMode}>
     <LexicalComposer
       initialConfig={initialConfig}
       key={aiMode ? "ai" : "rules"}
@@ -176,6 +179,7 @@ const Template = ({ editorState, instructions, title, useAI = true }) => {
           <CustomAnswerPlugin />
           <BlockSuggestionPlugin useAI={aiMode} />
         </Paper>
+        <AISuggestionSidebar />
 
         <Paper sx={{ p: 2, mt: 3, bgcolor: "grey.100" }}>
           <Typography variant="body2" color="text.secondary">
@@ -185,13 +189,13 @@ const Template = ({ editorState, instructions, title, useAI = true }) => {
               <>
                 • AI analyzes all blocks in your lesson
                 <br />
-                • Suggests blocks with educational reasoning
+                • Previews the suggested block in the sidebar
                 <br />
                 • Considers scaffolding, active learning, and assessment
                 principles
                 <br />
-                • Shows priority level (high/medium/low)
-                <br />• Waits 500ms before calling API (debounced)
+                • Accept or reject without an editor popup
+                <br />• Waits 1 second before calling API (debounced)
               </>
             ) : (
               <>
@@ -207,8 +211,29 @@ const Template = ({ editorState, instructions, title, useAI = true }) => {
         </Paper>
       </Box>
     </LexicalComposer>
+    </SuggestionProvider>
   );
 };
+
+function AISuggestionSidebar() {
+  const {
+    suggestions, insertSuggestion, rejectSuggestion, requestMoreSuggestions,
+    isLoadingAI, useAI, error,
+  } = useSuggestions();
+  return (
+    <Paper component="aside" aria-label="Block suggestions" sx={{ p: 2, mt: 2 }}>
+      <BlockSuggestionMenu
+        suggestions={suggestions}
+        onSelect={(index) => insertSuggestion(suggestions[index])}
+        onReject={(index) => rejectSuggestion(suggestions[index])}
+        onRequestMore={requestMoreSuggestions}
+        isLoadingAI={isLoadingAI}
+        useAI={useAI}
+        error={error}
+      />
+    </Paper>
+  );
+}
 
 // Story 1: Compare AI vs Rules
 export const CompareAIvsRules = {

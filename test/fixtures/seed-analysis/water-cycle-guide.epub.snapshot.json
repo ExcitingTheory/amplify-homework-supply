@@ -1,0 +1,155 @@
+{
+  "sourceSha256": "9a6223aa16f32f0978cc2738c9340194dc6df0b5ca096a9735f5399a7d36db37",
+  "capturedAt": "2026-10-28T12:55:25.432Z",
+  "sourceFormat": "epub-3",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "CHAPTER 1: THE WATER CYCLE",
+      "content": "Chapter 1 explains the water cycle, which encompasses the ongoing movement of water on, above, and below the Earth's surface. It details the key stages: Evaporation, where water transforms into vapor; Condensation, where vapor cools to form clouds; Precipitation, which involves water returning to the Earth as rain, snow, or hail; and Collection, where water gathers in bodies of water and underground.",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Document summary",
+      "content": "This document provides a comprehensive overview of the water cycle. It elaborates on its continuous movement across Earth's surface and the atmosphere. This cycle includes evaporation, where water turns to vapor; condensation, where vapor forms clouds; precipitation, involving water returning as rain, snow, or hail; and collection, where it accumulates in water bodies and underground stores.",
+      "pageRange": "Page 1"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is description for CHAPTER 1: THE WATER CYCLE?",
+      "answer": "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "CHAPTER 1: THE WATER CYCLE",
+      "field": "description",
+      "sourceText": "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "accept": [
+        "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth."
+      ]
+    },
+    {
+      "prompt": "What is 1. Evaporation for Evaporation?",
+      "answer": "Water from oceans, lakes, and rivers turns into water vapor.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Evaporation",
+      "field": "1. Evaporation",
+      "sourceText": "1. Evaporation - Water from oceans, lakes, and rivers turns into water vapor.",
+      "accept": []
+    },
+    {
+      "prompt": "What is 2. Condensation for Condensation?",
+      "answer": "Water vapor cools and forms clouds.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Condensation",
+      "field": "2. Condensation",
+      "sourceText": "2. Condensation - Water vapor cools and forms clouds.",
+      "accept": []
+    },
+    {
+      "prompt": "What is 3. Precipitation for Precipitation?",
+      "answer": "Water falls back to Earth as rain, snow, or hail.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Precipitation",
+      "field": "3. Precipitation",
+      "sourceText": "3. Precipitation - Water falls back to Earth as rain, snow, or hail.",
+      "accept": []
+    },
+    {
+      "prompt": "What is 4. Collection for Collection?",
+      "answer": "Water collects in oceans, rivers, and underground.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Collection",
+      "field": "4. Collection",
+      "sourceText": "4. Collection - Water collects in oceans, rivers, and underground.",
+      "accept": []
+    },
+    {
+      "prompt": "What is Description for The water cycle?",
+      "answer": "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "The water cycle",
+      "field": "Description",
+      "sourceText": "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth.",
+      "accept": [
+        "The water cycle describes the continuous movement of water on, above, and below the surface of the Earth."
+      ]
+    },
+    {
+      "prompt": "What is 1. Evaporation for KEY STAGES?",
+      "answer": "Water from oceans, lakes, and rivers turns into water vapor.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "KEY STAGES",
+      "field": "1. Evaporation",
+      "sourceText": "1. Evaporation - Water from oceans, lakes, and rivers turns into water vapor.",
+      "accept": [
+        "Water from oceans, lakes, and rivers turns into water vapor."
+      ]
+    },
+    {
+      "prompt": "What is 2. Condensation for KEY STAGES?",
+      "answer": "Water vapor cools and forms clouds.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "KEY STAGES",
+      "field": "2. Condensation",
+      "sourceText": "2. Condensation - Water vapor cools and forms clouds.",
+      "accept": [
+        "Water vapor cools and forms clouds."
+      ]
+    },
+    {
+      "prompt": "What is 3. Precipitation for KEY STAGES?",
+      "answer": "Water falls back to Earth as rain, snow, or hail.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "KEY STAGES",
+      "field": "3. Precipitation",
+      "sourceText": "3. Precipitation - Water falls back to Earth as rain, snow, or hail.",
+      "accept": [
+        "Water falls back to Earth as rain, snow, or hail."
+      ]
+    },
+    {
+      "prompt": "What is 4. Collection for KEY STAGES?",
+      "answer": "Water collects in oceans, rivers, and underground.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "KEY STAGES",
+      "field": "4. Collection",
+      "sourceText": "4. Collection - Water collects in oceans, rivers, and underground.",
+      "accept": [
+        "Water collects in oceans, rivers, and underground."
+      ]
+    }
+  ]
+}

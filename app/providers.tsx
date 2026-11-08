@@ -11,10 +11,9 @@ import "../src/components/Editor3/components/LanguageEditorTheme.css";
 import { Amplify } from "aws-amplify";
 import { parseAmplifyConfig } from "aws-amplify/utils";
 import { cognitoUserPoolsTokenProvider } from "aws-amplify/auth/cognito";
-import { DebugPanelProvider } from "../src/components/DebugPanel";
+import { DebugPanelProvider } from "../src/components/DebugPanel/DebugPanelProvider";
 import AuthContext, { AuthProvider } from "../src/context/authContext";
 import AppShell from "../src/components/AppShell";
-import { AppFooter } from "../src/components/AppFooter";
 import { SettingsProvider } from "../src/context/settingsContext";
 import DynamicThemeProvider from "../src/components/DynamicThemeProvider";
 import { NotificationProvider } from "../src/context/notificationContext";
@@ -26,8 +25,7 @@ import GlobalChatButton from "../src/components/GlobalChatButton";
 import GlobalChatDrawer from "../src/components/GlobalChatDrawer";
 import NotificationPanel from "../src/components/NotificationPanel";
 import OfflineBanner from "../src/components/OfflineBanner";
-import PageHint from "../src/components/PageHint";
-import { PageHintProvider } from "../src/context/pageHintContext";
+import FirstRunChecklist from "../src/components/FirstRunChecklist";
 import { useGlobalChatShortcut } from "../src/hooks/useGlobalChatShortcut";
 import { usePageViewTracking } from "../src/hooks/usePageViewTracking";
 import AppSkeleton from "../src/components/AppSkeleton";
@@ -215,26 +213,26 @@ function AuthenticatedShell({
   hideChatButton: boolean;
 }) {
   const { user } = React.useContext(AuthContext);
+  const userGroups = (user as { groups?: string[] } | undefined)?.groups || [];
+  const role = userGroups.some((group) =>
+    ["Admins", "Instructors"].includes(group),
+  )
+    ? "instructor"
+    : "learner";
 
   if (!user) {
-    return (
-      <>
-        {children}
-        <AppFooter />
-      </>
-    );
+    return children;
   }
 
   return (
-    <PageHintProvider>
-      <AppShell toolbarChildren={null} contentHeader={<PageHint />}>
-        {children}
-      </AppShell>
+    <>
+      <AppShell toolbarChildren={null}>{children}</AppShell>
+      <FirstRunChecklist role={role} />
       {!hideChatButton && <GlobalChatButton />}
       {!hideChatButton && <GlobalChatDrawer />}
       <NotificationPanel />
       <OfflineBanner />
       <EasterEggLayer />
-    </PageHintProvider>
+    </>
   );
 }

@@ -18,7 +18,8 @@ import ToolbarScrollButton from "../../ToolbarScrollButton";
 import { useAppShell } from "../../AppShellContext";
 
 import TimerIcon from "@mui/icons-material/Timer";
-import { ConnectionStatus } from "../../Workbook";
+import { ConnectionStatus } from "../../Workbook/ConnectionStatus";
+import { WorkbookPresenceBar } from "../../Workbook/WorkbookPresenceBar";
 
 const drawerWidth = 400;
 
@@ -228,7 +229,9 @@ export default function ToolBarRoPlugin({
             <Box
               sx={{
                 flexGrow: 1,
-                margin: isScrolled ? "0.5rem 1rem" : "0.5rem 1rem",
+                minWidth: 0,
+                my: 1,
+                px: 2,
                 transition: "all 0.3s ease",
                 display: "flex",
                 alignItems: "center",
@@ -258,7 +261,7 @@ export default function ToolBarRoPlugin({
                 sx={{
                   display: "flex",
                   alignItems: "center",
-                  flexShrink: 0,
+                  flex: "0 1 auto",
                   minWidth: 0,
                   width: { xs: "100%", sm: "auto" },
                 }}
@@ -280,11 +283,8 @@ export default function ToolBarRoPlugin({
                     flex: 1,
                     minWidth: 0,
                     maxWidth: "100%",
-                    overflowX: "hidden",
+                    overflowX: "auto",
                     scrollSnapType: "x mandatory",
-                    scrollbarWidth: "none",
-                    "&::-webkit-scrollbar": { display: "none" },
-                    msOverflowStyle: "none",
                     "& > *": {
                       scrollSnapAlign: "start",
                       flexShrink: 0,
@@ -297,6 +297,7 @@ export default function ToolBarRoPlugin({
                     size={isScrolled ? "small" : "small"}
                     showLabel={!isScrolled}
                   />
+                  <WorkbookPresenceBar />
                   <Chip
                     label={
                       <Box component="span">

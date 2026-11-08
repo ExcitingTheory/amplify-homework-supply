@@ -6,7 +6,7 @@
 import { createHeadlessEditor } from '@lexical/headless';
 import { $getRoot, $getSelection } from 'lexical';
 import { $generateHtmlFromNodes } from '@lexical/html';
-import { EditorNodes } from '../components/Editor3';
+import { EditorNodes } from '../components/Editor3/editorConfig';
 
 /**
  * Extract plain text from Lexical editor state

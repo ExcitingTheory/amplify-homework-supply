@@ -37,7 +37,7 @@ import { useTranslations } from "next-intl";
 import ReplyIcon from "@mui/icons-material/Reply";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import AddReactionIcon from "@mui/icons-material/AddReaction";
-import { MiniEditorReadOnly } from "../MiniEditor";
+import MiniEditorReadOnly from "../MiniEditor/MiniEditorReadOnly";
 import type { ChatMessage, ChatUser } from "./types";
 import { ProfileAvatarLink } from "../ProfileAvatarLink";
 

@@ -5,15 +5,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
 import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -32,6 +29,11 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
+import {
+  mergeSearchResults,
+  useAdminSemanticSearch,
+} from "../_components/adminSemanticSearch";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -70,6 +72,15 @@ interface FileHealthStats {
 
 type FilterMode =
   "all" | "orphaned" | "missing_thumbnail" | "large" | "flagged" | "generated";
+
+const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
+  { value: "all", label: "All Files" },
+  { value: "orphaned", label: "Orphaned" },
+  { value: "missing_thumbnail", label: "No Thumbnail" },
+  { value: "large", label: "Large (>10MB)" },
+  { value: "flagged", label: "Flagged" },
+  { value: "generated", label: "AI Generated" },
+];
 
 // Above this, a file is called out as unusually large (bytes).
 const LARGE_FILE_BYTES = 10 * 1024 * 1024;
@@ -187,6 +198,9 @@ export default function FileListClient({
     };
   }
 
+  const { hits: semanticHits, searching: semanticSearching } =
+    useAdminSemanticSearch(searchQuery, "file");
+
   const filteredFiles = React.useMemo(() => {
     let result = files;
 
@@ -210,7 +224,9 @@ export default function FileListClient({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(
+      result = mergeSearchResults(
+        result,
+        semanticHits,
         (f) =>
           (f.name || "").toLowerCase().includes(q) ||
           (f.path || "").toLowerCase().includes(q) ||
@@ -219,7 +235,7 @@ export default function FileListClient({
     }
 
     return result;
-  }, [files, filter, searchQuery]);
+  }, [files, filter, searchQuery, semanticHits]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -361,26 +377,21 @@ export default function FileListClient({
                 startAdornment: (
                   <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
                 ),
+                endAdornment: semanticSearching ? (
+                  <CircularProgress size={16} aria-label="Searching" />
+                ) : undefined,
               },
             }}
             sx={{ minWidth: 240 }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Filter</InputLabel>
-            <Select
-              value={filter}
-              label="Filter"
-              onChange={(e) => setFilter(e.target.value as FilterMode)}
-            >
-              <MenuItem value="all">All Files</MenuItem>
-              <MenuItem value="orphaned">Orphaned</MenuItem>
-              <MenuItem value="missing_thumbnail">No Thumbnail</MenuItem>
-              <MenuItem value="large">Large (&gt;10MB)</MenuItem>
-              <MenuItem value="flagged">Flagged</MenuItem>
-              <MenuItem value="generated">AI Generated</MenuItem>
-            </Select>
-          </FormControl>
+          <AdminSelect
+            label="Filter"
+            value={filter}
+            options={FILTER_OPTIONS}
+            onChange={setFilter}
+            minWidth={180}
+          />
 
           <Typography variant="body2" color="text.secondary">
             {filteredFiles.length} file{filteredFiles.length !== 1 ? "s" : ""}

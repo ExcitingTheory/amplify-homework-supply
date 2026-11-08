@@ -6,18 +6,17 @@
  * Note: Automatic debounced saving is handled by MyOnChangePlugin in index.js
  */
 import React from "react";
-import { useState, useContext } from "react";
+import { useContext } from "react";
 import Button from "@mui/material/Button";
-import Portal from "@mui/material/Portal";
 import UnitContext from "../../../context/unitContext";
 import SaveIcon from "@mui/icons-material/Save";
 import Skeleton from "@mui/material/Skeleton";
-import Snackbar from "@mui/material/Snackbar";
 import { useTranslations } from "next-intl";
+import { useEditorToast } from "../context/EditorToastContext";
 
 export function Save() {
   const t = useTranslations("editor.authoring");
-  const [saveMessage, setSaveMessage] = useState("");
+  const { showToast } = useEditorToast();
 
   const { saveEditorContent, editorStateRef, unit, isSaving } =
     useContext(UnitContext);
@@ -50,27 +49,30 @@ export function Save() {
       console.log("[Save] Manual save completed:", response);
 
       if (response === false) {
-        setSaveMessage(t("save.permissionError"));
+        showToast({
+          message: t("save.permissionError"),
+          severity: "error",
+          autoHideDuration: 3000,
+        });
       } else {
-        setSaveMessage(t("save.savedSuccessfully"));
+        showToast({
+          message: t("save.savedSuccessfully"),
+          severity: "success",
+          autoHideDuration: 3000,
+        });
       }
     } catch (error) {
       console.error("[Save] Manual save failed:", error);
-      setSaveMessage(t("save.saveFailed"));
+      showToast({
+        message: t("save.saveFailed"),
+        severity: "error",
+        autoHideDuration: 3000,
+      });
     }
   };
 
   return (
     <>
-      <Portal>
-        <Snackbar
-          open={saveMessage !== ""}
-          autoHideDuration={3000}
-          onClose={() => setSaveMessage("")}
-          message={saveMessage}
-          anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        />
-      </Portal>
       <Button
         data-testid="save-button"
         disabled={isSaving}

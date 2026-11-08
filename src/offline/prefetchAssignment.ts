@@ -245,11 +245,7 @@ export async function prefetchAssignment(
     // 6. Pre-cache search bundle for offline semantic search (93%)
     try {
       const { loadUnitBundle } = await import("../utils/searchBundles");
-      const identityId =
-        (unit as any).identityId || context?.assignment?.identityId;
-      if (identityId) {
-        await loadUnitBundle(identityId, unitId);
-      }
+      await loadUnitBundle(unitId);
     } catch {
       // Non-fatal: search bundle may not exist yet for this unit
       console.warn("[Prefetch] Could not cache search bundle");

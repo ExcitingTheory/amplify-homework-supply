@@ -69,6 +69,12 @@ export const storage = defineStorage({
         .to(["read", "write", "delete"]),
     ],
 
+    // Platform-wide search bundle (all instructors' content): Admins only.
+    // Written exclusively by the rebuildSearchBundle Lambda. Instructor, unit
+    // and section bundles have no rule here on purpose; they are served by
+    // /api/search-bundle, which checks ownership or enrollment first.
+    "admin/search-index/*": [allow.groups(["Admins"]).to(["read"])],
+
     // !! protected/units/* is intentionally NOT listed here !!
     //
     // Published unit content (protected/units/{unitId}/published.json,

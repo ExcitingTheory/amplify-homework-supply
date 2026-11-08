@@ -5,15 +5,12 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
+import CircularProgress from "@mui/material/CircularProgress";
 import Checkbox from "@mui/material/Checkbox";
 import Chip from "@mui/material/Chip";
-import FormControl from "@mui/material/FormControl";
 import Grid from "@mui/material/Grid";
 import IconButton from "@mui/material/IconButton";
-import InputLabel from "@mui/material/InputLabel";
 import LinearProgress from "@mui/material/LinearProgress";
-import MenuItem from "@mui/material/MenuItem";
-import Select from "@mui/material/Select";
 import Skeleton from "@mui/material/Skeleton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -32,6 +29,11 @@ import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import SearchIcon from "@mui/icons-material/Search";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import AdminRouteGuard from "../_components/AdminRouteGuard";
+import AdminSelect from "../_components/AdminSelect";
+import {
+  mergeSearchResults,
+  useAdminSemanticSearch,
+} from "../_components/adminSemanticSearch";
 import { getAmplifyClient } from "@/utils/amplifyClient";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
@@ -71,6 +73,16 @@ type FilterMode =
   | "missing_embedding"
   | "flagged"
   | "duplicates";
+
+const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
+  { value: "all", label: "All Words" },
+  { value: "missing_audio", label: "Missing Audio" },
+  { value: "missing_definition", label: "Missing Definition" },
+  { value: "missing_pronunciation", label: "Missing Pronunciation" },
+  { value: "missing_embedding", label: "Missing Embedding" },
+  { value: "flagged", label: "Flagged" },
+  { value: "duplicates", label: "Duplicates" },
+];
 
 // ============================================================================
 // Main Page
@@ -171,6 +183,9 @@ export default function WordListClient({
     };
   }
 
+  const { hits: semanticHits, searching: semanticSearching } =
+    useAdminSemanticSearch(searchQuery, "word");
+
   const filteredWords = React.useMemo(() => {
     let result = words;
 
@@ -210,7 +225,9 @@ export default function WordListClient({
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(
+      result = mergeSearchResults(
+        result,
+        semanticHits,
         (w) =>
           (w.phrase || "").toLowerCase().includes(q) ||
           (w.definition || "").toLowerCase().includes(q) ||
@@ -219,7 +236,7 @@ export default function WordListClient({
     }
 
     return result;
-  }, [words, filter, searchQuery]);
+  }, [words, filter, searchQuery, semanticHits]);
 
   function toggleSelect(id: string) {
     setSelected((prev) => {
@@ -375,29 +392,21 @@ export default function WordListClient({
                 startAdornment: (
                   <SearchIcon sx={{ mr: 1, color: "text.secondary" }} />
                 ),
+                endAdornment: semanticSearching ? (
+                  <CircularProgress size={16} aria-label="Searching" />
+                ) : undefined,
               },
             }}
             sx={{ minWidth: 240 }}
           />
 
-          <FormControl size="small" sx={{ minWidth: 180 }}>
-            <InputLabel>Filter</InputLabel>
-            <Select
-              value={filter}
-              label="Filter"
-              onChange={(e) => setFilter(e.target.value as FilterMode)}
-            >
-              <MenuItem value="all">All Words</MenuItem>
-              <MenuItem value="missing_audio">Missing Audio</MenuItem>
-              <MenuItem value="missing_definition">Missing Definition</MenuItem>
-              <MenuItem value="missing_pronunciation">
-                Missing Pronunciation
-              </MenuItem>
-              <MenuItem value="missing_embedding">Missing Embedding</MenuItem>
-              <MenuItem value="flagged">Flagged</MenuItem>
-              <MenuItem value="duplicates">Duplicates</MenuItem>
-            </Select>
-          </FormControl>
+          <AdminSelect
+            label="Filter"
+            value={filter}
+            options={FILTER_OPTIONS}
+            onChange={setFilter}
+            minWidth={180}
+          />
 
           <Typography variant="body2" color="text.secondary">
             {filteredWords.length} word{filteredWords.length !== 1 ? "s" : ""}

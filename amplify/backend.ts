@@ -34,7 +34,9 @@ import { openaiHandler } from "./functions/openai/resource";
 import { sectionHandler } from "./functions/section/resource";
 import { documentAnalysisHandler } from "./functions/documentAnalysis/resource";
 import { documentAnalysisWorkflowHandler } from "./functions/documentAnalysisWorkflow/resource";
+import { nativeVocabularyHandler } from "./functions/nativeVocabulary/resource";
 import { embeddingsHandler } from "./functions/embeddings/resource";
+import { rebuildSearchBundleHandler } from "./functions/rebuildSearchBundle/resource";
 
 import { moderationHandler } from "./functions/moderation/resource";
 import { mediaConvertHandler } from "./functions/mediaConvert/resource";
@@ -68,6 +70,7 @@ import * as lambda from "aws-cdk-lib/aws-lambda";
 import {
   DynamoEventSource,
   SqsDlq,
+  SqsEventSource,
 } from "aws-cdk-lib/aws-lambda-event-sources";
 import { Queue } from "aws-cdk-lib/aws-sqs";
 
@@ -89,7 +92,9 @@ export const backend = defineBackend({
   sectionHandler,
   documentAnalysisHandler,
   documentAnalysisWorkflowHandler,
+  nativeVocabularyHandler,
   embeddingsHandler,
+  rebuildSearchBundleHandler,
   moderationHandler,
   mediaConvertHandler,
   imageProcessHandler,
@@ -528,6 +533,24 @@ backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(
 );
 
 const workflowLambda = backend.documentAnalysisWorkflowHandler.resources.lambda;
+const nativeVocabularyLambda = backend.nativeVocabularyHandler.resources.lambda;
+backend.nativeVocabularyHandler.addEnvironment("STORAGE_BUCKET", backend.storage.resources.bucket.bucketName);
+nativeVocabularyLambda.addToRolePolicy(new PolicyStatement({
+  actions: ["s3:GetObject"],
+  resources: [backend.storage.resources.bucket.arnForObjects("protected/models/*")],
+}));
+nativeVocabularyLambda.addToRolePolicy(new PolicyStatement({
+  actions: ["s3:GetObject", "s3:PutObject", "s3:PutObjectTagging"],
+  resources: [backend.storage.resources.bucket.arnForObjects("private/*/documents/*/analysis/*/native-vocabulary/*")],
+}));
+for (const handler of [backend.documentAnalysisWorkflowHandler, backend.documentAnalysisHandler]) {
+  handler.addEnvironment("NATIVE_VOCABULARY_FUNCTION_NAME", nativeVocabularyLambda.functionName);
+  nativeVocabularyLambda.grantInvoke(handler.resources.lambda);
+}
+backend.documentAnalysisHandler.resources.lambda.addToRolePolicy(new PolicyStatement({
+  actions: ["s3:GetObject", "s3:PutObjectTagging"],
+  resources: [backend.storage.resources.bucket.arnForObjects("private/*/documents/*/analysis/*/native-vocabulary/*")],
+}));
 backend.documentAnalysisWorkflowHandler.addEnvironment(
   "API_ENDPOINT",
   backend.data.resources.cfnResources.cfnGraphqlApi.attrGraphQlUrl,
@@ -552,6 +575,13 @@ backend.documentAnalysisWorkflowHandler.addEnvironment(
   backend.documentThumbnailHandler.resources.lambda.functionName,
 );
 backend.documentThumbnailHandler.resources.lambda.grantInvoke(workflowLambda);
+// Paraphrased answers are matched by comparing embeddings from the same local
+// MiniLM model the embeddings Lambda uses for search.
+backend.documentAnalysisWorkflowHandler.addEnvironment(
+  "EMBEDDINGS_FUNCTION_NAME",
+  backend.embeddingsHandler.resources.lambda.functionName,
+);
+backend.embeddingsHandler.resources.lambda.grantInvoke(workflowLambda);
 
 const workflowAppSyncPolicy = new Policy(
   workflowLambda.stack,
@@ -803,6 +833,9 @@ const progressWait = new sfn.Wait(dataStack, "WaitForPageProgress", {
 });
 const progressTask = workflowInvoke("ReportDocumentAnalysisProgress", "progress", {
   totalPages: sfn.JsonPath.numberAt("$.totalPages"),
+  manifestKey: sfn.JsonPath.stringAt("$.manifestKey"),
+  directContentKey: sfn.JsonPath.stringAt("$.directContentKey"),
+  baseKey: sfn.JsonPath.stringAt("$.baseKey"),
 });
 const progressDone = new sfn.Pass(dataStack, "ProgressPollingComplete");
 const progressChoice = new sfn.Choice(dataStack, "PageMapHasFinished")
@@ -1071,6 +1104,91 @@ backend.embeddingsHandler.resources.lambda.addToRolePolicy(
   }),
 );
 
+// Search bundle builder: reads per-item embedding files and writes the
+// instructor and platform-wide (admin-only) bundles used for semantic search.
+backend.rebuildSearchBundleHandler.addEnvironment(
+  "AMPLIFY_STORAGE_BUCKET_NAME",
+  backend.storage.resources.bucket.bucketName,
+);
+backend.rebuildSearchBundleHandler.resources.lambda.addToRolePolicy(
+  new PolicyStatement({
+    // DeleteObject releases the rebuild lock that pauses incremental updates.
+    actions: ["s3:GetObject", "s3:PutObject", "s3:DeleteObject", "s3:ListBucket"],
+    resources: [
+      backend.storage.resources.bucket.bucketArn,
+      `${backend.storage.resources.bucket.bucketArn}/*`,
+    ],
+  }),
+);
+
+// Nightly rebuild so new and edited content becomes searchable without a
+// manual reindex (03:00 Pacific; 10:00 UTC).
+new events.Rule(dataStack, "RebuildSearchBundleNightlyRule", {
+  description:
+    "Rebuilds every instructor search bundle and the platform-wide admin bundle",
+  schedule: events.Schedule.cron({ minute: "0", hour: "10" }),
+  targets: [
+    new targets.LambdaFunction(
+      backend.rebuildSearchBundleHandler.resources.lambda,
+      {
+        event: events.RuleTargetInput.fromObject({
+          source: "platform-reindex",
+        }),
+        retryAttempts: 0,
+      },
+    ),
+  ],
+});
+
+// Incremental index updates: every embedding file written or deleted under
+// private/{identityId}/embeddings/ is queued, batched, and applied to the
+// affected bundles (instead of rebuilding them). EventBridge is already enabled
+// on the bucket (see the S3 rules above).
+const searchIndexDlq = new Queue(dataStack, "SearchIndexUpdatesDlq", {
+  retentionPeriod: cdk.Duration.days(14),
+});
+const searchIndexQueue = new Queue(dataStack, "SearchIndexUpdatesQueue", {
+  // Must cover the Lambda timeout; a batch held back by a running full rebuild
+  // reappears after this long.
+  visibilityTimeout: cdk.Duration.minutes(16),
+  deadLetterQueue: { queue: searchIndexDlq, maxReceiveCount: 5 },
+});
+new events.Rule(dataStack, "SearchIndexEmbeddingChangeRule", {
+  description:
+    "Queues embedding file changes so search bundles are updated incrementally",
+  eventPattern: {
+    source: ["aws.s3"],
+    detailType: ["Object Created", "Object Deleted"],
+    detail: {
+      bucket: {
+        name: [backend.storage.resources.bucket.bucketName],
+      },
+      object: {
+        key: events.Match.wildcard("private/*/embeddings/*/*.json"),
+      },
+    },
+  },
+  targets: [new targets.SqsQueue(searchIndexQueue)],
+});
+backend.rebuildSearchBundleHandler.resources.lambda.addEventSource(
+  new SqsEventSource(searchIndexQueue, {
+    // Coalesce bursts (bulk imports, document analysis) into few invocations.
+    batchSize: 200,
+    maxBatchingWindow: cdk.Duration.seconds(60),
+    // Few concurrent writers keeps ETag conflicts rare.
+    maxConcurrency: 2,
+  }),
+);
+
+// Lets scripts/rebuild-search-bundles.ts find the deployed function name.
+backend.addOutput({
+  custom: {
+    REBUILD_SEARCH_BUNDLE: {
+      functionName: backend.rebuildSearchBundleHandler.resources.lambda.functionName,
+    },
+  },
+});
+
 // Grant OpenAI handler permission to invoke itself for async operations (audio generation)
 const openaiSelfInvokePolicy = new Policy(
   backend.openaiHandler.resources.lambda.stack,
@@ -1288,6 +1406,15 @@ const publishUnitAppSyncPolicy = new Policy(
 );
 backend.publishUnitHandler.resources.lambda.role?.attachInlinePolicy(
   publishUnitAppSyncPolicy,
+);
+
+// Publishing asks the search bundle builder to write the unit's bundles.
+backend.publishUnitHandler.addEnvironment(
+  "REBUILD_SEARCH_BUNDLE_FUNCTION",
+  backend.rebuildSearchBundleHandler.resources.lambda.functionName,
+);
+backend.rebuildSearchBundleHandler.resources.lambda.grantInvoke(
+  backend.publishUnitHandler.resources.lambda,
 );
 
 backend.publishUnitHandler.addEnvironment(
@@ -1532,6 +1659,9 @@ new events.Rule(dataStack, "S3DocumentUploadRule", {
       },
       object: {
         key: events.Match.anyOf(
+          // A PDF needs no conversion, but still needs its first page rendered
+          // as a preview like every other document.
+          events.Match.suffix(".pdf"),
           events.Match.suffix(".doc"),
           events.Match.suffix(".docx"),
           events.Match.suffix(".xls"),

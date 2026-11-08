@@ -7,7 +7,7 @@
  * test/unit/parsedContentListsClient.test.ts.
  */
 
-export const VOCABULARY_FIELDS = ["word", "definition", "context", "page", "pages"] as const;
+export const VOCABULARY_FIELDS = ["word", "definition", "context", "pages", "wordID", "occurrences", "edited"] as const;
 export const SUMMARY_FIELDS = ["title", "content", "pageRange"] as const;
 export const CONCEPT_FIELDS = ["concept", "description", "relatedVocabulary"] as const;
 export const OBJECTIVE_FIELDS = ["objective", "bloomLevel"] as const;
@@ -25,8 +25,8 @@ export const QUESTION_FIELDS = [
   "hint",
   "questionType",
   "difficulty",
-  "page",
   "pages",
+  "questionID",
   "subject",
   "field",
   "sourceText",

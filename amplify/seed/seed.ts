@@ -4,7 +4,7 @@
  * Creates comprehensive test data for local development and testing:
  * - Test users (Admins, Instructors, Learners)
  * - Sample curriculum (Units, Words, Questions)
- * - Section groups with assignments
+ * - Section groups with locations, meeting schedules, academic terms, and assignments
  * - Files and documents for analysis testing
  * - Grade submissions for instructor testing
  *
@@ -56,6 +56,10 @@ import type { Schema } from "../data/resource";
 import { assertSourcePdfSha256 } from "../../scripts/thoth/verifySourcePdf";
 import { buildThothUnits } from "../../scripts/thoth/buildUnitContent";
 import { resolveThothSeedMode } from "../../scripts/thoth/resolveSeedMode";
+import {
+  loadLatestExtractionRun,
+  saveExtractionRun,
+} from "../../scripts/thoth/extractionRuns";
 import { findFirstFilteredRecord } from "../../scripts/thoth/findFirstFilteredRecord";
 import {
   collectPages,
@@ -84,9 +88,14 @@ import {
 } from "../../scripts/seed/analysisSnapshots";
 import {
   scoreExtraction,
+  scoreExtractionByContent,
   type ExtractionReport,
   type ThothGroundTruth,
 } from "../../test/integration/thoth/scoreExtraction";
+import {
+  buildThothNlpGroundTruth,
+  type ThothNlpExerciseFixture,
+} from "../../scripts/thoth/nlpExtractionFixture";
 import { buildCallResponseScript } from "../../src/utils/callResponse/buildCallResponseScript";
 
 const seedDir = dirname(fileURLToPath(import.meta.url));
@@ -99,6 +108,12 @@ const thothGroundTruth = JSON.parse(
     "utf8",
   ),
 ) as ThothGroundTruth;
+const thothNlpExercise = JSON.parse(
+  await readFile(
+    resolve(seedDir, "../../test/fixtures/thoth/nlp-extraction-exercise.json"),
+    "utf8",
+  ),
+) as ThothNlpExerciseFixture;
 const expectedThothPdfSha256: unknown = thothGroundTruth.source?.sha256;
 
 if (typeof expectedThothPdfSha256 !== "string") {
@@ -112,19 +127,33 @@ const thothSnapshotPath = resolve(
   seedDir,
   "../../test/fixtures/thoth/parsed-content.snapshot.json",
 );
-const thothSnapshotText = await readFile(thothSnapshotPath, "utf8").catch(
+const thothRunsDir = resolve(seedDir, "../../test/fixtures/thoth/runs");
+const validatedThothSnapshotText = await readFile(thothSnapshotPath, "utf8").catch(
   (error: NodeJS.ErrnoException) => {
     if (error.code === "ENOENT") return null;
     throw error;
   },
 );
+const capturedThothRun =
+  validatedThothSnapshotText === null &&
+  process.env.SEED_THOTH_MODE !== "live" &&
+  process.env.SEED_THOTH_MODE !== "off"
+    ? await loadLatestExtractionRun(thothRunsDir, expectedThothPdfSha256)
+    : null;
+const thothSnapshotText =
+  validatedThothSnapshotText ?? capturedThothRun?.text ?? null;
+if (capturedThothRun) {
+  console.log(
+    `Replaying unvalidated Thoth capture ${capturedThothRun.path}; the extraction gate still applies`,
+  );
+}
 const thothSeedMode = resolveThothSeedMode(
   process.env.SEED_THOTH_MODE,
   thothSnapshotText !== null,
 );
 if (thothSeedMode === "snapshot" && thothSnapshotText === null) {
   throw new Error(
-    `SEED_THOTH_MODE=snapshot requires ${thothSnapshotPath}; run a live seed once to create it`,
+    `SEED_THOTH_MODE=snapshot requires ${thothSnapshotPath} or a matching capture in ${thothRunsDir}`,
   );
 }
 console.log(`Thoth seed mode: ${thothSeedMode}`);
@@ -159,6 +188,16 @@ function passwordFor(username: string): string {
     .update(username)
     .digest("base64url");
   return `Dev!${digest}a1!`;
+}
+
+/** The first page of a parsed-content entry, for scoring against page-based ground truth. */
+function firstEntryPage(
+  pages: ReadonlyArray<number | null> | null | undefined,
+): number | undefined {
+  const numbers = (pages ?? []).filter(
+    (page): page is number => typeof page === "number",
+  );
+  return numbers.length > 0 ? Math.min(...numbers) : undefined;
 }
 
 // Initialize the data client
@@ -568,6 +607,26 @@ try {
   console.error("2. Password does not match");
   console.error("3. User pool configuration issue");
   throw error;
+}
+
+const instructor1SettingsResponse = await client.models.Settings.create({
+  autoAnalyzeDocuments: true,
+  documentAnalysisModel: "gpt-4",
+  documentAnalysisLlmExtractionOverride: null,
+  editorTheme: "light",
+  editorFontSize: 14,
+  defaultAIModel: "gpt-4",
+  assistantVoice: "alloy",
+  emailNotifications: true,
+  language: "en",
+  timezone: "America/New_York",
+});
+const instructor1Settings = unwrap(
+  [instructor1SettingsResponse],
+  "Instructor1 Settings",
+)[0];
+if (typeof instructor1Settings.owner !== "string" || !instructor1Settings.owner) {
+  throw new Error("Instructor1 Settings is missing its resolved owner");
 }
 
 // ========================================================================
@@ -1115,12 +1174,42 @@ console.log("✅ Created unit-word and unit-question relationships");
 // ========================================================================
 console.log("\n🏫 Creating class sections...");
 
+const seedDate = new Date();
+const seedYear = seedDate.getUTCFullYear();
+const seedMonth = seedDate.getUTCMonth();
+const semesterStartMonth = Math.floor(seedMonth / 6) * 6;
+const trimesterStartMonth = Math.floor(seedMonth / 4) * 4;
+const quarterStartMonth = Math.floor(seedMonth / 3) * 3;
+const defaultSectionLocation = {
+  school: {
+    name: "Homework Supply Demo School",
+    address: "123 Learning Lane, Example City, CA 90000",
+  },
+  campus: "Main Campus",
+  buildingName: "Learning Center",
+};
+
 const sectionsResponse = await Promise.all([
   client.models.Section.create({
     name: "Japanese 101 - Period 1",
     description: "Beginner Japanese for 9th grade",
     status: "PUBLISHED",
     code: "JPN101-P1",
+    location: { ...defaultSectionLocation, roomNumber: "101" },
+    timezone: "America/Los_Angeles",
+    classSchedule: [
+      { dayOfWeek: 1, startTime: "08:30", endTime: "09:20" },
+      { dayOfWeek: 3, startTime: "08:30", endTime: "09:20" },
+      { dayOfWeek: 5, startTime: "08:30", endTime: "09:20" },
+    ],
+    academicTerm: `${semesterStartMonth === 0 ? "Spring" : "Fall"} Semester ${seedYear}`,
+    startDate: new Date(Date.UTC(seedYear, semesterStartMonth, 1))
+      .toISOString()
+      .slice(0, 10),
+    endDate: new Date(Date.UTC(seedYear, semesterStartMonth + 6, 0))
+      .toISOString()
+      .slice(0, 10),
+    acceptWorkOutsideSectionDates: null,
     // Demonstrates the grade-aggregation feature — student2's 3 attempts on
     // unit 0 (50/78/95) resolve to the MEDIAN (78), not the highest (95).
     gradeAggregationMethod: "MEDIAN",
@@ -1167,6 +1256,24 @@ const sectionsResponse = await Promise.all([
     description: "Introduction to Biology",
     status: "PUBLISHED",
     code: "BIO101-P3",
+    location: {
+      ...defaultSectionLocation,
+      buildingName: "Science Building",
+      roomNumber: "Lab 303",
+    },
+    timezone: "America/Los_Angeles",
+    classSchedule: [
+      { dayOfWeek: 2, startTime: "10:30", endTime: "11:45" },
+      { dayOfWeek: 4, startTime: "10:30", endTime: "11:45" },
+    ],
+    academicTerm: `Trimester ${trimesterStartMonth / 4 + 1} ${seedYear}`,
+    startDate: new Date(Date.UTC(seedYear, trimesterStartMonth, 1))
+      .toISOString()
+      .slice(0, 10),
+    endDate: new Date(Date.UTC(seedYear, trimesterStartMonth + 4, 0))
+      .toISOString()
+      .slice(0, 10),
+    acceptWorkOutsideSectionDates: false,
     featuredImage: `protected/${instructor1IdentityId}/files/chloroplast-diagram.jpg`,
     thumbnail: `protected/${instructor1IdentityId}/files/animals-photo.jpg`,
     learner: "section-bio101-learners",
@@ -1575,6 +1682,7 @@ let seedEmbedder: Promise<(text: string) => Promise<number[]>> | undefined;
 async function regenerateEmbeddings(
   fileId: string,
   content: { vocabularyJSON?: unknown; summariesJSON?: unknown },
+  identityId = instructor1IdentityId,
 ) {
   const items = buildEmbeddingItems(content);
   if (items.length === 0) return undefined;
@@ -1593,7 +1701,7 @@ async function regenerateEmbeddings(
     const embedded = await embedItems(items, await seedEmbedder);
     if (embedded.length === 0) return undefined;
     await uploadData({
-      path: embeddingObjectKey(instructor1IdentityId, fileId),
+      path: embeddingObjectKey(identityId, fileId),
       data: JSON.stringify(buildEmbeddingFile(embedded)),
       options: { contentType: "application/json" },
     }).result;
@@ -2010,6 +2118,17 @@ const seedFiles = await Promise.all([
     description: "WAV audio sample tone for testing audio playback",
     duration: 1,
   }),
+  // The learner demo plays this through Chromium's fake microphone to record a
+  // spoken answer, so it survives a teardown and never needs regenerating.
+  // Regenerate with: node scripts/demos/generate-spoken-answer.mjs --force
+  seedFileWithUpload({
+    name: "biology-spoken-answer.wav",
+    localPath: "biology-spoken-answer.wav",
+    mimeType: "audio/wav",
+    description:
+      "Spoken answer about chloroplasts, used as the demo learner's recorded response",
+    duration: 17,
+  }),
 ]);
 
 const files = seedFiles.filter((f) => f !== null && f !== undefined);
@@ -2355,13 +2474,13 @@ if (documents.length > 0 && documents[0]) {
         word: "photosynthesis",
         definition: "Process of converting light to chemical energy",
         context: "Plants use photosynthesis to make food",
-        page: 1,
+        pages: [1],
       },
       {
         word: "chlorophyll",
         definition: "Green pigment in plants",
         context: "Chlorophyll captures light energy",
-        page: 2,
+        pages: [2],
       },
     ] as any,
     summariesJSON: [
@@ -2415,6 +2534,8 @@ await signInUser({
 });
 
 const gsResponse = await client.models.PlatformSettings.create({
+  defaultSectionLocation,
+  defaultAcceptWorkOutsideSectionDates: true,
   xpMultipliers: JSON.stringify({
     HOMEWORK_SUBMITTED: 1.0,
     ALL_BLOCKS_COMPLETED: 1.5,
@@ -2452,13 +2573,14 @@ const gsResponse = await client.models.PlatformSettings.create({
   }),
   autoAnalyzeDocuments: true,
   documentAnalysisModel: "gpt-4o",
+  documentAnalysisLlmExtractionEnabled: false,
   documentAnalysisOpenAiRequestsPerMinute: analysisLimit(
     "SEED_ANALYSIS_OPENAI_RPM",
     100,
   ),
   documentAnalysisOpenAiTokensPerMinute: analysisLimit(
     "SEED_ANALYSIS_OPENAI_TPM",
-    200_000,
+    1_000_000,
   ),
   documentAnalysisOpenAiMaxConcurrentRequests: analysisLimit(
     "SEED_ANALYSIS_OPENAI_CONCURRENCY",
@@ -2486,6 +2608,22 @@ await signInUser({
   signInFlow: "Password",
 });
 
+const thothLlmSettings = thothSeedMode === "off"
+  ? instructor1Settings
+  : unwrap(
+      [
+        await client.models.Settings.update({
+          id: instructor1Settings.id,
+          _version: instructor1Settings._version,
+          documentAnalysisLlmExtractionOverride: true,
+        }),
+      ],
+      "Thoth LLM Settings",
+    )[0];
+if (typeof thothLlmSettings.owner !== "string" || !thothLlmSettings.owner) {
+  throw new Error("Thoth LLM Settings is missing its resolved owner");
+}
+
 // ========================================================================
 // SECTION 11b: Thoth correspondence deck
 // ========================================================================
@@ -2504,6 +2642,12 @@ type ThothSeedFixture = {
   fileId: string;
   documentId: string;
   parsedContentId: string;
+  nlp: {
+    fileId: string;
+    documentId: string;
+    parsedContentId: string;
+    extractionReport: string;
+  };
   sectionId: string;
   units: Record<string, string>;
   wordIdsByTerm: Record<string, string>;
@@ -2524,7 +2668,7 @@ if (thothSeedMode !== "off") {
     level: "PROTECTED",
     path: thothPath,
     size: thothPdfBuffer.length,
-    owner: instructor1OwnerSub,
+    owner: thothLlmSettings.owner,
     identityId: instructor1IdentityId,
     settings: JSON.stringify({
       analysisProfile: "exhaustive",
@@ -2536,7 +2680,7 @@ if (thothSeedMode !== "off") {
   let thothDocumentID: string;
   let thothParsedContentID: string;
   let parsedSnapshot: ThothParsedContentSnapshot;
-  // Written only once the extraction gate below passes, so a failed run is retried.
+  // Captures are saved before scoring; only passing output becomes validated.
   let thothSnapshotToSave: string | null = null;
   const analysisTimeoutMinutes = Number(
     process.env.THOTH_ANALYSIS_TIMEOUT_MINUTES ?? 60,
@@ -2679,6 +2823,12 @@ if (thothSeedMode !== "off") {
       null,
       2,
     );
+    const capturePath = await saveExtractionRun(
+      thothRunsDir,
+      expectedThothPdfSha256,
+      parsedSnapshot,
+    );
+    console.log(`Thoth extraction captured before scoring: ${capturePath}`);
   }
 
   const extractionReport: ExtractionReport = scoreExtraction(thothGroundTruth, {
@@ -2690,16 +2840,34 @@ if (thothSeedMode !== "off") {
         subject: question.subject ?? undefined,
         field: question.field ?? undefined,
         sourceText: question.sourceText ?? undefined,
-        page: question.page,
+        page: firstEntryPage(question.pages),
       })),
     words: (parsedSnapshot.vocabularyJSON ?? [])
       .filter((word) => word != null)
       .map((word) => ({
         word: word.word,
         definition: word.definition ?? undefined,
-        page: word.page,
+        page: firstEntryPage(word.pages),
       })),
   });
+  const contentScore = scoreExtractionByContent(thothGroundTruth, {
+    questions: (parsedSnapshot.questionsJSON ?? [])
+      .filter((question) => question != null)
+      .map((question) => ({
+        prompt: question.prompt ?? undefined,
+        answer: question.answer ?? undefined,
+        subject: question.subject ?? undefined,
+        field: question.field ?? undefined,
+        sourceText: question.sourceText ?? undefined,
+        page: firstEntryPage(question.pages),
+        pages: (question.pages ?? []).filter((page): page is number => page != null),
+      })),
+    words: [],
+  });
+  console.log(
+    `[Thoth] Content recall (diagnostic, not gated): anchored=${contentScore.anchoredRecall.toFixed(3)} answered=${contentScore.answeredRecall.toFixed(3)} sourced=${contentScore.sourcedRecall.toFixed(3)}`,
+    contentScore.counts,
+  );
   const extractionReportPath = resolve(
     seedDir,
     "../../test/integration/thoth/extraction-report.json",
@@ -2723,6 +2891,311 @@ if (thothSeedMode !== "off") {
     await writeFile(thothSnapshotPath, thothSnapshotToSave);
     console.log(`💾 Thoth snapshot saved to ${thothSnapshotPath}`);
   }
+
+  const thothNlpBuffer = Buffer.from(
+    `${thothNlpExercise.lines.join("\n")}\n`,
+    "utf8",
+  );
+  const thothNlpSourceSha256 = sha256Hex(thothNlpBuffer);
+  const thothNlpSnapshot = thothSeedMode === "snapshot"
+    ? await loadAnalysisSnapshot(
+        analysisSnapshotDir,
+        thothNlpExercise.filename,
+        thothNlpSourceSha256,
+      )
+    : null;
+  if (thothSeedMode === "snapshot" && thothNlpSnapshot === null) {
+    console.log("No Thoth NLP exercise snapshot found; running the NLP-only exercise live");
+  }
+
+  console.log("\n🧪 Seeding the Thoth NLP-only extraction exercise...");
+  await signOut();
+  await signInUser({
+    username: TEST_USERS.instructor2.username,
+    password: passwordFor(TEST_USERS.instructor2.username),
+    signInFlow: "Password",
+  });
+  const thothNlpSession = await fetchAuthSession();
+  if (typeof thothNlpSession.identityId !== "string" || !thothNlpSession.identityId) {
+    throw new Error("Instructor2 session is missing its identity ID");
+  }
+  const thothNlpIdentityId = thothNlpSession.identityId;
+  const thothNlpSettingsResponse = await client.models.Settings.create({
+    autoAnalyzeDocuments: true,
+    documentAnalysisModel: "gpt-4",
+    documentAnalysisLlmExtractionOverride: false,
+    editorTheme: "light",
+    editorFontSize: 14,
+    defaultAIModel: "gpt-4",
+    assistantVoice: "alloy",
+    emailNotifications: true,
+    language: "en",
+    timezone: "America/New_York",
+    identityId: thothNlpIdentityId,
+  });
+  const thothNlpSettings = unwrap(
+    [thothNlpSettingsResponse],
+    "Thoth NLP Settings",
+  )[0];
+  if (typeof thothNlpSettings.owner !== "string" || !thothNlpSettings.owner) {
+    throw new Error("Thoth NLP Settings is missing its resolved owner");
+  }
+
+  const thothNlpPath = `protected/${thothNlpIdentityId}/files/${thothNlpExercise.filename.toLowerCase()}`;
+  const thothNlpFileResponse = await client.models.File.create({
+    name: thothNlpExercise.filename,
+    description: "Structured Thoth source for NLP-only extraction testing",
+    mimeType: "text/plain",
+    level: "PROTECTED",
+    path: thothNlpPath,
+    size: thothNlpBuffer.length,
+    owner: thothNlpSettings.owner,
+    identityId: thothNlpIdentityId,
+    settings: JSON.stringify({
+      analysisProfile: "exhaustive",
+      ...(thothNlpSnapshot ? { skipAutoAnalysis: true } : {}),
+    }),
+  });
+  const thothNlpFile = unwrap(
+    [thothNlpFileResponse],
+    "Thoth NLP File",
+  )[0];
+
+  let thothNlpDocumentID: string;
+  let thothNlpParsedContentID: string;
+  let thothNlpParsedSnapshot: ThothParsedContentSnapshot;
+  if (thothNlpSnapshot) {
+    thothNlpParsedSnapshot = {
+      vocabularyJSON: thothNlpSnapshot.vocabularyJSON,
+      summariesJSON: thothNlpSnapshot.summariesJSON,
+      objectivesJSON: thothNlpSnapshot.objectivesJSON,
+      conceptsJSON: thothNlpSnapshot.conceptsJSON,
+      questionsJSON: thothNlpSnapshot.questionsJSON,
+      pendingMediaJSON: thothNlpSnapshot.pendingMediaJSON,
+    } as ThothParsedContentSnapshot;
+    const thothNlpDocumentResponse = await client.models.Document.create({
+      filename: thothNlpExercise.filename,
+      s3Key: thothNlpPath,
+      status: "completed",
+      textExtractedAt: Date.now(),
+      pageCount: thothNlpSnapshot.pageCount,
+      fileSize: thothNlpBuffer.length,
+      mimeType: "text/plain",
+      sourceFormat: thothNlpSnapshot.sourceFormat ?? "txt",
+      identityId: thothNlpIdentityId,
+      owner: thothNlpSettings.owner,
+    });
+    const thothNlpDocument = unwrap(
+      [thothNlpDocumentResponse],
+      "Thoth NLP Document",
+    )[0];
+    thothNlpDocumentID = thothNlpDocument.id;
+    const thothNlpEmbedding = await regenerateEmbeddings(
+      thothNlpFile.id,
+      thothNlpParsedSnapshot,
+      thothNlpIdentityId,
+    );
+    unwrap(
+      [
+        await client.models.File.update({
+          id: thothNlpFile.id,
+          documentID: thothNlpDocument.id,
+          ...(thothNlpEmbedding ? { embedding: thothNlpEmbedding } : {}),
+          _version: thothNlpFile._version,
+        }),
+      ],
+      "Thoth NLP File link",
+    );
+    await uploadData({
+      path: thothNlpPath,
+      data: thothNlpBuffer,
+      options: { contentType: "text/plain" },
+    }).result;
+    await saveParsedContent(
+      thothNlpDocument.id,
+      thothNlpFile.id,
+      thothNlpParsedSnapshot,
+    );
+    thothNlpParsedContentID = parsedContentChunkId(thothNlpDocument.id, 0);
+  } else {
+    await uploadData({
+      path: thothNlpPath,
+      data: thothNlpBuffer,
+      options: { contentType: "text/plain" },
+    }).result;
+
+    const nlpDeadline = Date.now() + analysisTimeoutMinutes * 60 * 1000;
+    let completedNlpDocumentID: string | null = null;
+    let completedNlpParsedContentID: string | null = null;
+    let completedNlpSnapshot: ThothParsedContentSnapshot | null = null;
+    let lastNlpStatus: unknown = null;
+    while (Date.now() < nlpDeadline) {
+      const document = await findFirstFilteredRecord(
+        (nextToken) => client.models.Document.list({
+          filter: { s3Key: { eq: thothNlpPath } },
+          limit: 5,
+          nextToken,
+        }),
+        "Thoth NLP Document",
+      );
+      if (document) {
+        lastNlpStatus = document.status;
+        if (
+          document.status === "failed" ||
+          document.status === "error" ||
+          document.status === "cancelled"
+        ) {
+          throw new Error(
+            `Thoth NLP analysis ended with status ${document.status}`,
+          );
+        }
+        if (document.status === "completed") {
+          const parsed = await loadParsedContent(document.id);
+          if (parsed) {
+            completedNlpDocumentID = document.id;
+            completedNlpParsedContentID = parsed.id;
+            completedNlpSnapshot = {
+              vocabularyJSON: parsed.vocabularyJSON,
+              summariesJSON: parsed.summariesJSON,
+              objectivesJSON: parsed.objectivesJSON,
+              conceptsJSON: parsed.conceptsJSON,
+              questionsJSON: parsed.questionsJSON,
+              pendingMediaJSON: parsed.pendingMediaJSON,
+            } as ThothParsedContentSnapshot;
+            break;
+          }
+        }
+      }
+      await new Promise((resolveWait) => setTimeout(resolveWait, 5000));
+    }
+    if (
+      !completedNlpDocumentID ||
+      !completedNlpParsedContentID ||
+      !completedNlpSnapshot
+    ) {
+      throw new Error(
+        `Timed out waiting for Thoth NLP analysis; last status: ${JSON.stringify(lastNlpStatus)}`,
+      );
+    }
+    thothNlpDocumentID = completedNlpDocumentID;
+    thothNlpParsedContentID = completedNlpParsedContentID;
+    thothNlpParsedSnapshot = completedNlpSnapshot;
+  }
+
+  const nlpGroundTruth = buildThothNlpGroundTruth(
+    thothNlpExercise,
+    thothNlpSourceSha256,
+  );
+  const nlpExtractionReport = scoreExtraction(nlpGroundTruth, {
+    questions: (thothNlpParsedSnapshot.questionsJSON ?? [])
+      .filter((question) => question != null)
+      .map((question) => ({
+        prompt: question.prompt ?? undefined,
+        answer: question.answer ?? undefined,
+        subject: question.subject ?? undefined,
+        field: question.field ?? undefined,
+        sourceText: question.sourceText ?? undefined,
+        page: firstEntryPage(question.pages),
+      })),
+    words: (thothNlpParsedSnapshot.vocabularyJSON ?? [])
+      .filter((word) => word != null)
+      .map((word) => ({
+        word: word.word,
+        definition: word.definition ?? undefined,
+        page: firstEntryPage(word.pages),
+      })),
+  });
+  const expectedDefinitionMatches = thothNlpExercise.vocabulary.filter(
+    (expected) =>
+      thothNlpParsedSnapshot.vocabularyJSON?.some(
+        (word) =>
+          word?.word === expected.term &&
+          word?.definition === expected.definition,
+      ),
+  );
+  const definitionRecall =
+    thothNlpExercise.vocabulary.length === 0
+      ? 1
+      : expectedDefinitionMatches.length / thothNlpExercise.vocabulary.length;
+  const nlpReport = {
+    extractionMode: "nlp-only",
+    ...nlpExtractionReport,
+    vocabularyDefinitionRecall: definitionRecall,
+    missingVocabularyDefinitions: thothNlpExercise.vocabulary
+      .filter(
+        (expected) =>
+          !expectedDefinitionMatches.some(
+            (match) => match.term === expected.term,
+          ),
+      )
+      .map(({ term }) => term),
+  };
+  const nlpExtractionReportPath = resolve(
+    seedDir,
+    "../../test/integration/thoth/nlp-extraction-report.json",
+  );
+  await writeFile(
+    nlpExtractionReportPath,
+    JSON.stringify(nlpReport, null, 2),
+  );
+  const nlpGatePassed =
+    nlpReport.factRecall === 1 &&
+    nlpReport.vocabRecall === 1 &&
+    nlpReport.pageCoverage.missing.length === 0 &&
+    nlpReport.vocabularyDefinitionRecall === 1;
+  if (!nlpGatePassed) {
+    const gateFailure =
+      `Thoth NLP extraction gate failed: factRecall=${nlpReport.factRecall}, ` +
+      `vocabRecall=${nlpReport.vocabRecall}, ` +
+      `definitionRecall=${nlpReport.vocabularyDefinitionRecall}, ` +
+      `missingPages=${JSON.stringify(nlpReport.pageCoverage.missing)}`;
+    if (process.env.SEED_THOTH_ALLOW_PARTIAL !== "1") {
+      throw new Error(`${gateFailure}. Set SEED_THOTH_ALLOW_PARTIAL=1 to continue.`);
+    }
+    console.warn(`${gateFailure}; continuing because SEED_THOTH_ALLOW_PARTIAL=1`);
+  }
+  if (!thothNlpSnapshot && nlpGatePassed) {
+    const nlpPendingMedia = thothNlpParsedSnapshot.pendingMediaJSON;
+    const saved = await saveAnalysisSnapshot(
+      analysisSnapshotDir,
+      thothNlpExercise.filename,
+      {
+        sourceSha256: thothNlpSourceSha256,
+        capturedAt: new Date().toISOString(),
+        sourceFormat: "txt",
+        pageCount: 1,
+        vocabularyJSON: [...(thothNlpParsedSnapshot.vocabularyJSON ?? [])],
+        summariesJSON: [...(thothNlpParsedSnapshot.summariesJSON ?? [])],
+        objectivesJSON: [...(thothNlpParsedSnapshot.objectivesJSON ?? [])],
+        conceptsJSON: [...(thothNlpParsedSnapshot.conceptsJSON ?? [])],
+        questionsJSON: [...(thothNlpParsedSnapshot.questionsJSON ?? [])],
+        pendingMediaJSON:
+          nlpPendingMedia && nlpPendingMedia.length > 0
+            ? [...nlpPendingMedia]
+            : undefined,
+      },
+    );
+    if (saved) {
+      console.log("💾 Thoth NLP exercise snapshot saved");
+    } else {
+      console.warn("Thoth NLP exercise produced no snapshot-worthy content");
+    }
+  }
+  const thothNlpSeedFixture = {
+    fileId: thothNlpFile.id,
+    documentId: thothNlpDocumentID,
+    parsedContentId: thothNlpParsedContentID,
+    extractionReport: "test/integration/thoth/nlp-extraction-report.json",
+  };
+  console.log(
+    `✅ Thoth NLP exercise seeded using ${thothNlpSnapshot ? "snapshot" : "live analysis"}`,
+  );
+  await signOut();
+  await signInUser({
+    username: TEST_USERS.instructor1.username,
+    password: passwordFor(TEST_USERS.instructor1.username),
+    signInFlow: "Password",
+  });
 
   async function createThothRecords<T, R>(
     records: T[],
@@ -2802,6 +3275,22 @@ if (thothSeedMode !== "off") {
       "A correspondence-based study of the Thoth deck, its symbols, and its card attributions.",
     code: sectionCode,
     status: "PUBLISHED",
+    location: {
+      school: defaultSectionLocation.school,
+      campus: "Arts Campus",
+    },
+    timezone: "America/Los_Angeles",
+    classSchedule: [
+      { dayOfWeek: 6, startTime: "13:00", endTime: "15:00" },
+    ],
+    academicTerm: `Quarter ${quarterStartMonth / 3 + 1} ${seedYear}`,
+    startDate: new Date(Date.UTC(seedYear, quarterStartMonth, 1))
+      .toISOString()
+      .slice(0, 10),
+    endDate: new Date(Date.UTC(seedYear, quarterStartMonth + 3, 0))
+      .toISOString()
+      .slice(0, 10),
+    acceptWorkOutsideSectionDates: true,
     learner: "section-thoth-learners",
     readableGroups: ["section-thoth-instructors", "section-thoth-learners"],
     writableGroups: ["section-thoth-instructors"],
@@ -2919,6 +3408,7 @@ if (thothSeedMode !== "off") {
     fileId: thothFile.id,
     documentId: thothDocumentID,
     parsedContentId: thothParsedContentID,
+    nlp: thothNlpSeedFixture,
     sectionId: thothSection.id,
     units: unitIds,
     wordIdsByTerm,
@@ -2936,33 +3426,7 @@ if (thothSeedMode !== "off") {
 // ========================================================================
 // SECTION 12: Create Settings Records
 // ========================================================================
-console.log("\n⚙️  Creating user settings...");
-
-await Promise.all([
-  client.models.Settings.create({
-    autoAnalyzeDocuments: true,
-    documentAnalysisModel: "gpt-4",
-    editorTheme: "light",
-    editorFontSize: 14,
-    defaultAIModel: "gpt-4",
-    assistantVoice: "alloy",
-    emailNotifications: true,
-    language: "en",
-    timezone: "America/New_York",
-  }),
-  // client.models.Settings.create({
-  //   autoAnalyzeDocuments: false,
-  //   editorTheme: 'dark',
-  //   editorFontSize: 16,
-  //   defaultAIModel: 'gpt-3.5-turbo',
-  //   assistantVoice: 'nova',
-  //   emailNotifications: false,
-  //   language: 'en',
-  //   timezone: 'America/Los_Angeles',
-  // }),
-]);
-
-console.log("✅ Created user settings");
+console.log("✅ Seed user settings were created before document analysis");
 
 // ========================================================================
 // SECTION 13: Sign in as Student1 for Gamification Data
@@ -3108,7 +3572,7 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       sectionID,
       sourceId: "chapter-1-bug-wars",
     },
-  ] as any,
+  ],
   // Module progress (was StudentProgress) — moduleId is the Section this
   // student is enrolled in; completion is "assignments done / assignments in
   // that section", matching handleRecomputeProgress's real semantics.
@@ -3127,7 +3591,7 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       completedWorkbooks: 1,
       lastUpdatedAt: daysAgo(0),
     },
-  ] as any,
+  ],
   // Personal bests (was StudentPersonalBest)
   personalBests: [
     {
@@ -3142,7 +3606,7 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       achievedAt: daysAgo(1),
       previousBest: 60,
     },
-  ] as any,
+  ],
   // Leaderboard fields (was LeaderboardEntry)
   completedAssignments: 3,
   nailedItCount: 2,
@@ -3158,10 +3622,28 @@ const student1ProfileResponse = await client.models.StudentProfile.create({
       sourceId: "chapter-1-bug-wars",
       label: "ring: fire",
     },
-  ] as any,
-} as any);
+  ],
+  summaryText:
+    "Emma is at level 5 with 520 XP, a 5-day streak, and 3 tracked submissions in this section. Completion is strong relative to the class benchmark, and the next step is a brief pronunciation refresh before the next submission.",
+  summaryVersion: "section-rollup-seed-v1",
+  summaryGeneratedAt: now.toISOString(),
+  summaryContext: JSON.stringify({
+    sectionName: "Japanese 101 - Period 1",
+    studentLabel: "Johnson, Emma",
+    note: "Seeded for the dashboard student-view check-in.",
+    aggregate: {
+      completionRate: 67,
+      xp: 520,
+      level: 5,
+      streak: 5,
+    },
+  }),
+});
 
-const student1Profile = student1ProfileResponse.data!;
+const student1Profile = unwrap(
+  [student1ProfileResponse],
+  "StudentProfile student1",
+)[0];
 console.log("✅ Created student1 profile");
 
 // Additional leaderboard-like profiles for other students (display data)
@@ -3422,7 +3904,7 @@ console.log(
 );
 
 // Student skill progress → embedded in StudentProfile.skillProgress
-await client.models.StudentProfile.update({
+const student1SkillProgressResponse = await client.models.StudentProfile.update({
   id: student1Profile.id,
   _version: student1Profile._version,
   skillProgress: [
@@ -3434,8 +3916,9 @@ await client.models.StudentProfile.update({
     { skillId: skills[5].id, status: "LOCKED" }, // Oral Presentation
     { skillId: skills[6].id, status: "AVAILABLE" }, // Critical Analysis (prereq Reading done)
     { skillId: skills[7].id, status: "LOCKED" }, // Language Mastery
-  ] as any,
+  ],
 });
+unwrap([student1SkillProgressResponse], "StudentProfile student1 skill progress");
 
 console.log("✅ Updated student1 profile with skill progress");
 
@@ -4347,6 +4830,7 @@ console.log("\n🧠 Creating student memory records...");
 
 await client.models.StudentMemory.create({
   studentId: student1OwnerSub,
+  sectionID: sections[0].id,
   memoryMarkdown: `# Student Profile: Student One
 
 ## Learning Style
@@ -4381,6 +4865,7 @@ await client.models.StudentMemory.create({
 
 await client.models.StudentMemory.create({
   studentId: student1OwnerSub,
+  sectionID: sections[0].id,
   unitID: units[0].id,
   weakConcepts: [
     { concept: "verb-conjugation", strength: 0.3 },
@@ -4405,7 +4890,44 @@ await client.models.StudentMemory.create({
   lastPracticedAt: daysAgo(1),
 });
 
-console.log("✅ Created student memory records");
+const initialActionResponse = await client.models.StudentActionRecord.create({
+  studentId: student1OwnerSub,
+  sectionID: sections[0].id,
+  createdBy: TEST_USERS.instructor1.username,
+  actionType: "follow-up",
+  status: "planned",
+  description:
+    "Review pronunciation and sentence flow before the next Japanese greetings assignment.",
+  targetDate: new Date(Date.now() + 4 * 86400000).toISOString(),
+  outcome: "Continue practicing with a short warm-up routine.",
+  followUp: "Re-check vocab recall in the next tutor session.",
+  version: 1,
+  createdAt: daysAgo(2),
+  updatedAt: daysAgo(2),
+});
+
+const revisedActionResponse = await client.models.StudentActionRecord.create({
+  studentId: student1OwnerSub,
+  sectionID: sections[0].id,
+  createdBy: TEST_USERS.instructor1.username,
+  actionType: "follow-up",
+  status: "in-progress",
+  description:
+    "Revise the pronunciation follow-up to focus on set phrases and listening checks.",
+  targetDate: new Date(Date.now() + 3 * 86400000).toISOString(),
+  outcome: "Short, targeted practice blocks are helping recall.",
+  followUp: "Repeat with a 10-minute listening exercise before the next lesson.",
+  version: 2,
+  previousActionId: initialActionResponse.data?.id ?? null,
+  createdAt: daysAgo(1),
+  updatedAt: daysAgo(1),
+});
+
+console.log(
+  `✅ Created student memory and action records for ${
+    [initialActionResponse.data, revisedActionResponse.data].filter(Boolean).length
+  } follow-ups`,
+);
 
 // ========================================================================
 // SECTION 30: Student2 Data (Minimal - for empty/sparse states)
@@ -4740,6 +5262,12 @@ const seedFixture = {
     fileId: "",
     documentId: "",
     parsedContentId: "",
+    nlp: {
+      fileId: "",
+      documentId: "",
+      parsedContentId: "",
+      extractionReport: "test/integration/thoth/nlp-extraction-report.json",
+    },
     sectionId: "",
     units: {
       orientation: "",
@@ -4832,7 +5360,16 @@ const seedFixture = {
   platformSettings: gsResponse.data ? { id: gsResponse.data.id } : null,
 };
 
-await captureAnalysisSnapshots();
+// The seed signed out after the analytics section, but Document and
+// ParsedContent reads need the owning instructor's session.
+if (pendingAnalysisCaptures.length > 0) {
+  await signInUser({
+    username: TEST_USERS.instructor1.username,
+    password: passwordFor(TEST_USERS.instructor1.username),
+    signInFlow: "Password",
+  });
+  await captureAnalysisSnapshots();
+}
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const fixturePath = resolve(__dirname, "../../test/integration/seed-data.json");

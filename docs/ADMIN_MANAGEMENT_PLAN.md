@@ -7,7 +7,7 @@ and a full-account archive/replay system.
 ## 1. Navigation audit — orphaned routes
 
 Audit of every `page.tsx`/`page.jsx` under `app/[locale]/**` against every
-`href=`/`router.push(` in the codebase.
+`href=`/`router.push                                                        ,¬;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;(` in the codebase.
 
 ### Fixed in this session
 
@@ -110,7 +110,7 @@ Plan (bigger lift — needs explicit approval before touching `amplify/`):
 
 **Recommendation**: build Manage Chats first (self-contained, no schema
 changes); scope Manage Users as separate, explicitly-approved work.
-
+ 
 ## 3. Full-account archive + replay ("rattle everything off to an archive bucket")
 
 Goal: for a given student or instructor account, sweep **everything** they

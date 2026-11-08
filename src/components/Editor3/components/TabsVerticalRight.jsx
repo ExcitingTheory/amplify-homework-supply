@@ -11,7 +11,7 @@ import { AudioPlayerProvider } from "../context/AudioPlayerContext";
 import { useSuggestions } from "../context/SuggestionContext";
 
 import ChatSidebar from "../../ChatSidebar";
-import { ChatPanel } from "../../CollaborativeChat";
+import ChatPanel from "../../CollaborativeChat/ChatPanel";
 import BlockSuggestionMenu from "./BlockSuggestionMenu";
 import UnitContext from "../../../context/unitContext";
 
@@ -45,7 +45,7 @@ function TabPanel(props) {
       style={{
         width: "100%",
         minWidth: 0,
-        height: "calc(100vh - var(--app-bar-height, 11rem))",
+        height: "100%",
         overflow: overflowY === "hidden" ? "hidden" : "auto",
         direction: "rtl", // Flips scrollbar to left
       }}
@@ -90,6 +90,8 @@ export default function TabsVerticalRight({
     useAI,
     insertSuggestion,
     requestMoreSuggestions,
+    rejectSuggestion,
+    error: suggestionError,
   } = useSuggestions();
   const {
     recentGrades = [],
@@ -158,8 +160,8 @@ export default function TabsVerticalRight({
         // Close the drawer if dragged below minimum
         setOpen(false);
         setIsResizing(false);
-      } else if (newWidth <= 800 && setDrawerWidth) {
-        setDrawerWidth(newWidth);
+      } else if (setDrawerWidth) {
+        setDrawerWidth(Math.min(newWidth, window.innerWidth - 80));
       }
     },
     [isResizing, setDrawerWidth, setOpen],
@@ -190,6 +192,7 @@ export default function TabsVerticalRight({
       }}
     >
       <div
+        data-testid="right-sidebar-resize"
         onMouseDown={handleMouseDown}
         style={{
           position: "absolute",
@@ -212,7 +215,7 @@ export default function TabsVerticalRight({
           !isResizing && (e.currentTarget.style.backgroundColor = "transparent")
         }
       />
-      <Box sx={{ flexGrow: 1, minWidth: 0, order: 1 }}>
+      <Box sx={{ flexGrow: 1, minWidth: 0, minHeight: 0, order: 1, display: open ? "block" : "none" }}>
         <TabPanel value={value} index={5} overflowY={OVERFLOW_HIDDEN}>
           <ChatSidebar />
         </TabPanel>
@@ -257,8 +260,9 @@ export default function TabsVerticalRight({
               isLoadingAI={isLoadingAI}
               useAI={useAI}
               onRequestMore={requestMoreSuggestions}
+              onReject={(index) => rejectSuggestion(suggestions[index])}
+              error={suggestionError}
             />
-            {/*  Each suggestion shows preview of what it will look like in the editor as semi-transparent when the mouse hovers, clicking the suggestion will add. Important node when suggesting custom blocks we need ot add to the prompt the parameters too, for instance if something takes a list of questionIds or wordIds these need to be suggested as well */}
           </Box>
         </TabPanel>
         <TabPanel value={value} index={8}>

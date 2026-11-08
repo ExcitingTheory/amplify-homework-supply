@@ -1,0 +1,1352 @@
+{
+  "sourceSha256": "31e868054d84e3332f4e83fef2462b52683fb35befb847a4960f323c92448ea9",
+  "capturedAt": "2026-10-31T00:00:52.518Z",
+  "sourceFormat": "txt",
+  "pageCount": 1,
+  "vocabularyJSON": [
+    {
+      "word": "hablar",
+      "definition": "to speak, to talk",
+      "context": "hablar - to speak, to talk",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "trabajar",
+      "definition": "to work",
+      "context": "trabajar - to work",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "bailar",
+      "definition": "to dance",
+      "context": "bailar - to dance",
+      "pages": [
+        1
+      ]
+    },
+    {
+      "word": "Has multiple meanings",
+      "definition": "to take, to drink, to grab.",
+      "context": "Has multiple meanings: to take, to drink, to grab.",
+      "pages": [
+        1
+      ]
+    }
+  ],
+  "summariesJSON": [
+    {
+      "title": "Document summary",
+      "content": "The document lacks content from which to derive a summary as no summaries or concepts have been supplied, therefore, any specific details, objectives, or concepts cannot be delineated from this source material.",
+      "pageRange": "N/A"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is categorization by infinitive endings for Spanish verbs?",
+      "answer": "-ar, -er, or -ir",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Spanish verbs",
+      "field": "categorization by infinitive endings",
+      "sourceText": "Spanish verbs are categorized by their infinitive endings: -ar, -er, or -ir.",
+      "accept": [
+        "categorized by infinitive endings",
+        "infinitive endings are -ar, -er, or -ir"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "hablar - to speak, to talk",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "hablar - to speak, to talk",
+      "accept": [
+        "definition of hablar",
+        "hablar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "trabajar - to work",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "trabajar - to work",
+      "accept": [
+        "definition of trabajar",
+        "trabajar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "estudiar - to study",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "estudiar - to study",
+      "accept": [
+        "definition of estudiar",
+        "estudiar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "bailar - to dance",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "bailar - to dance",
+      "accept": [
+        "definition of bailar",
+        "bailar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "cantar - to sing",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "cantar - to sing",
+      "accept": [
+        "definition of cantar",
+        "cantar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "caminar - to walk",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "caminar - to walk",
+      "accept": [
+        "definition of caminar",
+        "caminar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "cocinar - to cook",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "cocinar - to cook",
+      "accept": [
+        "definition of cocinar",
+        "cocinar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "nadar - to swim",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "nadar - to swim",
+      "accept": [
+        "definition of nadar",
+        "nadar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "escuchar - to listen (to)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "escuchar - to listen (to)",
+      "accept": [
+        "definition of escuchar",
+        "escuchar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "mirar - to watch, to look at",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "mirar - to watch, to look at",
+      "accept": [
+        "definition of mirar",
+        "mirar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "comprar - to buy",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "comprar - to buy",
+      "accept": [
+        "definition of comprar",
+        "comprar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "viajar - to travel",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "viajar - to travel",
+      "accept": [
+        "definition of viajar",
+        "viajar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "descansar - to rest",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "descansar - to rest",
+      "accept": [
+        "definition of descansar",
+        "descansar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "llevar - to carry, to wear",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "llevar - to carry, to wear",
+      "accept": [
+        "definition of llevar",
+        "llevar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Essential Vocabulary?",
+      "answer": "tomar - to take, to drink",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Essential Vocabulary",
+      "field": "definition",
+      "sourceText": "tomar - to take, to drink",
+      "accept": [
+        "definition of tomar",
+        "tomar"
+      ]
+    },
+    {
+      "prompt": "What is yo ending for Conjugation Pattern?",
+      "answer": "o (I)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "yo ending",
+      "sourceText": "yo - o (I)",
+      "accept": [
+        "yo form",
+        "yo conjugation"
+      ]
+    },
+    {
+      "prompt": "What is tú ending for Conjugation Pattern?",
+      "answer": "as (you, informal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "tú ending",
+      "sourceText": "tú - as (you, informal)",
+      "accept": [
+        "tú form",
+        "tú conjugation"
+      ]
+    },
+    {
+      "prompt": "What is él/ella/usted ending for Conjugation Pattern?",
+      "answer": "a (he/she/you formal)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "él/ella/usted ending",
+      "sourceText": "él/ella/usted - a (he/she/you formal)",
+      "accept": [
+        "él form",
+        "ella form",
+        "usted form",
+        "él/ella/usted conjugation"
+      ]
+    },
+    {
+      "prompt": "What is nosotros/nosotras ending for Conjugation Pattern?",
+      "answer": "amos (we)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "nosotros/nosotras ending",
+      "sourceText": "nosotros/nosotras - amos (we)",
+      "accept": [
+        "nosotros form",
+        "nosotras form",
+        "nosotros/nosotras conjugation"
+      ]
+    },
+    {
+      "prompt": "What is vosotros/vosotras ending for Conjugation Pattern?",
+      "answer": "áis (you all, Spain)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "vosotros/vosotras ending",
+      "sourceText": "vosotros/vosotras - áis (you all, Spain)",
+      "accept": [
+        "vosotros form",
+        "vosotras form",
+        "vosotros/vosotras conjugation"
+      ]
+    },
+    {
+      "prompt": "What is ellos/ellas/ustedes ending for Conjugation Pattern?",
+      "answer": "an (they/you all)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation Pattern",
+      "field": "ellos/ellas/ustedes ending",
+      "sourceText": "ellos/ellas/ustedes - an (they/you all)",
+      "accept": [
+        "ellos form",
+        "ellas form",
+        "ustedes form",
+        "ellos/ellas/ustedes conjugation"
+      ]
+    },
+    {
+      "prompt": "What is yo form for Example for HABLAR?",
+      "answer": "yo hablo",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "yo form",
+      "sourceText": "yo hablo",
+      "accept": [
+        "yo hablo"
+      ]
+    },
+    {
+      "prompt": "What is tú form for Example for HABLAR?",
+      "answer": "tú hablas",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "tú form",
+      "sourceText": "tú hablas",
+      "accept": [
+        "tú hablas"
+      ]
+    },
+    {
+      "prompt": "What is él/ella/usted form for Example for HABLAR?",
+      "answer": "él/ella/usted habla",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "él/ella/usted form",
+      "sourceText": "él/ella/usted habla",
+      "accept": [
+        "él habla",
+        "ella habla",
+        "usted habla"
+      ]
+    },
+    {
+      "prompt": "What is nosotros/nosotras form for Example for HABLAR?",
+      "answer": "nosotros/nosotras hablamos",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "nosotros/nosotras form",
+      "sourceText": "nosotros/nosotras hablamos",
+      "accept": [
+        "nosotros hablamos",
+        "nosotras hablamos"
+      ]
+    },
+    {
+      "prompt": "What is vosotros/vosotras form for Example for HABLAR?",
+      "answer": "vosotros/vosotras habláis",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "vosotros/vosotras form",
+      "sourceText": "vosotros/vosotras habláis",
+      "accept": [
+        "vosotros habláis",
+        "vosotras habláis"
+      ]
+    },
+    {
+      "prompt": "What is ellos/ellas/ustedes form for Example for HABLAR?",
+      "answer": "ellos/ellas/ustedes hablan",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example for HABLAR",
+      "field": "ellos/ellas/ustedes form",
+      "sourceText": "ellos/ellas/ustedes hablan",
+      "accept": [
+        "ellos hablan",
+        "ellas hablan",
+        "ustedes hablan"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "buscar - to look for, to search",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "buscar - to look for, to search",
+      "accept": [
+        "definition of buscar",
+        "buscar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "enseñar - to teach, to show",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "enseñar - to teach, to show",
+      "accept": [
+        "definition of enseñar",
+        "enseñar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "esperar - to wait, to hope",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "esperar - to wait, to hope",
+      "accept": [
+        "definition of esperar",
+        "esperar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "ganar - to win, to earn",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "ganar - to win, to earn",
+      "accept": [
+        "definition of ganar",
+        "ganar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "llegar - to arrive",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "llegar - to arrive",
+      "accept": [
+        "definition of llegar",
+        "llegar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "necesitar - to need",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "necesitar - to need",
+      "accept": [
+        "definition of necesitar",
+        "necesitar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "pagar - to pay",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "pagar - to pay",
+      "accept": [
+        "definition of pagar",
+        "pagar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "pasar - to pass, to spend (time), to happen",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "pasar - to pass, to spend (time), to happen",
+      "accept": [
+        "definition of pasar",
+        "pasar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "preguntar - to ask (a question)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "preguntar - to ask (a question)",
+      "accept": [
+        "definition of preguntar",
+        "preguntar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Additional Important Verbs?",
+      "answer": "preparar - to prepare",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Additional Important Verbs",
+      "field": "definition",
+      "sourceText": "preparar - to prepare",
+      "accept": [
+        "definition of preparar",
+        "preparar"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "todos los días - every day",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "todos los días - every day",
+      "accept": [
+        "definition of todos los días",
+        "todos los días"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "siempre - always",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "siempre - always",
+      "accept": [
+        "definition of siempre",
+        "siempre"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "nunca - never",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "nunca - never",
+      "accept": [
+        "definition of nunca",
+        "nunca"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "a veces - sometimes",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "a veces - sometimes",
+      "accept": [
+        "definition of a veces",
+        "a veces"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "generalmente - generally",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "generalmente - generally",
+      "accept": [
+        "definition of generalmente",
+        "generalmente"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "frecuentemente - frequently",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "frecuentemente - frequently",
+      "accept": [
+        "definition of frecuentemente",
+        "frecuentemente"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "por la mañana - in the morning",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "por la mañana - in the morning",
+      "accept": [
+        "definition of por la mañana",
+        "por la mañana"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "por la tarde - in the afternoon",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "por la tarde - in the afternoon",
+      "accept": [
+        "definition of por la tarde",
+        "por la tarde"
+      ]
+    },
+    {
+      "prompt": "What is definition for Time Expressions Often Used with Present Tense?",
+      "answer": "por la noche - in the evening/at night",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Time Expressions Often Used with Present Tense",
+      "field": "definition",
+      "sourceText": "por la noche - in the evening/at night",
+      "accept": [
+        "definition of por la noche",
+        "por la noche"
+      ]
+    },
+    {
+      "prompt": "What is are categorized by their infinitive endings for Spanish verbs?",
+      "answer": "-ar, -er, or -ir. This lesson focuses on regular -ar verbs in the present tense.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Spanish verbs",
+      "field": "are categorized by their infinitive endings",
+      "sourceText": "Spanish verbs are categorized by their infinitive endings: -ar, -er, or -ir. This lesson focuses on regular -ar verbs in the present tense.",
+      "accept": []
+    },
+    {
+      "prompt": "What is topic for Regular -AR Verbs in Present Tense?",
+      "answer": "regular -AR verbs",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Regular -AR Verbs in Present Tense",
+      "field": "topic",
+      "sourceText": "Regular -AR Verbs in Present Tense",
+      "accept": []
+    },
+    {
+      "prompt": "What is instruction for Conjugation?",
+      "answer": "For regular -ar verbs, remove the -ar ending and add these endings:",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Conjugation",
+      "field": "instruction",
+      "sourceText": "For regular -ar verbs, remove the -ar ending and add these endings:",
+      "accept": []
+    },
+    {
+      "prompt": "What is follow a predictable pattern for Regular -ar verbs?",
+      "answer": "in Spanish. Once you learn this pattern, you can conjugate hundreds of verbs.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Regular -ar verbs",
+      "field": "follow a predictable pattern",
+      "sourceText": "Regular -ar verbs follow a predictable pattern in Spanish. Once you learn this pattern, you can conjugate hundreds of verbs.",
+      "accept": []
+    },
+    {
+      "prompt": "What is is essential for Practice?",
+      "answer": "try using these verbs in your own sentences about daily activities.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Practice",
+      "field": "is essential",
+      "sourceText": "Practice is essential - try using these verbs in your own sentences about daily activities.",
+      "accept": []
+    },
+    {
+      "prompt": "What is have stem changes or spelling changes for Some -ar verbs?",
+      "answer": "in certain tenses, but the basic pattern remains consistent.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Some -ar verbs",
+      "field": "have stem changes or spelling changes",
+      "sourceText": "As you progress, you'll learn that some -ar verbs have stem changes or spelling changes in certain tenses, but the basic pattern remains consistent.",
+      "accept": []
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Tomo café por la mañana. (I drink coffee in the morning.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Tomo café por la mañana. (I drink coffee in the morning.)",
+      "accept": [
+        "Example: Tomo café por la mañana. (I drink coffee in the morning.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "HABLAR (to speak)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: HABLAR (to speak)",
+      "accept": [
+        "Example: HABLAR (to speak)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Busco mis llaves. (I'm looking for my keys.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Busco mis llaves. (I'm looking for my keys.)",
+      "accept": [
+        "Example: Busco mis llaves. (I'm looking for my keys.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "El profesor enseña español. (The teacher teaches Spanish.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: El profesor enseña español. (The teacher teaches Spanish.)",
+      "accept": [
+        "Example: El profesor enseña español. (The teacher teaches Spanish.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Esperamos el autobús. (We wait for the bus.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Esperamos el autobús. (We wait for the bus.)",
+      "accept": [
+        "Example: Esperamos el autobús. (We wait for the bus.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Ganan dinero. (They earn money.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Ganan dinero. (They earn money.)",
+      "accept": [
+        "Example: Ganan dinero. (They earn money.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Llego a las ocho. (I arrive at eight.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Llego a las ocho. (I arrive at eight.)",
+      "accept": [
+        "Example: Llego a las ocho. (I arrive at eight.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Necesitas estudiar. (You need to study.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Necesitas estudiar. (You need to study.)",
+      "accept": [
+        "Example: Necesitas estudiar. (You need to study.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Pago la cuenta. (I pay the bill.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Pago la cuenta. (I pay the bill.)",
+      "accept": [
+        "Example: Pago la cuenta. (I pay the bill.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Pasamos el verano en la playa. (We spend summer at the beach.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Pasamos el verano en la playa. (We spend summer at the beach.)",
+      "accept": [
+        "Example: Pasamos el verano en la playa. (We spend summer at the beach.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Pregunto la hora. (I ask the time.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Pregunto la hora. (I ask the time.)",
+      "accept": [
+        "Example: Pregunto la hora. (I ask the time.)"
+      ]
+    },
+    {
+      "prompt": "What is has multiple meanings for action?",
+      "answer": "to take, to drink, to grab.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "action",
+      "field": "has multiple meanings",
+      "sourceText": "Has multiple meanings: to take, to drink, to grab.",
+      "accept": [
+        "has multiple meanings"
+      ]
+    },
+    {
+      "prompt": "What is Example for Los estudiantes?",
+      "answer": "Los estudiantes estudian en la biblioteca. (The students study in the library.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Los estudiantes",
+      "field": "Example",
+      "sourceText": "1. Los estudiantes estudian en la biblioteca. (The students study in the library.)",
+      "accept": [
+        "The students study in the library."
+      ]
+    },
+    {
+      "prompt": "What is Example for Yo?",
+      "answer": "Yo hablo con mis amigos todos los días. (I talk with my friends every day.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Yo",
+      "field": "Example",
+      "sourceText": "2. Yo hablo con mis amigos todos los días. (I talk with my friends every day.)",
+      "accept": [
+        "I talk with my friends every day."
+      ]
+    },
+    {
+      "prompt": "What is Example for Ella?",
+      "answer": "Ella trabaja en un hospital. (She works in a hospital.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Ella",
+      "field": "Example",
+      "sourceText": "3. Ella trabaja en un hospital. (She works in a hospital.)",
+      "accept": [
+        "She works in a hospital."
+      ]
+    },
+    {
+      "prompt": "What is Example for Nosotros?",
+      "answer": "Nosotros compramos frutas en el mercado. (We buy fruits at the market.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Nosotros",
+      "field": "Example",
+      "sourceText": "4. Nosotros compramos frutas en el mercado. (We buy fruits at the market.)",
+      "accept": [
+        "We buy fruits at the market."
+      ]
+    },
+    {
+      "prompt": "What is Example for Tú?",
+      "answer": "¿Tú cantas en la ducha? (Do you sing in the shower?)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Tú",
+      "field": "Example",
+      "sourceText": "5. ¿Tú cantas en la ducha? (Do you sing in the shower?)",
+      "accept": [
+        "Do you sing in the shower?"
+      ]
+    },
+    {
+      "prompt": "What is Example for Ellos?",
+      "answer": "Ellos viajan a España cada año. (They travel to Spain every year.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Ellos",
+      "field": "Example",
+      "sourceText": "6. Ellos viajan a España cada año. (They travel to Spain every year.)",
+      "accept": [
+        "They travel to Spain every year."
+      ]
+    },
+    {
+      "prompt": "What is Example for Yo?",
+      "answer": "Yo cocino pasta para la cena. (I cook pasta for dinner.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Yo",
+      "field": "Example",
+      "sourceText": "7. Yo cocino pasta para la cena. (I cook pasta for dinner.)",
+      "accept": [
+        "I cook pasta for dinner."
+      ]
+    },
+    {
+      "prompt": "What is Example for Ustedes?",
+      "answer": "Ustedes caminan al parque. (You all walk to the park.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Ustedes",
+      "field": "Example",
+      "sourceText": "8. Ustedes caminan al parque. (You all walk to the park.)",
+      "accept": [
+        "You all walk to the park."
+      ]
+    },
+    {
+      "prompt": "What is Common Mistakes to Avoid for conjugate?",
+      "answer": "Don't forget to conjugate!",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "conjugate",
+      "field": "Common Mistakes to Avoid",
+      "sourceText": "1. Don't forget to conjugate! Each subject needs its own verb ending.",
+      "accept": [
+        "Each subject needs its own verb ending."
+      ]
+    },
+    {
+      "prompt": "What is Common Mistakes to Avoid for yo form?",
+      "answer": "Remember that \"yo\" form ends in -o, not -ar.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "yo form",
+      "field": "Common Mistakes to Avoid",
+      "sourceText": "2. Remember that \"yo\" form ends in -o, not -ar.",
+      "accept": [
+        "yo form ends in -o"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Yo hablo español. (I speak Spanish.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Yo hablo español. (I speak Spanish.)",
+      "accept": [
+        "Yo hablo español. (I speak Spanish.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Ella trabaja en una oficina. (She works in an office.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Ella trabaja en una oficina. (She works in an office.)",
+      "accept": [
+        "Ella trabaja en una oficina. (She works in an office.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Nosotros estudiamos matemáticas. (We study mathematics.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Nosotros estudiamos matemáticas. (We study mathematics.)",
+      "accept": [
+        "Nosotros estudiamos matemáticas. (We study mathematics.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Ellos bailan salsa. (They dance salsa.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Ellos bailan salsa. (They dance salsa.)",
+      "accept": [
+        "Ellos bailan salsa. (They dance salsa.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Tú cantas bien. (You sing well.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Tú cantas bien. (You sing well.)",
+      "accept": [
+        "Tú cantas bien. (You sing well.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Él camina al trabajo. (He walks to work.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Él camina al trabajo. (He walks to work.)",
+      "accept": [
+        "Él camina al trabajo. (He walks to work.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Mi madre cocina la cena. (My mother cooks dinner.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Mi madre cocina la cena. (My mother cooks dinner.)",
+      "accept": [
+        "Mi madre cocina la cena. (My mother cooks dinner.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Los niños nadan en la piscina. (The children swim in the pool.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Los niños nadan en la piscina. (The children swim in the pool.)",
+      "accept": [
+        "Los niños nadan en la piscina. (The children swim in the pool.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Escucho música. (I listen to music.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Escucho música. (I listen to music.)",
+      "accept": [
+        "Escucho música. (I listen to music.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Miramos la televisión. (We watch television.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Miramos la televisión. (We watch television.)",
+      "accept": [
+        "Miramos la televisión. (We watch television.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Compro pan en la panadería. (I buy bread at the bakery.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Compro pan en la panadería. (I buy bread at the bakery.)",
+      "accept": [
+        "Compro pan en la panadería. (I buy bread at the bakery.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Viajan a México. (They travel to Mexico.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Viajan a México. (They travel to Mexico.)",
+      "accept": [
+        "Viajan a México. (They travel to Mexico.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Descansas después del trabajo. (You rest after work.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Descansas después del trabajo. (You rest after work.)",
+      "accept": [
+        "Descansas después del trabajo. (You rest after work.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Llevo una camisa azul. (I'm wearing a blue shirt.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Llevo una camisa azul. (I'm wearing a blue shirt.)",
+      "accept": [
+        "Llevo una camisa azul. (I'm wearing a blue shirt.)"
+      ]
+    },
+    {
+      "prompt": "What is Example for Example?",
+      "answer": "Preparan la comida. (They prepare the food.)",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Example",
+      "field": "Example",
+      "sourceText": "Example: Preparan la comida. (They prepare the food.)",
+      "accept": [
+        "Preparan la comida. (They prepare the food.)"
+      ]
+    }
+  ]
+}

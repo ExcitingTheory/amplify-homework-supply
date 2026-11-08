@@ -29,6 +29,8 @@ import {
   sleep,
   backoffMs,
   isConditionalCheckFailure,
+  toReadableError,
+  versionGuard,
 } from "../shared/concurrency";
 import {
   BADGES_SELECTION,
@@ -45,13 +47,13 @@ import {
 
 const GET_STUDENT_PROFILE = `query GetStudentProfile($studentId: String!, $sectionID: String) {
   listStudentProfiles(filter: { studentId: { eq: $studentId }, sectionID: { eq: $sectionID } }) {
-    items { id studentId sectionID totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId sectionID totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } easterEggs { easterEggId discoveredAt xpReward } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount recentXpLogIds _version }
   }
 }`;
 
 const GET_SECTION_PROGRESS = `query GetSectionProgress($studentId: String!, $sectionId: String!) {
   listSectionProgresses(filter: { studentId: { eq: $studentId }, sectionId: { eq: $sectionId } }) {
-    items { id studentId sectionId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount _version }
+    items { id studentId sectionId totalXP level nailedItCount completedAssignments onTimeSubmissions currentStreak longestStreak lastActivityDate badges { badgeType sourceId awardedAt sectionID unitID count isAnti } reasonCounts totalSubmissions maxFailedAttemptsOnSingleRef recentSubmissionTimestamps activeDaysCount recentXpLogIds _version }
   }
 }`;
 
@@ -573,7 +575,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
           newActiveDaysCount += 1;
         }
 
-        const expectedVersion = profile._version ?? 1;
+        const guard = versionGuard(profile._version);
         try {
           await (gqlClient as any).graphql({
             query: UPDATE_STUDENT_PROFILE,
@@ -592,9 +594,9 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 recentSubmissionTimestamps: JSON.stringify(recentTimestamps),
                 activeDaysCount: newActiveDaysCount,
                 recentXpLogIds: nextRecentIds,
-                _version: expectedVersion + 1,
+                _version: guard.nextVersion,
               },
-              condition: { _version: { eq: expectedVersion } },
+              condition: guard.condition,
             },
           });
           profileOutcome = {
@@ -602,7 +604,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             profile: {
               ...profile,
               id: profile.id,
-              _version: expectedVersion + 1,
+              _version: guard.nextVersion,
             },
             oldXP,
             oldLevel,
@@ -862,7 +864,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
             let spActiveDaysCount = sectionProgress.activeDaysCount || 0;
             if (spLastActivity !== today) spActiveDaysCount += 1;
 
-            const spExpectedVersion = sectionProgress._version ?? 1;
+            const spGuard = versionGuard(sectionProgress._version);
             try {
               await (gqlClient as any).graphql({
                 query: UPDATE_SECTION_PROGRESS,
@@ -886,9 +888,9 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                       JSON.stringify(spRecentTimestamps),
                     activeDaysCount: spActiveDaysCount,
                     recentXpLogIds: spNextRecentIds,
-                    _version: spExpectedVersion + 1,
+                    _version: spGuard.nextVersion,
                   },
-                  condition: { _version: { eq: spExpectedVersion } },
+                  condition: spGuard.condition,
                 },
               });
               break; // Success.
@@ -987,7 +989,7 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                 },
               ];
 
-              const expectedVersion = currentChallenge._version ?? 1;
+              const challengeGuard = versionGuard(currentChallenge._version);
               try {
                 await (gqlClient as any).graphql({
                   query: UPDATE_GROUP_CHALLENGE,
@@ -998,9 +1000,9 @@ export const handler: DynamoDBStreamHandler = async (event) => {
                       active: !goalReached,
                       contributions: updatedContributions,
                       creditedXpLogIds: nextCreditedIds,
-                      _version: expectedVersion + 1,
+                      _version: challengeGuard.nextVersion,
                     },
-                    condition: { _version: { eq: expectedVersion } },
+                    condition: challengeGuard.condition,
                   },
                 });
                 updateSucceeded = true;
@@ -1151,11 +1153,12 @@ export const handler: DynamoDBStreamHandler = async (event) => {
         sectionAntiBadgesEnabled: sectionSettings?.antiBadgesEnabled ?? true,
       });
     } catch (err) {
-      console.error(
-        `[xpStream] profile rollup failed for ${records[0]?.studentId}:`,
+      const readableErr = toReadableError(
         err,
+        `[xpStream] profile rollup failed for ${records[0]?.studentId}`,
       );
-      throw err; // Surface genuine failures instead of swallowing — let Lambda retry / route to the DLQ.
+      console.error(readableErr.message);
+      throw readableErr; // Surface genuine failures instead of swallowing — let Lambda retry / route to the DLQ.
     }
   }
 

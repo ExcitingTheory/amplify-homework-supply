@@ -17,10 +17,18 @@ import type { Meta, StoryObj } from "@storybook/nextjs-vite";
 import { expect, waitFor } from "storybook/test";
 import MetadataEditor from "./MetadataEditor";
 import { Box, Typography, Paper } from "@mui/material";
+import { EditorToastProvider } from "../context/EditorToastContext";
 
 const meta: Meta<typeof MetadataEditor> = {
   title: "✏️ Lesson Editor/Metadata",
   component: MetadataEditor,
+  decorators: [
+    (Story) => (
+      <EditorToastProvider>
+        <Story />
+      </EditorToastProvider>
+    ),
+  ],
   parameters: {
     layout: "fullscreen",
     docs: {

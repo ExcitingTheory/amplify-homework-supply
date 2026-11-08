@@ -47,12 +47,12 @@ describe("pickEntries", () => {
     expect(
       pickEntries(
         [
-          { word: "a", definition: null, page: 2, documentID: "d", filename: "f" },
+          { word: "a", definition: null, pages: [2], documentID: "d", filename: "f" },
           null,
           "text",
         ],
         VOCABULARY_FIELDS,
       ),
-    ).toEqual([{ word: "a", page: 2 }]);
+    ).toEqual([{ word: "a", pages: [2] }]);
   });
 });

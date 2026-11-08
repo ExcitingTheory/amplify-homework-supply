@@ -18,6 +18,9 @@ function getWebSocketUrl() {
   if (process.env.NEXT_PUBLIC_YJS_WS_URL) {
     return process.env.NEXT_PUBLIC_YJS_WS_URL;
   }
+  if (process.env.NODE_ENV === "development") {
+    return "wss://localhost:3001";
+  }
   try {
     const outputs = JSON.parse(readFileSync("./amplify_outputs.json", "utf-8"));
     const wsConfig = outputs?.custom?.WEBSOCKET_API;
@@ -94,13 +97,17 @@ const nextConfig = {
   // file tracing cannot discover. Without this the Amplify SSR bundle has no translations
   // (every message renders as its key) because public/ is served from the CDN only.
   outputFileTracingIncludes: {
-    "/*": ["./public/locales/**/*.json"],
+    "/*": [
+      "./public/locales/**/*.json",
+      `./node_modules/onnxruntime-node/bin/napi-v3/${process.platform}/${process.arch}/*`,
+    ],
   },
 
   // @huggingface/transformers (server actions/agent tools) conditionally requires
   // onnxruntime-node OR onnxruntime-web; file tracing can't resolve the branch so it
-  // includes both for every platform. Server always takes the Node.js/linux-x64 path
-  // (Amplify Hosting compute is x86_64), so trim everything else — this alone was the
+  // includes both for every platform. Amplify Hosting compute uses linux-x64;
+  // local standalone builds must also retain the host's native runtime.
+  // Trim unused platforms — this alone was the
   // majority of a 601MB standalone build exceeding Amplify's 230686720-byte cache limit.
   //
   // The entries below (webpack/terser/uglify-js/typescript/canvas/@swc/@esbuild/
@@ -111,9 +118,15 @@ const nextConfig = {
   // standalone trace even though the server never touches them.
   outputFileTracingExcludes: {
     "/*": [
-      "./node_modules/**/onnxruntime-node/bin/napi-v3/darwin/**",
-      "./node_modules/**/onnxruntime-node/bin/napi-v3/win32/**",
-      "./node_modules/**/onnxruntime-node/bin/napi-v3/linux/arm64/**",
+      ...(process.platform === "darwin"
+        ? []
+        : ["./node_modules/**/onnxruntime-node/bin/napi-v3/darwin/**"]),
+      ...(process.platform === "win32"
+        ? []
+        : ["./node_modules/**/onnxruntime-node/bin/napi-v3/win32/**"]),
+      ...(process.platform === "linux" && process.arch === "arm64"
+        ? []
+        : ["./node_modules/**/onnxruntime-node/bin/napi-v3/linux/arm64/**"]),
       "./node_modules/**/onnxruntime-web/**",
       "./node_modules/webpack/**",
       "./node_modules/terser/**",

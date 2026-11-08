@@ -28,6 +28,21 @@ when coverage is "finished."
 | Semantic tokens — elevation (depth) | ✅ | Semantic Tokens |
 | Semantic tokens — spacing / padding (density) | ✅ | Semantic Tokens |
 | Semantic tokens — surface / glass (app bar, drawer, modal blur) | ✅ | Semantic Tokens |
+| Semantic lesson tokens — reading width, text alignment, spacing, typography, and subtle block surfaces | ✅ | Semantic Tokens & Lesson Reading Flow |
+
+### Lesson reading flow
+
+`SEMANTIC_THEME.editor.lesson` defines the 64rem reading column, responsive
+gutters, shared prose/block text inset, 1.65 body line height, and paragraph/block
+spacing. `getSemanticLessonContentStyles(theme)` applies that layout in the
+authoring editor, workbook, and showcase.
+
+Exercise and vocabulary cards consume the same lesson tokens for padding,
+subtle border/background opacity, and inset accents. Hover changes the border
+without adding elevation. Selection rings and grading colors remain visible;
+inputs and action buttons retain their existing control styling. Start alignment
+supports RTL, while saved paragraph alignment is preserved. These are lesson
+patterns, not changes to the global dashboard card style.
 
 ## Core MUI components (with app overrides)
 

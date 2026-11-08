@@ -93,7 +93,7 @@ export const SCHEMA: Record<string, TypeSpec> = {
       ...modelBase(),
     ],
   },
-  QuestionEntry: { fields: [scalar("prompt"), scalar("answer"), scalar("page", "Int")] },
+  QuestionEntry: { fields: [scalar("prompt"), scalar("answer"), scalar("hint")] },
   CreateParsedContentInput: {
     inputFields: ["id", "owner", "documentID", "chunkIndex", "chunkCount", "questionsJSON"],
   },
@@ -103,28 +103,24 @@ export const SCHEMA: Record<string, TypeSpec> = {
       scalar("owner"),
       scalar("documentID", "ID", ["required"]),
       scalar("questionID", "ID", ["required"]),
-      scalar("page", "Int"),
-      scalar("sourceText"),
-      scalar("entryKey"),
       scalar("deletedAt", "AWSDateTime"),
       ...modelBase(),
     ],
   },
   CreateDocumentQuestionInput: {
-    inputFields: ["id", "owner", "documentID", "questionID", "page", "sourceText", "entryKey", "deletedAt"],
+    inputFields: ["id", "owner", "documentID", "questionID", "deletedAt"],
   },
   DocumentWord: {
     fields: [
       scalar("owner"),
       scalar("documentID", "ID", ["required"]),
       scalar("wordID", "ID", ["required"]),
-      scalar("page", "Int"),
       scalar("deletedAt", "AWSDateTime"),
       ...modelBase(),
     ],
   },
   CreateDocumentWordInput: {
-    inputFields: ["id", "owner", "documentID", "wordID", "page", "deletedAt"],
+    inputFields: ["id", "owner", "documentID", "wordID", "deletedAt"],
   },
   File: {
     fields: [

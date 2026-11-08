@@ -3,6 +3,8 @@ import { fetchAuthSession } from "aws-amplify/auth/server";
 import { runWithAmplifyServerContext } from "@/utils/amplifyServerUtils";
 import { getServerClient } from "@/utils/amplifyServerClient";
 import { redirect } from "next/navigation";
+import { canAccessAdminArea } from "./_components/adminAccess";
+import { Suspense } from "react";
 import AdminIndexClient from "./AdminIndexClient";
 
 // Mirrors ModerationClient's model coverage — Grade/Unit/Word/Question only
@@ -20,11 +22,60 @@ const SOFT_DELETE_MODELS = [
   "AssistantChat",
 ] as const;
 
+type TriageFilter = { filter: Record<string, unknown> };
+
+async function countMatching(
+  modelName: string,
+  { filter }: TriageFilter,
+): Promise<number> {
+  try {
+    const client = getServerClient() as any;
+    const { data } = await client.models[modelName].list({ filter, limit: 100 });
+    return (data || []).filter((item: unknown) => item != null).length;
+  } catch {
+    return 0;
+  }
+}
+
+async function sumCounts(counts: Promise<number>[]): Promise<number> {
+  return (await Promise.all(counts)).reduce((sum, n) => sum + n, 0);
+}
+
 /**
- * Admin index/directory page. Authenticates server-side (Admins/Instructors
- * only) and pre-fetches lightweight triage counts (flagged content, recycle
- * bin size) so the index can highlight what needs attention before linking
- * out to the individual admin tools.
+ * Streams in after the page shell: all 11 triage queries run concurrently
+ * instead of blocking the first paint.
+ */
+async function AdminIndexWithCounts() {
+  const [flaggedCount, recycleBinCount] = await Promise.all([
+    sumCounts(
+      MODERATION_MODELS.map((modelName) =>
+        countMatching(modelName, {
+          filter: { moderationStatus: { eq: "flagged" } },
+        }),
+      ),
+    ),
+    sumCounts(
+      SOFT_DELETE_MODELS.map((modelName) =>
+        countMatching(modelName, {
+          filter: { deletedAt: { attributeExists: true } },
+        }),
+      ),
+    ),
+  ]);
+
+  return (
+    <AdminIndexClient
+      flaggedCount={flaggedCount}
+      recycleBinCount={recycleBinCount}
+    />
+  );
+}
+
+/**
+ * Admin index/directory page. Authenticates server-side (Admins
+ * only), renders the tool directory immediately, and streams in lightweight
+ * triage counts (flagged content, recycle bin size) so the index can highlight
+ * what needs attention without delaying the first paint.
  */
 export default async function AdminIndexPage() {
   let groups: string[] = [];
@@ -40,52 +91,13 @@ export default async function AdminIndexPage() {
     // Fall through — treated as no access below
   }
 
-  if (!groups.includes("Admins") && !groups.includes("Instructors")) {
+  if (!canAccessAdminArea(groups)) {
     redirect("/?returnUrl=" + encodeURIComponent("/admin"));
   }
 
-  let flaggedCount = 0;
-  let recycleBinCount = 0;
-  try {
-    const client = getServerClient() as any;
-
-    const flaggedCounts = await Promise.all(
-      MODERATION_MODELS.map(async (modelName) => {
-        try {
-          const { data } = await client.models[modelName].list({
-            filter: { moderationStatus: { eq: "flagged" } },
-            limit: 100,
-          });
-          return (data || []).filter((item: unknown) => item != null).length;
-        } catch {
-          return 0;
-        }
-      }),
-    );
-    flaggedCount = flaggedCounts.reduce((sum, n) => sum + n, 0);
-
-    const recycleBinCounts = await Promise.all(
-      SOFT_DELETE_MODELS.map(async (modelName) => {
-        try {
-          const { data } = await client.models[modelName].list({
-            filter: { deletedAt: { attributeExists: true } },
-            limit: 100,
-          });
-          return (data || []).filter((item: unknown) => item != null).length;
-        } catch {
-          return 0;
-        }
-      }),
-    );
-    recycleBinCount = recycleBinCounts.reduce((sum, n) => sum + n, 0);
-  } catch (err) {
-    console.error("[AdminIndex RSC] Pre-fetch error:", err);
-  }
-
   return (
-    <AdminIndexClient
-      flaggedCount={flaggedCount}
-      recycleBinCount={recycleBinCount}
-    />
+    <Suspense fallback={<AdminIndexClient />}>
+      <AdminIndexWithCounts />
+    </Suspense>
   );
 }

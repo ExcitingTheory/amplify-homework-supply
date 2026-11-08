@@ -7,7 +7,15 @@ import { DecoratorNode } from "lexical";
 function convertCustomAnswerElement(domNode) {
   const ids = domNode.getAttribute("data-lexical-custom-answer");
   if (ids) {
-    return { node: $createCustomAnswerNode(ids.split(",")) };
+    return {
+      node: $createCustomAnswerNode(
+        ids.split(","),
+        undefined,
+        undefined,
+        undefined,
+        domNode.getAttribute("data-lexical-custom-answer-direction"),
+      ),
+    };
   }
   return null;
 }
@@ -17,6 +25,7 @@ export class CustomAnswerNode extends DecoratorNode {
   __promptMethod;
   __allowedInput;
   __format;
+  __direction;
 
   static getType() {
     return "custom-answer";
@@ -28,6 +37,7 @@ export class CustomAnswerNode extends DecoratorNode {
       node.__promptMethod,
       node.__allowedInput,
       node.__format,
+      node.__direction,
       node.__key,
     );
   }
@@ -38,6 +48,7 @@ export class CustomAnswerNode extends DecoratorNode {
       serializedNode.promptMethod,
       serializedNode.allowedInput,
       serializedNode.format,
+      serializedNode.direction,
     );
   }
 
@@ -49,6 +60,7 @@ export class CustomAnswerNode extends DecoratorNode {
       promptMethod: this.__promptMethod,
       allowedInput: this.__allowedInput,
       format: this.__format,
+      direction: this.__direction,
     };
   }
 
@@ -57,6 +69,7 @@ export class CustomAnswerNode extends DecoratorNode {
     promptMethod = "word",
     allowedInput = "text",
     format = "default",
+    direction = "question-to-answer",
     key,
   ) {
     super(key);
@@ -64,17 +77,20 @@ export class CustomAnswerNode extends DecoratorNode {
     this.__promptMethod = promptMethod;
     this.__allowedInput = allowedInput;
     this.__format = format;
+    this.__direction = direction;
   }
 
   exportDOM() {
     const element = document.createElement("div");
     element.setAttribute("data-lexical-custom-answer", this.__ids.join(","));
+    element.setAttribute("data-lexical-custom-answer-direction", this.__direction);
     return { element };
   }
 
   createDOM() {
     const div = document.createElement("div");
     div.setAttribute("data-lexical-custom-answer", this.__ids.join(","));
+    div.setAttribute("data-lexical-custom-answer-direction", this.__direction);
     return div;
   }
 
@@ -131,6 +147,15 @@ export class CustomAnswerNode extends DecoratorNode {
     return this.__format;
   }
 
+  getDirection() {
+    return this.__direction;
+  }
+
+  setDirection(direction) {
+    const writable = this.getWritable();
+    writable.__direction = direction;
+  }
+
   setFormat(value) {
     const writable = this.getWritable();
     writable.__format = value;
@@ -160,8 +185,20 @@ export class CustomAnswerNode extends DecoratorNode {
   }
 }
 
-export function $createCustomAnswerNode(ids, promptMethod, allowedInput, format) {
-  return new CustomAnswerNode(ids, promptMethod, allowedInput, format);
+export function $createCustomAnswerNode(
+  ids,
+  promptMethod,
+  allowedInput,
+  format,
+  direction,
+) {
+  return new CustomAnswerNode(
+    ids,
+    promptMethod,
+    allowedInput,
+    format,
+    direction,
+  );
 }
 
 export function $isCustomAnswerNode(node) {

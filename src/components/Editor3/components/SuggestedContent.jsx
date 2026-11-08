@@ -9,9 +9,6 @@ import React from 'react';
 import VocabularyReview2 from '../../VocabularyReview2';
 import QuestionsReview2 from '../../QuestionsReview2';
 
-const PLACEHOLDER_OWNER = 'current-user';
-const PLACEHOLDER_IDENTITY_ID = 'current-identity';
-
 /**
  * SuggestedVocabulary - Wrapper for VocabularyReview2
  * 
@@ -19,6 +16,8 @@ const PLACEHOLDER_IDENTITY_ID = 'current-identity';
  * @param {string} props.documentId - Document ID
  * @param {string} props.fileId - File ID (optional)
  * @param {string} props.unitId - Unit ID
+ * @param {string} props.owner - Authenticated user ID from UnitContext
+ * @param {string} props.identityId - Unit owner's storage identity
  * @param {boolean} props.enableInlineEditing - Enable inline editing (always true for Review2)
  * @param {Function} props.onImport - Callback when import is complete
  */
@@ -26,6 +25,8 @@ export const SuggestedVocabulary = ({
     documentId, 
     fileId, 
     unitId, 
+    owner,
+    identityId,
     enableInlineEditing = true,
     onImport 
 }) => {
@@ -39,8 +40,8 @@ export const SuggestedVocabulary = ({
         <VocabularyReview2
             documentId={documentId}
             unitId={unitId}
-            owner={PLACEHOLDER_OWNER} // This will be overridden by the component's internal auth check
-            identityId={PLACEHOLDER_IDENTITY_ID} // This will be overridden by the component's internal auth check
+            owner={owner}
+            identityId={identityId}
             onImportComplete={handleImportComplete}
             searchTerm=""
         />
@@ -54,6 +55,8 @@ export const SuggestedVocabulary = ({
  * @param {string} props.documentId - Document ID
  * @param {string} props.fileId - File ID (optional)
  * @param {string} props.unitId - Unit ID
+ * @param {string} props.owner - Authenticated user ID from UnitContext
+ * @param {string} props.identityId - Unit owner's storage identity
  * @param {boolean} props.enableInlineEditing - Enable inline editing (always true for Review2)
  * @param {Function} props.onImport - Callback when import is complete
  */
@@ -61,6 +64,8 @@ export const SuggestedQuestions = ({
     documentId, 
     fileId, 
     unitId, 
+    owner,
+    identityId,
     enableInlineEditing = true,
     onImport 
 }) => {
@@ -74,8 +79,8 @@ export const SuggestedQuestions = ({
         <QuestionsReview2
             documentId={documentId}
             unitId={unitId}
-            owner={PLACEHOLDER_OWNER} // This will be overridden by the component's internal auth check
-            identityId={PLACEHOLDER_IDENTITY_ID} // This will be overridden by the component's internal auth check
+            owner={owner}
+            identityId={identityId}
             onImportComplete={handleImportComplete}
             searchTerm=""
         />

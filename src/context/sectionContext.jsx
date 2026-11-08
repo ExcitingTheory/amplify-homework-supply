@@ -14,34 +14,29 @@ const SectionContext = React.createContext({
   assignments: [],
 });
 
-/**
- * Check if a subscription error is transient (safe to ignore).
- * DuplicatedOperationError occurs during rapid mount/unmount cycles
- * (React StrictMode, navigation) and resolves on its own.
- */
-function isTransientSubscriptionError(error) {
-  const msg =
-    error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
-  return msg.includes("DuplicatedOperationError");
+// Amplify observeQuery wraps real-time failures in { type, error }.
+function subscriptionErrorMessage(error) {
+  const details = error?.error ?? error;
+  const messages = [
+    details?.message,
+    ...(Array.isArray(details?.errors)
+      ? details.errors.map((item) => item?.message)
+      : []),
+  ].filter((message) => typeof message === "string" && message.length > 0);
+  if (messages.length > 0) return messages.join("; ");
+  if (typeof details === "string" && details.length > 0) return details;
+  return details?.name || "Subscription failed without error details";
 }
 
 function handleSubscriptionError(label, error) {
-  if (isTransientSubscriptionError(error)) {
+  const message = subscriptionErrorMessage(error);
+  if (message.includes("DuplicatedOperationError")) {
     console.warn(
       `[SectionContext] ${label}: transient DuplicatedOperationError (safe to ignore)`,
     );
     return;
   }
-  // Empty error objects are transient auth-timing issues (credentials not yet propagated)
-  const msg =
-    error?.message || error?.errors?.[0]?.message || JSON.stringify(error);
-  if (!msg || msg === "{}" || msg === "{}") {
-    console.warn(
-      `[SectionContext] ${label}: transient empty error (safe to ignore)`,
-    );
-    return;
-  }
-  console.error(`[SectionContext] ${label}:`, error);
+  console.error(`[SectionContext] ${label}: ${message}`, error);
 }
 
 const SectionProvider = ({ children, unitId, initialSections = [] }) => {

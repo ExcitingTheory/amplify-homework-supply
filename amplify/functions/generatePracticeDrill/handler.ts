@@ -27,6 +27,12 @@ import {
   VOCABULARY_SELECTION,
   toEntryList,
 } from "../shared/parsedContentLists";
+import {
+  listParsedContentChunksByRelation,
+  type GraphqlRequest,
+} from "../shared/parsedContentGraphql";
+import { mergeParsedContentChunks } from "../shared/parsedContentChunks";
+import { entryOriginsFrom, type EntryOrigins } from "../shared/entryOrigins";
 
 // ============================================================================
 // Types
@@ -150,7 +156,6 @@ const LIST_UNIT_WORDS = /* GraphQL */ `
           documentWords {
             items {
               documentID
-              page
               deletedAt
               _deleted
               document {
@@ -185,7 +190,6 @@ const LIST_QUESTION_UNITS = /* GraphQL */ `
           documentQuestions {
             items {
               documentID
-              page
               deletedAt
               _deleted
               document {
@@ -306,7 +310,6 @@ export function mapItemSources(
     .map((link: any) => ({
       documentId: link.documentID || link.document?.id,
       filename: link.document?.filename || "document",
-      ...(typeof link.page === "number" ? { page: link.page } : {}),
     }))
     .filter((source: ItemSourceRef) => !!source.documentId);
 }
@@ -341,6 +344,75 @@ export function mapQuestionUnits(
 
 function withSources(sources: ItemSourceRef[]) {
   return sources.length > 0 ? { sources } : {};
+}
+
+/**
+ * Fills in each source's page from the document's ParsedContent, finding the
+ * entry by the id the importer stored on it. Links no longer store a page, so
+ * an item imported before entries carried that id (or from a document whose
+ * content cannot be read) simply has none.
+ */
+export async function attachSourcePages(
+  material: SourceMaterial,
+  graphql: GraphqlRequest,
+): Promise<SourceMaterial> {
+  const documentIds = new Set<string>();
+  for (const item of [...material.vocabulary, ...material.questions]) {
+    for (const source of item.sources ?? []) documentIds.add(source.documentId);
+  }
+  if (documentIds.size === 0) return material;
+
+  const origins = new Map<
+    string,
+    { question: EntryOrigins; word: EntryOrigins }
+  >();
+  await Promise.all(
+    [...documentIds].map(async (documentId) => {
+      try {
+        const merged = mergeParsedContentChunks(
+          await listParsedContentChunksByRelation(
+            graphql,
+            { type: "Document", id: documentId },
+            `${VOCABULARY_SELECTION}\n${QUESTIONS_SELECTION}`,
+          ),
+        );
+        origins.set(documentId, {
+          question: entryOriginsFrom(merged, "question"),
+          word: entryOriginsFrom(merged, "word"),
+        });
+      } catch (error) {
+        console.warn(
+          `[generatePracticeDrill] Could not read content of document ${documentId}:`,
+          error,
+        );
+      }
+    }),
+  );
+
+  const withPages = <T extends { sources?: ItemSourceRef[] }>(
+    item: T,
+    kind: "question" | "word",
+    id: string,
+  ): T => {
+    if (!item.sources) return item;
+    return {
+      ...item,
+      sources: item.sources.map((source) => {
+        const page = origins.get(source.documentId)?.[kind].get(id)?.page;
+        return page === undefined ? source : { ...source, page };
+      }),
+    };
+  };
+
+  return {
+    ...material,
+    vocabulary: material.vocabulary.map((word) =>
+      withPages(word, "word", word.id),
+    ),
+    questions: material.questions.map((question) =>
+      withPages(question, "question", question.id),
+    ),
+  };
 }
 
 /**
@@ -816,10 +888,14 @@ export const handler: Handler = async (event: any) => {
         (id): id is string => typeof id === "string" && id.length > 0,
       )
     : [];
-  const material =
+  const scoped =
     documentIds.length > 0
       ? scopeMaterialToDocuments(fetched, documentIds)
       : fetched;
+  const material = await attachSourcePages(
+    scoped,
+    (request) => getDataClient().graphql(request as never) as Promise<any>,
+  );
   const totalItems =
     material.vocabulary.length +
     material.questions.length +

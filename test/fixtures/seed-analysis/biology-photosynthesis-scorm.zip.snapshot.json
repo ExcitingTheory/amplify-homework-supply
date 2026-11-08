@@ -1,0 +1,75 @@
+{
+  "sourceSha256": "5ea1cdd89e46ab1d65ac47f88adad06696660f7bfe609c913fab54d1ed70dfac",
+  "capturedAt": "2026-10-28T12:55:23.038Z",
+  "sourceFormat": "scorm-1.2",
+  "pageCount": 1,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Page 1",
+      "content": "Page 1 provides an overview of photosynthesis. It defines photosynthesis as the process where green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose. The overall chemical equation for photosynthesis is presented as 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. Additionally, it specifies that photosynthesis occurs in the chloroplasts, particularly in the thylakoid membranes and the stroma.",
+      "pageRange": "Page 1"
+    },
+    {
+      "title": "Document summary",
+      "content": "The document provides an overview of photosynthesis, describing it as the process through which green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose. It includes the overall chemical equation for photosynthesis: 6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂. The process is noted to occur in the chloroplasts, specifically within the thylakoid membranes and stroma.",
+      "pageRange": "Page 1"
+    }
+  ],
+  "objectivesJSON": [
+    {
+      "objective": "Understand the definition of photosynthesis."
+    },
+    {
+      "objective": "Learn the overall chemical equation for photosynthesis."
+    },
+    {
+      "objective": "Identify where photosynthesis takes place in the plant cell."
+    }
+  ],
+  "conceptsJSON": [],
+  "questionsJSON": [
+    {
+      "prompt": "What is Definition for Photosynthesis?",
+      "answer": "the process by which green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Photosynthesis",
+      "field": "Definition",
+      "sourceText": "Photosynthesis is the process by which green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose.",
+      "accept": [
+        "the process by which green plants, algae, and some bacteria convert light energy into chemical energy stored in glucose."
+      ]
+    },
+    {
+      "prompt": "What is Overall equation for Photosynthesis?",
+      "answer": "6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Photosynthesis",
+      "field": "Overall equation",
+      "sourceText": "THE OVERALL EQUATION\n\n6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂",
+      "accept": [
+        "6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂"
+      ]
+    },
+    {
+      "prompt": "What is Location for Photosynthesis?",
+      "answer": "Photosynthesis takes place in the chloroplasts, specifically in the thylakoid membranes and the stroma.",
+      "questionType": "recall",
+      "pages": [
+        1
+      ],
+      "subject": "Photosynthesis",
+      "field": "Location",
+      "sourceText": "Photosynthesis takes place in the chloroplasts, specifically in the thylakoid membranes and the stroma.",
+      "accept": [
+        "Photosynthesis takes place in the chloroplasts, specifically in the thylakoid membranes and the stroma."
+      ]
+    }
+  ]
+}

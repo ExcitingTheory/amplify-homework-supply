@@ -19,13 +19,17 @@ import {
   GetObjectCommand,
   CopyObjectCommand,
   PutObjectCommand,
-  ListObjectsV2Command,
 } from "@aws-sdk/client-s3";
+import { LambdaClient, InvokeCommand } from "@aws-sdk/client-lambda";
 import type { Schema } from "../../data/resource";
 
 import { SUMMARIES_SELECTION, toEntryList } from "../shared/parsedContentLists";
+import { buildSearchBundleRequest } from "./searchBundleRequest";
 const s3 = new S3Client({ region: process.env.AWS_REGION || "us-east-1" });
 const BUCKET = process.env.STORAGE_BUCKET!;
+const lambdaClient = new LambdaClient({
+  region: process.env.AWS_REGION || "us-east-1",
+});
 
 // ─── GraphQL helpers ─────────────────────────────────────────────────────────
 
@@ -228,13 +232,6 @@ async function writeS3Object(
       ...(cacheControl ? { CacheControl: cacheControl } : {}),
     }),
   );
-}
-
-async function listS3Objects(prefix: string): Promise<string[]> {
-  const result = await s3.send(
-    new ListObjectsV2Command({ Bucket: BUCKET, Prefix: prefix }),
-  );
-  return (result.Contents || []).map((o) => o.Key!).filter(Boolean);
 }
 
 // ─── Summary extraction from Lexical JSON ────────────────────────────────────
@@ -475,184 +472,40 @@ async function rebuildSectionCourseOutlines(
   }
 }
 
-// ─── Section-Wide Search Bundle Rebuild ──────────────────────────────────────
+// ─── Search Bundle Build ─────────────────────────────────────────────────────
 
 /**
- * Rebuild section-wide search bundles by merging all unit bundles.
- * Loads each unit's search index from S3, merges items, and writes
- * a combined section bundle. Uses linear index strategy for simplicity.
+ * Hands the published unit to the rebuildSearchBundle Lambda, which writes the
+ * unit's own bundle (only its words, questions and files) and the merged
+ * bundle of every section that assigns it. Asynchronous so publishing is not
+ * held up by embedding generation; Lambda retries failed async invocations.
  */
-async function rebuildSectionSearchBundles(
+async function requestSearchBundleBuild(
   client: any,
-  unitId: string,
-  identityId: string,
+  unit: { id: string; name?: string | null; identityId: string },
 ): Promise<void> {
-  // Find all sections that reference this unit
-  const { data: assignmentData } = (await client.graphql({
-    query: LIST_ASSIGNMENTS_BY_UNIT,
-    variables: { unitID: unitId },
-  } as any)) as any;
-
-  const sectionIds = new Set<string>();
-  for (const item of assignmentData?.listAssignments?.items ?? []) {
-    if (item?.sectionID) sectionIds.add(item.sectionID);
-  }
-
-  if (sectionIds.size === 0) return;
-
-  for (const sectionId of sectionIds) {
-    try {
-      // Get all unit IDs in this section
-      const { data: sectionAssignments } = (await client.graphql({
-        query: LIST_ASSIGNMENTS_BY_SECTION,
-        variables: { sectionID: sectionId },
-      } as any)) as any;
-
-      const unitIds: string[] = [];
-      for (const assignment of sectionAssignments?.listAssignments?.items ??
-        []) {
-        if (assignment?.unitID) unitIds.push(assignment.unitID);
-      }
-
-      if (unitIds.length === 0) continue;
-
-      // Load and merge unit bundles
-      const mergedItems: any[] = [];
-      let dimensions = 384;
-      let model = "Xenova/all-MiniLM-L6-v2";
-
-      for (const uid of unitIds) {
-        const bundleKey = `protected/${identityId}/search-index/unit/${uid}.json`;
-        try {
-          const response = await s3.send(
-            new GetObjectCommand({ Bucket: BUCKET, Key: bundleKey }),
-          );
-          const text = await response.Body?.transformToString();
-          if (!text) continue;
-          const bundle = JSON.parse(text);
-          if (bundle.dimensions) dimensions = bundle.dimensions;
-          if (bundle.model) model = bundle.model;
-          if (Array.isArray(bundle.items)) {
-            mergedItems.push(...bundle.items);
-          }
-        } catch (err: any) {
-          if (
-            err?.name === "NoSuchKey" ||
-            err?.$metadata?.httpStatusCode === 404
-          ) {
-            continue; // Bundle doesn't exist for this unit yet
-          }
-          console.warn(
-            `[publishUnit] Failed to load bundle for unit ${uid}:`,
-            err,
-          );
-        }
-      }
-
-      if (mergedItems.length === 0) continue;
-
-      // Deduplicate by item id
-      const seen = new Set<string>();
-      const deduped = mergedItems.filter((item) => {
-        if (seen.has(item.id)) return false;
-        seen.add(item.id);
-        return true;
-      });
-
-      // Build section bundle with linear index
-      const sectionBundle = {
-        version: 1,
-        dimensions,
-        model,
-        index: { strategy: "linear" },
-        items: deduped,
-      };
-
-      const sectionBundleKey = `protected/${identityId}/search-index/section/${sectionId}.json`;
-      await s3.send(
-        new PutObjectCommand({
-          Bucket: BUCKET,
-          Key: sectionBundleKey,
-          Body: JSON.stringify(sectionBundle),
-          ContentType: "application/json",
-        }),
-      );
-
-      console.log(
-        `[publishUnit] Section search bundle rebuilt: ${sectionId} (${deduped.length} items from ${unitIds.length} units)`,
-      );
-    } catch (err) {
-      console.error(
-        `[publishUnit] Failed to rebuild search bundle for section ${sectionId}:`,
-        err,
-      );
-    }
-  }
-
-  // Rebuild instructor-wide bundle (merges all unit bundles for this instructor)
-  try {
-    const allUnitKeys = await listS3Objects(
-      `protected/${identityId}/search-index/unit/`,
+  const functionName = process.env.REBUILD_SEARCH_BUNDLE_FUNCTION;
+  if (!functionName) {
+    console.warn(
+      "[publishUnit] REBUILD_SEARCH_BUNDLE_FUNCTION not set; skipping search bundle build",
     );
-    if (allUnitKeys.length > 0) {
-      const allItems: any[] = [];
-      let dimensions = 384;
-      let model = "Xenova/all-MiniLM-L6-v2";
-
-      for (const key of allUnitKeys) {
-        try {
-          const response = await s3.send(
-            new GetObjectCommand({ Bucket: BUCKET, Key: key }),
-          );
-          const text = await response.Body?.transformToString();
-          if (!text) continue;
-          const bundle = JSON.parse(text);
-          if (bundle.dimensions) dimensions = bundle.dimensions;
-          if (bundle.model) model = bundle.model;
-          if (bundle.items) allItems.push(...bundle.items);
-        } catch {
-          // skip unreadable bundles
-        }
-      }
-
-      if (allItems.length > 0) {
-        // Deduplicate by item id
-        const seen = new Set<string>();
-        const deduped = allItems.filter((item: any) => {
-          if (!item?.id || seen.has(item.id)) return false;
-          seen.add(item.id);
-          return true;
-        });
-
-        const instructorBundle = {
-          version: 1,
-          dimensions,
-          model,
-          index: { strategy: "linear" as const }, // IVF/HNSW built by rebuildSearchBundle Lambda on admin-reindex
-          items: deduped,
-        };
-
-        const instructorBundleKey = `private/${identityId}/search-index/instructor.json`;
-        await s3.send(
-          new PutObjectCommand({
-            Bucket: BUCKET,
-            Key: instructorBundleKey,
-            Body: JSON.stringify(instructorBundle),
-            ContentType: "application/json",
-          }),
-        );
-
-        console.log(
-          `[publishUnit] Instructor search bundle rebuilt: ${deduped.length} items from ${allUnitKeys.length} units`,
-        );
-      }
-    }
-  } catch (err) {
-    console.error(
-      `[publishUnit] Failed to rebuild instructor search bundle:`,
-      err,
-    );
+    return;
   }
+
+  const request = await buildSearchBundleRequest(
+    (graphqlRequest) => client.graphql(graphqlRequest as any),
+    unit,
+  );
+  await lambdaClient.send(
+    new InvokeCommand({
+      FunctionName: functionName,
+      InvocationType: "Event",
+      Payload: Buffer.from(JSON.stringify(request)),
+    }),
+  );
+  console.log(
+    `[publishUnit] Requested search bundle build: ${request.members.word?.length ?? 0} words, ${request.members.question?.length ?? 0} questions, ${request.members.file?.length ?? 0} files, ${request.sections.length} sections`,
+  );
 }
 
 // ─── Lexical JSON node transformation ────────────────────────────────────────
@@ -916,12 +769,16 @@ export const handler: Handler = async (event) => {
     console.error("[publishUnit] Course outline rebuild failed:", err);
   }
 
-  // 9. Rebuild section-wide search bundles (merge all unit bundles per section)
+  // 9. Build the unit's search bundle and its sections' merged bundles
   try {
-    await rebuildSectionSearchBundles(client, unitId, identityId);
+    await requestSearchBundleBuild(client, {
+      id: unitId,
+      name: unit.name,
+      identityId,
+    });
   } catch (err) {
-    // Non-fatal — bundle rebuild is best-effort
-    console.error("[publishUnit] Section search bundle rebuild failed:", err);
+    // Non-fatal — the search index is best-effort and rebuilt on the next publish
+    console.error("[publishUnit] Search bundle build request failed:", err);
   }
 
   console.log(

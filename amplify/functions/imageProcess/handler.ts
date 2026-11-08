@@ -27,6 +27,7 @@ import {
 } from "@aws-sdk/client-s3";
 import sharp from "sharp";
 import { renderPdfPage } from "../shared/pdfPageRender";
+import { findFileByPath } from "../shared/findFileByPath";
 
 // ---------------------------------------------------------------------------
 // Configuration
@@ -96,23 +97,6 @@ const GET_FILE = /* GraphQL */ `
       mimeType
       identityId
       owner
-    }
-  }
-`;
-
-const LIST_FILES_BY_PATH = /* GraphQL */ `
-  query ListFiles($filter: ModelFileFilterInput) {
-    listFiles(filter: $filter, limit: 1) {
-      items {
-        id
-        _version
-        _lastChangedAt
-        _deleted
-        path
-        mimeType
-        identityId
-        owner
-      }
     }
   }
 `;
@@ -422,17 +406,7 @@ async function handleS3Event(event: any): Promise<void> {
   }
 
   // Look up File record by path
-  const { data, errors } = (await client.graphql({
-    query: LIST_FILES_BY_PATH,
-    variables: { filter: { path: { eq: key } } },
-  })) as any;
-
-  if (errors) {
-    console.error("[ImageProcess] GraphQL error:", errors);
-    return;
-  }
-
-  const file = data?.listFiles?.items?.[0];
+  const file = await findFileByPath(client, key, (message) => console.warn(message));
   if (!file) {
     console.warn(`[ImageProcess] No File record for path: ${key}, skipping`);
     return;

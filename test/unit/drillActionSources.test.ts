@@ -29,11 +29,16 @@ vi.mock("../../src/utils/amplifyServerClient", () => ({
 import { generatePracticeDrill } from "../../app/actions/drill";
 
 const wordLinks = (links: any[]) => vi.fn(async () => ({ data: links, nextToken: null }));
-const link = (documentID: string, page?: number) => ({
-  id: `l-${documentID}`,
-  documentID,
-  ...(page !== undefined ? { page } : {}),
-});
+const link = (documentID: string) => ({ id: `l-${documentID}`, documentID });
+
+// Each document's own content says which page an entry is on.
+const contentOf: Record<string, any> = {
+  d1: {
+    vocabularyJSON: [{ word: "one (reworded since)", wordID: "w1", pages: [2] }],
+    questionsJSON: [{ prompt: "Why? (reworded since)", questionID: "q1", pages: [4] }],
+  },
+  d2: { vocabularyJSON: [{ word: "two", wordID: "w2", pages: [9] }] },
+};
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -44,12 +49,19 @@ beforeEach(() => {
   models.UnitDocument.list.mockResolvedValue({ data: [] });
   models.ParsedContent.list.mockResolvedValue({ data: [] });
   models.Document.get.mockImplementation(async ({ id }: { id: string }) => ({
-    data: { id, filename: `${id}.pdf` },
+    data: {
+      id,
+      filename: `${id}.pdf`,
+      parsedContent: vi.fn(async () => ({
+        data: [{ id: `${id}-chunk-0`, chunkIndex: 0, ...contentOf[id] }],
+        nextToken: null,
+      })),
+    },
   }));
 
   const words: Record<string, any> = {
-    w1: { id: "w1", phrase: "one", definition: "1", documentWords: wordLinks([link("d1", 2)]) },
-    w2: { id: "w2", phrase: "two", definition: "2", documentWords: wordLinks([link("d2", 9)]) },
+    w1: { id: "w1", phrase: "one", definition: "1", documentWords: wordLinks([link("d1")]) },
+    w2: { id: "w2", phrase: "two", definition: "2", documentWords: wordLinks([link("d2")]) },
   };
   models.Word.get.mockImplementation(async ({ id }: { id: string }) => ({ data: words[id] }));
   models.Question.get.mockResolvedValue({
@@ -57,7 +69,7 @@ beforeEach(() => {
       id: "q1",
       prompt: "Why?",
       answer: "Because",
-      documentQuestions: wordLinks([link("d1", 4)]),
+      documentQuestions: wordLinks([link("d1")]),
     },
   });
 

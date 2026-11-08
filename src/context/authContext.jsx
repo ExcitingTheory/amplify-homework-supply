@@ -1,10 +1,27 @@
 import React from "react";
-import { fetchUserAttributes, fetchAuthSession, signOut } from 'aws-amplify/auth';
+import { fetchUserAttributes, fetchAuthSession } from 'aws-amplify/auth';
 import { Hub } from 'aws-amplify/utils';
+import {
+  clearLocalAuthData,
+  signOutAndClearLocalAuthData as signOut,
+} from '../utils/authSessionRecovery';
 
 // NOTE: The AuthGate component in _app.jsx gates data-dependent providers
 // behind auth resolution, so by the time other contexts mount and call
 // list()/subscribe(), the SDK's internal credential cache is already warm.
+
+// Throttling and connectivity failures say nothing about whether the user is still signed in.
+const TRANSIENT_AUTH_ERROR_NAMES = new Set([
+  'TooManyRequestsException',
+  'LimitExceededException',
+  'ThrottlingException',
+  'NetworkError',
+]);
+
+function isTransientAuthError(error) {
+  return TRANSIENT_AUTH_ERROR_NAMES.has(error?.name) ||
+    /rate exceeded|network error|failed to fetch/i.test(error?.message ?? '');
+}
 
 const AuthContext = React.createContext({
   error: undefined,
@@ -21,7 +38,15 @@ const AuthProvider = ({ children }) => {
         session: undefined,
       });
       
-      const fetchCurrentUserAttributes = React.useCallback(async () => {
+      const userRef = React.useRef(undefined);
+      const attributesRequestRef = React.useRef(undefined);
+      const sessionRequestRef = React.useRef(undefined);
+
+      React.useEffect(() => {
+        userRef.current = result.user;
+      }, [result.user]);
+
+      const loadCurrentUser = React.useCallback(async () => {
         setResult((prevResult) => ({ ...prevResult, isLoading: true }));
         try {
           // Add timeout to prevent hanging indefinitely
@@ -58,6 +83,12 @@ const AuthProvider = ({ children }) => {
             isLoading: false 
           });
         } catch (error) {
+          if (userRef.current && isTransientAuthError(error)) {
+            console.warn('[AuthContext] Keeping the current session after a transient auth error:', error);
+            setResult((prevResult) => ({ ...prevResult, isLoading: false }));
+            return;
+          }
+
           // Handle timeout errors - treat as if user is not authenticated
           if (error.message === 'Authentication timeout') {
             console.warn('[AuthContext] Authentication request timed out - treating as not authenticated');
@@ -112,21 +143,81 @@ const AuthProvider = ({ children }) => {
           }
         }
       }, []);
+
+      // Overlapping requests (mount plus sign-in events) share one Cognito GetUser call.
+      const fetchCurrentUserAttributes = React.useCallback(() => {
+        if (!attributesRequestRef.current) {
+          attributesRequestRef.current = loadCurrentUser().finally(() => {
+            attributesRequestRef.current = undefined;
+          });
+        }
+        return attributesRequestRef.current;
+      }, [loadCurrentUser]);
+
+      // Amplify dispatches `tokenRefresh` once per caller awaiting a shared refresh, so a single
+      // expiry can fire it many times. Refreshed tokens are already cached, and attributes are
+      // unchanged, so only the session is updated: no GetUser call and no loading state, which
+      // would unmount every provider behind AuthGate.
+      const refreshSessionTokens = React.useCallback(() => {
+        if (!sessionRequestRef.current) {
+          sessionRequestRef.current = (async () => {
+            try {
+              const { identityId, tokens } = await fetchAuthSession();
+              if (!tokens) return;
+              const { idToken, accessToken } = tokens;
+              const groups = accessToken?.payload['cognito:groups'] || [];
+              setResult((prevResult) => {
+                if (!prevResult.user) return prevResult;
+                if (
+                  prevResult.session?.identityId === identityId &&
+                  prevResult.session?.idToken?.toString() === idToken?.toString()
+                ) {
+                  return prevResult;
+                }
+                return { ...prevResult, session: { identityId, idToken, groups } };
+              });
+            } catch (error) {
+              console.warn('[AuthContext] Could not read the refreshed session:', error);
+            } finally {
+              sessionRequestRef.current = undefined;
+            }
+          })();
+        }
+        return sessionRequestRef.current;
+      }, []);
+
       const handleAuth = React.useCallback(
         ({ payload }) => {
           switch (payload.event) {
             case "signedIn":
             case "signUp":
-            case "tokenRefresh":
             case "autoSignIn": {
               fetchCurrentUserAttributes();
               break;
             }
-            case "signedOut": {
-              setResult({ user: undefined, isLoading: false });
+            case "tokenRefresh": {
+              refreshSessionTokens();
               break;
             }
-            case "tokenRefresh_failure":
+            case "signedOut": {
+              try {
+                clearLocalAuthData();
+                setResult({ user: undefined, session: undefined, isLoading: false, error: undefined });
+              } catch (error) {
+                console.error('[AuthContext] Could not clear local authentication data:', error);
+                setResult({ user: undefined, session: undefined, isLoading: false, error });
+              }
+              break;
+            }
+            case "tokenRefresh_failure": {
+              // Amplify keeps the stored tokens for transient failures, so the user remains signed in.
+              if (userRef.current && isTransientAuthError(payload.data?.error)) {
+                console.warn('[AuthContext] Token refresh failed transiently:', payload.data.error);
+                break;
+              }
+              setResult({ error: payload.data, isLoading: false });
+              break;
+            }
             case "signIn_failure": {
               setResult({ error: payload.data, isLoading: false });
               break;
@@ -140,7 +231,7 @@ const AuthProvider = ({ children }) => {
             }
           }
         },
-        [fetchCurrentUserAttributes]
+        [fetchCurrentUserAttributes, refreshSessionTokens]
       );
       React.useEffect(() => {
         const unsubscribe = Hub.listen("auth", handleAuth, "useAuth");

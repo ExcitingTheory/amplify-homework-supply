@@ -24,6 +24,7 @@ vi.mock("openai", () => ({ default: class {} }));
 
 import {
   attachDocumentRefs,
+  attachSourcePages,
   buildGenerationPrompt,
   mapItemSources,
   mapUnitWords,
@@ -139,7 +140,7 @@ describe("generatePracticeDrill document sources", () => {
     expect(
       mapItemSources({
         items: [
-          link("d1", "a.pdf", { page: 3 }),
+          link("d1", "a.pdf"),
           link("d2", "b.pdf"),
           link("d3", "c.pdf", { deletedAt: "2026-10-01" }),
           link("d4", "d.pdf", { _deleted: true }),
@@ -147,7 +148,7 @@ describe("generatePracticeDrill document sources", () => {
         ],
       }),
     ).toEqual([
-      { documentId: "d1", filename: "a.pdf", page: 3 },
+      { documentId: "d1", filename: "a.pdf" },
       { documentId: "d2", filename: "b.pdf" },
     ]);
     expect(mapItemSources(undefined)).toEqual([]);
@@ -160,11 +161,11 @@ describe("generatePracticeDrill document sources", () => {
           id: "w1",
           phrase: "p",
           definition: "d",
-          documentWords: { items: [link("d1", "a.pdf", { page: 2 })] },
+          documentWords: { items: [link("d1", "a.pdf")] },
         },
       },
     ]);
-    expect(word.sources).toEqual([{ documentId: "d1", filename: "a.pdf", page: 2 }]);
+    expect(word.sources).toEqual([{ documentId: "d1", filename: "a.pdf" }]);
 
     const [question] = mapQuestionUnits([
       {
@@ -194,6 +195,58 @@ describe("generatePracticeDrill document sources", () => {
       { id: "d1", filename: "a.pdf", concepts: [], vocabulary: [], summaries: [] },
       { id: "d2", filename: "b.pdf", concepts: [], vocabulary: [], summaries: [] },
     ],
+  });
+
+  it("fills in each source's page from the entry that carries the item's id, however the text changed", async () => {
+    const graphql = vi.fn(async ({ variables }: { variables: { id: string } }) => ({
+      data: {
+        getDocument: {
+          parsedContent: {
+            items: [
+              variables.id === "d1"
+                ? {
+                    id: "d1-chunk-0",
+                    chunkIndex: 0,
+                    vocabularyJSON: [{ word: "one, reworded", wordID: "w1", pages: [6, 2] }],
+                    questionsJSON: [{ prompt: "q1, reworded", questionID: "q1", pages: [4] }],
+                  }
+                : { id: "d2-chunk-0", chunkIndex: 0, vocabularyJSON: [{ word: "Other", wordID: "w-other", pages: [8] }] },
+            ],
+            nextToken: null,
+          },
+        },
+      },
+    }));
+    const input = material();
+    input.vocabulary[0].sources = [{ documentId: "d1", filename: "a.pdf" }];
+    input.vocabulary[1].sources = [{ documentId: "d2", filename: "b.pdf" }];
+
+    const result = await attachSourcePages(input, graphql as any);
+
+    expect(result.vocabulary[0].sources).toEqual([{ documentId: "d1", filename: "a.pdf", page: 2 }]);
+    // No entry carries "w2" in d2, so the source keeps only its file
+    expect(result.vocabulary[1].sources).toEqual([{ documentId: "d2", filename: "b.pdf" }]);
+    expect(result.questions[0].sources).toEqual([{ documentId: "d1", filename: "a.pdf", page: 4 }]);
+    expect(result.vocabulary[2]).toEqual(input.vocabulary[2]);
+    // Each document's content is read once
+    expect(graphql).toHaveBeenCalledTimes(2);
+  });
+
+  it("keeps the sources when a document's content cannot be read", async () => {
+    const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+    const graphql = vi.fn().mockResolvedValue({ errors: [{ message: "denied" }] });
+    const input = material();
+
+    const result = await attachSourcePages(input, graphql as any);
+
+    expect(result.vocabulary[0].sources).toEqual(input.vocabulary[0].sources);
+    warn.mockRestore();
+  });
+
+  it("makes no request when nothing has sources", async () => {
+    const graphql = vi.fn();
+    await attachSourcePages({ vocabulary: [], questions: [], textBlocks: [], documents: [] }, graphql as any);
+    expect(graphql).not.toHaveBeenCalled();
   });
 
   it("scopes the material to the chosen documents", () => {

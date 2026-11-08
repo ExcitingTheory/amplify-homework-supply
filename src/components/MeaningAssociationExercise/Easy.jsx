@@ -24,6 +24,7 @@ export const Easy = ({
   promptFor = "definition",
   showAudio = true,
   showPronunciation = true,
+  readOnly = false,
 }) => {
   const t = useTranslations("components");
   const resolvedNextModeLabel =
@@ -181,6 +182,7 @@ export const Easy = ({
   const totalWords = shuffledWords.length;
 
   async function progressAssignment(draggedWordID, targetWordID) {
+    if (readOnly) return;
     // Verify the match is correct
     if (draggedWordID !== targetWordID) {
       console.error(
@@ -270,6 +272,7 @@ export const Easy = ({
   }
 
   async function sendFail(draggedWordID, targetWordID) {
+    if (readOnly) return;
     let _attemptedAnswers = JSON.parse(
       JSON.stringify(attemptedAnswersRef.current),
     );
@@ -365,7 +368,7 @@ export const Easy = ({
         maxWidth: "100vw",
       }}
     >
-      {showCompletion ? (
+      {showCompletion || readOnly ? (
         <Box
           sx={{
             display: "flex",
@@ -392,13 +395,15 @@ export const Easy = ({
               })}
             </Typography>
             <Box sx={{ display: "flex", gap: 1 }}>
-              <Button
-                variant="outlined"
-                size="small"
-                onClick={handleDismissCompletion}
-              >
-                {t("meaningAssociationExercise.back")}
-              </Button>
+              {!readOnly && (
+                <Button
+                  variant="outlined"
+                  size="small"
+                  onClick={handleDismissCompletion}
+                >
+                  {t("meaningAssociationExercise.back")}
+                </Button>
+              )}
               <Button
                 variant="contained"
                 color={nextMode ? "primary" : "success"}
