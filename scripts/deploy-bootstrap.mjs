@@ -540,7 +540,7 @@ async function deployPhaseWithRetry(
     if (HEALTHY_STACK_STATUSES.has(stack.status)) {
       if (!outputsWereWritten(attemptStartedMs)) {
         console.warn(
-          `[deploy-bootstrap] ${label}: stack is healthy but amplify_outputs.json was not (re)written at ${outputsPath} — client-config generation likely failed after the CFN deploy. Retrying.`,
+          `[deploy-bootstrap] ${label}: stack is healthy but amplify_outputs.json was not (re)written at ${outputsPath}. This does not confirm that this attempt deployed successfully; check the ampx error above for failures during asset publishing, deployment, or client-config generation. Retrying.`,
         );
         continue;
       }
@@ -618,6 +618,7 @@ async function main() {
     deployArgs = [
       "ampx",
       "pipeline-deploy",
+      "--debug",
       "--branch",
       branch,
       "--app-id",
