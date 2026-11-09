@@ -8,6 +8,12 @@ COPY amplify/functions/nativeVocabulary/modelAssets.ts amplify/functions/nativeV
 RUN node_modules/.bin/esbuild amplify/functions/nativeVocabulary/handler.ts \
     --bundle --platform=node --target=node22 --format=cjs --outfile=/build/handler.cjs
 
+FROM node:22-bookworm-slim AS runtime-client
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    g++ make cmake autoconf automake libtool unzip xz-utils python3 libcurl4-openssl-dev \
+    && rm -rf /var/lib/apt/lists/*
+RUN npm install --prefix /opt/runtime --omit=dev --no-audit --no-fund aws-lambda-ric@4.0.2
+
 # Use Debian as base instead of ECR Lambda image
 # This is compatible with Lambda's execution environment
 FROM debian:bookworm-slim
@@ -33,6 +39,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 ENV OMP_NUM_THREADS=1 MKL_NUM_THREADS=1 PYTHONDONTWRITEBYTECODE=1
 ENV LAMBDA_TASK_ROOT="/var/task"
+ENV NPM_CONFIG_CACHE="/tmp/.npm"
 
 # Create task root
 RUN mkdir -p ${LAMBDA_TASK_ROOT}
@@ -49,6 +56,8 @@ RUN env -u LD_LIBRARY_PATH python3.11 -m pip install --break-system-packages --n
 
 # Copy compiled handler from build stage
 COPY --from=build /build/handler.cjs ${LAMBDA_TASK_ROOT}/handler.js
+COPY --from=runtime-client /opt/runtime /opt/runtime
 COPY amplify/functions/nativeVocabulary/worker.py ${LAMBDA_TASK_ROOT}/worker.py
 
-CMD ["node", "handler.js"]
+ENTRYPOINT ["/opt/runtime/node_modules/.bin/aws-lambda-ric"]
+CMD ["handler.handler"]

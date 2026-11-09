@@ -1,0 +1,10 @@
+**
+!amplify/
+!amplify/functions/
+!amplify/functions/nativeVocabulary/
+!amplify/functions/nativeVocabulary/**
+!amplify/functions/documentAnalysis/
+!amplify/functions/documentAnalysis/vocabularyGlossary.ts
+**/node_modules
+**/__pycache__
+**/.env*

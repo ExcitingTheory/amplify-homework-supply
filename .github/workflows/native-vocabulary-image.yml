@@ -1,0 +1,113 @@
+name: Build Native Vocabulary Image and Release Amplify
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: native-vocabulary-release-main
+  cancel-in-progress: false
+
+jobs:
+  build-and-release:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    env:
+      AWS_REGION: us-east-1
+      AWS_PAGER: ""
+      AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID || secrets.AMPLIFY_APP_ID }}
+      IMAGE_REPOSITORY: ${{ vars.NATIVE_VOCABULARY_IMAGE_REPOSITORY || 'homework-native-vocabulary' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Validate configuration
+        env:
+          CI_ROLE_ARN: ${{ vars.NATIVE_VOCABULARY_CI_ROLE_ARN }}
+        run: |
+          test -n "$CI_ROLE_ARN" || { echo "::error::Set NATIVE_VOCABULARY_CI_ROLE_ARN from the CI bootstrap stack."; exit 1; }
+          test -n "$AMPLIFY_APP_ID" || { echo "::error::Set AMPLIFY_APP_ID."; exit 1; }
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.NATIVE_VOCABULARY_CI_ROLE_ARN }}
+          role-duration-seconds: 7200
+          aws-region: us-east-1
+      - name: Require ordered deployment
+        run: |
+          auto_build=$(aws amplify get-branch --app-id "$AMPLIFY_APP_ID" --branch-name main --query branch.enableAutoBuild --output text)
+          test "$auto_build" = "False" || { echo "::error::Disable Amplify automatic builds for main before enabling this workflow."; exit 1; }
+      - name: Log in to ECR
+        id: ecr
+        uses: aws-actions/amazon-ecr-login@v2
+      - name: Check for an already published commit
+        id: image
+        run: |
+          result=$(aws ecr batch-get-image --repository-name "$IMAGE_REPOSITORY" --image-ids "imageTag=$GITHUB_SHA")
+          if jq -e '.images | length == 1' <<< "$result" >/dev/null; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          elif jq -e '.failures | length == 1 and .[0].failureCode == "ImageNotFound"' <<< "$result" >/dev/null; then
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Could not determine whether the commit image exists."
+            jq '.failures' <<< "$result"
+            exit 1
+          fi
+      - uses: docker/setup-buildx-action@v3
+        if: steps.image.outputs.exists == 'false'
+      - name: Build Lambda image
+        if: steps.image.outputs.exists == 'false'
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: amplify/functions/nativeVocabulary/Dockerfile
+          platforms: linux/amd64
+          load: true
+          provenance: false
+          sbom: false
+          tags: ${{ steps.ecr.outputs.registry }}/${{ env.IMAGE_REPOSITORY }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Verify Lambda runtime
+        if: steps.image.outputs.exists == 'false'
+        env:
+          NATIVE_VOCABULARY_IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.IMAGE_REPOSITORY }}:${{ github.sha }}
+        run: node scripts/native-vocabulary-runtime-smoke.mjs
+      - name: Publish verified image
+        if: steps.image.outputs.exists == 'false'
+        env:
+          IMAGE: ${{ steps.ecr.outputs.registry }}/${{ env.IMAGE_REPOSITORY }}:${{ github.sha }}
+        run: docker push "$IMAGE"
+      - name: Release Amplify after publication
+        run: |
+          head_commit=$(git ls-remote origin refs/heads/main | cut -f1)
+          if [ "$head_commit" != "$GITHUB_SHA" ]; then
+            echo "::notice::Commit superseded by $head_commit; its workflow will release the newer image."
+            exit 0
+          fi
+          job=$(aws amplify start-job --app-id "$AMPLIFY_APP_ID" --branch-name main --job-type RELEASE --commit-id "$GITHUB_SHA")
+          job_id=$(jq -er '.jobSummary.jobId' <<< "$job")
+          if [ "$(jq -r '.jobSummary.commitId' <<< "$job")" != "$GITHUB_SHA" ]; then
+            aws amplify stop-job --app-id "$AMPLIFY_APP_ID" --branch-name main --job-id "$job_id"
+            echo "::error::Branch advanced before release; stopped the mismatched job."
+            exit 1
+          fi
+          echo "Amplify job $job_id started for $GITHUB_SHA."
+          for attempt in $(seq 1 180); do
+            status=$(aws amplify get-job --app-id "$AMPLIFY_APP_ID" --branch-name main --job-id "$job_id" --query job.summary.status --output text)
+            echo "Amplify job $job_id: $status"
+            case "$status" in
+              SUCCEED) exit 0 ;;
+              FAILED|CANCELLED) echo "::error::Amplify job $job_id ended with $status."; exit 1 ;;
+              CREATED|PENDING|PROVISIONING|RUNNING|CANCELLING) sleep 30 ;;
+              *) echo "::error::Unexpected Amplify job status: $status"; exit 1 ;;
+            esac
+          done
+          echo "::error::Timed out waiting for Amplify job $job_id; inspect Amplify before starting another release."
+          exit 1

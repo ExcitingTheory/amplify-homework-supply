@@ -65,6 +65,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { resolveNativeVocabularyImage } from "./resolve-native-vocabulary-image.mjs";
 import {
   CloudFormationClient,
   ListStacksCommand,
@@ -614,6 +615,7 @@ async function main() {
         "--mode=pipeline requires --branch=<branch> and --app-id=<id> (or AWS_BRANCH/AWS_APP_ID env vars).",
       );
     }
+    process.env.NATIVE_VOCABULARY_IMAGE_DIGEST = resolveNativeVocabularyImage();
     identifier = sanitizeIdentifier(branch);
     deployArgs = [
       "ampx",
