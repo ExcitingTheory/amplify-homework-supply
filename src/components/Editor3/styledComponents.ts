@@ -24,7 +24,7 @@ export const EditorCanvas = styled("div")(({ theme }) => ({
     boxShadow: theme.shadows[1],
     // Indicate focus on the whole paper so the cue spans the gutter wings and text column alike.
     "&:has(.editor:focus)": {
-      boxShadow: `${theme.shadows[1]}, inset 0 2px 4px ${(theme.vars || theme).palette.action.focus}`,
+      boxShadow: `${theme.shadows[1]}, inset 0 0 0 2px ${(theme.vars || theme).palette.primary.main}`,
     },
   },
   "& .editor": {
@@ -32,11 +32,18 @@ export const EditorCanvas = styled("div")(({ theme }) => ({
     backgroundColor: "transparent",
   },
   "& .editor-placeholder": {
-    top: SEMANTIC_THEME.editor.lesson.padding.top,
-    left: SEMANTIC_THEME.editor.lesson.padding.inlineMobile,
-    [theme.breakpoints.up("sm")]: {
-      left: SEMANTIC_THEME.editor.lesson.padding.inlineDesktop,
-    },
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: "calc(100% - 2rem)",
+    textAlign: "center",
+    color: (theme.vars || theme).palette.text.disabled,
+    pointerEvents: "none",
+    userSelect: "none",
+  },
+  "& .editor:focus ~ .editor-placeholder": {
+    display: "none",
   },
 }));
 

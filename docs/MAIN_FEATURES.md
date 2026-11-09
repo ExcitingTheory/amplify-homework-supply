@@ -51,7 +51,7 @@ flowchart TD
 ## 3. AI & ML Features
 
 - **Streaming AI chat** — tool use, persona routing, token accounting, chat memory summarization (`app/api/chat/route.ts`, `app/api/_shared/botPersonas.ts`)
-- **Editor AI autocomplete** — inline content completion while authoring (`app/api/content-completion/route.ts`)
+- **Editor AI autocomplete** — inline content completion while authoring; Tab accepts vocabulary cards and exercises. Live unit resources load across all relationship pages using reader-accessible link IDs, and explicitly named terms take priority in the bounded suggestion catalog (`app/api/content-completion/route.ts`, `src/components/Editor3/plugins/suggestionReferences.ts`, `src/context/unitContext.jsx`).
 - **AI block suggestions** — structured tool outputs for inserting Lexical editor blocks (`app/api/suggest-blocks/route.ts`)
 - **AI grading** — prompt-hardened, schema-validated, PII-filtered grading endpoint (`app/api/grade-ai/route.ts`)
 - **Document analysis** — PDF text extraction and media approval producing parsed vocabulary and educational artifacts; also triggered automatically via EventBridge on S3 upload (`amplify/functions/documentAnalysis/`)
@@ -84,6 +84,7 @@ flowchart LR
 - **Grade history viewer** embedded within editor context (`src/components/Editor3/components/GradeHistory.jsx`)
 - **Chat-assisted block insertion** — preview and insert AI-suggested blocks from the sidebar (`src/components/ChatSidebar/BlockInsertPreview.jsx`)
 - **Markdown support** via Lexical markdown plugin
+- **Editor focus** — autofocus and manual focus highlight the entire paper, including both gutter wings. The empty-editor hint is centered over the editable area and hidden while it has focus.
 - **Vocabulary autocomplete** plugin for inserting dictionary words inline
 
 ---

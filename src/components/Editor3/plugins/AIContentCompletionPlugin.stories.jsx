@@ -16,6 +16,9 @@ import { AutoLinkNode, LinkNode } from "@lexical/link";
 import { Box, Paper, Typography, Alert } from "@mui/material";
 
 import AIContentCompletionPlugin from "./AIContentCompletionPlugin";
+import "../components/SuggestionBlockPreview";
+import UnitContext from "../../../context/unitContext";
+import DictionaryContext from "../../../context/dictionaryContext";
 import {
   AIContentSuggestionNode,
   AILoadingNode,
@@ -210,6 +213,54 @@ export const AcceptWithTab = {
           .toContain(`Plants use sunlight ${suggestion}`);
         expect(editor.querySelector('[contenteditable="false"]')).toBeNull();
       });
+    } finally {
+      window.fetch = originalFetch;
+    }
+  },
+};
+
+export const CustomBlockGhostPreview = {
+  render: () => {
+    const word = {
+      id: "ghost-preview-word",
+      phrase: "Chloroplast",
+      definition: "A cell organelle",
+    };
+    return (
+      <DictionaryContext.Provider value={{ wordMapId: { [word.id]: word } }}>
+        <UnitContext.Provider value={{
+          unit: { id: "ai-completion-story-unit" },
+          dictionary: { [word.id]: word },
+          questionBank: {},
+          files: {},
+        }}>
+          <Template
+            title="Custom Blocks in Ghost Text"
+            instructions="Pause after typing to preview a vocabulary block before accepting it."
+          />
+        </UnitContext.Provider>
+      </DictionaryContext.Provider>
+    );
+  },
+  play: async ({ canvasElement }) => {
+    const originalFetch = window.fetch;
+    window.fetch = (input, init) => {
+      if (String(input).endsWith("/api/content-completion")) {
+        return Promise.resolve(new Response("\n\n:::word[w1]"));
+      }
+      return originalFetch.call(window, input, init);
+    };
+    try {
+      const editor = within(canvasElement).getByRole("textbox");
+      await userEvent.click(editor);
+      await userEvent.type(editor, "Plants use sunlight", { delay: 20 });
+      await waitFor(() => {
+        const preview = editor.querySelector('[data-block-type="word"]');
+        expect(preview).not.toBeNull();
+        expect(preview.querySelector("[inert] .MuiCard-root")).not.toBeNull();
+        expect(preview?.textContent).toContain("Chloroplast");
+        expect(preview?.textContent).not.toContain(":::word");
+      }, { timeout: 20000 });
     } finally {
       window.fetch = originalFetch;
     }

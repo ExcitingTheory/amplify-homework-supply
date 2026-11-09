@@ -30,6 +30,10 @@ export interface AgentContext {
   userId: string;
   groups: string[];
   identityId?: string;
+  /** Identity pool ID from the verified authentication session. */
+  sessionIdentityId?: string;
+  /** Owner identifiers from the verified authentication session. */
+  ownerIds?: string[];
   unitId?: string;
   sectionId?: string;
   locale?: string;

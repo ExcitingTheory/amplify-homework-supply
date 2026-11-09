@@ -7,6 +7,22 @@ import {
 } from "../suggestionReferences";
 
 describe("AI completion resource references", () => {
+  it("keeps explicitly named words ahead of incidental definition matches in a bounded catalog", () => {
+    const prompt = "Introduce useful vocabulary with word cards for Nucleus and Ribosomes before a meaning association exercise.";
+    const dictionary = Object.fromEntries(
+      Array.from({ length: 25 }, (_, index) => [
+        `other-${index}`,
+        { id: `other-${index}`, phrase: `Cell component ${index}`, definition: prompt },
+      ]),
+    );
+    dictionary.nucleus = { id: "nucleus", phrase: "Nucleus", definition: "Stores DNA" };
+    dictionary.ribosomes = { id: "ribosomes", phrase: "Ribosomes", definition: "Produce proteins" };
+    const { resources } = buildSuggestionReferenceCatalog(dictionary, {}, {}, prompt);
+    expect(resources.vocabulary.slice(0, 2).map((word) => word.phrase))
+      .toEqual(["Nucleus", "Ribosomes"]);
+    expect(resources.vocabulary).toHaveLength(20);
+  });
+
   it("keeps UUIDs in the client map, not the model-facing resource list", () => {
     const catalog = buildSuggestionReferenceCatalog(
       {

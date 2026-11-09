@@ -30,7 +30,7 @@ test("Demo 2: Learner completes an AI-graded exercise", async ({ browser }) => {
         const text = message.text();
         if (
           message.type() === "error" &&
-          /UserSubmission|AudioWaveformPlayer|CustomAIComponent|Transcribe URL Error/i.test(
+          /UnitContext|UserSubmission|AudioWaveformPlayer|CustomAIComponent|Transcribe URL Error/i.test(
             text,
           )
         ) {

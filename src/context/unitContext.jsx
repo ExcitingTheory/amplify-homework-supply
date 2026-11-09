@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import yaml from "js-yaml";
 import { moderateContent } from "../utils/moderateContent";
 import { getAmplifyClient } from "../utils/amplifyClient";
+import { collectAll } from "../utils/importBatch";
 import { saveDraftContent, loadContent } from "../utils/unitContentStorage";
 import { saveGradeOfflineAware } from "../offline/saveGradeOffline";
 import {
@@ -1303,24 +1304,34 @@ const UnitProvider = ({ children, id }) => {
       const _questionBank = {};
       const _playlistUrls = {};
 
-      // Load related words via join table
-      const { data: _unitWords } = await client.models.UnitWord.list({
-        filter: { unitID: { eq: id } },
-      });
-
-      // Load related files via join table
-      const { data: _unitFiles } = await client.models.UnitFile.list({
-        filter: { unitID: { eq: id } },
-      });
-
-      // Load related questions via join table
-      const { data: _unitQuestions } = await client.models.QuestionUnit.list({
-        filter: { unitID: { eq: id } },
-      });
+      const linkFilter = {
+        unitID: { eq: id },
+        deletedAt: { attributeExists: false },
+      };
+      // Filtered list pages can be empty while still carrying a nextToken.
+      const [_unitWords, _unitFiles, _unitQuestions] = await Promise.all([
+        collectAll(
+          (nextToken) => client.models.UnitWord.list({
+            filter: linkFilter, nextToken, selectionSet: ["wordID"],
+          }),
+          "load unit words",
+        ),
+        collectAll(
+          (nextToken) => client.models.UnitFile.list({
+            filter: linkFilter, nextToken, selectionSet: ["fileID"],
+          }),
+          "load unit files",
+        ),
+        collectAll(
+          (nextToken) => client.models.QuestionUnit.list({
+            filter: linkFilter, nextToken, selectionSet: ["questionID"],
+          }),
+          "load unit questions",
+        ),
+      ]);
 
       // Fetch full Word objects
       const _unitWordsWork = (_unitWords || [])
-        .filter((uw) => uw != null && uw.deletedAt == null)
         .map(async (uw) => {
           if (uw.wordID) {
             const { data } = await client.models.Word.get({ id: uw.wordID });
@@ -1331,7 +1342,6 @@ const UnitProvider = ({ children, id }) => {
 
       // Fetch full File objects
       const _unitFilesWork = (_unitFiles || [])
-        .filter((uf) => uf != null && uf.deletedAt == null)
         .map(async (uf) => {
           if (uf.fileID) {
             const { data } = await client.models.File.get({ id: uf.fileID });
@@ -1342,7 +1352,6 @@ const UnitProvider = ({ children, id }) => {
 
       // Fetch full Question objects
       const _unitQuestionsWork = (_unitQuestions || [])
-        .filter((uq) => uq != null && uq.deletedAt == null)
         .map(async (uq) => {
           if (uq.questionID) {
             const { data } = await client.models.Question.get({

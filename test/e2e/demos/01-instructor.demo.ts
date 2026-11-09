@@ -30,7 +30,28 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
       },
       async (page, demo) => {
         let selectedAIQuestion: { prompt: string; answer: string } | undefined;
+        const completionErrors: string[] = [];
+        const draftUploads: string[] = [];
+        page.on("response", (response) => {
+          if (createdUnit &&
+              response.request().method() === "PUT" &&
+              response.url().includes(`units/${createdUnit.id}/draft.json`) &&
+              response.ok()) {
+            const body = response.request().postData();
+            if (body) draftUploads.push(body);
+          }
+        });
+        page.on("requestfailed", (request) => {
+          if (request.url().endsWith("/api/content-completion")) {
+            console.log("Autocomplete request failed:", request.failure()?.errorText);
+          }
+        });
         page.on("console", (message) => {
+          if (message.type() === "error" &&
+              /AIContentCompletionPlugin|Error fetching suggestion/.test(message.text())) {
+            completionErrors.push(message.text());
+            console.log(message.text());
+          }
           if (message.text().includes("[saveEditorContent]") ||
               message.text().includes("[Save]") ||
               message.text().includes("[Editor] component error")) {
@@ -79,6 +100,30 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
         await page.goto(`/unit/${createdUnit.id}?sidebars=files&leftWidth=1100`);
         const editor = page.getByRole("textbox", { name: "Edit", exact: true });
         await expect(editor).toBeVisible({ timeout: 90_000 });
+        const startBottomParagraph = async () => {
+          await editor.press("Escape");
+          const lastBlockIsDecorator = await editor.locator(":scope > *").last()
+            .evaluate((element) => element.getAttribute("contenteditable") === "false");
+          const canvas = editor.locator('xpath=ancestor::*[contains(@class,"editor-container")][1]');
+          await canvas.locator(".editor-block-number:not([inert] *)").last().click();
+          await editor.focus();
+          await expect(editor).toBeFocused();
+          if (lastBlockIsDecorator) {
+            await page.keyboard.press("ArrowDown");
+          } else {
+            await page.keyboard.press("ArrowRight");
+            await page.keyboard.press("Enter");
+          }
+          await expect.poll(() => editor.evaluate((element) => {
+            const selection = element.ownerDocument.getSelection();
+            let anchor = selection?.anchorNode;
+            if (!anchor || !element.contains(anchor)) return false;
+            if (anchor === element) return selection!.anchorOffset === element.childNodes.length;
+            while (anchor.parentNode !== element) anchor = anchor.parentNode!;
+            return anchor === element.lastChild;
+          }), { message: "The caret must be at the bottom before adding content" }).toBe(true);
+          await expect(editor.locator(":scope > *").last()).toHaveText("");
+        };
         const filesTab = page.locator('[data-tour="files-tab"]');
         const leftDrawer = filesTab.locator('xpath=ancestor::*[contains(@class,"MuiDrawer-root")][1]');
         const drawerWidth = () => leftDrawer.evaluate((element) => element.getBoundingClientRect().width);
@@ -337,7 +382,7 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
             const prompt = (
               await row.locator('[contenteditable="true"]').first().innerText()
             ).trim();
-            if (prompt && !/photosynthesis/i.test(prompt)) {
+            if (prompt && !/photosynthesis|basic structure of the cell membrane/i.test(prompt)) {
               selectedQuestion = row;
               selectedPrompt = prompt;
               break;
@@ -405,14 +450,18 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
         await expect.poll(drawerWidth).toBeLessThan(100);
 
         // Continue below the PDF with a vocabulary-focused paragraph.
-        await editor.focus();
-        await page.keyboard.press("ControlOrMeta+End");
-        await page.keyboard.press("Enter");
+        await startBottomParagraph();
         await demo.chapter(
           "Explain useful vocabulary",
           "Start typing below the PDF and let autocomplete suggest the content",
         );
-        const completionPrompt = "Useful vocabulary for photosynthesis includes";
+        const completionPrompt =
+          "Introduce useful vocabulary with word cards for Nucleus and Ribosomes before a meaning association exercise.";
+        page.on("request", (request) => {
+          if (request.url().endsWith("/api/content-completion")) {
+            console.log("Autocomplete prompt:", request.postDataJSON()?.prompt);
+          }
+        });
         const completionResponse = page.waitForResponse(
           (response) =>
             response.url().endsWith("/api/content-completion") &&
@@ -424,20 +473,25 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
         const completionResult = await completionResponse;
         expect(completionResult.ok()).toBe(true);
         expect(await completionResult.finished()).toBeNull();
+        const completionMarkdown = await completionResult.text();
+        expect(completionMarkdown, "Autocomplete must suggest vocabulary word cards")
+          .toMatch(/:::word[\[{]/);
         const ghostText = editor.locator('span[contenteditable="false"][spellcheck="false"]')
           .filter({ hasText: /Tab.*accept/i }).first();
         await expect(ghostText).toBeVisible({ timeout: 60_000 });
         const completion = (await ghostText.locator(".ai-suggestion-markdown").innerText()).trim();
         expect(completion.length).toBeGreaterThan(0);
         await demo.beat(2500);
-        await editor.focus();
-        await editor.press("Escape");
+        await editor.press("Tab");
         await expect(ghostText).toHaveCount(0);
-        await expect(editor).toContainText(completionPrompt);
+        const vocabularyBlocks = editor.locator('[data-block-type="word-block"]');
+        await expect(
+          vocabularyBlocks.first(),
+          `Autocomplete must insert its vocabulary cards: ${completionErrors.join("\n")}`,
+        ).toBeVisible();
+        await expect(vocabularyBlocks.filter({ hasText: /Nucleus/i }).first()).toBeVisible();
+        await expect(vocabularyBlocks.filter({ hasText: /Ribosomes/i }).first()).toBeVisible();
         await demo.beat(2000);
-        await editor.focus();
-        await page.keyboard.press("ControlOrMeta+End");
-        await page.keyboard.press("Enter");
 
         const selectWordForExercise = async (input: Locator, word: string) => {
           await demo.type(input, word);
@@ -456,17 +510,22 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
           "Add a meaning-association exercise if autocomplete did not suggest one",
         );
         const meaningAssociations = page.locator(
-          '[data-block-type="meaning-association"]',
+          '[data-block-type="meaning-association"]:not([inert] *)',
         );
         if (!(await meaningAssociations.count())) {
-          await editor.focus();
-          await page.keyboard.press("ControlOrMeta+End");
-          await page.keyboard.press("Enter");
+          await startBottomParagraph();
           await page.locator('button[aria-controls="insert-node-menu"]').click();
           await page.getByRole("menuitem", { name: /Meaning Association/i }).click();
         }
         const meaningAssociation = meaningAssociations.last();
         await expect(meaningAssociation).toBeVisible();
+        await expect.poll(() => editor
+          .locator('[data-block-type="word-block"]:not([inert] *), [data-block-type="meaning-association"]:not([inert] *)')
+          .evaluateAll((blocks) => {
+            const kinds = blocks.map((block) => block.getAttribute("data-block-type"));
+            return kinds.lastIndexOf("word-block") < kinds.indexOf("meaning-association");
+          }),
+        ).toBe(true);
         const meaningWord = meaningAssociation.getByRole("combobox").first();
         const meaningWords = ["Nucleus", "Ribosomes"];
         for (const word of meaningWords) {
@@ -484,11 +543,9 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
           "Build a vocabulary answer",
           "Choose a pair of useful cell terms for short-answer practice",
         );
-        const shortAnswers = page.locator('[data-block-type="answer"]');
+        const shortAnswers = page.locator('[data-block-type="answer"]:not([inert] *)');
         if (!(await shortAnswers.count())) {
-          await editor.focus();
-          await page.keyboard.press("ControlOrMeta+End");
-          await page.keyboard.press("Enter");
+          await startBottomParagraph();
           await page.locator('button[aria-controls="insert-node-menu"]').click();
           await page
             .getByRole("menuitem", { name: /Short Answer.*Vocabulary/i })
@@ -521,9 +578,7 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
           "Make a multiple-choice quiz",
           "Build a quick check about the structure of plant cells",
         );
-        await editor.focus();
-        await page.keyboard.press("ControlOrMeta+End");
-        await page.keyboard.press("Enter");
+        await startBottomParagraph();
         const quizPrompt = "What is the basic structure of the cell membrane?";
         await page.keyboard.type(quizPrompt, { delay: 45 });
         await page.keyboard.press("Enter");
@@ -555,9 +610,7 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
           "Use a fresh cell-structure question from the imported bank",
           2800,
         );
-        await editor.focus();
-        await page.keyboard.press("ControlOrMeta+End");
-        await page.keyboard.press("Enter");
+        await startBottomParagraph();
         await page.locator('button[aria-controls="insert-node-menu"]').click();
         await page
           .getByRole("menuitem", { name: /AI-Graded Exercise/i })
@@ -635,24 +688,14 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
         await expect.poll(drawerWidth).toBeLessThan(100);
 
         await demo.chapter("Publish the lesson", "Make the completed unit available to learners");
-        await editor.click();
-        await page.keyboard.press("ControlOrMeta+End");
-        await page.keyboard.press("Enter");
-        await demo.type(editor, "Review the reading, practise the vocabulary, and explain how chlorophyll captures light for photosynthesis.");
-        const savedContent = page.context().waitForEvent("response", { predicate: (response) =>
-          response.url().includes("appsync-api") &&
-          /\bupdateUnit\s*\(/.test(response.request().postDataJSON()?.query || "") &&
-          response.request().postDataJSON()?.variables?.input?.contentVersion != null,
-          timeout: 60_000,
-        });
-        const draftUpload = page.context().waitForEvent("response", {
-          predicate: (response) => response.request().method() === "PUT" &&
-            response.url().includes(`units/${createdUnit?.id}/draft.json`) && response.ok(),
-          timeout: 60_000,
-        });
+        await startBottomParagraph();
+        await page.keyboard.type("Review the reading, practise the vocabulary, and explain how chlorophyll captures light for photosynthesis.", { delay: 55 });
         await page.getByTestId("save-button").click();
-        expect((await savedContent).ok()).toBe(true);
-        const savedDraft = JSON.parse((await draftUpload).request().postData()!);
+        await expect.poll(() => draftUploads.at(-1), {
+          message: "The final lesson text must reach its saved S3 draft",
+          timeout: 90_000,
+        }).toContain("Review the reading, practise the vocabulary");
+        const savedDraft = JSON.parse(draftUploads.at(-1)!);
         interface SavedNode {
           type: string;
           children?: SavedNode[];
@@ -660,11 +703,18 @@ test("Demo 1: Instructor builds a lesson", async ({ browser, request }) => {
           allowedInput?: string[];
         }
         const aiExercises: SavedNode[] = [];
+        const exerciseOrder: string[] = [];
         const collectExercises = (node: SavedNode) => {
+          if (["word-block", "meaning-association", "answer", "quiz", "custom-ai"].includes(node.type)) {
+            exerciseOrder.push(node.type);
+          }
           if (node.type === "custom-ai") aiExercises.push(node);
           node.children?.forEach(collectExercises);
         };
         collectExercises(savedDraft.root);
+        expect(exerciseOrder, "The saved lesson must preserve the demonstrated activity order").toEqual([
+          "word-block", "word-block", "meaning-association", "answer", "quiz", "custom-ai",
+        ]);
         // The exercise keeps its questions and now accepts spoken and drawn
         // answers as well as typed ones.
         expect(aiExercises.some((node) =>

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-11-07T22:50:19.661Z",
+  "generatedAt": "2026-11-08T12:00:39.690Z",
   "users": {
     "admin": {
       "username": "admin@example.com",
@@ -29,31 +29,31 @@
   },
   "words": [
     {
-      "id": "f8fdf92e-8e9a-4d75-b365-1d414c2c28e7",
+      "id": "63edaf9b-c0bc-4083-9ce0-36b1cfe2e76e",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "c182ea79-99ba-4b85-95e7-be2ed13e0362",
+      "id": "34d0854e-0388-4406-b45e-f339dbf2973d",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "04099c5c-e794-4bff-9a26-90c72fe98e35",
+      "id": "c37464ad-dce2-460b-b1c8-6c48f9a9d248",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "4bc66c4d-d5a9-494b-897a-9789d10e8608",
+      "id": "f1dc5230-ed38-49dc-8840-01766782469f",
       "phrase": null,
       "pronunciation": null,
       "definition": null
     },
     {
-      "id": "404ea0e3-2547-4894-806b-10fee2ac5bf0",
+      "id": "c0d5a461-a6a8-49b5-8120-c72d15d807a5",
       "phrase": null,
       "pronunciation": null,
       "definition": null
@@ -61,75 +61,75 @@
   ],
   "questions": [
     {
-      "id": "9ed4eef3-c3fb-4cc7-9ec1-764fef481d26",
+      "id": "0e05a519-4049-412b-9560-3cb8defbbaf3",
       "prompt": null,
       "answer": null
     },
     {
-      "id": "41aa542b-653a-4125-a7f1-dcb3e7b2ba8c",
+      "id": "f0765004-4cbb-47a9-b734-74ae2319e161",
       "prompt": null,
       "answer": null
     },
     {
-      "id": "c1353fe6-4df7-4330-92f9-de125012874a",
+      "id": "de1420bf-8134-4eb0-8e4b-eed581f1952b",
       "prompt": null,
       "answer": null
     }
   ],
   "units": [
     {
-      "id": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
+      "id": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
       "name": null,
       "status": null
     },
     {
-      "id": "3081c056-bcb7-47a0-9ca5-1ca94e349538",
+      "id": "91b0a41c-fb4b-4270-8837-c65ba3df5fbc",
       "name": null,
       "status": null
     },
     {
-      "id": "6d2c5921-9528-4a22-b92c-8826b6a69f90",
+      "id": "3f9a3297-b35f-4231-a492-2e1421a0ca14",
       "name": null,
       "status": null
     },
     {
-      "id": "fe7f2a71-6f1a-47c4-ae22-7b33b7c3d8ec",
+      "id": "de2f578c-d384-4383-aec4-b2a95c10935d",
       "name": null,
       "status": null
     }
   ],
   "sections": [
     {
-      "id": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "name": "Japanese 101 - Period 1",
       "code": "JPN101-P1"
     },
     {
-      "id": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
+      "id": "90a8713c-d735-407c-8618-ef286416352b",
       "name": "Biology 101 - Period 3",
       "code": "BIO101-P3"
     }
   ],
   "assignments": [
     {
-      "id": "12aed482-f38a-4eac-9795-bf6159f57bbf",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631"
+      "id": "6a0e92ea-c708-4939-a551-edde742e10bb",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e"
     },
     {
-      "id": "e44a27cb-a0c1-4d28-a6fe-8fe2d9f5817b",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "unitID": "6d2c5921-9528-4a22-b92c-8826b6a69f90"
+      "id": "fd961f6f-3d20-479e-a93d-65287d09f532",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "unitID": "3f9a3297-b35f-4231-a492-2e1421a0ca14"
     },
     {
-      "id": "32f1d2f3-6736-4364-8977-f885bcbb5873",
-      "sectionID": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "unitID": "3081c056-bcb7-47a0-9ca5-1ca94e349538"
+      "id": "3062c348-100c-442a-8e93-62755d2b8211",
+      "sectionID": "90a8713c-d735-407c-8618-ef286416352b",
+      "unitID": "91b0a41c-fb4b-4270-8837-c65ba3df5fbc"
     },
     {
-      "id": "d3e65951-1a40-48bb-beb1-9d3c927f2252",
-      "sectionID": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "unitID": "fe7f2a71-6f1a-47c4-ae22-7b33b7c3d8ec"
+      "id": "0219f595-cc54-4143-b622-40bed4890ed9",
+      "sectionID": "90a8713c-d735-407c-8618-ef286416352b",
+      "unitID": "de2f578c-d384-4383-aec4-b2a95c10935d"
     }
   ],
   "thoth": {
@@ -162,201 +162,201 @@
   },
   "grades": [
     {
-      "id": "28906fc5-f7c6-44a2-8fc8-892df9cf5d37",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "a0d4840d-fb42-449e-b048-44721f4484d4",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     },
     {
-      "id": "caa78ef6-ee05-49dd-a39f-fc047145deb8",
-      "unitID": "3081c056-bcb7-47a0-9ca5-1ca94e349538",
-      "sectionID": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
+      "id": "14f71b5a-3475-4773-a410-7fba95ded7fe",
+      "unitID": "91b0a41c-fb4b-4270-8837-c65ba3df5fbc",
+      "sectionID": "90a8713c-d735-407c-8618-ef286416352b",
       "complete": true
     },
     {
-      "id": "7200da2f-a8e3-4f96-aca7-1dbdf41d4df0",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "e781f443-55bb-4d29-84c0-3840f9a2e28c",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     },
     {
-      "id": "ebf609cd-6c2f-47a3-ab02-856591713813",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "0843db47-fb20-43aa-99f4-86caa7c9b198",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     },
     {
-      "id": "b5948599-32c9-46ea-ba6a-c8145a09f51f",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "04fddb3c-92e4-4638-8e7a-684739ae3246",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     },
     {
-      "id": "59c53b4f-dee0-40dc-9606-a9120c822329",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "585248f6-c387-49cb-877f-d75dc839bb0a",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     },
     {
-      "id": "140b5ada-eeed-4308-9272-d24cb4d6990a",
-      "unitID": "3081c056-bcb7-47a0-9ca5-1ca94e349538",
-      "sectionID": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
+      "id": "6cbda0fe-49e0-4cd2-9e76-91c876cdd9b2",
+      "unitID": "91b0a41c-fb4b-4270-8837-c65ba3df5fbc",
+      "sectionID": "90a8713c-d735-407c-8618-ef286416352b",
       "complete": true
     },
     {
-      "id": "7bf94c71-c46c-4f35-b73c-843592dac118",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
-      "sectionID": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "id": "d5d1fe0b-0f06-47f7-9d37-9d2ad9c7f8f6",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
+      "sectionID": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "complete": true
     }
   ],
   "files": [
     {
-      "id": "c9fed8eb-7076-4f4f-8711-0b9e17a2d1bc",
+      "id": "af93e110-fb92-4406-b7e0-e8b79871174c",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/chloroplast-diagram.jpg",
       "mimeType": null
     },
     {
-      "id": "579d8149-56e9-4d8a-a031-eba092e0b90f",
+      "id": "d7d25bbe-8312-4fba-a002-e0c097112e12",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/animals-photo.jpg",
       "mimeType": null
     },
     {
-      "id": "da9073a5-fdb7-4f8d-bd60-756b568feb80",
+      "id": "13f41bac-63cd-4af7-89e2-8b3b7d59a20b",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/pattern-texture.png",
       "mimeType": null
     },
     {
-      "id": "0d9f0ef2-5da4-4ad7-95cb-6e299fa45c5e",
+      "id": "b6b18ae8-8f0b-4345-9ca4-db63d6275193",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-guide.pdf",
       "mimeType": null
     },
     {
-      "id": "c22a882f-d0a2-48c2-883b-39860487f930",
+      "id": "c252578f-16cb-4fba-b44d-583d47f22e42",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/science-lesson-water-cycle.pdf",
       "mimeType": null
     },
     {
-      "id": "e38594b5-5ad2-4a85-a284-0730a8518e0d",
+      "id": "f5af5a90-ea69-4d11-8cd4-d57332a22b44",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-structure.docx",
       "mimeType": null
     },
     {
-      "id": "4b342327-77df-40ec-8d21-bc5f9c573d56",
+      "id": "d7c196c9-6b94-453d-985b-6dabe5629ee7",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/science-lesson-water-cycle.docx",
       "mimeType": null
     },
     {
-      "id": "bac9a3cd-d4e9-451c-924f-a2ac51ad42e9",
+      "id": "455cdfd8-bf6e-4925-9629-538d0a2c7dcb",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/french-seasons-vocabulary.txt",
       "mimeType": null
     },
     {
-      "id": "81f83952-f0f0-4197-9c24-482523ecc195",
+      "id": "ad312506-2b85-416d-8b06-f9eaf5ce7244",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-ar-verbs.txt",
       "mimeType": null
     },
     {
-      "id": "a56bcae6-c9d4-4152-beda-da53e2ac7652",
+      "id": "25179b2e-a2bc-43db-ad7e-49f07a82b4fc",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/philosophy-presocratics.txt",
       "mimeType": null
     },
     {
-      "id": "f4c8fc78-44cc-4902-8485-1a6e7f7ef2e4",
+      "id": "7cb61dc4-b24b-4d28-9f47-c9ffc81f08c0",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-guide.md",
       "mimeType": null
     },
     {
-      "id": "cc826a61-569b-4243-aadb-ac4cbf227611",
+      "id": "b4b7690e-f779-493a-bfb8-602654e4a80a",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-structure.md",
       "mimeType": null
     },
     {
-      "id": "c5d303a0-6432-4591-b2ab-a61aaa9ae02f",
+      "id": "265d6274-76c0-4cc8-a331-69d21386e8f2",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-vocabulary-list.csv",
       "mimeType": null
     },
     {
-      "id": "4a5f64d8-ee36-42ea-923b-bc6176eab5a2",
+      "id": "44316cba-c30e-4959-a386-9c665ee7bbaf",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-verbs-vocabulary.csv",
       "mimeType": null
     },
     {
-      "id": "1755560d-14a1-477f-a24f-3b77a12f0c8f",
+      "id": "7c806255-90c5-420d-9df1-cef868b69505",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/philosophy-presocratics.rtf",
       "mimeType": null
     },
     {
-      "id": "6b238f8d-33f6-411c-8d1d-df1f1c5d16dc",
+      "id": "d0558b7a-b1d6-4a7d-9f57-0c14d3366411",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/water-cycle-guide.epub",
       "mimeType": null
     },
     {
-      "id": "09552984-a5bf-4480-abac-f1c44168cfd4",
+      "id": "c5e7ad28-3d61-4a24-b8a4-bc39eb3062a0",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/spanish-quiz.gift",
       "mimeType": null
     },
     {
-      "id": "64336aae-9bd2-40cb-9893-3faae4f6cbea",
+      "id": "1b591e6a-6f7e-461c-9982-93301e91aa88",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-cell-quiz.qti",
       "mimeType": null
     },
     {
-      "id": "2e15838f-0d23-4a38-ab04-7a1abde809bd",
+      "id": "830e4d42-c50f-4883-9959-c40c7a5604e2",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/japanese-grammar-course.imscc",
       "mimeType": null
     },
     {
-      "id": "7ef088a7-63da-41f3-a50b-f8be93995a4c",
+      "id": "b7a1c331-7dba-4898-a357-502ac2957812",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-photosynthesis-scorm.zip",
       "mimeType": null
     },
     {
-      "id": "bfb80f28-f52a-4d92-bc43-5b9c00da7c5b",
+      "id": "8bbbfa7b-6c35-46b7-8199-b0f268f47b75",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/cinematic-designed-sci-fi-whoosh-transition-nexawave-228295.mp3",
       "mimeType": null
     },
     {
-      "id": "20ba8651-98f5-465c-93f5-a78ce6efc3a2",
+      "id": "d685de41-1175-4801-bc57-36cd0e78287c",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/descent-whoosh-long-cinematic-sound-effect-405921.mp3",
       "mimeType": null
     },
     {
-      "id": "9aee5a7f-09da-4ff5-a7d0-b6b82e19489f",
+      "id": "1f46a1fb-412f-4e06-a3f6-d7107590f361",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/sound-design-elements-sfx-ps-022-302865.mp3",
       "mimeType": null
     },
     {
-      "id": "2b1ada63-6181-4082-90a3-d9d116ecd1ee",
+      "id": "269f63f8-bab7-401f-8391-2ba1e805edbd",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/sample-tone.wav",
       "mimeType": null
     },
     {
-      "id": "36fc6d81-d653-45e5-9403-3c646c3ca472",
+      "id": "1b533992-ddde-4160-ba2a-fdc59b81b1e6",
       "name": null,
       "path": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/files/biology-spoken-answer.wav",
       "mimeType": null
@@ -364,49 +364,49 @@
   ],
   "documents": [
     {
-      "id": "803f080e-db0e-4c44-9ccf-96b6bc5062d0",
+      "id": "676497c8-e7a5-42e6-b90f-b6b59dfbb6d1",
       "filename": "photosynthesis-notes.pdf",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/photosynthesis-notes.pdf",
       "status": "completed"
     },
     {
-      "id": "efeab231-408c-4347-9814-df39885d9f41",
+      "id": "fde0f0d6-2ca6-42ee-868b-d8ad3d78763f",
       "filename": "japanese-grammar-guide.pdf",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/japanese-grammar-guide.pdf",
       "status": "uploaded"
     },
     {
-      "id": "654f75b3-d0e4-4019-aee4-f7b10df83b81",
+      "id": "0d7950da-f69c-46fc-815a-2e28c83fa3d3",
       "filename": "biology-cell-structure.docx",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-cell-structure.docx",
       "status": "uploaded"
     },
     {
-      "id": "ad7708ee-9fa0-4ea4-9a03-f118fc3bf9d4",
+      "id": "b939bd85-0c60-4cef-a589-fa31045e9e69",
       "filename": "french-seasons-vocabulary.txt",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/french-seasons-vocabulary.txt",
       "status": "uploaded"
     },
     {
-      "id": "457aa88d-cf38-46cf-8b73-72cb24ad694c",
+      "id": "c4f42173-1cfb-4a4d-ab77-3f5ab7f6fcd0",
       "filename": "spanish-quiz.gift",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/spanish-quiz.gift",
       "status": "uploaded"
     },
     {
-      "id": "98d73b77-0094-4a4b-9f80-2f74627eb431",
+      "id": "5fb5136f-9ea9-40cf-a66d-aab028e5cd11",
       "filename": "biology-cell-quiz.qti",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-cell-quiz.qti",
       "status": "uploaded"
     },
     {
-      "id": "92c92e62-313c-4f11-a53c-6dede58092ab",
+      "id": "2570de1c-67e2-4eb1-a6d2-112f41e58062",
       "filename": "japanese-grammar-course.imscc",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/japanese-grammar-course.imscc",
       "status": "uploaded"
     },
     {
-      "id": "5bcbd662-dd66-4cb6-84d7-3513de40ab99",
+      "id": "a995efe4-1ece-4303-b002-5e2fdb89d700",
       "filename": "biology-photosynthesis-scorm.zip",
       "s3Key": "protected/us-east-1:b0eadde9-f057-c359-361f-13559337cb1f/documents/biology-photosynthesis-scorm.zip",
       "status": "uploaded"
@@ -414,931 +414,931 @@
   ],
   "analyticsSummaries": [
     {
-      "id": "4e90362f-9b35-4111-bbe7-43b697011eb5",
-      "date": "2026-10-09",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 34,
-      "gradesSubmitted": 14,
-      "avgAccuracy": 80
-    },
-    {
-      "id": "5d91ef2d-5c27-4486-85e4-490c15fc7230",
-      "date": "2026-10-09",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 15,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 79
-    },
-    {
-      "id": "5512c6e2-3fc9-48dd-b79e-9592b0d876d1",
-      "date": "2026-10-09",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 17,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 68
-    },
-    {
-      "id": "800d5f62-f8a4-4981-a648-d0debfa51ac1",
+      "id": "42227b27-0724-4796-8d95-e2accd311c9d",
       "date": "2026-10-10",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 16,
-      "gradesSubmitted": 7,
-      "avgAccuracy": 87
-    },
-    {
-      "id": "ac2f695f-44f5-4f02-960c-a4580217031d",
-      "date": "2026-10-10",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 84
-    },
-    {
-      "id": "c0d6316a-9532-4ea6-a284-7698bf93128a",
-      "date": "2026-10-10",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 8,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 91
-    },
-    {
-      "id": "e81a5432-2aa5-4618-8083-56116383d2c3",
-      "date": "2026-10-11",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 8,
-      "avgAccuracy": 86
-    },
-    {
-      "id": "bba29484-3b6a-486e-a4de-55be5d719aa2",
-      "date": "2026-10-11",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 85
-    },
-    {
-      "id": "bc6b5be0-64e7-4455-a166-b73d13c8e944",
-      "date": "2026-10-11",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 84
-    },
-    {
-      "id": "b3194167-bcea-4ac6-814c-d376bf5e680b",
-      "date": "2026-10-12",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 23,
-      "gradesSubmitted": 19,
-      "avgAccuracy": 71
-    },
-    {
-      "id": "c5bd36fc-0657-4e57-8326-a9b20033bd5f",
-      "date": "2026-10-12",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 13,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 75
-    },
-    {
-      "id": "522a8894-5b40-4744-a8b5-8394e7513ec8",
-      "date": "2026-10-12",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 8,
-      "avgAccuracy": 93
-    },
-    {
-      "id": "14f40e78-6d41-4503-8fd3-6659dc70c30e",
-      "date": "2026-10-13",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 22,
-      "gradesSubmitted": 14,
-      "avgAccuracy": 89
-    },
-    {
-      "id": "dd5c461d-aff2-41b4-bcaa-552b7ad7f42b",
-      "date": "2026-10-13",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 91
-    },
-    {
-      "id": "16754269-57df-4742-bde6-6b103df4be54",
-      "date": "2026-10-13",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 94
-    },
-    {
-      "id": "d5565bd3-fc54-4560-90fd-85ca5bdd1402",
-      "date": "2026-10-14",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 32,
-      "gradesSubmitted": 23,
-      "avgAccuracy": 93
-    },
-    {
-      "id": "733afbf3-8e4f-4851-bd16-7fa7d1d25546",
-      "date": "2026-10-14",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 19,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 87
-    },
-    {
-      "id": "31523716-7520-4812-85cb-b44751de75c2",
-      "date": "2026-10-14",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 13,
-      "gradesSubmitted": 8,
-      "avgAccuracy": 70
-    },
-    {
-      "id": "d1730765-4b17-42ad-8fc6-ce5388387200",
-      "date": "2026-10-15",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 22,
-      "gradesSubmitted": 23,
-      "avgAccuracy": 83
-    },
-    {
-      "id": "4f8a29c6-0d22-408f-a186-2e9a43b2a48a",
-      "date": "2026-10-15",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 7,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 77
-    },
-    {
-      "id": "8f576812-fffb-4c29-ba33-660eacb0c66e",
-      "date": "2026-10-15",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 64
-    },
-    {
-      "id": "25f225f1-6c74-40f5-9745-394abe530be5",
-      "date": "2026-10-16",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 29,
-      "gradesSubmitted": 14,
-      "avgAccuracy": 76
-    },
-    {
-      "id": "1e411fe0-1f6a-4407-9f41-97df2440cb3d",
-      "date": "2026-10-16",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 14,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 98
-    },
-    {
-      "id": "dc51cf4d-7c4e-4843-a50d-4fe3415f6b55",
-      "date": "2026-10-16",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 93
-    },
-    {
-      "id": "9045844c-3ac7-4fc7-b7c3-80c6ac800cb2",
-      "date": "2026-10-17",
       "scope": "platform",
       "scopeId": "all",
       "dailyActiveUsers": 10,
-      "gradesSubmitted": 3,
+      "gradesSubmitted": 5,
       "avgAccuracy": 70
     },
     {
-      "id": "3c8c44b4-60a0-4af2-8fb0-98007bf96adc",
-      "date": "2026-10-17",
+      "id": "1a846819-344f-450a-9eb5-0aaceb9e801b",
+      "date": "2026-10-10",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 3,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 81
+    },
+    {
+      "id": "d1e07aef-3a69-4175-9aa7-2744e6036845",
+      "date": "2026-10-10",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
       "dailyActiveUsers": 3,
       "gradesSubmitted": 1,
-      "avgAccuracy": 70
+      "avgAccuracy": 81
     },
     {
-      "id": "14553f70-e4ff-49ef-b0b3-58fc5d1f8dd1",
-      "date": "2026-10-17",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 5,
-      "gradesSubmitted": 1,
-      "avgAccuracy": 82
-    },
-    {
-      "id": "f0c54f5a-0038-492b-b7e5-167392db1734",
-      "date": "2026-10-18",
+      "id": "72d09414-9929-4e16-bbf5-16f4b813db36",
+      "date": "2026-10-11",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 74
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 78
     },
     {
-      "id": "ae4a734c-f41c-4b1c-935d-d2b2f25cb89f",
-      "date": "2026-10-18",
+      "id": "b9931234-98ed-419a-900e-1ac4949a17d9",
+      "date": "2026-10-11",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 5,
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 66
+    },
+    {
+      "id": "c8b1a163-c371-42ba-87a4-f52328761c25",
+      "date": "2026-10-11",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 10,
       "gradesSubmitted": 1,
       "avgAccuracy": 89
     },
     {
-      "id": "e1dbc7a2-166f-4a01-9d45-b68d65dcb03d",
-      "date": "2026-10-18",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 2,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 61
-    },
-    {
-      "id": "d0fa967a-0a07-4774-97e5-a636b79d78f1",
-      "date": "2026-10-19",
+      "id": "0c3810b2-6466-4563-b4ef-560e0c53b722",
+      "date": "2026-10-12",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 27,
-      "gradesSubmitted": 17,
-      "avgAccuracy": 90
-    },
-    {
-      "id": "2c406a7e-1d28-4726-8aaf-0c7c9f2f1b92",
-      "date": "2026-10-19",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 68
-    },
-    {
-      "id": "5211b5b6-8b71-4f68-a429-1b2c7aa99c6a",
-      "date": "2026-10-19",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 8,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 87
-    },
-    {
-      "id": "a93b7e78-434e-4b98-847e-611b4fd61e1e",
-      "date": "2026-10-20",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 34,
-      "gradesSubmitted": 11,
-      "avgAccuracy": 65
-    },
-    {
-      "id": "f245f7af-6c8e-4eb2-9639-c621c733d9ca",
-      "date": "2026-10-20",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 61
-    },
-    {
-      "id": "0f189ee1-0b67-4cfe-b2ec-e0082ed1c9ed",
-      "date": "2026-10-20",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 16,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 77
-    },
-    {
-      "id": "d2217c49-d1d0-4933-8c9b-f2f241760d21",
-      "date": "2026-10-21",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 23,
-      "gradesSubmitted": 12,
-      "avgAccuracy": 94
-    },
-    {
-      "id": "2f2f14ae-f681-4b50-ba92-9831b4625d6c",
-      "date": "2026-10-21",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 8,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 85
-    },
-    {
-      "id": "46383a17-9f9a-4514-af7f-776f252fc27f",
-      "date": "2026-10-21",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 76
-    },
-    {
-      "id": "524fe63e-f16c-4c34-9ed2-71f9e4989b33",
-      "date": "2026-10-22",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 23,
-      "gradesSubmitted": 11,
-      "avgAccuracy": 80
-    },
-    {
-      "id": "c8b3b850-7b22-4d1b-869e-e388677a4069",
-      "date": "2026-10-22",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 81
-    },
-    {
-      "id": "6c5f01cd-4b10-4c1b-9d41-01efe8f37a1c",
-      "date": "2026-10-22",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 85
-    },
-    {
-      "id": "a400bb38-0219-458e-9f18-e6d705cddaee",
-      "date": "2026-10-23",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 23,
-      "gradesSubmitted": 16,
+      "dailyActiveUsers": 29,
+      "gradesSubmitted": 23,
       "avgAccuracy": 72
     },
     {
-      "id": "e1072b36-a8b0-4aa4-b7ec-e302713561ac",
-      "date": "2026-10-23",
+      "id": "e88c96e1-b873-4de8-bd7b-43d178cdffa6",
+      "date": "2026-10-12",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 8,
-      "gradesSubmitted": 7,
-      "avgAccuracy": 90
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 6,
+      "avgAccuracy": 61
     },
     {
-      "id": "ea68002e-a7f4-4072-8d8e-da4fdb84e494",
-      "date": "2026-10-23",
+      "id": "5cb8f78d-8dd2-4ac3-aa0b-9b495db508e7",
+      "date": "2026-10-12",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 7,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 79
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 89
     },
     {
-      "id": "6feb7692-d91c-491b-bda0-642b60259e15",
-      "date": "2026-10-24",
+      "id": "fc77a1c9-01be-4c85-ac34-13f687f23b79",
+      "date": "2026-10-13",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 5,
-      "gradesSubmitted": 3,
+      "dailyActiveUsers": 30,
+      "gradesSubmitted": 24,
       "avgAccuracy": 71
     },
     {
-      "id": "ea703eca-b739-400e-a763-9d92aac8293e",
-      "date": "2026-10-24",
+      "id": "ff925806-bbe0-4848-a1b9-b1eda3cb548b",
+      "date": "2026-10-13",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 2,
-      "gradesSubmitted": 1,
-      "avgAccuracy": 86
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 18,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 85
     },
     {
-      "id": "6812f68a-30fc-474b-bed1-c4c6c318a570",
-      "date": "2026-10-24",
+      "id": "4c2c2b20-9242-4d77-9bff-86c076184c66",
+      "date": "2026-10-13",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 2,
-      "gradesSubmitted": 1,
-      "avgAccuracy": 68
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 16,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 80
     },
     {
-      "id": "d1fd7c2c-ec12-40d6-9cd8-a95893f287a8",
-      "date": "2026-10-25",
+      "id": "f50ae092-02c8-4dbd-a898-393126bc77d3",
+      "date": "2026-10-14",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 70
+      "dailyActiveUsers": 31,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 66
     },
     {
-      "id": "f066ffaf-bcf6-4aba-a6f0-858757184d02",
-      "date": "2026-10-25",
+      "id": "7d1de27a-6f29-44cd-ad5a-94f48e35286f",
+      "date": "2026-10-14",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 4,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 94
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 80
     },
     {
-      "id": "31d94cad-af71-48be-9dd9-3c0ee73846d3",
-      "date": "2026-10-25",
+      "id": "51dcfe4b-4a1d-448e-a034-1e24cc887ece",
+      "date": "2026-10-14",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 7,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 73
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 65
     },
     {
-      "id": "b0f1e28c-7f86-4a45-92ff-91fd1744295f",
-      "date": "2026-10-26",
+      "id": "451badaa-c7c7-458a-bffe-02a01cee77d1",
+      "date": "2026-10-15",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 25,
-      "gradesSubmitted": 22,
-      "avgAccuracy": 88
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 16,
+      "avgAccuracy": 91
     },
     {
-      "id": "352adadb-fbff-4bc6-9993-85160fb32530",
-      "date": "2026-10-26",
+      "id": "067ea857-82a6-436e-92fa-2cf636775785",
+      "date": "2026-10-15",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 7,
-      "gradesSubmitted": 4,
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 5,
       "avgAccuracy": 93
     },
     {
-      "id": "a8430945-cc01-4989-9818-640adf1535f4",
-      "date": "2026-10-26",
+      "id": "e32aabe9-fcde-4a5b-b8bc-b4616b181ec9",
+      "date": "2026-10-15",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 6,
-      "avgAccuracy": 69
-    },
-    {
-      "id": "aad8cde0-f4e3-42e3-9af8-d18eeaa2621e",
-      "date": "2026-10-27",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 28,
-      "gradesSubmitted": 11,
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 4,
       "avgAccuracy": 71
     },
     {
-      "id": "e904e06c-c1e9-4ca7-9835-b017d2dca811",
-      "date": "2026-10-27",
+      "id": "8fbf288e-315b-4206-aa2b-de7dc927aab9",
+      "date": "2026-10-16",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 35,
+      "gradesSubmitted": 14,
+      "avgAccuracy": 93
+    },
+    {
+      "id": "c3e9cb02-4b74-4703-a5b5-22879e285a08",
+      "date": "2026-10-16",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 62
+    },
+    {
+      "id": "eacaf06e-02d4-4c4d-b98a-671763e82d64",
+      "date": "2026-10-16",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 19,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 60
+    },
+    {
+      "id": "ec575a12-54e1-4b44-b2c1-1b7e9c02d1c8",
+      "date": "2026-10-17",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 20,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 72
+    },
+    {
+      "id": "385639b5-8028-41fd-ab49-0ede1d9e69be",
+      "date": "2026-10-17",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 72
+    },
+    {
+      "id": "6827a999-4aac-4a22-966e-0acdb610f46c",
+      "date": "2026-10-17",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "8345cdf5-0f6c-4668-bbf0-61f45759fce1",
+      "date": "2026-10-18",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "ed3944c1-a021-40d5-a330-a4e3c4eb712e",
+      "date": "2026-10-18",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 2,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 91
+    },
+    {
+      "id": "01a70a6b-340c-4d4e-87a9-f05df044d800",
+      "date": "2026-10-18",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 4,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 71
+    },
+    {
+      "id": "0977575f-58d5-49f5-bdd6-840b5286c285",
+      "date": "2026-10-19",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 35,
+      "gradesSubmitted": 20,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "ae8b9c5e-3657-43c0-88a9-bc32cf7cb400",
+      "date": "2026-10-19",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 85
+    },
+    {
+      "id": "de9911c7-23e3-4d73-b5c2-cd7264e914f7",
+      "date": "2026-10-19",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
       "dailyActiveUsers": 15,
-      "gradesSubmitted": 4,
+      "gradesSubmitted": 10,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "896410cb-afb9-4f5e-99d0-b51d73097141",
+      "date": "2026-10-20",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 22,
+      "gradesSubmitted": 18,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "eccbc806-c86a-4871-aaf6-c4c1be4b83ba",
+      "date": "2026-10-20",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 71
+    },
+    {
+      "id": "5adbc759-8a7d-4aa1-b8cb-d10845b8e3ac",
+      "date": "2026-10-20",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "b019773d-c3df-487a-a0b2-3bdbe1402e44",
+      "date": "2026-10-21",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 26,
+      "gradesSubmitted": 14,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "d8f4c8cd-5a3f-49a6-94d5-5a71de9c5552",
+      "date": "2026-10-21",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "0d384b9a-5b66-4f1a-85ee-6760677e9e92",
+      "date": "2026-10-21",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 65
+    },
+    {
+      "id": "d284472f-87da-448a-be2f-b20635e3a968",
+      "date": "2026-10-22",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 23,
+      "gradesSubmitted": 15,
+      "avgAccuracy": 89
+    },
+    {
+      "id": "ba8d01f9-9576-4505-bccb-32c4a7aa6b72",
+      "date": "2026-10-22",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 5,
       "avgAccuracy": 69
     },
     {
-      "id": "c825a2c8-233a-43e7-a6fc-c2a23fb71d9f",
-      "date": "2026-10-27",
+      "id": "7d22f528-5fc4-4d9d-a282-1404d34b183b",
+      "date": "2026-10-22",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 9,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 66
+    },
+    {
+      "id": "dab8503a-5c4f-40a9-be5e-fec5fb47598e",
+      "date": "2026-10-23",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 24,
+      "gradesSubmitted": 13,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "9ee08935-552b-444a-b1c9-257a4f3abbf5",
+      "date": "2026-10-23",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 14,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 67
+    },
+    {
+      "id": "85dee6b5-25c1-41b8-aa96-110ce15cb946",
+      "date": "2026-10-23",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 96
+    },
+    {
+      "id": "fbe76640-8894-4a41-9500-d4114783f461",
+      "date": "2026-10-24",
+      "scope": "platform",
+      "scopeId": "all",
       "dailyActiveUsers": 14,
       "gradesSubmitted": 5,
       "avgAccuracy": 95
     },
     {
-      "id": "8ef1fc81-03ce-45f7-80b8-0fd88bdf27a1",
-      "date": "2026-10-28",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 21,
-      "gradesSubmitted": 21,
-      "avgAccuracy": 77
-    },
-    {
-      "id": "f0a4c73f-d098-4b0d-b99e-47a86e91406c",
-      "date": "2026-10-28",
+      "id": "73f0088b-fb85-4679-86ad-ac7bfae5b32b",
+      "date": "2026-10-24",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
       "dailyActiveUsers": 6,
-      "gradesSubmitted": 10,
-      "avgAccuracy": 93
+      "gradesSubmitted": 1,
+      "avgAccuracy": 83
     },
     {
-      "id": "d784b07f-f159-4fbd-a7f3-15db6f4cc381",
-      "date": "2026-10-28",
+      "id": "6f4526c0-7ec3-4436-8800-485d54082564",
+      "date": "2026-10-24",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 8,
-      "avgAccuracy": 80
-    },
-    {
-      "id": "cb54bfd4-a20a-4fdb-b9af-7847b036dcb9",
-      "date": "2026-10-29",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 23,
-      "gradesSubmitted": 15,
-      "avgAccuracy": 91
-    },
-    {
-      "id": "e17e004b-6628-4e0e-ac92-9f98c797e535",
-      "date": "2026-10-29",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 65
-    },
-    {
-      "id": "b3bc8088-6103-475d-ad67-279c2a7b06a2",
-      "date": "2026-10-29",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 84
-    },
-    {
-      "id": "d12e070f-d81f-47b7-aaba-0e1ead7bb066",
-      "date": "2026-10-30",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 33,
-      "gradesSubmitted": 10,
-      "avgAccuracy": 90
-    },
-    {
-      "id": "6d4ddc5a-d0ee-49ae-a4bb-4537a610b81b",
-      "date": "2026-10-30",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 17,
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
       "gradesSubmitted": 2,
-      "avgAccuracy": 70
-    },
-    {
-      "id": "726b51c6-b778-4c2b-a650-0e52169dac56",
-      "date": "2026-10-30",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 18,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 75
-    },
-    {
-      "id": "64a3f306-c6a9-4cd9-94ee-a757d45de54b",
-      "date": "2026-10-31",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 13,
-      "gradesSubmitted": 4,
       "avgAccuracy": 89
     },
     {
-      "id": "399fdac9-5057-4f2f-b8a9-c383fc576d53",
-      "date": "2026-10-31",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 7,
+      "id": "bd65701a-e0f1-450a-b8aa-759c8b8ebb8b",
+      "date": "2026-10-25",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 15,
       "gradesSubmitted": 2,
-      "avgAccuracy": 64
+      "avgAccuracy": 67
     },
     {
-      "id": "f6f944c7-a0e6-4de7-9146-c22850564150",
-      "date": "2026-10-31",
+      "id": "4b7cb330-3185-4cca-9245-f03b3f2319b3",
+      "date": "2026-10-25",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 6,
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 7,
       "gradesSubmitted": 1,
-      "avgAccuracy": 71
+      "avgAccuracy": 60
     },
     {
-      "id": "d2f3886e-04b2-4871-aece-7406cb2ec244",
-      "date": "2026-11-01",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 20,
-      "gradesSubmitted": 7,
-      "avgAccuracy": 68
-    },
-    {
-      "id": "4d31321b-92ef-46ce-a166-a329b05927dd",
-      "date": "2026-11-01",
+      "id": "3886396f-7b93-411c-a70d-480846c2c72b",
+      "date": "2026-10-25",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 6,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 87
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 83
     },
     {
-      "id": "149c2291-b93b-4325-8ce3-dc13320dd966",
-      "date": "2026-11-01",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 10,
-      "gradesSubmitted": 2,
-      "avgAccuracy": 92
-    },
-    {
-      "id": "2b544c74-2d6f-4d15-9723-ebd959dcca9d",
-      "date": "2026-11-02",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 35,
-      "gradesSubmitted": 21,
-      "avgAccuracy": 78
-    },
-    {
-      "id": "7800cfa3-747d-45f7-b79a-175a50d31379",
-      "date": "2026-11-02",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 4,
-      "avgAccuracy": 69
-    },
-    {
-      "id": "fecec2a5-1629-4cfb-af6e-87c40adcedfb",
-      "date": "2026-11-02",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 20,
-      "gradesSubmitted": 9,
-      "avgAccuracy": 94
-    },
-    {
-      "id": "9d4c6673-df7e-4a37-a995-e6ec267941cb",
-      "date": "2026-11-03",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 21,
-      "gradesSubmitted": 23,
-      "avgAccuracy": 69
-    },
-    {
-      "id": "00130c41-de60-4955-9537-067a4c7689a9",
-      "date": "2026-11-03",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 11,
-      "avgAccuracy": 97
-    },
-    {
-      "id": "4ad60cff-6377-4a39-8cf0-06ba8ca6a8d9",
-      "date": "2026-11-03",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 7,
-      "gradesSubmitted": 9,
-      "avgAccuracy": 64
-    },
-    {
-      "id": "4db19103-a82a-4efd-9810-6ada7ee76686",
-      "date": "2026-11-04",
-      "scope": "platform",
-      "scopeId": "all",
-      "dailyActiveUsers": 29,
-      "gradesSubmitted": 15,
-      "avgAccuracy": 81
-    },
-    {
-      "id": "915f4e61-6d11-4cf4-bbf8-9d39f32091b4",
-      "date": "2026-11-04",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 11,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 92
-    },
-    {
-      "id": "4ca2d2ef-6a86-4c53-8123-b0a6f32b26c3",
-      "date": "2026-11-04",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 13,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 61
-    },
-    {
-      "id": "094e3148-d60e-45d8-a3f3-788e5fee7bfa",
-      "date": "2026-11-05",
+      "id": "94e347cb-552a-4fc8-98de-84145654b97a",
+      "date": "2026-10-26",
       "scope": "platform",
       "scopeId": "all",
       "dailyActiveUsers": 30,
       "gradesSubmitted": 11,
-      "avgAccuracy": 81
+      "avgAccuracy": 88
     },
     {
-      "id": "105e2912-73ca-471d-87f7-ed4813d497a4",
-      "date": "2026-11-05",
+      "id": "c4dbb45a-d80a-461c-805e-1d36ff15f0e9",
+      "date": "2026-10-26",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 5,
-      "avgAccuracy": 65
-    },
-    {
-      "id": "c1cbfaeb-57d1-49e1-84b4-d5f60ddaf2ef",
-      "date": "2026-11-05",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 9,
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 14,
       "gradesSubmitted": 4,
-      "avgAccuracy": 91
+      "avgAccuracy": 79
     },
     {
-      "id": "708d58e7-11f6-46fd-b97c-18b890f2d6f9",
-      "date": "2026-11-06",
+      "id": "0cace125-4b6d-4ada-b13f-21c1e063d2b8",
+      "date": "2026-10-26",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 97
+    },
+    {
+      "id": "8a052869-f9e1-455d-ac9f-ba49359e2df9",
+      "date": "2026-10-27",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 28,
-      "gradesSubmitted": 17,
+      "dailyActiveUsers": 25,
+      "gradesSubmitted": 18,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "24402d96-d4bb-4819-8f03-290e7553ab0b",
+      "date": "2026-10-27",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 10,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 97
+    },
+    {
+      "id": "b7d0fca3-1317-4703-9550-00b52438cc4f",
+      "date": "2026-10-27",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "a48565d5-9662-4464-928f-eb7a41e9aa8d",
+      "date": "2026-10-28",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 30,
+      "gradesSubmitted": 22,
+      "avgAccuracy": 80
+    },
+    {
+      "id": "adb69d9e-f2bb-4228-8cba-fe96def89c4a",
+      "date": "2026-10-28",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 14,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 70
+    },
+    {
+      "id": "d0c179fa-13de-4bd3-ba3b-f225911bcc91",
+      "date": "2026-10-28",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 88
+    },
+    {
+      "id": "697b231d-b0cf-4475-91cd-ce163c4d56ed",
+      "date": "2026-10-29",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 34,
+      "gradesSubmitted": 22,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "4a052279-8732-4365-b3fe-b0b95d65c19b",
+      "date": "2026-10-29",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "e204b2d3-a6ce-4852-b4bf-874590f58692",
+      "date": "2026-10-29",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 4,
       "avgAccuracy": 72
     },
     {
-      "id": "3a083289-9187-430b-83ab-f95226abbb93",
-      "date": "2026-11-06",
-      "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 3,
-      "avgAccuracy": 98
-    },
-    {
-      "id": "fd7eb581-c269-40d8-b898-644aac5d5724",
-      "date": "2026-11-06",
-      "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 12,
-      "gradesSubmitted": 6,
+      "id": "64386db7-ec89-4af6-b115-3dd405ea8c69",
+      "date": "2026-10-30",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 34,
+      "gradesSubmitted": 17,
       "avgAccuracy": 87
     },
     {
-      "id": "7e6cbb2b-e3bb-44c0-91cd-7f98831d97e1",
-      "date": "2026-11-07",
+      "id": "fda25ce0-43eb-47d2-8a89-b855ff84a2b2",
+      "date": "2026-10-30",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "833ba7b2-8e85-4331-a2e0-bb50296df2cc",
+      "date": "2026-10-30",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 7,
+      "avgAccuracy": 95
+    },
+    {
+      "id": "f62c4f0b-d142-4b4d-983d-00f4d0639362",
+      "date": "2026-10-31",
       "scope": "platform",
       "scopeId": "all",
-      "dailyActiveUsers": 9,
-      "gradesSubmitted": 7,
+      "dailyActiveUsers": 19,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "ee09d27e-a31c-439f-b3a7-f4dcd72a921d",
+      "date": "2026-10-31",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 4,
       "avgAccuracy": 84
     },
     {
-      "id": "b1d94d8e-55f3-408c-b58e-5ce16fe714dd",
-      "date": "2026-11-07",
+      "id": "dbb60c62-65dc-4bc7-b01a-d74d23d15da2",
+      "date": "2026-10-31",
       "scope": "section",
-      "scopeId": "74c18c1d-6292-4cfd-abbf-01f8c0eade20",
-      "dailyActiveUsers": 3,
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 63
+    },
+    {
+      "id": "aa218b31-7243-4ae0-8eab-7a2baa36157a",
+      "date": "2026-11-01",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 5,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 71
+    },
+    {
+      "id": "32de1cb5-5b2e-4e2a-9f99-d74a35c30061",
+      "date": "2026-11-01",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 1,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 93
+    },
+    {
+      "id": "1d9ffbcc-d1e1-41e0-8781-1221c1a0c368",
+      "date": "2026-11-01",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 2,
       "gradesSubmitted": 1,
+      "avgAccuracy": 62
+    },
+    {
+      "id": "01c57b75-7551-4cd7-a9ea-1ad18983ea4f",
+      "date": "2026-11-02",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 22,
+      "gradesSubmitted": 20,
+      "avgAccuracy": 88
+    },
+    {
+      "id": "84cacbf5-1422-40bd-8485-f0374a0196b6",
+      "date": "2026-11-02",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 9,
+      "avgAccuracy": 79
+    },
+    {
+      "id": "56d268f3-d98a-4623-894d-12bbce6495f5",
+      "date": "2026-11-02",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 8,
+      "gradesSubmitted": 5,
       "avgAccuracy": 74
     },
     {
-      "id": "7f6545fd-6894-427c-aad2-23e6b608d858",
+      "id": "87c8e194-49db-477b-8565-fe88d88eb930",
+      "date": "2026-11-03",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 31,
+      "gradesSubmitted": 17,
+      "avgAccuracy": 83
+    },
+    {
+      "id": "117c7ebf-a640-4871-be01-e7bb35426201",
+      "date": "2026-11-03",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 74
+    },
+    {
+      "id": "e816a875-4860-4976-bcdd-99543c5c0d5a",
+      "date": "2026-11-03",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 17,
+      "gradesSubmitted": 3,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "bc2d0dbd-085f-4d9c-9b79-a9ea0177cfbd",
+      "date": "2026-11-04",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 23,
+      "gradesSubmitted": 13,
+      "avgAccuracy": 75
+    },
+    {
+      "id": "2b322eb8-aa53-419f-bb7e-a436372a2c1c",
+      "date": "2026-11-04",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 5,
+      "avgAccuracy": 92
+    },
+    {
+      "id": "24ac7280-be5c-4e82-8aa4-7e6dbc0a640f",
+      "date": "2026-11-04",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 88
+    },
+    {
+      "id": "e2a312b9-1e6a-45b1-b7c6-a587ad446cae",
+      "date": "2026-11-05",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 30,
+      "gradesSubmitted": 16,
+      "avgAccuracy": 90
+    },
+    {
+      "id": "fd101223-d6cb-4b72-ad09-09c24f94bf1e",
+      "date": "2026-11-05",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 11,
+      "gradesSubmitted": 4,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "71e01473-045c-4bdd-a2bd-ca14eb973708",
+      "date": "2026-11-05",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 15,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 78
+    },
+    {
+      "id": "86d3a7f7-adf5-4794-bc0f-97f10c3ee4a3",
+      "date": "2026-11-06",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 25,
+      "gradesSubmitted": 13,
+      "avgAccuracy": 73
+    },
+    {
+      "id": "77f2e76a-e60d-4768-94a2-97280d0245dc",
+      "date": "2026-11-06",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 86
+    },
+    {
+      "id": "6ac9064e-6efd-4700-96ca-c503f79b91ce",
+      "date": "2026-11-06",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 7,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 80
+    },
+    {
+      "id": "30069524-9c49-432d-9f52-223886602eb6",
+      "date": "2026-11-07",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 13,
+      "gradesSubmitted": 2,
+      "avgAccuracy": 76
+    },
+    {
+      "id": "02e0b6a2-40b6-40ba-adce-9643a1cf2b42",
       "date": "2026-11-07",
       "scope": "section",
-      "scopeId": "f578d785-f1f8-4bbf-a671-1d42afd628a8",
-      "dailyActiveUsers": 2,
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 7,
       "gradesSubmitted": 1,
-      "avgAccuracy": 76
+      "avgAccuracy": 80
+    },
+    {
+      "id": "2c92f87a-e715-464c-bfc6-b633fe7531b3",
+      "date": "2026-11-07",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 6,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 94
+    },
+    {
+      "id": "a88b01e9-a3e4-493b-b1bc-83c4c7f661b0",
+      "date": "2026-11-08",
+      "scope": "platform",
+      "scopeId": "all",
+      "dailyActiveUsers": 12,
+      "gradesSubmitted": 8,
+      "avgAccuracy": 85
+    },
+    {
+      "id": "4bda6cb6-ea18-42c7-bdf7-13e292ebd3cb",
+      "date": "2026-11-08",
+      "scope": "section",
+      "scopeId": "1fc0a22d-c42f-475d-bc74-4e4ff94aa902",
+      "dailyActiveUsers": 5,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 68
+    },
+    {
+      "id": "2dab93ea-d85a-472d-b009-ab664ab9a844",
+      "date": "2026-11-08",
+      "scope": "section",
+      "scopeId": "90a8713c-d735-407c-8618-ef286416352b",
+      "dailyActiveUsers": 4,
+      "gradesSubmitted": 1,
+      "avgAccuracy": 82
     }
   ],
   "squads": [
     {
-      "id": "a3d55240-00bf-438c-8dba-6b55204f2108",
+      "id": "a26c44e0-53c8-42ac-bf78-e9c91313e29a",
       "name": "Dragon Scholars"
     },
     {
-      "id": "3c740ef5-29d1-4ffe-92db-4319c1e80340",
+      "id": "61e16bff-d12f-47a3-9c7f-073274a1cb70",
       "name": "Phoenix Writers"
     }
   ],
   "skills": [
     {
-      "id": "587e4120-a9a2-4c29-be9f-1d4c1d935482",
+      "id": "846baf0e-8bf2-4182-ba5a-47cf6ccbb31b",
       "title": "Basic Vocabulary"
     },
     {
-      "id": "2baa0ad7-0fd0-43ea-be64-aba1885d76ca",
+      "id": "98fdf2a0-94c1-4ac1-8e69-65fb16fb6b60",
       "title": "Reading Comprehension"
     },
     {
-      "id": "529061a1-40c8-459b-a670-7eda8afd0532",
+      "id": "6823a590-b974-4148-9ec5-b1473e56736f",
       "title": "Grammar Patterns"
     },
     {
-      "id": "38268ed6-3daa-4fd8-9ad8-b68ba9a0ceb5",
+      "id": "18b224e8-2340-4dac-b4f8-cddffdb52f16",
       "title": "Listening & Speaking"
     },
     {
-      "id": "c155c62e-8c52-47bb-bd0e-6238c3a98d4f",
+      "id": "25d08a2b-6943-44a5-aa8d-20d21e7767b0",
       "title": "Advanced Composition"
     },
     {
-      "id": "aa9c5900-bfa6-48ec-9bcc-5091a31841e2",
+      "id": "733941af-08d7-4372-85c5-42e5bed154b9",
       "title": "Oral Presentation"
     },
     {
-      "id": "4f862ab3-716c-4e7f-972f-3b43b5769e65",
+      "id": "5e256bb8-055e-412e-9720-3cb92fdb0ae4",
       "title": "Critical Analysis"
     },
     {
-      "id": "4977d43f-7cf7-4c36-96d3-4567ccc149b9",
+      "id": "11ba1582-09f2-4377-82ce-c7fe95ba9b64",
       "title": "Language Mastery"
     }
   ],
   "badges": [
     {
-      "id": "7f11992c-0291-41ba-b67f-c9de1b0bb6e9",
+      "id": "8c8c7cd9-4df5-4b58-b4e2-dd5a66fb9d9a",
       "title": "First Submission",
       "category": "Achievement"
     },
     {
-      "id": "85b3fa85-d7dc-4de1-aa1b-a43b3063a4f8",
+      "id": "96ed1081-7e84-44cc-ae20-c583a5ddb568",
       "title": "Perfect Score",
       "category": "Excellence"
     },
     {
-      "id": "2c7fc09b-ffea-4605-a81f-a12caeb5b4c4",
+      "id": "d0fe0021-999f-4029-95a3-052beaddb984",
       "title": "Week Warrior",
       "category": "Consistency"
     },
     {
-      "id": "e3d1c3b7-dd80-4c19-9e5d-4c1ceef0c797",
+      "id": "1232168a-c898-42a9-8c4a-00a0f501c0e5",
       "title": "Speed Demon",
       "category": "Speed"
     },
     {
-      "id": "49377610-fd11-4ea7-afd2-805747bce1a9",
+      "id": "957c8959-e199-4507-a56d-4ea60bbe8a1b",
       "title": "Bug Squasher Initiate",
       "category": "Campaign"
     },
     {
-      "id": "5e4b04fa-0592-42e7-97c0-a04b39de864f",
+      "id": "13274c89-c9f2-4443-a620-7700b74c8f2b",
       "title": "Completionist",
       "category": "Achievement"
     }
   ],
   "xpLogs": [
     {
-      "id": "df970b9d-50e2-4df8-9140-158fca5a3a96",
+      "id": "dad9cb3e-7ff0-40a9-9c46-d0a3b34a4f39",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 50,
       "reason": "HOMEWORK_SUBMITTED"
     },
     {
-      "id": "5a894dc1-87ae-44dc-bebc-4422d29b54ee",
+      "id": "f00249cc-fe13-4f25-b062-4cd66bf182f0",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 100,
       "reason": "ALL_BLOCKS_COMPLETED"
     },
     {
-      "id": "37211549-5a19-4587-9bfe-932a7461a1cd",
+      "id": "c258ff2a-dd1e-4198-a83a-0135d7a4919c",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 25,
       "reason": "ON_TIME_SUBMISSION"
     },
     {
-      "id": "cf6e122d-3057-4a26-9895-103bc90a72de",
+      "id": "6fa02ea2-7133-4caf-ab90-85cc3ee2345c",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 75,
       "reason": "STREAK_3DAY"
     },
     {
-      "id": "e08b99fd-7554-465f-b6d6-3772688fdf84",
+      "id": "9512d851-ed1c-45ff-a334-458b8bfc6a4c",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 150,
       "reason": "PERFECT_SCORE"
     },
     {
-      "id": "ed96413e-c517-4ceb-9d8d-08fe249dc023",
+      "id": "19052028-a3dd-481c-a0ff-8c6ffac3ef14",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 30,
       "reason": "NAILED_IT"
     },
     {
-      "id": "02d381fc-b5a3-4083-8a58-5a3984048990",
+      "id": "2cf1ddfb-226b-4eaf-9ccf-2728561226be",
       "studentId": "7408e468-3071-70f1-df88-ac8bf65f37ee",
       "xpAmount": 40,
       "reason": "PEER_REVIEW_GIVEN"
@@ -1346,7 +1346,7 @@
   ],
   "challenges": [
     {
-      "id": "c73f8cca-cc33-4c42-87f7-6f5cfcd3a364",
+      "id": "fdd7cf84-9aa1-4524-b22b-84f25342c64b",
       "title": "Chapter 3: The Merge Conflict Colosseum",
       "chapterOrder": 3,
       "active": false
@@ -1354,25 +1354,25 @@
   ],
   "notifications": [
     {
-      "id": "daaec2d9-b25d-476d-86f7-3cda53b3bee7",
+      "id": "093ea22b-9ed4-452d-8758-26dcd39b31f1",
       "type": null,
       "category": null,
       "title": "Assignment Due Tomorrow"
     },
     {
-      "id": "35f42b46-f9a1-4522-9ced-3896dcaf0f4e",
+      "id": "b4617a94-3699-4f2f-a611-29d1a486e8ab",
       "type": null,
       "category": null,
       "title": "New Badge Earned! 🏅"
     },
     {
-      "id": "37ffd9f6-c512-4ced-9965-674882a18646",
+      "id": "6ab72f99-1078-4701-b8a4-830feffb665f",
       "type": null,
       "category": null,
       "title": "New Comment on Your Work"
     },
     {
-      "id": "caef0369-defe-4f56-af09-861c61041cf9",
+      "id": "e8f4353d-3334-4f76-bc9f-2560354ee71f",
       "type": null,
       "category": null,
       "title": "Bug Wars Chapter 2 — 42% Complete!"
@@ -1380,30 +1380,30 @@
   ],
   "easterEggs": [
     {
-      "id": "200ca1a3-e7de-4965-9625-9a2f1493c2a5",
+      "id": "b1aad27f-de72-4a62-b436-457cfc8b0aad",
       "trigger": "KEYWORD",
       "triggerValue": "konnichiwa"
     }
   ],
   "practiceSessions": [
     {
-      "id": "25119bc0-e435-4e45-a074-047a873f0129",
-      "unitID": "cfa3c77d-974d-48d7-9a12-2f3c344f5631",
+      "id": "abc66a6c-5f98-43e6-80bb-b4f3530aa143",
+      "unitID": "c75183bb-b5f3-4333-84ae-54b4de8ad13e",
       "drillType": "VOCABULARY",
       "complete": true
     },
     {
-      "id": "a38d4571-0796-42e5-bd51-bd0e20ab8ea7",
-      "unitID": "3081c056-bcb7-47a0-9ca5-1ca94e349538",
+      "id": "029ac032-0727-4e04-b967-8018a10cb53e",
+      "unitID": "91b0a41c-fb4b-4270-8837-c65ba3df5fbc",
       "drillType": "MIXED",
       "complete": false
     }
   ],
   "homeworkRoom": {
-    "id": "c2da8a83-b9c0-45da-952f-5a033a74eff1",
+    "id": "9885ae4c-5b0f-423d-98b3-b0b29f3e1fc3",
     "code": null
   },
   "platformSettings": {
-    "id": "71b4fd00-f22a-4255-baa4-abce87d55741"
+    "id": "dc5ee4eb-431c-4426-b3bf-796003549786"
   }
 }

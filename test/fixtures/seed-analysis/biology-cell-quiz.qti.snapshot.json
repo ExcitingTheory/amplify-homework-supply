@@ -1,0 +1,17 @@
+{
+  "sourceSha256": "ac0a20a37b9c3b2c3bd4fbba152c635fbfe0568414a16cb7545b0cd64aa6fa3e",
+  "capturedAt": "2026-11-08T12:00:44.101Z",
+  "sourceFormat": "qti-2.1",
+  "pageCount": 0,
+  "vocabularyJSON": [],
+  "summariesJSON": [
+    {
+      "title": "Document summary",
+      "content": "This document does not contain specific summaries, as there are no supplied page or chapter summaries or verified facts to synthesize from. It appears the document is incomplete or missing details necessary for creating a comprehensive summary.",
+      "pageRange": "N/A"
+    }
+  ],
+  "objectivesJSON": [],
+  "conceptsJSON": [],
+  "questionsJSON": []
+}

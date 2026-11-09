@@ -266,6 +266,7 @@ export function SquadJoinPanel({
           title={t("squadJoinPanel.emptyTitle")}
           description={t("squadJoinPanel.emptyDescription")}
           ctaLabel={t("squadJoinPanel.emptyCta")}
+          // eslint-disable-next-line i18next/no-literal-string -- Navigation route, not translatable text.
           ctaHref="/squads"
         />
       ) : (

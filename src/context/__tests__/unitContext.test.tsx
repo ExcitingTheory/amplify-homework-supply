@@ -16,6 +16,12 @@ const mocks = vi.hoisted(() => ({
   unitSubscribe: vi.fn(),
   saveDraft: vi.fn(),
   workbook: vi.fn(),
+  unitWords: vi.fn(),
+  unitFiles: vi.fn(),
+  unitQuestions: vi.fn(),
+  wordGet: vi.fn(),
+  fileGet: vi.fn(),
+  questionGet: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ push: vi.fn() }) }));
@@ -64,9 +70,12 @@ vi.mock("../../utils/amplifyClient", () => ({
         get: mocks.unitGet,
         onUpdate: () => ({ subscribe: mocks.unitSubscribe }),
       },
-      UnitWord: { list: async () => ({ data: [] }) },
-      UnitFile: { list: async () => ({ data: [] }) },
-      QuestionUnit: { list: async () => ({ data: [] }) },
+      UnitWord: { list: mocks.unitWords },
+      UnitFile: { list: mocks.unitFiles },
+      QuestionUnit: { list: mocks.unitQuestions },
+      Word: { get: mocks.wordGet },
+      File: { get: mocks.fileGet },
+      Question: { get: mocks.questionGet },
     },
     mutations: { evaluateSkillsForUnit: mocks.evaluateSkills },
   }),
@@ -114,6 +123,9 @@ async function setup() {
 describe("UnitProvider attempt lifecycle", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mocks.unitWords.mockResolvedValue({ data: [] });
+    mocks.unitFiles.mockResolvedValue({ data: [] });
+    mocks.unitQuestions.mockResolvedValue({ data: [] });
     mocks.workbook.mockReturnValue(null);
     mocks.gradeSubscribe.mockReturnValue({ unsubscribe: vi.fn() });
     mocks.gradeCreate.mockResolvedValue({ data: grade });
@@ -131,6 +143,70 @@ describe("UnitProvider attempt lifecycle", () => {
         data: JSON.stringify({ root: { children: [{ type: "custom-ai", key: "block-1" }] } }),
       },
     });
+  });
+
+  it("loads unit resources from later pages, including after an empty filtered page", async () => {
+    mocks.unitWords
+      .mockResolvedValueOnce({ data: [{ wordID: "nucleus" }], nextToken: "words-2" })
+      .mockResolvedValueOnce({ data: [], nextToken: "words-3" })
+      .mockResolvedValueOnce({ data: [{ wordID: "ribosomes" }], nextToken: null });
+    mocks.unitFiles
+      .mockResolvedValueOnce({ data: [], nextToken: "files-2" })
+      .mockResolvedValueOnce({ data: [{ fileID: "pdf" }], nextToken: null });
+    mocks.unitQuestions
+      .mockResolvedValueOnce({ data: [], nextToken: "questions-2" })
+      .mockResolvedValueOnce({ data: [{ questionID: "question" }], nextToken: null });
+    mocks.wordGet.mockImplementation(async ({ id }) => ({ data: { id } }));
+    mocks.fileGet.mockResolvedValue({ data: { id: "pdf" } });
+    mocks.questionGet.mockResolvedValue({ data: { id: "question" } });
+
+    const { result } = await setup();
+    expect(Object.keys(result.current.dictionary)).toEqual(["nucleus", "ribosomes"]);
+    expect(Object.keys(result.current.files)).toEqual(["pdf"]);
+    expect(Object.keys(result.current.questionBank)).toEqual(["question"]);
+    expect(mocks.unitWords).toHaveBeenLastCalledWith({
+      filter: { unitID: { eq: "unit-1" }, deletedAt: { attributeExists: false } },
+      nextToken: "words-3", selectionSet: ["wordID"],
+    });
+  });
+
+  it("loads learner resources when join metadata is readable only by the owner", async () => {
+    for (const [list, field, id] of [
+      [mocks.unitWords, "wordID", "nucleus"],
+      [mocks.unitFiles, "fileID", "pdf"],
+      [mocks.unitQuestions, "questionID", "question"],
+    ] as const) {
+      list.mockImplementation(async ({ selectionSet }: { selectionSet?: string[] }) =>
+        !selectionSet?.length || selectionSet.some((selected) => selected !== field)
+          ? { errors: [{ message: "Not Authorized to access join metadata" }] }
+          : { data: [{ [field]: id }] },
+      );
+    }
+    mocks.wordGet.mockResolvedValue({ data: { id: "nucleus" } });
+    mocks.fileGet.mockResolvedValue({ data: { id: "pdf" } });
+    mocks.questionGet.mockResolvedValue({ data: { id: "question" } });
+
+    const { result } = await setup();
+    expect(Object.keys(result.current.dictionary)).toEqual(["nucleus"]);
+    expect(Object.keys(result.current.files)).toEqual(["pdf"]);
+    expect(Object.keys(result.current.questionBank)).toEqual(["question"]);
+  });
+
+  it("reports a later-page failure instead of exposing an incomplete dictionary", async () => {
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      mocks.unitWords
+        .mockResolvedValueOnce({ data: [{ wordID: "nucleus" }], nextToken: "words-2" })
+        .mockResolvedValueOnce({ errors: [{ message: "Unauthorized" }] });
+      renderHook(() => React.useContext(UnitContext), { wrapper });
+      await waitFor(() => expect(error).toHaveBeenCalledWith(
+        "[UnitContext] Unit.get error:",
+        expect.objectContaining({ message: "Could not load unit words: Unauthorized" }),
+      ));
+      expect(mocks.wordGet).not.toHaveBeenCalled();
+    } finally {
+      error.mockRestore();
+    }
   });
 
   it("does not save remote workbook updates as student answers", async () => {

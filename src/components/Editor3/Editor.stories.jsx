@@ -218,7 +218,7 @@ export const EmptyEditorTextFormatting = {
     unitId: "empty-editor-text-formatting-id",
     initializeMockData: false,
   },
-  play: async ({ canvas }) => {
+  play: async ({ canvas, userEvent }) => {
     // Verify the editor rendered with a contenteditable area
     const textboxes = await canvas.findAllByRole("textbox");
     const editorContent =
@@ -239,6 +239,49 @@ export const EmptyEditorTextFormatting = {
     expect(editorContent.getBoundingClientRect().height).toBeGreaterThanOrEqual(
       frame.clientHeight - parseFloat(frameStyle.paddingTop) - parseFloat(frameStyle.paddingBottom),
     );
+    const blurEditor = async () => {
+      await userEvent.click(screen.getByRole("button", {
+        name: /^Formatting options for font family/,
+      }));
+      await userEvent.keyboard("{Escape}");
+      await waitFor(() => expect(editorContent).not.toHaveFocus());
+    };
+    await waitFor(() => expect(editorContent).toHaveFocus());
+    expect(getComputedStyle(paper).boxShadow).toContain("inset");
+    expect(getComputedStyle(editorContent).boxShadow).toBe("none");
+    await blurEditor();
+    const hint = within(paper).getByText(
+      /Start typing or use the toolbar above to add content/,
+    );
+    expect(hint).toBeVisible();
+    const hintBounds = hint.getBoundingClientRect();
+    const editorBounds = editorContent.getBoundingClientRect();
+    expect(Math.abs(
+      hintBounds.x + hintBounds.width / 2 - editorBounds.x - editorBounds.width / 2,
+    )).toBeLessThanOrEqual(1);
+    expect(Math.abs(
+      hintBounds.y + hintBounds.height / 2 - editorBounds.y - editorBounds.height / 2,
+    )).toBeLessThanOrEqual(1);
+    expect(getComputedStyle(hint).pointerEvents).toBe("none");
+    const unfocusedShadow = getComputedStyle(paper).boxShadow;
+    await userEvent.click(editorContent);
+    expect(editorContent).toHaveFocus();
+    expect(hint).not.toBeVisible();
+    expect(getComputedStyle(paper).boxShadow).not.toBe(unfocusedShadow);
+    expect(getComputedStyle(paper).boxShadow).toContain("inset");
+    expect(getComputedStyle(editorContent).boxShadow).toBe("none");
+    const paperBounds = paper.getBoundingClientRect();
+    expect(paperBounds.left).toBeLessThan(editorBounds.left);
+    expect(paperBounds.right).toBeGreaterThan(editorBounds.right);
+    await blurEditor();
+    expect(getComputedStyle(paper).boxShadow).toBe(unfocusedShadow);
+    expect(hint).toBeVisible();
+    await userEvent.click(editorContent);
+    await userEvent.keyboard("Cells are the basic units of life.");
+    await blurEditor();
+    await waitFor(() => expect(within(paper).queryByText(
+      /Start typing or use the toolbar above to add content/,
+    )).toBeNull());
   },
 };
 

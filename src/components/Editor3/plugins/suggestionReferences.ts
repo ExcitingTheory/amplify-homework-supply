@@ -60,11 +60,17 @@ function valuesByRelevance(
         (total, term) => total + (text.includes(term) ? 1 : 0),
         0,
       );
-      return { record, score };
+      const labelScore = label(record)
+        .toLocaleLowerCase()
+        .split(/[^\p{L}\p{N}]+/u)
+        .filter((term) => queryTerms.includes(term)).length;
+      return { record, score, labelScore };
     })
     .sort(
       (a, b) =>
-        b.score - a.score || label(a.record).localeCompare(label(b.record)),
+        b.labelScore - a.labelScore ||
+        b.score - a.score ||
+        label(a.record).localeCompare(label(b.record)),
     )
     .slice(0, limit)
     .map(({ record }) => record);
