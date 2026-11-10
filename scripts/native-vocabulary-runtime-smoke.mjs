@@ -17,6 +17,7 @@ const server = createServer(async (request, response) => {
     if (invocationSent) return;
     invocationSent = true;
     response.writeHead(200, {
+      "Content-Type": "application/json",
       "Lambda-Runtime-Aws-Request-Id": "runtime-smoke",
       "Lambda-Runtime-Deadline-Ms": String(Date.now() + 30_000),
       "Lambda-Runtime-Invoked-Function-Arn": "arn:aws:lambda:us-east-1:123456789012:function:runtime-smoke",
@@ -47,6 +48,11 @@ const child = spawn("docker", [
   "-e", `AWS_LAMBDA_RUNTIME_API=host.docker.internal:${address.port}`,
   "-e", "AWS_REGION=us-east-1",
   "-e", "AWS_LAMBDA_FUNCTION_NAME=runtime-smoke",
+  "-e", "AWS_LAMBDA_FUNCTION_VERSION=$LATEST",
+  "-e", "AWS_LAMBDA_FUNCTION_MEMORY_SIZE=3072",
+  "-e", "AWS_LAMBDA_LOG_GROUP_NAME=/aws/lambda/runtime-smoke",
+  "-e", "AWS_LAMBDA_LOG_STREAM_NAME=runtime-smoke",
+  "-e", "_HANDLER=handler.handler",
   "-e", "STORAGE_BUCKET=runtime-smoke",
   image,
 ], { stdio: ["ignore", "pipe", "pipe"] });
@@ -54,17 +60,28 @@ let logs = "";
 child.stdout.on("data", (chunk) => { logs += chunk; });
 child.stderr.on("data", (chunk) => { logs += chunk; });
 child.on("error", rejectResult);
-child.on("exit", (code) => rejectResult(new Error(`Container exited ${code}: ${logs}`)));
+child.on("close", (code) => rejectResult(new Error(`Container exited ${code}: ${logs}`)));
 const timer = setTimeout(() => rejectResult(new Error(`Runtime invocation timed out: ${logs}`)), 60_000);
+let runtimeError;
 try {
   const error = JSON.parse(await result);
   assert.equal(error.errorMessage, "Invalid native vocabulary artifact key");
   console.log("Lambda runtime dispatched the invocation and reported the handler's validation error.");
+} catch (error) {
+  runtimeError = error;
+  throw error;
 } finally {
   clearTimeout(timer);
-  const stopped = spawnSync("docker", ["stop", "--time", "2", name], { encoding: "utf8" });
+  const stopped = child.pid && child.exitCode === null && child.signalCode === null
+    ? spawnSync("docker", ["stop", "--time", "2", name], { encoding: "utf8" })
+    : undefined;
   server.closeAllConnections();
   server.close();
-  if (stopped.error) throw stopped.error;
-  if (stopped.status !== 0) throw new Error(`Could not stop smoke container: ${stopped.stderr}`);
+  const cleanupError = stopped?.error ?? (stopped && stopped.status !== 0
+    ? new Error(`Could not stop smoke container: ${stopped.stderr}`)
+    : undefined);
+  if (cleanupError) {
+    if (runtimeError) throw new AggregateError([runtimeError, cleanupError], "Runtime smoke test and container cleanup failed");
+    throw cleanupError;
+  }
 }
