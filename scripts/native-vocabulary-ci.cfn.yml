@@ -1,5 +1,8 @@
 AWSTemplateFormatVersion: "2010-09-09"
 Description: Commit-pinned native vocabulary images and GitHub Actions delivery to Amplify.
+Metadata:
+  AWSToolsMetrics:
+    AWSAgentToolkit: aws-cloudformation@3
 Parameters:
   GitHubRepository:
     Type: String
@@ -42,6 +45,11 @@ Resources:
                 aws:SourceArn: !Sub arn:${AWS::Partition}:lambda:${AWS::Region}:${AWS::AccountId}:function:amplify-${AmplifyAppId}-*
   GitHubImageRole:
     Type: AWS::IAM::Role
+    Metadata:
+      com.aws.cloudformation.Context:
+        why: Publish verified commit images before releasing Amplify.
+        must:
+          - Scope GetBranch to the branch ARN and StartJob, GetJob, StopJob to its job ARNs.
     Properties:
       MaxSessionDuration: 7200
       AssumeRolePolicyDocument:
@@ -79,11 +87,11 @@ Resources:
                 Effect: Allow
                 Action:
                   - amplify:GetBranch
-                  - amplify:StartJob
                 Resource: !Sub arn:${AWS::Partition}:amplify:${AWS::Region}:${AWS::AccountId}:apps/${AmplifyAppId}/branches/main
               - Sid: ObserveRelease
                 Effect: Allow
                 Action:
+                  - amplify:StartJob
                   - amplify:GetJob
                   - amplify:StopJob
                 Resource: !Sub arn:${AWS::Partition}:amplify:${AWS::Region}:${AWS::AccountId}:apps/${AmplifyAppId}/branches/main/jobs/*
