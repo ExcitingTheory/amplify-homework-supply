@@ -16,7 +16,7 @@ concurrency:
 jobs:
   build-and-release:
     if: github.ref == 'refs/heads/main'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 120
     env:
       AWS_REGION: us-east-1
@@ -24,17 +24,18 @@ jobs:
       AMPLIFY_APP_ID: ${{ vars.AMPLIFY_APP_ID || secrets.AMPLIFY_APP_ID }}
       IMAGE_REPOSITORY: ${{ vars.NATIVE_VOCABULARY_IMAGE_REPOSITORY || 'homework-native-vocabulary' }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
+          package-manager-cache: false
       - name: Validate configuration
         env:
           CI_ROLE_ARN: ${{ vars.NATIVE_VOCABULARY_CI_ROLE_ARN }}
         run: |
           test -n "$CI_ROLE_ARN" || { echo "::error::Set NATIVE_VOCABULARY_CI_ROLE_ARN from the CI bootstrap stack."; exit 1; }
           test -n "$AMPLIFY_APP_ID" || { echo "::error::Set AMPLIFY_APP_ID."; exit 1; }
-      - uses: aws-actions/configure-aws-credentials@v4
+      - uses: aws-actions/configure-aws-credentials@v6
         with:
           role-to-assume: ${{ vars.NATIVE_VOCABULARY_CI_ROLE_ARN }}
           role-duration-seconds: 7200
@@ -59,11 +60,11 @@ jobs:
             jq '.failures' <<< "$result"
             exit 1
           fi
-      - uses: docker/setup-buildx-action@v3
+      - uses: docker/setup-buildx-action@v4
         if: steps.image.outputs.exists == 'false'
       - name: Build Lambda image
         if: steps.image.outputs.exists == 'false'
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           file: amplify/functions/nativeVocabulary/Dockerfile
