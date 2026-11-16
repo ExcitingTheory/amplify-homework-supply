@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { blockAccuracyFraction } from "../../src/context/unitContext";
+import {
+  blockAccuracyFraction,
+  computeUnitAccuracy,
+} from "../../src/context/unitContext";
 
 /**
  * Graded blocks record accuracy as a 0..1 fraction (`correct / attempted`),
@@ -59,5 +62,55 @@ describe("a grade's accuracy", () => {
 
   it("has no score without blocks", () => {
     expect(gradeAccuracy([])).toBe(0);
+  });
+});
+
+describe("computeUnitAccuracy (the unit's stored accuracy)", () => {
+  it("counts a completed block that scored 0 instead of dropping it", () => {
+    // Before: the 0 block was skipped and this unit read as 100%.
+    expect(
+      computeUnitAccuracy({
+        a: { complete: true, accuracy: 1 },
+        b: { complete: true, accuracy: 0 },
+      }),
+    ).toBe(50);
+  });
+
+  it("ignores incomplete blocks and blocks with no usable score", () => {
+    expect(
+      computeUnitAccuracy({
+        a: { complete: true, accuracy: 0.5 },
+        b: { complete: false, accuracy: 0 },
+        c: { complete: true },
+        d: { complete: true, accuracy: NaN },
+      }),
+    ).toBe(50);
+  });
+
+  it("counts a completed practice mode that scored 0", () => {
+    expect(
+      computeUnitAccuracy({
+        m: {
+          learn: { complete: true, accuracy: 1 },
+          easy: { complete: true, accuracy: 0 },
+        },
+      }),
+    ).toBe(50);
+  });
+
+  it("keeps counting in-progress modes only once they have a non-zero score", () => {
+    expect(
+      computeUnitAccuracy({
+        m: {
+          learn: { complete: false, accuracy: 0.5 },
+          easy: { complete: false, accuracy: 0 },
+        },
+      }),
+    ).toBe(50);
+  });
+
+  it("is 0 with nothing scored", () => {
+    expect(computeUnitAccuracy({})).toBe(0);
+    expect(computeUnitAccuracy(null)).toBe(0);
   });
 });

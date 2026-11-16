@@ -3343,5 +3343,42 @@
     "xpCapsTitle": "Límites de XP",
     "xpDisabledWarning": "Los puntos de experiencia (XP) están desactivados para esta sección. Los estudiantes no obtendrán ningún XP.",
     "xpEnabled": "XP activada"
+  },
+  "studentResponses": {
+    "title": "{count, plural, one {# respuesta} other {# respuestas}}",
+    "tabAnswers": "Respuestas",
+    "tabHistory": "Historial",
+    "needsReviewOnly": "Por revisar ({count})",
+    "needsReview": "Por revisar",
+    "verdict": {
+      "correct": "Correcta",
+      "misspelled": "Mal escrita",
+      "incorrect": "Incorrecta",
+      "error": "Error al calificar"
+    },
+    "input": {
+      "text": "Escrita",
+      "audio": "Hablada",
+      "drawing": "Dibujada",
+      "image": "Foto",
+      "choice": "Elegida"
+    },
+    "attempts": "{count, plural, one {# intento} other {# intentos}}",
+    "prompt": "Pregunta: {prompt}",
+    "transcript": "Transcripción: {transcript}",
+    "noTranscript": "Sin transcripción",
+    "fileUnavailable": "Archivo no disponible",
+    "photoAlt": "Foto subida por el estudiante",
+    "legacy": "Guardada antes de conservar las respuestas completas",
+    "block": "Ejercicio {n}",
+    "noAnswers": "No hay respuestas guardadas para este intento.",
+    "loading": "Cargando respuestas…",
+    "loadError": "No se pudieron cargar las respuestas.",
+    "strokeOrderAlt": "Dibujo con {count, plural, one {# trazo} other {# trazos}}, numerados en el orden en que se dibujaron",
+    "strokeCount": "{count, plural, one {# trazo} other {# trazos}}, numerados en orden de dibujo",
+    "replay": "Reproducir",
+    "downloadExcalidraw": "Archivo de Excalidraw",
+    "backToWorkbook": "Volver al cuaderno",
+    "reviewEmpty": "Aún no hay nada que revisar. Termina el cuaderno para ver tus respuestas aquí."
   }
 }

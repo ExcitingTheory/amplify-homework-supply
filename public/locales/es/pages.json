@@ -419,7 +419,8 @@
     "reload": "Recargar",
     "start": "Iniciar",
     "timerInstructions": "Este es un ejercicio con tiempo límite, presiona iniciar para comenzar el cronómetro y responder las preguntas.",
-    "unitUpdated": "Esta unidad ha sido actualizada por el instructor. ¿Desea recargar con la versión más reciente?"
+    "unitUpdated": "Esta unidad ha sido actualizada por el instructor. ¿Desea recargar con la versión más reciente?",
+    "reviewAnswers": "Revisar mis respuestas"
   },
   "gradeReviewDrawer": {
     "cancel": "Cancelar",

@@ -21,6 +21,15 @@ import {
   searchBundle,
   hybridSearchBundle,
 } from "./serverSearch";
+import {
+  canReadBundle,
+  canReadInstructorBundle,
+  createBundleAccessData,
+  instructorBundlePath,
+  sectionBundlePath,
+  unitBundlePath,
+  type BundleUser,
+} from "./searchBundleAccess";
 
 const tracer = trace.getTracer("agent-tools", "1.0.0");
 
@@ -29,6 +38,7 @@ const tracer = trace.getTracer("agent-tools", "1.0.0");
 export interface AgentContext {
   userId: string;
   groups: string[];
+  /** Request-provided identity; never use it for bundle access decisions. */
   identityId?: string;
   /** Identity pool ID from the verified authentication session. */
   sessionIdentityId?: string;
@@ -47,9 +57,6 @@ export interface AgentContext {
     fileCount?: number;
   }>;
 }
-
-// Cache resolved identityId for the duration of the request
-let _resolvedIdentityId: string | null | undefined;
 
 /**
  * Wrap a tool execute function with an OpenTelemetry span.
@@ -79,34 +86,6 @@ function withToolSpan<TParams, TResult>(
 }
 
 /**
- * Resolve the identityId for search bundle paths.
- * Falls back to looking up the unit owner's identityId from the database.
- */
-async function resolveIdentityId(ctx: AgentContext): Promise<string | null> {
-  if (ctx.identityId) return ctx.identityId;
-  if (_resolvedIdentityId !== undefined) return _resolvedIdentityId;
-
-  if (ctx.unitId) {
-    try {
-      const { getServerClient } = await import("@/utils/amplifyServerClient");
-      const client = getServerClient();
-      const { data: unit } = await (client as any).models.Unit.get(
-        { id: ctx.unitId },
-        { selectionSet: ["id", "identityId"] },
-      );
-      _resolvedIdentityId = unit?.identityId ?? null;
-      return _resolvedIdentityId as string | null;
-    } catch {
-      _resolvedIdentityId = null;
-      return null;
-    }
-  }
-
-  _resolvedIdentityId = null;
-  return null;
-}
-
-/**
  * Resolve search bundle paths for shared (collaborator) units.
  * Queries CollaboratorAccess for the current user, then builds bundle paths
  * using each shared unit's owner identityId.
@@ -132,13 +111,9 @@ async function resolveSharedBundlePaths(ctx: AgentContext): Promise<string[]> {
       try {
         const { data: unit } = await (client as any).models.Unit.get(
           { id: grant.unitID },
-          { selectionSet: ["id", "identityId"] },
+          { selectionSet: ["id"] },
         );
-        if (unit?.identityId) {
-          paths.push(
-            `protected/${unit.identityId}/search-index/unit/${unit.id}.json`,
-          );
-        }
+        if (unit?.id) paths.push(unitBundlePath(unit.id));
       } catch {
         // Skip units that can't be fetched
       }
@@ -247,26 +222,41 @@ export function createSemanticSearchTool(ctx: AgentContext, apiKey: string) {
       try {
         const t = await getAgentTranslations(ctx.locale);
         const queryEmbedding = await embedQuery(query, apiKey);
-        const identityId = await resolveIdentityId(ctx);
-
-        if (!identityId) {
-          return {
-            results: [],
-            message: t("semanticSearch.noIdentity"),
-          };
-        }
+        const accessData = createBundleAccessData();
+        const user: BundleUser = {
+          userId: ctx.userId,
+          groups: ctx.groups,
+          identityId: ctx.sessionIdentityId,
+          ownerIds: ctx.ownerIds ?? [ctx.userId],
+        };
 
         // Determine which bundles to search
         const bundlePaths: string[] = [];
-        if (scope === "unit" && ctx.unitId) {
-          bundlePaths.push(
-            `protected/${identityId}/search-index/unit/${ctx.unitId}.json`,
-          );
-        } else if (scope === "section" && ctx.courseOutline) {
-          for (const entry of ctx.courseOutline) {
-            bundlePaths.push(
-              `protected/${identityId}/search-index/unit/${entry.unitId}.json`,
-            );
+        if (
+          scope === "unit" &&
+          ctx.unitId &&
+          (await canReadBundle("unit", user, ctx.unitId, accessData))
+        ) {
+          bundlePaths.push(unitBundlePath(ctx.unitId));
+        } else if (scope === "section") {
+          const canReadSection =
+            ctx.sectionId !== undefined &&
+            (await canReadBundle(
+              "section",
+              user,
+              ctx.sectionId,
+              accessData,
+            ));
+          if (ctx.sectionId && canReadSection) {
+            bundlePaths.push(sectionBundlePath(ctx.sectionId));
+          } else if (ctx.courseOutline) {
+            for (const entry of ctx.courseOutline) {
+              if (
+                await canReadBundle("unit", user, entry.unitId, accessData)
+              ) {
+                bundlePaths.push(unitBundlePath(entry.unitId));
+              }
+            }
           }
         } else if (scope === "shared") {
           // Search collaborator units — load bundles for each shared unit
@@ -277,11 +267,13 @@ export function createSemanticSearchTool(ctx: AgentContext, apiKey: string) {
           ctx.groups.some((g) => g === "Admins")
         ) {
           // Admin-only: platform-wide search bundle
-          bundlePaths.push(`private/platform/search-index/platform.json`);
-        } else {
-          bundlePaths.push(
-            `private/${identityId}/search-index/instructor.json`,
-          );
+          bundlePaths.push("admin/search-index/platform.json");
+        } else if (
+          scope === "all" &&
+          ctx.sessionIdentityId &&
+          canReadInstructorBundle(user, ctx.sessionIdentityId)
+        ) {
+          bundlePaths.push(instructorBundlePath(ctx.sessionIdentityId));
         }
 
         if (bundlePaths.length === 0) {

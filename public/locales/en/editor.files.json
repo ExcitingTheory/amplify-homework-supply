@@ -95,7 +95,7 @@
       "confirmMoveToRecycleBin": "Move to Recycle Bin: {name}?",
       "deleteTooltip": "Delete",
       "downloadTooltip": "Download",
-      "humanReviewMessage": "AI extraction needs human review. The entries below are listed first, each with the reason.",
+      "humanReviewMessage": "AI extraction needs human review. The import remains available while you review the warnings below.",
       "importedContentNote": "{questions, plural, one {# question} other {# questions}} and {words, plural, one {# word} other {# words}} imported from this document stay in your question bank and dictionary.",
       "insertTooltip": "Insert into editor",
       "moreReviewWarnings": "Showing the first review warnings. Full details are retained in the analysis artifacts.",

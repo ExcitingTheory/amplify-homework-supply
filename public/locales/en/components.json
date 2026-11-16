@@ -3541,5 +3541,42 @@
     "xpCapsTitle": "XP Caps",
     "xpDisabledWarning": "XP is disabled for this section. Students will not earn any XP.",
     "xpEnabled": "XP Enabled"
+  },
+  "studentResponses": {
+    "title": "{count, plural, one {# answer} other {# answers}}",
+    "tabAnswers": "Answers",
+    "tabHistory": "History",
+    "needsReviewOnly": "Needs review ({count})",
+    "needsReview": "Needs review",
+    "verdict": {
+      "correct": "Correct",
+      "misspelled": "Misspelled",
+      "incorrect": "Incorrect",
+      "error": "Grading failed"
+    },
+    "input": {
+      "text": "Typed",
+      "audio": "Spoken",
+      "drawing": "Drawn",
+      "image": "Photo",
+      "choice": "Chosen"
+    },
+    "attempts": "{count, plural, one {# attempt} other {# attempts}}",
+    "prompt": "Prompt: {prompt}",
+    "transcript": "Transcript: {transcript}",
+    "noTranscript": "No transcript",
+    "fileUnavailable": "File not available",
+    "photoAlt": "Photo the student uploaded",
+    "legacy": "Saved before full answers were kept",
+    "block": "Exercise {n}",
+    "noAnswers": "No answers saved for this attempt.",
+    "loading": "Loading answers…",
+    "loadError": "Couldn't load the answers.",
+    "strokeOrderAlt": "Drawing with {count, plural, one {# stroke} other {# strokes}}, numbered in drawing order",
+    "strokeCount": "{count, plural, one {# stroke} other {# strokes}}, numbered in drawing order",
+    "replay": "Replay",
+    "downloadExcalidraw": "Excalidraw file",
+    "backToWorkbook": "Back to workbook",
+    "reviewEmpty": "Nothing to review yet. Finish the workbook to see your answers here."
   }
 }

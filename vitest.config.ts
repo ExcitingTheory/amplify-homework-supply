@@ -1,4 +1,5 @@
 import { defineConfig, defineProject } from "vitest/config";
+import { existsSync } from "node:fs";
 import path from "path";
 import { fileURLToPath } from "url";
 import react from "@vitejs/plugin-react";
@@ -9,6 +10,7 @@ import { optimizeDepsInclude } from "./.storybook/optimize-deps";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const storybookConfigDir = path.resolve(__dirname, ".storybook");
+const amplifyOutputsPath = path.resolve(__dirname, "amplify_outputs.json");
 
 /**
  * Vitest Configuration for Vitest 4+ with @storybook/addon-vitest
@@ -338,9 +340,23 @@ export default defineConfig({
     },
   },
   resolve: {
-    alias: {
-      "@": path.resolve(__dirname, "./src"),
-      "@storybook/__mocks__": path.resolve(__dirname, "./.storybook/__mocks__"),
-    },
+    alias: [
+      ...(!existsSync(amplifyOutputsPath)
+        ? [
+            {
+              find: /(^|\/)amplify_outputs\.json$/,
+              replacement: path.resolve(
+                __dirname,
+                "./test/mocks/amplify-outputs.json",
+              ),
+            },
+          ]
+        : []),
+      { find: "@", replacement: path.resolve(__dirname, "./src") },
+      {
+        find: "@storybook/__mocks__",
+        replacement: path.resolve(__dirname, "./.storybook/__mocks__"),
+      },
+    ],
   },
 });

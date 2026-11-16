@@ -24,6 +24,7 @@ import {
 import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import OpenAI from "openai";
 import { getTranscriptionAudioFormat } from "./transcriptionAudioFormat";
+import { TRANSCRIPTION_MODEL } from "../shared/transcriptionModel";
 
 // Initialize Phoenix tracing at module load
 initializePhoenixTracing();
@@ -725,7 +726,7 @@ async function handleVerifyShortAnswer(args: any): Promise<string> {
 }
 
 async function handleTranscribe(args: any): Promise<string> {
-  const { audio, model = "whisper-1" } = args;
+  const { audio, model = TRANSCRIPTION_MODEL } = args;
   const openai = await getOpenAI();
 
   try {
@@ -748,7 +749,7 @@ async function handleTranscribe(args: any): Promise<string> {
 }
 
 async function handleVerifyAudio(args: any): Promise<string> {
-  const { expected, audio, model = "whisper-1", chatModel = "gpt-4o" } = args;
+  const { expected, audio, model = TRANSCRIPTION_MODEL, chatModel = "gpt-4o" } = args;
   const openai = await getOpenAI();
   const systemMsg = buildVerifySystemMessage(args);
 
@@ -785,7 +786,7 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
   const {
     expected,
     audioUrl,
-    model = "whisper-1",
+    model = TRANSCRIPTION_MODEL,
     chatModel = "gpt-4o",
     prompt,
   } = args;
@@ -795,8 +796,19 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
   try {
     // Fetch audio from S3 URL
     const response = await fetch(audioUrl);
+    if (!response.ok) {
+      throw new Error(`Failed to fetch audio: HTTP ${response.status}`);
+    }
     const audioBuffer = await response.arrayBuffer();
-    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+    // Recordings are webm or m4a; name the file after its real format rather
+    // than calling everything audio.mp3.
+    const format = getTranscriptionAudioFormat(
+      response.headers.get("content-type"),
+      audioUrl,
+    );
+    const file = new File([audioBuffer], `audio.${format.extension}`, {
+      type: format.mimeType,
+    });
 
     // Transcribe
     const transcriptionResponse = await openai.audio.transcriptions.create({
@@ -874,7 +886,7 @@ async function handleVerifyAudioUrl(args: any): Promise<string> {
 }
 
 async function handleTranscribeUrl(args: any): Promise<string> {
-  const { audioUrl, model = "whisper-1" } = args;
+  const { audioUrl, model = TRANSCRIPTION_MODEL } = args;
   const openai = await getOpenAI();
 
   try {

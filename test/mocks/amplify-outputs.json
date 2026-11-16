@@ -1,0 +1,27 @@
+{
+  "version": "1",
+  "auth": {
+    "user_pool_id": "us-east-1_unit_test",
+    "aws_region": "us-east-1",
+    "user_pool_client_id": "unit-test-client",
+    "identity_pool_id": "us-east-1:00000000-0000-0000-0000-000000000000"
+  },
+  "data": {
+    "url": "https://unit-test.appsync-api.us-east-1.amazonaws.com/graphql",
+    "aws_region": "us-east-1",
+    "default_authorization_type": "AWS_IAM",
+    "authorization_types": ["AWS_IAM"],
+    "model_introspection": {
+      "version": 1,
+      "models": {},
+      "enums": {},
+      "nonModels": {}
+    }
+  },
+  "storage": {
+    "aws_region": "us-east-1",
+    "bucket_name": "unit-test-bucket",
+    "buckets": []
+  },
+  "custom": {}
+}

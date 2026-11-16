@@ -21,14 +21,49 @@ export default function DocumentExtractionWarnings({
   itemLabel,
 }: DocumentExtractionWarningsProps) {
   const t = useTranslations("editor.files");
-  const warnings = readReviewWarnings(metadata);
+  let parsedMetadata = metadata;
+  if (typeof metadata === "string" && metadata.trim()) {
+    try {
+      parsedMetadata = JSON.parse(metadata);
+    } catch (error) {
+      console.error(
+        "[DocumentExtractionWarnings] Unable to parse document metadata:",
+        error,
+      );
+      return (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          {t("fileManager2.fileDetails.reviewWarningsUnavailable")}
+        </Alert>
+      );
+    }
+  }
+
+  const warnings = readReviewWarnings(parsedMetadata);
   if (warnings.length === 0) return null;
 
   const grouped = groupReviewWarnings(warnings);
-  const count = flaggedCount ?? grouped.flaggedCount;
+  const analysis =
+    parsedMetadata !== null && typeof parsedMetadata === "object"
+      ? (parsedMetadata as Record<string, unknown>).analysis
+      : undefined;
+  const recordedCount =
+    analysis !== null && typeof analysis === "object"
+      ? (analysis as Record<string, unknown>).reviewWarningCount
+      : undefined;
+  const count =
+    flaggedCount ??
+    (typeof recordedCount === "number" &&
+    Number.isFinite(recordedCount) &&
+    recordedCount >= 0
+      ? recordedCount
+      : grouped.flaggedCount + grouped.document.length);
   const label = itemLabel ?? t("fileManager2.fileDetails.reviewItems");
   const summary = t("fileManager2.fileDetails.reviewCount", { count, items: label });
   const message = t("fileManager2.fileDetails.humanReviewMessage");
+  const recordedWarningCount =
+    typeof recordedCount === "number" && Number.isFinite(recordedCount)
+      ? recordedCount
+      : warnings.length;
 
   return (
     <Alert severity="warning" sx={{ mt: 2 }}>
@@ -44,6 +79,12 @@ export default function DocumentExtractionWarnings({
             </li>
           ))}
         </Box>
+      )}
+      {(grouped.document.length > 5 ||
+        recordedWarningCount > warnings.length) && (
+        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+          {t("fileManager2.fileDetails.moreReviewWarnings")}
+        </Typography>
       )}
     </Alert>
   );

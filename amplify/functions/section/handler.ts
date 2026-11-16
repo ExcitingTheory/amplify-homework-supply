@@ -34,6 +34,7 @@ import {
   resolveGradeAggregationMethod,
   computeAggregatedGrade,
 } from "../shared/gradeAggregation";
+import { isAllowedSubmissionKey } from "./submissionKeys";
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
@@ -627,6 +628,8 @@ export const handler: Handler = async (event: any, context: any) => {
         );
       case "getStudentSubmissionUrl":
         return await handleGetStudentSubmissionUrl(args, userId, claims);
+      case "getStudentSubmissionUrls":
+        return await handleGetStudentSubmissionUrls(args, userId, claims);
       case "getUnitsCdnCookie":
         return await handleGetUnitsCdnCookie();
       default:
@@ -1535,7 +1538,7 @@ async function isUserInSection(
 // ========================================================================
 
 /**
- * Returns a short-lived S3 presigned URL for a student's private submission file.
+ * Checks that the caller may read files under a grade owner's private path.
  *
  * Authorization checks (in order):
  *  1. AppSync auth rule already verified caller is in Instructors or Admins group.
@@ -1543,18 +1546,14 @@ async function isUserInSection(
  *     (prevents path traversal — an instructor cannot request an arbitrary private path).
  *  3. Caller is the section instructor (section.instructor === userId) OR is an Admin
  *     OR is in the section's Cognito instructor group.
+ *
+ * Returns the private path prefix every requested key must start with.
  */
-async function handleGetStudentSubmissionUrl(
-  args: any,
+async function authorizeSubmissionAccess(
+  gradeId: string,
   userId: string,
   claims: Record<string, any>,
-): Promise<string> {
-  const { gradeId, submissionKey } = args;
-
-  if (!gradeId || !submissionKey) {
-    throw new Error("gradeId and submissionKey are required");
-  }
-
+): Promise<{ expectedPrefix: string; sectionID: string | null }> {
   const client = getClient();
 
   // 1. Fetch grade — needs identityId and sectionID
@@ -1570,17 +1569,11 @@ async function handleGetStudentSubmissionUrl(
 
   const grade = gradeData.getGrade;
 
-  // 2. Path traversal prevention — submissionKey must be under the grade owner's private path
-  const expectedPrefix = `private/${grade.identityId}/`;
-  if (!grade.identityId || !submissionKey.startsWith(expectedPrefix)) {
-    console.error(
-      "[getStudentSubmissionUrl] submissionKey does not match grade owner identity",
-      { submissionKey, expectedPrefix },
-    );
-    throw new Error(
-      "Unauthorized: submission key does not match grade owner identity",
-    );
+  // 2. Path traversal prevention — keys must be under the grade owner's private path
+  if (!grade.identityId) {
+    throw new Error("Unauthorized: grade has no owner identity");
   }
+  const expectedPrefix = `private/${grade.identityId}/`;
 
   // 3. Section authorization — caller must be the section's instructor or an Admin
   const userGroups: string[] = claims["cognito:groups"] || [];
@@ -1625,13 +1618,20 @@ async function handleGetStudentSubmissionUrl(
     }
   }
 
-  // 4. Generate short-lived CloudFront signed URL (15 minutes)
+  return { expectedPrefix, sectionID: grade.sectionID ?? null };
+}
+
+/** Load CloudFront signing credentials from SSM once per container. */
+async function loadCloudFrontSigner(): Promise<{
+  cdnDomain: string;
+  privateKey: string;
+  keyPairId: string;
+}> {
   const cdnDomain = process.env.CDN_DOMAIN;
   if (!cdnDomain) {
     throw new Error("CDN_DOMAIN environment variable not set");
   }
 
-  // Load CF credentials from SSM on first invocation, then reuse from cache
   if (!cfPrivateKey || !cfKeyPairId) {
     const ssmClient = new SSMClient({
       region: process.env.AWS_REGION || "us-east-1",
@@ -1656,22 +1656,113 @@ async function handleGetStudentSubmissionUrl(
   if (!cfPrivateKey || !cfKeyPairId) {
     throw new Error("CloudFront signing credentials not available in SSM");
   }
+  return { cdnDomain, privateKey: cfPrivateKey, keyPairId: cfKeyPairId };
+}
 
+/** Max keys signed per batch call (a grade's recordings and photos). */
+const MAX_SUBMISSION_KEYS = 100;
+
+/**
+ * Returns a short-lived (15 minute) CloudFront signed URL for one of a
+ * student's private submission files. See authorizeSubmissionAccess.
+ */
+async function handleGetStudentSubmissionUrl(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<string> {
+  const { gradeId, submissionKey } = args;
+
+  if (!gradeId || !submissionKey) {
+    throw new Error("gradeId and submissionKey are required");
+  }
+
+  const { expectedPrefix, sectionID } = await authorizeSubmissionAccess(
+    gradeId,
+    userId,
+    claims,
+  );
+  if (!isAllowedSubmissionKey(submissionKey, expectedPrefix)) {
+    console.error(
+      "[getStudentSubmissionUrl] submissionKey does not match grade owner identity",
+      { submissionKey, expectedPrefix },
+    );
+    throw new Error(
+      "Unauthorized: submission key does not match grade owner identity",
+    );
+  }
+
+  const signer = await loadCloudFrontSigner();
   const signedUrl = signCFUrl(
-    `https://${cdnDomain}/${submissionKey}`,
-    cfPrivateKey,
-    cfKeyPairId,
+    `https://${signer.cdnDomain}/${submissionKey}`,
+    signer.privateKey,
+    signer.keyPairId,
     Math.floor((Date.now() + 15 * 60 * 1000) / 1000),
   );
 
   console.log(
     "[getStudentSubmissionUrl] Generated CloudFront signed URL for:",
-    {
-      gradeId,
-      sectionID: grade.sectionID,
-      requestedBy: userId,
-    },
+    { gradeId, sectionID, requestedBy: userId },
   );
 
   return signedUrl;
+}
+
+/**
+ * Batch form of handleGetStudentSubmissionUrl: one authorization check, then
+ * a signed URL for each key. Keys outside the grade owner's private path get
+ * url: null instead of failing the whole batch.
+ */
+async function handleGetStudentSubmissionUrls(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<Array<{ key: string; url: string | null }>> {
+  const { gradeId } = args;
+  const keys: string[] = Array.isArray(args.submissionKeys)
+    ? [...new Set<string>(args.submissionKeys)]
+    : [];
+
+  if (!gradeId) throw new Error("gradeId is required");
+  if (keys.length === 0) return [];
+  if (keys.length > MAX_SUBMISSION_KEYS) {
+    throw new Error(`At most ${MAX_SUBMISSION_KEYS} submission keys per call`);
+  }
+
+  const { expectedPrefix, sectionID } = await authorizeSubmissionAccess(
+    gradeId,
+    userId,
+    claims,
+  );
+  const signer = await loadCloudFrontSigner();
+  const expiresAt = Math.floor((Date.now() + 15 * 60 * 1000) / 1000);
+
+  const results = keys.map((key) => {
+    if (!isAllowedSubmissionKey(key, expectedPrefix)) {
+      console.error(
+        "[getStudentSubmissionUrls] key does not match grade owner identity",
+        { key, expectedPrefix },
+      );
+      return { key, url: null };
+    }
+    return {
+      key,
+      url: signCFUrl(
+        `https://${signer.cdnDomain}/${key}`,
+        signer.privateKey,
+        signer.keyPairId,
+        expiresAt,
+      ),
+    };
+  });
+
+  console.log("[getStudentSubmissionUrls] Signed URLs:", {
+    gradeId,
+    sectionID,
+    requestedBy: userId,
+    count: results.filter((r) => r.url).length,
+    refused: results.filter((r) => !r.url).length,
+  });
+
+  return results;
 }

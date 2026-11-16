@@ -1,0 +1,26 @@
+
+> amplify-homework-supply@1.0.0 lint
+> npm run lint:parallel
+
+
+> amplify-homework-supply@1.0.0 lint:parallel
+> concurrently -n src,editor3,gamification "npm run lint:src" "npm run lint:editor3" "npm run lint:gamification"
+
+[gamification] 
+[gamification] > amplify-homework-supply@1.0.0 lint:gamification
+[gamification] > NODE_OPTIONS='--max-old-space-size=8192' eslint 'src/components/Gamification/**/*.{js,jsx,ts,tsx}' --max-warnings=0
+[gamification] 
+[src] 
+[src] > amplify-homework-supply@1.0.0 lint:src
+[src] > NODE_OPTIONS='--max-old-space-size=8192' eslint 'src/**/*.{js,jsx,ts,tsx}' --ignore-pattern 'src/components/Gamification/**' --ignore-pattern 'src/components/Editor3/**' --max-warnings=0
+[src] 
+[editor3] 
+[editor3] > amplify-homework-supply@1.0.0 lint:editor3
+[editor3] > NODE_OPTIONS='--max-old-space-size=8192' eslint 'src/components/Editor3/**/*.{js,jsx,ts,tsx}' --max-warnings=0
+[editor3] 
+[editor3] 📦 Loaded 1405 Material UI prop names for i18n exclusion
+[src] 📦 Loaded 1405 Material UI prop names for i18n exclusion
+[gamification] 📦 Loaded 1405 Material UI prop names for i18n exclusion
+[gamification] npm run lint:gamification exited with code 0
+[editor3] npm run lint:editor3 exited with code 0
+[src] npm run lint:src exited with code 0

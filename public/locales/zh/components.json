@@ -3343,5 +3343,42 @@
     "xpCapsTitle": "经验值上限",
     "xpDisabledWarning": "此部分已禁用经验值(XP),学生将无法获得任何经验值。",
     "xpEnabled": "经验值已启用"
+  },
+  "studentResponses": {
+    "title": "{count, plural, other {# 个回答}}",
+    "tabAnswers": "回答",
+    "tabHistory": "历史",
+    "needsReviewOnly": "待复核（{count}）",
+    "needsReview": "待复核",
+    "verdict": {
+      "correct": "正确",
+      "misspelled": "拼写错误",
+      "incorrect": "错误",
+      "error": "评分失败"
+    },
+    "input": {
+      "text": "输入",
+      "audio": "口述",
+      "drawing": "手写",
+      "image": "照片",
+      "choice": "选择"
+    },
+    "attempts": "{count, plural, other {# 次尝试}}",
+    "prompt": "题目：{prompt}",
+    "transcript": "转写：{transcript}",
+    "noTranscript": "无转写",
+    "fileUnavailable": "文件不可用",
+    "photoAlt": "学生上传的照片",
+    "legacy": "保存于完整记录回答之前",
+    "block": "练习 {n}",
+    "noAnswers": "此次尝试没有保存的回答。",
+    "loading": "正在加载回答…",
+    "loadError": "无法加载回答。",
+    "strokeOrderAlt": "共 {count, plural, other {# 笔}}的手写，按书写顺序编号",
+    "strokeCount": "{count, plural, other {# 笔}}，按书写顺序编号",
+    "replay": "重播",
+    "downloadExcalidraw": "Excalidraw 文件",
+    "backToWorkbook": "返回练习册",
+    "reviewEmpty": "暂无可查看的内容。完成练习册后即可在此查看回答。"
   }
 }

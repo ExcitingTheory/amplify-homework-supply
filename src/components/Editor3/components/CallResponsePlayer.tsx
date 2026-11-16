@@ -31,6 +31,8 @@ import {
 } from "../hooks/useCallResponseSession";
 import FrequencyRingVisualizer from "./FrequencyRingVisualizer";
 import CallResponseSlideView from "./CallResponseSlideView";
+import { TRANSCRIPTION_MODEL } from "../../../utils/transcriptionModel";
+import { speechRecorderOptions } from "../../../utils/audioRecordingFormat";
 
 interface CallResponsePlayerProps {
   blockId: string;
@@ -267,7 +269,7 @@ export default function CallResponsePlayer({
           const verification = await client.queries.verifyAudioUrl({
             expected: response.expected,
             audioUrl,
-            model: "whisper-1",
+            model: TRANSCRIPTION_MODEL,
             chatModel: "gpt-4o-mini",
             ...(expectedTerms ? { prompt: expectedTerms } : {}),
           });
@@ -428,9 +430,8 @@ export default function CallResponsePlayer({
     ].find((candidate) => MediaRecorder.isTypeSupported(candidate));
     let recorder: MediaRecorder;
     try {
-      recorder = mimeType
-        ? new MediaRecorder(stream, { mimeType })
-        : new MediaRecorder(stream);
+      // Spoken answers: record at a speech bitrate, not the browser default.
+      recorder = new MediaRecorder(stream, speechRecorderOptions(mimeType));
     } catch (recordError) {
       setError(
         recordError instanceof Error

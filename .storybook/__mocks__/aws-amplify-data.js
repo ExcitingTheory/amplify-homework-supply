@@ -57,6 +57,7 @@ const dataStores = {
   StudentMemory: new Map(),
   HomeworkRoom: new Map(),
   WorkbookComment: new Map(),
+  GradeResponse: new Map(),
   AgentJob: new Map(),
   AnalyticsSummary: new Map(),
 };
@@ -753,6 +754,7 @@ const mockClient = {
     StudentMemory: createMockModel("StudentMemory"),
     HomeworkRoom: createMockModel("HomeworkRoom"),
     WorkbookComment: createMockModel("WorkbookComment"),
+    GradeResponse: createMockModel("GradeResponse"),
     AgentJob: createMockModel("AgentJob"),
     AnalyticsSummary: createMockModel("AnalyticsSummary"),
   },

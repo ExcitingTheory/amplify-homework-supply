@@ -1,12 +1,16 @@
 import { lazy, Suspense, useState, useEffect, useRef, useContext } from "react";
 import "@excalidraw/excalidraw/index.css";
 import { verifySketchImage } from "../../../../app/actions/grading";
-import { uploadStudentSubmission } from "../../../utils/userSubmissionStorage";
 import UnitContext from "../../../context/unitContext";
 import { Box, Typography, Skeleton } from "@mui/material";
 import { useColorScheme } from "@mui/material/styles";
 import { useTranslations } from "next-intl";
 import ExerciseResponsePanel from "./ExerciseResponsePanel";
+import {
+  createStrokeLog,
+  encodeStrokes,
+  updateStrokeLog,
+} from "../../../utils/strokeLog";
 
 const FREEDRAW_TOOL = "freedraw";
 
@@ -30,6 +34,11 @@ const SketchPad = ({
   setFeedback,
   feedback,
   questionID,
+  // Called after a submission is graded with { strokes, result } so the
+  // parent can store the drawing with the answer in grade.data. `strokes` is
+  // encodeStrokes() output: every stroke in drawing order, with timing. It is
+  // the drawing itself; images are rendered from it when needed.
+  onDrawingSaved,
 }) => {
   const t = useTranslations("editor.shared");
   const { mode } = useColorScheme();
@@ -81,6 +90,19 @@ const SketchPad = ({
   // const t = useTranslations();
   // const theme = useTheme();
 
+  // Every stroke in the order it was drawn, with timing. Seeded from any saved
+  // scene so a reopened drawing keeps its earlier strokes first.
+  const strokeLogRef = useRef(null);
+  if (strokeLogRef.current === null) {
+    const now = Date.now();
+    strokeLogRef.current = createStrokeLog(now);
+    if (excalidrawData?.elements?.length) {
+      updateStrokeLog(strokeLogRef.current, excalidrawData.elements, now, {
+        restored: true,
+      });
+    }
+  }
+
   const thisVersion = _excalidrawData.version;
   const nextVersion = thisVersion + 1;
 
@@ -116,62 +138,26 @@ const SketchPad = ({
   };
 
   const submitDrawing = async (justBase64, elements, appState) => {
-    // Always upload drawings to S3 with private storage
-    if (grade && questionID) {
-      try {
-        console.log("[SketchPad] Uploading drawing to S3...");
+    // The strokes are the original input; the PNG sent to the grader is only
+    // a rendering of them, so it is not stored.
+    const strokes = encodeStrokes(strokeLogRef.current);
+    persistData({ elements, appState, version: nextVersion, strokes });
 
-        // Convert base64 to Blob
-        const byteCharacters = atob(justBase64);
-        const byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-          byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        const byteArray = new Uint8Array(byteNumbers);
-        const blob = new Blob([byteArray], { type: "image/png" });
-        const base64Size = justBase64.length * 0.75; // Approximate size in bytes
-
-        // Upload to user-submissions storage
-        const uploadResult = await uploadStudentSubmission({
-          file: blob,
-          gradeId: grade.id,
-          nodeKey: questionID,
-          fileType: "png",
-          metadata: {
-            type: "drawing",
-            expect: expect || "",
-          },
-        });
-
-        console.log("[SketchPad] Drawing uploaded:", uploadResult?.path);
-
-        // Store S3 path in persistData
-        // This will be picked up by the parent component to update grade.files[]
-        if (uploadResult?.path) {
-          persistData({
-            elements,
-            appState,
-            version: nextVersion,
-            s3Path: uploadResult.path,
-            imageSize: base64Size,
-          });
-        }
-      } catch (error) {
-        console.error("[SketchPad] S3 upload failed:", error);
-      }
-    }
-
+    let result;
     try {
-      const feedbackData = await verifySketchImage({
+      result = await verifySketchImage({
         expected: expect,
         imageBase64: justBase64,
       });
-
-      setFeedback(feedbackData);
     } catch (error) {
       console.error(error);
-      setFeedback({ error: error.message });
+      result = { error: error.message };
     }
+
+    // Report the drawing and the grade in the same tick so the parent stores
+    // both in one save.
+    onDrawingSaved?.({ strokes, result });
+    setFeedback(result);
   };
 
   const handleCancelSubmission = () => {
@@ -377,6 +363,11 @@ const SketchPad = ({
             <LazyExcalidraw
               initialData={{
                 ...excalidrawData,
+                // Reopening the pad (for example after cancelling the
+                // countdown) keeps the strokes drawn so far.
+                elements: excalidrawRef.current.elements?.length
+                  ? excalidrawRef.current.elements
+                  : excalidrawData?.elements,
                 appState: {
                   ...excalidrawData?.appState,
                   activeTool: {
@@ -387,6 +378,7 @@ const SketchPad = ({
               }}
               onChange={(elements, state) => {
                 excalidrawRef.current = { elements, state };
+                updateStrokeLog(strokeLogRef.current, elements, Date.now());
               }}
               clearCanvas={true}
               autoFocus={true}

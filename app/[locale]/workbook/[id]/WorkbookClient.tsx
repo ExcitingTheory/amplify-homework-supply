@@ -34,6 +34,7 @@ import { useChatPageContext } from "@/hooks/useChatPageContext";
 import { SectionProvider } from "@/context/sectionContext";
 import { CollaborativeChatWrapper } from "@/components/Chat/CollaborativeChatWrapper";
 import { SEMANTIC_THEME } from "@/themes/semanticTheme";
+import { Link } from "@/i18n/navigation";
 
 interface WorkbookClientProps {
   ssrHtml?: string;
@@ -450,6 +451,17 @@ function TimerWrappedEditor({ ssrHtml }: { ssrHtml?: string }) {
         {unit ? (
           <>
             <NarrativeContextBanner unitId={unit.id} />
+            {recentGrades.length > 0 && (
+              <Box sx={{ display: "flex", justifyContent: "flex-end", px: 2, pt: 1 }}>
+                <Button
+                  component={Link}
+                  href={`/workbook/${unit.id}/review`}
+                  size="small"
+                >
+                  {t("workbook.reviewAnswers")}
+                </Button>
+              </Box>
+            )}
             <Workbook timerGateOverlay={timerGateOverlay} />
             <SecretLinkIcon unitId={unit?.id || ""} />
           </>
