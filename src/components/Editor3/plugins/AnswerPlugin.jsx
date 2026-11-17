@@ -16,6 +16,10 @@ import * as React from "react";
 import { useEffect } from "react";
 
 import AnswerComponent from "../components/AnswerComponent";
+import {
+  createResponseBlockId,
+  resolveResponseBlockId,
+} from "../../../utils/responseBlockId";
 
 // Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
 const AnswerEditor = React.lazy(() => import("../components/AnswerEditor"));
@@ -36,6 +40,9 @@ function convertAnswerElement(domNode) {
     JSON.parse(domNode.getAttribute("data-lexical-answer-allowed-input")) || {};
   const promptMethod =
     JSON.parse(domNode.getAttribute("data-lexical-answer-prompt-method")) || {};
+  const responseBlockId = domNode.getAttribute(
+    "data-lexical-answer-response-block-id",
+  );
 
   if (wordIDs) {
     const node = $createAnswerNode(
@@ -43,6 +50,8 @@ function convertAnswerElement(domNode) {
       requestDefinition,
       allowedInput,
       promptMethod,
+      undefined,
+      responseBlockId,
     );
     return { node };
   }
@@ -64,6 +73,7 @@ export class AnswerNode extends DecoratorNode {
   __allowedInput;
   __promptMethod;
   __format;
+  __responseBlockId;
 
   static getType() {
     return "answer";
@@ -77,6 +87,7 @@ export class AnswerNode extends DecoratorNode {
       node.__promptMethod,
       node.__format,
       node.__key,
+      node.__responseBlockId,
     );
   }
 
@@ -87,6 +98,12 @@ export class AnswerNode extends DecoratorNode {
       serializedNode.allowedInput,
       serializedNode.promptMethod,
       serializedNode.format,
+      resolveResponseBlockId(serializedNode.responseBlockId, "answer", {
+        wordIDs: serializedNode.wordIDs,
+        requestDefinition: serializedNode.requestDefinition,
+        allowedInput: serializedNode.allowedInput,
+        promptMethod: serializedNode.promptMethod,
+      }),
     );
     return node;
   }
@@ -99,6 +116,7 @@ export class AnswerNode extends DecoratorNode {
       requestDefinition: this.__requestDefinition,
       allowedInput: this.__allowedInput,
       promptMethod: this.__promptMethod,
+      responseBlockId: this.__responseBlockId,
     };
   }
 
@@ -109,6 +127,7 @@ export class AnswerNode extends DecoratorNode {
     promptMethod = [],
     format,
     key,
+    responseBlockId = createResponseBlockId(),
   ) {
     super(key);
     this.__ids = ids;
@@ -116,6 +135,7 @@ export class AnswerNode extends DecoratorNode {
     this.__allowedInput = allowedInput;
     this.__promptMethod = promptMethod;
     this.__format = format;
+    this.__responseBlockId = responseBlockId;
   }
 
   exportDOM() {
@@ -132,6 +152,10 @@ export class AnswerNode extends DecoratorNode {
     element.setAttribute(
       "data-lexical-answer-prompt-method",
       JSON.stringify(this.__promptMethod),
+    );
+    element.setAttribute(
+      "data-lexical-answer-response-block-id",
+      this.__responseBlockId,
     );
     return { element };
   }
@@ -150,6 +174,10 @@ export class AnswerNode extends DecoratorNode {
     div.setAttribute(
       "data-lexical-answer-prompt-method",
       JSON.stringify(this.__promptMethod),
+    );
+    div.setAttribute(
+      "data-lexical-answer-response-block-id",
+      this.__responseBlockId,
     );
 
     const theme = config.theme;
@@ -266,6 +294,7 @@ export class AnswerNode extends DecoratorNode {
             className={className}
             format={this.__format}
             nodeKey={this.getKey()}
+            responseBlockId={this.__responseBlockId}
             wordIDs={this.__ids}
             requestDefinition={this.__requestDefinition}
             allowedInput={this.__allowedInput}
@@ -293,6 +322,7 @@ export function $createAnswerNode(
   allowedInputs,
   promptMethod,
   format,
+  responseBlockId,
 ) {
   return new AnswerNode(
     wordIDs,
@@ -300,6 +330,8 @@ export function $createAnswerNode(
     allowedInputs,
     promptMethod,
     format,
+    undefined,
+    responseBlockId,
   );
 }
 

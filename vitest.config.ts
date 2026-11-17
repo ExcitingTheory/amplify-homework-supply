@@ -11,7 +11,17 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const storybookConfigDir = path.resolve(__dirname, ".storybook");
 const amplifyOutputsPath = path.resolve(__dirname, "amplify_outputs.json");
-
+const amplifyOutputsFallback = !existsSync(amplifyOutputsPath)
+  ? [
+      {
+        find: /^(?:.*\/)?amplify_outputs\.json$/,
+        replacement: path.resolve(
+          __dirname,
+          "./test/mocks/amplify-outputs.json",
+        ),
+      },
+    ]
+  : [];
 /**
  * Vitest Configuration for Vitest 4+ with @storybook/addon-vitest
  *
@@ -59,13 +69,14 @@ export default defineConfig({
           ],
         },
         resolve: {
-          alias: {
-            "@": path.resolve(__dirname, "./src"),
-            "@storybook/__mocks__": path.resolve(
-              storybookConfigDir,
-              "./__mocks__",
-            ),
-          },
+          alias: [
+            ...amplifyOutputsFallback,
+            { find: "@", replacement: path.resolve(__dirname, "./src") },
+            {
+              find: "@storybook/__mocks__",
+              replacement: path.resolve(storybookConfigDir, "./__mocks__"),
+            },
+          ],
           conditions: ["import", "module", "browser", "default"],
           mainFields: ["module", "jsnext:main", "jsnext", "main"],
         },
@@ -106,9 +117,10 @@ export default defineConfig({
           ],
         },
         resolve: {
-          alias: {
-            "@": path.resolve(__dirname, "./src"),
-          },
+          alias: [
+            ...amplifyOutputsFallback,
+            { find: "@", replacement: path.resolve(__dirname, "./src") },
+          ],
         },
       }),
       // Storybook component test project
@@ -153,7 +165,9 @@ export default defineConfig({
           },
         },
         resolve: {
-          alias: {
+          alias: [
+            ...amplifyOutputsFallback,
+            ...Object.entries({
             "@": path.resolve(__dirname, "./src"),
             "@storybook/__mocks__": path.resolve(
               storybookConfigDir,
@@ -285,7 +299,8 @@ export default defineConfig({
             "@lexical/react$": "@lexical/react/LexicalComposer",
             // Stub native canvas module (pulled in by linkedom) to prevent .node loader error
             canvas: path.resolve(storybookConfigDir, "./__mocks__/canvas.js"),
-          },
+            }).map(([find, replacement]) => ({ find, replacement })),
+          ],
           conditions: ["import", "module", "browser", "default"],
           mainFields: ["module", "jsnext:main", "jsnext", "main"],
         },
@@ -341,17 +356,7 @@ export default defineConfig({
   },
   resolve: {
     alias: [
-      ...(!existsSync(amplifyOutputsPath)
-        ? [
-            {
-              find: /(^|\/)amplify_outputs\.json$/,
-              replacement: path.resolve(
-                __dirname,
-                "./test/mocks/amplify-outputs.json",
-              ),
-            },
-          ]
-        : []),
+      ...amplifyOutputsFallback,
       { find: "@", replacement: path.resolve(__dirname, "./src") },
       {
         find: "@storybook/__mocks__",

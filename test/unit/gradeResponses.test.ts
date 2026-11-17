@@ -3,8 +3,8 @@ import {
   fromGradeResponse,
   gradeResponseId,
   instructorGroupFor,
+  loadGradeResponse,
   listGradeResponses,
-  saveGradeResponse,
   toGradeResponseInput,
 } from "../../src/utils/gradeResponses";
 import { addResponse, buildResponse } from "../../src/utils/studentResponses";
@@ -79,36 +79,41 @@ describe("GradeResponse mapping", () => {
   });
 });
 
-describe("saveGradeResponse", () => {
-  const conditional = { errors: [{ errorType: "DynamoDB:ConditionalCheckFailedException", message: "The conditional request failed" }] };
-
-  it("creates a new item", async () => {
-    const create = vi.fn().mockResolvedValue({ data: {} });
-    const update = vi.fn();
-    await saveGradeResponse({ models: { GradeResponse: { create, update } } }, { id: "i", input: { a: 1 }, exists: false });
-    expect(create).toHaveBeenCalledWith({ id: "i", a: 1 });
-    expect(update).not.toHaveBeenCalled();
-  });
-
-  it("falls back to update when the item already exists", async () => {
-    const create = vi.fn().mockResolvedValue(conditional);
-    const update = vi.fn().mockResolvedValue({ data: {} });
-    await saveGradeResponse({ models: { GradeResponse: { create, update } } }, { id: "i", input: {}, exists: false });
-    expect(update).toHaveBeenCalledTimes(1);
-  });
-
-  it("falls back to create when an expected item is missing", async () => {
-    const create = vi.fn().mockResolvedValue({ data: {} });
-    const update = vi.fn().mockResolvedValue(conditional);
-    await saveGradeResponse({ models: { GradeResponse: { create, update } } }, { id: "i", input: {}, exists: true });
-    expect(create).toHaveBeenCalledTimes(1);
-  });
-
-  it("throws on other errors", async () => {
-    const create = vi.fn().mockResolvedValue({ errors: [{ errorType: "Unauthorized", message: "Not Authorized" }] });
+describe("loadGradeResponse", () => {
+  it("returns null only after a successful not-found read", async () => {
     await expect(
-      saveGradeResponse({ models: { GradeResponse: { create, update: vi.fn() } } }, { id: "i", input: {}, exists: false }),
-    ).rejects.toThrow("Not Authorized");
+      loadGradeResponse(
+        { models: { GradeResponse: { get: vi.fn().mockResolvedValue({ data: null }) } } },
+        "missing",
+      ),
+    ).resolves.toBeNull();
+  });
+
+  it("throws when the read returns GraphQL errors", async () => {
+    await expect(
+      loadGradeResponse(
+        {
+          models: {
+            GradeResponse: {
+              get: vi.fn().mockResolvedValue({
+                data: null,
+                errors: [{ message: "Not authorized" }],
+              }),
+            },
+          },
+        },
+        "response",
+      ),
+    ).rejects.toThrow("Not authorized");
+  });
+
+  it("throws when the read returns no result", async () => {
+    await expect(
+      loadGradeResponse(
+        { models: { GradeResponse: { get: vi.fn().mockResolvedValue(undefined) } } },
+        "response",
+      ),
+    ).rejects.toThrow("Loading response returned no data");
   });
 });
 
@@ -124,6 +129,26 @@ describe("listGradeResponses", () => {
     );
     expect(items.map((i: any) => i.id)).toEqual(["1", "2"]);
     expect(byIndex.mock.calls[1][1]).toMatchObject({ nextToken: "t" });
+  });
+
+  it("throws when listing returns GraphQL errors", async () => {
+    await expect(
+      listGradeResponses(
+        {
+          models: {
+            GradeResponse: {
+              listGradeResponseByGradeIDAndBlockKey: vi
+                .fn()
+                .mockResolvedValue({
+                  data: null,
+                  errors: [{ message: "Not authorized" }],
+                }),
+            },
+          },
+        },
+        "g1",
+      ),
+    ).rejects.toThrow("Not authorized");
   });
 });
 

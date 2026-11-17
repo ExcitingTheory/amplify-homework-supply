@@ -26,7 +26,6 @@ import {
   type ResponseRecord,
 } from "../../src/utils/studentResponses";
 import {
-  gradeResponseId,
   toGradeResponseInput,
   type GradeLike,
 } from "../../src/utils/gradeResponses";
@@ -318,12 +317,20 @@ export async function seedGradeResponses(
   const records = replayAnswerSteps(scenario.steps, { startedAt, audioPaths });
   let written = 0;
   for (const [questionKey, record] of Object.entries(records)) {
-    const { errors } = await ctx.client.models.GradeResponse.create({
-      id: gradeResponseId(grade.id, scenario.blockKey, questionKey),
-      ...toGradeResponseInput(record, { grade, blockKey: scenario.blockKey, questionKey }),
+    const { data, errors } = await ctx.client.mutations.saveStudentResponse({
+      gradeId: grade.id,
+      blockKey: scenario.blockKey,
+      questionKey,
+      response: toGradeResponseInput(record, {
+        grade,
+        blockKey: scenario.blockKey,
+        questionKey,
+      }),
     });
-    if (errors?.length) {
-      throw new Error(`GradeResponse ${questionKey}: ${errors[0]?.message ?? "create failed"}`);
+    if (errors?.length || data !== true) {
+      throw new Error(
+        `GradeResponse ${questionKey}: ${errors?.[0]?.message ?? "create failed"}`,
+      );
     }
     written++;
   }

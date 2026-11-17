@@ -13,6 +13,11 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { GroupManager } from "./groupManager";
 import {
+  gradeOwnerIdentifiers,
+  gradeResponseAssociations,
+  isGradeOwnedByCaller,
+} from "./gradeResponseOwnership";
+import {
   createNotification,
   createNotificationsForRecipients,
 } from "../shared/notificationUtils";
@@ -509,9 +514,37 @@ const GET_GRADE_WITH_IDENTITY = /* GraphQL */ `
   query GetGradeWithIdentity($id: ID!) {
     getGrade(id: $id) {
       id
+      unitID
       sectionID
       owner
       identityId
+      instructorGroup
+    }
+  }
+`;
+
+const GET_GRADE_RESPONSE_FOR_WRITE = /* GraphQL */ `
+  query GetGradeResponseForWrite($id: ID!) {
+    getGradeResponse(id: $id) {
+      id
+      gradeID
+      owner
+    }
+  }
+`;
+
+const CREATE_GRADE_RESPONSE = /* GraphQL */ `
+  mutation CreateGradeResponse($input: CreateGradeResponseInput!) {
+    createGradeResponse(input: $input) {
+      id
+    }
+  }
+`;
+
+const UPDATE_GRADE_RESPONSE = /* GraphQL */ `
+  mutation UpdateGradeResponse($input: UpdateGradeResponseInput!) {
+    updateGradeResponse(input: $input) {
+      id
     }
   }
 `;
@@ -570,7 +603,19 @@ export const handler: Handler = async (event: any, context: any) => {
     throw new Error("Unauthorized: User ID not found in event context");
   }
 
-  console.log(`[Section Handler] ${operationName}`, { userId, username, args });
+  const loggedArgs =
+    operationName === "saveStudentResponse"
+      ? {
+          gradeId: args.gradeId,
+          blockKey: args.blockKey,
+          questionKey: args.questionKey,
+        }
+      : args;
+  console.log(`[Section Handler] ${operationName}`, {
+    userId,
+    username,
+    args: loggedArgs,
+  });
 
   try {
     const userPoolId = await getUserPoolId();
@@ -630,6 +675,8 @@ export const handler: Handler = async (event: any, context: any) => {
         return await handleGetStudentSubmissionUrl(args, userId, claims);
       case "getStudentSubmissionUrls":
         return await handleGetStudentSubmissionUrls(args, userId, claims);
+      case "saveStudentResponse":
+        return await handleSaveStudentResponse(args, userId, username, claims);
       case "getUnitsCdnCookie":
         return await handleGetUnitsCdnCookie();
       default:
@@ -1536,6 +1583,113 @@ async function isUserInSection(
 // ========================================================================
 // STUDENT SUBMISSION URL (instructor cross-user file access)
 // ========================================================================
+
+async function handleSaveStudentResponse(
+  args: Record<string, any>,
+  userId: string,
+  username: string | undefined,
+  claims: Record<string, any>,
+): Promise<boolean> {
+  const { gradeId, blockKey, questionKey } = args;
+  if (
+    typeof gradeId !== "string" ||
+    typeof blockKey !== "string" ||
+    !blockKey ||
+    blockKey.length > 200 ||
+    blockKey.includes(":") ||
+    typeof questionKey !== "string" ||
+    !questionKey ||
+    questionKey.length > 200 ||
+    questionKey.includes(":")
+  ) {
+    throw new Error("Invalid student response identifiers");
+  }
+
+  const response =
+    typeof args.response === "string"
+      ? JSON.parse(args.response)
+      : args.response;
+  if (!response || typeof response !== "object" || Array.isArray(response)) {
+    throw new Error("Invalid student response payload");
+  }
+
+  const client = getClient();
+  const { data: gradeResult, errors: gradeErrors } = await client.graphql({
+    query: GET_GRADE_WITH_IDENTITY,
+    variables: { id: gradeId },
+  });
+  if (gradeErrors?.length || !gradeResult?.getGrade) {
+    throw new Error("Grade not found");
+  }
+
+  const grade = gradeResult.getGrade;
+  const ownerIds = gradeOwnerIdentifiers(userId, username, claims);
+  if (!isGradeOwnedByCaller(grade, ownerIds)) {
+    throw new Error("Unauthorized: grade is not owned by the current user");
+  }
+
+  const id = `${grade.id}:${blockKey}:${questionKey}`;
+  const { data: existingResult, errors: existingErrors } =
+    await client.graphql({
+      query: GET_GRADE_RESPONSE_FOR_WRITE,
+      variables: { id },
+    });
+  if (existingErrors?.length) {
+    throw new Error(
+      existingErrors[0]?.message || "Could not load the saved response",
+    );
+  }
+  const existing = existingResult?.getGradeResponse;
+  if (
+    existing &&
+    (existing.gradeID !== grade.id || existing.owner !== grade.owner)
+  ) {
+    throw new Error("Unauthorized: response does not belong to this grade");
+  }
+
+  const responseFields = [
+    "inputMethod",
+    "prompt",
+    "text",
+    "transcript",
+    "audioPath",
+    "imagePath",
+    "strokes",
+    "verdict",
+    "correct",
+    "score",
+    "confidence",
+    "reason",
+    "needsReview",
+    "attempts",
+    "history",
+    "submittedAt",
+  ];
+  const responseInput = Object.fromEntries(
+    responseFields
+      .filter((field) => Object.hasOwn(response, field))
+      .map((field) => [field, response[field]]),
+  );
+  const input = {
+    id,
+    blockKey,
+    questionKey,
+    ...gradeResponseAssociations(grade),
+    ...responseInput,
+  };
+  const mutation = existing ? UPDATE_GRADE_RESPONSE : CREATE_GRADE_RESPONSE;
+  const mutationName = existing ? "updateGradeResponse" : "createGradeResponse";
+  const { data: writeData, errors: writeErrors } = await client.graphql({
+    query: mutation,
+    variables: { input },
+  });
+  if (writeErrors?.length || !writeData?.[mutationName]?.id) {
+    throw new Error(
+      writeErrors?.[0]?.message || `Could not ${mutationName}`,
+    );
+  }
+  return true;
+}
 
 /**
  * Checks that the caller may read files under a grade owner's private path.

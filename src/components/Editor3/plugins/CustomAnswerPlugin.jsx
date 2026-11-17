@@ -18,6 +18,10 @@ import {
 import * as React from "react";
 import { useEffect } from "react";
 import CustomAnswerComponent from "../nodes/CustomAnswerNode/CustomAnswerComponent";
+import {
+  createResponseBlockId,
+  resolveResponseBlockId,
+} from "../../../utils/responseBlockId";
 
 // Lazy-load the authoring editor so read-only consumers (NarrativeReader, MiniEditorReadOnly) don't bundle it
 const CustomAnswerEditor = React.lazy(
@@ -44,6 +48,9 @@ function convertCustomAnswerElement(domNode) {
   const direction =
     domNode.getAttribute("data-lexical-custom-answer-direction") ||
     "question-to-answer";
+  const responseBlockId = domNode.getAttribute(
+    "data-lexical-custom-answer-response-block-id",
+  );
 
   if (ids) {
     const node = $createCustomAnswerNode(
@@ -52,6 +59,7 @@ function convertCustomAnswerElement(domNode) {
       promptMethod,
       undefined,
       direction,
+      responseBlockId,
     );
     return { node };
   }
@@ -73,6 +81,7 @@ export class CustomAnswerNode extends DecoratorNode {
   __allowedInput;
   __format;
   __direction;
+  __responseBlockId;
 
   static getType() {
     return "custom-answer";
@@ -86,6 +95,7 @@ export class CustomAnswerNode extends DecoratorNode {
       node.__format,
       node.__direction,
       node.__key,
+      node.__responseBlockId,
     );
   }
 
@@ -96,6 +106,12 @@ export class CustomAnswerNode extends DecoratorNode {
       serializedNode.promptMethod,
       serializedNode.format,
       serializedNode.direction,
+      resolveResponseBlockId(serializedNode.responseBlockId, "custom-answer", {
+        ids: serializedNode.ids,
+        allowedInput: serializedNode.allowedInput,
+        promptMethod: serializedNode.promptMethod,
+        direction: serializedNode.direction,
+      }),
     );
     if (serializedNode.format !== undefined) {
       node.setFormat(serializedNode.format);
@@ -112,6 +128,7 @@ export class CustomAnswerNode extends DecoratorNode {
       allowedInput: this.__allowedInput,
       format: this.__format,
       direction: this.__direction,
+      responseBlockId: this.__responseBlockId,
     };
   }
 
@@ -122,6 +139,7 @@ export class CustomAnswerNode extends DecoratorNode {
     format = "",
     direction = "question-to-answer",
     key,
+    responseBlockId = createResponseBlockId(),
   ) {
     super(key);
     this.__ids = ids;
@@ -129,6 +147,7 @@ export class CustomAnswerNode extends DecoratorNode {
     this.__allowedInput = allowedInput;
     this.__format = format;
     this.__direction = direction;
+    this.__responseBlockId = responseBlockId;
   }
 
   exportDOM() {
@@ -145,6 +164,10 @@ export class CustomAnswerNode extends DecoratorNode {
     element.setAttribute(
       "data-lexical-custom-answer-direction",
       this.__direction,
+    );
+    element.setAttribute(
+      "data-lexical-custom-answer-response-block-id",
+      this.__responseBlockId,
     );
     return { element };
   }
@@ -163,6 +186,10 @@ export class CustomAnswerNode extends DecoratorNode {
     div.setAttribute(
       "data-lexical-custom-answer-direction",
       this.__direction,
+    );
+    div.setAttribute(
+      "data-lexical-custom-answer-response-block-id",
+      this.__responseBlockId,
     );
     const theme = config.theme;
     const className = theme.image;
@@ -307,6 +334,7 @@ export class CustomAnswerNode extends DecoratorNode {
             className={className}
             format={this.__format}
             nodeKey={this.getKey()}
+            responseBlockId={this.__responseBlockId}
             ids={this.__ids}
             allowedInput={this.__allowedInput}
             promptMethod={this.__promptMethod}
@@ -333,6 +361,7 @@ export function $createCustomAnswerNode(
   promptMethod,
   format,
   direction,
+  responseBlockId,
 ) {
   return new CustomAnswerNode(
     ids,
@@ -340,6 +369,8 @@ export function $createCustomAnswerNode(
     promptMethod,
     format,
     direction,
+    undefined,
+    responseBlockId,
   );
 }
 

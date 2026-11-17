@@ -70,6 +70,7 @@ export interface ResponseRecord {
   attempts?: number;
   strokeCount?: number;
   history?: ResponseRecord[];
+  attemptId?: string;
 }
 
 export interface BuildResponseInput {
@@ -83,11 +84,19 @@ export interface BuildResponseInput {
   /** The grader's result, in any of the shapes our graders return */
   result?: unknown;
   now?: number;
+  attemptId?: string;
 }
 
 const MAX_TEXT = 5000;
 const MAX_REASON = 1000;
 const MAX_HISTORY = 3;
+
+export function createResponseAttemptId(): string {
+  if (typeof globalThis.crypto?.randomUUID === "function") {
+    return globalThis.crypto.randomUUID();
+  }
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
 
 const VERDICTS: readonly string[] = ["correct", "misspelled", "incorrect"];
 
@@ -146,6 +155,7 @@ export function buildResponse({
   strokes,
   imagePath,
   result,
+  attemptId,
   now = Date.now(),
 }: BuildResponseInput): ResponseRecord {
   const r = asObject(result);
@@ -170,6 +180,7 @@ export function buildResponse({
     reason: clip(typeof reason === "string" ? reason : undefined, MAX_REASON),
     submittedAt: new Date(now).toISOString(),
     needsReview: false,
+    attemptId,
   };
   const loose = record as unknown as Record<string, unknown>;
   for (const k of Object.keys(loose)) if (loose[k] === undefined) delete loose[k];
@@ -193,9 +204,15 @@ export function addResponse(
   responses: Record<string, ResponseRecord> | null | undefined,
   key: string | number,
   record: ResponseRecord,
-  { sameAttempt = false }: { sameAttempt?: boolean } = {},
+  {
+    sameAttempt = false,
+    attemptId,
+  }: { sameAttempt?: boolean; attemptId?: string } = {},
 ): Record<string, ResponseRecord> {
   const prev = responses?.[key];
+  if (prev && sameAttempt && attemptId && prev.attemptId !== attemptId) {
+    return { ...(responses || {}) };
+  }
   if (prev && sameAttempt) {
     const merged: ResponseRecord = { ...prev, ...record, attempts: prev.attempts || 1 };
     if (prev.history) merged.history = prev.history;

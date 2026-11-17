@@ -933,6 +933,8 @@ const rawSchemaDefinition = {
       allow.groupDefinedIn("instructorGroup").to(["read", "update"]),
       // Dynamic group authorization: peers invited to review can read
       allow.groupDefinedIn("peerReviewGroup").to(["read"]),
+      // The section handler validates the authenticated owner before response writes.
+      allow.resource(sectionHandler).to(["read"]),
     ]),
 
   // ==========================================================================
@@ -992,7 +994,7 @@ const rawSchemaDefinition = {
   GradeResponse: a
     .model({
       gradeID: a.id().required(),
-      blockKey: a.string().required(), // Lexical node key of the exercise block
+      blockKey: a.string().required(), // Persisted response block ID
       questionKey: a.string().required(), // question or word within the block
       unitID: a.id(),
       sectionID: a.id(),
@@ -1019,9 +1021,10 @@ const rawSchemaDefinition = {
       index("gradeID").sortKeys(["blockKey"]).name("byGrade"),
     ])
     .authorization((allow) => [
-      allow.owner(),
+      allow.owner().to(["read"]),
       allow.group("Admins").to(["read", "delete"]),
       allow.groupDefinedIn("instructorGroup").to(["read"]),
+      allow.resource(sectionHandler).to(["read", "create", "update"]),
     ]),
 
   // One signed URL per requested key; url is null when the key is refused.
@@ -3652,6 +3655,18 @@ const rawSchemaDefinition = {
       allow.group("Instructors"),
       allow.group("Admins"),
     ])
+    .handler(a.handler.function(sectionHandler)),
+
+  saveStudentResponse: a
+    .mutation()
+    .arguments({
+      gradeId: a.id().required(),
+      blockKey: a.string().required(),
+      questionKey: a.string().required(),
+      response: a.json().required(),
+    })
+    .returns(a.boolean().required())
+    .authorization((allow) => [allow.authenticated()])
     .handler(a.handler.function(sectionHandler)),
 
   // Phase 6 — Issues CloudFront signed cookie values for the protected/units/* path prefix.

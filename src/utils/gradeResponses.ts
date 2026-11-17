@@ -1,10 +1,10 @@
 /**
  * GradeResponse items: one typed DynamoDB item per answer.
  *
- * Components build response records with buildResponse/addResponse
+ * components build response records with buildResponse/addResponse
  * (studentResponses.ts). This module maps those records to and from the
- * GradeResponse model (amplify/data/resource.ts) and writes them. Recordings
- * and photos stay in S3; their keys are stored here.
+ * GradeResponse model (amplify/data/resource.ts); writes go through the
+ * server-side owner-validated mutation. Recordings and photos stay in S3.
  */
 
 import type { InputMethod, ResponseRecord, Verdict } from "./studentResponses";
@@ -62,7 +62,7 @@ export interface ResponseAttemptInput {
   submittedAt: string | null;
 }
 
-/** Input for client.models.GradeResponse.create / update (without id). */
+/** Payload for saveStudentResponse; the backend replaces parent associations. */
 export interface GradeResponseInput {
   gradeID: string;
   blockKey: string;
@@ -97,8 +97,6 @@ type ModelResult = { data?: any; nextToken?: string | null; errors?: Array<{ mes
 export interface GradeResponseClient {
   models: {
     GradeResponse: {
-      create?(input: Record<string, unknown>): Promise<ModelResult>;
-      update?(input: Record<string, unknown>): Promise<ModelResult>;
       get?(key: { id: string }): Promise<ModelResult>;
       list?(options: Record<string, unknown>): Promise<ModelResult>;
       listGradeResponseByGradeIDAndBlockKey?(
@@ -107,6 +105,24 @@ export interface GradeResponseClient {
       ): Promise<ModelResult>;
     };
   };
+}
+
+/** Load the prior response; a failed read must never be treated as a new answer. */
+export async function loadGradeResponse(
+  client: GradeResponseClient,
+  id: string,
+): Promise<Record<string, any> | null> {
+  if (!client.models.GradeResponse.get) {
+    throw new Error("GradeResponse model is not available");
+  }
+  const result = await client.models.GradeResponse.get({ id });
+  if (!result || !("data" in result)) {
+    throw new Error("Loading response returned no data");
+  }
+  if (result?.errors?.length) {
+    throw new Error(result.errors[0]?.message || "Loading response failed");
+  }
+  return result?.data ?? null;
 }
 
 /** One item per grade, block and question, so a re-answer updates in place. */
@@ -140,9 +156,8 @@ function attemptToInput(h: ResponseRecord): ResponseAttemptInput {
 }
 
 /**
- * Model input for a response record. Every field is sent (null when unset) so
- * an update for a new attempt clears fields the previous attempt had, such as
- * an audio path when the new answer was typed.
+ * Response payload for a record. Every field is sent (null when unset) so an
+ * update for a new attempt clears fields from the previous answer.
  */
 export function toGradeResponseInput(
   record: ResponseRecord,
@@ -229,35 +244,6 @@ export function fromGradeResponse(item: Record<string, any> | null | undefined):
   return record;
 }
 
-const isConditionalFailure = (errors: ModelResult["errors"]) =>
-  (errors || []).some((e) => /ConditionalCheckFailed/i.test(`${e?.errorType ?? ""} ${e?.message ?? ""}`));
-
-/**
- * Create or update the item. `exists` picks the first try; a conditional-check
- * failure (item already there, or missing) falls back to the other operation.
- * Returns true once the item is written; throws otherwise.
- */
-export async function saveGradeResponse(
-  client: GradeResponseClient,
-  { id, input, exists }: { id: string; input: GradeResponseInput | Record<string, unknown>; exists: boolean },
-): Promise<boolean> {
-  const model = client.models.GradeResponse;
-  if (!model.create || !model.update) throw new Error("GradeResponse model is not available");
-  const create = model.create.bind(model);
-  const update = model.update.bind(model);
-  const [first, second] = exists ? [update, create] : [create, update];
-  const firstResult = await first({ id, ...input });
-  if (!firstResult?.errors?.length) return true;
-  if (!isConditionalFailure(firstResult.errors)) {
-    throw new Error(firstResult.errors[0]?.message || "Saving response failed");
-  }
-  const secondResult = await second({ id, ...input });
-  if (secondResult?.errors?.length) {
-    throw new Error(secondResult.errors[0]?.message || "Saving response failed");
-  }
-  return true;
-}
-
 /**
  * Every GradeResponse of one grade (all blocks), ordered by block key.
  * Uses the byGrade index; falls back to a filtered list if the generated
@@ -268,12 +254,25 @@ export async function listGradeResponses(client: GradeResponseClient, gradeId: s
   const items: any[] = [];
   let nextToken: string | null = null;
   do {
-    const page: ModelResult = model.listGradeResponseByGradeIDAndBlockKey
-      ? await model.listGradeResponseByGradeIDAndBlockKey({ gradeID: gradeId }, { nextToken, limit: 200 })
-      : model.list
-        ? await model.list({ filter: { gradeID: { eq: gradeId } }, nextToken, limit: 200 })
-        : { data: [] };
+    let page: ModelResult;
+    if (model.listGradeResponseByGradeIDAndBlockKey) {
+      page = await model.listGradeResponseByGradeIDAndBlockKey(
+        { gradeID: gradeId },
+        { nextToken, limit: 200 },
+      );
+    } else if (model.list) {
+      page = await model.list({
+        filter: { gradeID: { eq: gradeId } },
+        nextToken,
+        limit: 200,
+      });
+    } else {
+      throw new Error("GradeResponse model cannot list responses");
+    }
     if (page?.errors?.length) throw new Error(page.errors[0]?.message || "Listing responses failed");
+    if (!page || !("data" in page) || page.data == null) {
+      throw new Error("Listing responses returned no data");
+    }
     items.push(...((page?.data as unknown[]) || []).filter(Boolean));
     nextToken = page?.nextToken ?? null;
   } while (nextToken);

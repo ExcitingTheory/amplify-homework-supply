@@ -33,6 +33,7 @@ import { getCustomAnswerDirectionPair } from "./direction";
 import { transcribeSubmission } from "../../../../utils/transcribeSubmission";
 import {
   buildResponse,
+  createResponseAttemptId,
   GRADING_FAILED,
   INPUT_METHOD,
 } from "../../../../utils/studentResponses";
@@ -99,6 +100,8 @@ export function CustomAnswerView({
   grade,
   saveGrade,
   workbook,
+  responseBlockId,
+  createGrade,
 }) {
   const t = useTranslations("workbook");
   const tEditor = useTranslations("editor");
@@ -119,7 +122,8 @@ export function CustomAnswerView({
   );
 
   const gradeId = grade?.id;
-  const inProgress = grade?.data?.[nodeKey];
+  const blockDataKey = responseBlockId || nodeKey;
+  const inProgress = grade?.data?.[blockDataKey];
   const completionSavedRef = useRef(false);
   const answersRef = useRef(answers);
   answersRef.current = answers;
@@ -127,7 +131,11 @@ export function CustomAnswerView({
   // Saves what the student actually submitted for each question (typed
   // text, recording, drawing strokes) with the grader's verdict as
   // GradeResponse items, for teacher review.
-  const recordResponse = useResponseRecorder({ grade, blockKey: nodeKey });
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
 
   // Fields this component has written to its block. Merged into every block
   // save so a save made while the grade in context is a render behind cannot
@@ -137,13 +145,13 @@ export function CustomAnswerView({
     (fields) => {
       ownBlockFieldsRef.current = { ...ownBlockFieldsRef.current, ...fields };
       saveGrade({
-        [nodeKey]: {
-          ...(grade?.data?.[nodeKey] || {}),
+        [blockDataKey]: {
+          ...(grade?.data?.[blockDataKey] || {}),
           ...ownBlockFieldsRef.current,
         },
       });
     },
-    [grade, nodeKey, saveGrade],
+    [blockDataKey, grade, saveGrade],
   );
 
   // Reset local state when grade changes (e.g., new grade after unit completion)
@@ -153,14 +161,14 @@ export function CustomAnswerView({
       gradeIdRef.current = gradeId;
       ownBlockFieldsRef.current = {};
       // Only reset if the new grade has no data for this exercise
-      if (!grade?.data?.[nodeKey]) {
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
         setProgress(0);
         completionSavedRef.current = false;
       }
     }
-  }, [gradeId, grade?.data, nodeKey]);
+  }, [blockDataKey, gradeId, grade?.data]);
 
   // Load saved answers from progress data
   React.useEffect(() => {
@@ -599,6 +607,7 @@ export function CustomAnswerView({
                           title={questionPrompt}
                           onRecordingComplete={wrapOnRecordingComplete(
                             async (audioFile, uploadResult) => {
+                              const attemptId = createResponseAttemptId();
                               const currentGradeData = grade?.data || {};
                               const audioNodeKey = `custom-answer-${questionID}`;
                               // Only this key: saveGrade merges it into the
@@ -625,6 +634,7 @@ export function CustomAnswerView({
                                     inputMethod: INPUT_METHOD.audio,
                                     prompt: questionPrompt,
                                     audioPath,
+                                    attemptId,
                                   }),
                                 );
                               }
@@ -666,8 +676,9 @@ export function CustomAnswerView({
                                         prompt: questionPrompt,
                                         transcript,
                                         result: feedbackData,
+                                        attemptId,
                                       }),
-                                      { sameAttempt: true },
+                                      { sameAttempt: true, attemptId },
                                     );
                                     setFeedback((prev) => ({
                                       ...prev,
@@ -691,8 +702,9 @@ export function CustomAnswerView({
                                             errors?.[0]?.message ||
                                             GRADING_FAILED,
                                         },
+                                        attemptId,
                                       }),
-                                      { sameAttempt: true },
+                                      { sameAttempt: true, attemptId },
                                     );
                                   }
                                 }
@@ -710,8 +722,9 @@ export function CustomAnswerView({
                                       result: {
                                         error: err?.message || String(err),
                                       },
+                                      attemptId,
                                     }),
-                                    { sameAttempt: true },
+                                    { sameAttempt: true, attemptId },
                                   );
                                 }
                               }
@@ -786,28 +799,35 @@ export default function CustomAnswerComponent({
   allowedInput = [],
   promptMethod = [],
   direction = "question-to-answer",
+  responseBlockId,
 }) {
-  const { grade, saveGrade, workbook } = React.useContext(UnitContext);
+  const { grade, saveGrade, workbook, createGrade, readOnly } =
+    React.useContext(UnitContext);
   // Keep verify-context hook for parity (memory/personalization side effects).
   useVerifyContext();
   const { questionBank } = React.useContext(DictionaryContext);
-  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
+  const nailedIt =
+    grade?.data?.[responseBlockId || nodeKey]?.nailedIt === true;
   return (
-    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <CustomAnswerView
-        className={className}
-        nodeKey={nodeKey}
-        ids={ids}
-        requestDefinition={requestDefinition}
-        customPrompt={customPrompt}
-        allowedInput={allowedInput}
-        promptMethod={promptMethod}
-        direction={direction}
-        questionBank={questionBank}
-        grade={grade}
-        saveGrade={saveGrade}
-        workbook={workbook}
-      />
-    </WorkbookBlockEnhancements>
+    <div inert={readOnly ? true : undefined} aria-disabled={!!readOnly}>
+      <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
+        <CustomAnswerView
+          className={className}
+          nodeKey={nodeKey}
+          ids={ids}
+          requestDefinition={requestDefinition}
+          customPrompt={customPrompt}
+          allowedInput={allowedInput}
+          promptMethod={promptMethod}
+          direction={direction}
+          questionBank={questionBank}
+          grade={grade}
+          saveGrade={saveGrade}
+          workbook={workbook}
+          responseBlockId={responseBlockId}
+          createGrade={createGrade}
+        />
+      </WorkbookBlockEnhancements>
+    </div>
   );
 }

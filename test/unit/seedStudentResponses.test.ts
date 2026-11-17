@@ -160,7 +160,14 @@ describe("seedGradeResponses", () => {
     const uploads: Array<{ path: string; contentType?: string; bytes: number }> = [];
     const created: any[] = [];
     const ctx = {
-      client: { models: { GradeResponse: { create: vi.fn(async (input) => (created.push(input), { data: input })) } } },
+      client: {
+        mutations: {
+          saveStudentResponse: vi.fn(async (input) => {
+            created.push(input);
+            return { data: true };
+          }),
+        },
+      },
       uploadData: vi.fn(({ path, data, options }) => {
         uploads.push({ path, contentType: options?.contentType, bytes: data.length });
         return { result: Promise.resolve({ path }) };
@@ -179,14 +186,26 @@ describe("seedGradeResponses", () => {
       contentType: "audio/mp4",
     });
     expect(uploads[0].path.startsWith("private/us-east-1:student-2/user-submissions/grade-2/")).toBe(true);
-    expect(created.map((c) => c.id)).toEqual(["grade-2:vocab-recall-1:0", "grade-2:vocab-recall-1:1", "grade-2:vocab-recall-1:2"]);
-    expect(created[0]).toMatchObject({ inputMethod: "TEXT", verdict: "MISSPELLED", instructorGroup: "section-jpn101-instructors" });
-    expect(created[2]).toMatchObject({ inputMethod: "AUDIO", audioPath: uploads[0].path, transcript: "さよなら" });
+    expect(created.map((c) => [c.gradeId, c.blockKey, c.questionKey])).toEqual([
+      ["grade-2", VOCAB_BLOCK_KEY, "0"],
+      ["grade-2", VOCAB_BLOCK_KEY, "1"],
+      ["grade-2", VOCAB_BLOCK_KEY, "2"],
+    ]);
+    expect(created[0].response).toMatchObject({
+      inputMethod: "TEXT",
+      verdict: "MISSPELLED",
+      instructorGroup: "section-jpn101-instructors",
+    });
+    expect(created[2].response).toMatchObject({
+      inputMethod: "AUDIO",
+      audioPath: uploads[0].path,
+      transcript: "さよなら",
+    });
 
     // Strokes only use fields the ResponseStroke type defines.
     const allowed = new Set(["order", "startMs", "durationMs", "points", "times", "restored", "erasedMs", "color", "width", "pointCount"]);
-    expect(Object.keys(created[1].strokes).sort()).toEqual(["startedAt", "strokes", "tolerance", "version"]);
-    for (const stroke of created[1].strokes.strokes) {
+    expect(Object.keys(created[1].response.strokes).sort()).toEqual(["startedAt", "strokes", "tolerance", "version"]);
+    for (const stroke of created[1].response.strokes.strokes) {
       for (const key of Object.keys(stroke)) expect(allowed.has(key)).toBe(true);
     }
   });

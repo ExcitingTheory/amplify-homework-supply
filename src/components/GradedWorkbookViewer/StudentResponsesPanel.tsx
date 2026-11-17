@@ -38,6 +38,7 @@ import {
   listGradeResponses,
   type GradeResponseClient,
 } from "../../utils/gradeResponses";
+import { getSubmissionUrlsInBatches } from "../../utils/submissionUrlBatches";
 import { getStudentSubmissionUrls } from "../../../app/actions/storage";
 import { StrokeOrderView } from "./StrokeOrderView";
 
@@ -93,14 +94,18 @@ async function loadAnswers(gradeId: string, data: PanelGrade["data"]) {
     legacy: false,
   }));
 
-  // Older grades: use what the block data kept, for blocks with no items.
-  const withItems = new Set(rows.map((r) => r.blockKey));
+  // Keep legacy answers unless that exact block/question has a response item.
+  const withItems = new Set(
+    rows.map((r) => JSON.stringify([r.blockKey, r.questionKey])),
+  );
   const knownAudio = new Set(rows.map((r) => r.record?.audioPath).filter(Boolean));
   for (const [blockKey, blockData] of Object.entries(parseData(data))) {
-    if (withItems.has(blockKey)) continue;
     for (const entry of listBlockResponses(blockData)) {
+      if (withItems.has(JSON.stringify([blockKey, entry.key]))) continue;
       if (entry.record.audioPath && knownAudio.has(entry.record.audioPath)) continue;
       rows.push({ blockKey, questionKey: entry.key, record: entry.record, legacy: true });
+      withItems.add(JSON.stringify([blockKey, entry.key]));
+      if (entry.record.audioPath) knownAudio.add(entry.record.audioPath);
     }
   }
   return rows;
@@ -115,8 +120,10 @@ async function signFiles(gradeId: string, rows: AnswerRow[], role: ViewerRole) {
     );
     return Object.fromEntries(pairs) as Record<string, string | null>;
   }
-  const { urls } = await getStudentSubmissionUrls(gradeId, keys);
-  return urls;
+  return getSubmissionUrlsInBatches(keys, async (batch) => {
+    const result = await getStudentSubmissionUrls(gradeId, batch);
+    return result.urls;
+  });
 }
 
 export function StudentResponsesPanel({

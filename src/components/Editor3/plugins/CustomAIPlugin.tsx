@@ -25,6 +25,10 @@ import type {
   DOMConversionMap,
   DOMConversionOutput,
 } from "lexical";
+import {
+  createResponseBlockId,
+  resolveResponseBlockId,
+} from "../../../utils/responseBlockId";
 import * as React from "react";
 import { useEffect, lazy, Suspense } from "react";
 
@@ -47,6 +51,7 @@ export interface SerializedCustomAINode extends SerializedLexicalNode {
   criteria: string;
   allowedInput: CustomAIInputMode[];
   format: string;
+  responseBlockId?: string;
 }
 
 function convertCustomAIElement(
@@ -71,8 +76,18 @@ function convertCustomAIElement(
       return ["text"];
     }
   })();
+  const responseBlockId = domNode.getAttribute(
+    "data-lexical-custom-ai-response-block-id",
+  );
 
-  const node = $createCustomAINode(ids, inputMode, criteria, allowedInput);
+  const node = $createCustomAINode(
+    ids,
+    inputMode,
+    criteria,
+    allowedInput,
+    "",
+    responseBlockId || undefined,
+  );
   return { node };
 }
 
@@ -88,6 +103,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
   __criteria: string;
   __allowedInput: CustomAIInputMode[];
   __format: string;
+  __responseBlockId: string;
 
   static getType(): string {
     return "custom-ai";
@@ -101,6 +117,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
       node.__allowedInput,
       node.__format,
       node.__key,
+      node.__responseBlockId,
     );
   }
 
@@ -111,6 +128,16 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
       serializedNode.criteria,
       serializedNode.allowedInput,
       serializedNode.format,
+      resolveResponseBlockId(
+        serializedNode.responseBlockId,
+        "custom-ai",
+        {
+          ids: serializedNode.ids,
+          inputMode: serializedNode.inputMode,
+          criteria: serializedNode.criteria,
+          allowedInput: serializedNode.allowedInput,
+        },
+      ),
     );
     return node;
   }
@@ -124,6 +151,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
       criteria: this.__criteria,
       allowedInput: [...this.__allowedInput],
       format: this.__format,
+      responseBlockId: this.__responseBlockId,
     };
   }
 
@@ -134,6 +162,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
     allowedInput: CustomAIInputMode[] = ["text"],
     format: string = "",
     key?: NodeKey,
+    responseBlockId: string = createResponseBlockId(),
   ) {
     super(key);
     this.__ids = ids;
@@ -141,6 +170,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
     this.__criteria = criteria;
     this.__allowedInput = allowedInput;
     this.__format = format;
+    this.__responseBlockId = responseBlockId;
   }
 
   exportDOM(): { element: HTMLElement } {
@@ -155,6 +185,10 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
       "data-lexical-custom-ai-allowed-input",
       JSON.stringify(this.__allowedInput),
     );
+    element.setAttribute(
+      "data-lexical-custom-ai-response-block-id",
+      this.__responseBlockId,
+    );
     return { element };
   }
 
@@ -166,6 +200,10 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
     div.setAttribute(
       "data-lexical-custom-ai-allowed-input",
       JSON.stringify(this.__allowedInput),
+    );
+    div.setAttribute(
+      "data-lexical-custom-ai-response-block-id",
+      this.__responseBlockId,
     );
     return div;
   }
@@ -288,6 +326,7 @@ export class CustomAINode extends DecoratorNode<React.JSX.Element> {
             className={className}
             format={this.__format}
             nodeKey={this.getKey()}
+            responseBlockId={this.__responseBlockId}
             ids={this.__ids}
             inputMode={this.__inputMode}
             criteria={this.__criteria}
@@ -308,8 +347,17 @@ export function $createCustomAINode(
   criteria: string = "",
   allowedInput: CustomAIInputMode[] = ["text"],
   format: string = "",
+  responseBlockId?: string,
 ): CustomAINode {
-  return new CustomAINode(ids, inputMode, criteria, allowedInput, format);
+  return new CustomAINode(
+    ids,
+    inputMode,
+    criteria,
+    allowedInput,
+    format,
+    undefined,
+    responseBlockId,
+  );
 }
 
 /**

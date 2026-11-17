@@ -131,6 +131,47 @@ describe("addResponse", () => {
     expect(map.q.needsReview).toBe(false);
   });
 
+  it("does not merge a stale grading callback into a newer recording", () => {
+    let map: any = addResponse(
+      {},
+      "q",
+      buildResponse({
+        inputMethod: "audio",
+        audioPath: "a.webm",
+        attemptId: "attempt-a",
+        now: NOW,
+      }),
+    );
+    map = addResponse(
+      map,
+      "q",
+      buildResponse({
+        inputMethod: "audio",
+        audioPath: "b.webm",
+        attemptId: "attempt-b",
+        now: NOW + 1,
+      }),
+    );
+    map = addResponse(
+      map,
+      "q",
+      buildResponse({
+        inputMethod: "audio",
+        transcript: "transcript for a",
+        attemptId: "attempt-a",
+        now: NOW + 2,
+      }),
+      { sameAttempt: true, attemptId: "attempt-a" },
+    );
+
+    expect(map.q).toMatchObject({
+      audioPath: "b.webm",
+      attempts: 2,
+      history: [{ audioPath: "a.webm" }],
+    });
+    expect(map.q.transcript).toBeUndefined();
+  });
+
   it("does not mutate the input map", () => {
     const map = {};
     addResponse(map, "q", first);

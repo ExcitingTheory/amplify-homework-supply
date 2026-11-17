@@ -38,6 +38,7 @@ import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../../utils/waveformDefaul
 import { transcribeSubmission } from "../../../../utils/transcribeSubmission";
 import {
   buildResponse,
+  createResponseAttemptId,
   INPUT_METHOD,
 } from "../../../../utils/studentResponses";
 import { useResponseRecorder } from "../../../../hooks/useResponseRecorder";
@@ -57,6 +58,7 @@ interface CustomAIComponentProps {
   className: { base: string; focus: string };
   format: string;
   nodeKey: string;
+  responseBlockId?: string;
   ids: string[];
   inputMode: CustomAIInputMode;
   criteria: string;
@@ -90,6 +92,7 @@ async function gradeWithAI(params: {
 export default function CustomAIComponent({
   className,
   nodeKey,
+  responseBlockId,
   ids: questionIDs,
   inputMode: defaultInputMode,
   criteria,
@@ -109,18 +112,23 @@ export default function CustomAIComponent({
   const sharedHistoryState = useRef(createEmptyHistoryState());
   const completionSavedRef = useRef(false);
 
-  const { grade, saveGrade, workbook } = useContext(UnitContext);
+  const { grade, saveGrade, workbook, createGrade } = useContext(UnitContext);
   const { questionBank } = useContext(DictionaryContext);
   const questionBankMap = (questionBank || {}) as Record<string, any>;
   const workbookApi = workbook as any;
 
   const gradeId = grade?.id;
-  const inProgress = grade?.data?.[nodeKey];
+  const blockDataKey = responseBlockId || nodeKey;
+  const inProgress = grade?.data?.[blockDataKey];
 
   // Saves what the student actually submitted for each question (typed
   // text, recording, drawing strokes, uploaded photo) with the grader's
   // verdict as GradeResponse items, for teacher review.
-  const recordResponse = useResponseRecorder({ grade, blockKey: nodeKey });
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
 
   // Fields this component has written to its block. Merged into every block
   // save so a save made while the grade in context is a render behind cannot
@@ -130,13 +138,13 @@ export default function CustomAIComponent({
     (fields: Record<string, unknown>) => {
       ownBlockFieldsRef.current = { ...ownBlockFieldsRef.current, ...fields };
       saveGrade({
-        [nodeKey]: {
-          ...(grade?.data?.[nodeKey] || {}),
+        [blockDataKey]: {
+          ...(grade?.data?.[blockDataKey] || {}),
           ...ownBlockFieldsRef.current,
         },
       });
     },
-    [grade, nodeKey, saveGrade],
+    [blockDataKey, grade, saveGrade],
   );
 
   // Reset when grade changes
@@ -145,14 +153,14 @@ export default function CustomAIComponent({
     if (gradeId && gradeId !== gradeIdRef.current) {
       gradeIdRef.current = gradeId;
       ownBlockFieldsRef.current = {};
-      if (!grade?.data?.[nodeKey]) {
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
         setGrading({});
         completionSavedRef.current = false;
       }
     }
-  }, [gradeId, grade?.data, nodeKey]);
+  }, [blockDataKey, gradeId, grade?.data]);
 
   // Load saved feedback from progress data
   useEffect(() => {
@@ -338,7 +346,7 @@ export default function CustomAIComponent({
   const accuracy = answeredCount > 0 ? (correctCount / answeredCount) * 100 : 0;
   const graded = totalQuestions > 0 && answeredCount >= totalQuestions;
 
-  const blockGradeData = grade?.data?.[nodeKey];
+  const blockGradeData = grade?.data?.[blockDataKey];
   const nailedIt = blockGradeData?.nailedIt === true;
 
   const MODE_LABELS: Record<CustomAIInputMode, string> = {
@@ -517,6 +525,7 @@ export default function CustomAIComponent({
                             title={displayPrompt}
                             onRecordingComplete={wrapOnRecordingComplete(
                               async (audioFile: any) => {
+                                const attemptId = createResponseAttemptId();
                                 const currentGradeData = grade?.data || {};
                                 const audioNodeKey = `custom-ai-${questionID}`;
                                 // Only this key: saveGrade merges it into the
@@ -542,6 +551,7 @@ export default function CustomAIComponent({
                                     inputMethod: INPUT_METHOD.audio,
                                     prompt: displayPrompt,
                                     audioPath: audioFile.path,
+                                    attemptId,
                                   }),
                                 );
 
@@ -570,8 +580,9 @@ export default function CustomAIComponent({
                                       prompt: displayPrompt,
                                       transcript,
                                       result,
+                                      attemptId,
                                     }),
-                                    { sameAttempt: true },
+                                    { sameAttempt: true, attemptId },
                                   );
                                   setFeedback((prev) => ({
                                     ...prev,
@@ -597,8 +608,9 @@ export default function CustomAIComponent({
                                           (err as Error)?.message ||
                                           String(err),
                                       },
+                                      attemptId,
                                     }),
-                                    { sameAttempt: true },
+                                    { sameAttempt: true, attemptId },
                                   );
                                 }
                               },

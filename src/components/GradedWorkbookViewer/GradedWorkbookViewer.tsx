@@ -53,6 +53,8 @@ import { AudioPlayerProvider } from "../Editor3/context/AudioPlayerContext";
 import { AutocompleteProvider } from "../Editor3/context/SharedAutocompleteContext";
 import { DndWrapper } from "../MeaningAssociationExercise/DndWrapper";
 import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
+import UnitContext from "../../context/unitContext";
+import DictionaryContext from "../../context/dictionaryContext";
 
 import YouTubePlugin from "../Editor3/plugins/YouTubePlugin";
 import WordBlockPlugin from "../Editor3/plugins/WordBlockPlugin";
@@ -197,6 +199,8 @@ export function GradedWorkbookViewer({
   viewerRole = "instructor",
 }: GradedWorkbookViewerProps) {
   const t = useTranslations("components");
+  const inheritedUnitContext = React.useContext(UnitContext);
+  const dictionaryContext = React.useContext(DictionaryContext);
   const [selectedAttempt, setSelectedAttempt] = React.useState(0);
   const [gutterTab, setGutterTab] = React.useState(0);
   const [gutterWidth, setGutterWidth] = React.useState(320);
@@ -238,6 +242,19 @@ export function GradedWorkbookViewer({
   );
 
   const currentGrade = grades[selectedAttempt];
+  const readOnlyUnitContext = useMemo(
+    () => ({
+      ...inheritedUnitContext,
+      grade: currentGrade,
+      dictionary:
+        dictionaryContext.dictionary || inheritedUnitContext.dictionary || {},
+      readOnly: true,
+      saveGrade: () => {
+        throw new Error("Cannot save grades from the read-only review view");
+      },
+    }),
+    [currentGrade, dictionaryContext.dictionary, inheritedUnitContext],
+  );
 
   // Collect wrong answers across all attempts for gutter annotations
   const wrongAnswersByBlock = useMemo(() => {
@@ -462,50 +479,53 @@ export function GradedWorkbookViewer({
             position: "relative",
           }}
         >
-          <DndWrapper>
-            <AutocompleteProvider>
-              <AudioPlayerProvider>
-                <LexicalComposer initialConfig={initialConfig}>
-                  <CheckListPlugin />
-                  <HashtagPlugin />
-                  <HorizontalRulePlugin />
-                  <ListPlugin />
-                  <TabIndentationPlugin />
-                  <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
-                  <TablePlugin />
-                  <LexicalClickableLinkPlugin />
-                  <YouTubePlugin />
-                  <WordBlockPlugin />
-                  <QuizPlugin />
-                  <MeaningAssociationPlugin />
-                  <PlaylistPlugin />
-                  <PdfViewerPlugin />
-                  <ImagesPlugin captionsEnabled={false} />
-                  <AnswerPlugin />
-                  <CustomAnswerPlugin />
-                  <GradedWorkbookStatePlugin contentJson={contentJson} />
+          <UnitContext.Provider value={readOnlyUnitContext}>
+            <DndWrapper>
+              <AutocompleteProvider>
+                <AudioPlayerProvider>
+                  <LexicalComposer initialConfig={initialConfig}>
+                    <CheckListPlugin />
+                    <HashtagPlugin />
+                    <HorizontalRulePlugin />
+                    <ListPlugin />
+                    <TabIndentationPlugin />
+                    <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
+                    <TablePlugin />
+                    <LexicalClickableLinkPlugin />
+                    <YouTubePlugin />
+                    <WordBlockPlugin />
+                    <QuizPlugin />
+                    <MeaningAssociationPlugin />
+                    <PlaylistPlugin />
+                    <PdfViewerPlugin />
+                    <ImagesPlugin captionsEnabled={false} />
+                    <AnswerPlugin />
+                    <CustomAnswerPlugin />
+                    <GradedWorkbookStatePlugin contentJson={contentJson} />
 
-                  <RichTextPlugin
-                    contentEditable={
-                      <ContentEditable
-                        aria-label={t("gradedWorkbookViewer.contentAriaLabel", {
-                          name: studentName,
-                        })}
-                        style={{
-                          width: "100%",
-                          padding: "1.5rem",
-                          outline: "none",
-                          minHeight: "400px",
-                        }}
-                      />
-                    }
-                    placeholder={null}
-                    ErrorBoundary={LexicalErrorBoundary}
-                  />
-                </LexicalComposer>
-              </AudioPlayerProvider>
-            </AutocompleteProvider>
-          </DndWrapper>
+                    <RichTextPlugin
+                      contentEditable={
+                        <ContentEditable
+                          aria-label={t(
+                            "gradedWorkbookViewer.contentAriaLabel",
+                            { name: studentName },
+                          )}
+                          style={{
+                            width: "100%",
+                            padding: "1.5rem",
+                            outline: "none",
+                            minHeight: "400px",
+                          }}
+                        />
+                      }
+                      placeholder={null}
+                      ErrorBoundary={LexicalErrorBoundary}
+                    />
+                  </LexicalComposer>
+                </AudioPlayerProvider>
+              </AutocompleteProvider>
+            </DndWrapper>
+          </UnitContext.Provider>
         </Paper>
 
         {/* Resize handle */}

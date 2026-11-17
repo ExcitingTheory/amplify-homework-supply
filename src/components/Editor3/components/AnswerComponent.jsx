@@ -41,7 +41,11 @@ const SketchPad = dynamic(async () => (await import("./SketchPad")).default, {
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import { LEARNER_EXERCISE_WAVEFORM_PRESET } from "../../../utils/waveformDefaults";
 import getCachedUrl from "../../../utils/getCachedUrl";
-import { buildResponse, INPUT_METHOD } from "../../../utils/studentResponses";
+import {
+  buildResponse,
+  createResponseAttemptId,
+  INPUT_METHOD,
+} from "../../../utils/studentResponses";
 import { useResponseRecorder } from "../../../hooks/useResponseRecorder";
 
 const ANSWER_BLOCK_TYPE = "answer";
@@ -65,9 +69,15 @@ async function gradeSpokenAnswer({
 }) {
   const audioPath = audioFile?.path || uploadResult?.path;
   if (!audioPath) return;
+  const attemptId = createResponseAttemptId();
   recordResponse(
     questionKey,
-    buildResponse({ inputMethod: INPUT_METHOD.audio, prompt, audioPath }),
+    buildResponse({
+      inputMethod: INPUT_METHOD.audio,
+      prompt,
+      audioPath,
+      attemptId,
+    }),
   );
   try {
     // transcribeAudio downloads the recording over HTTPS, so it needs a
@@ -82,8 +92,9 @@ async function gradeSpokenAnswer({
         prompt,
         transcript: feedbackData.transcript,
         result: feedbackData,
+        attemptId,
       }),
-      { sameAttempt: true },
+      { sameAttempt: true, attemptId },
     );
     setFeedback((prev) => ({ ...prev, [questionKey]: feedbackData }));
     // Broadcast to collaborators via Yjs
@@ -99,8 +110,9 @@ async function gradeSpokenAnswer({
         inputMethod: INPUT_METHOD.audio,
         prompt,
         result: { error: err?.message || String(err) },
+        attemptId,
       }),
-      { sameAttempt: true },
+      { sameAttempt: true, attemptId },
     );
   }
 }
@@ -164,6 +176,8 @@ export function AnswerView({
   grade,
   saveGrade,
   workbook,
+  responseBlockId,
+  createGrade,
 }) {
   const t = useTranslations("workbook");
 
@@ -191,10 +205,15 @@ export function AnswerView({
 
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
+  const blockDataKey = responseBlockId || nodeKey;
   // Saves what the student actually submitted (typed text, recording,
   // drawing strokes) as GradeResponse items, keyed like `feedback`, so
   // teachers can review it later.
-  const recordResponse = useResponseRecorder({ grade, blockKey: nodeKey });
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
   const sharedHistoryState = useRef(createEmptyHistoryState());
 
   const [currentInputMethod, setCurrentInputMethod] = useState(
@@ -236,12 +255,12 @@ export function AnswerView({
     if (grade?.id && grade.id !== gradeIdRef.current) {
       gradeIdRef.current = grade.id;
       // Only reset if the new grade has no data for this exercise
-      if (!grade?.data?.[nodeKey]) {
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
       }
     }
-  }, [grade?.id, grade?.data, nodeKey]);
+  }, [grade?.id, grade?.data, blockDataKey]);
 
   let thisPrompt = customPrompt
     ? customPrompt
@@ -253,7 +272,7 @@ export function AnswerView({
 
   // Track completion and save grade
   React.useEffect(() => {
-    if (!wordIDs || !feedback || !saveGrade || !nodeKey) return;
+    if (!wordIDs || !feedback || !saveGrade || !blockDataKey) return;
 
     // Check if all words have been answered correctly
     const answeredWords = Object.keys(feedback);
@@ -275,7 +294,7 @@ export function AnswerView({
       // Only this block: saveGrade merges it into the latest grade, so a
       // render-behind copy of other blocks cannot roll them back.
       const updatedGradeData = {
-        [nodeKey]: {
+        [blockDataKey]: {
           complete: isComplete,
           accuracy,
           totalWords,
@@ -287,7 +306,7 @@ export function AnswerView({
 
       saveGrade(updatedGradeData);
     }
-  }, [feedback, wordIDs, saveGrade, nodeKey]);
+  }, [feedback, wordIDs, saveGrade, blockDataKey]);
 
   const totalWords = wordIDs?.length || 0;
   const answeredCount = Object.keys(feedback).length;
@@ -426,28 +445,34 @@ export default function AnswerComponent({
   customPrompt,
   allowedInput,
   promptMethod,
+  responseBlockId,
 }) {
-  const { dictionary, grade, saveGrade, workbook } =
+  const { dictionary, grade, saveGrade, workbook, createGrade, readOnly } =
     React.useContext(UnitContext);
   // Keep verify-context hook for parity (memory/personalization side effects).
   useVerifyContext();
-  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
+  const blockDataKey = responseBlockId || nodeKey;
+  const nailedIt = grade?.data?.[blockDataKey]?.nailedIt === true;
   return (
-    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <AnswerView
-        workbook={workbook}
-        className={className}
-        nodeKey={nodeKey}
-        wordIDs={wordIDs}
-        requestDefinition={requestDefinition}
-        customPrompt={customPrompt}
-        allowedInput={allowedInput}
-        promptMethod={promptMethod}
-        dictionary={dictionary}
-        grade={grade}
-        saveGrade={saveGrade}
-      />
-    </WorkbookBlockEnhancements>
+    <div inert={readOnly ? true : undefined} aria-disabled={!!readOnly}>
+      <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
+        <AnswerView
+          workbook={workbook}
+          className={className}
+          nodeKey={nodeKey}
+          responseBlockId={responseBlockId}
+          wordIDs={wordIDs}
+          requestDefinition={requestDefinition}
+          customPrompt={customPrompt}
+          allowedInput={allowedInput}
+          promptMethod={promptMethod}
+          dictionary={dictionary}
+          grade={grade}
+          saveGrade={saveGrade}
+          createGrade={createGrade}
+        />
+      </WorkbookBlockEnhancements>
+    </div>
   );
 }
 

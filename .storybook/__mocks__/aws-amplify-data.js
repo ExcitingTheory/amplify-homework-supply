@@ -761,6 +761,32 @@ const mockClient = {
 
   // Mock mutations for custom server-side operations
   mutations: {
+    saveStudentResponse: async ({
+      gradeId,
+      blockKey,
+      questionKey,
+      response,
+    }) => {
+      const grade = dataStores.Grade.get(gradeId);
+      if (!grade) {
+        return { data: null, errors: [{ message: "Grade not found" }] };
+      }
+      const id = `${gradeId}:${blockKey}:${questionKey}`;
+      dataStores.GradeResponse.set(id, {
+        id,
+        gradeID: gradeId,
+        blockKey,
+        questionKey,
+        unitID: grade.unitID ?? null,
+        sectionID: grade.sectionID ?? null,
+        instructorGroup:
+          grade.instructorGroup ??
+          (grade.sectionID ? `section-${grade.sectionID}-instructors` : null),
+        owner: grade.owner,
+        ...response,
+      });
+      return { data: true, errors: null };
+    },
     createSectionGroup: async (input) => {
       console.log("[Mock Data] createSectionGroup() called with:", input);
       const sectionId = `mock-section-${Date.now()}`;
