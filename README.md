@@ -87,6 +87,12 @@ All completed features are documented in [FEATURES.md](./docs/FEATURES.md): cust
 
 ## Getting Started
 
+Before running `npm run dev` or `npm run typecheck`, make sure `amplify_outputs.json` exists at the repository root. This generated file is ignored by Git, so each worktree needs its own copy. Copy it from a checkout configured for the backend you intend to use, or generate it from an existing Amplify deployment without redeploying:
+
+```bash
+npx ampx generate outputs --branch <branch> --app-id <app-id>
+```
+
 ```bash
 npm run dev          # Next.js dev server (port 3000)
 npm run storybook    # Component development (port 6006)

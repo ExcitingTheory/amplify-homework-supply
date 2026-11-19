@@ -933,8 +933,6 @@ const rawSchemaDefinition = {
       allow.groupDefinedIn("instructorGroup").to(["read", "update"]),
       // Dynamic group authorization: peers invited to review can read
       allow.groupDefinedIn("peerReviewGroup").to(["read"]),
-      // The section handler validates the authenticated owner before response writes.
-      allow.resource(sectionHandler).to(["read"]),
     ]),
 
   // ==========================================================================
@@ -1024,7 +1022,6 @@ const rawSchemaDefinition = {
       allow.owner().to(["read"]),
       allow.group("Admins").to(["read", "delete"]),
       allow.groupDefinedIn("instructorGroup").to(["read"]),
-      allow.resource(sectionHandler).to(["read", "create", "update"]),
     ]),
 
   // One signed URL per requested key; url is null when the key is refused.
@@ -4035,6 +4032,7 @@ const schema = a
     allow.resource(moderationHandler),
     allow.resource(recycleBinHandler),
     allow.resource(gradeRollupStreamHandler),
+    // Amplify grants Lambda access at schema scope; the handler checks ownership before response writes.
     allow.resource(sectionHandler).to(["query", "mutate"]),
   ]);
 
