@@ -51,6 +51,8 @@ Each user receives a unique password derived from the private
 - **2 documents** (PDFs for analysis testing)
 - **1 parsed content** (extracted vocabulary/questions)
 - **User settings** (preferences for test users)
+- **Student answers** (`GradeResponse` items, one per question) with real
+  recordings and handwriting; see [Student answers](#student-answers)
 
 ### Section metadata and defaults
 
@@ -131,3 +133,25 @@ npx ampx sandbox seed
 
 - [Amplify Seed Documentation](https://docs.amplify.aws/react/deploy-and-host/sandbox-environments/seed/)
 - [@aws-amplify/seed API](https://www.npmjs.com/package/@aws-amplify/seed)
+
+## Student answers
+
+The seed writes `GradeResponse` items (typed answers, recordings, drawings and
+their verdicts) the same way the answer components do, using
+[`studentResponses.ts`](./studentResponses.ts). Each student's recordings are
+uploaded to their private `user-submissions` folder while signed in as them,
+and every seeded grade records the student's `identityId`, so instructors can
+open the recordings through `getStudentSubmissionUrls`.
+
+| Student | Unit | What they did |
+| --- | --- | --- |
+| student1 | Japanese Greetings | Word recall all correct: typed こんにちは, drew ありがとう in the correct stroke order, said さようなら |
+| student1 | AI Biology Exercise | Typed "Glucose and oxygen"; the first recording failed to transcribe, the second (a full spoken answer) was graded |
+| student2 | Japanese Greetings (attempt 1) | Typed こんにちわ (misspelled), drew ありがとう in the wrong stroke order, said the casual さよなら (flagged for review) |
+| student4 | Japanese Greetings | Typed ありがと (misspelled) and a silent recording (empty transcript, flagged for review) |
+
+The Japanese unit has a word-recall block (`answer`, text, audio and writing)
+for these answers. Seeded block keys (`vocab-recall-1`, `custom-ai-1`) are
+labels: in the app, block keys are Lexical node keys assigned at load time.
+Assets and how to regenerate them:
+[`test/mocks/student-responses`](../../test/mocks/student-responses/README.md).

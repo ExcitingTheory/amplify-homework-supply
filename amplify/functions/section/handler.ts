@@ -13,6 +13,11 @@ import { Amplify } from "aws-amplify";
 import { generateClient } from "aws-amplify/data";
 import { GroupManager } from "./groupManager";
 import {
+  gradeOwnerIdentifiers,
+  gradeResponseAssociations,
+  isGradeOwnedByCaller,
+} from "./gradeResponseOwnership";
+import {
   createNotification,
   createNotificationsForRecipients,
 } from "../shared/notificationUtils";
@@ -34,6 +39,7 @@ import {
   resolveGradeAggregationMethod,
   computeAggregatedGrade,
 } from "../shared/gradeAggregation";
+import { isAllowedSubmissionKey } from "./submissionKeys";
 
 // Cache for User Pool ID discovery
 let cachedUserPoolId: string | null = null;
@@ -508,9 +514,37 @@ const GET_GRADE_WITH_IDENTITY = /* GraphQL */ `
   query GetGradeWithIdentity($id: ID!) {
     getGrade(id: $id) {
       id
+      unitID
       sectionID
       owner
       identityId
+      instructorGroup
+    }
+  }
+`;
+
+const GET_GRADE_RESPONSE_FOR_WRITE = /* GraphQL */ `
+  query GetGradeResponseForWrite($id: ID!) {
+    getGradeResponse(id: $id) {
+      id
+      gradeID
+      owner
+    }
+  }
+`;
+
+const CREATE_GRADE_RESPONSE = /* GraphQL */ `
+  mutation CreateGradeResponse($input: CreateGradeResponseInput!) {
+    createGradeResponse(input: $input) {
+      id
+    }
+  }
+`;
+
+const UPDATE_GRADE_RESPONSE = /* GraphQL */ `
+  mutation UpdateGradeResponse($input: UpdateGradeResponseInput!) {
+    updateGradeResponse(input: $input) {
+      id
     }
   }
 `;
@@ -569,7 +603,19 @@ export const handler: Handler = async (event: any, context: any) => {
     throw new Error("Unauthorized: User ID not found in event context");
   }
 
-  console.log(`[Section Handler] ${operationName}`, { userId, username, args });
+  const loggedArgs =
+    operationName === "saveStudentResponse"
+      ? {
+          gradeId: args.gradeId,
+          blockKey: args.blockKey,
+          questionKey: args.questionKey,
+        }
+      : args;
+  console.log(`[Section Handler] ${operationName}`, {
+    userId,
+    username,
+    args: loggedArgs,
+  });
 
   try {
     const userPoolId = await getUserPoolId();
@@ -627,6 +673,10 @@ export const handler: Handler = async (event: any, context: any) => {
         );
       case "getStudentSubmissionUrl":
         return await handleGetStudentSubmissionUrl(args, userId, claims);
+      case "getStudentSubmissionUrls":
+        return await handleGetStudentSubmissionUrls(args, userId, claims);
+      case "saveStudentResponse":
+        return await handleSaveStudentResponse(args, userId, username, claims);
       case "getUnitsCdnCookie":
         return await handleGetUnitsCdnCookie();
       default:
@@ -1534,8 +1584,115 @@ async function isUserInSection(
 // STUDENT SUBMISSION URL (instructor cross-user file access)
 // ========================================================================
 
+async function handleSaveStudentResponse(
+  args: Record<string, any>,
+  userId: string,
+  username: string | undefined,
+  claims: Record<string, any>,
+): Promise<boolean> {
+  const { gradeId, blockKey, questionKey } = args;
+  if (
+    typeof gradeId !== "string" ||
+    typeof blockKey !== "string" ||
+    !blockKey ||
+    blockKey.length > 200 ||
+    blockKey.includes(":") ||
+    typeof questionKey !== "string" ||
+    !questionKey ||
+    questionKey.length > 200 ||
+    questionKey.includes(":")
+  ) {
+    throw new Error("Invalid student response identifiers");
+  }
+
+  const response =
+    typeof args.response === "string"
+      ? JSON.parse(args.response)
+      : args.response;
+  if (!response || typeof response !== "object" || Array.isArray(response)) {
+    throw new Error("Invalid student response payload");
+  }
+
+  const client = getClient();
+  const { data: gradeResult, errors: gradeErrors } = await client.graphql({
+    query: GET_GRADE_WITH_IDENTITY,
+    variables: { id: gradeId },
+  });
+  if (gradeErrors?.length || !gradeResult?.getGrade) {
+    throw new Error("Grade not found");
+  }
+
+  const grade = gradeResult.getGrade;
+  const ownerIds = gradeOwnerIdentifiers(userId, username, claims);
+  if (!isGradeOwnedByCaller(grade, ownerIds)) {
+    throw new Error("Unauthorized: grade is not owned by the current user");
+  }
+
+  const id = `${grade.id}:${blockKey}:${questionKey}`;
+  const { data: existingResult, errors: existingErrors } =
+    await client.graphql({
+      query: GET_GRADE_RESPONSE_FOR_WRITE,
+      variables: { id },
+    });
+  if (existingErrors?.length) {
+    throw new Error(
+      existingErrors[0]?.message || "Could not load the saved response",
+    );
+  }
+  const existing = existingResult?.getGradeResponse;
+  if (
+    existing &&
+    (existing.gradeID !== grade.id || existing.owner !== grade.owner)
+  ) {
+    throw new Error("Unauthorized: response does not belong to this grade");
+  }
+
+  const responseFields = [
+    "inputMethod",
+    "prompt",
+    "text",
+    "transcript",
+    "audioPath",
+    "imagePath",
+    "strokes",
+    "verdict",
+    "correct",
+    "score",
+    "confidence",
+    "reason",
+    "needsReview",
+    "attempts",
+    "history",
+    "submittedAt",
+  ];
+  const responseInput = Object.fromEntries(
+    responseFields
+      .filter((field) => Object.hasOwn(response, field))
+      .map((field) => [field, response[field]]),
+  );
+  const input = {
+    id,
+    blockKey,
+    questionKey,
+    ...gradeResponseAssociations(grade),
+    ...responseInput,
+  };
+  const mutation = existing ? UPDATE_GRADE_RESPONSE : CREATE_GRADE_RESPONSE;
+  const mutationName = existing ? "updateGradeResponse" : "createGradeResponse";
+  const { data: writeData, errors: writeErrors } = await client.graphql({
+    query: mutation,
+    variables: { input },
+  });
+  if (writeErrors?.length || !writeData?.[mutationName]?.id) {
+    throw new Error(
+      writeErrors?.[0]?.message || `Could not ${mutationName}`,
+    );
+  }
+  return true;
+}
+
 /**
- * Returns a short-lived S3 presigned URL for a student's private submission file.
+ * Checks that the caller may read files under a grade owner's private path.
  *
  * Authorization checks (in order):
  *  1. AppSync auth rule already verified caller is in Instructors or Admins group.
@@ -1543,18 +1700,14 @@ async function isUserInSection(
  *     (prevents path traversal — an instructor cannot request an arbitrary private path).
  *  3. Caller is the section instructor (section.instructor === userId) OR is an Admin
  *     OR is in the section's Cognito instructor group.
+ *
+ * Returns the private path prefix every requested key must start with.
  */
-async function handleGetStudentSubmissionUrl(
-  args: any,
+async function authorizeSubmissionAccess(
+  gradeId: string,
   userId: string,
   claims: Record<string, any>,
-): Promise<string> {
-  const { gradeId, submissionKey } = args;
-
-  if (!gradeId || !submissionKey) {
-    throw new Error("gradeId and submissionKey are required");
-  }
-
+): Promise<{ expectedPrefix: string; sectionID: string | null }> {
   const client = getClient();
 
   // 1. Fetch grade — needs identityId and sectionID
@@ -1570,17 +1723,11 @@ async function handleGetStudentSubmissionUrl(
 
   const grade = gradeData.getGrade;
 
-  // 2. Path traversal prevention — submissionKey must be under the grade owner's private path
-  const expectedPrefix = `private/${grade.identityId}/`;
-  if (!grade.identityId || !submissionKey.startsWith(expectedPrefix)) {
-    console.error(
-      "[getStudentSubmissionUrl] submissionKey does not match grade owner identity",
-      { submissionKey, expectedPrefix },
-    );
-    throw new Error(
-      "Unauthorized: submission key does not match grade owner identity",
-    );
+  // 2. Path traversal prevention — keys must be under the grade owner's private path
+  if (!grade.identityId) {
+    throw new Error("Unauthorized: grade has no owner identity");
   }
+  const expectedPrefix = `private/${grade.identityId}/`;
 
   // 3. Section authorization — caller must be the section's instructor or an Admin
   const userGroups: string[] = claims["cognito:groups"] || [];
@@ -1625,13 +1772,20 @@ async function handleGetStudentSubmissionUrl(
     }
   }
 
-  // 4. Generate short-lived CloudFront signed URL (15 minutes)
+  return { expectedPrefix, sectionID: grade.sectionID ?? null };
+}
+
+/** Load CloudFront signing credentials from SSM once per container. */
+async function loadCloudFrontSigner(): Promise<{
+  cdnDomain: string;
+  privateKey: string;
+  keyPairId: string;
+}> {
   const cdnDomain = process.env.CDN_DOMAIN;
   if (!cdnDomain) {
     throw new Error("CDN_DOMAIN environment variable not set");
   }
 
-  // Load CF credentials from SSM on first invocation, then reuse from cache
   if (!cfPrivateKey || !cfKeyPairId) {
     const ssmClient = new SSMClient({
       region: process.env.AWS_REGION || "us-east-1",
@@ -1656,22 +1810,113 @@ async function handleGetStudentSubmissionUrl(
   if (!cfPrivateKey || !cfKeyPairId) {
     throw new Error("CloudFront signing credentials not available in SSM");
   }
+  return { cdnDomain, privateKey: cfPrivateKey, keyPairId: cfKeyPairId };
+}
 
+/** Max keys signed per batch call (a grade's recordings and photos). */
+const MAX_SUBMISSION_KEYS = 100;
+
+/**
+ * Returns a short-lived (15 minute) CloudFront signed URL for one of a
+ * student's private submission files. See authorizeSubmissionAccess.
+ */
+async function handleGetStudentSubmissionUrl(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<string> {
+  const { gradeId, submissionKey } = args;
+
+  if (!gradeId || !submissionKey) {
+    throw new Error("gradeId and submissionKey are required");
+  }
+
+  const { expectedPrefix, sectionID } = await authorizeSubmissionAccess(
+    gradeId,
+    userId,
+    claims,
+  );
+  if (!isAllowedSubmissionKey(submissionKey, expectedPrefix)) {
+    console.error(
+      "[getStudentSubmissionUrl] submissionKey does not match grade owner identity",
+      { submissionKey, expectedPrefix },
+    );
+    throw new Error(
+      "Unauthorized: submission key does not match grade owner identity",
+    );
+  }
+
+  const signer = await loadCloudFrontSigner();
   const signedUrl = signCFUrl(
-    `https://${cdnDomain}/${submissionKey}`,
-    cfPrivateKey,
-    cfKeyPairId,
+    `https://${signer.cdnDomain}/${submissionKey}`,
+    signer.privateKey,
+    signer.keyPairId,
     Math.floor((Date.now() + 15 * 60 * 1000) / 1000),
   );
 
   console.log(
     "[getStudentSubmissionUrl] Generated CloudFront signed URL for:",
-    {
-      gradeId,
-      sectionID: grade.sectionID,
-      requestedBy: userId,
-    },
+    { gradeId, sectionID, requestedBy: userId },
   );
 
   return signedUrl;
+}
+
+/**
+ * Batch form of handleGetStudentSubmissionUrl: one authorization check, then
+ * a signed URL for each key. Keys outside the grade owner's private path get
+ * url: null instead of failing the whole batch.
+ */
+async function handleGetStudentSubmissionUrls(
+  args: any,
+  userId: string,
+  claims: Record<string, any>,
+): Promise<Array<{ key: string; url: string | null }>> {
+  const { gradeId } = args;
+  const keys: string[] = Array.isArray(args.submissionKeys)
+    ? [...new Set<string>(args.submissionKeys)]
+    : [];
+
+  if (!gradeId) throw new Error("gradeId is required");
+  if (keys.length === 0) return [];
+  if (keys.length > MAX_SUBMISSION_KEYS) {
+    throw new Error(`At most ${MAX_SUBMISSION_KEYS} submission keys per call`);
+  }
+
+  const { expectedPrefix, sectionID } = await authorizeSubmissionAccess(
+    gradeId,
+    userId,
+    claims,
+  );
+  const signer = await loadCloudFrontSigner();
+  const expiresAt = Math.floor((Date.now() + 15 * 60 * 1000) / 1000);
+
+  const results = keys.map((key) => {
+    if (!isAllowedSubmissionKey(key, expectedPrefix)) {
+      console.error(
+        "[getStudentSubmissionUrls] key does not match grade owner identity",
+        { key, expectedPrefix },
+      );
+      return { key, url: null };
+    }
+    return {
+      key,
+      url: signCFUrl(
+        `https://${signer.cdnDomain}/${key}`,
+        signer.privateKey,
+        signer.keyPairId,
+        expiresAt,
+      ),
+    };
+  });
+
+  console.log("[getStudentSubmissionUrls] Signed URLs:", {
+    gradeId,
+    sectionID,
+    requestedBy: userId,
+    count: results.filter((r) => r.url).length,
+    refused: results.filter((r) => !r.url).length,
+  });
+
+  return results;
 }

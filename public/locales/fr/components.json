@@ -3343,5 +3343,42 @@
     "xpCapsTitle": "Plafonds d'XP",
     "xpDisabledWarning": "Les XP sont désactivés pour cette section. Les étudiants ne gagneront aucun XP.",
     "xpEnabled": "XP activés"
+  },
+  "studentResponses": {
+    "title": "{count, plural, one {# réponse} other {# réponses}}",
+    "tabAnswers": "Réponses",
+    "tabHistory": "Historique",
+    "needsReviewOnly": "À vérifier ({count})",
+    "needsReview": "À vérifier",
+    "verdict": {
+      "correct": "Correcte",
+      "misspelled": "Mal orthographiée",
+      "incorrect": "Incorrecte",
+      "error": "Échec de la correction"
+    },
+    "input": {
+      "text": "Saisie",
+      "audio": "Orale",
+      "drawing": "Dessinée",
+      "image": "Photo",
+      "choice": "Choisie"
+    },
+    "attempts": "{count, plural, one {# tentative} other {# tentatives}}",
+    "prompt": "Consigne : {prompt}",
+    "transcript": "Transcription : {transcript}",
+    "noTranscript": "Aucune transcription",
+    "fileUnavailable": "Fichier indisponible",
+    "photoAlt": "Photo envoyée par l'élève",
+    "legacy": "Enregistrée avant la conservation des réponses complètes",
+    "block": "Exercice {n}",
+    "noAnswers": "Aucune réponse enregistrée pour cette tentative.",
+    "loading": "Chargement des réponses…",
+    "loadError": "Impossible de charger les réponses.",
+    "strokeOrderAlt": "Dessin de {count, plural, one {# trait} other {# traits}}, numérotés dans l'ordre du tracé",
+    "strokeCount": "{count, plural, one {# trait} other {# traits}}, numérotés dans l'ordre du tracé",
+    "replay": "Rejouer",
+    "downloadExcalidraw": "Fichier Excalidraw",
+    "backToWorkbook": "Retour au cahier",
+    "reviewEmpty": "Rien à revoir pour l'instant. Termine le cahier pour voir tes réponses ici."
   }
 }

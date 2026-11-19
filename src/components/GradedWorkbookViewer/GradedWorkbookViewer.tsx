@@ -26,6 +26,8 @@ import {
   Tooltip,
   LinearProgress,
   IconButton,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import ErrorOutlineIcon from "@mui/icons-material/ErrorOutline";
@@ -51,6 +53,8 @@ import { AudioPlayerProvider } from "../Editor3/context/AudioPlayerContext";
 import { AutocompleteProvider } from "../Editor3/context/SharedAutocompleteContext";
 import { DndWrapper } from "../MeaningAssociationExercise/DndWrapper";
 import LanguageEditorTheme from "../Editor3/config/LanguageEditorTheme";
+import UnitContext from "../../context/unitContext";
+import DictionaryContext from "../../context/dictionaryContext";
 
 import YouTubePlugin from "../Editor3/plugins/YouTubePlugin";
 import WordBlockPlugin from "../Editor3/plugins/WordBlockPlugin";
@@ -68,6 +72,8 @@ import {
   onError,
 } from "../Editor3/editorConfig";
 import { GradedWorkbookStatePlugin } from "./GradedWorkbookStatePlugin";
+import { StudentResponsesPanel, type ViewerRole } from "./StudentResponsesPanel";
+import { listBlockResponses } from "../../utils/studentResponses";
 import { GutterAnnotations } from "./GutterAnnotations";
 import { ModerationPanel } from "./ModerationPanel";
 import { getGradeCompletionLabel } from "../../utils/gradeTiming";
@@ -172,6 +178,11 @@ export interface GradedWorkbookViewerProps {
   ) => void;
   /** Optional max height for the workbook content area */
   maxHeight?: string | number;
+  /**
+   * Who is looking. "student" is the read-only view of their own work: no
+   * moderation panel, and recordings load from the student's own storage.
+   */
+  viewerRole?: ViewerRole;
 }
 
 // ============================================================================
@@ -185,9 +196,13 @@ export function GradedWorkbookViewer({
   moderation,
   onModerationAction,
   maxHeight,
+  viewerRole = "instructor",
 }: GradedWorkbookViewerProps) {
   const t = useTranslations("components");
+  const inheritedUnitContext = React.useContext(UnitContext);
+  const dictionaryContext = React.useContext(DictionaryContext);
   const [selectedAttempt, setSelectedAttempt] = React.useState(0);
+  const [gutterTab, setGutterTab] = React.useState(0);
   const [gutterWidth, setGutterWidth] = React.useState(320);
   const isDraggingRef = React.useRef(false);
   const startXRef = React.useRef(0);
@@ -227,6 +242,19 @@ export function GradedWorkbookViewer({
   );
 
   const currentGrade = grades[selectedAttempt];
+  const readOnlyUnitContext = useMemo(
+    () => ({
+      ...inheritedUnitContext,
+      grade: currentGrade,
+      dictionary:
+        dictionaryContext.dictionary || inheritedUnitContext.dictionary || {},
+      readOnly: true,
+      saveGrade: () => {
+        throw new Error("Cannot save grades from the read-only review view");
+      },
+    }),
+    [currentGrade, dictionaryContext.dictionary, inheritedUnitContext],
+  );
 
   // Collect wrong answers across all attempts for gutter annotations
   const wrongAnswersByBlock = useMemo(() => {
@@ -242,27 +270,8 @@ export function GradedWorkbookViewer({
         if (!result[blockId]) result[blockId] = [];
         if (typeof blockData !== "object" || blockData === null) return;
 
-        // Quiz blocks
-        if ("responses" in blockData && "accuracy" in blockData) {
-          const quizData = blockData as QuizBlockData;
-          Object.entries(quizData.responses).forEach(
-            ([questionId, response]) => {
-              if (!response.correct) {
-                result[blockId].push({
-                  blockId,
-                  questionId,
-                  attemptNumber: attemptNum,
-                  wrongAnswer: response.selected,
-                  type: "quiz",
-                  timestamp: grade.createdAt,
-                });
-              }
-            },
-          );
-        }
-
         // Meaning-association blocks — accuracy < 100 means some were wrong
-        if ("matches" in blockData && !("responses" in blockData)) {
+        if ("matches" in blockData) {
           const maData = blockData as MeaningAssocBlockData;
           if (maData.accuracy < 100) {
             result[blockId].push({
@@ -273,9 +282,14 @@ export function GradedWorkbookViewer({
               timestamp: grade.createdAt,
             });
           }
+          return;
         }
 
-        // Custom-answer blocks — accuracy < 100 or has feedback indicating issues
+        // Quiz, vocabulary and custom-answer blocks. listBlockResponses reads
+        // every shape these blocks have saved (quiz attemptedAnswers, the
+        // vocabulary feedback map, custom-answer results and userResponse).
+        // The old check looked for a `responses` field quizzes never had.
+        // Older custom-answer data: no per-question verdict, only a score.
         if ("userAnswer" in blockData) {
           const caData = blockData as CustomAnswerBlockData;
           if (caData.accuracy < 100 && caData.userAnswer) {
@@ -289,6 +303,30 @@ export function GradedWorkbookViewer({
               timestamp: grade.createdAt,
             });
           }
+          return;
+        }
+
+        const type: WrongAnswerAnnotation["type"] =
+          "attemptedAnswers" in blockData || "responses" in blockData
+            ? "quiz"
+            : "totalWords" in blockData
+              ? "answer"
+              : "custom-answer";
+        for (const entry of listBlockResponses(blockData)) {
+          const { verdict, text, transcript, reason } = entry.record;
+          if (verdict !== "incorrect" && verdict !== "misspelled" && verdict !== "error") {
+            continue;
+          }
+          result[blockId].push({
+            blockId,
+            questionId: entry.key,
+            attemptNumber: attemptNum,
+            wrongAnswer: text ?? transcript,
+            feedback: reason,
+            type,
+            accuracy: (blockData as { accuracy?: number }).accuracy,
+            timestamp: grade.createdAt,
+          });
         }
       });
     });
@@ -420,7 +458,7 @@ export function GradedWorkbookViewer({
       </Paper>
 
       {/* Moderation Panel */}
-      {moderation && (
+      {moderation && viewerRole === "instructor" && (
         <ModerationPanel
           moderation={moderation}
           gradeId={currentGrade?.id || ""}
@@ -441,50 +479,53 @@ export function GradedWorkbookViewer({
             position: "relative",
           }}
         >
-          <DndWrapper>
-            <AutocompleteProvider>
-              <AudioPlayerProvider>
-                <LexicalComposer initialConfig={initialConfig}>
-                  <CheckListPlugin />
-                  <HashtagPlugin />
-                  <HorizontalRulePlugin />
-                  <ListPlugin />
-                  <TabIndentationPlugin />
-                  <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
-                  <TablePlugin />
-                  <LexicalClickableLinkPlugin />
-                  <YouTubePlugin />
-                  <WordBlockPlugin />
-                  <QuizPlugin />
-                  <MeaningAssociationPlugin />
-                  <PlaylistPlugin />
-                  <PdfViewerPlugin />
-                  <ImagesPlugin captionsEnabled={false} />
-                  <AnswerPlugin />
-                  <CustomAnswerPlugin />
-                  <GradedWorkbookStatePlugin contentJson={contentJson} />
+          <UnitContext.Provider value={readOnlyUnitContext}>
+            <DndWrapper>
+              <AutocompleteProvider>
+                <AudioPlayerProvider>
+                  <LexicalComposer initialConfig={initialConfig}>
+                    <CheckListPlugin />
+                    <HashtagPlugin />
+                    <HorizontalRulePlugin />
+                    <ListPlugin />
+                    <TabIndentationPlugin />
+                    <MarkdownShortcutPlugin transformers={ALL_TRANSFORMERS} />
+                    <TablePlugin />
+                    <LexicalClickableLinkPlugin />
+                    <YouTubePlugin />
+                    <WordBlockPlugin />
+                    <QuizPlugin />
+                    <MeaningAssociationPlugin />
+                    <PlaylistPlugin />
+                    <PdfViewerPlugin />
+                    <ImagesPlugin captionsEnabled={false} />
+                    <AnswerPlugin />
+                    <CustomAnswerPlugin />
+                    <GradedWorkbookStatePlugin contentJson={contentJson} />
 
-                  <RichTextPlugin
-                    contentEditable={
-                      <ContentEditable
-                        aria-label={t("gradedWorkbookViewer.contentAriaLabel", {
-                          name: studentName,
-                        })}
-                        style={{
-                          width: "100%",
-                          padding: "1.5rem",
-                          outline: "none",
-                          minHeight: "400px",
-                        }}
-                      />
-                    }
-                    placeholder={null}
-                    ErrorBoundary={LexicalErrorBoundary}
-                  />
-                </LexicalComposer>
-              </AudioPlayerProvider>
-            </AutocompleteProvider>
-          </DndWrapper>
+                    <RichTextPlugin
+                      contentEditable={
+                        <ContentEditable
+                          aria-label={t(
+                            "gradedWorkbookViewer.contentAriaLabel",
+                            { name: studentName },
+                          )}
+                          style={{
+                            width: "100%",
+                            padding: "1.5rem",
+                            outline: "none",
+                            minHeight: "400px",
+                          }}
+                        />
+                      }
+                      placeholder={null}
+                      ErrorBoundary={LexicalErrorBoundary}
+                    />
+                  </LexicalComposer>
+                </AudioPlayerProvider>
+              </AutocompleteProvider>
+            </DndWrapper>
+          </UnitContext.Provider>
         </Paper>
 
         {/* Resize handle */}
@@ -522,11 +563,24 @@ export function GradedWorkbookViewer({
             maxHeight: maxHeight || "70vh",
           }}
         >
-          <GutterAnnotations
-            wrongAnswersByBlock={wrongAnswersByBlock}
-            currentAttempt={selectedAttempt}
-            grades={grades}
-          />
+          <Tabs
+            value={gutterTab}
+            onChange={(_, value) => setGutterTab(value)}
+            variant="fullWidth"
+            sx={{ minHeight: 36, "& .MuiTab-root": { minHeight: 36 } }}
+          >
+            <Tab label={t("studentResponses.tabAnswers")} />
+            <Tab label={t("studentResponses.tabHistory")} />
+          </Tabs>
+          {gutterTab === 0 ? (
+            <StudentResponsesPanel grade={currentGrade} viewerRole={viewerRole} />
+          ) : (
+            <GutterAnnotations
+              wrongAnswersByBlock={wrongAnswersByBlock}
+              currentAttempt={selectedAttempt}
+              grades={grades}
+            />
+          )}
         </Box>
       </Box>
 

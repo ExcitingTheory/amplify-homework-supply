@@ -54,6 +54,45 @@ export function blockAccuracyFraction(value) {
   return accuracy > 1 ? accuracy / 100 : accuracy;
 }
 
+/** True when a block or mode recorded a usable score, including a score of 0. */
+function hasAccuracy(value) {
+  return value != null && value !== "" && Number.isFinite(Number(value));
+}
+
+/**
+ * A unit's accuracy as a 0..100 percentage: the mean of the scored blocks and
+ * practice modes in a grade's data.
+ *
+ * A completed block or mode that scored 0 counts as 0. It used to be skipped
+ * (`accuracy` was tested for truthiness), so a block answered entirely wrong
+ * dropped out of the average and raised the unit's accuracy instead of lowering it.
+ * In-progress modes still count only once they have a non-zero score, as before.
+ */
+export function computeUnitAccuracy(data) {
+  let total = 0;
+  let accuracy = 0;
+  if (data) {
+    Object.values(data).forEach((block) => {
+      if (block?.complete === true && hasAccuracy(block?.accuracy)) {
+        total++;
+        accuracy += blockAccuracyFraction(block.accuracy);
+      }
+      ["learn", "easy", "hard"].forEach((mode) => {
+        const m = block?.[mode];
+        if (
+          hasAccuracy(m?.accuracy) &&
+          (m?.complete === true || Number(m.accuracy) > 0)
+        ) {
+          total++;
+          accuracy += blockAccuracyFraction(m.accuracy);
+        }
+      });
+    });
+  }
+  if (total === 0) return 0;
+  return (accuracy / total) * 100;
+}
+
 function gradedBlockKeys(nodes = [], parentPath = "root") {
   return nodes.flatMap((node, index) => {
     const path = `${parentPath}.${index}`;
@@ -337,26 +376,10 @@ const UnitProvider = ({ children, id }) => {
     return () => subscription.unsubscribe();
   }, []);
 
-  const verifyAccuracy = React.useCallback((data) => {
-    let total = 0;
-    let accuracy = 0;
-    if (data) {
-      Object.entries(data).forEach((g) => {
-        if (g[1]?.complete === true && g[1]?.accuracy) {
-          total++;
-          accuracy += blockAccuracyFraction(g[1]?.accuracy);
-        }
-        ["learn", "easy", "hard"].forEach((mode) => {
-          if (g[1]?.[mode]?.accuracy) {
-            total++;
-            accuracy += blockAccuracyFraction(g[1][mode].accuracy);
-          }
-        });
-      });
-    }
-    if (total === 0) return 0;
-    return (accuracy / total) * 100;
-  }, []);
+  const verifyAccuracy = React.useCallback(
+    (data) => computeUnitAccuracy(data),
+    [],
+  );
 
   const createGrade = React.useCallback(
     async (
@@ -380,6 +403,14 @@ const UnitProvider = ({ children, id }) => {
         const { data: _grade, errors } = await client.models.Grade.create({
           unitID: id,
           sectionID: sectionId || undefined,
+          // Lets the section's instructors read this grade (Grade auth rule
+          // groupDefinedIn("instructorGroup")); it was never set before.
+          instructorGroup: sectionId
+            ? `section-${sectionId}-instructors`
+            : undefined,
+          // getStudentSubmissionUrl(s) only signs files under
+          // private/{identityId}/, so the grade has to record it.
+          identityId: authSession?.identityId || undefined,
           // use the unit owner as the instructor
           instructor: currentUnit?.owner || "",
           // Owner will be auto-populated by Amplify based on auth
@@ -432,7 +463,7 @@ const UnitProvider = ({ children, id }) => {
           gradeCreationRef.current = null;
       }
     },
-    [id, sectionId, user],
+    [id, sectionId, user, authSession?.identityId],
   );
 
   /**

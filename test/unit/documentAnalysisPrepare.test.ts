@@ -19,6 +19,7 @@ const sim = vi.hoisted(() => ({
   openAiCalls: [] as Array<{ model: string; filename?: string; png: boolean }>,
   lambdaCalls: [] as Array<Record<string, unknown>>,
   visionReply: null as null | Record<string, unknown>,
+  llmExtractionEnabled: false,
   /** What LibreOffice returns per input extension (each differs, as real output would). */
   libreOfficePng: {} as Record<string, Buffer>,
 }));
@@ -72,7 +73,18 @@ vi.mock("aws-amplify/data", () => ({
   generateClient: () => ({
     graphql: async ({ query, variables }: any) => {
       if (query.includes("listPlatformSettings")) {
-        return { data: { listPlatformSettings: { items: [] } } };
+        return {
+          data: {
+            listPlatformSettings: {
+              items: [
+                {
+                  documentAnalysisLlmExtractionEnabled:
+                    sim.llmExtractionEnabled,
+                },
+              ],
+            },
+          },
+        };
       }
       if (query.includes("getFile")) {
         return { data: { getFile: { id: variables.id, settings: {} } } };
@@ -101,18 +113,32 @@ vi.mock("openai", () => ({
       completions: {
         create: async (request: any) => {
           const content = request.messages[1].content;
-          const image = content.find((part: any) => part.type === "image_url");
-          const dataUrl: string = image.image_url.url;
-          const bytes = Buffer.from(dataUrl.split(",")[1], "base64");
-          const filename = /^Image file: (.+)$/.exec(content[0].text)?.[1];
+          const parts = Array.isArray(content) ? content : [];
+          const image = parts.find((part: any) => part.type === "image_url");
+          const imageUrl = image?.image_url?.url;
+          const filename = image
+            ? /^Image file: (.+)$/.exec(parts[0]?.text)?.[1]
+            : undefined;
+          const bytes = imageUrl
+            ? Buffer.from(imageUrl.split(",")[1], "base64")
+            : undefined;
           sim.openAiCalls.push({
             model: request.model,
             filename,
-            png: bytes.subarray(1, 4).toString() === "PNG",
+            png: bytes?.subarray(1, 4).toString() === "PNG",
           });
 
-          if (request.model === "gpt-4o") {
+          if (request.model === "gpt-4o" && image) {
             return reply(sim.visionReply);
+          }
+          if (request.model === "gpt-4o") {
+            return reply({
+              vocabularyJSON: [],
+              summariesJSON: [],
+              objectivesJSON: [],
+              conceptsJSON: [],
+              factsJSON: [],
+            });
           }
           return reply({
             relevant: true,
@@ -216,6 +242,7 @@ beforeEach(async () => {
   sim.openAiCalls.length = 0;
   sim.lambdaCalls.length = 0;
   sim.visionReply = null;
+  sim.llmExtractionEnabled = false;
   sim.document = {
     _version: 1,
     metadata: JSON.stringify({ analysis: { runId: "run-1", state: "queued" } }),
@@ -332,6 +359,7 @@ describe("prepare: ODT with an embedded PNG and an EMF", () => {
 
 describe("prepare: PPTX", () => {
   it("renders pages instead of describing images, and keeps picture-only slides", async () => {
+    sim.llmExtractionEnabled = true;
     const { pages } = await prepare("rainfall-deck.pptx");
 
     expect(pages.map((page) => page.pageNumber)).toEqual([1, 2, 3]);
@@ -392,6 +420,7 @@ describe("scanned PDF: prepare, extract, then vision", () => {
   const FACT = "Evaporation is the process by which liquid water";
 
   it("routes a page with no text layer to vision without calling the text model", async () => {
+    sim.llmExtractionEnabled = true;
     const { manifest, pages } = await prepare("scanned-page.pdf");
 
     expect(pages).toHaveLength(1);
@@ -418,6 +447,7 @@ describe("scanned PDF: prepare, extract, then vision", () => {
   });
 
   it("accepts a fact read from the rendered image by merging its transcription into the page", async () => {
+    sim.llmExtractionEnabled = true;
     const source = upload("scanned-page.pdf");
     const { manifest } = await prepare("scanned-page.pdf");
     await handler(

@@ -36,6 +36,13 @@ import { ExerciseBlockCard } from "../../components/ExerciseBlockCard";
 import { ExerciseProgressMeters } from "../../components/ExerciseProgressMeters";
 import { AUDIO_WAVEFORM_PLAYER_DEFAULTS } from "../../../../utils/waveformDefaults";
 import { transcribeSubmission } from "../../../../utils/transcribeSubmission";
+import {
+  buildResponse,
+  createResponseAttemptId,
+  INPUT_METHOD,
+} from "../../../../utils/studentResponses";
+import { useResponseRecorder } from "../../../../hooks/useResponseRecorder";
+import { uploadStudentSubmission } from "../../../../utils/userSubmissionStorage";
 
 import type { CustomAIInputMode } from "../../plugins/CustomAIPlugin";
 
@@ -51,6 +58,7 @@ interface CustomAIComponentProps {
   className: { base: string; focus: string };
   format: string;
   nodeKey: string;
+  responseBlockId?: string;
   ids: string[];
   inputMode: CustomAIInputMode;
   criteria: string;
@@ -84,6 +92,7 @@ async function gradeWithAI(params: {
 export default function CustomAIComponent({
   className,
   nodeKey,
+  responseBlockId,
   ids: questionIDs,
   inputMode: defaultInputMode,
   criteria,
@@ -103,37 +112,70 @@ export default function CustomAIComponent({
   const sharedHistoryState = useRef(createEmptyHistoryState());
   const completionSavedRef = useRef(false);
 
-  const { grade, saveGrade, workbook } = useContext(UnitContext);
+  const { grade, saveGrade, workbook, createGrade } = useContext(UnitContext);
   const { questionBank } = useContext(DictionaryContext);
   const questionBankMap = (questionBank || {}) as Record<string, any>;
   const workbookApi = workbook as any;
 
   const gradeId = grade?.id;
-  const inProgress = grade?.data?.[nodeKey];
+  const blockDataKey = responseBlockId || nodeKey;
+  const inProgress = grade?.data?.[blockDataKey];
+
+  // Saves what the student actually submitted for each question (typed
+  // text, recording, drawing strokes, uploaded photo) with the grader's
+  // verdict as GradeResponse items, for teacher review.
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
+
+  // Fields this component has written to its block. Merged into every block
+  // save so a save made while the grade in context is a render behind cannot
+  // drop them (for example `complete`).
+  const ownBlockFieldsRef = useRef<Record<string, unknown>>({});
+  const saveBlock = React.useCallback(
+    (fields: Record<string, unknown>) => {
+      ownBlockFieldsRef.current = { ...ownBlockFieldsRef.current, ...fields };
+      saveGrade({
+        [blockDataKey]: {
+          ...(grade?.data?.[blockDataKey] || {}),
+          ...ownBlockFieldsRef.current,
+        },
+      });
+    },
+    [blockDataKey, grade, saveGrade],
+  );
 
   // Reset when grade changes
   const gradeIdRef = useRef(gradeId);
   useEffect(() => {
     if (gradeId && gradeId !== gradeIdRef.current) {
       gradeIdRef.current = gradeId;
-      if (!grade?.data?.[nodeKey]) {
+      ownBlockFieldsRef.current = {};
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
         setGrading({});
         completionSavedRef.current = false;
       }
     }
-  }, [gradeId, grade?.data, nodeKey]);
+  }, [blockDataKey, gradeId, grade?.data]);
 
   // Load saved feedback from progress data
   useEffect(() => {
     if (inProgress?.complete && inProgress?.feedback) {
       const completeFeedback: Record<string, GradingResponse> = {};
       questionIDs?.forEach((qid) => {
+        // Show each question's saved verdict when we have it.
+        const saved = inProgress.results?.[qid];
         completeFeedback[qid] = {
-          correct: true,
-          score: inProgress.score || 100,
-          feedback: inProgress.feedback || t("customAIComponent.completed"),
+          correct: saved?.answer ?? true,
+          score: saved?.score ?? (inProgress.score || 100),
+          feedback:
+            saved?.reason ||
+            inProgress.feedback ||
+            t("customAIComponent.completed"),
         };
       });
       setFeedback(completeFeedback);
@@ -160,20 +202,27 @@ export default function CustomAIComponent({
       const avgScore = scores.reduce((a, b) => a + b, 0) / scores.length;
 
       const firstId = questionIDs[0];
-      const updatedData = {
-        ...(grade?.data || {}),
-        [nodeKey]: {
-          ...inProgress,
-          complete: true,
-          userResponse: answers[firstId] || "",
-          feedback: feedback[firstId]?.feedback || "All questions completed",
-          accuracy: avgScore / 100,
-          score: avgScore,
-        },
-      };
-      saveGrade(updatedData);
+      // Update this exercise's block; saveGrade keeps the other blocks.
+      saveBlock({
+        complete: true,
+        userResponse: answers[firstId] || "",
+        feedback: feedback[firstId]?.feedback || "All questions completed",
+        accuracy: avgScore / 100,
+        score: avgScore,
+        // Per-question verdicts, so a reload shows each question's result.
+        results: Object.fromEntries(
+          questionIDs.map((qid) => [
+            qid,
+            {
+              answer: feedback[qid]?.correct === true,
+              score: feedback[qid]?.score ?? 0,
+              reason: (feedback[qid]?.feedback || "").slice(0, 500),
+            },
+          ]),
+        ),
+      });
     }
-  }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress, answers]);
+  }, [feedback, questionIDs, saveBlock, inProgress, answers]);
 
   const handleInputChange = (
     _: React.MouseEvent<HTMLElement>,
@@ -197,6 +246,15 @@ export default function CustomAIComponent({
         criteria,
       });
 
+      recordResponse(
+        questionID,
+        buildResponse({
+          inputMethod: INPUT_METHOD.text,
+          prompt: question.prompt || question.question,
+          text,
+          result,
+        }),
+      );
       setFeedback((prev) => ({ ...prev, [questionID]: result }));
       workbookApi?.setFeedback?.(nodeKey, {
         text: result.feedback,
@@ -204,6 +262,15 @@ export default function CustomAIComponent({
       });
     } catch (error) {
       console.error("[CustomAIComponent] Grading error:", error);
+      recordResponse(
+        questionID,
+        buildResponse({
+          inputMethod: INPUT_METHOD.text,
+          prompt: question.prompt || question.question,
+          text,
+          result: { error: (error as Error)?.message || String(error) },
+        }),
+      );
       setFeedback((prev) => ({
         ...prev,
         [questionID]: {
@@ -220,11 +287,22 @@ export default function CustomAIComponent({
   const handleDrawingSubmit = async (
     questionID: string,
     imageBase64: string,
+    imagePath?: string | null,
   ) => {
     const question = questionBankMap[questionID];
     if (!question) return;
 
     setGrading((prev) => ({ ...prev, [questionID]: true }));
+    const record = (result: unknown) =>
+      recordResponse(
+        questionID,
+        buildResponse({
+          inputMethod: INPUT_METHOD.image,
+          prompt: question.prompt || question.question,
+          imagePath,
+          result,
+        }),
+      );
 
     try {
       const result = await gradeWithAI({
@@ -236,6 +314,7 @@ export default function CustomAIComponent({
         imageData: imageBase64,
       });
 
+      record(result);
       setFeedback((prev) => ({ ...prev, [questionID]: result }));
       workbookApi?.setFeedback?.(nodeKey, {
         text: result.feedback,
@@ -243,6 +322,7 @@ export default function CustomAIComponent({
       });
     } catch (error) {
       console.error("[CustomAIComponent] Drawing grading error:", error);
+      record({ error: (error as Error)?.message || String(error) });
       setFeedback((prev) => ({
         ...prev,
         [questionID]: {
@@ -266,7 +346,7 @@ export default function CustomAIComponent({
   const accuracy = answeredCount > 0 ? (correctCount / answeredCount) * 100 : 0;
   const graded = totalQuestions > 0 && answeredCount >= totalQuestions;
 
-  const blockGradeData = grade?.data?.[nodeKey];
+  const blockGradeData = grade?.data?.[blockDataKey];
   const nailedIt = blockGradeData?.nailedIt === true;
 
   const MODE_LABELS: Record<CustomAIInputMode, string> = {
@@ -445,11 +525,13 @@ export default function CustomAIComponent({
                             title={displayPrompt}
                             onRecordingComplete={wrapOnRecordingComplete(
                               async (audioFile: any) => {
+                                const attemptId = createResponseAttemptId();
                                 const currentGradeData = grade?.data || {};
                                 const audioNodeKey = `custom-ai-${questionID}`;
+                                // Only this key: saveGrade merges it into the
+                                // latest grade, so other blocks are not rolled back.
                                 const saveAudioGrade = (extra: Record<string, unknown> = {}) =>
                                   saveGrade({
-                                    ...currentGradeData,
                                     [audioNodeKey]: {
                                       ...currentGradeData[audioNodeKey],
                                       audioFilePath: audioFile?.path || null,
@@ -460,13 +542,25 @@ export default function CustomAIComponent({
                                     },
                                   });
                                 saveAudioGrade();
+                                if (!audioFile?.path) return;
+                                // Keep the original recording with the answer
+                                // before it is transcribed.
+                                recordResponse(
+                                  questionID,
+                                  buildResponse({
+                                    inputMethod: INPUT_METHOD.audio,
+                                    prompt: displayPrompt,
+                                    audioPath: audioFile.path,
+                                    attemptId,
+                                  }),
+                                );
 
+                                let transcript: string | undefined;
                                 try {
-                                  if (!audioFile?.path) return;
                                   // The grader reads text, so the recording is
                                   // transcribed first; grading the file path
                                   // would mark every spoken answer wrong.
-                                  const transcript = await transcribeSubmission(
+                                  transcript = await transcribeSubmission(
                                     audioFile.path,
                                   );
                                   // Keep the transcript with the grade so the
@@ -479,6 +573,17 @@ export default function CustomAIComponent({
                                     inputMode: "audio",
                                     criteria,
                                   });
+                                  recordResponse(
+                                    questionID,
+                                    buildResponse({
+                                      inputMethod: INPUT_METHOD.audio,
+                                      prompt: displayPrompt,
+                                      transcript,
+                                      result,
+                                      attemptId,
+                                    }),
+                                    { sameAttempt: true, attemptId },
+                                  );
                                   setFeedback((prev) => ({
                                     ...prev,
                                     [questionID]: result,
@@ -491,6 +596,21 @@ export default function CustomAIComponent({
                                   console.error(
                                     "[CustomAIComponent] Audio grading error:",
                                     err,
+                                  );
+                                  recordResponse(
+                                    questionID,
+                                    buildResponse({
+                                      inputMethod: INPUT_METHOD.audio,
+                                      prompt: displayPrompt,
+                                      transcript,
+                                      result: {
+                                        error:
+                                          (err as Error)?.message ||
+                                          String(err),
+                                      },
+                                      attemptId,
+                                    }),
+                                    { sameAttempt: true, attemptId },
                                   );
                                 }
                               },
@@ -511,6 +631,23 @@ export default function CustomAIComponent({
                           excalidrawData={inProgress?.excalidrawData ?? {}}
                           expect={question.answer || ""}
                           questionID={questionID}
+                          onDrawingSaved={({
+                            strokes,
+                            result,
+                          }: {
+                            strokes: unknown;
+                            result: unknown;
+                          }) =>
+                            recordResponse(
+                              questionID,
+                              buildResponse({
+                                inputMethod: INPUT_METHOD.drawing,
+                                prompt: displayPrompt,
+                                strokes,
+                                result,
+                              }),
+                            )
+                          }
                           setFeedback={(data: any) => {
                             if (data?.imageBase64) {
                               handleDrawingSubmit(questionID, data.imageBase64);
@@ -549,6 +686,29 @@ export default function CustomAIComponent({
                           const file = e.target.files?.[0];
                           if (!file) return;
 
+                          // Keep the original photo in the student's private
+                          // folder before it goes to the grader.
+                          const imagePathPromise = gradeId
+                            ? uploadStudentSubmission({
+                                file,
+                                gradeId,
+                                nodeKey: `custom-ai-${questionID}`,
+                                fileType:
+                                  file.name.split(".").pop()?.toLowerCase() ||
+                                  file.type.split("/").pop() ||
+                                  INPUT_METHOD.image,
+                                metadata: { type: INPUT_METHOD.image },
+                              })
+                                .then((r: { path?: string }) => r?.path ?? null)
+                                .catch((err: unknown) => {
+                                  console.error(
+                                    "[CustomAIComponent] Image upload failed:",
+                                    err,
+                                  );
+                                  return null;
+                                })
+                            : Promise.resolve(null);
+
                           const reader = new FileReader();
                           reader.onload = async () => {
                             const base64 = (reader.result as string).split(
@@ -559,7 +719,11 @@ export default function CustomAIComponent({
                                 ...prev,
                                 [questionID]: `[Image: ${file.name}]`,
                               }));
-                              await handleDrawingSubmit(questionID, base64);
+                              await handleDrawingSubmit(
+                                questionID,
+                                base64,
+                                await imagePathPromise,
+                              );
                             }
                           };
                           reader.readAsDataURL(file);

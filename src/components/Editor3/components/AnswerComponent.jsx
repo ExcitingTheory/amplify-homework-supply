@@ -8,6 +8,7 @@ import React, { Suspense } from "react";
 import { useTranslations } from "next-intl";
 import {
   gradeDefinition,
+  gradeVocabularyWord,
   transcribeAudio,
 } from "../../../../app/actions/grading";
 
@@ -40,9 +41,81 @@ const SketchPad = dynamic(async () => (await import("./SketchPad")).default, {
 import AudioWaveformPlayer from "./AudioWaveformPlayer";
 import { LEARNER_EXERCISE_WAVEFORM_PRESET } from "../../../utils/waveformDefaults";
 import getCachedUrl from "../../../utils/getCachedUrl";
+import {
+  buildResponse,
+  createResponseAttemptId,
+  INPUT_METHOD,
+} from "../../../utils/studentResponses";
+import { useResponseRecorder } from "../../../hooks/useResponseRecorder";
 
 const ANSWER_BLOCK_TYPE = "answer";
 const ANSWER_INPUT_TEST_ID = "answer-input";
+
+/**
+ * Grade a recorded answer. The original recording is stored with the answer
+ * first, then transcribed and graded; the transcript and verdict are added to
+ * the same attempt.
+ */
+async function gradeSpokenAnswer({
+  audioFile,
+  uploadResult,
+  expectedAnswer,
+  prompt,
+  questionKey,
+  nodeKey,
+  recordResponse,
+  setFeedback,
+  workbook,
+}) {
+  const audioPath = audioFile?.path || uploadResult?.path;
+  if (!audioPath) return;
+  const attemptId = createResponseAttemptId();
+  recordResponse(
+    questionKey,
+    buildResponse({
+      inputMethod: INPUT_METHOD.audio,
+      prompt,
+      audioPath,
+      attemptId,
+    }),
+  );
+  try {
+    // transcribeAudio downloads the recording over HTTPS, so it needs a
+    // signed URL, not the storage path.
+    const audioUrl = await getCachedUrl(audioPath);
+    const feedbackData = await transcribeAudio({ audioUrl, expectedAnswer });
+    if (!feedbackData) return;
+    recordResponse(
+      questionKey,
+      buildResponse({
+        inputMethod: INPUT_METHOD.audio,
+        prompt,
+        transcript: feedbackData.transcript,
+        result: feedbackData,
+        attemptId,
+      }),
+      { sameAttempt: true, attemptId },
+    );
+    setFeedback((prev) => ({ ...prev, [questionKey]: feedbackData }));
+    // Broadcast to collaborators via Yjs
+    workbook?.setFeedback?.(nodeKey, {
+      text: feedbackData?.reason || "",
+      timestamp: Date.now(),
+    });
+  } catch (err) {
+    console.error("[AnswerComponent] Audio verification error:", err);
+    recordResponse(
+      questionKey,
+      buildResponse({
+        inputMethod: INPUT_METHOD.audio,
+        prompt,
+        result: { error: err?.message || String(err) },
+        attemptId,
+      }),
+      { sameAttempt: true, attemptId },
+    );
+  }
+}
 
 // Component to handle signed URL for word audio
 function SignedAudioPlayer({ audioKey, identityId, width, height, title }) {
@@ -102,6 +175,9 @@ export function AnswerView({
   dictionary,
   grade,
   saveGrade,
+  workbook,
+  responseBlockId,
+  createGrade,
 }) {
   const t = useTranslations("workbook");
 
@@ -129,6 +205,15 @@ export function AnswerView({
 
   const [answers, setAnswers] = useState({});
   const [feedback, setFeedback] = useState({});
+  const blockDataKey = responseBlockId || nodeKey;
+  // Saves what the student actually submitted (typed text, recording,
+  // drawing strokes) as GradeResponse items, keyed like `feedback`, so
+  // teachers can review it later.
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
   const sharedHistoryState = useRef(createEmptyHistoryState());
 
   const [currentInputMethod, setCurrentInputMethod] = useState(
@@ -170,12 +255,12 @@ export function AnswerView({
     if (grade?.id && grade.id !== gradeIdRef.current) {
       gradeIdRef.current = grade.id;
       // Only reset if the new grade has no data for this exercise
-      if (!grade?.data?.[nodeKey]) {
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
       }
     }
-  }, [grade?.id, grade?.data, nodeKey]);
+  }, [grade?.id, grade?.data, blockDataKey]);
 
   let thisPrompt = customPrompt
     ? customPrompt
@@ -187,7 +272,7 @@ export function AnswerView({
 
   // Track completion and save grade
   React.useEffect(() => {
-    if (!wordIDs || !feedback || !saveGrade || !nodeKey) return;
+    if (!wordIDs || !feedback || !saveGrade || !blockDataKey) return;
 
     // Check if all words have been answered correctly
     const answeredWords = Object.keys(feedback);
@@ -206,10 +291,10 @@ export function AnswerView({
 
     // Save grade data on every answer (partial and complete)
     if (answeredCount > 0) {
-      const currentGradeData = grade?.data || {};
+      // Only this block: saveGrade merges it into the latest grade, so a
+      // render-behind copy of other blocks cannot roll them back.
       const updatedGradeData = {
-        ...currentGradeData,
-        [nodeKey]: {
+        [blockDataKey]: {
           complete: isComplete,
           accuracy,
           totalWords,
@@ -221,7 +306,7 @@ export function AnswerView({
 
       saveGrade(updatedGradeData);
     }
-  }, [feedback, wordIDs, saveGrade, nodeKey, grade]);
+  }, [feedback, wordIDs, saveGrade, blockDataKey]);
 
   const totalWords = wordIDs?.length || 0;
   const answeredCount = Object.keys(feedback).length;
@@ -271,6 +356,8 @@ export function AnswerView({
             nodeKey,
             t,
             sharedHistoryState.current,
+            recordResponse,
+            workbook,
           )}
         {requestDefinition &&
           ByWordList(
@@ -287,6 +374,8 @@ export function AnswerView({
             t,
             saveGrade,
             sharedHistoryState.current,
+            recordResponse,
+            workbook,
           )}
         <Box
           sx={{
@@ -356,26 +445,34 @@ export default function AnswerComponent({
   customPrompt,
   allowedInput,
   promptMethod,
+  responseBlockId,
 }) {
-  const { dictionary, grade, saveGrade } = React.useContext(UnitContext);
+  const { dictionary, grade, saveGrade, workbook, createGrade, readOnly } =
+    React.useContext(UnitContext);
   // Keep verify-context hook for parity (memory/personalization side effects).
   useVerifyContext();
-  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
+  const blockDataKey = responseBlockId || nodeKey;
+  const nailedIt = grade?.data?.[blockDataKey]?.nailedIt === true;
   return (
-    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <AnswerView
-        className={className}
-        nodeKey={nodeKey}
-        wordIDs={wordIDs}
-        requestDefinition={requestDefinition}
-        customPrompt={customPrompt}
-        allowedInput={allowedInput}
-        promptMethod={promptMethod}
-        dictionary={dictionary}
-        grade={grade}
-        saveGrade={saveGrade}
-      />
-    </WorkbookBlockEnhancements>
+    <div inert={readOnly ? true : undefined} aria-disabled={!!readOnly}>
+      <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
+        <AnswerView
+          workbook={workbook}
+          className={className}
+          nodeKey={nodeKey}
+          responseBlockId={responseBlockId}
+          wordIDs={wordIDs}
+          requestDefinition={requestDefinition}
+          customPrompt={customPrompt}
+          allowedInput={allowedInput}
+          promptMethod={promptMethod}
+          dictionary={dictionary}
+          grade={grade}
+          saveGrade={saveGrade}
+          createGrade={createGrade}
+        />
+      </WorkbookBlockEnhancements>
+    </div>
   );
 }
 
@@ -393,6 +490,8 @@ function ByWordList(
   t,
   saveGrade,
   historyState,
+  recordResponse,
+  workbook,
 ) {
   // Add defensive check for dictionary
   if (!dictionary) {
@@ -507,6 +606,15 @@ function ByWordList(
                     expectedDefinition: dictionary[wordId]?.definition,
                   });
 
+                  recordResponse(
+                    key,
+                    buildResponse({
+                      inputMethod: INPUT_METHOD.text,
+                      prompt: dictionary[wordId]?.phrase,
+                      text,
+                      result: data,
+                    }),
+                  );
                   setFeedback({
                     ...feedback,
                     [key]: data,
@@ -610,35 +718,18 @@ function ByWordList(
                       nodeKey={`${nodeKey}-${wordId}`}
                       title={dictionary[wordId]?.phrase}
                       onRecordingComplete={wrapOnRecordingComplete(
-                        async (audioFile, uploadResult) => {
-                          // Verify the recorded audio against expected word
-                          try {
-                            const audioUrl =
-                              audioFile?.path || uploadResult?.path;
-                            if (audioUrl) {
-                              const feedbackData = await transcribeAudio({
-                                audioUrl,
-                                expectedAnswer: dictionary[wordId]?.phrase,
-                              });
-                              if (feedbackData) {
-                                setFeedback((prev) => ({
-                                  ...prev,
-                                  [key]: feedbackData,
-                                }));
-                                // Broadcast to collaborators via Yjs
-                                workbook?.setFeedback?.(nodeKey, {
-                                  text: feedbackData?.reason || "",
-                                  timestamp: Date.now(),
-                                });
-                              }
-                            }
-                          } catch (err) {
-                            console.error(
-                              "[AnswerComponent] Audio verification error:",
-                              err,
-                            );
-                          }
-                        },
+                        (audioFile, uploadResult) =>
+                          gradeSpokenAnswer({
+                            audioFile,
+                            uploadResult,
+                            expectedAnswer: dictionary[wordId]?.phrase,
+                            prompt: dictionary[wordId]?.phrase,
+                            questionKey: key,
+                            nodeKey,
+                            recordResponse,
+                            setFeedback,
+                            workbook,
+                          }),
                       )}
                     />
                   )}
@@ -723,18 +814,29 @@ function ByWordList(
                   expect={dictionary[wordId]?.definition}
                   excalidrawData={{}}
                   setFeedback={(data) => {
-                    setFeedback({
-                      ...feedback,
+                    setFeedback((prev) => ({
+                      ...prev,
                       [key]: data,
-                    });
+                    }));
                     // Broadcast to collaborators via Yjs
                     workbook?.setFeedback?.(nodeKey, {
                       text: data?.reason || "",
                       timestamp: Date.now(),
                     });
                   }}
+                  onDrawingSaved={({ result, ...drawing }) =>
+                    recordResponse(
+                      key,
+                      buildResponse({
+                        inputMethod: INPUT_METHOD.drawing,
+                        prompt: dictionary[wordId]?.phrase,
+                        ...drawing,
+                        result,
+                      }),
+                    )
+                  }
                   feedback={feedback}
-                  questionID={key}
+                  questionID={`${nodeKey}-${wordId}`}
                 />
               </Suspense>
             </li>
@@ -757,6 +859,8 @@ function ByDefinitionWordList(
   nodeKey,
   t,
   historyState,
+  recordResponse,
+  workbook,
 ) {
   // Add defensive check for dictionary
   if (!dictionary) {
@@ -860,12 +964,22 @@ function ByDefinitionWordList(
                   });
                 }}
                 onAutoSubmit={async (text) => {
-                  const data = await gradeDefinition({
-                    word: text,
+                  // Word recall: exact vocabulary word only; misspellings get 0 points and a spelling note.
+                  const data = await gradeVocabularyWord({
+                    studentWord: text,
+                    expectedWord: dictionary[wordId]?.phrase,
                     definition: dictionary[wordId]?.definition,
-                    expectedDefinition: dictionary[wordId]?.phrase,
                   });
 
+                  recordResponse(
+                    key,
+                    buildResponse({
+                      inputMethod: INPUT_METHOD.text,
+                      prompt: dictionary[wordId]?.definition,
+                      text,
+                      result: data,
+                    }),
+                  );
                   setFeedback({
                     ...feedback,
                     [key]: data,
@@ -970,30 +1084,17 @@ function ByDefinitionWordList(
                       nodeKey={`${nodeKey}-${wordId}`}
                       title={dictionary[wordId]?.definition}
                       onRecordingComplete={wrapOnRecordingComplete(
-                        async (audioFile, uploadResult) => {
-                          // Verify the recorded audio against expected word
-                          try {
-                            const audioUrl =
-                              audioFile?.path || uploadResult?.path;
-                            if (audioUrl) {
-                              const feedbackData = await transcribeAudio({
-                                audioUrl,
-                                expectedAnswer: dictionary[wordId]?.phrase,
-                              });
-                              if (feedbackData) {
-                                setFeedback((prev) => ({
-                                  ...prev,
-                                  [key]: feedbackData,
-                                }));
-                              }
-                            }
-                          } catch (err) {
-                            console.error(
-                              "[AnswerComponent] Audio verification error:",
-                              err,
-                            );
-                          }
-                        },
+                        (audioFile, uploadResult) =>
+                          gradeSpokenAnswer({
+                            audioFile,
+                            uploadResult,
+                            expectedAnswer: dictionary[wordId]?.phrase,
+                            prompt: dictionary[wordId]?.definition,
+                            questionKey: key,
+                            nodeKey,
+                            recordResponse,
+                            setFeedback,
+                          }),
                       )}
                     />
                   )}
@@ -1074,17 +1175,30 @@ function ByDefinitionWordList(
                 fallback={<Typography variant="body2">Loading...</Typography>}
               >
                 <SketchPad
-                  expect={dictionary[wordId]?.definition}
+                  // Word recall: the student writes the word itself, so grade
+                  // the drawing against the word, not its definition.
+                  expect={dictionary[wordId]?.phrase}
                   excalidrawData={{}}
                   requestDefinition={true}
                   setFeedback={(data) => {
-                    setFeedback({
-                      ...feedback,
+                    setFeedback((prev) => ({
+                      ...prev,
                       [key]: data,
-                    });
+                    }));
                   }}
+                  onDrawingSaved={({ result, ...drawing }) =>
+                    recordResponse(
+                      key,
+                      buildResponse({
+                        inputMethod: INPUT_METHOD.drawing,
+                        prompt: dictionary[wordId]?.definition,
+                        ...drawing,
+                        result,
+                      }),
+                    )
+                  }
                   feedback={feedback}
-                  questionID={key}
+                  questionID={`${nodeKey}-${wordId}`}
                 />
               </Suspense>
             </li>

@@ -36,6 +36,7 @@ import AudioPromptPanel from "./AudioPromptPanel";
 import {
   extensionForMimeType,
   preferredRecordingMimeType,
+  speechRecorderOptions,
 } from "../../../utils/audioRecordingFormat";
 import AudioTakePlaylist from "./AudioTakePlaylist";
 import {
@@ -1102,6 +1103,10 @@ export default function AudioWaveformPlayer({
     const gain = audioContext.createGain();
     const analyser = audioContext.createAnalyser();
     const destination = audioContext.createMediaStreamDestination();
+    // Student answers (recorded against a grade) are speech: record mono at a
+    // speech bitrate. Authoring recordings keep the browser defaults.
+    const isStudentAnswer = Boolean(gradeId);
+    if (isStudentAnswer) destination.channelCount = 1;
     gain.gain.value = inputGainValueRef.current;
     source.connect(gain);
     source.connect(analyser);
@@ -1111,7 +1116,11 @@ export default function AudioWaveformPlayer({
     const recordingType = preferredRecordingMimeType();
     const recorder = new MediaRecorder(
       destination.stream,
-      recordingType ? { mimeType: recordingType } : undefined,
+      isStudentAnswer
+        ? speechRecorderOptions(recordingType)
+        : recordingType
+          ? { mimeType: recordingType }
+          : undefined,
     );
     setMediaRecorder(recorder);
     recorder.start();

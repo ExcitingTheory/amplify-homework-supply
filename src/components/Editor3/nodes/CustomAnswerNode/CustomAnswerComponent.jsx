@@ -30,6 +30,43 @@ import DictionaryContext from "../../../../context/dictionaryContext";
 import { WorkbookBlockEnhancements } from "../../components/WorkbookBlockEnhancements";
 import { useVerifyContext } from "../../../../hooks/useVerifyContext";
 import { getCustomAnswerDirectionPair } from "./direction";
+import { transcribeSubmission } from "../../../../utils/transcribeSubmission";
+import {
+  buildResponse,
+  createResponseAttemptId,
+  GRADING_FAILED,
+  INPUT_METHOD,
+} from "../../../../utils/studentResponses";
+import { useResponseRecorder } from "../../../../hooks/useResponseRecorder";
+
+/**
+ * verifyShortAnswer returns `{ correct, score, feedback }` as text (sometimes in
+ * a code fence); this component reads `{ answer, reason }`. Used by the text and
+ * audio paths so both show results.
+ */
+function parseShortAnswerResult(rawText) {
+  const raw = JSON.parse(
+    String(rawText ?? "").match(/\{[\s\S]*\}/)?.[0] ?? "{}",
+  );
+  return {
+    ...raw,
+    answer: raw.answer ?? raw.correct,
+    reason: raw.reason ?? raw.feedback,
+  };
+}
+
+/** { questionId: { answer, reason } } for the block's grade data. */
+function summarizeResults(questionIDs, feedback) {
+  const results = {};
+  for (const qid of questionIDs) {
+    const f = feedback[qid];
+    results[qid] = {
+      answer: f?.answer === true,
+      ...(typeof f?.reason === "string" ? { reason: f.reason.slice(0, 500) } : {}),
+    };
+  }
+  return results;
+}
 
 function LinearProgressWithLabel({ value }) {
   return (
@@ -62,6 +99,9 @@ export function CustomAnswerView({
   questionBank = {},
   grade,
   saveGrade,
+  workbook,
+  responseBlockId,
+  createGrade,
 }) {
   const t = useTranslations("workbook");
   const tEditor = useTranslations("editor");
@@ -82,25 +122,53 @@ export function CustomAnswerView({
   );
 
   const gradeId = grade?.id;
-  const inProgress = grade?.data?.[nodeKey];
+  const blockDataKey = responseBlockId || nodeKey;
+  const inProgress = grade?.data?.[blockDataKey];
   const completionSavedRef = useRef(false);
   const answersRef = useRef(answers);
   answersRef.current = answers;
+
+  // Saves what the student actually submitted for each question (typed
+  // text, recording, drawing strokes) with the grader's verdict as
+  // GradeResponse items, for teacher review.
+  const recordResponse = useResponseRecorder({
+    grade,
+    blockKey: blockDataKey,
+    createGrade,
+  });
+
+  // Fields this component has written to its block. Merged into every block
+  // save so a save made while the grade in context is a render behind cannot
+  // drop them (for example `complete`).
+  const ownBlockFieldsRef = useRef({});
+  const saveBlock = React.useCallback(
+    (fields) => {
+      ownBlockFieldsRef.current = { ...ownBlockFieldsRef.current, ...fields };
+      saveGrade({
+        [blockDataKey]: {
+          ...(grade?.data?.[blockDataKey] || {}),
+          ...ownBlockFieldsRef.current,
+        },
+      });
+    },
+    [blockDataKey, grade, saveGrade],
+  );
 
   // Reset local state when grade changes (e.g., new grade after unit completion)
   const gradeIdRef = useRef(gradeId);
   React.useEffect(() => {
     if (gradeId && gradeId !== gradeIdRef.current) {
       gradeIdRef.current = gradeId;
+      ownBlockFieldsRef.current = {};
       // Only reset if the new grade has no data for this exercise
-      if (!grade?.data?.[nodeKey]) {
+      if (!grade?.data?.[blockDataKey]) {
         setAnswers({});
         setFeedback({});
         setProgress(0);
         completionSavedRef.current = false;
       }
     }
-  }, [gradeId, grade?.data, nodeKey]);
+  }, [blockDataKey, gradeId, grade?.data]);
 
   // Load saved answers from progress data
   React.useEffect(() => {
@@ -119,9 +187,13 @@ export function CustomAnswerView({
       // Mark as complete if already finished with detailed feedback
       const completeFeedback = {};
       questionIDs?.forEach((qid) => {
+        // Show each question's saved verdict when we have it, rather than
+        // marking every question correct.
+        const saved = inProgress.results?.[qid];
         completeFeedback[qid] = {
-          answer: true,
+          answer: saved?.answer ?? true,
           reason:
+            saved?.reason ||
             inProgress.feedback ||
             t("customAnswerComponent.answerVerifiedAndAccepted"),
           userResponse: inProgress.userResponse || answersRef.current[qid],
@@ -178,22 +250,27 @@ export function CustomAnswerView({
           answers[firstQuestionId] || inProgress?.userResponse;
         const feedbackText =
           feedback[firstQuestionId]?.reason || "All questions completed";
+        // Score the block from the graded answers (fraction correct, 0-1)
+        // instead of saving 1.0 for every completed attempt.
+        const correctCount = questionIDs.filter(
+          (qid) => feedback[qid]?.answer === true,
+        ).length;
+        const accuracy = correctCount / questionIDs.length;
 
-        // Update this exercise's data while preserving all other exercise data
-        const updatedData = {
-          ...(grade?.data || {}),
-          [nodeKey]: {
-            ...inProgress,
-            complete: true,
-            userResponse: userResponse,
-            feedback: feedbackText,
-            accuracy: 1.0,
-          },
-        };
-        saveGrade(updatedData);
+        // Update this exercise's block; saveGrade keeps the other blocks.
+        saveBlock({
+          complete: true,
+          userResponse: userResponse,
+          feedback: feedbackText,
+          accuracy,
+          correctCount,
+          totalQuestions: questionIDs.length,
+          // Per-question verdicts, so a reload shows each question's result.
+          results: summarizeResults(questionIDs, feedback),
+        });
       }
     }
-  }, [feedback, questionIDs, saveGrade, nodeKey, grade, inProgress, answers]);
+  }, [feedback, questionIDs, saveBlock, inProgress, answers]);
 
   return (
     <div
@@ -456,12 +533,21 @@ export function CustomAnswerView({
 
                           console.log("response", response);
 
-                          const data = JSON.parse(response?.data) || {};
+                          const data = parseShortAnswerResult(response?.data);
 
-                          setFeedback({
-                            ...feedback,
+                          recordResponse(
+                            questionID,
+                            buildResponse({
+                              inputMethod: INPUT_METHOD.text,
+                              prompt: questionPrompt,
+                              text,
+                              result: data,
+                            }),
+                          );
+                          setFeedback((prev) => ({
+                            ...prev,
                             [questionID]: data,
-                          });
+                          }));
                           // Broadcast to collaborators via Yjs
                           workbook?.setFeedback?.(nodeKey, {
                             text: data?.reason || "",
@@ -469,12 +555,21 @@ export function CustomAnswerView({
                           });
                         } catch (error) {
                           console.error(error);
-                          setFeedback({
-                            ...feedback,
+                          recordResponse(
+                            questionID,
+                            buildResponse({
+                              inputMethod: INPUT_METHOD.text,
+                              prompt: questionPrompt,
+                              text,
+                              result: { error: error?.message || String(error) },
+                            }),
+                          );
+                          setFeedback((prev) => ({
+                            ...prev,
                             [questionID]: t(
                               "customAnswerComponent.errorOccurred",
                             ),
-                          });
+                          }));
                         }
                       }}
                       historyState={sharedHistoryState.current}
@@ -512,10 +607,12 @@ export function CustomAnswerView({
                           title={questionPrompt}
                           onRecordingComplete={wrapOnRecordingComplete(
                             async (audioFile, uploadResult) => {
+                              const attemptId = createResponseAttemptId();
                               const currentGradeData = grade?.data || {};
                               const audioNodeKey = `custom-answer-${questionID}`;
+                              // Only this key: saveGrade merges it into the
+                              // latest grade, so other blocks are not rolled back.
                               const updatedGradeData = {
-                                ...currentGradeData,
                                 [audioNodeKey]: {
                                   ...currentGradeData[audioNodeKey],
                                   audioFilePath: audioFile?.path || null,
@@ -526,15 +623,42 @@ export function CustomAnswerView({
                               };
                               saveGrade(updatedGradeData);
 
-                              // Verify the recorded audio
+                              const audioPath =
+                                audioFile?.path || uploadResult?.path;
+                              // Keep the original recording with the answer
+                              // before it is transcribed.
+                              if (audioPath) {
+                                recordResponse(
+                                  questionID,
+                                  buildResponse({
+                                    inputMethod: INPUT_METHOD.audio,
+                                    prompt: questionPrompt,
+                                    audioPath,
+                                    attemptId,
+                                  }),
+                                );
+                              }
+
+                              // Verify the recorded audio. The grader reads text, so the
+                              // recording is transcribed first; sending the file path
+                              // graded the path instead of what the student said.
                               try {
                                 const client = getAmplifyClient();
-                                const audioUrl =
-                                  audioFile?.path || uploadResult?.path;
-                                if (audioUrl) {
+                                if (audioPath) {
+                                  const transcript =
+                                    await transcribeSubmission(audioPath);
+                                  // Keep the transcript with the grade so the
+                                  // instructor can see what was actually heard.
+                                  saveGrade({
+                                    ...updatedGradeData,
+                                    [audioNodeKey]: {
+                                      ...updatedGradeData[audioNodeKey],
+                                      transcript,
+                                    },
+                                  });
                                   const { data, errors } =
                                     await client.queries.verifyShortAnswer({
-                                      answer: audioUrl,
+                                      answer: transcript,
                                       prompt: questionPrompt,
                                       expected: expectedAnswer,
                                       // eslint-disable-next-line i18next/no-literal-string -- model identifier
@@ -543,7 +667,19 @@ export function CustomAnswerView({
                                       contentContext,
                                     });
                                   if (!errors && data) {
-                                    const feedbackData = JSON.parse(data);
+                                    const feedbackData =
+                                      parseShortAnswerResult(data);
+                                    recordResponse(
+                                      questionID,
+                                      buildResponse({
+                                        inputMethod: INPUT_METHOD.audio,
+                                        prompt: questionPrompt,
+                                        transcript,
+                                        result: feedbackData,
+                                        attemptId,
+                                      }),
+                                      { sameAttempt: true, attemptId },
+                                    );
                                     setFeedback((prev) => ({
                                       ...prev,
                                       [questionID]: feedbackData,
@@ -553,6 +689,23 @@ export function CustomAnswerView({
                                       text: feedbackData?.reason || "",
                                       timestamp: Date.now(),
                                     });
+                                  } else {
+                                    // Keep the transcript even when grading fails.
+                                    recordResponse(
+                                      questionID,
+                                      buildResponse({
+                                        inputMethod: INPUT_METHOD.audio,
+                                        prompt: questionPrompt,
+                                        transcript,
+                                        result: {
+                                          error:
+                                            errors?.[0]?.message ||
+                                            GRADING_FAILED,
+                                        },
+                                        attemptId,
+                                      }),
+                                      { sameAttempt: true, attemptId },
+                                    );
                                   }
                                 }
                               } catch (err) {
@@ -560,6 +713,20 @@ export function CustomAnswerView({
                                   "[CustomAnswerComponent] Audio verification error:",
                                   err,
                                 );
+                                if (audioPath) {
+                                  recordResponse(
+                                    questionID,
+                                    buildResponse({
+                                      inputMethod: INPUT_METHOD.audio,
+                                      prompt: questionPrompt,
+                                      result: {
+                                        error: err?.message || String(err),
+                                      },
+                                      attemptId,
+                                    }),
+                                    { sameAttempt: true, attemptId },
+                                  );
+                                }
                               }
                             },
                           )}
@@ -582,19 +749,33 @@ export function CustomAnswerView({
                       <SketchPad
                         excalidrawData={inProgress?.excalidrawData ?? {}}
                         className={className}
-                        expect={answer}
+                        // `answer` was never defined here, so the writing
+                        // input crashed on render; grade against the same
+                        // expected answer the text and audio paths use.
+                        expect={expectedAnswer}
                         questionID={questionID}
                         setFeedback={(data) => {
-                          setFeedback({
-                            ...feedback,
+                          setFeedback((prev) => ({
+                            ...prev,
                             [questionID]: data,
-                          });
+                          }));
                           // Broadcast to collaborators via Yjs
                           workbook?.setFeedback?.(nodeKey, {
                             text: data?.reason || "",
                             timestamp: Date.now(),
                           });
                         }}
+                        onDrawingSaved={({ result, ...drawing }) =>
+                          recordResponse(
+                            questionID,
+                            buildResponse({
+                              inputMethod: INPUT_METHOD.drawing,
+                              prompt: questionPrompt,
+                              ...drawing,
+                              result,
+                            }),
+                          )
+                        }
                         feedback={feedback}
                         question={prompt}
                       />
@@ -618,27 +799,35 @@ export default function CustomAnswerComponent({
   allowedInput = [],
   promptMethod = [],
   direction = "question-to-answer",
+  responseBlockId,
 }) {
-  const { grade, saveGrade } = React.useContext(UnitContext);
+  const { grade, saveGrade, workbook, createGrade, readOnly } =
+    React.useContext(UnitContext);
   // Keep verify-context hook for parity (memory/personalization side effects).
   useVerifyContext();
   const { questionBank } = React.useContext(DictionaryContext);
-  const nailedIt = grade?.data?.[nodeKey]?.nailedIt === true;
+  const nailedIt =
+    grade?.data?.[responseBlockId || nodeKey]?.nailedIt === true;
   return (
-    <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
-      <CustomAnswerView
-        className={className}
-        nodeKey={nodeKey}
-        ids={ids}
-        requestDefinition={requestDefinition}
-        customPrompt={customPrompt}
-        allowedInput={allowedInput}
-        promptMethod={promptMethod}
-        direction={direction}
-        questionBank={questionBank}
-        grade={grade}
-        saveGrade={saveGrade}
-      />
-    </WorkbookBlockEnhancements>
+    <div inert={readOnly ? true : undefined} aria-disabled={!!readOnly}>
+      <WorkbookBlockEnhancements blockId={nodeKey} nailedIt={nailedIt}>
+        <CustomAnswerView
+          className={className}
+          nodeKey={nodeKey}
+          ids={ids}
+          requestDefinition={requestDefinition}
+          customPrompt={customPrompt}
+          allowedInput={allowedInput}
+          promptMethod={promptMethod}
+          direction={direction}
+          questionBank={questionBank}
+          grade={grade}
+          saveGrade={saveGrade}
+          workbook={workbook}
+          responseBlockId={responseBlockId}
+          createGrade={createGrade}
+        />
+      </WorkbookBlockEnhancements>
+    </div>
   );
 }

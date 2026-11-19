@@ -3343,5 +3343,42 @@
     "xpCapsTitle": "XP上限",
     "xpDisabledWarning": "このセクションではXPが無効になっています。受講生はXPを獲得できません。",
     "xpEnabled": "XP有効"
+  },
+  "studentResponses": {
+    "title": "{count, plural, other {#件の回答}}",
+    "tabAnswers": "回答",
+    "tabHistory": "履歴",
+    "needsReviewOnly": "要確認（{count}）",
+    "needsReview": "要確認",
+    "verdict": {
+      "correct": "正解",
+      "misspelled": "つづりの誤り",
+      "incorrect": "不正解",
+      "error": "採点エラー"
+    },
+    "input": {
+      "text": "入力",
+      "audio": "音声",
+      "drawing": "手書き",
+      "image": "写真",
+      "choice": "選択"
+    },
+    "attempts": "{count, plural, other {#回目}}",
+    "prompt": "問題：{prompt}",
+    "transcript": "文字起こし：{transcript}",
+    "noTranscript": "文字起こしなし",
+    "fileUnavailable": "ファイルを表示できません",
+    "photoAlt": "学習者がアップロードした写真",
+    "legacy": "回答の全記録を保存する前のデータ",
+    "block": "練習 {n}",
+    "noAnswers": "この回の回答は保存されていません。",
+    "loading": "回答を読み込み中…",
+    "loadError": "回答を読み込めませんでした。",
+    "strokeOrderAlt": "{count, plural, other {#画}}の手書き（書き順に番号付き）",
+    "strokeCount": "{count, plural, other {#画}}・書き順に番号付き",
+    "replay": "再生",
+    "downloadExcalidraw": "Excalidrawファイル",
+    "backToWorkbook": "ワークブックに戻る",
+    "reviewEmpty": "まだ確認できる回答はありません。ワークブックを終えるとここに回答が表示されます。"
   }
 }

@@ -435,7 +435,8 @@
     "reload": "Reload",
     "start": "Start",
     "timerInstructions": "This is a timed exercise, press start to begin the timer and answer the questions.",
-    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?"
+    "unitUpdated": "This unit has been updated by the instructor. Would you like to reload with the latest version?",
+    "reviewAnswers": "Review my answers"
   },
   "gradeReviewDrawer": {
     "cancel": "Cancel",

@@ -3343,5 +3343,42 @@
     "xpCapsTitle": "XP-Obergrenzen",
     "xpDisabledWarning": "XP sind für diesen Abschnitt deaktiviert. Studierende erhalten keine XP.",
     "xpEnabled": "XP aktiviert"
+  },
+  "studentResponses": {
+    "title": "{count, plural, one {# Antwort} other {# Antworten}}",
+    "tabAnswers": "Antworten",
+    "tabHistory": "Verlauf",
+    "needsReviewOnly": "Zu prüfen ({count})",
+    "needsReview": "Zu prüfen",
+    "verdict": {
+      "correct": "Richtig",
+      "misspelled": "Falsch geschrieben",
+      "incorrect": "Falsch",
+      "error": "Bewertung fehlgeschlagen"
+    },
+    "input": {
+      "text": "Getippt",
+      "audio": "Gesprochen",
+      "drawing": "Gezeichnet",
+      "image": "Foto",
+      "choice": "Gewählt"
+    },
+    "attempts": "{count, plural, one {# Versuch} other {# Versuche}}",
+    "prompt": "Aufgabe: {prompt}",
+    "transcript": "Transkript: {transcript}",
+    "noTranscript": "Kein Transkript",
+    "fileUnavailable": "Datei nicht verfügbar",
+    "photoAlt": "Vom Lernenden hochgeladenes Foto",
+    "legacy": "Gespeichert, bevor vollständige Antworten aufbewahrt wurden",
+    "block": "Übung {n}",
+    "noAnswers": "Für diesen Versuch wurden keine Antworten gespeichert.",
+    "loading": "Antworten werden geladen…",
+    "loadError": "Die Antworten konnten nicht geladen werden.",
+    "strokeOrderAlt": "Zeichnung mit {count, plural, one {# Strich} other {# Strichen}}, in Zeichenreihenfolge nummeriert",
+    "strokeCount": "{count, plural, one {# Strich} other {# Striche}}, in Zeichenreihenfolge nummeriert",
+    "replay": "Abspielen",
+    "downloadExcalidraw": "Excalidraw-Datei",
+    "backToWorkbook": "Zurück zum Arbeitsheft",
+    "reviewEmpty": "Noch nichts zu prüfen. Schließe das Arbeitsheft ab, um deine Antworten hier zu sehen."
   }
 }

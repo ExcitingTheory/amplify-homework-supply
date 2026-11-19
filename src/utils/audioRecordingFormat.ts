@@ -57,3 +57,24 @@ export function extensionForMimeType(mimeType: string | null | undefined): strin
   const type = (mimeType ?? "").split(";")[0].trim().toLowerCase();
   return EXTENSIONS.find(([pattern]) => pattern.test(type))?.[1] ?? "webm";
 }
+
+/**
+ * Target bitrates for recorded student answers. Browsers default to far more
+ * than speech needs (often 128 kbps). Mono Opus at 16 kbps, or AAC at 24 kbps
+ * where the browser records MP4, stays clear enough for transcription and for
+ * a teacher to judge pronunciation: a 3-second answer is about 6-9KB.
+ * Browsers treat the value as a target, not an exact rate.
+ */
+export const SPEECH_BITRATE_OPUS = 16_000;
+export const SPEECH_BITRATE_AAC = 24_000;
+
+/** MediaRecorder options for a spoken answer in the given container. */
+export function speechRecorderOptions(
+  mimeType?: string | null,
+): MediaRecorderOptions {
+  const type = (mimeType ?? "").toLowerCase();
+  const audioBitsPerSecond = /opus|webm|ogg/.test(type)
+    ? SPEECH_BITRATE_OPUS
+    : SPEECH_BITRATE_AAC;
+  return mimeType ? { mimeType, audioBitsPerSecond } : { audioBitsPerSecond };
+}

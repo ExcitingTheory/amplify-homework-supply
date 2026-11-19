@@ -149,6 +149,14 @@ export async function transcribeAudio() {
 export async function verifySketchImage() {
   return { answer: false, reason: "Mock", accuracy: 0 };
 }
+export async function gradeVocabularyWord({ studentWord, expectedWord } = {}) {
+  const correct =
+    String(studentWord ?? "").trim().toLowerCase() ===
+    String(expectedWord ?? "").trim().toLowerCase();
+  return correct
+    ? { answer: true, reason: "Mock: correct", score: 100, verdict: "correct" }
+    : { answer: false, reason: "Mock: incorrect", score: 0, verdict: "incorrect" };
+}
 
 // --- app/actions/chat ---
 export async function chatCompletion() {
@@ -277,6 +285,13 @@ export async function cancelDocumentAnalysis() {
 // --- app/actions/storage ---
 export async function getStudentSubmissionUrl() {
   return { url: "https://example.com/mock-submission.pdf" };
+}
+export async function getStudentSubmissionUrls(_gradeId, keys = []) {
+  return {
+    urls: Object.fromEntries(
+      keys.map((key) => [key, `https://example.com/mock/${key.split("/").pop()}`]),
+    ),
+  };
 }
 
 // --- app/actions/forkUnit ---

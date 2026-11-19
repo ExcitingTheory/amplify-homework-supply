@@ -39,10 +39,14 @@ describe("commit-pinned native vocabulary deployment", () => {
         NATIVE_VOCABULARY_IMAGE_DIGEST: digest,
       }),
     });
-    Template.fromStack(stack).hasResourceProperties("AWS::Lambda::Function", {
-      Code: { ImageUri: `123456789012.dkr.ecr.us-east-1.amazonaws.com/homework-native-vocabulary@${digest}` },
-      PackageType: "Image",
-    });
+    const functions = Template.fromStack(stack).findResources(
+      "AWS::Lambda::Function",
+    );
+    const imageUri = Object.values(functions)[0]?.Properties.Code.ImageUri;
+    expect(Object.keys(functions)).toHaveLength(1);
+    expect(imageUri).toMatchObject({ "Fn::Join": expect.any(Array) });
+    expect(JSON.stringify(imageUri)).toContain(digest);
+    expect(Object.values(functions)[0]?.Properties.PackageType).toBe("Image");
     const assembly = app.synth();
     const manifest = assembly.artifacts.find((artifact) => artifact.id === `${stack.artifactId}.assets`);
     expect(manifest?.contents.dockerImages ?? {}).toEqual({});

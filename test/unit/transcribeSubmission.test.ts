@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { transcribeSubmission } from "../../src/utils/transcribeSubmission";
+import { TRANSCRIPTION_MODEL } from "../../src/utils/transcriptionModel";
 
 const spoken = "Chloroplasts are where photosynthesis takes place.";
 const clientReturning = (response: unknown) => ({
@@ -13,7 +14,7 @@ describe("transcribeSubmission", () => {
     expect(await transcribeSubmission("private/u/a.wav", { client, resolveUrl })).toBe(spoken);
     expect(client.queries.transcribeUrl).toHaveBeenCalledWith({
       audioUrl: "https://signed.example/audio.wav",
-      model: "whisper-1",
+      model: TRANSCRIPTION_MODEL,
     });
   });
 

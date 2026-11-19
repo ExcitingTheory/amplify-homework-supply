@@ -419,7 +419,8 @@
     "reload": "重新加载",
     "start": "开始",
     "timerInstructions": "这是一个限时练习，请点击开始按钮启动计时器并回答问题。",
-    "unitUpdated": "本单元已由教师更新。您是否希望重新加载最新版本?"
+    "unitUpdated": "本单元已由教师更新。您是否希望重新加载最新版本?",
+    "reviewAnswers": "查看我的回答"
   },
   "gradeReviewDrawer": {
     "cancel": "取消",

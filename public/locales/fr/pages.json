@@ -307,7 +307,8 @@
   "workbook": {
     "loading": "Chargement…",
     "start": "Démarrer",
-    "timerInstructions": "Il s'agit d'un exercice chronométré, appuyez sur démarrer pour lancer le minuteur et répondre aux questions."
+    "timerInstructions": "Il s'agit d'un exercice chronométré, appuyez sur démarrer pour lancer le minuteur et répondre aux questions.",
+    "reviewAnswers": "Revoir mes réponses"
   },
   "gradeReviewDrawer": {
     "cancel": "Annuler",

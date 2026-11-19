@@ -7,9 +7,10 @@
  */
 import { getAmplifyClient } from "./amplifyClient";
 import getCachedUrl from "./getCachedUrl";
+// The transcription model reads the recording; the graders read its text.
+import { TRANSCRIPTION_MODEL } from "./transcriptionModel";
 
-/** Whisper reads the recording; the graders then read its text. */
-const TRANSCRIPTION_MODEL = "whisper-1";
+
 
 export interface TranscribeOptions {
   client?: { queries: { transcribeUrl: (input: Record<string, unknown>) => Promise<any> } };

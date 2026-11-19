@@ -97,6 +97,14 @@ import {
   type ThothNlpExerciseFixture,
 } from "../../scripts/thoth/nlpExtractionFixture";
 import { buildCallResponseScript } from "../../src/utils/callResponse/buildCallResponseScript";
+import {
+  biologyAIScenario,
+  japaneseVocabScenario,
+  seedGradeResponses,
+  VOCAB_BLOCK_KEY,
+  AI_BLOCK_KEY,
+  type SeedResponsesContext,
+} from "./studentResponses";
 
 const seedDir = dirname(fileURLToPath(import.meta.url));
 const mocksDir = resolve(seedDir, "../../test/mocks");
@@ -806,6 +814,16 @@ const japaneseUnitContent = {
         answer: "Hello (daytime)",
         choices: ["Hello (daytime)", "Good morning", "Good evening", "Goodbye"],
       },
+      // Word recall: the definition is shown and the student types, says or
+      // writes the word. Seeded answers for it are GradeResponse items.
+      {
+        type: "answer",
+        version: 1,
+        wordIDs: [words[0].id, words[1].id, words[2].id],
+        requestDefinition: false,
+        allowedInput: ["text", "audio", "writing"],
+        promptMethod: ["text"],
+      },
     ],
   },
 };
@@ -1439,6 +1457,63 @@ const sampleGradeData = {
   },
 };
 
+// Student answers as GradeResponse items: typed text, real recordings
+// (test/mocks/student-responses) and handwriting synthesized from KanjiVG
+// stroke paths. See ./studentResponses.ts. Each student's items and
+// recordings are written while signed in as that student (owner auth and the
+// private/{identityId}/ storage path both require it).
+const responseAssetsDir = resolve(mocksDir, "student-responses");
+const arigatouGlyphs = JSON.parse(
+  await readFile(resolve(responseAssetsDir, "kanjivg-arigatou.json"), "utf8"),
+).glyphs;
+const vocabWords = words.slice(0, 3).map((w) => ({
+  id: w.id,
+  phrase: w.phrase ?? "",
+  definition: w.definition ?? "",
+}));
+const answeredDaysAgo = (days: number) =>
+  Date.now() - days * 24 * 60 * 60 * 1000;
+const responseStarts = {
+  student1Japanese: answeredDaysAgo(3),
+  student1Biology: answeredDaysAgo(2),
+  student2Japanese: answeredDaysAgo(6),
+  student4Japanese: answeredDaysAgo(1),
+};
+const student1Vocab = japaneseVocabScenario(
+  "strong",
+  vocabWords,
+  arigatouGlyphs,
+  responseStarts.student1Japanese,
+);
+const student2Vocab = japaneseVocabScenario(
+  "struggling",
+  vocabWords,
+  arigatouGlyphs,
+  responseStarts.student2Japanese,
+);
+const student4Vocab = japaneseVocabScenario(
+  "silent",
+  vocabWords,
+  arigatouGlyphs,
+  responseStarts.student4Japanese,
+);
+const student1Biology = biologyAIScenario(
+  [questions[1], questions[2]].map((q) => ({ id: q.id, prompt: q.prompt ?? "" })),
+  responseStarts.student1Biology,
+);
+const responsesContext = async (): Promise<SeedResponsesContext> => {
+  const { identityId } = await fetchAuthSession();
+  if (!identityId) throw new Error("Signed-in student has no identity ID");
+  return { client, uploadData, identityId, assetsDir: responseAssetsDir };
+};
+const gradeRef = (g: { id: string; unitID: string; sectionID?: string | null; instructorGroup?: string | null }) => ({
+  id: g.id,
+  unitID: g.unitID,
+  sectionID: g.sectionID ?? null,
+  instructorGroup: g.instructorGroup ?? null,
+});
+let seededResponseCount = 0;
+
 // Grades require owner auth — must sign in as each student to create their own grades
 await signOut();
 
@@ -1451,6 +1526,9 @@ await signInUser({
 });
 const student1Session = await fetchAuthSession();
 console.log(`  ✓ Signed in as student1 (sub: ${student1Session.userSub})`);
+// Grades record the owner's identity ID: instructors' signed URLs for
+// recordings are only issued under private/{identityId}/.
+const student1Context = await responsesContext();
 
 const student1Grades = await Promise.all([
   // Student 1 - Japanese unit 0 (completed, 100%)
@@ -1461,9 +1539,13 @@ const student1Grades = await Promise.all([
     accuracy: 100,
     complete: true,
     engagedTimeMs: 240_000, // 4 min
-    data: JSON.stringify(sampleGradeData),
+    data: JSON.stringify({
+      ...sampleGradeData,
+      [VOCAB_BLOCK_KEY]: student1Vocab.blockData,
+    }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student1Context.identityId,
   }),
   // Student 1 - Biology unit 1 (completed, 75%)
   client.models.Grade.create({
@@ -1483,8 +1565,37 @@ const student1Grades = await Promise.all([
     }),
     instructorGroup: "section-bio101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student1Context.identityId,
+  }),
+  // Student 1 - AI Biology exercise (completed, typed and spoken answers)
+  client.models.Grade.create({
+    unitID: units[3].id,
+    sectionID: sections[1].id,
+    percentComplete: 100,
+    accuracy: 94,
+    complete: true,
+    engagedTimeMs: 420_000, // 7 min, including a recording that had to be redone
+    data: JSON.stringify({ [AI_BLOCK_KEY]: student1Biology.blockData }),
+    instructorGroup: "section-bio101-instructors",
+    instructor: "instructor1@example.com",
+    identityId: student1Context.identityId,
   }),
 ]);
+{
+  const [japanese, , biology] = unwrap(student1Grades, "Grade");
+  seededResponseCount += await seedGradeResponses(
+    student1Context,
+    gradeRef(japanese),
+    student1Vocab,
+    responseStarts.student1Japanese,
+  );
+  seededResponseCount += await seedGradeResponses(
+    student1Context,
+    gradeRef(biology),
+    student1Biology,
+    responseStarts.student1Biology,
+  );
+}
 
 await signOut();
 
@@ -1495,6 +1606,7 @@ await signInUser({
   password: passwordFor(TEST_USERS.student2.username),
   signInFlow: "Password",
 });
+const student2Context = await responsesContext();
 
 const student2Grades = await Promise.all([
   // Student 2 - Japanese unit 0 — THREE attempts (demonstrates the
@@ -1516,9 +1628,11 @@ const student2Grades = await Promise.all([
         userAnswer: "Hi",
         feedback: "First attempt — review basic greetings.",
       },
+      [VOCAB_BLOCK_KEY]: student2Vocab.blockData,
     }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student2Context.identityId,
   }),
   client.models.Grade.create({
     unitID: units[0].id,
@@ -1538,6 +1652,7 @@ const student2Grades = await Promise.all([
     }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student2Context.identityId,
   }),
   client.models.Grade.create({
     unitID: units[0].id,
@@ -1557,8 +1672,17 @@ const student2Grades = await Promise.all([
     }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student2Context.identityId,
   }),
 ]);
+// First attempt: a misspelling, a drawing in the wrong stroke order, and a
+// low-confidence spoken answer (see japaneseVocabScenario "struggling").
+seededResponseCount += await seedGradeResponses(
+  student2Context,
+  gradeRef(unwrap(student2Grades, "Grade")[0]),
+  student2Vocab,
+  responseStarts.student2Japanese,
+);
 
 await signOut();
 
@@ -1569,6 +1693,7 @@ await signInUser({
   password: passwordFor(TEST_USERS.student3.username),
   signInFlow: "Password",
 });
+const student3IdentityId = (await responsesContext()).identityId;
 
 const student3Grades = await Promise.all([
   // Student 3 - Japanese unit 0 (completed, 92%)
@@ -1589,6 +1714,7 @@ const student3Grades = await Promise.all([
     }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student3IdentityId,
   }),
   // Student 3 - Biology unit 1 (completed, 88%)
   client.models.Grade.create({
@@ -1608,6 +1734,7 @@ const student3Grades = await Promise.all([
     }),
     instructorGroup: "section-bio101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student3IdentityId,
   }),
 ]);
 
@@ -1620,6 +1747,7 @@ await signInUser({
   password: passwordFor(TEST_USERS.student4.username),
   signInFlow: "Password",
 });
+const student4Context = await responsesContext();
 
 const student4Grades = await Promise.all([
   // Student 4 - Japanese unit 0 (completed, 52% — at-risk)
@@ -1638,11 +1766,20 @@ const student4Grades = await Promise.all([
         feedback:
           "Review basic greetings and pronunciation. Consider extra practice.",
       },
+      [VOCAB_BLOCK_KEY]: student4Vocab.blockData,
     }),
     instructorGroup: "section-jpn101-instructors",
     instructor: "instructor1@example.com",
+    identityId: student4Context.identityId,
   }),
 ]);
+// A misspelling and a recording with no speech in it (empty transcript).
+seededResponseCount += await seedGradeResponses(
+  student4Context,
+  gradeRef(unwrap(student4Grades, "Grade")[0]),
+  student4Vocab,
+  responseStarts.student4Japanese,
+);
 
 await signOut();
 
@@ -1662,6 +1799,9 @@ const gradesResponse = [
 ];
 const grades = unwrap(gradesResponse, "Grade");
 console.log(`✅ Created ${grades.length} grade submissions`);
+console.log(
+  `✅ Seeded ${seededResponseCount} student answers (GradeResponse) with recordings and handwriting`,
+);
 
 // ========================================================================
 // ========================================================================

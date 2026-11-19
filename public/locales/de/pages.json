@@ -419,7 +419,8 @@
     "reload": "Neu laden",
     "start": "Starten",
     "timerInstructions": "Dies ist eine zeitlich begrenzte Übung. Drücken Sie Start, um den Timer zu beginnen und die Fragen zu beantworten.",
-    "unitUpdated": "Diese Einheit wurde vom Kursleiter aktualisiert. Möchten Sie die neueste Version neu laden?"
+    "unitUpdated": "Diese Einheit wurde vom Kursleiter aktualisiert. Möchten Sie die neueste Version neu laden?",
+    "reviewAnswers": "Meine Antworten ansehen"
   },
   "gradeReviewDrawer": {
     "cancel": "Abbrechen",

@@ -19,6 +19,8 @@ import { fromNodeProviderChain } from "@aws-sdk/credential-providers";
 import { type Schema } from "../../data/resource";
 import OpenAI from "openai";
 import { MODERATION_SELECTION, buildModerationField } from "./typedSelections";
+import { getTranscriptionAudioFormat } from "../openai/transcriptionAudioFormat";
+import { TRANSCRIPTION_MODEL } from "../shared/transcriptionModel";
 
 // Configure Amplify for GraphQL access from Lambda (IAM auth)
 Amplify.configure(
@@ -443,12 +445,18 @@ async function handleModerateAudio(args: any): Promise<any> {
       );
     }
     const audioBuffer = await audioResponse.arrayBuffer();
-    const file = new File([audioBuffer], "audio.mp3", { type: "audio/mpeg" });
+    const format = getTranscriptionAudioFormat(
+      audioResponse.headers.get("content-type"),
+      audioUrl,
+    );
+    const file = new File([audioBuffer], `audio.${format.extension}`, {
+      type: format.mimeType,
+    });
 
-    // Step 2: Transcribe with Whisper
+    // Step 2: Transcribe
     const transcription = await openai.audio.transcriptions.create({
       file,
-      model: "whisper-1",
+      model: TRANSCRIPTION_MODEL,
     });
 
     const transcript = transcription.text;

@@ -935,6 +935,101 @@ const rawSchemaDefinition = {
       allow.groupDefinedIn("peerReviewGroup").to(["read"]),
     ]),
 
+  // ==========================================================================
+  // STUDENT RESPONSES: one typed item per answer (no AWSJSON)
+  // ==========================================================================
+  // What the student actually submitted (typed text, transcript, drawing
+  // strokes, S3 keys of recordings and photos) and the grader's verdict.
+  // Kept out of Grade.data so each answer is its own item: saving a grade does
+  // not rewrite every answer, and no single item nears the 400KB limit.
+  // Binary files stay in S3 (GraphQL has no binary scalar); instructors get
+  // signed URLs for them from getStudentSubmissionUrls.
+  ResponseInputMethod: a.enum(["TEXT", "AUDIO", "DRAWING", "IMAGE", "CHOICE"]),
+  ResponseVerdict: a.enum(["CORRECT", "MISSPELLED", "INCORRECT", "ERROR"]),
+
+  // One pen stroke. `points` is [x0, y0, dx1, dy1, ...] in whole pixels and
+  // `times` the per-point time deltas in ms. See encodeStrokes() in
+  // src/utils/strokeLog.ts.
+  ResponseStroke: a.customType({
+    order: a.integer().required(),
+    startMs: a.integer(),
+    durationMs: a.integer(),
+    points: a.integer().array(),
+    times: a.integer().array(),
+    restored: a.boolean(),
+    erasedMs: a.integer(),
+    color: a.string(),
+    width: a.float(),
+    pointCount: a.integer(),
+  }),
+
+  // Every stroke of a drawing in the order it was drawn.
+  ResponseStrokes: a.customType({
+    version: a.integer(),
+    startedAt: a.float(), // epoch ms; too large for GraphQL Int
+    tolerance: a.float(), // path simplification used, in px
+    truncated: a.boolean(),
+    total: a.integer(),
+    strokes: a.ref("ResponseStroke").array(),
+  }),
+
+  // An earlier attempt at the same question (without stroke data).
+  ResponseAttempt: a.customType({
+    inputMethod: a.ref("ResponseInputMethod"),
+    text: a.string(),
+    transcript: a.string(),
+    audioPath: a.string(),
+    imagePath: a.string(),
+    strokeCount: a.integer(),
+    verdict: a.ref("ResponseVerdict"),
+    correct: a.boolean(),
+    score: a.float(),
+    reason: a.string(),
+    needsReview: a.boolean(),
+    submittedAt: a.datetime(),
+  }),
+
+  GradeResponse: a
+    .model({
+      gradeID: a.id().required(),
+      blockKey: a.string().required(), // Persisted response block ID
+      questionKey: a.string().required(), // question or word within the block
+      unitID: a.id(),
+      sectionID: a.id(),
+      // Copied from the grade so the section's instructors can read it
+      instructorGroup: a.string(),
+      inputMethod: a.ref("ResponseInputMethod").required(),
+      prompt: a.string(), // what the student was shown
+      text: a.string(), // typed answer, verbatim
+      transcript: a.string(), // speech-to-text of the recording
+      audioPath: a.string(), // S3 key: private/{identityId}/user-submissions/...
+      imagePath: a.string(), // S3 key of an uploaded photo
+      strokes: a.ref("ResponseStrokes"), // drawings are stored as strokes
+      verdict: a.ref("ResponseVerdict"),
+      correct: a.boolean(),
+      score: a.float(),
+      confidence: a.float(),
+      reason: a.string(),
+      needsReview: a.boolean(), // low confidence: a teacher should look
+      attempts: a.integer(),
+      history: a.ref("ResponseAttempt").array(), // up to 3 earlier attempts
+      submittedAt: a.datetime(),
+    })
+    .secondaryIndexes((index) => [
+      index("gradeID").sortKeys(["blockKey"]).name("byGrade"),
+    ])
+    .authorization((allow) => [
+      allow.owner().to(["read"]),
+      allow.group("Admins").to(["read", "delete"]),
+      allow.groupDefinedIn("instructorGroup").to(["read"]),
+    ]),
+
+  // One signed URL per requested key; url is null when the key is refused.
+  SubmissionUrl: a.customType({
+    key: a.string().required(),
+    url: a.string(),
+  }),
+
   Section: a
     .model({
       _version: a.integer(),
@@ -3544,6 +3639,33 @@ const rawSchemaDefinition = {
     ])
     .handler(a.handler.function(sectionHandler)),
 
+  // Batch form of getStudentSubmissionUrl: signs every recording and photo of
+  // one grade in a single call, with the same authorization checks.
+  getStudentSubmissionUrls: a
+    .query()
+    .arguments({
+      gradeId: a.id().required(),
+      submissionKeys: a.string().required().array().required(),
+    })
+    .returns(a.ref("SubmissionUrl").array())
+    .authorization((allow) => [
+      allow.group("Instructors"),
+      allow.group("Admins"),
+    ])
+    .handler(a.handler.function(sectionHandler)),
+
+  saveStudentResponse: a
+    .mutation()
+    .arguments({
+      gradeId: a.id().required(),
+      blockKey: a.string().required(),
+      questionKey: a.string().required(),
+      response: a.json().required(),
+    })
+    .returns(a.boolean().required())
+    .authorization((allow) => [allow.authenticated()])
+    .handler(a.handler.function(sectionHandler)),
+
   // Phase 6 — Issues CloudFront signed cookie values for the protected/units/* path prefix.
   // Authenticated users receive a 4-hour custom-policy cookie so their browser can fetch
   // published unit JSON, images, and audio directly from CloudFront without per-request
@@ -3910,6 +4032,7 @@ const schema = a
     allow.resource(moderationHandler),
     allow.resource(recycleBinHandler),
     allow.resource(gradeRollupStreamHandler),
+    // Amplify grants Lambda access at schema scope; the handler checks ownership before response writes.
     allow.resource(sectionHandler).to(["query", "mutate"]),
   ]);
 
